@@ -13,4 +13,10 @@ class DashboardController extends Controller
             'title' => 'Dashboard',
         ]);
     }
+
+    public function roles() {
+        return Inertia::render('Role/index', [
+            'title' => 'Dashboard',
+        ]);
+    }
 }

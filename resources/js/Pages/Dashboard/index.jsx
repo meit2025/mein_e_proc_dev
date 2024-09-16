@@ -1,11 +1,10 @@
-export default function Index({ title }) {
-  const koplak = 'anajy';
-  return (
-    <>
-      <h1>My Super Blog</h1>
-      <h1>{title}</h1>
-      <>{koplak}</>
-      <hr />
-    </>
-  );
+import MainLayout from '../Layouts/MainLayout';
+
+function Index({ title }) {
+  return <b>asda</b>;
 }
+
+// Assign layout to the page
+Index.layout = (page) => <MainLayout>{page}</MainLayout>;
+
+export default Index;
