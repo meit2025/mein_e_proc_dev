@@ -1,0 +1,39 @@
+version: "3.8"
+services:
+  postgres_db:
+    image: postgres
+    hostname: postgres_db
+    container_name: local_pgdb
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: toor
+    volumes:
+      - local_pgdata:/var/lib/postgresql/data
+
+    networks:
+      - mein-networks
+
+      
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    restart: always
+    ports:
+      - "8880:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: testing123
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - mein-networks
+
+volumes:
+  local_pgdata:
+  pgadmin-data:
+
+networks:
+  mein-networks:
