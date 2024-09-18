@@ -12,7 +12,14 @@ class AuthController extends Controller
      */
     public function index()
     {
-        return Inertia::render('Auth/Login');
+
+        $fileImage = asset('images/mitsubishi_logo.png');
+        $bgImage = asset('images/login_bg.png');
+
+        return Inertia::render('Auth/Login', [
+            'fileImage'  => $fileImage,
+            'bgImage' => $bgImage
+        ]);
     }
 
     /**

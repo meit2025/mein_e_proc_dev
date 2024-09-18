@@ -1,4 +1,6 @@
-export default function Index({ title }) {
+export default function Index({ title }: {
+  title: string
+}) {
   const koplak = 'anajy';
   return (
     <>
