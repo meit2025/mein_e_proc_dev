@@ -60,7 +60,7 @@ export function LoginForm() {
               <FormItem>
                 <FormLabel>Username</FormLabel>
                 <FormControl>
-                  <Input placeholder='shadcn' {...field} />
+                  <Input placeholder='Username' {...field} />
                 </FormControl>
                 {/* <FormDescription>This is your public display name.</FormDescription> */}
                 <FormMessage />
@@ -75,7 +75,7 @@ export function LoginForm() {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <PasswordInput placeholder='shadcn' {...field} />
+                  <PasswordInput placeholder='Password' {...field} />
                 </FormControl>
                 {/* <FormDescription>This is your public display name.</FormDescription> */}
                 <FormMessage />
@@ -127,7 +127,7 @@ export default function Login({ fileImage, bgImage }: { fileImage: string, bgIma
       <div className='flex  z-10 w-full items-center flex-col space-y-4'>
         <div className='my-4'>{fileImage ? <img src={fileImage} alt='' className="rounded-md object-contain" /> : null}</div>
         <div className='md:w-1/4 md:my-12 bg-white rounded-md shadow-md md:p-6 '>
-          <div className='text-center text-2xl'>Sign In</div>
+          <div className='text-center text-xl mb-4'>Sign In</div>
           <LoginForm  />
         </div>
       </div>
