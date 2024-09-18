@@ -11,7 +11,6 @@ export default {
     './resources/views/**/*.blade.php',
     './resources/js/**/*.tsx',
     './resources/js/**/*.jsx',
-
   ],
 
   theme: {
@@ -36,7 +35,7 @@ export default {
           foreground: 'hsl(var(--popover-foreground))',
         },
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
+          DEFAULT: '#ff0000',
           foreground: 'hsl(var(--primary-foreground))',
         },
         secondary: {
