@@ -1,9 +1,5 @@
-// eslint.config.cjs
-
 const reactConfig = require('eslint-plugin-react/configs/recommended');
 const prettierConfig = require('eslint-config-prettier');
-
-// eslint.config.cjs
 
 module.exports = [
   // React and JSX-A11Y configuration
@@ -18,10 +14,12 @@ module.exports = [
     languageOptions: {
       ecmaVersion: 2021, // Latest ECMAScript features
       sourceType: 'module', // Support for ECMAScript modules
+      parser: require('@typescript-eslint/parser'), // Use TypeScript parser
       parserOptions: {
         ecmaFeatures: {
           jsx: true, // Enable JSX
         },
+        project: './tsconfig.json', // Point to your TypeScript config
       },
     },
     settings: {
@@ -34,6 +32,7 @@ module.exports = [
       'react-hooks': require('eslint-plugin-react-hooks'),
       'jsx-a11y': require('eslint-plugin-jsx-a11y'),
       prettier: require('eslint-plugin-prettier'),
+      '@typescript-eslint': require('@typescript-eslint/eslint-plugin'), // Add TypeScript ESLint plugin
     },
     rules: {
       // React-specific rules
@@ -62,6 +61,11 @@ module.exports = [
       quotes: ['error', 'single', { avoidEscape: false }],
       semi: ['error', 'always'],
       'prettier/prettier': ['error', { singleQuote: true, semi: true }],
+
+      // TypeScript-specific rules
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/explicit-function-return-type': 'off',
     },
   },
 ];

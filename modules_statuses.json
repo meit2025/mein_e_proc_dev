@@ -1,3 +1,5 @@
 {
-    "Master": true
+  "Master": true,
+  "Reimbuse": true,
+  "Auth": true
 }
