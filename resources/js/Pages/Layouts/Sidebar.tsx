@@ -1192,7 +1192,6 @@ export default function Sidebar() {
                 <div className='menu-item'>
                   <div
                     className='menu-label border border-transparent items-center grow gap-[14px] pl-[10px] pr-[10px] py-[8px]'
-                    ref='#'
                     tabIndex={0}
                   >
                     <span className='menu-bullet flex w-[6px] relative before:absolute before:top-0 before:size-[6px] before:rounded-full before:-translate-x-1/2 before:-translate-y-1/2 menu-item-active:before:bg-primary menu-item-hover:before:bg-primary'></span>
@@ -1207,7 +1206,6 @@ export default function Sidebar() {
                 <div className='menu-item'>
                   <div
                     className='menu-label border border-transparent items-center grow gap-[14px] pl-[10px] pr-[10px] py-[8px]'
-                    ref='#'
                     tabIndex={0}
                   >
                     <span className='menu-bullet flex w-[6px] relative before:absolute before:top-0 before:size-[6px] before:rounded-full before:-translate-x-1/2 before:-translate-y-1/2 menu-item-active:before:bg-primary menu-item-hover:before:bg-primary'></span>
@@ -1220,7 +1218,6 @@ export default function Sidebar() {
                 <div className='menu-item'>
                   <div
                     className='menu-label border border-transparent items-center grow gap-[14px] pl-[10px] pr-[10px] py-[8px]'
-                    ref='#'
                     tabIndex={0}
                   >
                     <span className='menu-bullet flex w-[6px] relative before:absolute before:top-0 before:size-[6px] before:rounded-full before:-translate-x-1/2 before:-translate-y-1/2 menu-item-active:before:bg-primary menu-item-hover:before:bg-primary'></span>
@@ -1587,7 +1584,6 @@ export default function Sidebar() {
             <div className='menu-item'>
               <div
                 className='menu-label border border-transparent gap-[10px] pl-[10px] pr-[10px] py-[6px]'
-                ref=''
                 tabIndex={0}
               >
                 <span className='menu-icon items-start text-gray-500 dark:text-gray-400 w-[20px]'>
@@ -1604,7 +1600,6 @@ export default function Sidebar() {
             <div className='menu-item'>
               <div
                 className='menu-label border border-transparent gap-[10px] pl-[10px] pr-[10px] py-[6px]'
-                ref=''
                 tabIndex={0}
               >
                 <span className='menu-icon items-start text-gray-500 dark:text-gray-400 w-[20px]'>
@@ -1619,7 +1614,6 @@ export default function Sidebar() {
             <div className='menu-item'>
               <div
                 className='menu-label border border-transparent gap-[10px] pl-[10px] pr-[10px] py-[6px]'
-                ref=''
                 tabIndex={0}
               >
                 <span className='menu-icon items-start text-gray-500 dark:text-gray-400 w-[20px]'>
@@ -1639,7 +1633,6 @@ export default function Sidebar() {
             <div className='menu-item'>
               <div
                 className='menu-label border border-transparent gap-[10px] pl-[10px] pr-[10px] py-[6px]'
-                ref=''
                 tabIndex={0}
               >
                 <span className='menu-icon items-start text-gray-500 dark:text-gray-400 w-[20px]'>
@@ -1654,7 +1647,6 @@ export default function Sidebar() {
             <div className='menu-item'>
               <div
                 className='menu-label border border-transparent gap-[10px] pl-[10px] pr-[10px] py-[6px]'
-                ref=''
                 tabIndex={0}
               >
                 <span className='menu-icon items-start text-gray-500 dark:text-gray-400 w-[20px]'>

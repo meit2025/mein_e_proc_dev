@@ -52,7 +52,6 @@ export function LoginForm() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className=''>
         <div className='flex flex-col space-y-3'>
-          
           <FormField
             control={form.control}
             name='username'
@@ -118,17 +117,19 @@ export function LoginForm() {
     </Form>
   );
 }
-export default function Login({ fileImage, bgImage }: { fileImage: string, bgImage: string }) {
+export default function Login({ fileImage, bgImage }: { fileImage: string; bgImage: string }) {
   return (
     <div className='flex h-screen w-screen fixed md:pt-20 top-0 left-0 justify-center '>
-      {
-        bgImage?  (<img src={bgImage}  className="absolute top-0 left-0 h-screen w-screen -z-1" alt="" />) : null
-      }
+      {bgImage ? (
+        <img src={bgImage} className='absolute top-0 left-0 h-screen w-screen -z-1' alt='' />
+      ) : null}
       <div className='flex  z-10 w-full items-center flex-col space-y-4'>
-        <div className='my-4'>{fileImage ? <img src={fileImage} alt='' className="rounded-md object-contain" /> : null}</div>
+        <div className='my-4'>
+          {fileImage ? <img src={fileImage} alt='' className='rounded-md object-contain' /> : null}
+        </div>
         <div className='md:w-1/4 md:my-12 bg-white rounded-md shadow-md md:p-6 '>
           <div className='text-center text-xl mb-4'>Sign In</div>
-          <LoginForm  />
+          <LoginForm />
         </div>
       </div>
     </div>

@@ -5,7 +5,7 @@
     "dev": "vite",
     "build": "vite build",
     "prepare": "husky install",
-    "lint": "npx eslint ./resources/js/Pages",
+    "lint": "npx eslint ./resources/js/pages",
     "lint:fix": "next lint --fix"
   },
   "devDependencies": {
