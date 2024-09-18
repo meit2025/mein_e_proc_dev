@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\Http\Controllers\AuthController;
-use Modules\Reimbuse\Http\Controllers\ReimbuseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,5 +14,6 @@ use Modules\Reimbuse\Http\Controllers\ReimbuseController;
 |
 */
 
-Route::get('/login',[AuthController::class, 'index'])->name('auth.login-index');
-
+Route::group([], function () {
+    Route::resource('auth', AuthController::class)->names('auth');
+});

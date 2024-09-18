@@ -2,7 +2,8 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/inertia-react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import '../sass/app.scss';
+// import '../sass/app.scss';
+import '../css/app.css';
 createInertiaApp({
   // Below you can see that we are going to get all React components from resources/js/Pages folder
   resolve: (name) =>
