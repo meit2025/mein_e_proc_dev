@@ -24,7 +24,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email'    => 'required|email|min:5', // Tambahkan validasi email disini
+            'username'    => 'required|min:5', // Tambahkan validasi email disini
             'password' => 'required|string|min:8', // Tambahkan validasi minimum 8 karakter
         ];
     }
@@ -37,8 +37,7 @@ class LoginRequest extends FormRequest
     public function messages()
     {
         return [
-            'email.required' => 'Email is required.',
-            'email.email' => 'Please enter a valid email address.',
+            'username.required' => 'username is required.',
             'password.required' => 'Password is required.',
             'password.min' => 'Password must be at least 8 characters.',
         ];

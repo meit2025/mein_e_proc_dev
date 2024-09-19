@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Auth\Http\Controllers\AuthController;
+use Modules\Approval\Http\Controllers\ApprovalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,7 +14,6 @@ use Modules\Auth\Http\Controllers\AuthController;
 |
 */
 
-
-
-Route::get('/login', [AuthController::class, 'index'])->name('login');
-Route::post('/login', [AuthController::class, 'store'])->name('login.store');
+Route::group([], function () {
+    Route::resource('approval', ApprovalController::class)->names('approval');
+});
