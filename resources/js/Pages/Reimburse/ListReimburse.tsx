@@ -1,40 +1,21 @@
 // import * as React from 'react';
-import { CaretSortIcon, ChevronDownIcon, DotsHorizontalIcon } from '@radix-ui/react-icons';
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
+import { DotsHorizontalIcon } from '@radix-ui/react-icons';
+import { ColumnDef } from '@tanstack/react-table';
 
-import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
 import { Button } from '@/components/shacdn/button';
-import { Checkbox } from '@/components/shacdn/checkbox';
+
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/shacdn/dropdown-menu';
-import { Input } from '@/components/shacdn/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/shacdn/table';
+
+import { Plus as PlusIcon } from 'lucide-react';
 
 import { CustomTable } from '@/components/commons/CustomTable';
 
@@ -43,6 +24,10 @@ import * as React from 'react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 
 import { HeaderPage } from '@/components/commons/HeaderPage';
+
+import { ReimburseForm } from './components/ReimburseForm';
+
+import './css/reimburse.scss';
 
 const data: Reimburse[] = [
   {
@@ -172,8 +157,18 @@ const ListReimburse = () => {
   return (
     <AuthenticatedLayout>
       <div>
-        <CustomDialog open={open} onClose={() => setOpen(false)} />
-        <HeaderPage title='Reimbuse' />
+        <CustomDialog className='md:max-w-[800px]' open={open} onClose={() => setOpen(false)}>
+          <ReimburseForm />
+        </CustomDialog>
+        <div className='flex items-center justify-between'>
+          <HeaderPage title='Reimbuse' />
+
+          <div className='flex items-center space-x-4'>
+            <Button variant={'outline'} onClick={() => setOpen(true)}>
+              <PlusIcon className='h-4 w-4' />
+            </Button>
+          </div>
+        </div>
         <CustomTable columns={columns} data={data}></CustomTable>
       </div>
     </AuthenticatedLayout>
