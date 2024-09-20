@@ -4,10 +4,27 @@ namespace Modules\Reimbuse\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
+use Modules\Reimbuse\Models\Reimburse;
 
 class ReimbuseController extends Controller
 {
+    protected $validator_rule = [
+        'type'                  =>  'required|string|exists:reimburse_types,id',
+        'requester'             =>  'required|string|exists:users,nip',
+        'remark'                =>  'nullable',
+        'balance'               =>  'required|numeric',
+        'claim_limit'           =>  'required|numeric',
+        'receipt_date'          =>  'required|date',
+        'start_date'            =>  'required|date',
+        'end_date'              =>  'required|date',
+        'start_balance_date'    =>  'required|date',
+        'end_balance_date'      =>  'required|date',
+        'currency'              =>  'required|string|exists:currencies,code'
+    ];
+
     /**
      * Display a listing of the resource.
      */
@@ -21,7 +38,7 @@ class ReimbuseController extends Controller
      */
     public function create()
     {
-        return view('reimbuse::create');
+        return Inertia::render('Reimburse/ReimburseForm');
     }
 
     /**
@@ -29,7 +46,20 @@ class ReimbuseController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), $this->validator_rule);
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+        try {
+            $data = $validator->validated();
+            DB::beginTransaction();
+            Reimburse::create($data);
+            DB::commit();
+            return redirect()->route('order.detail', ['code' => $data['order']])->with('success', 'Order created successfully!');
+          } catch (\ErrorException $e) {
+            DB::rollBack();
+            return back()->withErrors(['status' => $e->getMessage()]);
+          }
     }
 
     /**
