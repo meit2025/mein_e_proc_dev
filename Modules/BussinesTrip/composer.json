@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/bussinestrip",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\BussinesTrip\\": "app/",
+            "Modules\\BussinesTrip\\Database\\Factories\\": "database/factories/",
+            "Modules\\BussinesTrip\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\BussinesTrip\\Tests\\": "tests/"
+        }
+    }
+}

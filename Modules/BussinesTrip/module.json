@@ -1,0 +1,11 @@
+{
+    "name": "BussinesTrip",
+    "alias": "bussinestrip",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\BussinesTrip\\Providers\\BussinesTripServiceProvider"
+    ],
+    "files": []
+}
