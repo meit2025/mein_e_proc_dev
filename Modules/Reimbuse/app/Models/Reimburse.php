@@ -6,12 +6,43 @@ use App\Traits\UniqueCode;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 // use Modules\Reimbuse\Database\Factories\ReimburseFactory;
 
 class Reimburse extends Model
 {
     use HasFactory, UniqueCode, SoftDeletes;
+
+    protected $guarded = ['id'];
+    protected $primaryKey = 'rn';
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Generate unique 'rn' before creating the model
+        static::creating(function ($reimburse) {
+            $reimburse->rn = self::generateUniqueRn();
+        });
+    }
+
+    /**
+     * Generate a unique RN code.
+     *
+     * @return string
+     */
+    private static function generateUniqueRn()
+    {
+        do {
+            // Generate a random string (e.g., 10 characters long)
+            $rn = Str::random(10);
+        } while (self::where('rn', $rn)->exists());
+
+        return $rn;
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -23,7 +54,6 @@ class Reimburse extends Model
         "requester", // guy who ask reimburse
         "remark", // reimburse detail (free text)
         "balance",
-        "claim_limit",
         "receipt_date",
         "start_date",
         "end_date",

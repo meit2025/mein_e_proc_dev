@@ -10,10 +10,15 @@ class ReimburseType extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+    protected $primaryKey = 'code';
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = ["name"];
+    protected $fillable = ["code", "group", "name", "claim_limit", "plafon"];
 
     // protected static function newFactory(): ReimburseTypeFactory
     // {

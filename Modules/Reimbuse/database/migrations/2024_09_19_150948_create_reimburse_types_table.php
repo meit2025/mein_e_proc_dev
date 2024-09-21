@@ -13,7 +13,11 @@ return new class extends Migration
     {
         Schema::create('reimburse_types', function (Blueprint $table) {
             $table->id();
+            $table->string('code')->unique();
+            $table->string("group")->nullable();
             $table->string('name');
+            $table->integer('claim_limit')->nullable();
+            $table->double('plafon')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

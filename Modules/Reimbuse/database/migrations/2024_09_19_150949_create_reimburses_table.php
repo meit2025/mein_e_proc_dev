@@ -14,14 +14,23 @@ return new class extends Migration
         Schema::create('reimburses', function (Blueprint $table) {
             $table->id();
             $table->string('rn')->unique();
-            $table->string('group');
-            $table->foreignId('type')->constrained('reimburse_types')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('requester')->constrained('users')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->string('group')->nullable();
+            $table->string('type');
+            $table->string('requester');
+            $table->string('currency');
             $table->longText('remark');
             $table->double('balance');
-            $table->integer('claim_limit')->default(0);
+            $table->date('receipt_date');
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->date('start_balance_date');
+            $table->date('end_balance_date');
             $table->softDeletes();
             $table->timestamps();
+            
+            $table->foreign('type')->references('code')->on('reimburse_types')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreign('requester')->references('nip')->on('users')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreign('currency')->references('code')->on('currencies')->cascadeOnDelete()->cascadeOnUpdate();            
         });
     }
 

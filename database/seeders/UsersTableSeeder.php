@@ -17,12 +17,16 @@ class UsersTableSeeder extends Seeder
         //
         User::insert([
             [
-                'name' => 'John Doe',
-                'email' => 'admin@gmail.com',
-                'email_verified_at' => now(),
-                'password' => Hash::make('admin12345'), // Enkripsi password
-                'created_at' => now(),
-                'updated_at' => now(),
+                'nip'               =>  '12345',
+                'division'          =>  'IT',
+                'role'              =>  'user',
+                'job_level'         =>  'staff',
+                'name'              =>  'John Doe',
+                'email'             =>  'admin@gmail.com',
+                'email_verified_at' =>  now(),
+                'password'          =>  Hash::make('admin12345'), // Enkripsi password
+                'created_at'        =>  now(),
+                'updated_at'        =>  now(),
             ]
         ]);
     }
