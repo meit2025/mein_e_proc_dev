@@ -4,13 +4,13 @@ import { z } from 'zod';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Textarea } from '@/components/shacdn/textarea';
+import { Textarea } from '@/Components/shacdn/textarea';
 
 import '../css/reimburse.scss';
-import { ScrollArea } from '@/components/shacdn/scroll-area';
-import { Separator } from '@/components/shacdn/separator';
+import { ScrollArea } from '@/Components/shacdn/scroll-area';
+import { Separator } from '@/Components/shacdn/separator';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/shacdn/tabs';
 
 import {
   Select,
@@ -18,13 +18,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/shacdn/select';
-import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
+} from '@/Components/shacdn/select';
+import { CustomDatePicker } from '@/Components/commons/CustomDatePicker';
 import { Input } from '@/components/shacdn/input';
 
 const formSchema = z.object({
   remark: z.string().min(1).max(50),
-  reimburse_cost: z.number()
+  reimburse_cost: z.number(),
 });
 export const ReimburseForm = () => {
   // defining form for reimburese form

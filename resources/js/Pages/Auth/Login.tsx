@@ -1,12 +1,9 @@
 import * as React from 'react';
 
-import { Button } from '@/c
-omponents/shacdn/button';
+import { Button } from '@/components/shacdn/button';
 // import image_logo from  '../../../assets/images/mitsubishi_logo';
-// import { Button } from '@/c
-omponents/shacdn/button';
-import { PasswordInput } from '@/c
-omponents/commons/PasswordInput';
+// import { Button } from '@/components/shacdn/button';
+import { PasswordInput } from '@/components/commons/PasswordInput';
 import {
   Form,
   FormControl,
