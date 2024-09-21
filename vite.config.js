@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     react(), // React plugin that we installed for vite.js
     laravel({
-      input: ['resources/js/app.tsx', 'resources/css/app.css'],
+      input: ['resources/js/app.tsx', 'resources/sass/app.scss', 'resources/css/app.css'],
       refresh: true,
     }),
   ],

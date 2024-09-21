@@ -4,10 +4,28 @@ namespace Modules\Reimbuse\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
+use Modules\Reimbuse\Jobs\ProcessReimbursements;
+use Modules\Reimbuse\Models\Reimburse;
 
 class ReimbuseController extends Controller
 {
+    protected $validator_rule = [
+        'type'                  =>  'required|string|exists:reimburse_types,code',
+        'requester'             =>  'required|string|exists:users,nip',
+        'group'                 =>  'nullable',
+        'remark'                =>  'nullable',
+        'balance'               =>  'required|numeric',
+        'receipt_date'          =>  'required|date',
+        'start_date'            =>  'required|date',
+        'end_date'              =>  'required|date',
+        'start_balance_date'    =>  'required|date',
+        'end_balance_date'      =>  'required|date',
+        'currency'              =>  'required|string|exists:currencies,code'
+    ];
+
     /**
      * Display a listing of the resource.
      */
@@ -21,7 +39,7 @@ class ReimbuseController extends Controller
      */
     public function create()
     {
-        return view('reimbuse::create');
+        return Inertia::render('Reimburse/ReimbursementForm');
     }
 
     /**
@@ -29,8 +47,39 @@ class ReimbuseController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Ensure the input is an array of reimbursements
+        $reimbursements = $request->all();
+
+        if (!is_array($reimbursements)) {
+            return back()->withErrors(['status' => 'Invalid input format. Expecting an array of reimbursements.']);
+        }
+
+        // Loop through each reimbursement in the array
+        foreach ($reimbursements as $reimbursementData) {
+            $validator = Validator::make($reimbursementData, $this->validator_rule);
+
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+
+            try {
+                $data = $validator->validated();
+
+                // Start transaction for each reimbursement
+                DB::beginTransaction();
+
+                Reimburse::create($data);
+
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return back()->withErrors(['status' => $e->getMessage()]);
+            }
+        }
+
+        return "All data has been processed successfully.";
     }
+
 
     /**
      * Show the specified resource.
