@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Master\Http\Controllers\MasterController;
+use Modules\Master\Http\Controllers\MasterMaterialController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,4 +17,5 @@ use Modules\Master\Http\Controllers\MasterController;
 
 Route::group([], function () {
     Route::resource('master', MasterController::class)->names('master');
+    Route::inertia('master-material', 'Master/MasterMaterial/Index');
 });

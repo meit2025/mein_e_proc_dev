@@ -1,4 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
+// import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
   return (
@@ -105,7 +106,7 @@ const sidebar = [
         sub: [
           {
             name: 'Master Material',
-            route: '',
+            route: '/master-material',
             roles: '',
           },
           {

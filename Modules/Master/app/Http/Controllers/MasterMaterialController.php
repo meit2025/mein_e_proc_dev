@@ -4,16 +4,14 @@ namespace Modules\Master\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class MasterMaterialController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        return view('master::index');
-    }
+    public function index() {}
 
     /**
      * Show the form for creating a new resource.
