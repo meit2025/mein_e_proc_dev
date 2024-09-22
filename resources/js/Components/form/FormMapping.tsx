@@ -1,4 +1,4 @@
-import FormWrapper from '@/components/form/FormWrapper';
+import FormWrapper from '@/Components/form/FormWrapper';
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';

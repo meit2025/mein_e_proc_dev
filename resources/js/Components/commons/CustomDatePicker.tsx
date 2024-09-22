@@ -4,8 +4,8 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/shacdn/button';
-import { Calendar } from '@/components/shacdn/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/shacdn/popover';
+import { Calendar } from '@/Components/shacdn/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/Components/shacdn/popover';
 
 interface CustomDatePickerProps {
   className?: string;

@@ -1,17 +1,17 @@
 import { ReactNode } from 'react';
 import MainLayout from '../Layouts/MainLayout';
-import FormInput from '@/components/Input/formInput';
+import FormInput from '@/Components/Input/formInput';
 import { useForm, FormProvider } from 'react-hook-form';
 import { Button } from '@mui/material';
-import FormCheckbox from '@/components/Input/formCheckbox';
+import FormCheckbox from '@/Components/Input/formCheckbox';
 import SearchIcon from '@mui/icons-material/Search';
-import FormAutocomplete from '@/components/Input/formDropdown';
-import FormTextArea from '@/components/Input/formTextArea';
-import FormSwitch from '@/components/Input/formSwitch';
-import FormMultiSelect from '@/components/Input/formMultiSelect';
-import FormFileUpload from '@/components/Input/formFieldUpload';
+import FormAutocomplete from '@/Components/Input/formDropdown';
+import FormTextArea from '@/Components/Input/formTextArea';
+import FormSwitch from '@/Components/Input/formSwitch';
+import FormMultiSelect from '@/Components/Input/formMultiSelect';
+import FormFileUpload from '@/Components/Input/formFieldUpload';
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
-import FormMapping from '@/components/form/FormMapping';
+import FormMapping from '@/Components/form/FormMapping';
 
 const formModel: Array<FormFieldModel<any>> = [
   {
