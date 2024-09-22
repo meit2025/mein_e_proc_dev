@@ -1,4 +1,4 @@
-import { TextField, InputAdornment } from '@mui/material';
+import { TextField, InputAdornment, FormHelperText } from '@mui/material';
 import { Controller, useFormContext } from 'react-hook-form';
 import { CSSProperties, ReactNode } from 'react';
 
@@ -11,8 +11,8 @@ interface FormInputProps {
   type?: string;
   requiredMessage?: string;
   placeholder?: string;
-  minValue?: number;
-  maxValue?: number;
+  minLength?: number; // Menambahkan minLength untuk validasi panjang minimal
+  maxLength?: number; // Menambahkan maxLength untuk validasi panjang maksimal
   classNames?: string;
   icon?: ReactNode; // For passing an icon component or HTML
   iconPosition?: 'start' | 'end'; // Specify the position of the icon
@@ -27,11 +27,10 @@ const FormInput: React.FC<FormInputProps> = ({
   type = 'text',
   requiredMessage,
   placeholder,
-  minValue,
-  maxValue,
+  minLength, // Parameter untuk panjang minimal
+  maxLength, // Parameter untuk panjang maksimal
   classNames,
   icon,
-  iconPosition = 'end',
 }) => {
   const {
     control,
@@ -39,50 +38,64 @@ const FormInput: React.FC<FormInputProps> = ({
   } = useFormContext();
 
   return (
-    <Controller
-      name={fieldName}
-      control={control}
-      rules={{
-        required: isRequired ? (requiredMessage ?? `${fieldLabel} is required`) : false,
-        ...(minValue !== undefined
-          ? { min: { value: minValue, message: `Minimum value is ${minValue}` } }
-          : {}),
-        ...(maxValue !== undefined
-          ? { max: { value: maxValue, message: `Maximum value is ${maxValue}` } }
-          : {}),
-      }}
-      render={({ field }) => (
-        <TextField
-          error={Boolean(errors[fieldName])}
-          required={isRequired}
-          label={fieldLabel}
-          {...field}
-          {...(minValue !== undefined ? { inputProps: { min: minValue } } : {})}
-          {...(maxValue !== undefined ? { inputProps: { max: maxValue } } : {})}
-          defaultValue={field.value}
-          placeholder={placeholder}
-          type={type}
-          style={style}
-          className={`${
-            isRequired && !field.value ? 'wide-full required' : 'wide-full'
-          } custom-placeholder ${classNames}`}
-          disabled={disabled}
-          helperText={errors[fieldName]?.message ? String(errors[fieldName]?.message) : ''}
-          slotProps={{
-            inputLabel: {
-              shrink: true,
-            },
-            input: {
-              ...(icon && {
-                [`${iconPosition}Adornment`]: (
-                  <InputAdornment position={iconPosition}>{icon}</InputAdornment>
-                ),
-              }),
-            },
+    <div className='w-full'>
+      <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
+        <label className='form-label max-w-32'>
+          {fieldLabel} <span className='text-red-700'> {isRequired ? '*' : ''}</span>
+        </label>
+        <Controller
+          name={fieldName}
+          control={control}
+          rules={{
+            required: isRequired ? (requiredMessage ?? `${fieldLabel} is required`) : false,
+            ...(minLength !== undefined
+              ? {
+                  minLength: {
+                    value: minLength,
+                    message: `Minimum length is ${minLength} characters`,
+                  },
+                }
+              : {}),
+            ...(maxLength !== undefined
+              ? {
+                  maxLength: {
+                    value: maxLength,
+                    message: `Maximum length is ${maxLength} characters`,
+                  },
+                }
+              : {}),
+          }}
+          render={({ field }) => {
+            return (
+              <>
+                <label
+                  className={`input ${isRequired && errors[fieldName] ? 'border-danger' : ''} ${classNames}`}
+                  style={style}
+                >
+                  {icon}
+                  <input
+                    placeholder={placeholder}
+                    type={type}
+                    required={isRequired}
+                    disabled={disabled}
+                    {...field}
+                    {...(minLength !== undefined ? { minLength: minLength } : {})}
+                    {...(maxLength !== undefined ? { maxLength: maxLength } : {})}
+                  />
+                  <br />
+                </label>
+              </>
+            );
           }}
         />
-      )}
-    />
+      </div>
+      <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
+        <label className='form-label max-w-32'>{''}</label>
+        {errors[fieldName] && (
+          <FormHelperText error>{String(errors[fieldName]?.message)}</FormHelperText>
+        )}
+      </div>
+    </div>
   );
 };
 

@@ -6,6 +6,8 @@ import FormCheckbox from '../Input/formCheckbox';
 import FormMultiSelect from '../Input/formMultiSelect';
 import FormFileUpload from '../Input/formFieldUpload';
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
+import FormTextArea from '../Input/formTextArea';
+import FormSwitch from '../Input/formSwitch';
 
 interface FormWrapperProps<T = any> {
   model: FormFieldModel<T>;
@@ -25,11 +27,24 @@ const FormWrapper = <T,>({ model, onChangeOutside }: FormWrapperProps<T>) => {
           type={model.texttype}
           requiredMessage={model.requiredMessage}
           placeholder={model.placeholder}
-          minValue={model.minLength}
-          maxValue={model.maxLength}
+          minLength={model.minLength}
+          maxLength={model.maxLength}
           classNames={model.classNames}
           icon={model.icon}
           iconPosition={model.iconPosition}
+        />
+      );
+    case 'textarea':
+      return (
+        <FormTextArea
+          fieldLabel={model.label}
+          fieldName={model.name}
+          isRequired={model.required}
+          disabled={model.disabled}
+          style={model.style}
+          requiredMessage={model.requiredMessage}
+          placeholder={model.placeholder}
+          classNames={model.classNames}
         />
       );
 
@@ -75,6 +90,19 @@ const FormWrapper = <T,>({ model, onChangeOutside }: FormWrapperProps<T>) => {
           placeholder={model.placeholder}
           classNames={model.classNames}
           onChangeOutside={onChangeOutside}
+        />
+      );
+
+    case 'switch':
+      return (
+        <FormSwitch
+          fieldLabel={model.label}
+          fieldName={model.name}
+          isRequired={model.required}
+          disabled={model.disabled}
+          style={model.style}
+          requiredMessage={model.requiredMessage}
+          classNames={model.classNames}
         />
       );
 

@@ -24,8 +24,8 @@ const FormTextArea: React.FC<FormTextAreaProps> = ({
   style,
   requiredMessage,
   placeholder,
-  rows = 3,
-  maxRows = 6,
+  rows = 10,
+  maxRows = 10,
   maxLength,
   classNames,
 }) => {
@@ -40,47 +40,60 @@ const FormTextArea: React.FC<FormTextAreaProps> = ({
   };
 
   return (
-    <Controller
-      name={fieldName}
-      control={control}
-      rules={{
-        required: isRequired ? (requiredMessage ?? `${fieldLabel} is required`) : false,
-      }}
-      render={({ field }) => (
-        <div style={style} className={classNames}>
-          <TextField
-            {...field}
-            label={fieldLabel}
-            multiline
-            rows={rows}
-            maxRows={maxRows}
-            placeholder={placeholder}
-            disabled={disabled}
-            error={Boolean(errors[fieldName])}
-            required={isRequired}
-            variant='outlined'
-            inputProps={{
-              ...(maxLength ? { maxLength } : {}),
-            }}
-            onChange={(e) => {
-              field.onChange(e); // Pass the value to react-hook-form
-              handleInputChange(e as React.ChangeEvent<HTMLInputElement>); // Update the input length
-            }}
-          />
-          {maxLength && (
-            <Typography
-              variant='caption'
-              style={{ textAlign: 'right', display: 'block', marginTop: 4 }}
-            >
-              {inputLength}/{maxLength} characters
-            </Typography>
+    <div className='w-full'>
+      <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
+        <label className='form-label max-w-32'>
+          {fieldLabel} <span className='text-red-700'> {isRequired ? '*' : ''}</span>
+        </label>
+        <Controller
+          name={fieldName}
+          control={control}
+          rules={{
+            required: isRequired ? (requiredMessage ?? `${fieldLabel} is required`) : false,
+          }}
+          render={({ field }) => (
+            <div style={style} className={classNames}>
+              <TextField
+                {...field}
+                multiline
+                rows={rows}
+                style={style}
+                maxRows={maxRows}
+                placeholder={placeholder}
+                disabled={disabled}
+                error={Boolean(errors[fieldName])}
+                required={isRequired}
+                variant='outlined'
+                inputProps={{
+                  ...(maxLength ? { maxLength } : {}),
+                }}
+                onChange={(e) => {
+                  field.onChange(e); // Pass the value to react-hook-form
+                  handleInputChange(e as React.ChangeEvent<HTMLInputElement>); // Update the input length
+                }}
+              />
+              {maxLength && (
+                <Typography
+                  variant='caption'
+                  style={{ textAlign: 'right', display: 'block', marginTop: 4 }}
+                >
+                  {inputLength}/{maxLength} characters
+                </Typography>
+              )}
+              {errors[fieldName] && (
+                <FormHelperText error>{String(errors[fieldName]?.message)}</FormHelperText>
+              )}
+            </div>
           )}
-          {errors[fieldName] && (
-            <FormHelperText error>{String(errors[fieldName]?.message)}</FormHelperText>
-          )}
-        </div>
-      )}
-    />
+        />
+      </div>
+      <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
+        <label className='form-label max-w-32'>{''}</label>
+        {errors[fieldName] && (
+          <FormHelperText error>{String(errors[fieldName]?.message)}</FormHelperText>
+        )}
+      </div>
+    </div>
   );
 };
 

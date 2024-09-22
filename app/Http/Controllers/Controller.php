@@ -51,4 +51,39 @@ abstract class Controller
     {
         return $this->errorResponse($message, 404);
     }
+
+    protected function applyColumnFilter($query, $column, $operator, $value)
+    {
+        switch ($operator) {
+            case 'equals':
+                return $query->where($column, '=', $value);
+            case 'does not equal':
+                return $query->where($column, '!=', $value);
+            case 'contains':
+                return $query->where($column, 'like', "%{$value}%");
+            case 'does not contain':
+                return $query->where($column, 'not like', "%{$value}%");
+            case 'starts with':
+                return $query->where($column, 'like', "{$value}%");
+            case 'ends with':
+                return $query->where($column, 'like', "%{$value}");
+            case 'is empty':
+                return $query->where(function ($query) use ($column) {
+                    $query->where($column, '=', '')
+                        ->orWhereNull($column);
+                });
+            case 'is not empty':
+                return $query->where(function ($query) use ($column) {
+                    $query->where($column, '!=', '')
+                        ->whereNotNull($column);
+                });
+            case 'is any of':
+                // Assumes value is a comma-separated string of options
+                $values = explode(',', $value);
+                return $query->whereIn($column, $values);
+            default:
+                // Default fallback (e.g., equals)
+                return $query->where($column, '=', $value);
+        }
+    }
 }

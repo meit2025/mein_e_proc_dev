@@ -23,14 +23,23 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/shacdn/breadcrumb';
+import { PropsWithChildren } from 'react';
 
 interface CustomDialogProps {
   open?: boolean;
   onOpenChange?: () => void;
   onClose?: () => void;
   onSubmit?: () => void;
+  className?: string;
 }
-const CustomDialog = ({ open, onOpenChange, onSubmit, onClose }: CustomDialogProps) => {
+const CustomDialog = ({
+  open,
+  onOpenChange,
+  onSubmit,
+  onClose,
+  children,
+  className,
+}: PropsWithChildren<CustomDialogProps>) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       {/* {onOpenChange ? null : (
@@ -39,7 +48,7 @@ const CustomDialog = ({ open, onOpenChange, onSubmit, onClose }: CustomDialogPro
         </DialogTrigger>
       )} */}
       <DialogTitle></DialogTitle>
-      <DialogContent className='md:max-w-[600px]'>
+      <DialogContent className={className ? className : 'md:max-w-[600px]'}>
         <DialogHeader>
           <Breadcrumb>
             <BreadcrumbList>
@@ -62,6 +71,7 @@ const CustomDialog = ({ open, onOpenChange, onSubmit, onClose }: CustomDialogPro
           </Breadcrumb>
         </DialogHeader>
 
+        <div> {children ? children : null}</div>
         <DialogFooter>
           {onClose ? (
             <Button variant={'outline'} onClick={onClose}>

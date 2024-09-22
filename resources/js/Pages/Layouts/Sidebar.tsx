@@ -1,3 +1,4 @@
+import { LIST_PAGE_SECRET } from '@/endpoint/secret/page';
 import { Link, usePage } from '@inertiajs/react';
 // import { Link } from '@inertiajs/inertia-react';
 
@@ -137,6 +138,23 @@ const sidebar = [
         ],
       },
       {
+        title: 'Gateway',
+        icon: 'ki-key-square',
+        route: '/',
+        sub: [
+          {
+            name: 'Secret',
+            route: LIST_PAGE_SECRET,
+            roles: 'gateway.secret',
+          },
+          {
+            name: 'Api',
+            route: '',
+            roles: '',
+          },
+        ],
+      },
+      {
         title: 'Dashboard2',
         icon: 'ki-element-11',
         route: '/',
@@ -147,8 +165,7 @@ const sidebar = [
 ];
 
 export default function Sidebar() {
-  const { url } = usePage().props;
-
+  const { component: url } = usePage();
   return (
     <div
       className='sidebar dark:bg-coal-600 bg-light border-r border-r-gray-200 dark:border-r-coal-100 fixed top-0 bottom-0 z-20 hidden lg:flex flex-col items-stretch shrink-0'

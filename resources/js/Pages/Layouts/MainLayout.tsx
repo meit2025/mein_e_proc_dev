@@ -36,7 +36,7 @@ export default function MainLayout({ children, title, description }: MainLayoutP
               </div>
             )}
 
-            {children}
+            <div className='container-fixed'> {children}</div>
           </main>
           <Footer />
         </div>
