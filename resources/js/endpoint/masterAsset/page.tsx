@@ -1,0 +1,6 @@
+const ROUTE_MASTER_ASSET_PAGE = '/master/asset';
+
+export const LIST_PAGE_MASTER_ASSET = `${ROUTE_MASTER_ASSET_PAGE}`;
+export const CREATE_PAGE_MASTER_ASSET = `${ROUTE_MASTER_ASSET_PAGE}/create`;
+export const EDIT_PAGE_MASTER_ASSET = `${ROUTE_MASTER_ASSET_PAGE}/update`;
+export const DETAIL_PAGE_MASTER_ASSET = `${ROUTE_MASTER_ASSET_PAGE}/detail`;

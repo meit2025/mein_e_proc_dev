@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Modules\Gateway\Models\Log;
 
 abstract class Controller
 {
@@ -84,6 +86,25 @@ abstract class Controller
             default:
                 // Default fallback (e.g., equals)
                 return $query->where($column, '=', $value);
+        }
+    }
+
+    protected function logToDatabase($id, $functionName, $level, $message, $context = [])
+    {
+        try {
+            //code...
+            Log::create([
+                'releted_id' => $id,
+                'function_name' => $functionName,
+                'level' => $level,
+                'message' => $message,
+                'context' => json_encode($context), // Store additional context as JSON
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        } catch (\Throwable $th) {
+            //throw $th;
+            dd($th);
         }
     }
 }

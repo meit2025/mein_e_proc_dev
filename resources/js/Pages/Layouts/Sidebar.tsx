@@ -1,3 +1,10 @@
+import { LIST_PAGE_API } from '@/endpoint/getway/page';
+import { LIST_PAGE_MASTER_ASSET } from '@/endpoint/masterAsset/page';
+import { LIST_PAGE_MASTER_BANK_KEY } from '@/endpoint/masterBankKey/page';
+import { LIST_PAGE_MASTER_COST_CENTER } from '@/endpoint/masterCostCenter/page';
+import { LIST_PAGE_MASTER_MATERIAL } from '@/endpoint/masterMaterial/page';
+import { LIST_PAGE_MASTER_ORDER } from '@/endpoint/masterOrder/page';
+import { LIST_PAGE_MASTER_RECON } from '@/endpoint/masterRecon/page';
 import { LIST_PAGE_SECRET } from '@/endpoint/secret/page';
 import { Link, usePage } from '@inertiajs/react';
 // import { Link } from '@inertiajs/inertia-react';
@@ -107,32 +114,32 @@ const sidebar = [
         sub: [
           {
             name: 'Master Material',
-            route: '/master-material',
+            route: LIST_PAGE_MASTER_MATERIAL,
             roles: '',
           },
           {
             name: 'Asset',
-            route: '',
+            route: LIST_PAGE_MASTER_ASSET,
             roles: '',
           },
           {
             name: 'Cost Center',
-            route: '',
+            route: LIST_PAGE_MASTER_COST_CENTER,
             roles: '',
           },
           {
             name: 'Internal Order',
-            route: '',
+            route: LIST_PAGE_MASTER_ORDER,
             roles: '',
           },
           {
             name: 'Recon Account',
-            route: '',
+            route: LIST_PAGE_MASTER_RECON,
             roles: '',
           },
           {
             name: 'Bank Key',
-            route: '',
+            route: LIST_PAGE_MASTER_BANK_KEY,
             roles: '',
           },
         ],
@@ -149,7 +156,7 @@ const sidebar = [
           },
           {
             name: 'Api',
-            route: '',
+            route: LIST_PAGE_API,
             roles: '',
           },
         ],

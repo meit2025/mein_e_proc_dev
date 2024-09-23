@@ -40,42 +40,56 @@ const FormAutocomplete = <T,>({
   } = useFormContext();
 
   return (
-    <Controller
-      name={fieldName}
-      control={control}
-      rules={{
-        required: isRequired ? (requiredMessage ?? `${fieldLabel} is required`) : false,
-      }}
-      render={({ field }) => (
-        <div style={style} className={classNames}>
-          <Autocomplete
-            {...field}
-            options={options}
-            getOptionLabel={(option) => option.label}
-            isOptionEqualToValue={(option, value) => option.value === value}
-            onChange={(_, data) => {
-              field.onChange(data ? data.value : null);
-              if (onChangeOutside) {
-                onChangeOutside(data ? data.value : null);
-              }
-            }}
-            disabled={disabled}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label={fieldLabel}
-                placeholder={placeholder}
-                error={Boolean(errors[fieldName])}
-                required={isRequired}
+    <div className='w-full'>
+      <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
+        <label className='form-label max-w-32'>
+          {fieldLabel} <span className='text-red-700'> {isRequired ? '*' : ''}</span>
+        </label>
+        <Controller
+          name={fieldName}
+          control={control}
+          rules={{
+            required: isRequired ? (requiredMessage ?? `${fieldLabel} is required`) : false,
+          }}
+          render={({ field }) => (
+            <div className={`${classNames}`}>
+              <Autocomplete
+                {...field}
+                options={options}
+                getOptionLabel={(option) => option.label}
+                isOptionEqualToValue={(option, value) => option.value === value}
+                onChange={(_, data) => {
+                  field.onChange(data ? data.value : null);
+                  if (onChangeOutside) {
+                    onChangeOutside(data ? data.value : null);
+                  }
+                }}
+                sx={style}
+                disabled={disabled}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder={placeholder}
+                    error={Boolean(errors[fieldName])}
+                    required={isRequired}
+                    InputProps={{
+                      ...params.InputProps,
+                      sx: { height: '36px' },
+                    }}
+                  />
+                )}
               />
-            )}
-          />
-          {errors[fieldName] && (
-            <FormHelperText error>{String(errors[fieldName]?.message)}</FormHelperText>
+            </div>
           )}
-        </div>
-      )}
-    />
+        />
+      </div>
+      <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
+        <label className='form-label max-w-32'>{''}</label>
+        {errors[fieldName] && (
+          <FormHelperText error>{String(errors[fieldName]?.message)}</FormHelperText>
+        )}
+      </div>
+    </div>
   );
 };
 

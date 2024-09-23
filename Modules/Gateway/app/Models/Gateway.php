@@ -16,12 +16,14 @@ class Gateway extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
+        'code_endpoint',
         'name',
         'tabel_name',
         'methods',
-        'authentication',
         'desc',
         'command',
+        'is_status',
+        'type'
     ];
 
     public function gatewayValues()

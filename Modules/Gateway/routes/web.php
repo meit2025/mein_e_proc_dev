@@ -24,6 +24,16 @@ Route::group(['middleware' => 'auth'], function () {
                 'id' => fn() => request()->route('id'),
             ]);
         });
+        Route::group(['prefix' => 'api'], function () {
+            Route::inertia('/', 'Gateway/Api/Index');
+            Route::inertia('/create', 'Gateway/Api/Create');
+            Route::inertia('/update/{id}', 'Gateway/Api/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+            Route::inertia('/detail/{id}', 'Gateway/Api/Detail', [
+                'id' => fn() => request()->route('id'),
+            ]);
+        });
     });
 
     Route::group(['prefix' => 'api/secret', 'middleware' => 'auth'], function () {
@@ -32,5 +42,13 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('/update/{id}', [SecretController::class, 'update'])->name('secret.employees.update');
         Route::get('/detail/{id}', [SecretController::class, 'show'])->name('secret.employees.show');
         Route::delete('/delete/{id}', [SecretController::class, 'destroy'])->name('secret.employees.destroy');
+    });
+
+    Route::group(['prefix' => 'api/api', 'middleware' => 'auth'], function () {
+        Route::get('/list', [GatewayController::class, 'index'])->name('secret.api.index');
+        Route::post('/create', [GatewayController::class, 'store'])->name('secret.api.store');
+        Route::post('/update/{id}', [GatewayController::class, 'update'])->name('secret.api.update');
+        Route::get('/detail/{id}', [GatewayController::class, 'show'])->name('secret.api.show');
+        Route::delete('/delete/{id}', [GatewayController::class, 'destroy'])->name('secret.api.destroy');
     });
 });

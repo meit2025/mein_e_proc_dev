@@ -15,9 +15,4 @@ use Modules\Gateway\Http\Controllers\SecretController;
  *
 */
 
-// Route::group(['middleware' => 'auth'], function () {
-//     Route::group(['prefix' => 'secret'], function () {
-//         // Route to get all secret key employees
-//         Route::get('/list', [SecretController::class, 'index'])->name('secret.employees.index');
-//     });
-// });
+Route::post('/allow', [GatewayController::class, 'setApiPost']);
