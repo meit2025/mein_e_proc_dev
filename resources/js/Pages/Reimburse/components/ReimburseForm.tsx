@@ -1,17 +1,14 @@
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/shacdn/form';
-
+import { Button } from '@/components/shacdn/button';
+import { Inertia } from '@inertiajs/inertia';
 import { z } from 'zod';
-
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/shacdn/form';
 import { useForm } from 'react-hook-form';
 import { Textarea } from '@/Components/shacdn/textarea';
-
 import '../css/reimburse.scss';
 import { ScrollArea } from '@/Components/shacdn/scroll-area';
 import { Separator } from '@/Components/shacdn/separator';
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/shacdn/tabs';
-
 import {
   Select,
   SelectContent,
@@ -22,102 +19,158 @@ import {
 import { CustomDatePicker } from '@/Components/commons/CustomDatePicker';
 import { Input } from '@/components/shacdn/input';
 
-const formSchema = z.object({
-  remark: z.string().min(1).max(50),
-  reimburse_cost: z.number(),
-});
-export const ReimburseForm = () => {
-  // defining form for reimburese form
+interface User {
+  id: string;
+  nip: string;
+  name: string;
+}
+
+interface Type {
+  id: string;
+  code: string;
+  name: string;
+}
+
+interface Currency {
+  id: string;
+  code: string;
+}
+
+interface Props {
+  users: User[];
+  types: Type[];
+  currencies: Currency[];
+  csrf_token: string;
+}
+
+export const ReimburseForm: React.FC<Props> = ({ users, types, currencies, csrf_token }) => {
+  const formSchema = z.object({
+    type: z.string().nonempty('Type is required'),
+    requester: z.string().nonempty('Requester is required'),
+    remark: z.string().nonempty('Remark is required'),
+    balance: z.number().min(1, 'Balance must be at least 1'),
+    receipt_date: z.date(),
+    start_date: z.date(),
+    end_date: z.date(),
+    start_balance_date: z.date(),
+    end_balance_date: z.date(),
+    currency: z.string().nonempty('Currency is required'),
+  });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      type: '',
+      requester: '',
       remark: '',
-      reimburse_cost: 0,
+      balance: 0,
+      receipt_date: new Date(),
+      start_date: new Date(),
+      end_date: new Date(),
+      start_balance_date: new Date(),
+      end_balance_date: new Date(),
+      currency: 'IDR',
     },
   });
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    Inertia.post('/reimburse', values, {
+      headers: {
+        'X-CSRF-TOKEN': csrf_token,
+      },
+    });
+  };
 
   return (
     <ScrollArea className='h-[600px] w-full '>
       <Form {...form}>
-        <table className='text-xs mt-4 reimburse-form-table font-thin'>
-          <tr>
-            <td width={200}>Reimburse Request No.</td>
-            <td>Test-12321</td>
-          </tr>
-          <tr>
-            <td width={200}>Request Status</td>
-            <td>Fully Approved</td>
-          </tr>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <table className='text-xs mt-4 reimburse-form-table font-thin'>
+            <tr>
+              <td width={200}>Reimburse Request No.</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td width={200}>Request Status</td>
+              <td>-</td>
+            </tr>
 
-          <tr>
-            <td width={200}>Request For</td>
-            <td>Samsudin</td>
-          </tr>
-          <tr>
-            <td width={200}>Remark</td>
-            <td>
-              <FormField
-                control={form.control}
-                name='remark'
-                render={({ field }) => (
-                  <FormItem>
-                    {/* <FormLabel>Username</FormLabel> */}
-                    <FormControl>
-                      <Textarea placeholder='Insert remark' {...field} />
-                    </FormControl>
-                    {/* <FormDescription>This is your public display name.</FormDescription> */}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </td>
-          </tr>
-        </table>
+            <tr>
+              <td width={200}>Employee</td>
+              <td>
+                <FormField
+                  control={form.control}
+                  name='requester'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
+                          value={field.value} // Set the current value from React Hook Form
+                        >
+                          <SelectTrigger className='w-[200px]'>
+                            <SelectValue placeholder='Requester' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {users.map((user) => (
+                              <SelectItem key={user.id} value={user.nip}>
+                                {user.name} ({user.nip})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </td>
+            </tr>
+          </table>
 
-        <Separator className='my-4' />
+          <Separator className='my-4' />
 
-        <Tabs defaultValue='form1' className='w-full'>
-          <TabsList className='grid w-full grid-cols-2'>
-            <TabsTrigger value='form1'>Form1</TabsTrigger>
-            {/* <TabsTrigger value='form2'>Form2</TabsTrigger> */}
-          </TabsList>
-          <TabsContent value='form1'>
-            <div>
-              <table className='text-xs mt-4 reimburse-form-detail font-thin'>
-                <tr>
-                  <td width={200}>Type of Reimbursment</td>
-                  <td>Glasses</td>
-                </tr>
-                <tr>
-                  <td width={200}>Reimbursment Balance Date</td>
-                  <td>
-                    <FormField
-                      control={form.control}
-                      name='remark'
-                      render={({ field }) => (
-                        <FormItem>
-                          {/* <FormLabel>Username</FormLabel> */}
-                          <FormControl>
-                            <Select>
-                              <SelectTrigger className='w-[200px]'>
-                                <SelectValue placeholder='Reimburse date' />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value='light'>22 Nov 23 - 26 Nov 24</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          {/* <FormDescription>This is your public display name.</FormDescription> */}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                </tr>
-
-                <tr>
-                  <td width={200}>Employee</td>
-                  <td>
+          <Tabs defaultValue='form1' className='w-full'>
+            <TabsList className='grid w-full grid-cols-2'>
+              <TabsTrigger value='form1'>Form1</TabsTrigger>
+              {/* <TabsTrigger value='form2'>Form2</TabsTrigger> */}
+            </TabsList>
+            <TabsContent value='form1'>
+              <div>
+                <table className='text-xs mt-4 reimburse-form-detail font-thin'>
+                  <tr>
+                    <td width={200}>Type of Reimbursment</td>
+                    <td>
+                      <FormField
+                        control={form.control}
+                        name='type'
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Select
+                                onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
+                                value={field.value} // Set the current value from React Hook Form
+                              >
+                                <SelectTrigger className='w-[200px]'>
+                                  <SelectValue placeholder='Requester' />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {types.map((type) => (
+                                    <SelectItem key={type.id} value={type.code}>
+                                      {type.name} ({type.code})
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width={200}>Remark</td>
                     <td>
                       <FormField
                         control={form.control}
@@ -126,13 +179,140 @@ export const ReimburseForm = () => {
                           <FormItem>
                             {/* <FormLabel>Username</FormLabel> */}
                             <FormControl>
+                              <Textarea placeholder='Insert remark' {...field} />
+                            </FormControl>
+                            {/* <FormDescription>This is your public display name.</FormDescription> */}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td width={200}>Balance</td>
+                    <td>-</td>
+                  </tr>
+
+                  <tr>
+                    <td width={200}>Limit per claim</td>
+                    <td>-</td>
+                  </tr>
+
+                  <tr>
+                    <td width={200}>Receipt Date</td>
+                    <td>
+                      <FormField
+                        control={form.control}
+                        name='receipt_date'
+                        render={({ field }) => (
+                          <FormItem>
+                            {/* <FormLabel>Username</FormLabel> */}
+                            <FormControl>
+                              <CustomDatePicker />
+                            </FormControl>
+                            {/* <FormDescription>This is your public display name.</FormDescription> */}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td width={200}>Claim date</td>
+                    <td className='flex items-center'>
+                      {/* <CustomDatePicker /> */}
+                      <span className='mx-2'>Start Date</span>
+                      <FormField
+                        control={form.control}
+                        name='start_date'
+                        render={({ field }) => (
+                          <FormItem>
+                            {/* <FormLabel>Username</FormLabel> */}
+                            <FormControl>
+                              <CustomDatePicker />
+                            </FormControl>
+                            {/* <FormDescription>This is your public display name.</FormDescription> */}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <span className='mx-2'>End Date</span>
+                      <FormField
+                        control={form.control}
+                        name='end_date'
+                        render={({ field }) => (
+                          <FormItem>
+                            {/* <FormLabel>Username</FormLabel> */}
+                            <FormControl>
+                              <CustomDatePicker />
+                            </FormControl>
+                            {/* <FormDescription>This is your public display name.</FormDescription> */}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td width={200}>Period Date</td>
+                    <td className='flex items-center'>
+                      <span className='mx-2'>Start Date</span>
+                      {/* <CustomDatePicker /> */}
+                      <FormField
+                        control={form.control}
+                        name='start_balance_date'
+                        render={({ field }) => (
+                          <FormItem>
+                            {/* <FormLabel>Username</FormLabel> */}
+                            <FormControl>
+                              <CustomDatePicker />
+                            </FormControl>
+                            {/* <FormDescription>This is your public display name.</FormDescription> */}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <span className='mx-2'>End Date</span>
+                      <FormField
+                        control={form.control}
+                        name='end_balance_date'
+                        render={({ field }) => (
+                          <FormItem>
+                            {/* <FormLabel>Username</FormLabel> */}
+                            <FormControl>
+                              <CustomDatePicker />
+                            </FormControl>
+                            {/* <FormDescription>This is your public display name.</FormDescription> */}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td width={200}>Reimburse Cost</td>
+                    <td className='flex items-center space-x-3'>
+                      <FormField
+                        control={form.control}
+                        name='currency'
+                        render={({ field }) => (
+                          <FormItem>
+                            {/* <FormLabel>Username</FormLabel> */}
+                            <FormControl>
                               <Select>
-                                <SelectTrigger className='w-[200px]'>
-                                  <SelectValue placeholder='' />
+                                <SelectTrigger className='w-[100px]'>
+                                  <SelectValue placeholder='-' />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value='employee'>Employee</SelectItem>
-                                  <SelectItem value='children'>Children</SelectItem>
+                                  {currencies.map((currency) => (
+                                    <SelectItem key={currency.id} value={currency.code}>
+                                      {currency.code}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                             </FormControl>
@@ -141,189 +321,33 @@ export const ReimburseForm = () => {
                           </FormItem>
                         )}
                       />
+
+                      <FormField
+                        control={form.control}
+                        name='balance'
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                type='number'
+                                placeholder='0.0'
+                                {...field}
+                                value={field.value || ''}
+                                onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </td>
-                  </td>
-                </tr>
-                <tr>
-                  <td width={200}>Balance</td>
-                  <td>IDR 512.000</td>
-                </tr>
-
-                <tr>
-                  <td width={200}>Limit per claim</td>
-                  <td>Unlimited</td>
-                </tr>
-
-                <tr>
-                  <td width={200}>Receipt Date</td>
-                  <td>
-                    <FormField
-                      control={form.control}
-                      name='remark'
-                      render={({ field }) => (
-                        <FormItem>
-                          {/* <FormLabel>Username</FormLabel> */}
-                          <FormControl>
-                            <CustomDatePicker />
-                          </FormControl>
-                          {/* <FormDescription>This is your public display name.</FormDescription> */}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                </tr>
-
-                <tr>
-                  <td width={200}>Start date</td>
-                  <td className='flex items-center'>
-                    {/* <CustomDatePicker /> */}
-                    <FormField
-                      control={form.control}
-                      name='remark'
-                      render={({ field }) => (
-                        <FormItem>
-                          {/* <FormLabel>Username</FormLabel> */}
-                          <FormControl>
-                            <CustomDatePicker />
-                          </FormControl>
-                          {/* <FormDescription>This is your public display name.</FormDescription> */}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <span className='mx-2'>End Date</span>
-                    <FormField
-                      control={form.control}
-                      name='remark'
-                      render={({ field }) => (
-                        <FormItem>
-                          {/* <FormLabel>Username</FormLabel> */}
-                          <FormControl>
-                            <CustomDatePicker />
-                          </FormControl>
-                          {/* <FormDescription>This is your public display name.</FormDescription> */}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                </tr>
-
-                <tr>
-                  <td width={200}>Reimburse Cost</td>
-                  <td className='flex items-center space-x-3'>
-                    <FormField
-                      control={form.control}
-                      name='remark'
-                      render={({ field }) => (
-                        <FormItem>
-                          {/* <FormLabel>Username</FormLabel> */}
-                          <FormControl>
-                            <Select>
-                              <SelectTrigger className='w-[100px]'>
-                                <SelectValue placeholder='' />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value='employee'>IDR</SelectItem>
-                                <SelectItem value='children'>USD</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          {/* <FormDescription>This is your public display name.</FormDescription> */}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name='reimburse_cost'
-                      render={({ field }) => (
-                        <FormItem>
-                          {/* <FormLabel>Username</FormLabel> */}
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          {/* <FormDescription>This is your public display name.</FormDescription> */}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <span>Valid Cost:</span>
-
-                    <FormField
-                      control={form.control}
-                      name='reimburse_cost'
-                      render={({ field }) => (
-                        <FormItem>
-                          {/* <FormLabel>Username</FormLabel> */}
-                          <FormControl>
-                            <Input {...field} disabled className='bg-gray-200' />
-                          </FormControl>
-                          {/* <FormDescription>This is your public display name.</FormDescription> */}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                </tr>
-
-                <tr>
-                  <td width={200}>Remark</td>
-                  <td>
-                    <FormField
-                      control={form.control}
-                      name='remark'
-                      render={({ field }) => (
-                        <FormItem>
-                          {/* <FormLabel>Username</FormLabel> */}
-                          <FormControl>
-                            <Textarea
-                              placeholder='Insert remark'
-                              {...field}
-                              className='w-[300px]'
-                            />
-                          </FormControl>
-                          {/* <FormDescription>This is your public display name.</FormDescription> */}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                </tr>
-
-                <tr>
-                  <td width={200}>File Attachment</td>
-                  <td>file.tsx</td>
-                </tr>
-                <tr>
-                  <td width={200}>Replace File Attachment</td>
-                  <td>
-                    <FormField
-                      control={form.control}
-                      name='remark'
-                      render={({ field }) => (
-                        <FormItem>
-                          {/* <FormLabel>Username</FormLabel> */}
-                          <FormControl>
-                            <Input id='picture' type='file' className='w-[200px]' />
-                          </FormControl>
-                          {/* <FormDescription>This is your public display name.</FormDescription> */}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td width={200}>File Extension</td>
-                  <td>tsx,jpg</td>
-                </tr>
-              </table>
-            </div>
-          </TabsContent>
-        </Tabs>
+                  </tr>
+                </table>
+              </div>
+            </TabsContent>
+          </Tabs>
+          <Button type='submit'>Save</Button>
+        </form>
       </Form>
     </ScrollArea>
   );

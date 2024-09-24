@@ -1,4 +1,4 @@
-// import * as React from 'react';
+import { useState } from 'react';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { ColumnDef } from '@tanstack/react-table';
 
@@ -63,8 +63,44 @@ export type Reimburse = {
   source: string;
 };
 
-const ListReimburse = () => {
-  const [open, setOpen] = React.useState<boolean>(false);
+interface User {
+  id: string;
+  nip: string;
+  name: string;
+}
+
+interface Type {
+  id: string;
+  code: string;
+  name: string;
+}
+
+interface Currency {
+  id: string;
+  code: string;
+}
+
+interface Props {
+  users: User[];
+  types: Type[];
+  currencies: Currency[];
+  csrf_token: string;
+}
+
+const ListReimburse: React.FC<Props> = ({ users, types, currencies, csrf_token }) => {
+  const [open, setOpen] = useState(false);
+  const [currentReimbursement, setCurrentReimbursement] = useState(null);
+
+  // Function to open the dialog for a specific reimbursement
+  const handleOpenForm = (reimbursement = null) => {
+    setCurrentReimbursement(reimbursement); // If null, this is a new reimbursement
+    setOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setCurrentReimbursement(null);
+    setOpen(false);
+  };
   const columns: ColumnDef<Reimburse>[] = [
     //   {
     //     id: 'select',
@@ -158,7 +194,12 @@ const ListReimburse = () => {
     <AuthenticatedLayout>
       <div>
         <CustomDialog className='md:max-w-[800px]' open={open} onClose={() => setOpen(false)}>
-          <ReimburseForm />
+          <ReimburseForm
+            users={users}
+            types={types}
+            currencies={currencies}
+            csrf_token={csrf_token}
+          />
         </CustomDialog>
         <div className='flex items-center justify-between'>
           <HeaderPage title='Reimbuse' />
