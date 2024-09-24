@@ -34,11 +34,13 @@ class ReimbuseController extends Controller
      */
     public function index()
     {
+        $reimburses = Reimburse::with('users')->get();
         $users = User::select('id', 'nip', 'name')->get();
         $types = ReimburseType::select('id', 'code', 'name')->get();
         $currencies = Currency::select('id', 'code')->get();
         $csrf_token = csrf_token();
         return Inertia::render('Reimburse/ListReimburse', [
+            'reimburses'    =>  $reimburses,
             'users'         =>  $users,
             'types'         =>  $types,
             'currencies'    =>  $currencies,
