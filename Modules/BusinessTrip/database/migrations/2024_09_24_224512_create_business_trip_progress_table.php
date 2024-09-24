@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reimburse_progress', function (Blueprint $table) {
+        Schema::create('business_trip_progress', function (Blueprint $table) {
             $table->id();
-            $table->string('reimburse');
+            $table->string('business_trip');
             $table->string('approver');
             $table->longText('notes');
             $table->enum('status', ['Approved', 'Rejected', 'Waiting'])->default('Waiting');
             $table->softDeletes();
             $table->timestamps();
 
-            $table->foreign('reimburse')->references('rn')->on('reimburses')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreign('business_trip')->references('rn')->on('business_trips')->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreign('approver')->references('nip')->on('users')->cascadeOnUpdate()->cascadeOnDelete();
         });
     }
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reimburse_progress');
+        Schema::dropIfExists('business_trip_progress');
     }
 };

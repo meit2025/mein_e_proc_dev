@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reimburse_types', function (Blueprint $table) {
-            $table->string('code')->primary();
-            $table->string("group")->nullable();
-            $table->string('name');
-            $table->integer('claim_limit')->nullable();
-            $table->double('plafon')->nullable();
-            $table->softDeletes();
+        Schema::create('business_trip_attachments', function (Blueprint $table) {
+            $table->id();
+            $table->string('business_trip');
+            $table->longText('url');
             $table->timestamps();
+
+            $table->foreign('business_trip')->references('rn')->on('business_trips')->cascadeOnUpdate()->cascadeOnDelete();
         });
     }
 
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reimburse_types');
+        Schema::dropIfExists('business_trip_attachments');
     }
 };

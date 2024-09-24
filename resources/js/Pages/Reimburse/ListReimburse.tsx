@@ -31,20 +31,18 @@ interface Reimburse {
 }
 
 interface User {
-  id: string;
   nip: string;
   name: string;
 }
 
 interface Type {
-  id: string;
   code: string;
   name: string;
 }
 
 interface Currency {
-  id: string;
   code: string;
+  name: string;
 }
 
 interface Props {

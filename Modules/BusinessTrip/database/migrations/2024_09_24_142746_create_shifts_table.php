@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reimburse_types', function (Blueprint $table) {
+        Schema::create('shifts', function (Blueprint $table) {
             $table->string('code')->primary();
-            $table->string("group")->nullable();
-            $table->string('name');
-            $table->integer('claim_limit')->nullable();
-            $table->double('plafon')->nullable();
+            $table->string('name')->nullable();
+            $table->longText('description')->nullable();
+            $table->date('start');
+            $table->date('end');
             $table->softDeletes();
             $table->timestamps();
         });
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reimburse_types');
+        Schema::dropIfExists('shifts');
     }
 };

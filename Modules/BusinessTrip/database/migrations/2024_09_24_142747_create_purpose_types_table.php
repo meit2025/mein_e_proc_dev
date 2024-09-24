@@ -11,12 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reimburse_types', function (Blueprint $table) {
-            $table->string('code')->primary();
-            $table->string("group")->nullable();
+        Schema::create('purpose_types', function (Blueprint $table) {
+            $table->id();
             $table->string('name');
-            $table->integer('claim_limit')->nullable();
-            $table->double('plafon')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reimburse_types');
+        Schema::dropIfExists('purpose_types');
     }
 };

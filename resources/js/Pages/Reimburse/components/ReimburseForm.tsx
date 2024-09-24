@@ -156,7 +156,7 @@ export const ReimburseForm: React.FC<Props> = ({ users, types, currencies, csrf_
                                 </SelectTrigger>
                                 <SelectContent>
                                   {types.map((type) => (
-                                    <SelectItem key={type.id} value={type.code}>
+                                    <SelectItem key={type.code} value={type.code}>
                                       {type.name} ({type.code})
                                     </SelectItem>
                                   ))}
@@ -309,8 +309,8 @@ export const ReimburseForm: React.FC<Props> = ({ users, types, currencies, csrf_
                                 </SelectTrigger>
                                 <SelectContent>
                                   {currencies.map((currency) => (
-                                    <SelectItem key={currency.id} value={currency.code}>
-                                      {currency.code}
+                                    <SelectItem key={currency.code} value={currency.code}>
+                                      {currency.code} ({currency.name})
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
