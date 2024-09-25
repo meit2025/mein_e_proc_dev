@@ -1,11 +1,11 @@
-import FormWrapper from '@/components/form/FormWrapper';
+import FormWrapper from '@/Components/form/FormWrapper';
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { FieldValues } from 'react-hook-form';
 import axios from 'axios';
 import axiosInstance from '@/axiosInstance';
-import { useAlert } from '@/contexts/AlertContext';
+import { useAlert } from '@/Contexts/AlertContext';
 import { Loading } from '../commons/Loading';
 
 interface FormMappingProps {

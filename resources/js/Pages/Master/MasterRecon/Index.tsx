@@ -1,6 +1,6 @@
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import { ReactNode } from 'react';
-import DataGridComponent from '@/components/commons/DataGrid';
+import DataGridComponent from '@/Components/commons/DataGrid';
 import { columns } from './model/listModel';
 import { GET_MASTER_MATERIAL } from '@/endpoint/masterMaterial/api';
 import { GET_MASTER_RECON } from '@/endpoint/masterRecon/api';

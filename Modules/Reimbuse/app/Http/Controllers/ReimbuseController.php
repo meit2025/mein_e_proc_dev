@@ -3,12 +3,15 @@
 namespace Modules\Reimbuse\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Currency;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Modules\Reimbuse\Jobs\ProcessReimbursements;
 use Modules\Reimbuse\Models\Reimburse;
+use Modules\Reimbuse\Models\ReimburseType;
 
 class ReimbuseController extends Controller
 {
@@ -31,7 +34,18 @@ class ReimbuseController extends Controller
      */
     public function index()
     {
-        return Inertia::render('Reimburse/ListReimburse');
+        $reimburses = Reimburse::with('users')->get();
+        $users = User::select('nip', 'name')->get();
+        $types = ReimburseType::select('code', 'name')->get();
+        $currencies = Currency::select('code', 'name')->get();
+        $csrf_token = csrf_token();
+        return Inertia::render('Reimburse/ListReimburse', [
+            'reimburses'    =>  $reimburses,
+            'users'         =>  $users,
+            'types'         =>  $types,
+            'currencies'    =>  $currencies,
+            'csrf_token'    =>  $csrf_token
+        ]);
     }
 
     /**
@@ -47,36 +61,25 @@ class ReimbuseController extends Controller
      */
     public function store(Request $request)
     {
-        // Ensure the input is an array of reimbursements
         $reimbursements = $request->all();
-
-        if (!is_array($reimbursements)) {
-            return back()->withErrors(['status' => 'Invalid input format. Expecting an array of reimbursements.']);
+        // if (!is_array($reimbursements)) {
+        //     return back()->withErrors(['status' => 'Invalid input format. Expecting an array of reimbursements.']);
+        // }
+        // foreach ($reimbursements as $reimbursementData) {
+        $validator = Validator::make($reimbursements, $this->validator_rule);
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
         }
-
-        // Loop through each reimbursement in the array
-        foreach ($reimbursements as $reimbursementData) {
-            $validator = Validator::make($reimbursementData, $this->validator_rule);
-
-            if ($validator->fails()) {
-                return redirect()->back()->withErrors($validator)->withInput();
-            }
-
-            try {
-                $data = $validator->validated();
-
-                // Start transaction for each reimbursement
-                DB::beginTransaction();
-
-                Reimburse::create($data);
-
-                DB::commit();
-            } catch (\Exception $e) {
-                DB::rollBack();
-                return back()->withErrors(['status' => $e->getMessage()]);
-            }
+        try {
+            $data = $validator->validated();
+            DB::beginTransaction();
+            Reimburse::create($data);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['status' => $e->getMessage()]);
         }
-
+        // }
         return "All data has been processed successfully.";
     }
 

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import MainLayout from '@/Pages/Layouts/MainLayout';
-import FormMapping from '@/components/form/FormMapping';
+import FormMapping from '@/Components/form/FormMapping';
 import { formModel } from './model/formModel';
 import { useForm } from 'react-hook-form';
 import { CREATE_API } from '@/endpoint/getway/api';

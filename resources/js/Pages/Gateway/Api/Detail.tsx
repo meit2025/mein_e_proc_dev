@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import axiosInstance from '@/axiosInstance';
 import { usePage } from '@inertiajs/react';
 import { DETAIL_API } from '@/endpoint/getway/api';
-import CustomTab from '@/components/commons/CustomTab';
+import CustomTab from '@/Components/commons/CustomTab';
 
 const Detail = ({ id }: { id: number }) => {
   const { props } = usePage();
