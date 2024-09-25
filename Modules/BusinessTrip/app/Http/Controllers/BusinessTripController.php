@@ -3,7 +3,12 @@
 namespace Modules\BusinessTrip\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Currency;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Modules\Reimbuse\Models\Reimburse;
+use Modules\Reimbuse\Models\ReimburseType;
 
 class BusinessTripController extends Controller
 {
@@ -12,7 +17,18 @@ class BusinessTripController extends Controller
      */
     public function index()
     {
-        return view('businesstrip::index');
+        $reimburses = Reimburse::with('users')->get();
+        $users = User::select('nip', 'name')->get();
+        $types = ReimburseType::select('code', 'name')->get();
+        $currencies = Currency::select('code', 'name')->get();
+        $csrf_token = csrf_token();
+        return Inertia::render('BusinessTrip/ListBusinessTrip', [
+            'reimburses'    =>  $reimburses,
+            'users'         =>  $users,
+            'types'         =>  $types,
+            'currencies'    =>  $currencies,
+            'csrf_token'    =>  $csrf_token
+        ]);
     }
 
     /**
