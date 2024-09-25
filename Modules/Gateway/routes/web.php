@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Gateway\Http\Controllers\GatewayController;
+use Modules\Gateway\Http\Controllers\GatewayValueController;
 use Modules\Gateway\Http\Controllers\SecretController;
 
 /*
@@ -34,6 +35,12 @@ Route::group(['middleware' => 'auth'], function () {
                 'id' => fn() => request()->route('id'),
             ]);
         });
+        Route::group(['prefix' => 'value'], function () {
+            Route::inertia('/create', 'Gateway/Api/Value/Create');
+            Route::inertia('/update/{id}', 'Gateway/Api/Value/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+        });
     });
 
     Route::group(['prefix' => 'api/secret', 'middleware' => 'auth'], function () {
@@ -50,5 +57,13 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('/update/{id}', [GatewayController::class, 'update'])->name('secret.api.update');
         Route::get('/detail/{id}', [GatewayController::class, 'show'])->name('secret.api.show');
         Route::delete('/delete/{id}', [GatewayController::class, 'destroy'])->name('secret.api.destroy');
+    });
+
+    Route::group(['prefix' => 'api/value', 'middleware' => 'auth'], function () {
+        Route::get('/list', [GatewayValueController::class, 'index'])->name('secret.value.index');
+        Route::post('/create', [GatewayValueController::class, 'store'])->name('secret.value.store');
+        Route::post('/update/{id}', [GatewayValueController::class, 'update'])->name('secret.value.update');
+        Route::get('/detail/{id}', [GatewayValueController::class, 'show'])->name('secret.value.show');
+        Route::delete('/delete/{id}', [GatewayValueController::class, 'destroy'])->name('secret.value.destroy');
     });
 });

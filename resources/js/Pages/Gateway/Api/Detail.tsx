@@ -6,21 +6,14 @@ import axiosInstance from '@/axiosInstance';
 import { usePage } from '@inertiajs/react';
 import { DETAIL_API } from '@/endpoint/getway/api';
 import CustomTab from '@/components/commons/CustomTab';
+import { contentsTabs, labelsTabs } from './model/detailModel';
+import { Loading } from '@/components/commons/Loading';
 
 const Detail = ({ id }: { id: number }) => {
   const { props } = usePage();
 
-  const methods = useForm({
-    mode: 'onChange',
-    reValidateMode: 'onChange',
-  });
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const labels = ['Detail', 'Value Parameter', 'Logs'];
-  const contents = [
-    <div>Overview content goes here</div>,
-    <div>Details content goes here</div>,
-    <div>Reviews content goes here</div>,
-  ];
+  const [data, setData] = useState<boolean>(false);
 
   const getdetail = useCallback(
     async () => {
@@ -28,14 +21,14 @@ const Detail = ({ id }: { id: number }) => {
       try {
         const response = await axiosInstance.get(DETAIL_API(props.id));
         const data = response.data;
-        methods.reset(data.data);
+        setData(data.data);
       } catch (error) {
         console.error('Error fetching detail:', error);
       } finally {
         setIsLoading(false);
       }
     },
-    [methods, props.id], // Include `methods` in the dependency array
+    [props.id], // Include `methods` in the dependency array
   );
 
   useEffect(() => {
@@ -44,7 +37,8 @@ const Detail = ({ id }: { id: number }) => {
 
   return (
     <>
-      <CustomTab tabLabels={labels} tabContents={contents} />
+      <Loading isLoading={isLoading} />
+      <CustomTab tabLabels={labelsTabs} tabContents={contentsTabs(data)} />
     </>
   );
 };

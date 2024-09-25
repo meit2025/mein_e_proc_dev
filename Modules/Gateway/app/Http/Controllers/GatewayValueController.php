@@ -4,23 +4,27 @@ namespace Modules\Gateway\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Modules\Gateway\Http\Requests\CreateSecret;
-use Modules\Gateway\Models\SecretKeyEmployee;
+use Modules\Gateway\Models\GatewayValue;
 
-class SecretController extends Controller
+class GatewayValueController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function inde(Request $request)
     {
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'asc');
 
-        $query = SecretKeyEmployee::query();
+        $query = GatewayValue::query();
 
-        $filterableColumns = ['key', 'employee', 'secret_key', 'desc'];
+        $filterableColumns = [
+            'gateways_id',
+            'column_value',
+            'value',
+            'is_key'
+        ];
         foreach ($request->all() as $key => $value) {
             if (in_array($key, $filterableColumns)) {
                 list($operator, $filterValue) = array_pad(explode(',', $value, 2), 2, null);
@@ -29,7 +33,10 @@ class SecretController extends Controller
         }
 
         if ($request->search) {
-            $query->where('employee', 'like', '%' . $request->search . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('column_value', 'like', '%' . $request->search . '%')
+                    ->orWhere('value', 'like', '%' . $request->search . '%');
+            });
         }
 
         $query->orderBy($sortBy, $sortDirection);
@@ -49,11 +56,12 @@ class SecretController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateSecret $request)
+    public function store(Request $request)
     {
+        //
         $dataInsert = $request->all();
-        $dataInsert['is_status'] = $request->is_status ?? false;
-        $secret = SecretKeyEmployee::create($dataInsert);
+        $dataInsert['is_key'] = $request->is_status ?? false;
+        $secret = GatewayValue::create($dataInsert);
         return $this->successResponse($secret);
     }
 
@@ -62,7 +70,7 @@ class SecretController extends Controller
      */
     public function show($id)
     {
-        $secret = SecretKeyEmployee::find($id);
+        $secret = GatewayValue::find($id);
         return $this->successResponse($secret);
     }
 
@@ -77,11 +85,12 @@ class SecretController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(CreateSecret $request, $id)
+    public function update(Request $request, $id)
     {
+        //
         $dataInsert = $request->all();
-        $dataInsert['is_status'] = $request->is_status ?? false;
-        $secret = SecretKeyEmployee::find($id)->update($dataInsert);
+        $dataInsert['is_key'] = $request->is_status ?? false;
+        $secret = GatewayValue::find($id)->update($dataInsert);
         return $this->successResponse($secret);
     }
 
@@ -91,7 +100,7 @@ class SecretController extends Controller
     public function destroy($id)
     {
         //
-        $secret = SecretKeyEmployee::find($id)->delete();
+        $secret = GatewayValue::find($id)->delete();
         return $this->successResponse($secret);
     }
 }

@@ -71,7 +71,9 @@ class GatewayController extends Controller
     public function store(GatewayRequest $request)
     {
         //
-        $secret = Gateway::create($request->all());
+        $dataInsert = $request->all();
+        $dataInsert['is_status'] = $request->is_status ?? false;
+        $secret = Gateway::create($dataInsert);
         return $this->successResponse($secret);
     }
 
@@ -98,7 +100,9 @@ class GatewayController extends Controller
     public function update(Request $request, $id)
     {
         //
-        $secret = SecretKeyEmployee::find($id)->update($request->all());
+        $dataInsert = $request->all();
+        $dataInsert['is_status'] = $request->is_status ?? false;
+        $secret = Gateway::find($id)->update($dataInsert);
         return $this->successResponse($secret);
     }
 
