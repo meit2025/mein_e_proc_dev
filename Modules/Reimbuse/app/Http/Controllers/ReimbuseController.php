@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Modules\Reimbuse\Jobs\ProcessReimbursements;
 use Modules\Reimbuse\Models\Reimburse;
+use Modules\Reimbuse\Models\ReimbursePeriod;
 use Modules\Reimbuse\Models\ReimburseType;
 
 class ReimbuseController extends Controller
@@ -38,12 +39,15 @@ class ReimbuseController extends Controller
         $users = User::select('nip', 'name')->get();
         $types = ReimburseType::select('code', 'name')->get();
         $currencies = Currency::select('code', 'name')->get();
+        $periods = ReimbursePeriod::select('id', 'start', 'end')->get();
+        
         $csrf_token = csrf_token();
         return Inertia::render('Reimburse/ListReimburse', [
             'reimburses'    =>  $reimburses,
             'users'         =>  $users,
             'types'         =>  $types,
             'currencies'    =>  $currencies,
+            'periods'       =>  $periods,
             'csrf_token'    =>  $csrf_token
         ]);
     }

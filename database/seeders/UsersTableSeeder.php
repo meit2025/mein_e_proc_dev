@@ -14,17 +14,43 @@ class UsersTableSeeder extends Seeder
      */
     public function run(): void
     {
-        //
         User::insert([
+            [
+                'nip'               =>  '00001',
+                'division'          =>  'IT',
+                'role'              =>  'user',
+                'job_level'         =>  'direktur',
+                'immediate_spv'     =>  null,
+                'name'              =>  'John Doe',
+                'email'             =>  'direktur@gmail.com',
+                'email_verified_at' =>  now(),
+                'password'          =>  Hash::make('password'),
+                'created_at'        =>  now(),
+                'updated_at'        =>  now(),
+            ],
+            [
+                'nip'               =>  '23456',
+                'division'          =>  'IT',
+                'role'              =>  'user',
+                'job_level'         =>  'manager',
+                'immediate_spv'     =>  '00001',
+                'name'              =>  'John',
+                'email'             =>  'manager@gmail.com',
+                'email_verified_at' =>  now(),
+                'password'          =>  Hash::make('password'),
+                'created_at'        =>  now(),
+                'updated_at'        =>  now(),
+            ],
             [
                 'nip'               =>  '12345',
                 'division'          =>  'IT',
                 'role'              =>  'user',
                 'job_level'         =>  'staff',
-                'name'              =>  'John Doe',
-                'email'             =>  'admin@gmail.com',
+                'immediate_spv'     =>  '23456',
+                'name'              =>  'Doe',
+                'email'             =>  'staff@gmail.com',
                 'email_verified_at' =>  now(),
-                'password'          =>  Hash::make('admin12345'), // Enkripsi password
+                'password'          =>  Hash::make('password'),
                 'created_at'        =>  now(),
                 'updated_at'        =>  now(),
             ]
