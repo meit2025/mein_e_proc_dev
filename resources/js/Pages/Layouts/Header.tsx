@@ -1,3 +1,5 @@
+import { Link, usePage } from '@inertiajs/react';
+import Logo from '../../../assets/images/logo.png';
 export default function Header() {
   return (
     <header
@@ -2399,8 +2401,8 @@ export default function Header() {
               <div className='menu-toggle btn btn-icon rounded-full'>
                 <img
                   alt=''
-                  className='size-9 rounded-full border-2 border-success shrink-0'
-                  src='assets/media/avatars/300-2.png'
+                  className='size-10 rounded-full border-2 border-success shrink-0'
+                  src={Logo}
                 ></img>
               </div>
               <div className='menu-dropdown menu-default light:border-gray-300 w-screen max-w-[250px]'>
@@ -2409,7 +2411,7 @@ export default function Header() {
                     <img
                       alt=''
                       className='size-9 rounded-full border-2 border-success'
-                      src='assets/media/avatars/300-2.png'
+                      src={Logo}
                     ></img>
                     <div className='flex flex-col gap-1.5'>
                       <span className='text-sm text-gray-800 font-semibold leading-none'>
@@ -2650,10 +2652,7 @@ export default function Header() {
                     </div>
                   </div>
                   <div className='menu-item px-4 py-1.5'>
-                    <a
-                      className='btn btn-sm btn-light justify-center'
-                      href='html/demo1/authentication/classic/sign-in.html'
-                    >
+                    <a className='btn btn-sm btn-light justify-center' href='/logout'>
                       Log out
                     </a>
                   </div>

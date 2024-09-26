@@ -97,4 +97,13 @@ class AuthController extends Controller
     {
         //
     }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function logout()
+    {
+        Auth::logout(); // Mengeluarkan pengguna yang sedang aktif
+        return redirect('/login')->with('success', 'You have been logged out successfully.');
+    }
 }
