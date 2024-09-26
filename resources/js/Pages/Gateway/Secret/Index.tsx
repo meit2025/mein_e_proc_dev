@@ -16,7 +16,7 @@ export const Index = () => {
           editUrl: EDIT_PAGE_SECRET,
           deleteUrl: DELET_SECRET,
         }}
-        labelFilter='search employee'
+        labelFilter='search'
       />
     </>
   );

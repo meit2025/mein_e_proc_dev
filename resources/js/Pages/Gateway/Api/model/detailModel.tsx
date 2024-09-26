@@ -7,6 +7,6 @@ export const contentsTabs = (detail: any, id: number) => {
   return [
     <DetailLayout key='Detail' detail={detail} />,
     <ValueLayout key='value' id={id} />,
-    <LogsLayout key='logs' />,
+    <LogsLayout key='logs' id={id} />,
   ];
 };

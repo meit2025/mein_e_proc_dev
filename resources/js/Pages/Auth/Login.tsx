@@ -24,14 +24,14 @@ import { Input } from '@/components/shacdn/input';
 
 import { z } from 'zod';
 
-import { router, usePage } from '@inertiajs/react'; 
+import { router, usePage } from '@inertiajs/react';
 
 const formSchema = z.object({
   username: z.string().min(1, {
-    message: 'Username required'
+    message: 'Username required',
   }),
   password: z.string().min(1, {
-    message: "Password required"
+    message: 'Password required',
   }),
   remember_me: z.boolean().default(false).optional(),
 });
@@ -39,11 +39,10 @@ const formSchema = z.object({
 import { useForm } from 'react-hook-form';
 import axios, { AxiosError } from 'axios';
 import { useAlert } from '../../contexts/AlertContext.jsx';
+import axiosInstance from '@/axiosInstance.js';
 
 export function LoginForm() {
-
   const { errors } = usePage().props;
-
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -61,7 +60,7 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       // Menggunakan axios untuk mengirim permintaan POST
-      const response = await axios.post('/login', values);
+      const response = await axiosInstance.post('/login', values);
       showToast(response.data.message, 'success');
       window.location.href = '/';
     } catch (error) {

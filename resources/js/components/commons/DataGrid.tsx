@@ -26,6 +26,7 @@ interface DataGridProps {
   onEdit?: (id: number) => Promise<void> | void;
   onDelete?: (id: number) => Promise<void> | void;
   onDetail?: (id: number) => Promise<void> | void;
+  buttonActionCustome?: ReactNode;
 }
 
 const DataGridComponent: React.FC<DataGridProps> = ({
@@ -38,6 +39,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   onDelete,
   onDetail,
   defaultSearch,
+  buttonActionCustome,
 }) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -106,7 +108,13 @@ const DataGridComponent: React.FC<DataGridProps> = ({
 
   // Kondisi untuk menambahkan kolom "Actions" jika salah satu aksi tersedia
   const actionColumn =
-    onEdit || onDelete || onDetail || url.detailUrl || url.editUrl || url.deleteUrl
+    onEdit ||
+    onDelete ||
+    onDetail ||
+    url.detailUrl ||
+    url.editUrl ||
+    url.deleteUrl ||
+    buttonActionCustome
       ? [
           {
             field: 'actions',
@@ -146,6 +154,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                       <i className=' ki-duotone ki-trash-square text-danger text-2xl'></i>
                     </Link>
                   )}
+                  {buttonActionCustome}
                 </div>
               </>
             ),

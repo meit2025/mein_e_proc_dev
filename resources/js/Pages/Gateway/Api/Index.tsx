@@ -17,7 +17,7 @@ export const Index = () => {
           deleteUrl: DELET_API,
           detailUrl: DETAIL_PAGE_API,
         }}
-        labelFilter='search employee'
+        labelFilter='search'
       />
     </>
   );
