@@ -5,7 +5,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { FieldValues } from 'react-hook-form';
 import axios from 'axios';
 import axiosInstance from '@/axiosInstance';
-import { useAlert } from '@/contexts/AlertContext';
+import { useAlert } from '@/Contexts/AlertContext';
 import { Loading } from '../commons/Loading';
 
 interface FormMappingProps {
@@ -41,7 +41,7 @@ const FormMapping: React.FC<FormMappingProps> = ({
       onSave && (await onSave(response));
       if (redirectUrl) {
         setTimeout(() => {
-          window.location.href = redirectUrl;
+          //   window.location.href = redirectUrl;
         }, 2000);
       }
     } catch (error) {

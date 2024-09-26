@@ -25,3 +25,19 @@ export const columns: GridColDef[] = [
     },
   },
 ];
+
+export const columnsValue: GridColDef[] = [
+  {
+    field: 'column_value',
+    headerName: 'Column',
+    width: 300,
+    filterable: true,
+  },
+  { field: 'value', headerName: 'Parameter Value', width: 150, filterable: true },
+  {
+    filterable: false,
+    field: 'is_key',
+    headerName: 'key',
+    width: 100,
+  },
+];

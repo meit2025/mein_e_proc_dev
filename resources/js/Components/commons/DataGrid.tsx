@@ -6,7 +6,7 @@ import { DataGrid, GridColDef, GridFilterModel, GridSortModel } from '@mui/x-dat
 import axiosInstance from '@/axiosInstance'; // Pastikan mengimport axiosInstance
 import { Link } from '@inertiajs/react';
 import axios from 'axios';
-import { useAlert } from '@/contexts/AlertContext';
+import { useAlert } from '@/Contexts/AlertContext';
 
 interface UrlDataGrid {
   url: string;
@@ -21,6 +21,7 @@ interface DataGridProps {
   url: UrlDataGrid;
   labelFilter?: string;
   buttonCustome?: ReactNode;
+  defaultSearch?: string;
   onExport?: () => Promise<void> | void;
   onEdit?: (id: number) => Promise<void> | void;
   onDelete?: (id: number) => Promise<void> | void;
@@ -36,6 +37,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   onEdit,
   onDelete,
   onDetail,
+  defaultSearch,
 }) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -68,7 +70,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
 
       try {
         const response = await axiosInstance.get(
-          `${url.url}?page=${page + 1}&per_page=${pageSize}&search=${search}&sort_by=${sortBy}&sort_direction=${sortDirection}&${filterParams}`,
+          `${url.url}${defaultSearch ? defaultSearch : '?'}page=${page + 1}&per_page=${pageSize}&search=${search}&sort_by=${sortBy}&sort_direction=${sortDirection}&${filterParams}`,
         );
         setRows(response.data.data.data);
         setRowCount(response.data.data.total);

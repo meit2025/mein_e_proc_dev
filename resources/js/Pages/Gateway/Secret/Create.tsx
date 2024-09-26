@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
 import MainLayout from '@/Pages/Layouts/MainLayout';
-import FormMapping from '@/components/form/FormMapping';
+import FormMapping from '@/Components/form/FormMapping';
 import { CREATE_SECRET } from '@/endpoint/secret/api';
 import { LIST_PAGE_SECRET } from '@/endpoint/secret/page';
 import { formModel } from './model/formModel';

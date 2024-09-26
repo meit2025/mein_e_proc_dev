@@ -1,17 +1,13 @@
 /* eslint-disable react/jsx-key */
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import MainLayout from '@/Pages/Layouts/MainLayout';
-import { useForm } from 'react-hook-form';
 import axiosInstance from '@/axiosInstance';
-import { usePage } from '@inertiajs/react';
 import { DETAIL_API } from '@/endpoint/getway/api';
 import CustomTab from '@/components/commons/CustomTab';
 import { contentsTabs, labelsTabs } from './model/detailModel';
 import { Loading } from '@/components/commons/Loading';
 
 const Detail = ({ id }: { id: number }) => {
-  const { props } = usePage();
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [data, setData] = useState<boolean>(false);
 
@@ -19,7 +15,7 @@ const Detail = ({ id }: { id: number }) => {
     async () => {
       setIsLoading(true);
       try {
-        const response = await axiosInstance.get(DETAIL_API(props.id));
+        const response = await axiosInstance.get(DETAIL_API(id));
         const data = response.data;
         setData(data.data);
       } catch (error) {
@@ -28,7 +24,7 @@ const Detail = ({ id }: { id: number }) => {
         setIsLoading(false);
       }
     },
-    [props.id], // Include `methods` in the dependency array
+    [id], // Include `methods` in the dependency array
   );
 
   useEffect(() => {
@@ -38,7 +34,7 @@ const Detail = ({ id }: { id: number }) => {
   return (
     <>
       <Loading isLoading={isLoading} />
-      <CustomTab tabLabels={labelsTabs} tabContents={contentsTabs(data)} />
+      <CustomTab tabLabels={labelsTabs} tabContents={contentsTabs(data, id)} />
     </>
   );
 };

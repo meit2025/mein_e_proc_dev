@@ -32,7 +32,7 @@ const formSchema = z.object({
 
 import { useForm } from 'react-hook-form';
 import axios, { AxiosError } from 'axios';
-import { useAlert } from '../../contexts/AlertContext.jsx';
+import { useAlert } from '../../Contexts/AlertContext.jsx';
 
 export function LoginForm() {
   const form = useForm<z.infer<typeof formSchema>>({

@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/businesstrip",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\BusinessTrip\\": "app/",
+            "Modules\\BusinessTrip\\Database\\Factories\\": "database/factories/",
+            "Modules\\BusinessTrip\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\BusinessTrip\\Tests\\": "tests/"
+        }
+    }
+}

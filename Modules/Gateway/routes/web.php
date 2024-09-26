@@ -36,7 +36,9 @@ Route::group(['middleware' => 'auth'], function () {
             ]);
         });
         Route::group(['prefix' => 'value'], function () {
-            Route::inertia('/create', 'Gateway/Api/Value/Create');
+            Route::inertia('/create/{id}', 'Gateway/Api/Value/Create', [
+                'id' => fn() => request()->route('id'),
+            ]);
             Route::inertia('/update/{id}', 'Gateway/Api/Value/Update', [
                 'id' => fn() => request()->route('id'),
             ]);

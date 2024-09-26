@@ -3,10 +3,10 @@ import { LogsLayout } from '../components/logs';
 import { ValueLayout } from '../components/value';
 
 export const labelsTabs = ['Detail', 'Value Parameter', 'Logs'];
-export const contentsTabs = (detail: any) => {
+export const contentsTabs = (detail: any, id: number) => {
   return [
     <DetailLayout key='Detail' detail={detail} />,
-    <ValueLayout key='value' />,
+    <ValueLayout key='value' id={id} />,
     <LogsLayout key='logs' />,
   ];
 };

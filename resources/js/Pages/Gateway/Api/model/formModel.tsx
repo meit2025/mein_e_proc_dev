@@ -98,3 +98,29 @@ export const formModel: Array<FormFieldModel<any>> = [
     },
   },
 ];
+
+export const formModelValue: Array<FormFieldModel<any>> = [
+  {
+    type: 'input',
+    name: 'column_value',
+    label: 'column',
+    placeholder: 'Enter your column name',
+    required: true,
+  },
+  {
+    type: 'input',
+    name: 'value',
+    label: 'Parameter Value',
+    placeholder: 'Enter your Parameter Value',
+    required: true,
+  },
+  {
+    type: 'switch',
+    name: 'is_key',
+    label: 'key',
+    placeholder: 'key',
+    style: {
+      width: '65.5rem',
+    },
+  },
+];

@@ -26,7 +26,7 @@ class CreateSecret extends FormRequest
         return [
             'key'    => 'required|min:10', // Tambahkan validasi email disini
             'secret_key' => 'required|string|min:10', // Tambahkan validasi minimum 8 karakter
-            'employee' => 'required|string|min:10',
+            'employee' => 'required|string',
             'desc'  => 'string',
             'is_status' => 'boolean'
         ];

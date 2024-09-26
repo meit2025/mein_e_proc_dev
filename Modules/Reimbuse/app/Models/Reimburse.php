@@ -2,6 +2,7 @@
 
 namespace Modules\Reimbuse\Models;
 
+use App\Models\User;
 use App\Traits\UniqueCode;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -61,6 +62,11 @@ class Reimburse extends Model
         "end_balance_date",
         "currency",
     ];
+
+    public function users()
+    {
+        return $this->hasOne(User::class, 'nip', 'requester');
+    }
 
     // protected static function newFactory(): ReimburseFactory
     // {

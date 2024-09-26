@@ -13,12 +13,15 @@ return new class extends Migration
     {
         Schema::create('reimburse_progress', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('reimburse')->constrained('reimburses')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignId('approver')->constrained('users')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->string('reimburse');
+            $table->string('approver');
             $table->longText('notes');
             $table->enum('status', ['Approved', 'Rejected', 'Waiting'])->default('Waiting');
             $table->softDeletes();
             $table->timestamps();
+
+            $table->foreign('reimburse')->references('rn')->on('reimburses')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreign('approver')->references('nip')->on('users')->cascadeOnUpdate()->cascadeOnDelete();
         });
     }
 

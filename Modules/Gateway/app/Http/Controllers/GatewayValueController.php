@@ -11,13 +11,13 @@ class GatewayValueController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function inde(Request $request)
+    public function index(Request $request)
     {
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'asc');
 
-        $query = GatewayValue::query();
+        $query = GatewayValue::where('gateways_id', $request->gateway);
 
         $filterableColumns = [
             'gateways_id',
@@ -60,7 +60,7 @@ class GatewayValueController extends Controller
     {
         //
         $dataInsert = $request->all();
-        $dataInsert['is_key'] = $request->is_status ?? false;
+        $dataInsert['is_key'] = $request->is_key ?? false;
         $secret = GatewayValue::create($dataInsert);
         return $this->successResponse($secret);
     }
@@ -89,7 +89,7 @@ class GatewayValueController extends Controller
     {
         //
         $dataInsert = $request->all();
-        $dataInsert['is_key'] = $request->is_status ?? false;
+        $dataInsert['is_key'] = $request->is_key ?? false;
         $secret = GatewayValue::find($id)->update($dataInsert);
         return $this->successResponse($secret);
     }
