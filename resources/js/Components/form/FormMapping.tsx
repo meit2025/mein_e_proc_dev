@@ -41,7 +41,7 @@ const FormMapping: React.FC<FormMappingProps> = ({
       onSave && (await onSave(response));
       if (redirectUrl) {
         setTimeout(() => {
-          //   window.location.href = redirectUrl;
+          window.location.href = redirectUrl;
         }, 2000);
       }
     } catch (error) {
