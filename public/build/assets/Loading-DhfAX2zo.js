@@ -1,1 +1,0 @@
-import{j as s}from"./app-OCxfqGpa.js";import{l as i}from"./loading-NyqXPFiX.js";const e=({isLoading:a})=>a&&s.jsx("div",{id:"busy-overlay",className:"busy-overlay",children:s.jsx("div",{className:"spinner",children:s.jsx("img",{src:i,width:"75px",height:"75px",alt:"loading"})})});export{e as L};
