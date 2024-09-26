@@ -13,12 +13,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/shacdn/dropdown-menu';
 import { Plus as PlusIcon } from 'lucide-react';
-import { CustomTable } from '@/components/commons/CustomTable';
+import { CustomTable, CustomTableFilters } from '@/components/commons/CustomTable';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import { HeaderPage } from '@/components/commons/HeaderPage';
 import { ReimburseForm } from './components/ReimburseForm';
 import './css/reimburse.scss';
 
+import MainLayout from '../Layouts/MainLayout';
 interface Reimburse {
   id: string;
   rn: string;
@@ -53,6 +54,7 @@ interface Props {
   csrf_token: string;
 }
 
+
 const ListReimburse: React.FC<Props> = ({ reimburses, users, types, currencies, csrf_token }) => {
   const [open, setOpen] = useState(false);
   const [currentReimbursement, setCurrentReimbursement] = useState<Reimburse | null>(null);
@@ -61,6 +63,44 @@ const ListReimburse: React.FC<Props> = ({ reimburses, users, types, currencies, 
     setCurrentReimbursement(reimbursement);
     setOpen(true);
   };
+
+
+  const listFilters: CustomTableFilters = [
+    {
+      params: 'User',
+      data: [
+        {
+          id: '293871923',
+          name: 'Verrandy',
+        },
+        {
+          id: 'q232',
+          name: 'test',
+        },
+      ],
+      key: 'id',
+      label: 'name',
+    },
+
+    {
+      params: 'company',
+      data: [
+        {
+          id: '293871923',
+          name: 'Verrandy',
+        },
+
+        {
+          id: 'comapny a',
+          name: 'company b',
+        },
+      ],
+      key: 'id',
+      label: 'name',
+    },
+  ];
+  
+
 
   const handleCloseForm = () => {
     setCurrentReimbursement(null);
@@ -150,7 +190,7 @@ const ListReimburse: React.FC<Props> = ({ reimburses, users, types, currencies, 
   ];
 
   return (
-    <AuthenticatedLayout>
+    <MainLayout title='Reimburse Page' description='Just Remburse'>
       <div>
         <CustomDialog className='md:max-w-[800px]' open={open} onClose={handleCloseForm}>
           <ReimburseForm
@@ -168,9 +208,9 @@ const ListReimburse: React.FC<Props> = ({ reimburses, users, types, currencies, 
             </Button>
           </div>
         </div>
-        <CustomTable columns={columns} data={reimburses} />
+        <CustomTable filters={listFilters} columns={columns} data={reimburses} />
       </div>
-    </AuthenticatedLayout>
+    </MainLayout>
   );
 };
 

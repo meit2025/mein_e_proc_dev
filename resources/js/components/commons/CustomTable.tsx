@@ -36,6 +36,15 @@ import {
   TableRow,
 } from '@/components/shacdn/table';
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/shacdn/select';
+import { Label } from '@radix-ui/react-label';
+
 const data: Payment[] = [
   {
     id: 'm5gr84i9',
@@ -68,6 +77,13 @@ const data: Payment[] = [
     email: 'carmella@hotmail.com',
   },
 ];
+
+export interface CustomTableFilters {
+  params: string;
+  data: any[];
+  key: string;
+  label: string;
+}
 
 export type Payment = {
   id: string;
@@ -168,7 +184,7 @@ export function CustomTable({
   data,
 }: {
   columns: any[];
-  filters?: [];
+  filters?: CustomTableFilters[];
   data: any[];
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -195,10 +211,47 @@ export function CustomTable({
     },
   });
 
+  const [params, setParams] = React.useState({});
+
+  function onChangeFilter(key: string, value: string) {
+    const queryParams:any = {};
+
+    queryParams[key] = value;
+    setParams({
+      ...params,
+      [key]: value
+    });
+
+    console.log(params);
+  }
+
   return (
-    <div className='w-full'>
-      <div className='flex items-center py-4'>
-        <DropdownMenu>
+    <div className='w-full my-4 '>
+      {filters ? (
+        <div className='flex justify-end my-2'>
+          <div className={'flex space-x-4'}>
+            {filters.map((filter) => (
+              <div className='flex flex-col space-y-2'>
+                <Select onValueChange={(value) => onChangeFilter(filter.params, value)}>
+                  <Label className='mb-1 capitalize text-xs'>Filter By {filter.params}</Label>
+                  <SelectTrigger className='w-[100px]'>
+                    <SelectValue placeholder='-' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filter.data.map((data) => (
+                      <SelectItem key={data[filter.key]} value={data[filter.key]}>
+                        {data[filter.label]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant='outline' className='ml-auto'>
               Columns <ChevronDownIcon className='ml-2 h-4 w-4' />
@@ -221,8 +274,8 @@ export function CustomTable({
                 );
               })}
           </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+        </DropdownMenu> */}
+
       <div className='rounded-md border'>
         <Table>
           <TableHeader>
