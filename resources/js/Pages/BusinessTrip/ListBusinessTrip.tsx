@@ -19,6 +19,9 @@ import { HeaderPage } from '@/components/commons/HeaderPage';
 import { BusinessTripForm } from './components/BusinessTripForm';
 import './css/business_trip.scss';
 
+
+import MainLayout from '../Layouts/MainLayout';
+import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
 interface Reimburse {
   id: string;
   rn: string;
@@ -156,10 +159,10 @@ const ListBusinessTrip: React.FC<Props> = ({
   ];
 
   return (
-    <AuthenticatedLayout>
+    <MainLayout title="Bussines Trip" description='Just Bussines Trip'>
       <div>
         <CustomDialog className='md:max-w-[800px]' open={open} onClose={handleCloseForm}>
-          <BusinessTripForm
+          <BussinessTripFormV1
             users={users}
             types={types}
             currencies={currencies}
@@ -176,7 +179,7 @@ const ListBusinessTrip: React.FC<Props> = ({
         </div>
         <CustomTable columns={columns} data={reimburses} />
       </div>
-    </AuthenticatedLayout>
+    </MainLayout>
   );
 };
 

@@ -100,6 +100,20 @@ const sidebar = [
         route: '/',
         sub: [],
       },
+
+      {
+        title: 'Reimburse',
+        icon: 'ki-element-11',
+        route: '/reimburse',
+        sub: [],
+      },
+
+      {
+        title: 'Bussiness Trip',
+        icon: 'ki-element-11',
+        route: '/bussiness-trip',
+        sub: [],
+      },
     ],
   },
   {

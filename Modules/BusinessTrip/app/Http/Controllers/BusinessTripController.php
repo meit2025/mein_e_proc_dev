@@ -22,6 +22,8 @@ class BusinessTripController extends Controller
         $types = ReimburseType::select('code', 'name')->get();
         $currencies = Currency::select('code', 'name')->get();
         $csrf_token = csrf_token();
+
+        
         return Inertia::render('BusinessTrip/ListBusinessTrip', [
             'reimburses'    =>  $reimburses,
             'users'         =>  $users,

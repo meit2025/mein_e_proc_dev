@@ -14,6 +14,9 @@ use Modules\BusinessTrip\Http\Controllers\BusinessTripController;
 |
 */
 
-Route::group([], function () {
-    Route::resource('businesstrip', BusinessTripController::class)->names('businesstrip');
-});
+// Route::group([], function () {
+//     Route::resource('businesstrip', BusinessTripController::class)->names('businesstrip');
+// });
+
+
+Route::get('bussiness-trip', [BusinessTripController::class, 'index'])->name('bussiness-trip.index');
