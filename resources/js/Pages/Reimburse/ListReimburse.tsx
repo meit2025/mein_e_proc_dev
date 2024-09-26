@@ -45,15 +45,23 @@ interface Currency {
   name: string;
 }
 
+interface Period {
+  id: string;
+  code: string;
+  start: string;
+  end: string;
+}
+
 interface Props {
   reimburses: Reimburse[];
   users: User[];
   types: Type[];
+  periods: Period[];
   currencies: Currency[];
   csrf_token: string;
 }
 
-const ListReimburse: React.FC<Props> = ({ reimburses, users, types, currencies, csrf_token }) => {
+const ListReimburse: React.FC<Props> = ({ reimburses, users, types, currencies, periods, csrf_token }) => {
   const [open, setOpen] = useState(false);
   const [currentReimbursement, setCurrentReimbursement] = useState<Reimburse | null>(null);
 
@@ -157,6 +165,7 @@ const ListReimburse: React.FC<Props> = ({ reimburses, users, types, currencies, 
             users={users}
             types={types}
             currencies={currencies}
+            periods={periods}
             csrf_token={csrf_token}
           />
         </CustomDialog>

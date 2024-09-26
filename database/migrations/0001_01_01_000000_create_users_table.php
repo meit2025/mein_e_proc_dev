@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('role');
             $table->string('job_level');
             $table->string('division');
+            $table->string('immediate_spv')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
