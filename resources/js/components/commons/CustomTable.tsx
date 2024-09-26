@@ -162,7 +162,15 @@ export const columns: ColumnDef<Payment>[] = [
   },
 ];
 
-export function CustomTable({ columns, filters, data }: { columns: any[], filters?: [], data: any[] }) {
+export function CustomTable({
+  columns,
+  filters,
+  data,
+}: {
+  columns: any[];
+  filters?: [];
+  data: any[];
+}) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -190,7 +198,6 @@ export function CustomTable({ columns, filters, data }: { columns: any[], filter
   return (
     <div className='w-full'>
       <div className='flex items-center py-4'>
-      
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant='outline' className='ml-auto'>

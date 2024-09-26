@@ -6,7 +6,7 @@ import { DataGrid, GridColDef, GridFilterModel, GridSortModel } from '@mui/x-dat
 import axiosInstance from '@/axiosInstance'; // Pastikan mengimport axiosInstance
 import { Link } from '@inertiajs/react';
 import axios from 'axios';
-import { useAlert } from '@/Contexts/AlertContext';
+import { useAlert } from '@/contexts/AlertContext';
 
 interface UrlDataGrid {
   url: string;

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { ColumnDef } from '@tanstack/react-table';
 
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { Button } from '@/components/shacdn/button';
 import {
   DropdownMenu,
@@ -53,7 +53,13 @@ interface Props {
   csrf_token: string;
 }
 
-const ListBusinessTrip: React.FC<Props> = ({ reimburses, users, types, currencies, csrf_token }) => {
+const ListBusinessTrip: React.FC<Props> = ({
+  reimburses,
+  users,
+  types,
+  currencies,
+  csrf_token,
+}) => {
   const [open, setOpen] = useState(false);
   const [currentBusinesstrip, setcurrentBusinesstrip] = useState<BusinessTrip | null>(null);
 
