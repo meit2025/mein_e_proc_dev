@@ -112,7 +112,7 @@ class GatewayController extends Controller
     public function destroy($id)
     {
         //
-        $secret = SecretKeyEmployee::find($id)->delete();
+        $secret = Gateway::find($id)->delete();
         return $this->successResponse($secret);
     }
 

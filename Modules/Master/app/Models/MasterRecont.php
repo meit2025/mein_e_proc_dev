@@ -16,6 +16,8 @@ class MasterRecont extends Model
     protected $fillable = [
         'account',
         'account_long_text',
+        'desc',
+        'recon_acc',
     ];
 
     // protected static function newFactory(): MasterRecontFactory

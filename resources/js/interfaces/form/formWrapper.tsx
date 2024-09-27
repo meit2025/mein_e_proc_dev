@@ -21,4 +21,5 @@ export interface FormFieldModel<T = any> {
   classNames?: string;
   icon?: ReactNode;
   iconPosition?: 'start' | 'end';
+  classPosition?: string;
 }

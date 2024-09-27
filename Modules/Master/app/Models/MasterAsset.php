@@ -24,6 +24,7 @@ class MasterAsset extends Model
         'inventory_number',
         'qty',
         'base_unit_of_measure',
+        'delete'
     ];
 
     // protected static function newFactory(): MasterAssetFactory

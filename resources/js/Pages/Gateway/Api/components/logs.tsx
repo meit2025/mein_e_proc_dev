@@ -1,6 +1,6 @@
 import DataGridComponent from '@/components/commons/DataGrid';
 import { columnsLogs } from '../model/listModel';
-import { DELET_GATEWAY_VALUE, GET_GATEWAY_VALUE } from '@/endpoint/getwayValue/api';
+import { GET_LOG } from '@/endpoint/log/api';
 
 export const LogsLayout = ({ id }: { id: number }) => {
   return (
@@ -9,7 +9,7 @@ export const LogsLayout = ({ id }: { id: number }) => {
         columns={columnsLogs}
         defaultSearch={`?function=setApiPost&id=${id}&`}
         url={{
-          url: `${GET_GATEWAY_VALUE}`,
+          url: `${GET_LOG}`,
         }}
         labelFilter='search'
       />

@@ -30,6 +30,7 @@ class AssetController extends Controller
             'inventory_number',
             'qty',
             'base_unit_of_measure',
+            'delete'
         ];
 
         foreach ($request->all() as $key => $value) {

@@ -91,20 +91,14 @@ abstract class Controller
 
     protected function logToDatabase($id, $functionName, $level, $message, $context = [])
     {
-        try {
-            //code...
-            Log::create([
-                'releted_id' => $id,
-                'function_name' => $functionName,
-                'level' => $level,
-                'message' => $message,
-                'context' => json_encode($context), // Store additional context as JSON
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        } catch (\Throwable $th) {
-            //throw $th;
-            dd($th);
-        }
+        Log::create([
+            'releted_id' => $id,
+            'function_name' => $functionName,
+            'level' => $level,
+            'message' => $message,
+            'context' => json_encode($context), // Store additional context as JSON
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }

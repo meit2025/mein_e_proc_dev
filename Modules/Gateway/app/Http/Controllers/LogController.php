@@ -29,7 +29,7 @@ class LogController extends Controller
         foreach ($request->all() as $key => $value) {
             if (in_array($key, $filterableColumns)) {
                 list($operator, $filterValue) = array_pad(explode(',', $value, 2), 2, null);
-                $query = $this->applyColumnFilter($query, $key, $operator, $filterValue); // Use the helper function
+                $query = $this->applyColumnFilter($query, $key, $operator, $filterValue);
             }
         }
 

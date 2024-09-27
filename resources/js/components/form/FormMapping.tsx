@@ -1,6 +1,6 @@
 import FormWrapper from '@/components/form/FormWrapper';
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { FieldValues } from 'react-hook-form';
 import axios from 'axios';
@@ -15,6 +15,9 @@ interface FormMappingProps {
   methods: ReturnType<typeof useForm>;
   onSave?: (data: any) => Promise<void> | void;
   isLoading?: boolean;
+  classForm?: string;
+  isCustom?: boolean;
+  formCustom?: ReactNode;
 }
 
 const FormMapping: React.FC<FormMappingProps> = ({
@@ -24,6 +27,9 @@ const FormMapping: React.FC<FormMappingProps> = ({
   methods,
   onSave,
   isLoading,
+  classForm,
+  isCustom = false,
+  formCustom,
 }) => {
   const { setError } = methods;
   const { showToast } = useAlert();
@@ -67,11 +73,19 @@ const FormMapping: React.FC<FormMappingProps> = ({
     <FormProvider {...methods}>
       <Loading isLoading={isLoading || isLoadings} />
       <form onSubmit={methods.handleSubmit(onSubmit)}>
-        {formModel.map((field, index) => (
-          <div key={index} className='mt-8'>
-            <FormWrapper model={field} />
-          </div>
-        ))}
+        <div className={classForm}>
+          {isCustom ? (
+            <>{formCustom}</>
+          ) : (
+            <>
+              {formModel.map((field, index) => (
+                <div key={index} className={`mt-8 ${field.classPosition}`}>
+                  <FormWrapper model={field} />
+                </div>
+              ))}
+            </>
+          )}
+        </div>
         {/* Kontainer untuk tombol di kanan bawah */}
         <div className='flex justify-end mt-8'>
           <button
