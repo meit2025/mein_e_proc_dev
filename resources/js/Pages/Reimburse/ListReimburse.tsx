@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { ColumnDef } from '@tanstack/react-table';
-
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Button } from '@/components/shacdn/button';
 import {
   DropdownMenu,
@@ -13,26 +11,32 @@ import {
   DropdownMenuTrigger,
 } from '@/components/shacdn/dropdown-menu';
 import { Plus as PlusIcon } from 'lucide-react';
-import { CustomTable } from '@/components/commons/CustomTable';
+import { CustomTable, CustomTableFilters } from '@/components/commons/CustomTable';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import { HeaderPage } from '@/components/commons/HeaderPage';
 import { ReimburseForm } from './components/ReimburseForm';
 import './css/reimburse.scss';
 
+import MainLayout from '../Layouts/MainLayout';
+
 interface Reimburse {
   id: string;
   rn: string;
   currency: string;
-  requester: string;
-  remark: string;
   balance: string;
-  users: User;
-  receipt_date: string;
 }
 
 interface User {
   nip: string;
   name: string;
+}
+
+interface Group {
+  id: string;
+  code: string;
+  remark: string;
+  users: User;
+  reimburses: Reimburse[];
 }
 
 interface Type {
@@ -53,7 +57,7 @@ interface Period {
 }
 
 interface Props {
-  reimburses: Reimburse[];
+  groups: Group[];
   users: User[];
   types: Type[];
   periods: Period[];
@@ -61,29 +65,52 @@ interface Props {
   csrf_token: string;
 }
 
-const ListReimburse: React.FC<Props> = ({ reimburses, users, types, currencies, periods, csrf_token }) => {
+const ListReimburse: React.FC<Props> = ({
+  groups,
+  users,
+  types,
+  currencies,
+  periods,
+  csrf_token,
+}) => {
   const [open, setOpen] = useState(false);
-  const [currentReimbursement, setCurrentReimbursement] = useState<Reimburse | null>(null);
+  const [currentReimbursement, setCurrentReimbursement] = useState<Group | null>(null);
 
-  const handleOpenForm = (reimbursement: Reimburse | null = null) => {
+  const handleOpenForm = (reimbursement: Group | null = null) => {
     setCurrentReimbursement(reimbursement);
     setOpen(true);
   };
+
+  const listFilters: CustomTableFilters = [
+    {
+      params: 'User',
+      data: users,
+      key: 'nip',
+      label: 'name',
+    },
+    {
+      params: 'company',
+      data: groups,
+      key: 'id',
+      label: 'remark',
+    },
+  ];
 
   const handleCloseForm = () => {
     setCurrentReimbursement(null);
     setOpen(false);
   };
 
-  function numberWithCommas(x) {
+  // Helper function to format numbers with commas
+  function numberWithCommas(x: number) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
 
-  const columns: ColumnDef<Reimburse>[] = [
+  const columns: ColumnDef<Group>[] = [
     {
-      accessorKey: 'rn',
+      accessorKey: 'code',
       header: 'Request Number',
-      cell: ({ row }) => <div className='capitalize'>{row.getValue('rn')}</div>,
+      cell: ({ row }) => <div className='capitalize'>{row.getValue('code')}</div>,
     },
     {
       accessorKey: 'users.name',
@@ -91,42 +118,43 @@ const ListReimburse: React.FC<Props> = ({ reimburses, users, types, currencies, 
       cell: ({ row }) => <div className='lowercase'>{row.original.users.name}</div>,
     },
     {
-      accessorKey: 'balance',
-      header: 'Balance',
-      cell: ({ row }) => (
-        <div>
-          {row.original.currency}
-          {'. '}
-          {numberWithCommas(row.getValue('balance'))}
-        </div>
-      ),
-    },
-    {
       accessorKey: 'remark',
       header: 'Remarks',
       cell: ({ row }) => <div>{row.getValue('remark')}</div>,
     },
     {
-      accessorKey: 'receipt_date',
-      header: 'Receipt Date',
-      cell: ({ row }) => <div>{row.getValue('receipt_date')}</div>,
+      accessorKey: 'reimburses',
+      header: 'Balance',
+      cell: ({ row }) => {
+        const reimburses = row.original.reimburses;
+        const sumBalance = reimburses.reduce(
+          (sum, reimburse) => sum + parseFloat(reimburse.balance),
+          0,
+        );
+        return <div>{`IDR. ${numberWithCommas(sumBalance)}`}</div>;
+      },
+    },
+    {
+      accessorKey: 'reimburses',
+      header: 'Form',
+      cell: ({ row }) => {
+        return <div>{row.original.reimburses.length}</div>;
+      },
     },
     {
       accessorKey: 'request_status',
       header: () => <div className='text-left'>Request Status</div>,
       cell: ({ row }) => <div>{row.getValue('request_status') ?? '-'}</div>,
     },
-
     {
       accessorKey: 'paid_status',
       header: () => <div className='text-left'>Paid Status</div>,
       cell: ({ row }) => <div>{row.getValue('paid_status') ?? '-'}</div>,
     },
-
     {
       accessorKey: 'source',
       header: () => <div className='text-left'>Source</div>,
-      cell: ({ row }) => <div>{row.getValue('request_status') ?? '-'}</div>,
+      cell: ({ row }) => <div>{row.getValue('source') ?? '-'}</div>,
     },
     {
       accessorKey: 'id',
@@ -158,7 +186,7 @@ const ListReimburse: React.FC<Props> = ({ reimburses, users, types, currencies, 
   ];
 
   return (
-    <AuthenticatedLayout>
+    <MainLayout title='Reimburse Page' description='Just Reimburse'>
       <div>
         <CustomDialog className='md:max-w-[800px]' open={open} onClose={handleCloseForm}>
           <ReimburseForm
@@ -177,9 +205,9 @@ const ListReimburse: React.FC<Props> = ({ reimburses, users, types, currencies, 
             </Button>
           </div>
         </div>
-        <CustomTable columns={columns} data={reimburses} />
+        <CustomTable filters={listFilters} columns={columns} data={groups} />
       </div>
-    </AuthenticatedLayout>
+    </MainLayout>
   );
 };
 
