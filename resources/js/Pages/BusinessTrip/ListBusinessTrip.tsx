@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { ColumnDef } from '@tanstack/react-table';
 
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { Button } from '@/components/shacdn/button';
 import {
   DropdownMenu,
@@ -19,6 +19,9 @@ import { HeaderPage } from '@/components/commons/HeaderPage';
 import { BusinessTripForm } from './components/BusinessTripForm';
 import './css/business_trip.scss';
 
+
+import MainLayout from '../Layouts/MainLayout';
+import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
 interface Reimburse {
   id: string;
   rn: string;
@@ -53,7 +56,13 @@ interface Props {
   csrf_token: string;
 }
 
-const ListBusinessTrip: React.FC<Props> = ({ reimburses, users, types, currencies, csrf_token }) => {
+const ListBusinessTrip: React.FC<Props> = ({
+  reimburses,
+  users,
+  types,
+  currencies,
+  csrf_token,
+}) => {
   const [open, setOpen] = useState(false);
   const [currentBusinesstrip, setcurrentBusinesstrip] = useState<BusinessTrip | null>(null);
 
@@ -150,10 +159,10 @@ const ListBusinessTrip: React.FC<Props> = ({ reimburses, users, types, currencie
   ];
 
   return (
-    <AuthenticatedLayout>
+    <MainLayout title="Bussines Trip" description='Just Bussines Trip'>
       <div>
         <CustomDialog className='md:max-w-[800px]' open={open} onClose={handleCloseForm}>
-          <BusinessTripForm
+          <BussinessTripFormV1
             users={users}
             types={types}
             currencies={currencies}
@@ -170,7 +179,7 @@ const ListBusinessTrip: React.FC<Props> = ({ reimburses, users, types, currencie
         </div>
         <CustomTable columns={columns} data={reimburses} />
       </div>
-    </AuthenticatedLayout>
+    </MainLayout>
   );
 };
 

@@ -24,9 +24,15 @@ import { Input } from '@/components/shacdn/input';
 
 import { z } from 'zod';
 
+import { router, usePage } from '@inertiajs/react';
+
 const formSchema = z.object({
-  username: z.string().min(2).max(50),
-  password: z.string().min(8).max(100),
+  username: z.string().min(1, {
+    message: 'Username required',
+  }),
+  password: z.string().min(1, {
+    message: 'Password required',
+  }),
   remember_me: z.boolean().default(false).optional(),
 });
 
@@ -35,6 +41,8 @@ import axios, { AxiosError } from 'axios';
 import { useAlert } from '../../Contexts/AlertContext.jsx';
 
 export function LoginForm() {
+  const { errors } = usePage().props;
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {

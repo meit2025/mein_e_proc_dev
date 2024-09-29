@@ -24,10 +24,10 @@ class DatabaseSeeder extends Seeder
             UsersTableSeeder::class,
             CurrencySeeder::class,
             ReimburseTypeSeeder::class,
-            ReimburseGroupSeeder::class,
             ReimbursePeriodSeeder::class,
-            ReimburseSeeder::class,
-            ReimburseProgressSeeder::class
+            // ReimburseGroupSeeder::class,
+            // ReimburseSeeder::class,
+            // ReimburseProgressSeeder::class
         ]);
     }
 }
