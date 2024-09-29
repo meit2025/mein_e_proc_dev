@@ -6,44 +6,35 @@ use App\Http\Controllers\Controller;
 use App\Models\Currency;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
-use Modules\Reimbuse\Jobs\ProcessReimbursements;
-use Modules\Reimbuse\Models\Reimburse;
+use Modules\Reimbuse\Models\ReimburseGroup;
 use Modules\Reimbuse\Models\ReimbursePeriod;
 use Modules\Reimbuse\Models\ReimburseType;
+use Modules\Reimbuse\Services\ReimbursementService;
 
 class ReimbuseController extends Controller
 {
-    protected $validator_rule = [
-        'type'                  =>  'required|string|exists:reimburse_types,code',
-        'requester'             =>  'required|string|exists:users,nip',
-        'group'                 =>  'nullable',
-        'remark'                =>  'nullable',
-        'balance'               =>  'required|numeric',
-        'receipt_date'          =>  'required|date',
-        'start_date'            =>  'required|date',
-        'end_date'              =>  'required|date',
-        'start_balance_date'    =>  'required|date',
-        'end_balance_date'      =>  'required|date',
-        'currency'              =>  'required|string|exists:currencies,code'
-    ];
+    protected $reimbursementService;
+
+    public function __construct(ReimbursementService $reimbursementService)
+    {
+        $this->reimbursementService = $reimbursementService;
+    }
 
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $reimburses = Reimburse::with('users')->get();
+        $reimburses = json_decode(ReimburseGroup::with('reimburses', 'users')->get());
         $users = User::select('nip', 'name')->get();
-        $types = ReimburseType::select('code', 'name')->get();
+        $types = ReimburseType::select('code', 'name', 'claim_limit', 'plafon')->get();
         $currencies = Currency::select('code', 'name')->get();
-        $periods = ReimbursePeriod::select('id', 'start', 'end')->get();
-        
+        $periods = ReimbursePeriod::select('id', 'code', 'start', 'end')->get();
+
         $csrf_token = csrf_token();
         return Inertia::render('Reimburse/ListReimburse', [
-            'reimburses'    =>  $reimburses,
+            'groups'        =>  $reimburses,
             'users'         =>  $users,
             'types'         =>  $types,
             'currencies'    =>  $currencies,
@@ -63,28 +54,20 @@ class ReimbuseController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+
     public function store(Request $request)
     {
-        $reimbursements = $request->all();
-        // if (!is_array($reimbursements)) {
-        //     return back()->withErrors(['status' => 'Invalid input format. Expecting an array of reimbursements.']);
-        // }
-        // foreach ($reimbursements as $reimbursementData) {
-        $validator = Validator::make($reimbursements, $this->validator_rule);
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+        $data = $request->all();
+        $groupData = [
+            'remark' => $data['remark_group'],
+            'requester'    => $data['requester'],
+        ];
+        $forms = $data['forms'];
+        $response = $this->reimbursementService->storeReimbursements($groupData, $forms);
+        if (isset($response['error'])) {
+            return back()->withErrors(['status' => $response['error']]);
         }
-        try {
-            $data = $validator->validated();
-            DB::beginTransaction();
-            Reimburse::create($data);
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withErrors(['status' => $e->getMessage()]);
-        }
-        // }
-        return "All data has been processed successfully.";
+        return redirect()->back()->with('status', 'All data has been processed successfully.');
     }
 
 
