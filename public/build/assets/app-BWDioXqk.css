@@ -1,0 +1,1 @@
+.busy-overlay{top:0;right:0;width:100%;height:100%;position:fixed;display:flex;justify-content:center;align-items:center;opacity:.5;z-index:9999999;background-color:#fff}.busy-overlay div.spinner{display:flex;justify-content:center;align-items:center}body{font-family:Inter,sans-serif;background-color:#3490dc}
