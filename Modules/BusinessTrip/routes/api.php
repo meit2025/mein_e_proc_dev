@@ -14,6 +14,6 @@ use Modules\BusinessTrip\Http\Controllers\BusinessTripController;
  *
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
+Route::middleware(['auth:sanctum'])->prefix('business-trip')->group(function () {
     Route::apiResource('businesstrip', BusinessTripController::class)->names('businesstrip');
 });

@@ -20,6 +20,7 @@ import {
 
 import { CaretSortIcon, ChevronDownIcon, DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { Button as ShacdnButton } from '@/components/shacdn/button';
+import { Edit } from 'lucide-react';
 
 
 interface UrlDataGrid {
@@ -40,6 +41,7 @@ interface DataGridProps {
   onEdit?: (id: number) => Promise<void> | void;
   onDelete?: (id: number) => Promise<void> | void;
   onDetail?: (id: number) => Promise<void> | void;
+  actionType?: string;
 }
 
 const DataGridComponent: React.FC<DataGridProps> = ({
@@ -52,6 +54,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   onDelete,
   onDetail,
   defaultSearch,
+  actionType
 }) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -128,56 +131,78 @@ const DataGridComponent: React.FC<DataGridProps> = ({
             width: 150,
             renderCell: (params: any) => (
               <>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <ShacdnButton variant='ghost' className='h-8 w-8 p-0'>
-                      <span className='sr-only'>Open menu</span>
-                      <DotsHorizontalIcon className='h-4 w-4' />
-                    </ShacdnButton>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align='end'>
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem >
-                      Copy payment ID
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>View customer</DropdownMenuItem>
-                    <DropdownMenuItem>View payment details</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    justifyContent: 'flex-start',
-                    alignItems: 'center',
-                    gap: '10px', // Add consistent spacing between elements
-                  }}
-                >
-                  {(onDetail || url.detailUrl) && (
-                    <Link
-                      href={`${url.detailUrl}/${params.row.id}`}
-                      onClick={() => onDetail && onDetail(params.row.id)}
-                      alt='detail'
+                {actionType == 'dropdown' ? (
+                  <>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <ShacdnButton variant='ghost' className='h-8 w-8 p-0'>
+                          <span className='sr-only'>...</span>
+                          <DotsHorizontalIcon className='h-4 w-4' />
+                        </ShacdnButton>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align='end'>
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        {(onEdit || url.editUrl) && (
+                          <DropdownMenuItem onClick={() => onEdit && onEdit(params.row.id)}>
+                            <span className='flex items-center text-sm space-x-2'>
+                              <span>Edit</span>
+                              <Edit size={14} />
+                            </span>
+                          </DropdownMenuItem>
+                        )}
+
+                        <DropdownMenuSeparator />
+                        {/* <DropdownMenuItem>View customer</DropdownMenuItem> */}
+
+                        {(url.deleteUrl || onDelete) && (
+                          <DropdownMenuItem onClick={() => handleDelete(params.row.id)}>
+                            <span className='flex items-center  text-sm space-x-2'>
+                              <span>Delete</span>
+                              <Edit size={14} />
+                            </span>
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem>View payment details</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </>
+                ) : (
+                  <>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        gap: '10px', // Add consistent spacing between elements
+                      }}
                     >
-                      <i className=' ki-duotone ki-size text-info text-2xl'></i>
-                    </Link>
-                  )}
-                  {(onEdit || url.editUrl) && (
-                    <Link
-                      href={`${url.editUrl}/${params.row.id}`}
-                      onClick={() => onEdit && onEdit(params.row.id)}
-                      alt='edit'
-                    >
-                      <i className=' ki-duotone ki-notepad-edit text-success text-2xl'></i>
-                    </Link>
-                  )}
-                  {(url.deleteUrl || onDelete) && (
-                    <Link href={''} onClick={() => handleDelete(params.row.id)} alt='delete'>
-                      <i className=' ki-duotone ki-trash-square text-danger text-2xl'></i>
-                    </Link>
-                  )}
-                </div>
+                      {(onDetail || url.detailUrl) && (
+                        <Link
+                          href={`${url.detailUrl}/${params.row.id}`}
+                          onClick={() => onDetail && onDetail(params.row.id)}
+                          alt='detail'
+                        >
+                          <i className=' ki-duotone ki-size text-info text-2xl'></i>
+                        </Link>
+                      )}
+                      {(onEdit || url.editUrl) && (
+                        <Link
+                          href={`${url.editUrl}/${params.row.id}`}
+                          onClick={() => onEdit && onEdit(params.row.id)}
+                          alt='edit'
+                        >
+                          <i className=' ki-duotone ki-notepad-edit text-success text-2xl'></i>
+                        </Link>
+                      )}
+                      {(url.deleteUrl || onDelete) && (
+                        <Link href={''} onClick={() => handleDelete(params.row.id)} alt='delete'>
+                          <i className=' ki-duotone ki-trash-square text-danger text-2xl'></i>
+                        </Link>
+                      )}
+                    </div>
+                  </>
+                )}
               </>
             ),
           },

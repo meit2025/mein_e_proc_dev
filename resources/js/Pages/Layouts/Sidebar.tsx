@@ -8,6 +8,7 @@ import { LIST_PAGE_MASTER_RECON } from '@/endpoint/masterRecon/page';
 import { LIST_PAGE_SECRET } from '@/endpoint/secret/page';
 import { Link, usePage } from '@inertiajs/react';
 import Logo from '../../../assets/images/logo.png';
+import { LIST_PAGE_ALLOWANCE_CATEGORY } from '@/endpoint/allowance-category/page';
 // import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
@@ -111,8 +112,57 @@ const sidebar = [
       {
         title: 'Bussiness Trip',
         icon: 'ki-element-11',
-        route: '/bussiness-trip',
-        sub: [],
+        route: '/',
+        sub: [
+          {
+            name: 'Allowance Category',
+            route: LIST_PAGE_ALLOWANCE_CATEGORY,
+            roles: '',
+          },
+          // {
+          //   name: 'Bank Key',
+          //   route: LIST_PAGE_ALLOWANCE_CATEGORY,
+          //   roles: '',
+          // },
+        ],
+      },
+
+      {
+        title: 'Master',
+        icon: 'ki-setting-3',
+        route: '/',
+        sub: [
+          {
+            name: 'Master Material',
+            route: LIST_PAGE_MASTER_MATERIAL,
+            roles: '',
+          },
+          {
+            name: 'Asset',
+            route: LIST_PAGE_MASTER_ASSET,
+            roles: '',
+          },
+          {
+            name: 'Cost Center',
+            route: LIST_PAGE_MASTER_COST_CENTER,
+            roles: '',
+          },
+          {
+            name: 'Internal Order',
+            route: LIST_PAGE_MASTER_ORDER,
+            roles: '',
+          },
+          {
+            name: 'Recon Account',
+            route: LIST_PAGE_MASTER_RECON,
+            roles: '',
+          },
+          {
+            name: 'Bank Key',
+            route: LIST_PAGE_MASTER_BANK_KEY,
+            roles: '',
+          },
+        ],
       },
     ],
   },
