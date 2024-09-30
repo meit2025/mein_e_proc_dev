@@ -5,7 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import '../sass/app.scss';
-import { AlertProvider } from './Contexts/AlertContext.jsx';
+import { AlertProvider } from './contexts/AlertContext.jsx';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -15,7 +15,6 @@ createInertiaApp({
   setup({ el, App, props }) {
     createRoot(el).render(
       <AlertProvider>
-        {' '}
         <ToastContainer />
         <App {...props} />
       </AlertProvider>,

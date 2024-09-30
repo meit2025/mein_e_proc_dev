@@ -1,6 +1,6 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import MainLayout from '@/Pages/Layouts/MainLayout';
-import FormMapping from '@/Components/form/FormMapping';
+import FormMapping from '@/components/form/FormMapping';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@/axiosInstance';
 import { usePage } from '@inertiajs/react';

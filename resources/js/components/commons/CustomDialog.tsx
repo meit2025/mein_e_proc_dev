@@ -78,9 +78,11 @@ const CustomDialog = ({
               Close
             </Button>
           ) : null}
-          <Button type='submit' onClick={onSubmit}>
-            Save changes
-          </Button>
+          {onSubmit ? (
+            <Button type='submit' onClick={onSubmit}>
+              Save changes
+            </Button>
+          ) : null}
         </DialogFooter>
       </DialogContent>
     </Dialog>

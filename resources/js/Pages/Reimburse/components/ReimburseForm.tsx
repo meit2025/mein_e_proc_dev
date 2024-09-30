@@ -78,13 +78,13 @@ export const ReimburseForm: React.FC<Props> = ({
         currency: z.string().nonempty('Currency is required'),
       }),
     ),
-    formCount: z.number().min(1, 'Form count must be at least 1'),
+    formCount: z.string().nonempty('Currency is required'),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      formCount: 1,
+      formCount: '1',
       remark_group: '',
       requester: '',
       forms: Array.from({ length: 1 }).map(() => ({
@@ -209,7 +209,7 @@ export const ReimburseForm: React.FC<Props> = ({
                     <FormItem>
                       <FormControl>
                         <Select
-                          onValueChange={(value) => handleFormCountChange(Number(value))}
+                          onValueChange={(value) => handleFormCountChange(value)}
                           value={formCount}
                         >
                           <SelectTrigger className='w-[200px]'>

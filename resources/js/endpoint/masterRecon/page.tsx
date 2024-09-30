@@ -1,0 +1,6 @@
+const ROUTE_MASTER_RECON_PAGE = '/master/recon';
+
+export const LIST_PAGE_MASTER_RECON = `${ROUTE_MASTER_RECON_PAGE}`;
+export const CREATE_PAGE_MASTER_RECON = `${ROUTE_MASTER_RECON_PAGE}/create`;
+export const EDIT_PAGE_MASTER_RECON = `${ROUTE_MASTER_RECON_PAGE}/update`;
+export const DETAIL_PAGE_MASTER_RECON = `${ROUTE_MASTER_RECON_PAGE}/detail`;

@@ -1,4 +1,4 @@
-import DataGridComponent from '@/Components/commons/DataGrid';
+import DataGridComponent from '@/components/commons/DataGrid';
 import { columnsValue } from '../model/listModel';
 import { DELET_GATEWAY_VALUE, GET_GATEWAY_VALUE } from '@/endpoint/getwayValue/api';
 import { CREATE_PAGE_GATEWAY_VALUE, EDIT_PAGE_GATEWAY_VALUE } from '@/endpoint/getwayValue/page';

@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import MainLayout from '@/Pages/Layouts/MainLayout';
-import FormMapping from '@/Components/form/FormMapping';
+import FormMapping from '@/components/form/FormMapping';
 import { useForm } from 'react-hook-form';
 import { usePage } from '@inertiajs/react';
 import { LIST_PAGE_API } from '@/endpoint/getway/page';

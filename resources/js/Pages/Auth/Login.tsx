@@ -24,24 +24,26 @@ import { Input } from '@/components/shacdn/input';
 
 import { z } from 'zod';
 
-import { router, usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react'; 
 
 const formSchema = z.object({
   username: z.string().min(1, {
-    message: 'Username required',
+    message: 'Username required'
   }),
   password: z.string().min(1, {
-    message: 'Password required',
+    message: "Password required"
   }),
   remember_me: z.boolean().default(false).optional(),
 });
 
 import { useForm } from 'react-hook-form';
 import axios, { AxiosError } from 'axios';
-import { useAlert } from '../../Contexts/AlertContext.jsx';
+import { useAlert } from '../../contexts/AlertContext.jsx';
 
 export function LoginForm() {
+
   const { errors } = usePage().props;
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

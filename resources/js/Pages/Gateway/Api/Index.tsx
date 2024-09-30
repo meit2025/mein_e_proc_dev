@@ -1,6 +1,6 @@
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import { ReactNode } from 'react';
-import DataGridComponent from '@/Components/commons/DataGrid';
+import DataGridComponent from '@/components/commons/DataGrid';
 import { columns } from './model/listModel';
 import { DELET_API, GET_API } from '@/endpoint/getway/api';
 import { CREATE_PAGE_API, DETAIL_PAGE_API, EDIT_PAGE_API } from '@/endpoint/getway/page';

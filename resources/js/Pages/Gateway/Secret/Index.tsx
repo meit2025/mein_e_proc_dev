@@ -1,6 +1,6 @@
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import { ReactNode } from 'react';
-import DataGridComponent from '@/Components/commons/DataGrid';
+import DataGridComponent from '@/components/commons/DataGrid';
 import { DELET_SECRET, GET_SECRET } from '@/endpoint/secret/api';
 import { CREATE_PAGE_SECRET, EDIT_PAGE_SECRET } from '@/endpoint/secret/page';
 import { columns } from './model/listModel';
