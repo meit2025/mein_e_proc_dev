@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Modules\Reimbuse\Models\Reimburse;
 use Modules\Reimbuse\Models\ReimburseGroup;
 use Modules\Reimbuse\Models\ReimburseProgress;
+use Carbon\Carbon;
 
 class ReimbursementService
 {
@@ -27,14 +28,12 @@ class ReimbursementService
         try {
             DB::beginTransaction();
 
-            // Step 1: Create the reimbursement group
             $group = ReimburseGroup::create([
                 'code'   => $this->generateUniqueGroupCode(),
                 'remark' => $groupData['remark'],
                 'requester' => $groupData['requester'],
             ]);
 
-            // Step 2: Store each reimbursement form
             foreach ($forms as $form) {
                 $validator = Validator::make($form, $this->validator_rule);
                 if ($validator->fails()) {
@@ -42,10 +41,14 @@ class ReimbursementService
                 }
                 $validatedData = $validator->validated();
                 $validatedData['group'] = $group->code;
+
+                $validatedData['receipt_date'] = Carbon::parse($form['receipt_date'])->format('Y-m-d');
+                $validatedData['start_date'] = Carbon::parse($form['start_date'])->format('Y-m-d');
+                $validatedData['end_date'] = Carbon::parse($form['end_date'])->format('Y-m-d');
+
                 Reimburse::create($validatedData);
             }
 
-            // Step 3: Generate progress entries for the approvers
             $requester = User::where('nip', $groupData['requester'])->first();
             $this->generateProgress($group, $requester);
 

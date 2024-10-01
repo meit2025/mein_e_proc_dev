@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/shacdn/button';
 import { Inertia } from '@inertiajs/inertia';
 import { z } from 'zod';
@@ -20,48 +20,54 @@ import {
 import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import { Input } from '@/components/shacdn/input';
 
+interface Reimburse {
+  id: string;
+  rn: string;
+  remark: string;
+  type: string;
+  currency: string;
+  balance: number;
+  receipt_date: Date;
+  start_date: Date;
+  end_date: Date;
+  period: string;
+}
+
 interface User {
   id: string;
   nip: string;
   name: string;
 }
 
-interface Type {
+interface Group {
   id: string;
   code: string;
-  name: string;
-  claim_limit: number;
-  plafon: number;
-}
-
-interface Currency {
-  id: string;
-  code: string;
-}
-
-interface Period {
-  id: string;
-  code: string;
-  start: string;
-  end: string;
+  remark: string;
+  users: User;
+  reimburses: Reimburse[];
 }
 
 interface Props {
+  reimbursement: Group | null;
+  reimburses: Reimburse[];
+  currencies: { id: string; code: string; name: string }[];
+  types: { id: string; code: string; name: string }[];
+  periods: { id: string; code: string; start: string; end: string }[];
   users: User[];
-  types: Type[];
-  periods: Period[];
-  currencies: Currency[];
   csrf_token: string;
 }
 
 export const ReimburseForm: React.FC<Props> = ({
-  users,
-  types,
+  reimbursement,
+  reimburses,
   currencies,
+  types,
   periods,
+  users,
   csrf_token,
 }) => {
-  const [formCount, setFormCount] = useState<number>(1); // Manage formCount state
+  const [formCount, setFormCount] = useState<number>(1);
+  const [formData, setFormData] = useState<Reimburse[]>(reimburses);
 
   const formSchema = z.object({
     remark_group: z.string().nonempty('Remark is required'),
@@ -100,17 +106,26 @@ export const ReimburseForm: React.FC<Props> = ({
     },
   });
 
-  function numberWithCommas(x: number) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  }
-
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    Inertia.post('/reimburse', values, {
-      headers: {
-        'X-CSRF-TOKEN': csrf_token,
-      },
-    });
-  };
+  useEffect(() => {
+    if (reimbursement) {
+      form.setValue('remark_group', reimbursement.remark);
+      form.setValue('requester', reimbursement.users.nip);
+      form.setValue('formCount', reimbursement.reimburses.length);
+      form.setValue(
+        'forms',
+        reimbursement.reimburses.map((reimburse) => ({
+          type: reimburse.type,
+          remark: reimburse.remark,
+          balance: reimburse.balance,
+          currency: reimburse.currency,
+          period: reimburse.period,
+          receipt_date: new Date(reimburse.receipt_date),
+          start_date: new Date(reimburse.start_date),
+          end_date: new Date(reimburse.end_date),
+        })),
+      );
+    }
+  }, [reimbursement]);
 
   const handleFormCountChange = (value: number) => {
     setFormCount(value);
@@ -132,104 +147,111 @@ export const ReimburseForm: React.FC<Props> = ({
       );
     });
     form.setValue('forms', newForms);
-    form.setValue('formCount', value); // Set form count in form state
+    form.setValue('formCount', value.toString()); // Update form count in form state
+  };
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    Inertia.post('/reimburse', values, {
+      headers: {
+        'X-CSRF-TOKEN': csrf_token,
+      },
+    });
   };
 
   return (
-    <ScrollArea className='h-[600px] w-full '>
+    <ScrollArea className='h-[600px] w-full'>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <table className='text-xs mt-4 reimburse-form-table font-thin'>
-            <tr>
-              <td width={200}>Reimburse Request No.</td>
-              <td>-</td>
-            </tr>
-            <tr>
-              <td width={200}>Request Status</td>
-              <td>-</td>
-            </tr>
-            <tr>
-              <td width={200}>Remark</td>
-              <td>
-                <FormField
-                  control={form.control}
-                  name='remark_group'
-                  render={({ field }) => (
-                    <FormItem>
-                      {/* <FormLabel>Username</FormLabel> */}
-                      <FormControl>
-                        <Textarea placeholder='Insert remark' {...field} />
-                      </FormControl>
-                      {/* <FormDescription>This is your public display name.</FormDescription> */}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td width={200}>Employee</td>
-              <td>
-                <FormField
-                  control={form.control}
-                  name='requester'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
-                          value={field.value} // Set the current value from React Hook Form
-                        >
-                          <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='Requester' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {users.map((user) => (
-                              <SelectItem key={user.id} value={user.nip}>
-                                {user.name} ({user.nip})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </td>
-            </tr>
-
-            <tr>
-              <td width={200}>Number of Forms</td>
-              <td>
-                <FormField
-                  control={form.control}
-                  name='formCount'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => handleFormCountChange(value)}
-                          value={formCount}
-                        >
-                          <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='Select number of forms' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
-                              <SelectItem key={num} value={num.toString()}>
-                                {num}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </td>
-            </tr>
+            <tbody>
+              <tr>
+                <td width={200}>Reimburse Request No.</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td width={200}>Request Status</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td width={200}>Remark</td>
+                <td>
+                  <FormField
+                    control={form.control}
+                    name='remark_group'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Textarea placeholder='Insert remark' {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td width={200}>Employee</td>
+                <td>
+                  <FormField
+                    control={form.control}
+                    name='requester'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Select
+                            onValueChange={(value) => field.onChange(value)}
+                            value={field.value}
+                          >
+                            <SelectTrigger className='w-[200px]'>
+                              <SelectValue placeholder='Requester' />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {users.map((user) => (
+                                <SelectItem key={user.id} value={user.nip}>
+                                  {user.name} ({user.nip})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td width={200}>Number of Forms</td>
+                <td>
+                  <FormField
+                    control={form.control}
+                    name='formCount'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Select
+                            onValueChange={(value) => handleFormCountChange(parseInt(value))}
+                            value={field.value?.toString()}
+                          >
+                            <SelectTrigger className='w-[200px]'>
+                              <SelectValue placeholder='Select number of forms' />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
+                                <SelectItem key={num} value={num.toString()}>
+                                  {num}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </td>
+              </tr>
+            </tbody>
           </table>
 
           <Separator className='my-4' />
@@ -242,213 +264,232 @@ export const ReimburseForm: React.FC<Props> = ({
               <TabsContent value={`form${index + 1}`}>
                 <div>
                   <table className='text-xs mt-4 reimburse-form-detail font-thin'>
-                    <tr>
-                      <td width={200}>Type of Reimbursment</td>
-                      <td>
-                        <FormField
-                          control={form.control}
-                          name={`forms.${index}.type`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Select
-                                  onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
-                                  value={field.value} // Set the current value from React Hook Form
-                                >
-                                  <SelectTrigger className='w-[200px]'>
-                                    <SelectValue placeholder='-' />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {types.map((type) => (
-                                      <SelectItem key={type.code} value={type.code}>
-                                        {type.name} ({type.code})
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </td>
-                    </tr>
+                    <tbody>
+                      <tr>
+                        <td width={200}>Type of Reimbursement</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.type`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Select
+                                    onValueChange={(value) => field.onChange(value)}
+                                    value={field.value}
+                                  >
+                                    <SelectTrigger className='w-[200px]'>
+                                      <SelectValue placeholder='-' />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {types.map((type) => (
+                                        <SelectItem key={type.code} value={type.code}>
+                                          {type.name} ({type.code})
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
 
-                    <tr>
-                      <td width={200}>Period Date</td>
-                      <td>
-                        <FormField
-                          control={form.control}
-                          name={`forms.${index}.period`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Select
-                                  onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
-                                  value={field.value} // Set the current value from React Hook Form
-                                >
-                                  <SelectTrigger className='w-[200px]'>
-                                    <SelectValue placeholder='-' />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {periods.map((period) => (
-                                      <SelectItem key={period.id} value={period.code}>
-                                        {period.start} - {period.end}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </td>
-                    </tr>
+                      <tr>
+                        <td width={200}>Period Date</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.period`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Select
+                                    onValueChange={(value) => field.onChange(value)}
+                                    value={field.value}
+                                  >
+                                    <SelectTrigger className='w-[200px]'>
+                                      <SelectValue placeholder='-' />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {periods.map((period) => (
+                                        <SelectItem key={period.code} value={period.code}>
+                                          {period.start} - {period.end} ({period.code})
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
 
-                    <tr>
-                      <td width={200}>Remark</td>
-                      <td>
-                        <FormField
-                          control={form.control}
-                          name={`forms.${index}.remark`}
-                          render={({ field }) => (
-                            <FormItem>
-                              {/* <FormLabel>Username</FormLabel> */}
-                              <FormControl>
-                                <Textarea placeholder='Insert remark' {...field} />
-                              </FormControl>
-                              {/* <FormDescription>This is your public display name.</FormDescription> */}
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </td>
-                    </tr>
+                      <tr>
+                        <td width={200}>Balance</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.balance`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    type='number'
+                                    placeholder='0.0'
+                                    {...field}
+                                    onChange={(e) => field.onChange(Number(e.target.value))}
+                                    value={field.value || 0.0}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
 
-                    <tr>
-                      <td width={200}>Balance</td>
-                      <td>-</td>
-                    </tr>
+                      <tr>
+                        <td width={200}>Start Date</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.start_date`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <CustomDatePicker
+                                    initialDate={
+                                      field.value instanceof Date
+                                        ? field.value
+                                        : new Date(field.value)
+                                    }
+                                    onDateChange={(date) => field.onChange(date)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
 
-                    <tr>
-                      <td width={200}>Limit per claim</td>
-                      <td>-</td>
-                    </tr>
+                      <tr>
+                        <td width={200}>End Date</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.end_date`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <CustomDatePicker
+                                    initialDate={
+                                      field.value instanceof Date
+                                        ? field.value
+                                        : new Date(field.value)
+                                    }
+                                    onDateChange={(date) => field.onChange(date)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
 
-                    <tr>
-                      <td width={200}>Receipt Date</td>
-                      <td>
-                        <FormField
-                          control={form.control}
-                          name={`forms.${index}.receipt_date`}
-                          render={({ field }) => (
-                            <FormItem>
-                              {/* <FormLabel>Username</FormLabel> */}
-                              <FormControl>
-                                <CustomDatePicker />
-                              </FormControl>
-                              {/* <FormDescription>This is your public display name.</FormDescription> */}
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </td>
-                    </tr>
+                      <tr>
+                        <td width={200}>Receipt Date</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.receipt_date`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <CustomDatePicker
+                                    initialDate={
+                                      field.value instanceof Date
+                                        ? field.value
+                                        : new Date(field.value)
+                                    }
+                                    onDateChange={(date) => field.onChange(date)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
 
-                    <tr>
-                      <td width={200}>Claim date</td>
-                      <td className='flex items-center'>
-                        {/* <CustomDatePicker /> */}
-                        <span className='mx-2'>Start Date</span>
-                        <FormField
-                          control={form.control}
-                          name={`forms.${index}.start_date`}
-                          render={({ field }) => (
-                            <FormItem>
-                              {/* <FormLabel>Username</FormLabel> */}
-                              <FormControl>
-                                <CustomDatePicker />
-                              </FormControl>
-                              {/* <FormDescription>This is your public display name.</FormDescription> */}
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <span className='mx-2'>End Date</span>
-                        <FormField
-                          control={form.control}
-                          name={`forms.${index}.end_date`}
-                          render={({ field }) => (
-                            <FormItem>
-                              {/* <FormLabel>Username</FormLabel> */}
-                              <FormControl>
-                                <CustomDatePicker />
-                              </FormControl>
-                              {/* <FormDescription>This is your public display name.</FormDescription> */}
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </td>
-                    </tr>
+                      <tr>
+                        <td width={200}>Currency</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.currency`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Select
+                                    onValueChange={(value) => field.onChange(value)}
+                                    value={field.value}
+                                  >
+                                    <SelectTrigger className='w-[200px]'>
+                                      <SelectValue placeholder='-' />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {currencies.map((currency) => (
+                                        <SelectItem key={currency.code} value={currency.code}>
+                                          {currency.name} ({currency.code})
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
 
-                    <tr>
-                      <td width={200}>Reimburse Cost</td>
-                      <td className='flex items-center space-x-3'>
-                        <FormField
-                          control={form.control}
-                          name={`forms.${index}.currency`}
-                          render={({ field }) => (
-                            <FormItem>
-                              {/* <FormLabel>Username</FormLabel> */}
-                              <FormControl>
-                                <Select>
-                                  <SelectTrigger className='w-[100px]'>
-                                    <SelectValue placeholder='-' />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {currencies.map((currency) => (
-                                      <SelectItem key={currency.code} value={currency.code}>
-                                        {currency.code}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </FormControl>
-                              {/* <FormDescription>This is your public display name.</FormDescription> */}
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name={`forms.${index}.balance`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input
-                                  type='number'
-                                  placeholder='0.0'
-                                  {...field}
-                                  onChange={(e) => field.onChange(Number(e.target.value))}
-                                  value={field.value || 0.0}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </td>
-                    </tr>
+                      <tr>
+                        <td width={200}>Remark</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.remark`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Textarea placeholder='Insert remark' {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
                   </table>
                 </div>
               </TabsContent>
             </Tabs>
           ))}
 
-          <Button type='submit'>Save</Button>
+          <Separator className='my-4' />
+          <div className='mt-4 flex justify-end'>
+            <Button type='submit' className='w-32'>
+              Save
+            </Button>
+          </div>
         </form>
       </Form>
     </ScrollArea>

@@ -22,8 +22,14 @@ import MainLayout from '../Layouts/MainLayout';
 interface Reimburse {
   id: string;
   rn: string;
+  remark: string;
+  type: string;
   currency: string;
-  balance: string;
+  balance: number;
+  receipt_date: Date;
+  start_date: Date;
+  end_date: Date;
+  period: string;
 }
 
 interface User {
@@ -174,7 +180,9 @@ const ListReimburse: React.FC<Props> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => setOpen(true)}>Edit</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleOpenForm(reimbursement)}>
+                Edit
+              </DropdownMenuItem>{' '}
               <DropdownMenuSeparator />
               <DropdownMenuItem>View customer</DropdownMenuItem>
               <DropdownMenuItem>View payment details</DropdownMenuItem>
@@ -195,6 +203,7 @@ const ListReimburse: React.FC<Props> = ({
             currencies={currencies}
             periods={periods}
             csrf_token={csrf_token}
+            reimbursement={currentReimbursement}
           />
         </CustomDialog>
         <div className='flex items-center justify-between'>
