@@ -74,6 +74,7 @@ export const ReimburseForm: React.FC<Props> = ({
     requester: z.string().nonempty('Requester is required'),
     forms: z.array(
       z.object({
+        rn: z.string(),
         type: z.string().nonempty('Type is required'),
         period: z.string().nonempty('Period is required'),
         remark: z.string().nonempty('Remark is required'),
@@ -94,6 +95,7 @@ export const ReimburseForm: React.FC<Props> = ({
       remark_group: '',
       requester: '',
       forms: Array.from({ length: 1 }).map(() => ({
+        rn: '',
         type: '',
         remark: '',
         period: '',
@@ -110,13 +112,14 @@ export const ReimburseForm: React.FC<Props> = ({
     if (reimbursement) {
       form.setValue('remark_group', reimbursement.remark);
       form.setValue('requester', reimbursement.users.nip);
-      form.setValue('formCount', reimbursement.reimburses.length);
+      form.setValue('formCount', reimbursement.reimburses.length.toString());
       form.setValue(
         'forms',
         reimbursement.reimburses.map((reimburse) => ({
+          rn: reimburse.rn,
           type: reimburse.type,
           remark: reimburse.remark,
-          balance: reimburse.balance,
+          balance: Number(reimburse.balance),
           currency: reimburse.currency,
           period: reimburse.period,
           receipt_date: new Date(reimburse.receipt_date),
@@ -130,11 +133,11 @@ export const ReimburseForm: React.FC<Props> = ({
   const handleFormCountChange = (value: number) => {
     setFormCount(value);
 
-    // Update form values based on the new formCount
     const currentForms = form.getValues('forms');
     const newForms = Array.from({ length: value }).map((_, index) => {
       return (
         currentForms[index] || {
+          rn: '',
           type: '',
           remark: '',
           period: '',
@@ -147,15 +150,23 @@ export const ReimburseForm: React.FC<Props> = ({
       );
     });
     form.setValue('forms', newForms);
-    form.setValue('formCount', value.toString()); // Update form count in form state
+    form.setValue('formCount', value.toString());
   };
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    Inertia.post('/reimburse', values, {
-      headers: {
-        'X-CSRF-TOKEN': csrf_token,
-      },
-    });
+    if (reimbursement) {
+      Inertia.put(`/reimburse/${reimbursement.id}`, values, {
+        headers: {
+          'X-CSRF-TOKEN': csrf_token,
+        },
+      });
+    } else {
+      Inertia.post('/reimburse', values, {
+        headers: {
+          'X-CSRF-TOKEN': csrf_token,
+        },
+      });
+    }
   };
 
   return (
@@ -181,7 +192,11 @@ export const ReimburseForm: React.FC<Props> = ({
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Textarea placeholder='Insert remark' {...field} />
+                          <Textarea
+                            disabled={reimbursement !== null}
+                            placeholder='Insert remark'
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -199,6 +214,7 @@ export const ReimburseForm: React.FC<Props> = ({
                       <FormItem>
                         <FormControl>
                           <Select
+                            disabled={reimbursement !== null}
                             onValueChange={(value) => field.onChange(value)}
                             value={field.value}
                           >
@@ -230,7 +246,8 @@ export const ReimburseForm: React.FC<Props> = ({
                       <FormItem>
                         <FormControl>
                           <Select
-                            onValueChange={(value) => handleFormCountChange(parseInt(value))}
+                            disabled={reimbursement !== null}
+                            onValueChange={(value) => handleFormCountChange(value)}
                             value={field.value?.toString()}
                           >
                             <SelectTrigger className='w-[200px]'>
@@ -262,6 +279,19 @@ export const ReimburseForm: React.FC<Props> = ({
                 <TabsTrigger value={`form${index + 1}`}>Form {index + 1}</TabsTrigger>
               </TabsList>
               <TabsContent value={`form${index + 1}`}>
+                <FormField
+                  control={form.control}
+                  name={`forms.${index}.rn`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input className='sr-only' value={field.value} onChange={field.onChange} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <div>
                   <table className='text-xs mt-4 reimburse-form-detail font-thin'>
                     <tbody>
@@ -275,6 +305,7 @@ export const ReimburseForm: React.FC<Props> = ({
                               <FormItem>
                                 <FormControl>
                                   <Select
+                                    disabled={reimbursement !== null}
                                     onValueChange={(value) => field.onChange(value)}
                                     value={field.value}
                                   >
@@ -307,6 +338,7 @@ export const ReimburseForm: React.FC<Props> = ({
                               <FormItem>
                                 <FormControl>
                                   <Select
+                                    disabled={reimbursement !== null}
                                     onValueChange={(value) => field.onChange(value)}
                                     value={field.value}
                                   >
@@ -339,6 +371,7 @@ export const ReimburseForm: React.FC<Props> = ({
                               <FormItem>
                                 <FormControl>
                                   <Input
+                                    disabled={reimbursement !== null}
                                     type='number'
                                     placeholder='0.0'
                                     {...field}
@@ -363,6 +396,7 @@ export const ReimburseForm: React.FC<Props> = ({
                               <FormItem>
                                 <FormControl>
                                   <CustomDatePicker
+                                    disabled={reimbursement !== null}
                                     initialDate={
                                       field.value instanceof Date
                                         ? field.value
@@ -388,6 +422,7 @@ export const ReimburseForm: React.FC<Props> = ({
                               <FormItem>
                                 <FormControl>
                                   <CustomDatePicker
+                                    disabled={reimbursement !== null}
                                     initialDate={
                                       field.value instanceof Date
                                         ? field.value
@@ -413,6 +448,7 @@ export const ReimburseForm: React.FC<Props> = ({
                               <FormItem>
                                 <FormControl>
                                   <CustomDatePicker
+                                    disabled={reimbursement !== null}
                                     initialDate={
                                       field.value instanceof Date
                                         ? field.value
@@ -438,6 +474,7 @@ export const ReimburseForm: React.FC<Props> = ({
                               <FormItem>
                                 <FormControl>
                                   <Select
+                                    disabled={reimbursement !== null}
                                     onValueChange={(value) => field.onChange(value)}
                                     value={field.value}
                                   >

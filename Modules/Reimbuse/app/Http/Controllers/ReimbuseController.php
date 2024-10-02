@@ -92,8 +92,15 @@ class ReimbuseController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $data = $request->all();
+        $forms = $data['forms'];
+        $response = $this->reimbursementService->updateReimbursements($forms);
+        if (isset($response['error'])) {
+            return back()->withErrors(['status' => $response['error']]);
+        }
+        return redirect()->back()->with('status', 'Reimbursements updated successfully.');
     }
+
 
     /**
      * Remove the specified resource from storage.

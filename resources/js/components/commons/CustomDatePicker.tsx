@@ -10,35 +10,40 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/shacdn/pop
 interface CustomDatePickerProps {
   className?: string;
   dateFormat?: string;
-  initialDate?: Date; // Add a prop for the initial date
-  onDateChange?: (date: Date | undefined) => void; // Add a prop for when the date changes
+  initialDate?: Date;
+  onDateChange?: (date: Date | undefined) => void;
+  disabled?: boolean;
 }
 
 export function CustomDatePicker({
   className = 'w-[150px]',
   dateFormat = 'M/d/yyyy',
   initialDate,
+  disabled = false,
   onDateChange,
 }: CustomDatePickerProps) {
   const [date, setDate] = React.useState<Date | undefined>(initialDate);
 
   const handleDateChange = (selectedDate: Date | undefined) => {
-    setDate(selectedDate);
-    if (onDateChange) {
-      onDateChange(selectedDate); // Call the callback when the date changes
+    if (!disabled) {
+      setDate(selectedDate);
+      if (onDateChange) {
+        onDateChange(selectedDate);
+      }
     }
   };
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild disabled={disabled}>
         <Button
           variant={'outline'}
           className={cn(
             'w-[280px] justify-start text-left font-normal text-xs',
-            !date && 'text-muted-foreground ',
+            !date && 'text-muted-foreground',
             className,
           )}
+          disabled={disabled}
         >
           <CalendarIcon className='mr-2 h-4 w-4' />
           {date ? format(date, dateFormat) : <span>Pick a date</span>}

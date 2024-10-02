@@ -60,6 +60,32 @@ class ReimbursementService
         }
     }
 
+    public function updateReimbursements($forms)
+    {
+        try {
+            DB::beginTransaction();
+
+            foreach ($forms as $form) {
+                $validator = Validator::make($form, $this->validator_rule);
+                if ($validator->fails()) {
+                    return $validator->errors();
+                }
+                $validatedData = $validator->validated();
+                $reimburse = Reimburse::where('rn', $form['rn'])->first();
+                if ($reimburse) {
+                    $reimburse->update($validatedData);
+                }
+            }
+
+            DB::commit();
+            return "Reimbursements updated successfully.";
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $e->getMessage();
+        }
+    }
+
+
     // Function to generate progress based on the immediate_spv hierarchy
     protected function generateProgress($group, $user)
     {
