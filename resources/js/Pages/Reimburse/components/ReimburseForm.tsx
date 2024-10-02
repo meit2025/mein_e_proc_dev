@@ -83,6 +83,7 @@ export const ReimburseForm: React.FC<Props> = ({
         start_date: z.date(),
         end_date: z.date(),
         currency: z.string().nonempty('Currency is required'),
+        attachment: z.array(z.instanceof(File)).optional(),
       }),
     ),
     formCount: z.string().nonempty('Currency is required'),
@@ -104,6 +105,7 @@ export const ReimburseForm: React.FC<Props> = ({
         start_date: new Date(),
         end_date: new Date(),
         currency: 'IDR',
+        attachment: null,
       })),
     },
   });
@@ -125,6 +127,7 @@ export const ReimburseForm: React.FC<Props> = ({
           receipt_date: new Date(reimburse.receipt_date),
           start_date: new Date(reimburse.start_date),
           end_date: new Date(reimburse.end_date),
+          attachment: reimburse.attachment || null,
         })),
       );
     }
@@ -153,7 +156,30 @@ export const ReimburseForm: React.FC<Props> = ({
     form.setValue('formCount', value.toString());
   };
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const formData = new FormData();
+
+    // Append group data
+    formData.append('remark_group', values.remark_group);
+    formData.append('requester', values.requester);
+
+    // Append form details and attachments
+    values.forms.forEach((form, index) => {
+      formData.append(`forms[${index}][rn]`, form.rn);
+      formData.append(`forms[${index}][type]`, form.type);
+      formData.append(`forms[${index}][remark]`, form.remark);
+      formData.append(`forms[${index}][balance]`, form.balance.toString());
+      formData.append(`forms[${index}][period]`, form.period);
+      formData.append(`forms[${index}][currency]`, form.currency);
+      formData.append(`forms[${index}][receipt_date]`, form.receipt_date.toISOString());
+      formData.append(`forms[${index}][start_date]`, form.start_date.toISOString());
+      formData.append(`forms[${index}][end_date]`, form.end_date.toISOString());
+      form.attachment.forEach((file) => {
+        formData.append(`forms[${index}][attachments][]`, file);
+      });
+    });
+
+    // Make the request
     if (reimbursement) {
       Inertia.put(`/reimburse/${reimbursement.id}`, values, {
         headers: {
@@ -161,9 +187,10 @@ export const ReimburseForm: React.FC<Props> = ({
         },
       });
     } else {
-      Inertia.post('/reimburse', values, {
+      await Inertia.post('/reimburse', formData, {
         headers: {
           'X-CSRF-TOKEN': csrf_token,
+          'Content-Type': 'multipart/form-data',
         },
       });
     }
@@ -507,6 +534,35 @@ export const ReimburseForm: React.FC<Props> = ({
                               <FormItem>
                                 <FormControl>
                                   <Textarea placeholder='Insert remark' {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td width={200}>Attachments</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.attachment`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <input
+                                    type='file'
+                                    multiple
+                                    accept='image/*,.pdf,.doc,.docx'
+                                    onChange={(e) => {
+                                      const files = e.target.files;
+                                      if (files) {
+                                        const fileArray = Array.from(files);
+                                        field.onChange(fileArray);
+                                      }
+                                    }}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>

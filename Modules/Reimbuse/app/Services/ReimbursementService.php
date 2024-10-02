@@ -9,6 +9,8 @@ use Modules\Reimbuse\Models\Reimburse;
 use Modules\Reimbuse\Models\ReimburseGroup;
 use Modules\Reimbuse\Models\ReimburseProgress;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Modules\Reimbuse\Models\ReimburseAttachment;
 
 class ReimbursementService
 {
@@ -46,7 +48,17 @@ class ReimbursementService
                 $validatedData['start_date'] = Carbon::parse($form['start_date'])->format('Y-m-d');
                 $validatedData['end_date'] = Carbon::parse($form['end_date'])->format('Y-m-d');
 
-                Reimburse::create($validatedData);
+                $reimburse = Reimburse::create($validatedData);
+
+                if (isset($form['attachments'])) {
+                    foreach ($form['attachments'] as $file) {
+                        $filePath = $file->store('reimburse_attachments', 'public');
+                        ReimburseAttachment::create([
+                            'reimburse' => $reimburse->rn,
+                            'url' => $filePath,
+                        ]);
+                    }
+                }
             }
 
             $requester = User::where('nip', $groupData['requester'])->first();
@@ -60,6 +72,7 @@ class ReimbursementService
         }
     }
 
+
     public function updateReimbursements($forms)
     {
         try {
@@ -70,10 +83,30 @@ class ReimbursementService
                 if ($validator->fails()) {
                     return $validator->errors();
                 }
+
                 $validatedData = $validator->validated();
                 $reimburse = Reimburse::where('rn', $form['rn'])->first();
                 if ($reimburse) {
+                    // Update reimbursement details
                     $reimburse->update($validatedData);
+
+                    // Handle file attachments
+                    if (isset($form['attachment'])) {
+                        // Delete old attachments
+                        foreach ($reimburse->attachments as $attachment) {
+                            Storage::delete($attachment->path); // Delete from storage
+                            $attachment->delete(); // Delete record from the database
+                        }
+
+                        // Store new attachments
+                        foreach ($form['attachment'] as $file) {
+                            $path = $file->store('reimburse_attachments'); // Store file
+                            ReimburseAttachment::create([
+                                'reimburse_id' => $reimburse->id,
+                                'path' => $path,
+                            ]);
+                        }
+                    }
                 }
             }
 
@@ -84,6 +117,7 @@ class ReimbursementService
             return $e->getMessage();
         }
     }
+
 
 
     // Function to generate progress based on the immediate_spv hierarchy
