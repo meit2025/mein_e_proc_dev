@@ -29,8 +29,8 @@ return new class extends Migration
     {
         //
         Schema::table('master_reconts', function (Blueprint $table) {
-            $table->dropColumn('desc', 10)->index()->nullable();
-            $table->dropColumn('recon_acc', 50)->index()->unique();
+            $table->dropColumn('desc')->index()->nullable();
+            $table->dropColumn('recon_acc')->index()->unique();
         });
 
         Schema::table('master_assets', function (Blueprint $table) {

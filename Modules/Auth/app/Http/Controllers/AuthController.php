@@ -48,10 +48,11 @@ class AuthController extends Controller
     {
         // JIKA ADA KONEKSI KE LDAP
         if (env("APP_ENV") != 'local') {
-            $ldapConnect = $ldapService->connect();
-            if ($ldapConnect) {
-                // LOGIN KE LDAP
-                try {
+            try {
+
+                $ldapConnect = $ldapService->connect();
+                if ($ldapConnect) {
+                    // LOGIN KE LDAP
                     //code...
                     $ldapUser = $ldapService->login($ldapConnect, $request->username, $request->password);
                     if ($ldapUser) {
@@ -78,27 +79,27 @@ class AuthController extends Controller
                         ];
                         return $this->successResponse($data);
                     }
-                } catch (\Throwable $th) {
-                    $data = User::where('email', $request->username)->first();
-                    if (!$data) {
-                        return $this->errorResponse('username not found', 400, [
-                            'username' => ['The provided email does not match our records.']
-                        ]);
-                    }
+                }
+            } catch (\Throwable $th) {
+                $data = User::where('email', $request->username)->first();
+                if (!$data) {
+                    return $this->errorResponse('username not found', 400, [
+                        'username' => ['The provided email does not match our records.']
+                    ]);
+                }
 
-                    $data = [
-                        'username'     => $request->username,
-                        'password'  => $request->password,
-                    ];
+                $data = [
+                    'username'     => $request->username,
+                    'password'  => $request->password,
+                ];
 
 
-                    if (Auth::attempt($data)) {
-                        return $this->successResponse($data);
-                    } else {
-                        return $this->errorResponse('Password incorrect', 400, [
-                            'password' => ['The provided password is incorrect.']
-                        ]);
-                    }
+                if (Auth::attempt($data)) {
+                    return $this->successResponse($data);
+                } else {
+                    return $this->errorResponse('Password incorrect', 400, [
+                        'password' => ['The provided password is incorrect.']
+                    ]);
                 }
             }
         }
