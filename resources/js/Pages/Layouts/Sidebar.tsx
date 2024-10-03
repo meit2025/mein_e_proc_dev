@@ -8,6 +8,7 @@ import { LIST_PAGE_MASTER_RECON } from '@/endpoint/masterRecon/page';
 import { LIST_PAGE_SECRET } from '@/endpoint/secret/page';
 import { Link, usePage } from '@inertiajs/react';
 import Logo from '../../../assets/images/logo.png';
+import { LIST_PAGE_MASTER_BUSINESS_PARTNER } from '@/endpoint/masterBusinessPartner/page';
 // import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
@@ -152,6 +153,11 @@ const sidebar = [
           {
             name: 'Bank Key',
             route: LIST_PAGE_MASTER_BANK_KEY,
+            roles: '',
+          },
+          {
+            name: 'Business Patner',
+            route: LIST_PAGE_MASTER_BUSINESS_PARTNER,
             roles: '',
           },
         ],

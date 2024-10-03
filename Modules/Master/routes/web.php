@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Master\Http\Controllers\AssetController;
 use Modules\Master\Http\Controllers\BankKeyController;
 use Modules\Master\Http\Controllers\CostCenterController;
+use Modules\Master\Http\Controllers\MasterBusinessPartnerController;
 use Modules\Master\Http\Controllers\MasterController;
 use Modules\Master\Http\Controllers\MasterMaterialController;
 use Modules\Master\Http\Controllers\OrderController;
@@ -39,6 +40,9 @@ Route::group(['middleware' => 'auth'], function () {
         });
         Route::group(['prefix' => 'recon'], function () {
             Route::inertia('/',  'Master/MasterRecon/Index');
+        });
+        Route::group(['prefix' => 'business-partner'], function () {
+            Route::inertia('/',  'Master/MasterBusinessPartner/Index');
         });
     });
 
@@ -84,6 +88,14 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/update/{id}', [ReconController::class, 'update'])->name('master.recon.update');
             Route::get('/detail/{id}', [ReconController::class, 'show'])->name('master.recon.show');
             Route::delete('/delete/{id}', [ReconController::class, 'destroy'])->name('master.recon.destroy');
+        });
+
+        Route::group(['prefix' => 'business-parner'], function () {
+            Route::get('/list', [MasterBusinessPartnerController::class, 'index'])->name('master.business.index');
+            Route::post('/create', [MasterBusinessPartnerController::class, 'store'])->name('master.business.store');
+            Route::post('/update/{id}', [MasterBusinessPartnerController::class, 'update'])->name('master.business.update');
+            Route::get('/detail/{id}', [MasterBusinessPartnerController::class, 'show'])->name('master.business.show');
+            Route::delete('/delete/{id}', [MasterBusinessPartnerController::class, 'destroy'])->name('master.business.destroy');
         });
     });
 });
