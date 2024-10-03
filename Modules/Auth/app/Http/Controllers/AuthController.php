@@ -47,41 +47,43 @@ class AuthController extends Controller
     public function store(LdapAuthService $ldapService, LoginRequest $request)
     {
         $dataAccount = null;
-        $ldapConnect = $ldapService->connect();
         // JIKA ADA KONEKSI KE LDAP
-        if ($ldapConnect && env("APP_ENV") != 'local') {
-            // LOGIN KE LDAP
-            $ldapUser = $ldapService->login($ldapConnect, $request->username, $request->password);
-            if ($ldapUser) {
-                $user = User::orWhere('email', $request->username)->first();
-                if (is_null($user)) {
-                    $user = User::create([
+        if (env("APP_ENV") != 'local') {
+            $ldapConnect = $ldapService->connect();
+            if ($ldapConnect) {
+                // LOGIN KE LDAP
+                $ldapUser = $ldapService->login($ldapConnect, $request->username, $request->password);
+                if ($ldapUser) {
+                    $user = User::orWhere('email', $request->username)->first();
+                    if (is_null($user)) {
+                        $user = User::create([
+                            'email'     => $request->username,
+                            'password'  => Hash::make($request->password),
+                        ]);
+                    }
+                    Auth::login($user);
+                    $data = [
                         'email'     => $request->username,
-                        'password'  => Hash::make($request->password),
-                    ]);
-                }
-                Auth::login($user);
-                $data = [
-                    'email'     => $request->username,
-                    'password'  => $request->password,
-                ];
-                return $this->successResponse($data);
-            } else {
-                $data = [
-                    'email'     => $request->username,
-                    'password'  => $request->password,
-                ];
-
-                if (Auth::attempt($data)) {
+                        'password'  => $request->password,
+                    ];
                     return $this->successResponse($data);
                 } else {
-                    return $this->errorResponse('Password incorrect', 400, [
-                        'password' => ['The provided password is incorrect.']
-                    ]);
+                    $data = [
+                        'email'     => $request->username,
+                        'password'  => $request->password,
+                    ];
+
+                    if (Auth::attempt($data)) {
+                        return $this->successResponse($data);
+                    } else {
+                        return $this->errorResponse('Password incorrect', 400, [
+                            'password' => ['The provided password is incorrect.']
+                        ]);
+                    }
+                    // return $this->errorResponse('Password incorrect', 400, [
+                    //     'password' => ['The provided password is incorrect.']
+                    // ]);
                 }
-                // return $this->errorResponse('Password incorrect', 400, [
-                //     'password' => ['The provided password is incorrect.']
-                // ]);
             }
         }
 
