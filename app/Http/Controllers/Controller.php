@@ -20,6 +20,7 @@ abstract class Controller
     protected function successResponse($data = null, string $message = 'Success', int $statusCode = 200): JsonResponse
     {
         return response()->json([
+            'status_code' => $statusCode,
             'status' => 'success',
             'message' => $message,
             'data' => $data,
@@ -37,6 +38,7 @@ abstract class Controller
     protected function errorResponse(string $message = 'Error', int $statusCode = 400, $errors = null): JsonResponse
     {
         return response()->json([
+            'status_code' => $statusCode,
             'status' => 'error',
             'message' => $message,
             'errors' => $errors,
