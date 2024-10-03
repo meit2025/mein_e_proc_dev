@@ -1,11 +1,9 @@
-// import * as React from 'react';
+import { useState } from 'react';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { ColumnDef } from '@tanstack/react-table';
 
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { Button } from '@/components/shacdn/button';
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,125 +12,168 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/shacdn/dropdown-menu';
-
 import { Plus as PlusIcon } from 'lucide-react';
-
-import { CustomTable } from '@/components/commons/CustomTable';
-
-import * as React from 'react';
-
+import { CustomTable, CustomTableFilters } from '@/components/commons/CustomTable';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-
 import { HeaderPage } from '@/components/commons/HeaderPage';
-
 import { ReimburseForm } from './components/ReimburseForm';
-
 import './css/reimburse.scss';
 
-const data: Reimburse[] = [
-  {
-    id: 'm5gr84i9',
-    request_number: 'string',
-    request_for: 'string',
-    total_form: 1,
-    remarks: 'string',
-    request_status: 'string',
-    paid_status: 'string',
-    source: 'string',
-  },
-  {
-    id: 'm5gr84i9',
-    request_number: 'string',
-    request_for: 'string',
-    total_form: 1,
-    remarks: 'string',
-    request_status: 'string',
-    paid_status: 'string',
-    source: 'string',
-  },
-];
-
-export type Reimburse = {
+import MainLayout from '../Layouts/MainLayout';
+interface Reimburse {
   id: string;
-  request_number: string;
-  request_for: string;
-  total_form: number;
-  remarks: string;
-  request_status: string;
-  paid_status: string;
-  source: string;
-};
+  rn: string;
+  currency: string;
+  requester: string;
+  remark: string;
+  balance: string;
+  users: User;
+  receipt_date: string;
+}
 
-const ListReimburse = () => {
-  const [open, setOpen] = React.useState<boolean>(false);
+interface User {
+  nip: string;
+  name: string;
+}
+
+interface Type {
+  code: string;
+  name: string;
+}
+
+interface Currency {
+  code: string;
+  name: string;
+}
+
+interface Period {
+  id: string;
+  code: string;
+  start: string;
+  end: string;
+}
+
+interface Props {
+  reimburses: Reimburse[];
+  users: User[];
+  types: Type[];
+  periods: Period[];
+  currencies: Currency[];
+  csrf_token: string;
+}
+
+const ListReimburse: React.FC<Props> = ({ reimburses, users, types, currencies, periods, csrf_token }) => {
+  const [open, setOpen] = useState(false);
+  const [currentReimbursement, setCurrentReimbursement] = useState<Reimburse | null>(null);
+
+  const handleOpenForm = (reimbursement: Reimburse | null = null) => {
+    setCurrentReimbursement(reimbursement);
+    setOpen(true);
+  };
+
+
+  const listFilters: CustomTableFilters = [
+    {
+      params: 'User',
+      data: [
+        {
+          id: '293871923',
+          name: 'Verrandy',
+        },
+        {
+          id: 'q232',
+          name: 'test',
+        },
+      ],
+      key: 'id',
+      label: 'name',
+    },
+
+    {
+      params: 'company',
+      data: [
+        {
+          id: '293871923',
+          name: 'Verrandy',
+        },
+
+        {
+          id: 'comapny a',
+          name: 'company b',
+        },
+      ],
+      key: 'id',
+      label: 'name',
+    },
+  ];
+  
+
+
+  const handleCloseForm = () => {
+    setCurrentReimbursement(null);
+    setOpen(false);
+  };
+
+  function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
   const columns: ColumnDef<Reimburse>[] = [
-    //   {
-    //     id: 'select',
-    //     header: ({ table }) => (
-    //       <Checkbox
-    //         checked={
-    //           table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')
-    //         }
-    //         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-    //         aria-label='Select all'
-    //       />
-    //     ),
-    //     cell: ({ row }) => (
-    //       <Checkbox
-    //         checked={row.getIsSelected()}
-    //         onCheckedChange={(value) => row.toggleSelected(!!value)}
-    //         aria-label='Select row'
-    //       />
-    //     ),
-    //     enableSorting: false,
-    //     enableHiding: false,
-    //   },
     {
-      accessorKey: 'request_number',
+      accessorKey: 'rn',
       header: 'Request Number',
-      cell: ({ row }) => <div className='capitalize'>{row.getValue('request_number')}</div>,
+      cell: ({ row }) => <div className='capitalize'>{row.getValue('rn')}</div>,
     },
     {
-      accessorKey: 'request_for',
+      accessorKey: 'users.name',
       header: 'Request For',
-
-      cell: ({ row }) => <div className='lowercase'>{row.getValue('request_for')}</div>,
+      cell: ({ row }) => <div className='lowercase'>{row.original.users.name}</div>,
     },
     {
-      accessorKey: 'total_form',
-      header: () => <div className='text-left'>Total Form</div>,
-      cell: ({ row }) => <div>{row.getValue('total_form')}</div>,
+      accessorKey: 'balance',
+      header: 'Balance',
+      cell: ({ row }) => (
+        <div>
+          {row.original.currency}
+          {'. '}
+          {numberWithCommas(row.getValue('balance'))}
+        </div>
+      ),
     },
-
     {
-      accessorKey: 'remarks',
-      header: () => <div className='text-left'>remarks</div>,
-      cell: ({ row }) => <div>{row.getValue('remarks')}</div>,
+      accessorKey: 'remark',
+      header: 'Remarks',
+      cell: ({ row }) => <div>{row.getValue('remark')}</div>,
     },
-
+    {
+      accessorKey: 'receipt_date',
+      header: 'Receipt Date',
+      cell: ({ row }) => <div>{row.getValue('receipt_date')}</div>,
+    },
     {
       accessorKey: 'request_status',
       header: () => <div className='text-left'>Request Status</div>,
-      cell: ({ row }) => <div>{row.getValue('request_status')}</div>,
+      cell: ({ row }) => <div>{row.getValue('request_status') ?? '-'}</div>,
     },
 
     {
       accessorKey: 'paid_status',
       header: () => <div className='text-left'>Paid Status</div>,
-      cell: ({ row }) => <div>{row.getValue('paid_status')}</div>,
+      cell: ({ row }) => <div>{row.getValue('paid_status') ?? '-'}</div>,
     },
 
     {
       accessorKey: 'source',
       header: () => <div className='text-left'>Source</div>,
-      cell: ({ row }) => <div>{row.getValue('request_status')}</div>,
+      cell: ({ row }) => <div>{row.getValue('request_status') ?? '-'}</div>,
     },
     {
+      accessorKey: 'id',
       id: 'actions',
       enableHiding: false,
       header: 'Action',
       cell: ({ row }) => {
-        const payment = row.original;
+        const reimbursement = row.original;
 
         return (
           <DropdownMenu>
@@ -154,24 +195,30 @@ const ListReimburse = () => {
       },
     },
   ];
+
   return (
-    <AuthenticatedLayout>
+    <MainLayout title='Reimburse Page' description='Just Remburse'>
       <div>
-        <CustomDialog className='md:max-w-[800px]' open={open} onClose={() => setOpen(false)}>
-          <ReimburseForm />
+        <CustomDialog className='md:max-w-[800px]' open={open} onClose={handleCloseForm}>
+          <ReimburseForm
+            users={users}
+            types={types}
+            currencies={currencies}
+            periods={periods}
+            csrf_token={csrf_token}
+          />
         </CustomDialog>
         <div className='flex items-center justify-between'>
-          <HeaderPage title='Reimbuse' />
-
+          <HeaderPage title='Reimburse' />
           <div className='flex items-center space-x-4'>
-            <Button variant={'outline'} onClick={() => setOpen(true)}>
+            <Button variant={'outline'} onClick={() => handleOpenForm()}>
               <PlusIcon className='h-4 w-4' />
             </Button>
           </div>
         </div>
-        <CustomTable columns={columns} data={data}></CustomTable>
+        <CustomTable filters={listFilters} columns={columns} data={reimburses} />
       </div>
-    </AuthenticatedLayout>
+    </MainLayout>
   );
 };
 

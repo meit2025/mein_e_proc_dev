@@ -20,6 +20,14 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'nip',
+        'role',
+        'job_level',
+        'division',
+        'immediate_spv',
+        'email_verified_at',
+        'password',
+        'username',
     ];
 
     /**

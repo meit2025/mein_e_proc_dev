@@ -1,0 +1,4 @@
+const ROUTE_GATEWAY_VALUE_PAGE = '/gateway/value';
+
+export const CREATE_PAGE_GATEWAY_VALUE = `${ROUTE_GATEWAY_VALUE_PAGE}/create`;
+export const EDIT_PAGE_GATEWAY_VALUE = `${ROUTE_GATEWAY_VALUE_PAGE}/update`;

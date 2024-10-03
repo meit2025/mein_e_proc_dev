@@ -3,5 +3,11 @@
     "Reimbuse": true,
     "Auth": true,
     "Approval": true,
+<<<<<<< HEAD
     "BussinesTrip": true
+=======
+    "Gateway": true,
+    "BusinessTrip": true,
+    "User": true
+>>>>>>> develop
 }

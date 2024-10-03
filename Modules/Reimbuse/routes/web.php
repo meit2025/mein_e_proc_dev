@@ -17,6 +17,5 @@ use Modules\Reimbuse\Http\Controllers\ReimbuseController;
 
 // Route::get('/login',[AuthController::class, 'index'])->name('auth.login-index');
 
-
-Route::get('/reimbuse', [ReimbuseController::class , 'index'])->name('reimburse-list');
+Route::resource('/reimburse', ReimbuseController::class);
 

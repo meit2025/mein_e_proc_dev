@@ -30,8 +30,12 @@ interface CustomDialogProps {
   onOpenChange?: () => void;
   onClose?: () => void;
   onSubmit?: () => void;
+<<<<<<< HEAD
   className?: string,
   onSave? : () =>void;
+=======
+  className?: string;
+>>>>>>> develop
 }
 const CustomDialog = ({
   open,

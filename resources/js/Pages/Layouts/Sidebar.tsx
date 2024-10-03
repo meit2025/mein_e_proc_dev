@@ -1,4 +1,17 @@
+import { LIST_PAGE_API } from '@/endpoint/getway/page';
+import { LIST_PAGE_MASTER_ASSET } from '@/endpoint/masterAsset/page';
+import { LIST_PAGE_MASTER_BANK_KEY } from '@/endpoint/masterBankKey/page';
+import { LIST_PAGE_MASTER_COST_CENTER } from '@/endpoint/masterCostCenter/page';
+import { LIST_PAGE_MASTER_MATERIAL } from '@/endpoint/masterMaterial/page';
+import { LIST_PAGE_MASTER_ORDER } from '@/endpoint/masterOrder/page';
+import { LIST_PAGE_MASTER_RECON } from '@/endpoint/masterRecon/page';
+import { LIST_PAGE_SECRET } from '@/endpoint/secret/page';
+import { LIST_PAGE_USER } from '@/endpoint/user/page';
+import { LIST_PAGE_ROLE } from '@/endpoint/role/page';
 import { Link, usePage } from '@inertiajs/react';
+import Logo from '../../../assets/images/logo.png';
+import { LIST_PAGE_MASTER_BUSINESS_PARTNER } from '@/endpoint/masterBusinessPartner/page';
+// import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
   return (
@@ -13,16 +26,24 @@ export const RuteTitle = (title: string) => {
 export const Singel = (menu: any, url: string) => {
   const isActive = url === menu.route;
   return (
-    <div className={`menu-item ${isActive ? 'active' : ''}`}>
-      <div
-        className='menu-label border border-transparent gap-[10px] pl-[10px] pr-[10px] py-[6px]'
+    <div
+      className={`menu-item  menu-item-active:text-primary menu-link-hover:!text-primary ${isActive ? 'active' : ''}`}
+    >
+      <Link
+        className='menu-link border border-transparent items-center grow menu-item-active:bg-secondary-active dark:menu-item-active:bg-coal-300 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-secondary-active dark:hover:bg-coal-300 dark:hover:border-gray-100 hover:rounded-lg'
+        href={menu.route}
         tabIndex={0}
       >
-        <span className='menu-icon items-start text-gray-500 dark:text-gray-400 w-[20px]'>
-          <i className={`ki-filled ${menu.icon}  text-lg`}></i>
-        </span>
-        <span className='menu-title text-sm font-medium text-gray-800'>{menu.title}</span>
-      </div>
+        <div
+          className='menu-label border border-transparent gap-[10px] pl-[10px] pr-[10px] py-[6px]'
+          tabIndex={0}
+        >
+          <span className='menu-icon items-start text-gray-500 dark:text-gray-400 w-[20px]'>
+            <i className={`ki-filled ${menu.icon}  text-lg`}></i>
+          </span>
+          <span className='menu-title text-sm font-medium text-gray-800'>{menu.title}</span>
+        </div>
+      </Link>
     </div>
   );
 };
@@ -80,18 +101,21 @@ const sidebar = [
         title: 'Dashboard',
         icon: 'ki-element-11',
         route: '/',
-        sub: [
-          {
-            name: 'Light Sidebar',
-            route: '',
-            roles: '',
-          },
-          {
-            name: 'Drak Sidebar',
-            route: '',
-            roles: '',
-          },
-        ],
+        sub: [],
+      },
+
+      {
+        title: 'Reimburse',
+        icon: 'ki-element-11',
+        route: '/reimburse',
+        sub: [],
+      },
+
+      {
+        title: 'Bussiness Trip',
+        icon: 'ki-element-11',
+        route: '/bussiness-trip',
+        sub: [],
       },
     ],
   },
@@ -105,49 +129,81 @@ const sidebar = [
         sub: [
           {
             name: 'Master Material',
-            route: '',
+            route: LIST_PAGE_MASTER_MATERIAL,
             roles: '',
           },
           {
             name: 'Asset',
-            route: '',
+            route: LIST_PAGE_MASTER_ASSET,
             roles: '',
           },
           {
             name: 'Cost Center',
-            route: '',
+            route: LIST_PAGE_MASTER_COST_CENTER,
             roles: '',
           },
           {
             name: 'Internal Order',
-            route: '',
+            route: LIST_PAGE_MASTER_ORDER,
             roles: '',
           },
           {
             name: 'Recon Account',
-            route: '',
+            route: LIST_PAGE_MASTER_RECON,
             roles: '',
           },
           {
             name: 'Bank Key',
-            route: '',
+            route: LIST_PAGE_MASTER_BANK_KEY,
+            roles: '',
+          },
+          {
+            name: 'Business Patner',
+            route: LIST_PAGE_MASTER_BUSINESS_PARTNER,
             roles: '',
           },
         ],
       },
       {
-        title: 'Dashboard2',
-        icon: 'ki-element-11',
+        title: 'Gateway',
+        icon: 'ki-key-square',
         route: '/',
-        sub: [],
+        sub: [
+          {
+            name: 'Secret',
+            route: LIST_PAGE_SECRET,
+            roles: 'gateway.secret',
+          },
+          {
+            name: 'Api',
+            route: LIST_PAGE_API,
+            roles: '',
+          },
+        ],
+      },
+      {
+        title: 'User Management',
+        icon: 'ki-users',
+        route: '/',
+        sub: [
+          {
+            name: 'Users',
+            route: LIST_PAGE_USER,
+            roles: '',
+          },
+          {
+            name: 'Roles',
+            route: LIST_PAGE_ROLE,
+            roles: '',
+          },
+        ],
       },
     ],
   },
 ];
 
 export default function Sidebar() {
-  const { url } = usePage().props;
-
+  const { component: url } = usePage();
   return (
     <div
       className='sidebar dark:bg-coal-600 bg-light border-r border-r-gray-200 dark:border-r-coal-100 fixed top-0 bottom-0 z-20 hidden lg:flex flex-col items-stretch shrink-0'
@@ -161,24 +217,12 @@ export default function Sidebar() {
         id='sidebar_header'
       >
         <a className='dark:hidden' href='html/demo1.html'>
-          <img
-            className='default-logo min-h-[22px] max-w-none'
-            src='assets/media/app/default-logo.svg'
-          />
-          <img
-            className='small-logo min-h-[22px] max-w-none'
-            src='assets/media/app/mini-logo.svg'
-          />
+          <img className='default-logo min-h-[22px] max-w-none' src={Logo} />
+          <img className='small-logo min-h-[22px] max-w-none' src={Logo} />
         </a>
         <a className='hidden dark:block' href='html/demo1.html'>
-          <img
-            className='default-logo min-h-[22px] max-w-none'
-            src='assets/media/app/default-logo-dark.svg'
-          />
-          <img
-            className='small-logo min-h-[22px] max-w-none'
-            src='assets/media/app/mini-logo.svg'
-          />
+          <img className='default-logo min-h-[22px] max-w-none' src={Logo} />
+          <img className='small-logo min-h-[22px] max-w-none' src={Logo} />
         </a>
         <button
           className='btn btn-icon btn-icon-md size-[30px] rounded-lg border border-gray-200 dark:border-gray-300 bg-light text-gray-500 hover:text-gray-700 toggle absolute left-full top-2/4 -translate-x-2/4 -translate-y-2/4'

@@ -15,13 +15,23 @@ return new class extends Migration
             $table->id();
             $table->string('rn')->unique();
             $table->string('group');
-            $table->foreignId('type')->constrained('reimburse_types')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('requester')->constrained('users')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->string('type');
+            $table->string('requester');
+            $table->string('currency');
             $table->longText('remark');
             $table->double('balance');
-            $table->integer('claim_limit')->default(0);
+            $table->date('receipt_date');
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->string('period');
             $table->softDeletes();
             $table->timestamps();
+
+            $table->foreign('period')->references('code')->on('reimburse_periods')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreign('group')->references('code')->on('reimburse_groups')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreign('type')->references('code')->on('reimburse_types')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreign('requester')->references('nip')->on('users')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreign('currency')->references('code')->on('currencies')->cascadeOnDelete()->cascadeOnUpdate();            
         });
     }
 

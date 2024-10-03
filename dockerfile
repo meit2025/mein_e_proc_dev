@@ -24,6 +24,9 @@ RUN docker-php-ext-install gd
 RUN pecl install pdo_sqlsrv \
     && docker-php-ext-enable pdo_sqlsrv
 
+RUN apt-get update && apt-get install -y libldap2-dev && docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ && docker-php-ext-install ldap
+
+
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
@@ -35,6 +38,7 @@ RUN apt-get install -y nodejs
 WORKDIR /var/www/html
 COPY package*.json ./
 RUN npm install
+RUN npm run build
 
 # Copy application files
 COPY . /var/www/html
