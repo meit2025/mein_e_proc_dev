@@ -13,8 +13,13 @@ class LdapAuthService
 
     function connect()
     {
-        $ldapConnection = ldap_connect($this::LDAP_HOST);
-        return $ldapConnection;
+        try {
+            //code...
+            $ldapConnection = ldap_connect($this::LDAP_HOST);
+            return $ldapConnection;
+        } catch (\Throwable $th) {
+            throw new Exception($th->getMessage(), 1);
+        }
     }
 
     function login($ldapConnection, $username, $password)
