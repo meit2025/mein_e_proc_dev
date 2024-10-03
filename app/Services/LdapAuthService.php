@@ -14,7 +14,6 @@ class LdapAuthService
     function connect()
     {
         try {
-            //code...
             $ldapConnection = ldap_connect($this::LDAP_HOST);
             return $ldapConnection;
         } catch (\Throwable $th) {

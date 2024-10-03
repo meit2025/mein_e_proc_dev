@@ -51,30 +51,55 @@ class AuthController extends Controller
             $ldapConnect = $ldapService->connect();
             if ($ldapConnect) {
                 // LOGIN KE LDAP
-                $ldapUser = $ldapService->login($ldapConnect, $request->username, $request->password);
-                if ($ldapUser) {
-                    $user = User::orWhere('username', $request->username)->first();
-                    if (is_null($user)) {
-                        $user = User::create([
-                            'email'     => $request->username,
-                            'password'  => Hash::make($request->password),
-                            'name' => $request->username,
-                            'nip'  =>  $request->username . '12345',
-                            'division' =>  'IT',
-                            'role' =>  'user',
-                            'job_level' =>  'staff',
-                            'immediate_spv'     =>  '23456',
-                            'name'              =>  'Doe',
-                            'email'             =>  $request->username . '@gmail.com',
-                            'username' => $request->username,
+                try {
+                    //code...
+                    $ldapUser = $ldapService->login($ldapConnect, $request->username, $request->password);
+                    if ($ldapUser) {
+                        $user = User::orWhere('username', $request->username)->first();
+                        if (is_null($user)) {
+                            $user = User::create([
+                                'email'     => $request->username,
+                                'password'  => Hash::make($request->password),
+                                'name' => $request->username,
+                                'nip'  =>  $request->username . '12345',
+                                'division' =>  'IT',
+                                'role' =>  'user',
+                                'job_level' =>  'staff',
+                                'immediate_spv'     =>  '23456',
+                                'name'              =>  'Doe',
+                                'email'             =>  $request->username . '@gmail.com',
+                                'username' => $request->username,
+                            ]);
+                        }
+                        Auth::login($user);
+                        $data = [
+                            'username'     => $request->username,
+                            'password'  => $request->password,
+                        ];
+                        return $this->successResponse($data);
+                    }
+                } catch (\Throwable $th) {
+                    //throw $th;
+                    $data = User::where('email', $request->username)->first();
+                    if (!$data) {
+                        return $this->errorResponse('username not found', 400, [
+                            'username' => ['The provided email does not match our records.']
                         ]);
                     }
-                    Auth::login($user);
+
                     $data = [
                         'username'     => $request->username,
                         'password'  => $request->password,
                     ];
-                    return $this->successResponse($data);
+
+
+                    if (Auth::attempt($data)) {
+                        return $this->successResponse($data);
+                    } else {
+                        return $this->errorResponse('Password incorrect', 400, [
+                            'password' => ['The provided password is incorrect.']
+                        ]);
+                    }
                 }
             }
         }
