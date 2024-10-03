@@ -79,7 +79,6 @@ class AuthController extends Controller
                         return $this->successResponse($data);
                     }
                 } catch (\Throwable $th) {
-                    //throw $th;
                     $data = User::where('email', $request->username)->first();
                     if (!$data) {
                         return $this->errorResponse('username not found', 400, [
