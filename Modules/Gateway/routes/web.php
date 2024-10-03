@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Gateway\Http\Controllers\GatewayController;
 use Modules\Gateway\Http\Controllers\GatewayValueController;
+use Modules\Gateway\Http\Controllers\LogController;
 use Modules\Gateway\Http\Controllers\SecretController;
 
 /*
@@ -67,5 +68,8 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('/update/{id}', [GatewayValueController::class, 'update'])->name('secret.value.update');
         Route::get('/detail/{id}', [GatewayValueController::class, 'show'])->name('secret.value.show');
         Route::delete('/delete/{id}', [GatewayValueController::class, 'destroy'])->name('secret.value.destroy');
+    });
+    Route::group(['prefix' => 'api/log', 'middleware' => 'auth'], function () {
+        Route::get('/list', [LogController::class, 'index'])->name('secret.log.index');
     });
 });

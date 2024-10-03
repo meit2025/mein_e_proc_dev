@@ -15,8 +15,8 @@ class PurposeType extends Model
      */
     protected $fillable = [];
 
-    // protected static function newFactory(): PurposeTypeFactory
-    // {
-    //     // return PurposeTypeFactory::new();
-    // }
+    protected static function newFactory(): PurposeTypeFactory
+    {
+        // return PurposeTypeFactory::new();
+    }
 }

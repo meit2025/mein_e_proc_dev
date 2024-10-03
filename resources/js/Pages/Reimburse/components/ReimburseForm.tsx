@@ -36,24 +36,38 @@ interface Currency {
   code: string;
 }
 
+interface Period {
+  id: string;
+  code: string;
+  start: string;
+  end: string;
+}
+
 interface Props {
   users: User[];
   types: Type[];
+  periods: Period[];
   currencies: Currency[];
   csrf_token: string;
 }
 
-export const ReimburseForm: React.FC<Props> = ({ users, types, currencies, csrf_token }) => {
+export const ReimburseForm: React.FC<Props> = ({
+  users,
+  types,
+  currencies,
+  periods,
+  csrf_token,
+}) => {
   const formSchema = z.object({
     type: z.string().nonempty('Type is required'),
     requester: z.string().nonempty('Requester is required'),
+    remark_group: z.string().nonempty('Remark is required'),
+    period: z.string().nonempty('Period is required'),
     remark: z.string().nonempty('Remark is required'),
     balance: z.number().min(1, 'Balance must be at least 1'),
     receipt_date: z.date(),
     start_date: z.date(),
     end_date: z.date(),
-    start_balance_date: z.date(),
-    end_balance_date: z.date(),
     currency: z.string().nonempty('Currency is required'),
   });
 
@@ -62,13 +76,13 @@ export const ReimburseForm: React.FC<Props> = ({ users, types, currencies, csrf_
     defaultValues: {
       type: '',
       requester: '',
+      remark_group: '',
       remark: '',
+      period: '',
       balance: 0,
       receipt_date: new Date(),
       start_date: new Date(),
       end_date: new Date(),
-      start_balance_date: new Date(),
-      end_balance_date: new Date(),
       currency: 'IDR',
     },
   });
@@ -94,7 +108,25 @@ export const ReimburseForm: React.FC<Props> = ({ users, types, currencies, csrf_
               <td width={200}>Request Status</td>
               <td>-</td>
             </tr>
-
+            <tr>
+              <td width={200}>Remark</td>
+              <td>
+                <FormField
+                  control={form.control}
+                  name='remark_group'
+                  render={({ field }) => (
+                    <FormItem>
+                      {/* <FormLabel>Username</FormLabel> */}
+                      <FormControl>
+                        <Textarea placeholder='Insert remark' {...field} />
+                      </FormControl>
+                      {/* <FormDescription>This is your public display name.</FormDescription> */}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </td>
+            </tr>
             <tr>
               <td width={200}>Employee</td>
               <td>
@@ -152,7 +184,7 @@ export const ReimburseForm: React.FC<Props> = ({ users, types, currencies, csrf_
                                 value={field.value} // Set the current value from React Hook Form
                               >
                                 <SelectTrigger className='w-[200px]'>
-                                  <SelectValue placeholder='Requester' />
+                                  <SelectValue placeholder='-' />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {types.map((type) => (
@@ -169,6 +201,39 @@ export const ReimburseForm: React.FC<Props> = ({ users, types, currencies, csrf_
                       />
                     </td>
                   </tr>
+
+                  <tr>
+                    <td width={200}>Period Date</td>
+                    <td>
+                      <FormField
+                        control={form.control}
+                        name='period'
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Select
+                                onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
+                                value={field.value} // Set the current value from React Hook Form
+                              >
+                                <SelectTrigger className='w-[200px]'>
+                                  <SelectValue placeholder='-' />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {periods.map((period) => (
+                                    <SelectItem key={period.code} value={period.code}>
+                                      {period.start} - {period.end}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </td>
+                  </tr>
+
                   <tr>
                     <td width={200}>Remark</td>
                     <td>
@@ -242,43 +307,6 @@ export const ReimburseForm: React.FC<Props> = ({ users, types, currencies, csrf_
                       <FormField
                         control={form.control}
                         name='end_date'
-                        render={({ field }) => (
-                          <FormItem>
-                            {/* <FormLabel>Username</FormLabel> */}
-                            <FormControl>
-                              <CustomDatePicker />
-                            </FormControl>
-                            {/* <FormDescription>This is your public display name.</FormDescription> */}
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td width={200}>Period Date</td>
-                    <td className='flex items-center'>
-                      <span className='mx-2'>Start Date</span>
-                      {/* <CustomDatePicker /> */}
-                      <FormField
-                        control={form.control}
-                        name='start_balance_date'
-                        render={({ field }) => (
-                          <FormItem>
-                            {/* <FormLabel>Username</FormLabel> */}
-                            <FormControl>
-                              <CustomDatePicker />
-                            </FormControl>
-                            {/* <FormDescription>This is your public display name.</FormDescription> */}
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <span className='mx-2'>End Date</span>
-                      <FormField
-                        control={form.control}
-                        name='end_balance_date'
                         render={({ field }) => (
                           <FormItem>
                             {/* <FormLabel>Username</FormLabel> */}

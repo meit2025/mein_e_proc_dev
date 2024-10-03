@@ -5,8 +5,10 @@ namespace Modules\Auth\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Models\User;
+use App\Services\LdapAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
 class AuthController extends Controller
@@ -42,17 +44,74 @@ class AuthController extends Controller
      * Store a newly created resource in storage.
      */
 
-    public function store(LoginRequest $request)
+    public function store(LdapAuthService $ldapService, LoginRequest $request)
     {
-        $data = User::orWhere('email', $request->username)->first();
+        // JIKA ADA KONEKSI KE LDAP
+        if (env("APP_ENV") != 'local') {
+            $ldapConnect = $ldapService->connect();
+            if ($ldapConnect) {
+                // LOGIN KE LDAP
+                try {
+                    //code...
+                    $ldapUser = $ldapService->login($ldapConnect, $request->username, $request->password);
+                    if ($ldapUser) {
+                        $user = User::orWhere('username', $request->username)->first();
+                        if (is_null($user)) {
+                            $user = User::create([
+                                'email'     => $request->username,
+                                'password'  => Hash::make($request->password),
+                                'name' => $request->username,
+                                'nip'  =>  $request->username . '12345',
+                                'division' =>  'IT',
+                                'role' =>  'user',
+                                'job_level' =>  'staff',
+                                'immediate_spv'     =>  '23456',
+                                'name'              =>  'Doe',
+                                'email'             =>  $request->username . '@gmail.com',
+                                'username' => $request->username,
+                            ]);
+                        }
+                        Auth::login($user);
+                        $data = [
+                            'username'     => $request->username,
+                            'password'  => $request->password,
+                        ];
+                        return $this->successResponse($data);
+                    }
+                } catch (\Throwable $th) {
+                    $data = User::where('email', $request->username)->first();
+                    if (!$data) {
+                        return $this->errorResponse('username not found', 400, [
+                            'username' => ['The provided email does not match our records.']
+                        ]);
+                    }
+
+                    $data = [
+                        'username'     => $request->username,
+                        'password'  => $request->password,
+                    ];
+
+
+                    if (Auth::attempt($data)) {
+                        return $this->successResponse($data);
+                    } else {
+                        return $this->errorResponse('Password incorrect', 400, [
+                            'password' => ['The provided password is incorrect.']
+                        ]);
+                    }
+                }
+            }
+        }
+
+        $data = User::where('email', $request->username)->first();
         if (!$data) {
-            return $this->errorResponse('Email not found', 400, [
-                'email' => ['The provided email does not match our records.']
+            return $this->errorResponse('username not found', 400, [
+                'username' => ['The provided email does not match our records.']
             ]);
         }
 
         $data = [
-            'email'     => $request->username,
+            'username'     => $request->username,
             'password'  => $request->password,
         ];
 

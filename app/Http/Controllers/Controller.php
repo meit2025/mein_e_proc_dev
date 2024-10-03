@@ -20,6 +20,7 @@ abstract class Controller
     protected function successResponse($data = null, string $message = 'Success', int $statusCode = 200): JsonResponse
     {
         return response()->json([
+            'status_code' => $statusCode,
             'status' => 'success',
             'message' => $message,
             'data' => $data,
@@ -37,6 +38,7 @@ abstract class Controller
     protected function errorResponse(string $message = 'Error', int $statusCode = 400, $errors = null): JsonResponse
     {
         return response()->json([
+            'status_code' => $statusCode,
             'status' => 'error',
             'message' => $message,
             'errors' => $errors,
@@ -91,20 +93,14 @@ abstract class Controller
 
     protected function logToDatabase($id, $functionName, $level, $message, $context = [])
     {
-        try {
-            //code...
-            Log::create([
-                'releted_id' => $id,
-                'function_name' => $functionName,
-                'level' => $level,
-                'message' => $message,
-                'context' => json_encode($context), // Store additional context as JSON
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        } catch (\Throwable $th) {
-            //throw $th;
-            dd($th);
-        }
+        Log::create([
+            'releted_id' => $id,
+            'function_name' => $functionName,
+            'level' => $level,
+            'message' => $message,
+            'context' => json_encode($context), // Store additional context as JSON
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }

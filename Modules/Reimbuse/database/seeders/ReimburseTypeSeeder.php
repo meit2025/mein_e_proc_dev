@@ -15,22 +15,22 @@ class ReimburseTypeSeeder extends Seeder
         ReimburseType::insert([
             [
                 "code"          =>  "PS1",
-                "group"         =>  null,
                 "name"          =>  "Persalinan",
+                "is_employee"   =>  0,
                 "claim_limit"   =>  "2",
                 "plafon"        =>  "100000"
             ],
             [
                 "code"          =>  "IB1",
-                "group"         =>  "gr1",
-                "name"          =>  "Ibadah Haji",
+                "name"          =>  "Perjalanan Rohani",
+                "is_employee"   =>  0,
                 "claim_limit"   =>  "1",
                 "plafon"        =>  "100000000"
             ],
             [
                 "code"          =>  "IB2",
-                "group"         =>  "gr1",
-                "name"          =>  "Ibadah Umrah",
+                "name"          =>  "ATK",
+                "is_employee"   =>  1,
                 "claim_limit"   =>  null,
                 "plafon"        =>  "50000000"
             ],

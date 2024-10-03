@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('code')->primary();
             $table->string("group")->nullable();
             $table->string('name');
+            $table->boolean('is_employee');
             $table->integer('claim_limit')->nullable();
             $table->double('plafon')->nullable();
             $table->softDeletes();

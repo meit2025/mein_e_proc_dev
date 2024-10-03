@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('reimburse');
             $table->string('approver');
             $table->longText('notes');
-            $table->enum('status', ['Approved', 'Rejected', 'Waiting'])->default('Waiting');
+            $table->enum('status', ['Approved', 'Rejected', 'Open'])->default('Open');
             $table->softDeletes();
             $table->timestamps();
 

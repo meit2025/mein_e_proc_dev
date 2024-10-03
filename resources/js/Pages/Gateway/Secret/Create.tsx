@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-import { FormFieldModel } from '@/interfaces/form/formWrapper';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import FormMapping from '@/components/form/FormMapping';
 import { CREATE_SECRET } from '@/endpoint/secret/api';

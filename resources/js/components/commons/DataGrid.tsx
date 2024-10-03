@@ -54,7 +54,8 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   onDelete,
   onDetail,
   defaultSearch,
-  actionType
+  actionType,
+  buttonActionCustome,
 }) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -123,7 +124,13 @@ const DataGridComponent: React.FC<DataGridProps> = ({
 
   // Kondisi untuk menambahkan kolom "Actions" jika salah satu aksi tersedia
   const actionColumn =
-    onEdit || onDelete || onDetail || url.detailUrl || url.editUrl || url.deleteUrl
+    onEdit ||
+    onDelete ||
+    onDetail ||
+    url.detailUrl ||
+    url.editUrl ||
+    url.deleteUrl ||
+    buttonActionCustome
       ? [
           {
             field: 'actions',
@@ -177,32 +184,25 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                         gap: '10px', // Add consistent spacing between elements
                       }}
                     >
-                      {(onDetail || url.detailUrl) && (
-                        <Link
-                          href={`${url.detailUrl}/${params.row.id}`}
-                          onClick={() => onDetail && onDetail(params.row.id)}
-                          alt='detail'
-                        >
-                          <i className=' ki-duotone ki-size text-info text-2xl'></i>
-                        </Link>
-                      )}
-                      {(onEdit || url.editUrl) && (
-                        <Link
-                          href={`${url.editUrl}/${params.row.id}`}
-                          onClick={() => onEdit && onEdit(params.row.id)}
-                          alt='edit'
-                        >
-                          <i className=' ki-duotone ki-notepad-edit text-success text-2xl'></i>
-                        </Link>
-                      )}
-                      {(url.deleteUrl || onDelete) && (
-                        <Link href={''} onClick={() => handleDelete(params.row.id)} alt='delete'>
-                          <i className=' ki-duotone ki-trash-square text-danger text-2xl'></i>
-                        </Link>
-                      )}
-                    </div>
-                  </>
-                )}
+                      <i className=' ki-duotone ki-size text-info text-2xl'></i>
+                    </Link>
+                  )}
+                  {(onEdit || url.editUrl) && (
+                    <Link
+                      href={`${url.editUrl}/${params.row.id}`}
+                      onClick={() => onEdit && onEdit(params.row.id)}
+                      alt='edit'
+                    >
+                      <i className=' ki-duotone ki-notepad-edit text-success text-2xl'></i>
+                    </Link>
+                  )}
+                  {(url.deleteUrl || onDelete) && (
+                    <Link href={''} onClick={() => handleDelete(params.row.id)} alt='delete'>
+                      <i className=' ki-duotone ki-trash-square text-danger text-2xl'></i>
+                    </Link>
+                  )}
+                  {buttonActionCustome}
+                </div>
               </>
             ),
           },

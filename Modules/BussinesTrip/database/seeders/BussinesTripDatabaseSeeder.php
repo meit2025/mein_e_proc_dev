@@ -1,0 +1,16 @@
+<?php
+
+namespace Modules\BussinesTrip\Database\Seeders;
+
+use Illuminate\Database\Seeder;
+
+class BussinesTripDatabaseSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        // $this->call([]);
+    }
+}

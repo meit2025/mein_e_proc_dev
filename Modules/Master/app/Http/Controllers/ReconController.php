@@ -22,6 +22,8 @@ class ReconController extends Controller
         $filterableColumns =  [
             'account',
             'account_long_text',
+            'desc',
+            'recon_acc',
         ];
 
         foreach ($request->all() as $key => $value) {
