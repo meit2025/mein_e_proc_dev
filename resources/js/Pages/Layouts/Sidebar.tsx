@@ -6,6 +6,8 @@ import { LIST_PAGE_MASTER_MATERIAL } from '@/endpoint/masterMaterial/page';
 import { LIST_PAGE_MASTER_ORDER } from '@/endpoint/masterOrder/page';
 import { LIST_PAGE_MASTER_RECON } from '@/endpoint/masterRecon/page';
 import { LIST_PAGE_SECRET } from '@/endpoint/secret/page';
+import { LIST_PAGE_USER } from '@/endpoint/user/page';
+import { LIST_PAGE_ROLE } from '@/endpoint/role/page';
 import { Link, usePage } from '@inertiajs/react';
 import Logo from '../../../assets/images/logo.png';
 // import { Link } from '@inertiajs/inertia-react';
@@ -169,6 +171,23 @@ const sidebar = [
           {
             name: 'Api',
             route: LIST_PAGE_API,
+            roles: '',
+          },
+        ],
+      },
+      {
+        title: 'User Management',
+        icon: 'ki-users',
+        route: '/',
+        sub: [
+          {
+            name: 'Users',
+            route: LIST_PAGE_USER,
+            roles: '',
+          },
+          {
+            name: 'Roles',
+            route: LIST_PAGE_ROLE,
             roles: '',
           },
         ],
