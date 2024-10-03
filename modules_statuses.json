@@ -4,5 +4,6 @@
     "Auth": true,
     "Approval": true,
     "Gateway": true,
-    "BusinessTrip": true
+    "BusinessTrip": true,
+    "User": true
 }
