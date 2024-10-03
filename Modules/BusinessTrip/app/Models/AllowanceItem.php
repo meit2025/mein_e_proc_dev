@@ -4,9 +4,9 @@ namespace Modules\BusinessTrip\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\BusinessTrip\Database\Factories\PurposeTypeFactory;
+// use Modules\BusinessTrip\Database\Factories\AllowanceItemFactory;
 
-class PurposeType extends Model
+class AllowanceItem extends Model
 {
     use HasFactory;
 
@@ -15,8 +15,8 @@ class PurposeType extends Model
      */
     protected $fillable = [];
 
-    protected static function newFactory(): PurposeTypeFactory
-    {
-        // return PurposeTypeFactory::new();
-    }
+    // protected static function newFactory(): AllowanceItemFactory
+    // {
+    //     // return AllowanceItemFactory::new();
+    // }
 }
