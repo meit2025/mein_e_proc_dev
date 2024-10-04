@@ -25,6 +25,18 @@ class ReimbursementService
         'currency'     =>  'required|string|exists:currencies,code'
     ];
 
+    public function checkGroupStatus(string $groupCode): string
+    {
+        $progressRecords = ReimburseProgress::where('group', $groupCode)->get();
+        if ($progressRecords->contains('status', 'Rejected')) {
+            return 'Rejected';
+        }
+        if ($progressRecords->contains('status', 'Open')) {
+            return 'Open';
+        }
+        return 'Finished';
+    }
+
     public function storeReimbursements($groupData, $forms)
     {
         try {

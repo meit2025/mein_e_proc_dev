@@ -26,7 +26,10 @@ class ReimbuseController extends Controller
      */
     public function index()
     {
-        $reimburses = json_decode(ReimburseGroup::with('reimburses', 'users')->get());
+        $reimburses = ReimburseGroup::with('reimburses', 'users')->get();
+        foreach($reimburses as $reimburse){
+            $reimburse['status'] = $this->reimbursementService->checkGroupStatus($reimburse->code);
+        }
         $users = User::select('nip', 'name')->get();
         $types = ReimburseType::select('code', 'name', 'claim_limit', 'plafon')->get();
         $currencies = Currency::select('code', 'name')->get();
@@ -35,6 +38,7 @@ class ReimbuseController extends Controller
         $csrf_token = csrf_token();
         return Inertia::render('Reimburse/ListReimburse', [
             'groups'        =>  $reimburses,
+            'progress'      =>  '',
             'users'         =>  $users,
             'types'         =>  $types,
             'currencies'    =>  $currencies,

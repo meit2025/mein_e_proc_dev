@@ -4,7 +4,7 @@ import { Inertia } from '@inertiajs/inertia';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/shacdn/form';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { Textarea } from '@/components/shacdn/textarea';
 import '../css/reimburse.scss';
 import { ScrollArea } from '@/components/shacdn/scroll-area';
@@ -43,6 +43,7 @@ interface Group {
   id: string;
   code: string;
   remark: string;
+  status: string;
   users: User;
   reimburses: Reimburse[];
 }
@@ -130,6 +131,9 @@ export const ReimburseForm: React.FC<Props> = ({
           attachment: reimburse.attachment || null,
         })),
       );
+      reimbursement.reimburses.forEach((reimburse, index) => {
+        selectedTypeCode(index, reimburse.type);
+      });
     }
   }, [reimbursement]);
 
@@ -156,6 +160,24 @@ export const ReimburseForm: React.FC<Props> = ({
     form.setValue('formCount', value.toString());
   };
 
+  const [limits, setLimits] = useState([]);
+
+  const selectedTypeCode = (index, value) => {
+    const selectedType = types.find((type) => type.code === value);
+
+    setLimits((prevLimits) => {
+      const updatedLimits = [...prevLimits];
+      updatedLimits[index] = {
+        plafon: selectedType?.plafon ?? 0,
+        claim: selectedType?.claim_limit ?? 'Unlimited',
+      };
+      return updatedLimits;
+    });
+
+    // Set the form value for the specific index
+    form.setValue(`forms.${index}.type`, value);
+  };
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const formData = new FormData();
 
@@ -179,7 +201,6 @@ export const ReimburseForm: React.FC<Props> = ({
       });
     });
 
-    // Make the request
     if (reimbursement) {
       Inertia.put(`/reimburse/${reimbursement.id}`, values, {
         headers: {
@@ -204,11 +225,11 @@ export const ReimburseForm: React.FC<Props> = ({
             <tbody>
               <tr>
                 <td width={200}>Reimburse Request No.</td>
-                <td>-</td>
+                <td>{reimbursement?.code ?? '-'}</td>
               </tr>
               <tr>
                 <td width={200}>Request Status</td>
-                <td>-</td>
+                <td>{reimbursement?.status ?? '-'}</td>
               </tr>
               <tr>
                 <td width={200}>Remark</td>
@@ -251,7 +272,7 @@ export const ReimburseForm: React.FC<Props> = ({
                             <SelectContent>
                               {users.map((user) => (
                                 <SelectItem key={user.id} value={user.nip}>
-                                  {user.name} ({user.nip})
+                                  {user.name} [{user.nip}]
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -329,27 +350,22 @@ export const ReimburseForm: React.FC<Props> = ({
                             control={form.control}
                             name={`forms.${index}.type`}
                             render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Select
-                                    disabled={reimbursement !== null}
-                                    onValueChange={(value) => field.onChange(value)}
-                                    value={field.value}
-                                  >
-                                    <SelectTrigger className='w-[200px]'>
-                                      <SelectValue placeholder='-' />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {types.map((type) => (
-                                        <SelectItem key={type.code} value={type.code}>
-                                          {type.name} ({type.code})
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
+                              <Select
+                                disabled={reimbursement !== null}
+                                onValueChange={(value) => selectedTypeCode(index, value)}
+                                value={field.value}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder='Select type' />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {types.map((type) => (
+                                    <SelectItem key={type.code} value={type.code}>
+                                      {type.name} ({type.code})
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             )}
                           />
                         </td>
@@ -389,80 +405,31 @@ export const ReimburseForm: React.FC<Props> = ({
                       </tr>
 
                       <tr>
+                        <td width={200}>Remark</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.remark`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Textarea placeholder='Insert remark' {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
+
+                      <tr>
                         <td width={200}>Balance</td>
-                        <td>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.balance`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input
-                                    disabled={reimbursement !== null}
-                                    type='number'
-                                    placeholder='0.0'
-                                    {...field}
-                                    onChange={(e) => field.onChange(Number(e.target.value))}
-                                    value={field.value || 0.0}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </td>
+                        <td>{limits[index]?.plafon || '-'}</td>
                       </tr>
 
                       <tr>
-                        <td width={200}>Start Date</td>
-                        <td>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.start_date`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <CustomDatePicker
-                                    disabled={reimbursement !== null}
-                                    initialDate={
-                                      field.value instanceof Date
-                                        ? field.value
-                                        : new Date(field.value)
-                                    }
-                                    onDateChange={(date) => field.onChange(date)}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                      </tr>
-
-                      <tr>
-                        <td width={200}>End Date</td>
-                        <td>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.end_date`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <CustomDatePicker
-                                    disabled={reimbursement !== null}
-                                    initialDate={
-                                      field.value instanceof Date
-                                        ? field.value
-                                        : new Date(field.value)
-                                    }
-                                    onDateChange={(date) => field.onChange(date)}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </td>
+                        <td width={200}>Limit per claim</td>
+                        <td>{limits[index]?.claim || '-'}</td>
                       </tr>
 
                       <tr>
@@ -492,8 +459,57 @@ export const ReimburseForm: React.FC<Props> = ({
                       </tr>
 
                       <tr>
-                        <td width={200}>Currency</td>
-                        <td>
+                        <td width={200}>Claim date</td>
+                        <td className='flex items-center'>
+                          {/* <CustomDatePicker /> */}
+                          <span className='mx-2'>Start Date</span>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.start_date`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <CustomDatePicker
+                                    disabled={reimbursement !== null}
+                                    initialDate={
+                                      field.value instanceof Date
+                                        ? field.value
+                                        : new Date(field.value)
+                                    }
+                                    onDateChange={(date) => field.onChange(date)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <span className='mx-2'>End Date</span>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.end_date`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <CustomDatePicker
+                                    disabled={reimbursement !== null}
+                                    initialDate={
+                                      field.value instanceof Date
+                                        ? field.value
+                                        : new Date(field.value)
+                                    }
+                                    onDateChange={(date) => field.onChange(date)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td width={200}>Reimburse Cost</td>
+                        <td className='flex items-center space-x-3'>
                           <FormField
                             control={form.control}
                             name={`forms.${index}.currency`}
@@ -521,19 +537,22 @@ export const ReimburseForm: React.FC<Props> = ({
                               </FormItem>
                             )}
                           />
-                        </td>
-                      </tr>
 
-                      <tr>
-                        <td width={200}>Remark</td>
-                        <td>
                           <FormField
                             control={form.control}
-                            name={`forms.${index}.remark`}
+                            name={`forms.${index}.balance`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormControl>
-                                  <Textarea placeholder='Insert remark' {...field} />
+                                  <Input
+                                    disabled={reimbursement !== null}
+                                    type='number'
+                                    placeholder='0.0'
+                                    max={limits[index]?.plafon}
+                                    {...field}
+                                    onChange={(e) => field.onChange(Number(e.target.value))}
+                                    value={field.value || 0.0}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>

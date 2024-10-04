@@ -41,6 +41,7 @@ interface Group {
   id: string;
   code: string;
   remark: string;
+  status: string;
   users: User;
   reimburses: Reimburse[];
 }
@@ -148,9 +149,9 @@ const ListReimburse: React.FC<Props> = ({
       },
     },
     {
-      accessorKey: 'request_status',
+      accessorKey: 'status',
       header: () => <div className='text-left'>Request Status</div>,
-      cell: ({ row }) => <div>{row.getValue('request_status') ?? '-'}</div>,
+      cell: ({ row }) => <div>{row.getValue('status') ?? '-'}</div>,
     },
     {
       accessorKey: 'paid_status',

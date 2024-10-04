@@ -19,7 +19,7 @@ class ReimburseGroup extends Model
         "remark",
         "requester"
     ];
-
+    
     public function reimburses()
     {
         return $this->hasMany(Reimburse::class, 'group', 'code');
