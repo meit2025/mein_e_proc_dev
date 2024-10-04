@@ -15,7 +15,7 @@ class ReimburseProgress extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = ["reimburse", "approver", "notes", "status"];
+    protected $fillable = ["group", "approver", "notes", "status"];
 
     // protected static function newFactory(): ReimburseProgressFactory
     // {

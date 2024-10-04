@@ -24,28 +24,22 @@ RUN docker-php-ext-install gd
 RUN pecl install pdo_sqlsrv \
     && docker-php-ext-enable pdo_sqlsrv
 
-RUN apt-get update && apt-get install -y libldap2-dev && docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ && docker-php-ext-install ldap
-
-
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 RUN apt-get install -y nodejs
 
 # Set working directory
 WORKDIR /var/www/html
-COPY package*.json ./
-RUN npm install
-RUN npm run build
 
 # Copy application files
 COPY . /var/www/html
 
 # Set permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html/storage
+RUN chmod -R 775 /var/www/html/storage
 
 # Copy and set entrypoint
 COPY docker-entrypoint.sh /usr/local/bin

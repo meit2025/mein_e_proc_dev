@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('rn')->unique();
             $table->string('group');
             $table->string('type');
-            $table->string('requester');
             $table->string('currency');
             $table->longText('remark');
             $table->double('balance');
@@ -30,7 +29,6 @@ return new class extends Migration
             $table->foreign('period')->references('code')->on('reimburse_periods')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreign('group')->references('code')->on('reimburse_groups')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreign('type')->references('code')->on('reimburse_types')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreign('requester')->references('nip')->on('users')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreign('currency')->references('code')->on('currencies')->cascadeOnDelete()->cascadeOnUpdate();            
         });
     }

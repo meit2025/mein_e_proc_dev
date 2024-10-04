@@ -15,8 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique();
             $table->longText('remark');
+            $table->string('requester');
             $table->softDeletes();
             $table->timestamps();
+
+            $table->foreign('requester')->references('nip')->on('users')->cascadeOnUpdate()->cascadeOnDelete();
         });
     }
 
