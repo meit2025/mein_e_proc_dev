@@ -52,21 +52,14 @@ class Reimburse extends Model
         "rn", //request number
         "group", // group for combine reimburse
         "type", // reimburse type or purpose
-        "requester", // guy who ask reimburse
         "remark", // reimburse detail (free text)
         "balance",
         "receipt_date",
         "start_date",
         "end_date",
-        "start_balance_date",
-        "end_balance_date",
+        "period",
         "currency",
     ];
-
-    public function users()
-    {
-        return $this->hasOne(User::class, 'nip', 'requester');
-    }
 
     // protected static function newFactory(): ReimburseFactory
     // {
