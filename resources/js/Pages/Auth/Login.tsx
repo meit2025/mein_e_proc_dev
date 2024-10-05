@@ -61,19 +61,16 @@ export function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      setLoading(true);
-
-      setTimeout(async () => {
-        setLoading(false);
-
+        setLoading(true);
         // Menggunakan axios untuk mengirim permintaan POST
         const response = await axiosInstance.post('/login', values);
         showToast(response.data.message, 'success');
         window.location.href = '/';
-      }, 2000);
     } catch (error) {
-      const resultError = error as AxiosError;
-      console.log(resultError);
+        const resultError = error as AxiosError;
+        console.log(resultError);
+    } finally {
+        setLoading(false);
     }
   }
 

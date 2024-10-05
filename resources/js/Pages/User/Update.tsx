@@ -1,8 +1,8 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import FormMapping from '@/components/form/FormMapping';
-import { CREATE_SECRET, DETAIL_SECRET, EDIT_SECRET } from '@/endpoint/secret/api';
-import { LIST_PAGE_SECRET } from '@/endpoint/secret/page';
+import { CREATE_USER, DETAIL_USER, EDIT_USER } from '@/endpoint/user/api';
+import { LIST_PAGE_USER } from '@/endpoint/user/page';
 import { formModel } from './model/formModel';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@/axiosInstance';
@@ -22,7 +22,7 @@ const Update = ({ id }: { id: number }) => {
       console.log('ini id', id);
       setIsLoading(true);
       try {
-        const response = await axiosInstance.get(DETAIL_SECRET(props.id));
+        const response = await axiosInstance.get(DETAIL_USER(props.id));
         const data = response.data;
         methods.reset(data.data);
       } catch (error) {
@@ -46,8 +46,8 @@ const Update = ({ id }: { id: number }) => {
             isLoading={isLoading}
             methods={methods}
             formModel={formModel}
-            url={`${EDIT_SECRET}/${props.id}`}
-            redirectUrl={LIST_PAGE_SECRET}
+            url={`${EDIT_USER}/${props.id}`}
+            redirectUrl={LIST_PAGE_USER}
           />
         </div>
       </div>
@@ -57,7 +57,7 @@ const Update = ({ id }: { id: number }) => {
 
 // Assign layout to the page
 Update.layout = (page: ReactNode) => (
-  <MainLayout title='Gateway' description='Gateway Secret Update'>
+  <MainLayout title='User' description='User Update'>
     {page}
   </MainLayout>
 );
