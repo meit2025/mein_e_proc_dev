@@ -11,6 +11,7 @@ import { LIST_PAGE_ROLE } from '@/endpoint/role/page';
 import { Link, usePage } from '@inertiajs/react';
 import Logo from '../../../assets/images/logo.png';
 import { LIST_PAGE_MASTER_BUSINESS_PARTNER } from '@/endpoint/masterBusinessPartner/page';
+import { LIST_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
 // import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
@@ -115,6 +116,12 @@ const sidebar = [
         title: 'Bussiness Trip',
         icon: 'ki-element-11',
         route: '/bussiness-trip',
+        sub: [],
+      },
+      {
+        title: 'Purchase Requisition',
+        icon: 'ki-element-11',
+        route: LIST_PAGE_PR,
         sub: [],
       },
     ],

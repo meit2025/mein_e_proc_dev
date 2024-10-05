@@ -18,6 +18,7 @@ interface FormMappingProps {
   classForm?: string;
   isCustom?: boolean;
   formCustom?: ReactNode;
+  formLogic?: ReactNode;
 }
 
 const FormMapping: React.FC<FormMappingProps> = ({
@@ -30,6 +31,7 @@ const FormMapping: React.FC<FormMappingProps> = ({
   classForm,
   isCustom = false,
   formCustom,
+  formLogic,
 }) => {
   const { setError } = methods;
   const { showToast } = useAlert();
@@ -47,7 +49,7 @@ const FormMapping: React.FC<FormMappingProps> = ({
       onSave && (await onSave(response));
       if (redirectUrl) {
         setTimeout(() => {
-          window.location.href = redirectUrl;
+          //   window.location.href = redirectUrl;
         }, 2000);
       }
     } catch (error) {
@@ -85,6 +87,7 @@ const FormMapping: React.FC<FormMappingProps> = ({
               ))}
             </>
           )}
+          {formLogic}
         </div>
         {/* Kontainer untuk tombol di kanan bawah */}
         <div className='flex justify-end mt-8'>

@@ -81,7 +81,7 @@ class AuthController extends Controller
                     }
                 }
             } catch (\Throwable $th) {
-                $data = User::where('email', $request->username)->first();
+                $data = User::where('username', $request->username)->first();
                 if (!$data) {
                     return $this->errorResponse('username not found', 400, [
                         'username' => ['The provided email does not match our records.']
@@ -104,7 +104,7 @@ class AuthController extends Controller
             }
         }
 
-        $data = User::where('email', $request->username)->first();
+        $data = User::where('username', $request->username)->first();
         if (!$data) {
             return $this->errorResponse('username not found', 400, [
                 'username' => ['The provided email does not match our records.']

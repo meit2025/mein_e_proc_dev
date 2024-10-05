@@ -14,6 +14,7 @@ class MasterBusinessPartnerAddress extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
+        // sap tabel BUT020
         'id',
         'address_number',
         'date_of_move',
@@ -27,10 +28,4 @@ class MasterBusinessPartnerAddress extends Model
         'partner_number',
         'is_standard_address'
     ];
-
-    // Relasi dengan Business Partner
-    public function businessPartner()
-    {
-        return $this->belongsTo(MasterBusinessPartner::class, 'partner_number', 'external_partner_number');
-    }
 }

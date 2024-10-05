@@ -14,6 +14,7 @@ class MasterBusinessPartnerAddressDetail extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
+        // sap tabel ADRC
         'building',
         'city',
         'district',
@@ -41,9 +42,10 @@ class MasterBusinessPartnerAddressDetail extends Model
         'communication_valid_from',
         'communication_valid_to',
         'partner_number',
+
+        // ADR6
+        'business_partner_number',
+        'business_partner_tax_number',
+        'tax_number_category',
     ];
-    public function businessPartner()
-    {
-        return $this->belongsTo(MasterBusinessPartnerAddress::class, 'partner_number', 'external_partner_number');
-    }
 }
