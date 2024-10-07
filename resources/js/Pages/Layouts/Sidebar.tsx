@@ -14,6 +14,7 @@ import { LIST_PAGE_ALLOWANCE_CATEGORY } from '@/endpoint/allowance-category/page
 import { LIST_PAGE_MASTER_BUSINESS_PARTNER } from '@/endpoint/masterBusinessPartner/page';
 import { LIST_PAGE_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/page';
 import { LIST_PAGE_PURPOSE_TYPE } from '@/endpoint/purpose-type/page';
+import { LIST_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
 // import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
@@ -180,6 +181,12 @@ const sidebar = [
             roles: '',
           },
         ],
+      },
+      {
+        title: 'Purchase Requisition',
+        icon: 'ki-element-11',
+        route: LIST_PAGE_PR,
+        sub: [],
       },
     ],
   },

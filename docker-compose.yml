@@ -34,5 +34,5 @@ services:
 
 networks:
   utama:
-    driver: bridge
+    external: true
     name: utama

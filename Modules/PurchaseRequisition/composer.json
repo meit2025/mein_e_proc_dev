@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/purchaserequisition",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\PurchaseRequisition\\": "app/",
+            "Modules\\PurchaseRequisition\\Database\\Factories\\": "database/factories/",
+            "Modules\\PurchaseRequisition\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\PurchaseRequisition\\Tests\\": "tests/"
+        }
+    }
+}

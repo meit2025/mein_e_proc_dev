@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Master\Http\Controllers\AssetController;
 use Modules\Master\Http\Controllers\BankKeyController;
 use Modules\Master\Http\Controllers\CostCenterController;
+use Modules\Master\Http\Controllers\DropdownMasterController;
 use Modules\Master\Http\Controllers\MasterBusinessPartnerController;
 use Modules\Master\Http\Controllers\MasterController;
 use Modules\Master\Http\Controllers\MasterMaterialController;
@@ -96,6 +97,9 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/update/{id}', [MasterBusinessPartnerController::class, 'update'])->name('master.business.update');
             Route::get('/detail/{id}', [MasterBusinessPartnerController::class, 'show'])->name('master.business.show');
             Route::delete('/delete/{id}', [MasterBusinessPartnerController::class, 'destroy'])->name('master.business.destroy');
+        });
+        Route::group(['prefix' => 'dropdown'], function () {
+            Route::get('/', [DropdownMasterController::class, 'dropdown'])->name('master.dropdown');
         });
     });
 });

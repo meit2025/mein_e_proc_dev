@@ -14,6 +14,7 @@ class MasterBusinessPartnerBank extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
+        // sap tabel BUT0BK
         'id',
         'is_standard_address',
         'bank_key',
