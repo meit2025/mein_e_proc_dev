@@ -65,14 +65,16 @@ export default function AllowanceItemForm({
     code: z.string().min(1, 'Code is required'),
     name: z.string().min(1, 'Name is required'),
     all: z.boolean().optional(),
-    allowances: z.array(z.string()).optional()
+    allowances: z.array(z.string()).optional(),
+    attedance_status: z.string().min(1, 'Attedance Status is required')
   });
 
   let defaultValues = {
     code: '',
     name: '',
     all: false,
-    allowances: []
+    allowances: [],
+    attedance_status: '',
   };
 
   //   console.log('currency_id', listCurrency);
@@ -186,8 +188,39 @@ export default function AllowanceItemForm({
                       </FormControl>
                       <div className='space-y-1 leading-none'>
                         <FormLabel>All</FormLabel>
-                       
                       </div>
+                    </FormItem>
+                  )}
+                />
+              </td>
+            </tr>
+
+            <tr>
+              <td width={200}>
+                Attendance Status <span className='text-red-500'>*</span>
+              </td>
+              <td>
+                <FormField
+                  control={form.control}
+                  name='attedance_status'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
+                          value={field.value} // Set the current value from React Hook Form
+                        >
+                          <SelectTrigger className='w-[200px]'>
+                            <SelectValue placeholder='Select Currency' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem key={'BST'} value={'Business Trip'}>
+                              Business Trip (BST)
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
