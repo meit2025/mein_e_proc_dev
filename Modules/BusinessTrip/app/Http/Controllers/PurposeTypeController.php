@@ -10,9 +10,10 @@ class PurposeTypeController extends Controller
     /**
      * Display a listing of the resource.
      */
+    
     public function index()
     {
-        return view('businesstrip::index');
+        return inertia('BusinessTrip/PurposeType/index');
     }
 
     /**

@@ -42,6 +42,7 @@ interface DataGridProps {
   onDelete?: (id: number) => Promise<void> | void;
   onDetail?: (id: number) => Promise<void> | void;
   actionType?: string;
+  buttonActionCustome?: ReactNode;
 }
 
 const DataGridComponent: React.FC<DataGridProps> = ({
@@ -138,7 +139,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
             width: 150,
             renderCell: (params: any) => (
               <>
-                {actionType == 'dropdown' ? (
+                { actionType == 'dropdown' ? (
                   <>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -174,7 +175,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                     </DropdownMenu>
                   </>
                 ) : (
-                  <>
+                   <>
                     <div
                       style={{
                         display: 'flex',
@@ -185,8 +186,8 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                       }}
                     >
                       <i className=' ki-duotone ki-size text-info text-2xl'></i>
-                    </Link>
-                  )}
+          
+                
                   {(onEdit || url.editUrl) && (
                     <Link
                       href={`${url.editUrl}/${params.row.id}`}
@@ -204,7 +205,12 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                   {buttonActionCustome}
                 </div>
               </>
-            ),
+  
+                )}
+            
+            </>
+            )
+            
           },
         ]
       : [];

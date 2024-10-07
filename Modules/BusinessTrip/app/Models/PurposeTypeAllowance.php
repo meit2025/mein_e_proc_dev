@@ -13,7 +13,10 @@ class PurposeTypeAllowance extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'allowance_item_id',
+        'purpose_type_id'
+    ];
 
     // protected static function newFactory(): PurposeTypeAllowanceFactory
     // {

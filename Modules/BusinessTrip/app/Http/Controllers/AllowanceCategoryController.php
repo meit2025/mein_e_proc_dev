@@ -34,7 +34,6 @@ class AllowanceCategoryController extends Controller
         $sortDirection = $request->get('sort_direction', 'asc');
 
         
-
         $query->orderBy($sortBy, $sortDirection);
 
         $data = $query->paginate($perPage);

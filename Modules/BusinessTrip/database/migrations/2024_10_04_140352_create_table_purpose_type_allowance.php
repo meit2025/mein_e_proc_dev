@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('allowance_categories', function (Blueprint $table) {
+        Schema::create('purpose_type_allowances', function (Blueprint $table) {
             $table->id();
-
-            $table->string("name");
-            $table->string('code');
-            
             $table->softDeletes();
+            $table->unsignedBigInteger('purpose_type_id');
+            $table->foreign('purpose_type_id')->references('id')->on('purpose_types')->onDelete('cascade');
+            $table->unsignedBigInteger('allowance_items_id');
+            $table->foreign('allowance_items_id')->references('id')->on('allowance_items')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('allowance_categories');
+        Schema::dropIfExists('');
     }
 };

@@ -13,15 +13,17 @@ return new class extends Migration
     {
         Schema::create('allowance_items', function (Blueprint $table) {
             $table->id();
+            $table->string('type');
             $table->float('fixed_value')->nullable();
+            $table->float('max_value')->nullable();
             $table->string('request_value');
             $table->text('formula')->nullable();
-            $table->foreign('currency_id')->references('id')->on('currencies')->onDelete('cascade');
-
-            $table->foreign('allowance_category_id')->references('id')->on('currencies')->onDelete('cascade');
-
-
+            $table->unsignedBigInteger('currency_id');
+            $table->unsignedBigInteger('allowance_category_id');
+            $table->string('code')->unique();
+            $table->string('name');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

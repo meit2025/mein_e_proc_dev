@@ -5,3 +5,10 @@ export const columns: GridColDef[] = [
   { field: 'name', headerName: 'Category Name', width: 200, filterable: true },
   
 ];
+
+
+export interface AllowanceCategoryModel {
+  id: number,
+  code: string,
+  name: string
+}

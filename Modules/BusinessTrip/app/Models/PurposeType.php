@@ -13,7 +13,13 @@ class PurposeType extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [];
+
+     
+    protected $fillable = [
+        'code',
+        'name',
+        'attedance_status'
+    ];
 
     protected static function newFactory(): PurposeTypeFactory
     {

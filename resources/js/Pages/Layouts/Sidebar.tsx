@@ -12,6 +12,8 @@ import { Link, usePage } from '@inertiajs/react';
 import Logo from '../../../assets/images/logo.png';
 import { LIST_PAGE_ALLOWANCE_CATEGORY } from '@/endpoint/allowance-category/page';
 import { LIST_PAGE_MASTER_BUSINESS_PARTNER } from '@/endpoint/masterBusinessPartner/page';
+import { LIST_PAGE_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/page';
+import { LIST_PAGE_PURPOSE_TYPE } from '@/endpoint/purpose-type/page';
 // import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
@@ -120,6 +122,18 @@ const sidebar = [
           {
             name: 'Allowance Category',
             route: LIST_PAGE_ALLOWANCE_CATEGORY,
+            roles: '',
+          },
+
+          {
+            name: 'Allowance Item',
+            route: LIST_PAGE_ALLOWANCE_ITEM,
+            roles: '',
+          },
+
+          {
+            name: 'Purpose Type',
+            route: LIST_PAGE_PURPOSE_TYPE,
             roles: '',
           },
           // {
