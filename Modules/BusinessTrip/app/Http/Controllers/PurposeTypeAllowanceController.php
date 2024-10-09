@@ -4,19 +4,15 @@ namespace Modules\BusinessTrip\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Modules\BusinessTrip\Models\AllowanceItem;
-use Modules\BusinessTrip\Models\PurposeType;
-use Modules\BusinessTrip\Models\PurposeTypeAllowance;
 
-class PurposeTypeController extends Controller
+class PurposeTypeAllowanceController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    
     public function index()
     {
-        return inertia('BusinessTrip/PurposeType/index');
+        return view('businesstrip::index');
     }
 
     /**
@@ -65,17 +61,5 @@ class PurposeTypeController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    public function detailAPI($id) {
-        $find = PurposeType::with(['listAllowance'])->find($id);
-        return $this->successResponse($find);
-
-    }
-
-    public function getAllowanceByPurposeAPI($id) {
-        $listAllowances =  AllowanceItem::whereIn('id', PurposeTypeAllowance::where('purpose_type_id', $id)->get()->pluck('allowance_items_id')->toArray())->get();
-
-        return $this->successResponse($listAllowances);
     }
 }

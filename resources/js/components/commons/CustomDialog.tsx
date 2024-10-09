@@ -49,7 +49,7 @@ const CustomDialog = ({
         </DialogTrigger>
       )} */}
       <DialogTitle></DialogTitle>
-      <DialogContent className={className ? className : 'md:max-w-[600px]'}>
+      <DialogContent className={className ? className : 'md:max-w-[768px]'}>
         <DialogHeader>
           <Breadcrumb>
             <BreadcrumbList>

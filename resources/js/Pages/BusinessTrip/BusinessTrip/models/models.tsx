@@ -11,11 +11,36 @@ export const columns: GridColDef[] = [
 
 
 
-
-
-export interface PurposeTypeModel {
-  code: string,
-  name:string,
-  attedance_status: string,
-  id: string,
+export interface CurrencyModel {
+    code: string,
+    name: string
 }
+
+export interface UserModel {
+  name: string,
+  id: string,
+  nip:string
+}
+
+export interface AllowanceItemModel {
+  code: string,
+  name: string,
+  purpose_type?: [],
+  currency_id: string,
+  request_value: string,
+  formula:string,
+  type:string,
+  max_value?:string,
+  fixed_value?:string,
+  allowance_category_id:number,
+}
+
+//  'type',
+//    'fixed_value',
+//    'max_value',
+//    'request_value',
+//    'formula',
+//    'currency_id',
+//    'allowance_category_id',
+//    'code',
+//    'name';

@@ -21,6 +21,11 @@ class PurposeType extends Model
         'attedance_status'
     ];
 
+
+    public function listAllowance() {
+        return $this->hasMany(PurposeTypeAllowance::class, 'purpose_type_id', 'id');
+    }
+
     protected static function newFactory(): PurposeTypeFactory
     {
         // return PurposeTypeFactory::new();

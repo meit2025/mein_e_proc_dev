@@ -14,9 +14,19 @@ class PurposeTypeAllowance extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
-        'allowance_item_id',
+        'allowance_items_id',
         'purpose_type_id'
     ];
+
+
+    public function allowanceItem() {
+        return $this->belongsTo(allowanceItem::class , 'allowance_items_id', 'id');
+    }
+
+    public function purposeType()
+    {
+        return $this->belongsTo(PurposeType::class, 'purpose_type_id', 'id');
+    }
 
     // protected static function newFactory(): PurposeTypeAllowanceFactory
     // {

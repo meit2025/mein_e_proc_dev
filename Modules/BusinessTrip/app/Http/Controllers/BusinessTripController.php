@@ -6,7 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Currency;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
+use Modules\BusinessTrip\Models\BusinessTrip;
+use Modules\BusinessTrip\Models\PurposeType;
 use Modules\Reimbuse\Models\Reimburse;
 use Modules\Reimbuse\Models\ReimburseType;
 
@@ -17,20 +21,10 @@ class BusinessTripController extends Controller
      */
     public function index()
     {
-        $reimburses = Reimburse::with('users')->get();
-        $users = User::select('nip', 'name')->get();
-        $types = ReimburseType::select('code', 'name')->get();
-        $currencies = Currency::select('code', 'name')->get();
-        $csrf_token = csrf_token();
+        $users = User::select('nip', 'name', 'id')->get();   
 
-        
-        return Inertia::render('BusinessTrip/ListBusinessTrip', [
-            'reimburses'    =>  $reimburses,
-            'users'         =>  $users,
-            'types'         =>  $types,
-            'currencies'    =>  $currencies,
-            'csrf_token'    =>  $csrf_token
-        ]);
+        $listPurposeType = PurposeType::select('name', 'code', 'id')->get();
+        return Inertia::render('BusinessTrip/BusinessTrip/index', compact('users', 'listPurposeType'));
     }
 
     /**
@@ -79,5 +73,47 @@ class BusinessTripController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function storeAPI(Request $request) {
+
+        $rules = [
+            'purpose_type_id' => 'required',
+            'request_for' => 'required',
+            'destination.*' => 'required'
+        ];
+
+        $validator =  Validator::make($request->all(), $rules);
+
+        if($validator->fails()){
+            return $this->errorResponse("erorr", 400, $validator->errors());
+        }
+
+        DB::beginTransaction();
+
+        try {
+            
+            
+        }
+        catch(\Exception $e) {
+            dd($e);
+        } 
+    }
+
+    public function listAPI(Request $request)
+    {
+
+        $query =  BusinessTrip::query();
+        $perPage = $request->get('per_page', 10);
+        $sortBy = $request->get('sort_by', 'id');
+        $sortDirection = $request->get('sort_direction', 'asc');
+
+
+        $query->orderBy($sortBy, $sortDirection);
+
+        $data = $query->paginate($perPage);
+
+
+        return $this->successResponse($data);
     }
 }

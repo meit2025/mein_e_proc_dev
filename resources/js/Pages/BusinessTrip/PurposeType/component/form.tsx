@@ -48,6 +48,7 @@ import { CREATE_API_PURPOSE_TYPE } from '@/endpoint/purpose-type/api';
 import { AxiosError } from 'axios';
 import { AllowanceItemModel } from '../../AllowanceItem/models/models';
 import { FormType } from '@/lib/utils';
+import { MultiSelect } from '@/components/commons/MultiSelect';
 //
 
 export interface AllowanceItemFormInterface {
@@ -76,6 +77,17 @@ export default function AllowanceItemForm({
     allowances: [],
     attedance_status: '',
   };
+
+  const exampleOptions = [
+    {
+      id: 'fucek',
+      name: 'fucek to',
+    },
+    {
+      id: 'fack',
+      name: 'fack',
+    },
+  ];
 
   //   console.log('currency_id', listCurrency);
   async function getDetailData() {
@@ -178,7 +190,7 @@ export default function AllowanceItemForm({
             <tr>
               <td width={200}>Allowances</td>
               <td>
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name='all'
                   render={({ field }) => (
@@ -191,7 +203,11 @@ export default function AllowanceItemForm({
                       </div>
                     </FormItem>
                   )}
-                />
+                /> */}
+
+                <MultiSelect value={[]} key='id' label='name' options={exampleOptions} onSelect={(value) => {
+                  console.log(value)
+                }} />
               </td>
             </tr>
 
