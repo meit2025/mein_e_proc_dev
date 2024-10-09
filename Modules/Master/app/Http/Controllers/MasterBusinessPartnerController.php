@@ -23,14 +23,17 @@ class MasterBusinessPartnerController extends Controller
             'external_partner_number',
             'partner_grouping',
             'search_term_one',
-            'search_term_two',
             'name_one',
-            'name_two',
-            'name_three',
-            'name_four',
             'partner_number',
-            'form_of_address_key',
             'central_block',
+            'city',
+            'country',
+            'postal_code',
+            'tax_number',
+            'number_supplier',
+            'delete',
+            'purchasing_block',
+            'type',
         ];
 
         foreach ($request->all() as $key => $value) {

@@ -115,6 +115,13 @@ export const formModelValue: Array<FormFieldModel<any>> = [
     required: true,
   },
   {
+    type: 'input',
+    name: 'default',
+    label: 'Parameter default',
+    placeholder: 'Enter your Parameter default',
+    required: true,
+  },
+  {
     type: 'switch',
     name: 'is_key',
     label: 'key',
