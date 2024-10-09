@@ -1,7 +1,7 @@
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import { ReactNode } from 'react';
 import DataGridComponent from '@/components/commons/DataGrid';
-import { DELET_SECRET, GET_SECRET } from '@/endpoint/secret/api';
+import { GET_PR } from '@/endpoint/purchaseRequisition/api';
 import { columns } from './model/listModel';
 import { CREATE_PAGE_PR, EDIT_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
 
@@ -11,7 +11,7 @@ export const Index = () => {
       <DataGridComponent
         columns={columns}
         url={{
-          url: GET_SECRET,
+          url: GET_PR,
           addUrl: CREATE_PAGE_PR,
           editUrl: EDIT_PAGE_PR,
         }}
@@ -23,7 +23,7 @@ export const Index = () => {
 
 // Assign layout to the page
 Index.layout = (page: ReactNode) => (
-  <MainLayout title='Secret' description='Secret Key hit api'>
+  <MainLayout title='Purchase Requisition' description='Purchase Requisition List'>
     {page}
   </MainLayout>
 );

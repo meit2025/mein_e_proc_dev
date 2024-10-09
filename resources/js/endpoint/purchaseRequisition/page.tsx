@@ -1,4 +1,4 @@
-const ROUTE_PR_PAGE = '/pr/purchase-requisition';
+const ROUTE_PR_PAGE = '/purchase-requisition';
 
 export const LIST_PAGE_PR = `${ROUTE_PR_PAGE}`;
 export const CREATE_PAGE_PR = `${ROUTE_PR_PAGE}/create`;
