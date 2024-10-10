@@ -189,6 +189,60 @@ const sidebar = [
         ],
       },
       {
+        title: 'Master PR',
+        icon: 'ki-users',
+        route: '/',
+        sub: [
+          {
+            name: 'Dokument Type',
+            route: LIST_PAGE_USER,
+            roles: '',
+          },
+          {
+            name: 'Valuation Type',
+            route: LIST_PAGE_ROLE,
+            roles: '',
+          },
+          {
+            name: 'Purchasing Groups',
+            route: LIST_PAGE_ROLE,
+            roles: '',
+          },
+          {
+            name: 'Account Assignment Categories',
+            route: LIST_PAGE_ROLE,
+            roles: '',
+          },
+          {
+            name: 'Item Categories',
+            route: LIST_PAGE_ROLE,
+            roles: '',
+          },
+          {
+            name: 'Storage Locations',
+            route: LIST_PAGE_ROLE,
+            roles: '',
+          },
+        ],
+      },
+      {
+        title: 'Approval',
+        icon: 'ki-users',
+        route: '/',
+        sub: [
+          {
+            name: 'Approval',
+            route: LIST_PAGE_USER,
+            roles: '',
+          },
+          {
+            name: 'Approval Conditional',
+            route: LIST_PAGE_ROLE,
+            roles: '',
+          },
+        ],
+      },
+      {
         title: 'User Management',
         icon: 'ki-users',
         route: '/',

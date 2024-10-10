@@ -13,7 +13,10 @@ class DocumentType extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'purchasing_doc',
+        'purchasing_dsc',
+    ];
 
     // protected static function newFactory(): DocumentTypeFactory
     // {
