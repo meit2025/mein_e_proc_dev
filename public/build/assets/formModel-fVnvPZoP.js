@@ -1,1 +1,0 @@
-const e=[{type:"select",name:"vendor",label:"vendor",required:!0,options:[]},{type:"select",name:"account_assignment_category",label:"Account Assignment Category",required:!0,options:[]}];export{e as formModel};
