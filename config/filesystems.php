@@ -64,9 +64,10 @@ return [
 
             // Optional
             'port' => env('FTP_PORT', 21),
-            'root' => env('FTP_ROOT', ''),
-            'passive' => env('FTP_PASSIVE', true),
-            'timeout' => env('FTP_TIME_OUT', 30),
+            'root'     => env('FTP_ROOT', '/web'),
+            'passive'  => true,
+            'ssl'      => false,
+            'timeout'  => 30,
         ],
 
     ],
