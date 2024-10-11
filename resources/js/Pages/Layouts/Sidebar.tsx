@@ -10,8 +10,12 @@ import { LIST_PAGE_USER } from '@/endpoint/user/page';
 import { LIST_PAGE_ROLE } from '@/endpoint/role/page';
 import { Link, usePage } from '@inertiajs/react';
 import Logo from '../../../assets/images/logo.png';
+import { LIST_PAGE_ALLOWANCE_CATEGORY } from '@/endpoint/allowance-category/page';
 import { LIST_PAGE_MASTER_BUSINESS_PARTNER } from '@/endpoint/masterBusinessPartner/page';
+import { LIST_PAGE_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/page';
+import { LIST_PAGE_PURPOSE_TYPE } from '@/endpoint/purpose-type/page';
 import { LIST_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
+import { LIST_PAGE_BUSINESS_TRIP } from '@/endpoint/business-trip/page';
 // import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
@@ -115,8 +119,75 @@ const sidebar = [
       {
         title: 'Bussiness Trip',
         icon: 'ki-element-11',
-        route: '/bussiness-trip',
-        sub: [],
+        route: '/',
+        sub: [
+          {
+            name: 'Allowance Category',
+            route: LIST_PAGE_ALLOWANCE_CATEGORY,
+            roles: '',
+          },
+
+          {
+            name: 'Allowance Item',
+            route: LIST_PAGE_ALLOWANCE_ITEM,
+            roles: '',
+          },
+
+          {
+            name: 'Purpose Type',
+            route: LIST_PAGE_PURPOSE_TYPE,
+            roles: '',
+          },
+
+          {
+            name: 'Business Trip',
+            route: LIST_PAGE_BUSINESS_TRIP,
+            roles: '',
+          },
+          // {
+          //   name: 'Bank Key',
+          //   route: LIST_PAGE_ALLOWANCE_CATEGORY,
+          //   roles: '',
+          // },
+        ],
+      },
+
+      {
+        title: 'Master',
+        icon: 'ki-setting-3',
+        route: '/',
+        sub: [
+          {
+            name: 'Master Material',
+            route: LIST_PAGE_MASTER_MATERIAL,
+            roles: '',
+          },
+          {
+            name: 'Asset',
+            route: LIST_PAGE_MASTER_ASSET,
+            roles: '',
+          },
+          {
+            name: 'Cost Center',
+            route: LIST_PAGE_MASTER_COST_CENTER,
+            roles: '',
+          },
+          {
+            name: 'Internal Order',
+            route: LIST_PAGE_MASTER_ORDER,
+            roles: '',
+          },
+          {
+            name: 'Recon Account',
+            route: LIST_PAGE_MASTER_RECON,
+            roles: '',
+          },
+          {
+            name: 'Bank Key',
+            route: LIST_PAGE_MASTER_BANK_KEY,
+            roles: '',
+          },
+        ],
       },
       {
         title: 'Purchase Requisition',

@@ -3,8 +3,8 @@
     "Reimbuse": true,
     "Auth": true,
     "Approval": true,
+    "BussinesTrip": true,
     "Gateway": true,
-    "BusinessTrip": true,
     "User": true,
     "PurchaseRequisition": true
 }

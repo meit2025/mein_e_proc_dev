@@ -112,9 +112,11 @@ class AuthController extends Controller
         }
 
         $data = [
-            'username'     => $request->username,
+            'username'    => $request->username,
             'password'  => $request->password,
         ];
+
+        dd($request->all());
 
 
         if (Auth::attempt($data)) {

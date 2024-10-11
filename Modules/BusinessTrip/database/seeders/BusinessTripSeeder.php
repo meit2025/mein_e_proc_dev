@@ -3,6 +3,8 @@
 namespace Modules\BusinessTrip\Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Modules\BusinessTrip\Models\AllowanceCategory;
+use Modules\BusinessTrip\Models\AllowanceItem;
 
 class BusinessTripSeeder extends Seeder
 {
@@ -11,6 +13,8 @@ class BusinessTripSeeder extends Seeder
      */
     public function run(): void
     {
-        // $this->call([]);
+        // $this->call([])
+        
+        $this->call([AllowanceIitemSeeder::class, AllowanceCategorySeeder::class, PurposeTypeSeeder::class]);
     }
 }

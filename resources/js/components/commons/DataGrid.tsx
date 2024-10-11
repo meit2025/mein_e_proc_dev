@@ -8,6 +8,21 @@ import { Link } from '@inertiajs/react';
 import axios from 'axios';
 import { useAlert } from '@/contexts/AlertContext';
 
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/shacdn/dropdown-menu';
+
+import { CaretSortIcon, ChevronDownIcon, DotsHorizontalIcon } from '@radix-ui/react-icons';
+import { Button as ShacdnButton } from '@/components/shacdn/button';
+import { Edit } from 'lucide-react';
+
+
 interface UrlDataGrid {
   url: string;
   addUrl?: string;
@@ -26,6 +41,7 @@ interface DataGridProps {
   onEdit?: (id: number) => Promise<void> | void;
   onDelete?: (id: number) => Promise<void> | void;
   onDetail?: (id: number) => Promise<void> | void;
+  actionType?: string;
   buttonActionCustome?: ReactNode;
 }
 
@@ -39,6 +55,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   onDelete,
   onDetail,
   defaultSearch,
+  actionType,
   buttonActionCustome,
 }) => {
   const [rows, setRows] = useState([]);
@@ -122,24 +139,55 @@ const DataGridComponent: React.FC<DataGridProps> = ({
             width: 150,
             renderCell: (params: any) => (
               <>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    justifyContent: 'flex-start',
-                    alignItems: 'center',
-                    gap: '10px', // Add consistent spacing between elements
-                  }}
-                >
-                  {(onDetail || url.detailUrl) && (
-                    <Link
-                      href={`${url.detailUrl}/${params.row.id}`}
-                      onClick={() => onDetail && onDetail(params.row.id)}
-                      alt='detail'
+                { actionType == 'dropdown' ? (
+                  <>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <ShacdnButton variant='ghost' className='h-8 w-8 p-0'>
+                          <span className='sr-only'>...</span>
+                          <DotsHorizontalIcon className='h-4 w-4' />
+                        </ShacdnButton>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align='end'>
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        {(onEdit || url.editUrl) && (
+                          <DropdownMenuItem onClick={() => onEdit && onEdit(params.row.id)}>
+                            <span className='flex items-center text-sm space-x-2'>
+                              <span>Edit</span>
+                              <Edit size={14} />
+                            </span>
+                          </DropdownMenuItem>
+                        )}
+
+                        <DropdownMenuSeparator />
+                        {/* <DropdownMenuItem>View customer</DropdownMenuItem> */}
+
+                        {(url.deleteUrl || onDelete) && (
+                          <DropdownMenuItem onClick={() => handleDelete(params.row.id)}>
+                            <span className='flex items-center  text-sm space-x-2'>
+                              <span>Delete</span>
+                              <Edit size={14} />
+                            </span>
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem>View payment details</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </>
+                ) : (
+                   <>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        gap: '10px', // Add consistent spacing between elements
+                      }}
                     >
                       <i className=' ki-duotone ki-size text-info text-2xl'></i>
-                    </Link>
-                  )}
+          
+                
                   {(onEdit || url.editUrl) && (
                     <Link
                       href={`${url.editUrl}/${params.row.id}`}
@@ -157,7 +205,12 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                   {buttonActionCustome}
                 </div>
               </>
-            ),
+  
+                )}
+            
+            </>
+            )
+            
           },
         ]
       : [];

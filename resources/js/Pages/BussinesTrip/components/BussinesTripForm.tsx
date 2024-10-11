@@ -15,7 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Textarea } from '@/components/shacdn/textarea';
 
-import '../css/business_trip.scss';
+import '../css/bussines_trip.scss';
 import { ScrollArea } from '@/components/shacdn/scroll-area';
 import { Separator } from '@/components/shacdn/separator';
 
@@ -32,75 +32,22 @@ import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import { Input } from '@/components/shacdn/input';
 import * as React from 'react';
 
-interface User {
-  id: string;
-  nip: string;
-  name: string;
-}
-
-interface Type {
-  id: string;
-  code: string;
-  name: string;
-}
-
-interface CurrencyModel {
-  id: string;
-  code: string;
-}
-
-interface Props {
-  users: User[];
-  types: Type[];
-  currencies: Currency[];
-  csrf_token: string;
-}
-
 const formSchema = z.object({
   remark: z.string().min(1).max(50),
   reimburse_cost: z.number(),
 });
-export const BussinessTripFormV1 = ({
-  users,
-  types,
-  currencies,
-  csrf_token,
-}: {
-  users: User;
-  types: Type;
-  currencies: CurrencyModel;
-  csrf_token: string;
-}) => {
+export const BussinesTripForm = () => {
   // defining form for reimburese form
-  const formSchema = z.object({
-    type: z.string().nonempty('Type is required'),
-    requester: z.string().nonempty('Requester is required'),
-    remark: z.string().nonempty('Remark is required'),
-    balance: z.number().min(1, 'Balance must be at least 1'),
-    receipt_date: z.date(),
-    start_date: z.date(),
-    end_date: z.date(),
-    start_balance_date: z.date(),
-    end_balance_date: z.date(),
-    currency: z.string().nonempty('Currency is required'),
-  });
-  const [totalDestination, setTotalDestination] = React.useState<string>('1');
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: '',
-      requester: '',
       remark: '',
-      balance: 0,
-      receipt_date: new Date(),
-      start_date: new Date(),
-      end_date: new Date(),
-      start_balance_date: new Date(),
-      end_balance_date: new Date(),
-      currency: 'IDR',
+      reimburse_cost: 0,
     },
   });
+
+  const [totalDestination, setTotalDestination] = React.useState<string>('1');
+
   return (
     <ScrollArea className='h-[600px] w-full '>
       <Form {...form}>
@@ -505,6 +452,7 @@ export const BussinessTripFormV1 = ({
                       </td>
                     </td>
                   </tr>
+                 
                 </table>
 
                 <table className='w-3/4 detail-bussiness text-xs text-gray-600 font-light'>
