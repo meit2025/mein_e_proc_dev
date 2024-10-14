@@ -42,7 +42,6 @@ import {
 } from '@/endpoint/allowance-category/api';
 import { useAlert } from '@/contexts/AlertContext';
 import { AllowanceCategoryModel } from '../../AllowanceCategory/model/AllowanceModel';
-import { CurrencyModel } from '../models/models';
 import { RadioGroup, RadioGroupItem } from '@/components/shacdn/radio-group';
 import { CREATE_API_PURPOSE_TYPE } from '@/endpoint/purpose-type/api';
 import { AxiosError } from 'axios';
@@ -57,17 +56,18 @@ export interface AllowanceItemFormInterface {
   id?: string;
   listAllowanceModel: AllowanceItemModel[];
 }
-export default function AllowanceItemForm({
+export default function PurposeTypeForm({
   onSuccess,
   type = FormType.create,
   id,
+  listAllowanceModel,
 }: AllowanceItemFormInterface) {
   var formSchema = z.object({
     code: z.string().min(1, 'Code is required'),
     name: z.string().min(1, 'Name is required'),
     all: z.boolean().optional(),
-    allowances: z.array(z.string()).optional(),
-    attedance_status: z.string().min(1, 'Attedance Status is required')
+    allowances: z.array(z.number()).optional(),
+    attedance_status: z.string().min(1, 'Attedance Status is required'),
   });
 
   let defaultValues = {
@@ -125,6 +125,8 @@ export default function AllowanceItemForm({
       showToast('Please Check the input', 'error');
     }
   };
+
+  // console.log('list allowance',listAllowanceModel)
 
   React.useEffect(() => {
     if (id && type == FormType.edit) {
@@ -205,9 +207,16 @@ export default function AllowanceItemForm({
                   )}
                 /> */}
 
-                <MultiSelect value={[]} key='id' label='name' options={exampleOptions} onSelect={(value) => {
-                  console.log(value)
-                }} />
+                <MultiSelect
+                  value={form.getValues('allowances')}
+                  id="id"
+                  label='name'
+
+                  options={listAllowanceModel}
+                  onSelect={(value) => {
+                    form.setValue('allowances', value.map((map) => map.id));
+                  }}
+                />
               </td>
             </tr>
 
@@ -227,7 +236,7 @@ export default function AllowanceItemForm({
                           value={field.value} // Set the current value from React Hook Form
                         >
                           <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='Select Currency' />
+                            <SelectValue placeholder='Select Attedance status' />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem key={'BST'} value={'Business Trip'}>
