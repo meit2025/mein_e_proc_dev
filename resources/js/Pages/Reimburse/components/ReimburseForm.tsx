@@ -4,7 +4,7 @@ import { Inertia } from '@inertiajs/inertia';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/shacdn/form';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { Textarea } from '@/components/shacdn/textarea';
 import '../css/reimburse.scss';
 import { ScrollArea } from '@/components/shacdn/scroll-area';
@@ -17,12 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/shacdn/select';
+import axios, { AxiosError } from 'axios';
 import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import { Input } from '@/components/shacdn/input';
+import { useAlert } from '../../../contexts/AlertContext.jsx';
+import { usePage } from '@inertiajs/react';
 
 interface Reimburse {
   id: string;
-  rn: string;
   remark: string;
   type: string;
   currency: string;
@@ -52,7 +54,6 @@ interface Props {
   reimbursement: Group | null;
   reimburses: Reimburse[];
   currencies: { id: string; code: string; name: string }[];
-  types: { id: string; code: string; name: string }[];
   periods: { id: string; code: string; start: string; end: string }[];
   users: User[];
   csrf_token: string;
@@ -67,16 +68,21 @@ export const ReimburseForm: React.FC<Props> = ({
   users,
   csrf_token,
 }) => {
+  const { showToast } = useAlert();
+  const { errors } = usePage().props;
   const [formCount, setFormCount] = useState<number>(1);
   const [formData, setFormData] = useState<Reimburse[]>(reimburses);
+  const [limits, setLimits] = useState([]);
+  const [reimburseTypes, setReimburseTypes] = useState([[]]);
 
   const formSchema = z.object({
     remark_group: z.string().nonempty('Remark is required'),
     requester: z.string().nonempty('Requester is required'),
     forms: z.array(
       z.object({
-        rn: z.string(),
+        id: z.string(),
         type: z.string().nonempty('Type is required'),
+        reimburse_type: z.string().nonempty('Type is required'),
         period: z.string().nonempty('Period is required'),
         remark: z.string().nonempty('Remark is required'),
         balance: z.number().min(1, 'Balance must be at least 1'),
@@ -97,8 +103,9 @@ export const ReimburseForm: React.FC<Props> = ({
       remark_group: '',
       requester: '',
       forms: Array.from({ length: 1 }).map(() => ({
-        rn: '',
+        id: '',
         type: '',
+        reimburse_type: '',
         remark: '',
         period: '',
         balance: 0,
@@ -119,7 +126,7 @@ export const ReimburseForm: React.FC<Props> = ({
       form.setValue(
         'forms',
         reimbursement.reimburses.map((reimburse) => ({
-          rn: reimburse.rn,
+          id: reimburse.id,
           type: reimburse.type,
           remark: reimburse.remark,
           balance: Number(reimburse.balance),
@@ -144,8 +151,9 @@ export const ReimburseForm: React.FC<Props> = ({
     const newForms = Array.from({ length: value }).map((_, index) => {
       return (
         currentForms[index] || {
-          rn: '',
+          id: '',
           type: '',
+          reimburse_type: '',
           remark: '',
           period: '',
           balance: 0,
@@ -160,23 +168,34 @@ export const ReimburseForm: React.FC<Props> = ({
     form.setValue('formCount', value.toString());
   };
 
-  const [limits, setLimits] = useState([]);
-
-  const selectedTypeCode = (index, value) => {
+  async function selectedTypeCode(index, value) {
     const selectedType = types.find((type) => type.code === value);
+    try {
+      const response = await axios.get(`/reimburse/type/${value}`);
+      const typeData = response.data;
 
-    setLimits((prevLimits) => {
-      const updatedLimits = [...prevLimits];
-      updatedLimits[index] = {
-        plafon: selectedType?.plafon ?? 0,
-        claim: selectedType?.claim_limit ?? 'Unlimited',
-      };
-      return updatedLimits;
-    });
+      setLimits((prevLimits) => {
+        const updatedLimits = [...prevLimits];
+        updatedLimits[index] = {
+          plafon: selectedType?.plafon ?? 0,
+          claim: selectedType?.claim_limit ?? 'Unlimited',
+        };
+        return updatedLimits;
+      });
 
-    // Set the form value for the specific index
-    form.setValue(`forms.${index}.type`, value);
-  };
+      setReimburseTypes((prevTypes) => {
+        const updatedTypes = [...prevTypes];
+        updatedTypes[index] = typeData.data;
+        return updatedTypes;
+      });
+
+      form.setValue(`forms.${index}.type`, value);
+    } catch (error) {
+      const resultError = error as AxiosError;
+      const err = resultError.response.data;
+      showToast(err.message, err.status);
+    }
+  }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const formData = new FormData();
@@ -187,7 +206,7 @@ export const ReimburseForm: React.FC<Props> = ({
 
     // Append form details and attachments
     values.forms.forEach((form, index) => {
-      formData.append(`forms[${index}][rn]`, form.rn);
+      formData.append(`forms[${index}][id]`, form.id);
       formData.append(`forms[${index}][type]`, form.type);
       formData.append(`forms[${index}][remark]`, form.remark);
       formData.append(`forms[${index}][balance]`, form.balance.toString());
@@ -329,7 +348,7 @@ export const ReimburseForm: React.FC<Props> = ({
               <TabsContent value={`form${index + 1}`}>
                 <FormField
                   control={form.control}
-                  name={`forms.${index}.rn`}
+                  name={`forms.${index}.id`}
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -345,7 +364,7 @@ export const ReimburseForm: React.FC<Props> = ({
                     <tbody>
                       <tr>
                         <td width={200}>Type of Reimbursement</td>
-                        <td>
+                        <td className='flex items-center space-x-3'>
                           <FormField
                             control={form.control}
                             name={`forms.${index}.type`}
@@ -360,10 +379,41 @@ export const ReimburseForm: React.FC<Props> = ({
                                 </SelectTrigger>
                                 <SelectContent>
                                   {types.map((type) => (
-                                    <SelectItem key={type.code} value={type.code}>
-                                      {type.name} ({type.code})
+                                    <SelectItem key={type} value={type}>
+                                      {type}
                                     </SelectItem>
                                   ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.reimburse_type`}
+                            render={({ field }) => (
+                              <Select
+                                disabled={
+                                  !reimburseTypes[index] || reimburseTypes[index].length === 0
+                                }
+                                onValueChange={(value) =>
+                                  form.setValue(`forms.${index}.reimburse_type`, value)
+                                }
+                                value={field.value}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder='Select detail' />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {reimburseTypes[index] &&
+                                    reimburseTypes[index].map((reimburseType) => (
+                                      <SelectItem
+                                        key={reimburseType.code}
+                                        value={reimburseType.code}
+                                      >
+                                        {reimburseType.name}
+                                      </SelectItem>
+                                    ))}
                                 </SelectContent>
                               </Select>
                             )}

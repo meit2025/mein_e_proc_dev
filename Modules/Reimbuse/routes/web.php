@@ -18,4 +18,5 @@ use Modules\Reimbuse\Http\Controllers\ReimbuseController;
 // Route::get('/login',[AuthController::class, 'index'])->name('auth.login-index');
 
 Route::resource('/reimburse', ReimbuseController::class);
+Route::get('/reimburse/type/{type}', [ReimbuseController::class, 'getTypeData']);
 

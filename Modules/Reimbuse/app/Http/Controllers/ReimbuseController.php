@@ -7,9 +7,11 @@ use App\Models\Currency;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Modules\Reimbuse\Models\Reimburse;
 use Modules\Reimbuse\Models\ReimburseGroup;
 use Modules\Reimbuse\Models\ReimbursePeriod;
 use Modules\Reimbuse\Models\ReimburseType;
+use Modules\Reimbuse\Models\ReimburseUsed;
 use Modules\Reimbuse\Services\ReimbursementService;
 
 class ReimbuseController extends Controller
@@ -21,24 +23,35 @@ class ReimbuseController extends Controller
         $this->reimbursementService = $reimbursementService;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
+    public function getTypeData($type)
+    {
+        try {
+            $res = ($type == 'Employee') ? 1 : 0;
+            $typeData = ReimburseType::where('is_employee', $res)->get();
+            return $this->successResponse($typeData);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 400);
+        }
+    }
+
+    public function limit_plafon() {}
+
     public function index()
     {
         $reimburses = ReimburseGroup::with('reimburses', 'users')->get();
-        foreach($reimburses as $reimburse){
+
+        foreach ($reimburses as $reimburse) {
             $reimburse['status'] = $this->reimbursementService->checkGroupStatus($reimburse->code);
         }
-        $users = User::select('nip', 'name')->get();
-        $types = ReimburseType::select('code', 'name', 'claim_limit', 'plafon')->get();
+
+        $users = User::with('families')->select('nip', 'name')->get();
+        $types = ['Employee', 'Family'];
         $currencies = Currency::select('code', 'name')->get();
         $periods = ReimbursePeriod::select('id', 'code', 'start', 'end')->get();
-
         $csrf_token = csrf_token();
+
         return Inertia::render('Reimburse/ListReimburse', [
             'groups'        =>  $reimburses,
-            'progress'      =>  '',
             'users'         =>  $users,
             'types'         =>  $types,
             'currencies'    =>  $currencies,
@@ -47,17 +60,10 @@ class ReimbuseController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return Inertia::render('Reimburse/ReimbursementForm');
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
 
     public function store(Request $request)
     {
@@ -74,26 +80,6 @@ class ReimbuseController extends Controller
         return redirect()->back()->with('status', 'All data has been processed successfully.');
     }
 
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('reimbuse::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('reimbuse::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
         $data = $request->all();
@@ -103,14 +89,5 @@ class ReimbuseController extends Controller
             return back()->withErrors(['status' => $response['error']]);
         }
         return redirect()->back()->with('status', 'Reimbursements updated successfully.');
-    }
-
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        //
     }
 }
