@@ -90,10 +90,17 @@ class BusinessTripGradeController extends Controller
         // dd($data);
         $data->getCollection()->transform(function ($map) {
             // dd($map->gradeUsers);
+
+
+            $userRelations = collect($map->gradeUsers)->map(function($relation) {
+                return $relation->user->name;
+            })->toArray();
+
+            
             return [
                 'id' => $map->id,
                 'grade' => $map->grade,
-                // 'users' => $map->name,
+                'users' => join(',', $userRelations),
             ];
         });
 
