@@ -1,0 +1,1 @@
+const e=[{field:"pr_number",headerName:"Purchase Requisition Number",width:200,filterable:!0},{field:"item_number",headerName:"Item Number",width:200,filterable:!0},{field:"requirement_tracking_number",headerName:"Requirement Tracking Number",width:200,filterable:!0}];export{e as columns};

@@ -35,50 +35,19 @@ class MasterBusinessPartner extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
-        // tabel sap BUT000
         'external_partner_number',
         'partner_grouping',
         'search_term_one',
-        'search_term_two',
         'name_one',
-        'name_two',
-        'name_three',
-        'name_four',
         'partner_number',
-        'form_of_address_key',
         'central_block',
-
-        // tabel sap LFA1
-        'supplier_account_number',
-
-        // tabel sap LFB1
-        'reconciliation_account',
-        'company_code',
-        'payment_terms_credit_memos',
-        'house_bank_short_key',
-        'head_office_account_number',
-        'central_deletion_flag',
-        'double_invoice_check_flag',
-        'tolerance_group',
-        'payment_block_key',
-        'sorting_assignment_key',
-        'respected_payment_methods',
-
-        // tabel sap LFB1
-        'vendor_account_number',
-        'purchasing_organization',
-        'incoterms_part_1',
-        'incoterms_part_2',
-        'calculation_schema_group',
-        'auto_po_allowed',
-        'indicates_returns_supplier',
-        'abc_indicator',
-        'central_deletion_flag_master_record',
-        'central_purchasing_block',
-        'responsible_salesperson',
-        'shipping_conditions',
-        'currency_key',
-        'gr_invoice_verification',
-        'payment_terms_key',
+        'city',
+        'country',
+        'postal_code',
+        'tax_number',
+        'number_supplier',
+        'delete',
+        'purchasing_block',
+        'type',
     ];
 }

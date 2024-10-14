@@ -61,6 +61,10 @@ RUN composer install
 RUN npm install
 RUN npm run build
 
+RUN apt-get update && apt-get install -y supervisor
+RUN mkdir -p /etc/supervisor/conf.d
+COPY ./docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
 COPY ./.env /var/www/html/mein/
 COPY ./docker/info.php /var/www/html/mein/public/
 RUN chown -R www-data:www-data /var/www/html/mein

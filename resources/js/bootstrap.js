@@ -1,37 +1,13 @@
 import axios from 'axios';
-import { Inertia } from '@inertiajs/inertia';
 
 window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-// Membuat instance axios
-const axiosInstance = axios.create({
-  baseURL: '/api', // Ganti dengan URL dasar API Anda
-  headers: {
-    'X-Requested-With': 'XMLHttpRequest',
-  },
-});
 
-const token = document.head.querySelector('meta[name="csrf-token"]');
+/**
+ * Echo exposes an expressive API for subscribing to channels and listening
+ * for events that are broadcast by Laravel. Echo and event broadcasting
+ * allow your team to quickly build robust real-time web applications.
+ */
 
-if (token) {
-  axiosInstance.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
-} else {
-  console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
-}
-
-// Interceptor untuk menangani response dan error
-axiosInstance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    if (error.response && error.response.status === 401) {
-      // Arahkan ke halaman login jika unauthorized
-      Inertia.visit('/login');
-    }
-    return Promise.reject(error);
-  },
-);
-
-export default axiosInstance;
+import './echo';

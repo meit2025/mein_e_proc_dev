@@ -21,7 +21,7 @@ export const Index = () => {
 
 // Assign layout to the page
 Index.layout = (page: ReactNode) => (
-  <MainLayout title='Master' description='Master Bank Key'>
+  <MainLayout title='Master' description='Master Vendor/employee'>
     {page}
   </MainLayout>
 );

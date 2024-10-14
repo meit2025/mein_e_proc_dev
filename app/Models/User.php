@@ -26,7 +26,6 @@ class User extends Authenticatable
         'division',
         'immediate_spv',
         'email_verified_at',
-        'password',
         'username',
     ];
 
@@ -51,5 +50,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function notifikasis()
+    {
+        return $this->hasMany(Notifikasi::class);
     }
 }
