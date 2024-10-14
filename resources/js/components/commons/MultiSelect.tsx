@@ -12,7 +12,7 @@ export function MultiSelectItem({
 }: React.PropsWithChildren<multiSelectItemInterface>) {
   return (
     <div onClick={onClick} className={'py-2 ' + (isSelect ? 'bg-gray-200 ' : '')}>
-      {children ? children : null} {isSelect ? 'true' : 'false'}
+      {children ? children : null} 
     </div>
   );
 }
@@ -134,7 +134,7 @@ export function MultiSelect({ options, label, id, onSelect, value }: multiSelect
               }}
               isSelect={rightSelect.find((find: any) => find[id] == item[id]) ? true : false}
             >
-              {item[label]} {item[id]}
+              {item[label]} 
             </MultiSelectItem>
           ))}
         </ScrollArea>

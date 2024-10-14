@@ -13,10 +13,16 @@ class BusinessTripGrade extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'grade'
+    ];
 
     // protected static function newFactory(): BusinessTripGradeFactory
     // {
     //     // return BusinessTripGradeFactory::new();
     // }
+
+    public function gradeUsers(){
+        return $this->hasMany(BusinessTripGradeUser::class, 'grade_id', 'id');
+    }
 }

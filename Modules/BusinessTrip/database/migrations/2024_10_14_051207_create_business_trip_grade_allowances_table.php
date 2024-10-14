@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('grade_id');
             $table->unsignedBigInteger('allowance_item_id');
-            
+            $table->float('plafon')->default(0);
             $table->timestamps();
         });
     }

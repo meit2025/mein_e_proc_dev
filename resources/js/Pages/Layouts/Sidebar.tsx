@@ -16,6 +16,7 @@ import { LIST_PAGE_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/page';
 import { LIST_PAGE_PURPOSE_TYPE } from '@/endpoint/purpose-type/page';
 import { LIST_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
 import { LIST_PAGE_BUSINESS_TRIP } from '@/endpoint/business-trip/page';
+import { LIST_PAGE_BUSINESS_GRADE } from '@/endpoint/business-grade/page';
 // import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
@@ -142,6 +143,12 @@ const sidebar = [
           {
             name: 'Business Trip',
             route: LIST_PAGE_BUSINESS_TRIP,
+            roles: '',
+          },
+
+          {
+            name: 'Business Trip Grade',
+            route: LIST_PAGE_BUSINESS_GRADE,
             roles: '',
           },
           // {
