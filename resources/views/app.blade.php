@@ -15,6 +15,7 @@
         <link href="{{asset('assets/vendors/apexcharts/apexcharts.css')}}" rel="stylesheet"/>
         <link href="{{asset('assets/vendors/keenicons/styles.bundle.css')}}" rel="stylesheet"/>
         <link href="{{asset('assets/css/styles.css')}}" rel="stylesheet"/>
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/sass/app.scss' , 'resources/js/app.tsx'])
         <!-- In this article, we are going to use JSX syntax for React components -->

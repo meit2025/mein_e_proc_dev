@@ -13,10 +13,26 @@ class BusinessTrip extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [];
 
+    protected $table = 'business_trip';
+    protected $fillable = [
+        'purpose_type_id',
+        'request_no',
+        'request_for',
+        'created_by',
+        'remarks',
+        'total_destination',
+
+
+    ];
+
+   
     // protected static function newFactory(): BusinessTripFactory
     // {
     //     // return BusinessTripFactory::new();
     // }
+
+    public function bussinessTripDestination() {
+        return $this->hasMany(BusinessTripDestination::class, 'business_trip_id', 'id');
+    }
 }

@@ -21,6 +21,13 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'nip',
+        'role',
+        'job_level',
+        'division',
+        'immediate_spv',
+        'email_verified_at',
+        'username',
     ];
 
     /**
@@ -49,5 +56,10 @@ class User extends Authenticatable
     public function families()
     {
         return $this->hasMany(Family::class, 'user', 'nip');
+    }
+
+    public function notifikasis()
+    {
+        return $this->hasMany(Notifikasi::class);
     }
 }

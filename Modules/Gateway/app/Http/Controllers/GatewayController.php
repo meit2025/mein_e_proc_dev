@@ -112,7 +112,7 @@ class GatewayController extends Controller
     public function destroy($id)
     {
         //
-        $secret = SecretKeyEmployee::find($id)->delete();
+        $secret = Gateway::find($id)->delete();
         return $this->successResponse($secret);
     }
 
@@ -152,7 +152,7 @@ class GatewayController extends Controller
             $buildDataToInsert = function ($value) use ($valueData) {
                 $dataToInsert = [];
                 foreach ($valueData as $vd) {
-                    $dataToInsert[$vd->column_value] = $value[$vd->value] ?? "-";
+                    $dataToInsert[$vd->column_value] = $vd->default == '-' ? ($value[$vd->value] ?? "-") : $vd->default;
                 }
                 return $dataToInsert;
             };

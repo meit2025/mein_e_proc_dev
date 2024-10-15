@@ -1,6 +1,6 @@
 import FormWrapper from '@/components/form/FormWrapper';
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { FieldValues } from 'react-hook-form';
 import axios from 'axios';
@@ -9,12 +9,17 @@ import { useAlert } from '@/contexts/AlertContext';
 import { Loading } from '../commons/Loading';
 
 interface FormMappingProps {
-  formModel: Array<FormFieldModel<any>>;
+  formModel?: Array<FormFieldModel<any>>;
   url: string;
   redirectUrl?: string;
   methods: ReturnType<typeof useForm>;
   onSave?: (data: any) => Promise<void> | void;
   isLoading?: boolean;
+  classForm?: string;
+  isCustom?: boolean;
+  formCustom?: ReactNode;
+  formLogic?: ReactNode;
+  disableButtonSubmit?: boolean;
 }
 
 const FormMapping: React.FC<FormMappingProps> = ({
@@ -24,8 +29,13 @@ const FormMapping: React.FC<FormMappingProps> = ({
   methods,
   onSave,
   isLoading,
+  classForm,
+  isCustom = false,
+  formCustom,
+  formLogic,
+  disableButtonSubmit = false,
 }) => {
-  const { setError } = methods;
+  const { setError, watch } = methods;
   const { showToast } = useAlert();
   const [isLoadings, setIsLoading] = useState<boolean>(false);
 
@@ -67,20 +77,34 @@ const FormMapping: React.FC<FormMappingProps> = ({
     <FormProvider {...methods}>
       <Loading isLoading={isLoading || isLoadings} />
       <form onSubmit={methods.handleSubmit(onSubmit)}>
-        {formModel.map((field, index) => (
-          <div key={index} className='mt-8'>
-            <FormWrapper model={field} />
-          </div>
-        ))}
-        {/* Kontainer untuk tombol di kanan bawah */}
-        <div className='flex justify-end mt-8'>
-          <button
-            type='submit'
-            className='bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-all'
-          >
-            Submit
-          </button>
+        <div className={classForm}>
+          {isCustom ? (
+            <>{formCustom}</>
+          ) : (
+            <>
+              {(formModel ?? []).map((field, index) => (
+                <div key={index} className={`mt-8 ${field.classPosition}`}>
+                  {!field.conditional ||
+                  watch(field.parameterConditional ?? '') === field.conditional ? (
+                    <FormWrapper model={field} />
+                  ) : null}
+                </div>
+              ))}
+            </>
+          )}
+          {formLogic}
         </div>
+        {/* Kontainer untuk tombol di kanan bawah */}
+        {!disableButtonSubmit && (
+          <div className='flex justify-end mt-8'>
+            <button
+              type='submit'
+              className='bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-all'
+            >
+              Submit
+            </button>
+          </div>
+        )}
       </form>
     </FormProvider>
   );

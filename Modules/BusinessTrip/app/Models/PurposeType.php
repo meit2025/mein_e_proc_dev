@@ -13,10 +13,21 @@ class PurposeType extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [];
 
-    // protected static function newFactory(): PurposeTypeFactory
-    // {
-    //     // return PurposeTypeFactory::new();
-    // }
+     
+    protected $fillable = [
+        'code',
+        'name',
+        'attedance_status'
+    ];
+
+
+    public function listAllowance() {
+        return $this->hasMany(PurposeTypeAllowance::class, 'purpose_type_id', 'id');
+    }
+
+    protected static function newFactory(): PurposeTypeFactory
+    {
+        // return PurposeTypeFactory::new();
+    }
 }

@@ -6,8 +6,25 @@ import { LIST_PAGE_MASTER_MATERIAL } from '@/endpoint/masterMaterial/page';
 import { LIST_PAGE_MASTER_ORDER } from '@/endpoint/masterOrder/page';
 import { LIST_PAGE_MASTER_RECON } from '@/endpoint/masterRecon/page';
 import { LIST_PAGE_SECRET } from '@/endpoint/secret/page';
+import { LIST_PAGE_USER } from '@/endpoint/user/page';
+import { LIST_PAGE_ROLE } from '@/endpoint/role/page';
 import { Link, usePage } from '@inertiajs/react';
 import Logo from '../../../assets/images/logo.png';
+import { LIST_PAGE_ALLOWANCE_CATEGORY } from '@/endpoint/allowance-category/page';
+import { LIST_PAGE_MASTER_BUSINESS_PARTNER } from '@/endpoint/masterBusinessPartner/page';
+import { LIST_PAGE_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/page';
+import { LIST_PAGE_PURPOSE_TYPE } from '@/endpoint/purpose-type/page';
+import { LIST_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
+import { LIST_PAGE_BUSINESS_TRIP } from '@/endpoint/business-trip/page';
+import { LIST_PAGE_BUSINESS_GRADE } from '@/endpoint/business-grade/page';
+import { LIST_PAGE_MASTER_DOKUMENT_TYPE } from '@/endpoint/dokumentType/page';
+import { LIST_PAGE_MASTER_VALUATION_TYPE } from '@/endpoint/valuationType/page';
+import { LIST_PAGE_MASTER_PURCHASING_GROUP } from '@/endpoint/purchasingGroup/page';
+import { LIST_PAGE_MASTER_ACCOUNT_ASSIGNMENT_CATEGORY } from '@/endpoint/accountAssignmentCategory/page';
+import { LIST_PAGE_MASTER_ITEM_CATEGORY } from '@/endpoint/ItemCategory/page';
+import { LIST_PAGE_MASTER_STORAGE_LOCATION } from '@/endpoint/storageLocation/page';
+import { LIST_PAGE_APPROVAL_ROUTE } from '@/endpoint/approvalRoute/page';
+import { LIST_PAGE_SETTING_APPROVAL } from '@/endpoint/settingApproval/page';
 // import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
@@ -111,7 +128,86 @@ const sidebar = [
       {
         title: 'Bussiness Trip',
         icon: 'ki-element-11',
-        route: '/bussiness-trip',
+        route: '/',
+        sub: [
+          {
+            name: 'Allowance Category',
+            route: LIST_PAGE_ALLOWANCE_CATEGORY,
+            roles: '',
+          },
+
+          {
+            name: 'Allowance Item',
+            route: LIST_PAGE_ALLOWANCE_ITEM,
+            roles: '',
+          },
+
+          {
+            name: 'Purpose Type',
+            route: LIST_PAGE_PURPOSE_TYPE,
+            roles: '',
+          },
+
+          {
+            name: 'Business Trip',
+            route: LIST_PAGE_BUSINESS_TRIP,
+            roles: '',
+          },
+
+          {
+            name: 'Business Trip Grade',
+            route: LIST_PAGE_BUSINESS_GRADE,
+            roles: '',
+          },
+          // {
+          //   name: 'Bank Key',
+          //   route: LIST_PAGE_ALLOWANCE_CATEGORY,
+          //   roles: '',
+          // },
+        ],
+      },
+
+      {
+        title: 'Master',
+        icon: 'ki-setting-3',
+        route: '/',
+        sub: [
+          {
+            name: 'Master Material',
+            route: LIST_PAGE_MASTER_MATERIAL,
+            roles: '',
+          },
+          {
+            name: 'Asset',
+            route: LIST_PAGE_MASTER_ASSET,
+            roles: '',
+          },
+          {
+            name: 'Cost Center',
+            route: LIST_PAGE_MASTER_COST_CENTER,
+            roles: '',
+          },
+          {
+            name: 'Internal Order',
+            route: LIST_PAGE_MASTER_ORDER,
+            roles: '',
+          },
+          {
+            name: 'Recon Account',
+            route: LIST_PAGE_MASTER_RECON,
+            roles: '',
+          },
+          {
+            name: 'Bank Key',
+            route: LIST_PAGE_MASTER_BANK_KEY,
+            roles: '',
+          },
+        ],
+      },
+      {
+        title: 'Purchase Requisition',
+        icon: 'ki-element-11',
+        route: LIST_PAGE_PR,
         sub: [],
       },
     ],
@@ -154,6 +250,11 @@ const sidebar = [
             route: LIST_PAGE_MASTER_BANK_KEY,
             roles: '',
           },
+          {
+            name: 'Business Patner',
+            route: LIST_PAGE_MASTER_BUSINESS_PARTNER,
+            roles: '',
+          },
         ],
       },
       {
@@ -169,6 +270,77 @@ const sidebar = [
           {
             name: 'Api',
             route: LIST_PAGE_API,
+            roles: '',
+          },
+        ],
+      },
+      {
+        title: 'Master PR',
+        icon: 'ki-users',
+        route: '/',
+        sub: [
+          {
+            name: 'Dokument Type',
+            route: LIST_PAGE_MASTER_DOKUMENT_TYPE,
+            roles: '',
+          },
+          {
+            name: 'Valuation Type',
+            route: LIST_PAGE_MASTER_VALUATION_TYPE,
+            roles: '',
+          },
+          {
+            name: 'Purchasing Groups',
+            route: LIST_PAGE_MASTER_PURCHASING_GROUP,
+            roles: '',
+          },
+          {
+            name: 'Account Assignment Categories',
+            route: LIST_PAGE_MASTER_ACCOUNT_ASSIGNMENT_CATEGORY,
+            roles: '',
+          },
+          {
+            name: 'Item Categories',
+            route: LIST_PAGE_MASTER_ITEM_CATEGORY,
+            roles: '',
+          },
+          {
+            name: 'Storage Locations',
+            route: LIST_PAGE_MASTER_STORAGE_LOCATION,
+            roles: '',
+          },
+        ],
+      },
+      {
+        title: 'Approval',
+        icon: 'ki-users',
+        route: '/',
+        sub: [
+          {
+            name: 'Approval',
+            route: LIST_PAGE_APPROVAL_ROUTE,
+            roles: '',
+          },
+          {
+            name: 'Setting Approval',
+            route: LIST_PAGE_SETTING_APPROVAL,
+            roles: '',
+          },
+        ],
+      },
+      {
+        title: 'User Management',
+        icon: 'ki-users',
+        route: '/',
+        sub: [
+          {
+            name: 'Users',
+            route: LIST_PAGE_USER,
+            roles: '',
+          },
+          {
+            name: 'Roles',
+            route: LIST_PAGE_ROLE,
             roles: '',
           },
         ],

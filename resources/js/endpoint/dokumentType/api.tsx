@@ -1,0 +1,8 @@
+const ROUTE_MASTER_DOKUMENT_TYPE = '/api/master-pr/dokument-type';
+
+export const GET_MASTER_DOKUMENT_TYPE = `${ROUTE_MASTER_DOKUMENT_TYPE}/list`;
+export const CREATE_MASTER_DOKUMENT_TYPE = `${ROUTE_MASTER_DOKUMENT_TYPE}/create`;
+export const EDIT_MASTER_DOKUMENT_TYPE = `${ROUTE_MASTER_DOKUMENT_TYPE}/update`;
+export const DETAIL_MASTER_DOKUMENT_TYPE = (id: any) =>
+  `${ROUTE_MASTER_DOKUMENT_TYPE}/detail/${id}`;
+export const DELET_MASTER_DOKUMENT_TYPE = `${ROUTE_MASTER_DOKUMENT_TYPE}/delete`;

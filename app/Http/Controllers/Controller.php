@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Clue\Redis\Protocol\Model\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Modules\Gateway\Models\Log;
@@ -20,6 +21,7 @@ abstract class Controller
     protected function successResponse($data = null, string $message = 'Success', int $statusCode = 200): JsonResponse
     {
         return response()->json([
+            'status_code' => $statusCode,
             'status' => 'success',
             'message' => $message,
             'data' => $data,
@@ -37,6 +39,7 @@ abstract class Controller
     protected function errorResponse(string $message = 'Error', int $statusCode = 400, $errors = null): JsonResponse
     {
         return response()->json([
+            'status_code' => $statusCode,
             'status' => 'error',
             'message' => $message,
             'errors' => $errors,
@@ -52,6 +55,33 @@ abstract class Controller
     protected function notFoundResponse(string $message = 'Resource not found'): JsonResponse
     {
         return $this->errorResponse($message, 404);
+    }
+
+    public function filterAndPaginate($request, $model, array $filterableColumns)
+    {
+        $perPage = $request->get('per_page', 10);
+        $sortBy = $request->get('sort_by', 'id');
+        $sortDirection = $request->get('sort_direction', 'asc');
+
+        $query = $model::query();
+
+        foreach ($request->all() as $key => $value) {
+            if (in_array($key, $filterableColumns)) {
+                list($operator, $filterValue) = array_pad(explode(',', $value, 2), 2, null);
+                $query = $this->applyColumnFilter($query, $key, $operator, $filterValue); // Menggunakan fungsi helper
+            }
+        }
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request, $filterableColumns) {
+                foreach ($filterableColumns as $column) {
+                    $q->orWhere($column, 'ILIKE', '%' . $request->search . '%');
+                }
+            });
+        }
+
+        $query->orderBy($sortBy, $sortDirection);
+        return $query->paginate($perPage);
     }
 
     protected function applyColumnFilter($query, $column, $operator, $value)
@@ -91,20 +121,14 @@ abstract class Controller
 
     protected function logToDatabase($id, $functionName, $level, $message, $context = [])
     {
-        try {
-            //code...
-            Log::create([
-                'releted_id' => $id,
-                'function_name' => $functionName,
-                'level' => $level,
-                'message' => $message,
-                'context' => json_encode($context), // Store additional context as JSON
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        } catch (\Throwable $th) {
-            //throw $th;
-            dd($th);
-        }
+        Log::create([
+            'releted_id' => $id,
+            'function_name' => $functionName,
+            'level' => $level,
+            'message' => $message,
+            'context' => json_encode($context), // Store additional context as JSON
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }

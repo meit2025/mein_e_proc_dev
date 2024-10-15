@@ -13,12 +13,6 @@ class AssetController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->get('per_page', 10);
-        $sortBy = $request->get('sort_by', 'id');
-        $sortDirection = $request->get('sort_direction', 'asc');
-
-        $query = MasterAsset::query();
-
         $filterableColumns =  [
             'company_code',
             'company_name',
@@ -30,32 +24,9 @@ class AssetController extends Controller
             'inventory_number',
             'qty',
             'base_unit_of_measure',
+            'delete'
         ];
-
-        foreach ($request->all() as $key => $value) {
-            if (in_array($key, $filterableColumns)) {
-                list($operator, $filterValue) = array_pad(explode(',', $value, 2), 2, null);
-                $query = $this->applyColumnFilter($query, $key, $operator, $filterValue); // Use the helper function
-            }
-        }
-
-        if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('company_name', 'like', '%' . $request->search . '%')
-                    ->orWhere('company_code', 'like', '%' . $request->search . '%')
-                    ->orWhere('asset', 'like', '%' . $request->search . '%')
-                    ->orWhere('asset_subnumber', 'like', '%' . $request->search . '%')
-                    ->orWhere('asset_class', 'like', '%' . $request->search . '%')
-                    ->orWhere('asset_class_desc', 'like', '%' . $request->search . '%')
-                    ->orWhere('desc', 'like', '%' . $request->search . '%')
-                    ->orWhere('inventory_number', 'like', '%' . $request->search . '%')
-                    ->orWhere('qty', 'like', '%' . $request->search . '%')
-                    ->orWhere('base_unit_of_measure', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        $query->orderBy($sortBy, $sortDirection);
-        $data = $query->paginate($perPage);
+        $data = $this->filterAndPaginate($request, MasterAsset::class, $filterableColumns);
 
         return $this->successResponse($data);
     }

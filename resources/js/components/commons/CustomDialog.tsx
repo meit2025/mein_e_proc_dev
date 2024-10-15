@@ -39,6 +39,7 @@ const CustomDialog = ({
   onClose,
   children,
   className,
+  onSave
 }: PropsWithChildren<CustomDialogProps>) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -48,7 +49,7 @@ const CustomDialog = ({
         </DialogTrigger>
       )} */}
       <DialogTitle></DialogTitle>
-      <DialogContent className={className ? className : 'md:max-w-[600px]'}>
+      <DialogContent className={className ? className : 'md:max-w-[768px]'}>
         <DialogHeader>
           <Breadcrumb>
             <BreadcrumbList>
@@ -78,11 +79,9 @@ const CustomDialog = ({
               Close
             </Button>
           ) : null}
-          {onSubmit ? (
-            <Button type='submit' onClick={onSubmit}>
-              Save changes
-            </Button>
-          ) : null}
+         {onSave ? ( <Button type='submit' onClick={onSubmit}>
+            Save changes
+          </Button>) : null}
         </DialogFooter>
       </DialogContent>
     </Dialog>

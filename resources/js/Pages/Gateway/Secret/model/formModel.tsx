@@ -21,7 +21,7 @@ export const formModel: Array<FormFieldModel<any>> = [
     type: 'input',
     name: 'employee',
     label: 'Employee',
-    placeholder: 'Enter your secret key',
+    placeholder: 'Enter your employee',
     minLength: 10,
     required: true,
   },
@@ -29,7 +29,7 @@ export const formModel: Array<FormFieldModel<any>> = [
     type: 'textarea',
     name: 'desc',
     label: 'Description',
-    placeholder: 'Enter your secret key',
+    placeholder: 'Enter your description',
     style: {
       width: '65.5rem',
     },

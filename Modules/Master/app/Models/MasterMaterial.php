@@ -25,6 +25,7 @@ class MasterMaterial extends Model
         'plant_specific_material_status',
         'material_status_valid',
         'plant',
+        'delete'
     ];
 
     // protected static function newFactory(): MasterMaterialFactory

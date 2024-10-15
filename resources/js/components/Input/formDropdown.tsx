@@ -19,7 +19,7 @@ interface FormAutocompleteProps<T> {
   placeholder?: string;
   classNames?: string;
   // eslint-disable-next-line no-unused-vars
-  onChangeOutside?: (value: T) => void;
+  onChangeOutside?: (value: T | null) => void;
 }
 
 const FormAutocomplete = <T,>({
@@ -55,6 +55,7 @@ const FormAutocomplete = <T,>({
             <div className={`${classNames}`}>
               <Autocomplete
                 {...field}
+                value={options.find((option) => option.value === field.value) || null} // Make sure the value is controlled
                 options={options}
                 getOptionLabel={(option) => option.label}
                 isOptionEqualToValue={(option, value) => option.value === value}

@@ -19,7 +19,8 @@ class GatewayValue extends Model
         'gateways_id',
         'column_value',
         'value',
-        'is_key'
+        'is_key',
+        'default'
     ];
 
     public function gateway()

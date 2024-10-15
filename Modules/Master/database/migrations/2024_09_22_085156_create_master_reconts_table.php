@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('account', 10)->index()->unique();
             $table->string('account_long_text', 50)->index()->unique();
-
             $table->timestamps();
         });
     }

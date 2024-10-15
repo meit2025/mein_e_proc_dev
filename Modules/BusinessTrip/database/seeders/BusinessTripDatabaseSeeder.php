@@ -12,5 +12,6 @@ class BusinessTripDatabaseSeeder extends Seeder
     public function run(): void
     {
         // $this->call([]);
+        $this->call([AllowanceIitemSeeder::class, AllowanceCategorySeeder::class]);
     }
 }
