@@ -13,10 +13,9 @@ return new class extends Migration
     {
         Schema::create('reimburse_quotas', function (Blueprint $table) {
             $table->id();
-            $table->string('user');
             $table->string('period');
             $table->string('type');
-            $table->enum('grade', ['A', 'B', 'C', 'D', 'E']);
+            $table->foreignId('grade')->constrained('grades')->cascadeOnUpdate();
             $table->integer('limit')->nullable();
             $table->double('plafon')->nullable();
             $table->softDeletes();

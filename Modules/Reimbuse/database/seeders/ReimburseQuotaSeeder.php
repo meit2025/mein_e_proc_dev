@@ -2,6 +2,7 @@
 
 namespace Modules\Reimbuse\Database\Seeders;
 
+use App\Models\Grade;
 use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
 use Modules\Reimbuse\Models\ReimbursePeriod;
@@ -16,15 +17,17 @@ class ReimburseQuotaSeeder extends Seeder
     public function run(): void
     {
         $faker = Faker::create();
-        $stt = ['A', 'B', 'C', 'D', 'E'];
-        for ($i = 0; $i < 10; $i++) {
-            ReimburseQuota::create([
-                'period'    =>  ReimbursePeriod::inRandomOrder()->first()->code,
-                'type'      =>  ReimburseType::inRandomOrder()->first()->code,
-                'grade'     =>  $stt[rand(0, count($stt) - 1)],
-                'plafon'    =>  $faker->randomFloat(2, 100000, 10000000),
-                'limit'     =>  $faker->randomDigit()
-            ]);
+        $stt = Grade::count();
+        for ($i = 0; $i < $stt; $i++) {
+            for ($j = 1; $j < rand(2, 7); $j++) {
+                ReimburseQuota::create([
+                    'period'    =>  ReimbursePeriod::inRandomOrder()->first()->code,
+                    'type'      =>  ReimburseType::inRandomOrder()->first()->code,
+                    'grade'     =>  rand(1, $stt),
+                    'plafon'    =>  $faker->randomFloat(2, 100000, 10000000),
+                    'limit'     =>  $faker->randomDigit()
+                ]);
+            }
         }
     }
 }

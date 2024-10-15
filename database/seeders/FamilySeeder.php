@@ -17,13 +17,17 @@ class FamilySeeder extends Seeder
     {
         $st_psb = ['wife', 'child'];
         $faker = Faker::create();
-        for ($i = 0; $i < 10; $i++) {
-            Family::create([
-                'user'      =>  User::inRandomOrder()->first()->nip,
-                'name'      =>  $faker->name,
-                'status'    =>  $st_psb[rand(0, 1)],
-                'bod'       =>  $faker->date()
-            ]);
+        $usr_amt = User::count();
+        for ($i = 1; $i <= $usr_amt; $i++) {
+            $rand_fams = rand(1, 5);
+            for ($j = 1; $j <= $rand_fams; $j++) {
+                Family::create([
+                    'user'      =>  User::where('id', $i)->first()->nip,
+                    'name'      =>  $faker->name,
+                    'status'    =>  $st_psb[rand(0, 1)],
+                    'bod'       =>  $faker->date()
+                ]);
+            }
         }
     }
 }

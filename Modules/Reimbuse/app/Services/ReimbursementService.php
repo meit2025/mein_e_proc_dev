@@ -31,7 +31,7 @@ class ReimbursementService
         if ($progressRecords->contains('status', 'Rejected')) {
             return 'Rejected';
         }
-        if ($progressRecords->contains('status', 'Open')) {
+        if ($progressRecords->contains('status', 'Open') || $progressRecords->count() == 0) {
             return 'Open';
         }
         return 'Finished';

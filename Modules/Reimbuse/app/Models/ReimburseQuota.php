@@ -15,13 +15,8 @@ class ReimburseQuota extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = ["user", "period", "type", "value", "plafon"];
-
-    public function used()
-    {
-        return $this->hasMany(ReimburseUsed::class, 'quota', 'id');
-    }
-
+    protected $fillable = ["period", "type", "value", "plafon"];
+    
     // protected static function newFactory(): ReimburseQuotaFactory
     // {
     //     // return ReimburseQuotaFactory::new();

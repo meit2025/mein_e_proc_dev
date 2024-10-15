@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reimburse_used', function (Blueprint $table) {
+        Schema::create('grades', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('reimburse')->constrained('reimburses')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->string('user');
-            $table->softDeletes();
+            $table->string('name');
+            $table->string('module')->nullable();
             $table->timestamps();
-
-            $table->foreign('user')->references('nip')->on('users')->cascadeOnUpdate();
         });
     }
 
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reimburse_used');
+        Schema::dropIfExists('grades');
     }
 };

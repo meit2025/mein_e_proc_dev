@@ -19,4 +19,5 @@ use Modules\Reimbuse\Http\Controllers\ReimbuseController;
 
 Route::resource('/reimburse', ReimbuseController::class);
 Route::get('/reimburse/type/{type}', [ReimbuseController::class, 'getTypeData']);
+Route::get('/reimburse/is_required', [ReimbuseController::class, 'is_required']);
 

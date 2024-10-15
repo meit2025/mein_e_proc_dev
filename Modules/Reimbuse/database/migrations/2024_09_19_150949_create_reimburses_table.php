@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('type');
             $table->string('currency');
             $table->longText('remark');
-            $table->foreignId('for');
+            $table->string('for');
             $table->double('balance');
             $table->date('receipt_date');
             $table->date('start_date');

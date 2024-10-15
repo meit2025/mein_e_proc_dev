@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Modules\Reimbuse\Database\Seeders\ReimburseGroupSeeder;
@@ -22,13 +21,14 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
         // $this->call(UsersTableSeeder::class);
         $this->call([
+            GradeSeeder::class,
             UsersTableSeeder::class,
             FamilySeeder::class,
             CurrencySeeder::class,
             ReimburseTypeSeeder::class,
             ReimbursePeriodSeeder::class,
-            // ReimburseGroupSeeder::class,
-            // ReimburseSeeder::class,
+            ReimburseGroupSeeder::class,
+            ReimburseSeeder::class,
             // ReimburseProgressSeeder::class
             ReimburseQuotaSeeder::class
         ]);
