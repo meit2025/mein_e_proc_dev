@@ -4,8 +4,10 @@ use Illuminate\Support\Facades\Route;
 use Modules\BusinessTrip\Http\Controllers\AllowanceCategoryController;
 use Modules\BusinessTrip\Http\Controllers\AllowanceItemController;
 use Modules\BusinessTrip\Http\Controllers\BusinessTripController;
+use Modules\BusinessTrip\Http\Controllers\BusinessTripDeclarationController;
 use Modules\BusinessTrip\Http\Controllers\PurposeTypeController;
 use Modules\BusinessTrip\Models\AllowanceItem;
+use Modules\BusinessTrip\Models\BusinessTrip;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,8 +31,10 @@ Route::get('/allowance-category', [AllowanceCategoryController::class, 'index'])
 
 
 Route::prefix('business-trip')->group(function () {});
+
 Route::group(['prefix' => 'business-trip'], function () {
     Route::get('/', [BusinessTripController::class, 'index'])->name('bussiness-trip.index');
+    Route::get('/business-trip-declaration', [BusinessTripDeclarationController::class, 'index'])->name('bussiness-trip-declaration.index');
     Route::get('/allowance-category', [AllowanceCategoryController::class, 'index'])->name('allowance-category.index');
     Route::get('/allowance-item', [AllowanceItemController::class, 'index'])->name('allowance-item.index');
     Route::get('/purpose-type', [PurposeTypeController::class, 'index'])->name('purpose-type.index');
@@ -86,6 +90,14 @@ Route::group(['prefix' => 'api/'], function () {
         // Route::delete('/delete/{id}', [MasterMaterialController::class, 'destroy'])->name('master.master-material.destroy');
 
 
+    });
+
+    Route::group(['prefix' => 'business-trip-declaration'], function () {
+        Route::get('/list', [BusinessTripDeclarationController::class, 'listAPI'])->name('business-trip-declaration-list.index');
+        Route::post('/create', [BusinessTripDeclarationController::class, 'storeAPI'])->name('business-trip-declaration.store');
+        // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
+        // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
+        Route::get('/detail/{id}', [BusinessTripDeclarationController::class, 'showAPI'])->name('allowance-category.detail');
     });
 
     Route::group(['prefix' => 'purpose-type-allowance'], function () {

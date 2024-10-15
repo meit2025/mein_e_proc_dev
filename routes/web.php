@@ -8,6 +8,7 @@ use App\Http\Controllers\NotifikasiController;
 use App\Jobs\SendNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Modules\BusinessTrip\Models\BusinessTrip;
 
 // Route::get('/login', [AuthController::class, 'login'])->name('login');
 // Route::post('/login', [AuthController::class, 'store'])->name('login.store');

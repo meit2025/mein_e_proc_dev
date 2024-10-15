@@ -116,9 +116,6 @@ class AuthController extends Controller
             'password'  => $request->password,
         ];
 
-        dd($request->all());
-
-
         if (Auth::attempt($data)) {
             return $this->successResponse($data);
         } else {

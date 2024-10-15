@@ -22,11 +22,9 @@ class BusinessTrip extends Model
         'created_by',
         'remarks',
         'total_destination',
-
-
     ];
 
-   
+
     // protected static function newFactory(): BusinessTripFactory
     // {
     //     // return BusinessTripFactory::new();
@@ -34,5 +32,9 @@ class BusinessTrip extends Model
 
     public function bussinessTripDestination() {
         return $this->hasMany(BusinessTripDestination::class, 'business_trip_id', 'id');
+    }
+
+    function purposeType() {
+        return $this->belongsTo(PurposeType::class);
     }
 }

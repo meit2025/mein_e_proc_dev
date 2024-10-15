@@ -21,7 +21,7 @@ class BusinessTripController extends Controller
      */
     public function index()
     {
-        $users = User::select('nip', 'name', 'id')->get();   
+        $users = User::select('nip', 'name', 'id')->get();
 
         $listPurposeType = PurposeType::select('name', 'code', 'id')->get();
         return Inertia::render('BusinessTrip/BusinessTrip/index', compact('users', 'listPurposeType'));
@@ -92,18 +92,18 @@ class BusinessTripController extends Controller
         DB::beginTransaction();
 
         try {
-            
-            
+
+
         }
         catch(\Exception $e) {
             dd($e);
-        } 
+        }
     }
 
     public function listAPI(Request $request)
     {
 
-        $query =  BusinessTrip::query();
+        $query =  BusinessTrip::query()->with(['purposeType']);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'asc');
@@ -112,6 +112,18 @@ class BusinessTripController extends Controller
         $query->orderBy($sortBy, $sortDirection);
 
         $data = $query->paginate($perPage);
+
+        $data->getCollection()->transform(function ($map) {
+
+            $purposeRelations = $map->purposeType ? $map->purposeType->name : ''; // Assuming 'name' is the field
+
+            return [
+                'id' => $map->id,
+                'request_no' => $map->request_no,
+                'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array
+                'total_destination' => $map->total_destination, // You can join multiple relations here if it's an array
+            ];
+        });
 
 
         return $this->successResponse($data);
