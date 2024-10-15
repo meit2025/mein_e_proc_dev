@@ -1,1 +1,0 @@
-const e=[{type:"input",name:"plant",label:"Name plant",placeholder:"Enter your plant",required:!0},{type:"input",name:"storage_location",label:"storage location",placeholder:"Enter your storage location",required:!0},{type:"input",name:"storage_location_desc",label:"storage location desc",placeholder:"storage location desc",required:!0}];export{e as formModel};

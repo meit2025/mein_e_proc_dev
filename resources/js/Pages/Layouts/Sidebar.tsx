@@ -15,10 +15,8 @@ import { LIST_PAGE_MASTER_BUSINESS_PARTNER } from '@/endpoint/masterBusinessPart
 import { LIST_PAGE_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/page';
 import { LIST_PAGE_PURPOSE_TYPE } from '@/endpoint/purpose-type/page';
 import { LIST_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
-<<<<<<< HEAD
 import { LIST_PAGE_BUSINESS_TRIP } from '@/endpoint/business-trip/page';
 import { LIST_PAGE_BUSINESS_GRADE } from '@/endpoint/business-grade/page';
-=======
 import { LIST_PAGE_MASTER_DOKUMENT_TYPE } from '@/endpoint/dokumentType/page';
 import { LIST_PAGE_MASTER_VALUATION_TYPE } from '@/endpoint/valuationType/page';
 import { LIST_PAGE_MASTER_PURCHASING_GROUP } from '@/endpoint/purchasingGroup/page';
@@ -27,7 +25,6 @@ import { LIST_PAGE_MASTER_ITEM_CATEGORY } from '@/endpoint/ItemCategory/page';
 import { LIST_PAGE_MASTER_STORAGE_LOCATION } from '@/endpoint/storageLocation/page';
 import { LIST_PAGE_APPROVAL_ROUTE } from '@/endpoint/approvalRoute/page';
 import { LIST_PAGE_SETTING_APPROVAL } from '@/endpoint/settingApproval/page';
->>>>>>> develop
 // import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
