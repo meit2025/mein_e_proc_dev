@@ -496,7 +496,7 @@ import {
 
         detailAllowance.push({
           date: momentStart.toDate(),
-          request_price: 0,
+          request_price: 800,
 
         });
 
@@ -520,7 +520,8 @@ import {
                       request_price: dummyPrice,
                       },
                   ]
-                  : detailAllowance,
+                  : 
+                  detailAllowance,
           };
       });
 
@@ -890,27 +891,24 @@ import {
     form,
     destinationIndex,
     allowanceField,
-    allowanceIndex,
   }: {
     form: any;
     destinationIndex: number;
     allowanceField: any;
     allowanceIndex:number;
   }) {
-    console.log('allowance field', allowanceField);
-    console.log('allowance index', allowanceIndex);
-
+  
     return (
       <table className='w-full allowance-table'>
         {allowanceField.map((allowance:any, index:any) => (
-          <AllowanceRowInput form={form} allowance={allowance} index={index} destinationIndex={destinationIndex} allowanceIndex={allowanceIndex}/>
+          <AllowanceRowInput form={form} allowance={allowance} index={index} destinationIndex={destinationIndex} allowanceIndex={index}/>
         ))}
       </table>
     );
   }
 
 
-  export function AllowanceRowInput({ form, allowance, index,destinationIndex, allowanceIndex }: { form: any, allowance: any, index:number,destinationIndex: any, allowanceIndex: any }) {
+  export function AllowanceRowInput({ form, allowance, index, destinationIndex,  allowanceIndex }: { form: any, allowance: any, index:number,destinationIndex: any, allowanceIndex: any }) {
       const [isExpanded, setIsExpanded] = React.useState<boolean>(false);
       const handleClikRow = (index:number) => {
           setIsExpanded((prev) => !prev);
@@ -942,86 +940,94 @@ import {
           }
       };
 
-      console.log(allowance, ' ALLOWANCE')
+
 
       return (
-          <>
-              <tr key={allowance.id}>
-                  <td width={260} style={{ verticalAlign: 'middle' }} className='text-sm'>{allowance.name} {index}</td>
-                  <td style={{ verticalAlign: 'middle',padding: '2px 5px' }}>:</td>
-                  <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-                  {allowance.type == 'TOTAL' ? (
-                      <span className='text-sm'>IDR</span>
-                  ) : (
-                      <span></span>
-                  )}
-                  </td>
-                  <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-                  {allowance.type == 'TOTAL' ? (
-                      <div className='flex items-center'>
-                          <AllowanceInputForm
-                              form={form}
-                              allowanceIndex={index}
-                              type={allowance.type}
-                              destinationIndex={destinationIndex}
-                          />
-                          <span className='text-sm'>* 100%</span>
-                      </div>
-                  ) : (
-                      <span className='text-sm'> {allowance.detail.length} Days * 0 * 100%</span>
-                  )}
-                  </td>
-                  <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-                      <div className='flex items-center'>
-                      <span className='text-sm' style={{padding: '2px 5px'}}>= IDR {calculateTotal()}</span>
-                      </div>
-                  </td>
-                  {allowance.type == 'TOTAL' ? (
-                      <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
-                  ) : (
-                      <td style={{ verticalAlign: 'middle', padding: '2px 5px' }} onClick={() => handleClikRow(index)}>
-                          <Button variant='ghost' size='sm' className='w-9 p-0'>
-                              <ChevronsUpDown className='h-4 w-4' />
-                              <span className='sr-only'>Toggle</span>
-                          </Button>
-                      </td>
-                  )}
-              </tr>
-
-              {isExpanded && (
-                  <>
-                  {allowance.detail.map((detail: any, detailIndex: number) => (
-                    <tr key={detail.id}>
-                      <td className="text-end" style={{ verticalAlign: 'middle' }}>
-                        <span className="text-sm">{moment(detail.date).format('DD/MM/YYYY')}</span> {detailIndex}
-                      </td>
-                      <td style={{ padding: '8px 2px', verticalAlign: 'middle' }}>:</td>
-                      <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-                        <span className="text-sm">IDR</span>
-                      </td>
-                      <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-                        <div className="flex mt-1 text-sm justify-between items-center">
-                          <FormField
-                            control={form.control}
-                            name={`destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${detailIndex}.request_price`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input value={field.value} onChange={field.onChange} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </td>
-                      <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
-                      <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
-                    </tr>
-                  ))}
-                </>
+        <>
+          <tr key={allowance.id}>
+            <td width={260} style={{ verticalAlign: 'middle' }} className='text-sm'>
+              {allowance.name} {index}
+            </td>
+            <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>:</td>
+            <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+              {allowance.type == 'TOTAL' ? <span className='text-sm'>IDR</span> : <span></span>}
+            </td>
+            <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+              {allowance.type == 'TOTAL' ? (
+                <div className='flex items-center'>
+                  <AllowanceInputForm
+                    form={form}
+                    allowanceIndex={index}
+                    type={allowance.type}
+                    destinationIndex={destinationIndex}
+                  />
+                  <span className='text-sm'>* 100%</span>
+                </div>
+              ) : (
+                <span className='text-sm'> {allowance.detail.length} Days * 0 * 100%</span>
               )}
-          </>
+            </td>
+            <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+              <div className='flex items-center'>
+                <span className='text-sm' style={{ padding: '2px 5px' }}>
+                  = IDR {calculateTotal()}
+                </span>
+              </div>
+            </td>
+            {allowance.type == 'DAY' ? (
+              <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
+            ) : (
+              <td
+                style={{ verticalAlign: 'middle', padding: '2px 5px' }}
+                onClick={() => handleClikRow(index)}
+              >
+                <Button variant='ghost' size='sm' className='w-9 p-0'>
+                  <ChevronsUpDown className='h-4 w-4' />
+                  <span className='sr-only'>Toggle</span>
+                </Button>
+              </td>
+            )}
+          </tr>
+
+          {isExpanded && (
+            <>
+              {allowance.detail.map((detail: any, detailIndex: number) => (
+                <tr key={detail.id}>
+                  <td className='text-end' style={{ verticalAlign: 'middle' }}>
+                    <span className='text-sm'>{moment(detail.date).format('DD/MM/YYYY')}</span>{' '}
+                    {detailIndex}
+                  </td>
+                  <td style={{ padding: '8px 2px', verticalAlign: 'middle' }}>:</td>
+                  <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+                    <span className='text-sm'>IDR</span>
+                  </td>
+                  <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+                    <div className='flex mt-1 text-sm justify-between items-center'>
+                      <FormField
+                        control={form.control}
+                        name={`destinations.${destinationIndex}.allowances.${index}.detail.${detailIndex}.request_price`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                value={field.value} // Ensure proper value binding
+                                onChange={field.onChange} // Bind change handler to form control
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {detail.request_price}
+                    </div>
+                  </td>
+                  <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
+                  <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
+                </tr>
+              ))}
+            </>
+          )}
+        </>
       );
   }
 
