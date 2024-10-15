@@ -13,12 +13,6 @@ class MasterBusinessPartnerController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->get('per_page', 10);
-        $sortBy = $request->get('sort_by', 'id');
-        $sortDirection = $request->get('sort_direction', 'asc');
-
-        $query = MasterBusinessPartner::query();
-
         $filterableColumns =  [
             'external_partner_number',
             'partner_grouping',
@@ -35,28 +29,7 @@ class MasterBusinessPartnerController extends Controller
             'purchasing_block',
             'type',
         ];
-
-        foreach ($request->all() as $key => $value) {
-            if (in_array($key, $filterableColumns)) {
-                list($operator, $filterValue) = array_pad(explode(',', $value, 2), 2, null);
-                $query = $this->applyColumnFilter($query, $key, $operator, $filterValue); // Use the helper function
-            }
-        }
-
-        if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('search_term_one', 'like', '%' . $request->search . '%')
-                    ->orWhere('external_partner_number', 'like', '%' . $request->search . '%')
-                    ->orWhere('partner_grouping', 'like', '%' . $request->search . '%')
-                    ->orWhere('partner_number', 'like', '%' . $request->search . '%')
-                    ->orWhere('form_of_address_key', 'like', '%' . $request->search . '%')
-                    ->orWhere('central_block', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        $query->orderBy($sortBy, $sortDirection);
-        $data = $query->paginate($perPage);
-
+        $data = $this->filterAndPaginate($request, MasterBusinessPartner::class, $filterableColumns);
         return $this->successResponse($data);
     }
 

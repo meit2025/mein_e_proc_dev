@@ -11,11 +11,11 @@ interface FormInputProps {
   type?: string;
   requiredMessage?: string;
   placeholder?: string;
-  minLength?: number; // Menambahkan minLength untuk validasi panjang minimal
-  maxLength?: number; // Menambahkan maxLength untuk validasi panjang maksimal
+  minLength?: number;
+  maxLength?: number;
   classNames?: string;
-  icon?: ReactNode; // For passing an icon component or HTML
-  iconPosition?: 'start' | 'end'; // Specify the position of the icon
+  icon?: ReactNode;
+  onChanges?: (data: any) => void;
 }
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -27,10 +27,11 @@ const FormInput: React.FC<FormInputProps> = ({
   type = 'text',
   requiredMessage,
   placeholder,
-  minLength, // Parameter untuk panjang minimal
-  maxLength, // Parameter untuk panjang maksimal
+  minLength,
+  maxLength,
   classNames,
   icon,
+  onChanges,
 }) => {
   const {
     control,
@@ -66,25 +67,28 @@ const FormInput: React.FC<FormInputProps> = ({
               : {}),
           }}
           render={({ field }) => {
+            const { onChange, ...restField } = field; // Extract onChange separately
+
             return (
-              <>
-                <label
-                  className={`input ${isRequired && errors[fieldName] ? 'border-danger' : ''} ${classNames}`}
-                  style={style}
-                >
-                  {icon}
-                  <input
-                    placeholder={placeholder}
-                    type={type}
-                    required={isRequired}
-                    disabled={disabled}
-                    {...field}
-                    {...(minLength !== undefined ? { minLength: minLength } : {})}
-                    {...(maxLength !== undefined ? { maxLength: maxLength } : {})}
-                  />
-                  <br />
-                </label>
-              </>
+              <label
+                className={`input ${isRequired && errors[fieldName] ? 'border-danger' : ''} ${classNames}`}
+                style={style}
+              >
+                {icon}
+                <input
+                  {...restField} // Spread the remaining properties excluding onChange
+                  onChange={(e) => {
+                    onChange(e); // Call the default onChange handler from react-hook-form
+                    if (onChanges) onChanges(e); // Also call custom onChanges if provided
+                  }}
+                  placeholder={placeholder}
+                  type={type}
+                  required={isRequired}
+                  disabled={disabled}
+                  minLength={minLength}
+                  maxLength={maxLength}
+                />
+              </label>
             );
           }}
         />

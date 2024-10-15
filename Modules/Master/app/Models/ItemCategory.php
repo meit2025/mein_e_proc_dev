@@ -13,7 +13,10 @@ class ItemCategory extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'item_category',
+        'text_category',
+    ];
 
     // protected static function newFactory(): ItemCategoryFactory
     // {

@@ -1,0 +1,1 @@
+import{j as r}from"./app-D4tGAPRo.js";/* empty css            */const d=()=>r.jsx(r.Fragment,{children:r.jsx("div",{className:"w-full mt-8 border rounded-md shadow-md",children:"tiga"})});export{d as PageThree,d as default};

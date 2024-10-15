@@ -22,4 +22,7 @@ export interface FormFieldModel<T = any> {
   icon?: ReactNode;
   iconPosition?: 'start' | 'end';
   classPosition?: string;
+  conditional?: boolean;
+  valueConditional?: any;
+  parameterConditional?: string;
 }

@@ -13,7 +13,11 @@ class PurchasingGroup extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'purchasing_group',
+        'purchasing_group_desc',
+
+    ];
 
     // protected static function newFactory(): PurchasingGroupFactory
     // {
