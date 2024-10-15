@@ -1,175 +1,189 @@
-import { useFormContext } from 'react-hook-form';
-import FormInput from '@/components/Input/formInput';
-import { useEffect, useState } from 'react';
+import { styled } from '@mui/material/styles';
+import Stack from '@mui/material/Stack';
+import Stepper from '@mui/material/Stepper';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
+import Check from '@mui/icons-material/Check';
+import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector';
+import { StepIconProps } from '@mui/material/StepIcon';
+import { Box, Button, Typography } from '@mui/material';
+import { Fragment, useState } from 'react';
+import PageOne from './pageOne';
+import PageTwo from './pageTwo';
+import PageThree from './pageThree';
 
-interface StructDropdown {
-  id: string;
-  tabel: string;
-  name: string;
-}
-
-interface EntertainmentInput {
-    date_entertaiment: string;
-    place_entertaiment: string;
-    address_entertaiment: string;
-    type_entertaiment: string;
-    name_dientertained: string;
-    position_dientertained: string;
-    name_company: string;
-    type_business: string;
-    type_activity: string;
-  }
-
-export const CustomeForm = () => {
-    const { watch, getValues } = useFormContext();
-    const category = watch('account_assignment_category');
-    const dataInitial = getValues();
-    const [data, setData] = useState(dataInitial.EBKN ?? [{ id: 0 }]);
-
-    const addData = () => {
-        const newData = [...data, { id: data.length + 1 }];
-        setData(newData);
-    };
-
-  const [inputs, setInputs] = useState([
-    {
-      deletion_indicator:"",
-      cost_center:"",
-      item_number:"",
-      purchase_requisition_number:"",
-      order_number:"",
-      asset_number:"",
-      main_asset_number:"",
+const QontoConnector = styled(StepConnector)(({ theme }) => ({
+  [`&.${stepConnectorClasses.alternativeLabel}`]: {
+    top: 10,
+    left: 'calc(-50% + 16px)',
+    right: 'calc(50% + 16px)',
+  },
+  [`&.${stepConnectorClasses.active}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      borderColor: '#784af4',
     },
-  ]);
-
-  const handleAddInput = () => {
-    setInputs([
-      ...inputs,
-      {
-        deletion_indicator: "",
-        cost_center: "",
-        item_number: "",
-        purchase_requisition_number: "",
-        order_number: "",
-        asset_number: "",
-        main_asset_number: "",
-      },
-    ]);
-  };
-
-  const handleRemoveInput = (index:any) => {
-    const newInputs = inputs.filter((_, i) => i !== index);
-    console.log
-    setInputs(newInputs);
-  };
-
-  const handleInputChange = (index:any, event:any) => {
-    const { name, value } = event.target;
-    const newInputs = [...inputs];
-    newInputs[index][name as keyof typeof newInputs[0]] = value;
-    setInputs(newInputs);
-  };
-
-  const [inputsEntertaiment, setInputsEntertaiment] = useState<EntertainmentInput[]>([
-    {
-      date_entertaiment: '',
-      place_entertaiment: '',
-      address_entertaiment: '',
-      type_entertaiment: '',
-      name_dientertained: '',
-      position_dientertained: '',
-      name_company: '',
-      type_business: '',
-      type_activity: '',
+  },
+  [`&.${stepConnectorClasses.completed}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      borderColor: '#784af4',
     },
-  ]);
+  },
+  [`& .${stepConnectorClasses.line}`]: {
+    borderColor: '#eaeaf0',
+    borderTopWidth: 3,
+    borderRadius: 1,
+    ...theme.applyStyles('dark', {
+      borderColor: theme.palette.grey[800],
+    }),
+  },
+}));
 
-  const handleAddInputEntertaiment = () => {
-    setInputsEntertaiment([
-      ...inputsEntertaiment,
-      {
-        date_entertaiment: '',
-        place_entertaiment: '',
-        address_entertaiment: '',
-        type_entertaiment: '',
-        name_dientertained: '',
-        position_dientertained: '',
-        name_company: '',
-        type_business: '',
-        type_activity: '',
+const QontoStepIconRoot = styled('div')<{ ownerState: { active?: boolean } }>(({ theme }) => ({
+  color: '#eaeaf0',
+  display: 'flex',
+  height: 22,
+  alignItems: 'center',
+  '& .QontoStepIcon-completedIcon': {
+    color: '#784af4',
+    zIndex: 1,
+    fontSize: 18,
+  },
+  '& .QontoStepIcon-circle': {
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    backgroundColor: 'currentColor',
+  },
+  ...theme.applyStyles('dark', {
+    color: theme.palette.grey[700],
+  }),
+  variants: [
+    {
+      props: ({ ownerState }) => ownerState.active,
+      style: {
+        color: '#784af4',
       },
-    ]);
-  };
+    },
+  ],
+}));
 
-  const handleRemoveInputEntertaiment = (index: number) => {
-    const newInputsEntertaiment = inputsEntertaiment.filter((_, i) => i !== index);
-    setInputsEntertaiment(newInputsEntertaiment);
-  };
-
-  const handleInputChangeEntertaiment = (
-    index: number,
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const { name, value } = event.target;
-    const newInputsEntertaiment = [...inputsEntertaiment];
-    newInputsEntertaiment[index][name as keyof EntertainmentInput] = value;
-    setInputsEntertaiment(newInputsEntertaiment);
-  };
+function QontoStepIcon(props: StepIconProps) {
+  const { active, completed, className } = props;
 
   return (
-    <>
-        <FormInput
-            fieldLabel={'Short Text'}
-            fieldName={'short_text'}
-            isRequired={category === 'A' ? true : false}
-            disabled={false}
-            style={{
-            }}
-            type={'text'}
-            placeholder={''}
-            classNames={''}
-        />
-
-        <div className="w-full mt-8 border rounded-md shadow-md">
-            <div className='p-4'>
-                Purchase Requisition Item
-            </div>
-            {inputs.map((input, index) => (
-            <div key={index} className="p-4 mb-4">
-                <h3 className="text-lg font-semibold mb-2">Form {index + 1}</h3>
-                <div className="grid grid-cols-2 gap-4">
-                    <FormInput
-                        fieldLabel={'Short Text'}
-                        fieldName={`EBKN[${index}].cost_center`}
-                        isRequired={category === 'A' ? true : false}
-                        disabled={false}
-                        style={{}}
-                        type={'text'}
-                        placeholder={''}
-                        classNames={''}
-                    />
-                </div>
-                <button
-                    type="button"
-                    onClick={() => handleRemoveInput(index)}
-                    className="mt-4 bg-red-500 text-white p-2 rounded-md"
-                >
-                    Hapus Form
-                </button>
-            </div>
-        ))}
-        <button
-            type="button"
-            onClick={handleAddInput}
-            className="mt-4 bg-blue-500 text-white p-2 m-4 rounded-md"
-        >
-            Tambah Form
-        </button>
-        </div>
-
-    </>
+    <QontoStepIconRoot ownerState={{ active }} className={className}>
+      {completed ? (
+        <Check className='QontoStepIcon-completedIcon' />
+      ) : (
+        <div className='QontoStepIcon-circle' />
+      )}
+    </QontoStepIconRoot>
   );
-};
+}
 
-export default CustomeForm;
+const steps = [
+  {
+    label: 'Select Vendor',
+    page: <PageOne item={[]} vendor={[]} />,
+  },
+  {
+    label: 'Data PR',
+    page: <PageTwo />,
+  },
+  {
+    label: 'Summary',
+    page: <PageThree />,
+  },
+];
+
+export default function CustomeForm() {
+  const [activeStep, setActiveStep] = useState(0);
+  const [skipped, setSkipped] = useState(new Set<number>());
+  const isStepOptional = (step: number) => {
+    return step === 1;
+  };
+
+  const isStepSkipped = (step: number) => {
+    return skipped.has(step);
+  };
+
+  const handleNext = () => {
+    let newSkipped = skipped;
+    if (isStepSkipped(activeStep)) {
+      newSkipped = new Set(newSkipped.values());
+      newSkipped.delete(activeStep);
+    }
+
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    setSkipped(newSkipped);
+  };
+
+  const handleReset = () => {
+    setActiveStep(0);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleSkip = () => {
+    if (!isStepOptional(activeStep)) {
+      throw new Error('You can`t skip a step that isn`t optional.');
+    }
+
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    setSkipped((prevSkipped) => {
+      const newSkipped = new Set(prevSkipped.values());
+      newSkipped.add(activeStep);
+      return newSkipped;
+    });
+  };
+  return (
+    <Box>
+      <Stack sx={{ width: '100%' }} spacing={4}>
+        <Stepper alternativeLabel activeStep={activeStep} connector={<QontoConnector />}>
+          {steps.map((label, index) => (
+            <Step key={index}>
+              <StepLabel StepIconComponent={QontoStepIcon}>{label.label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </Stack>
+      {activeStep === steps.length ? (
+        <Fragment>
+          <Typography sx={{ mt: 2, mb: 1 }}>All steps completed - you&apos;re finished</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+            <Box sx={{ flex: '1 1 auto' }} />
+            <Button onClick={handleReset}>Reset</Button>
+          </Box>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <Typography sx={{ mt: 2, mb: 1 }}>{steps[activeStep].page}</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+            <Button color='inherit' disabled={activeStep === 0} onClick={handleBack} sx={{ mr: 1 }}>
+              Back
+            </Button>
+            <Box sx={{ flex: '1 1 auto' }} />
+            {isStepOptional(activeStep) && (
+              <Button color='inherit' onClick={handleSkip} sx={{ mr: 1 }}>
+                Skip
+              </Button>
+            )}
+            <Button onClick={handleNext}>
+              {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+            </Button>
+          </Box>
+        </Fragment>
+      )}
+      <div className='flex justify-end mt-8'>
+        <button
+          type='submit'
+          className='bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-all'
+        >
+          Submit
+        </button>
+      </div>
+    </Box>
+  );
+}

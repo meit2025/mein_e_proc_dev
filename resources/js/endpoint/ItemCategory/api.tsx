@@ -1,0 +1,8 @@
+const ROUTE_MASTER_ITEM_CATEGORY = '/api/master-pr/item-category';
+
+export const GET_MASTER_ITEM_CATEGORY = `${ROUTE_MASTER_ITEM_CATEGORY}/list`;
+export const CREATE_MASTER_ITEM_CATEGORY = `${ROUTE_MASTER_ITEM_CATEGORY}/create`;
+export const EDIT_MASTER_ITEM_CATEGORY = `${ROUTE_MASTER_ITEM_CATEGORY}/update`;
+export const DETAIL_MASTER_ITEM_CATEGORY = (id: any) =>
+  `${ROUTE_MASTER_ITEM_CATEGORY}/detail/${id}`;
+export const DELET_MASTER_ITEM_CATEGORY = `${ROUTE_MASTER_ITEM_CATEGORY}/delete`;

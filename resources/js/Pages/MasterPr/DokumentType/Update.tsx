@@ -7,6 +7,11 @@ import { formModel } from './model/formModel';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@/axiosInstance';
 import { usePage } from '@inertiajs/react';
+import {
+  DETAIL_MASTER_DOKUMENT_TYPE,
+  EDIT_MASTER_DOKUMENT_TYPE,
+} from '@/endpoint/dokumentType/api';
+import { LIST_PAGE_MASTER_DOKUMENT_TYPE } from '@/endpoint/dokumentType/page';
 
 const Update = ({ id }: { id: number }) => {
   const { props } = usePage();
@@ -19,10 +24,9 @@ const Update = ({ id }: { id: number }) => {
 
   const getdetail = useCallback(
     async () => {
-      console.log('ini id', id);
       setIsLoading(true);
       try {
-        const response = await axiosInstance.get(DETAIL_SECRET(props.id));
+        const response = await axiosInstance.get(DETAIL_MASTER_DOKUMENT_TYPE(props.id));
         const data = response.data;
         methods.reset(data.data);
       } catch (error) {
@@ -46,8 +50,8 @@ const Update = ({ id }: { id: number }) => {
             isLoading={isLoading}
             methods={methods}
             formModel={formModel}
-            url={`${EDIT_SECRET}/${props.id}`}
-            redirectUrl={LIST_PAGE_SECRET}
+            url={`${EDIT_MASTER_DOKUMENT_TYPE}/${props.id}`}
+            redirectUrl={LIST_PAGE_MASTER_DOKUMENT_TYPE}
           />
         </div>
       </div>
@@ -57,7 +61,7 @@ const Update = ({ id }: { id: number }) => {
 
 // Assign layout to the page
 Update.layout = (page: ReactNode) => (
-  <MainLayout title='Gateway' description='Gateway Secret Update'>
+  <MainLayout title='Dokument Type' description='Dokument Type Update'>
     {page}
   </MainLayout>
 );

@@ -5,6 +5,8 @@ import { CREATE_SECRET } from '@/endpoint/secret/api';
 import { LIST_PAGE_SECRET } from '@/endpoint/secret/page';
 import { formModel } from './model/formModel';
 import { useForm } from 'react-hook-form';
+import { CREATE_MASTER_DOKUMENT_TYPE } from '@/endpoint/dokumentType/api';
+import { LIST_PAGE_MASTER_DOKUMENT_TYPE } from '@/endpoint/dokumentType/page';
 
 function Create() {
   const methods = useForm({
@@ -18,8 +20,8 @@ function Create() {
           <FormMapping
             methods={methods}
             formModel={formModel}
-            url={CREATE_SECRET}
-            redirectUrl={LIST_PAGE_SECRET}
+            url={CREATE_MASTER_DOKUMENT_TYPE}
+            redirectUrl={LIST_PAGE_MASTER_DOKUMENT_TYPE}
           />
         </div>
       </div>
@@ -29,7 +31,7 @@ function Create() {
 
 // Assign layout to the page
 Create.layout = (page: ReactNode) => (
-  <MainLayout title='Gateway' description='Gateway Secret Create'>
+  <MainLayout title='Dokument Type' description='Dokument Type Create'>
     {page}
   </MainLayout>
 );

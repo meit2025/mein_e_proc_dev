@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\PurchaseRequisition\Http\Controllers\ProcurementController;
 use Modules\PurchaseRequisition\Http\Controllers\PurchaseRequisitionController;
 
 /*
@@ -27,10 +28,10 @@ Route::group(['middleware' => 'auth'], function () {
     });
 
     Route::group(['prefix' => 'api/pr/purchase-requisition', 'middleware' => 'auth'], function () {
-        Route::get('/list', [PurchaseRequisitionController::class, 'index'])->name('pr.purchase-requisition.index');
-        Route::post('/create', [PurchaseRequisitionController::class, 'store'])->name('pr.purchase-requisition.store');
-        Route::post('/update/{id}', [PurchaseRequisitionController::class, 'update'])->name('pr.purchase-requisition.update');
-        Route::get('/detail/{id}', [PurchaseRequisitionController::class, 'show'])->name('pr.purchase-requisition.show');
-        Route::delete('/delete/{id}', [PurchaseRequisitionController::class, 'destroy'])->name('pr.purchase-requisition.destroy');
+        Route::get('/list', [ProcurementController::class, 'index'])->name('pr.purchase-requisition.index');
+        Route::post('/create', [ProcurementController::class, 'store'])->name('pr.purchase-requisition.store');
+        Route::post('/update/{id}', [ProcurementController::class, 'update'])->name('pr.purchase-requisition.update');
+        Route::get('/detail/{id}', [ProcurementController::class, 'show'])->name('pr.purchase-requisition.show');
+        Route::delete('/delete/{id}', [ProcurementController::class, 'destroy'])->name('pr.purchase-requisition.destroy');
     });
 });

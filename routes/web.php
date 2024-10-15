@@ -17,7 +17,7 @@ Route::get('/test-upload-file', function () {
     $fileName = 'example.txt';
     $content = "example txt";
 
-    Storage::disk('ftp')->put($fileName, $content);
+    Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($fileName, $content);
     return response()->json([
         'sukses' => 'sukses'
     ]);
