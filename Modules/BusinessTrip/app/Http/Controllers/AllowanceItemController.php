@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Modules\BusinessTrip\Models\AllowanceCategory;
 use Modules\BusinessTrip\Models\AllowanceItem;
+use Modules\BusinessTrip\Models\BusinessTripGrade;
+use Modules\BusinessTrip\Models\BusinessTripGradeAllowance;
 
 class AllowanceItemController extends Controller
 {
@@ -22,8 +24,10 @@ class AllowanceItemController extends Controller
 
         $listAllowanceCategory = AllowanceCategory::get();
         $listCurrency =  Currency::get();
+        $listGrade =  BusinessTripGrade::get();
 
-        return inertia('BusinessTrip/AllowanceItem/index',compact('listAllowanceCategory', 'listCurrency'));
+
+        return inertia('BusinessTrip/AllowanceItem/index',compact('listAllowanceCategory', 'listCurrency', 'listGrade'));
     }
 
     /**
@@ -51,14 +55,24 @@ class AllowanceItemController extends Controller
 
         // dd($data);
         $data->getCollection()->transform(function ($map) {
+            $gradeRelations = collect($map->allowanceGrades)->map(function ($relation) {
+                return 'Grade '.$relation->grade->grade . ": ".$relation->plafon;
+            })->toArray();
+
+            $purposeTypeRelations = collect($map->allowancePurposeType)->map(function ($relation) {
+                return  $relation->purposeType->name ;
+            })->toArray();
             return [
                 'id' => $map->id,
                 'code' => $map->code,
                 'name' => $map->name,
                 'category' => $map->allowanceCategory->name,
                 'currency' => $map->currency_id,
-                'type' => $map->type,
-                'purpose_type' => 'purpose'
+                'type' =>strtoupper($map->type),
+                'purpose_type' => join(' , ', $purposeTypeRelations),
+                'grade_option' => $map->grade_option,
+                'grades' => join(' ,',$gradeRelations)
+
             ];
         });
 
@@ -116,7 +130,8 @@ class AllowanceItemController extends Controller
             'request_value' => 'required',
             'currency_id' =>'required',
             'type' => 'required',
-            'formula' => 'required'
+            'formula' => 'required',
+            'grade_option' => 'required'
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -133,6 +148,7 @@ class AllowanceItemController extends Controller
             ]);
         }
 
+ 
         DB::beginTransaction();
 
         try {
@@ -145,12 +161,27 @@ class AllowanceItemController extends Controller
             $store->allowance_category_id = $request->allowance_category_id;
             $store->currency_id = $request->currency_id;
             $store->formula = $request->formula;
+            $store->grade_option = $request->grade_option;
+            $store->grade_all_price = $request->grade_all_price;
+
+
             $store->type= $request->type;
 
             $store->save();
 
-            DB::commit();
+            $grades = [];
 
+            foreach($request->grades as $grade) {
+                array_push($grades, [
+                    'grade_id' => $grade['id'],
+                    'allowance_item_id' => $store->id,
+                    'plafon' => $grade['plafon']
+
+                ]);
+
+            }
+            BusinessTripGradeAllowance::insert($grades);
+            DB::commit();
             return $this->successResponse("Successfully created allowance item");
 
         }
