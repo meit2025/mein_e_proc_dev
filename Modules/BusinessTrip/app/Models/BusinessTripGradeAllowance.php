@@ -13,10 +13,18 @@ class BusinessTripGradeAllowance extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'grade_id',
+        'allowance_item_id',
+        'plafon'
+    ];
 
     // protected static function newFactory(): BusinessTripGradeAllowanceFactory
     // {
     //     // return BusinessTripGradeAllowanceFactory::new();
     // }
+
+    public function grade() {
+        return $this->belongsTo(BusinessTripGrade::class ,'grade_id', 'id');
+    }
 }

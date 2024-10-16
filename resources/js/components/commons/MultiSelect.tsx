@@ -11,7 +11,7 @@ export function MultiSelectItem({
   onClick,
 }: React.PropsWithChildren<multiSelectItemInterface>) {
   return (
-    <div onClick={onClick} className={'py-2 ' + (isSelect ? 'bg-gray-200 ' : '')}>
+    <div onClick={onClick} className={'py-2 px-4 ' + (isSelect ? 'bg-gray-200 ' : '')}>
       {children ? children : null} 
     </div>
   );
@@ -74,7 +74,9 @@ export function MultiSelect({ options, label, id, onSelect, value }: multiSelect
       leftValues.filter((item) => !itemSelect.map((map) => map[id]).includes(item[id])),
     );
 
+    onSelect([...rightValues, ...itemSelect]);
     setItemSelect([]);
+
 
     console.log(rightValues);
    
@@ -83,23 +85,23 @@ export function MultiSelect({ options, label, id, onSelect, value }: multiSelect
   function setToLeftValue() {
     setLeftValues([...leftValues, ...rightSelect]);
 
+    onSelect(rightValues.filter((item) => !rightSelect.map((map) => map[id]).includes(item[id])));
+
     setRightValues(
       rightValues.filter((item) => !rightSelect.map((map) => map[id]).includes(item[id])),
     );
 
+
+
     setRightSelect([]);
   }
 
-
-  console.log(rightValues)
-  React.useEffect(() => {
-     onSelect(rightValues);
-  }, [rightValues])
+  console.log('grade');
 
   React.useEffect(() => {
     setLeftValues(options.filter((filter) => !value.includes(filter[id])));
     setRightValues(options.filter((filter) => value.includes(filter[id])));
-  }, [options, value]);
+  }, []);
   return (
     <div className='flex items-center space-x-4'>
       <div className='flex-1'>

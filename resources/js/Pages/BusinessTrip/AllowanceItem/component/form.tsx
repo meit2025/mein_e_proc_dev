@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { Button } from '@/components/shacdn/button';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { Textarea } from '@/components/shacdn/textarea';
 
 import { ScrollArea } from '@/components/shacdn/scroll-area';
@@ -46,6 +46,8 @@ import { CurrencyModel } from '../models/models';
 import { RadioGroup, RadioGroupItem } from '@/components/shacdn/radio-group';
 import { CREATE_API_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/api';
 import { AxiosError } from 'axios';
+import { MultiSelect } from '@/components/commons/MultiSelect';
+import { BusinessTripGrade } from '../../BusinessGrade/model/model';
 // 
 
 export enum AllowanceType {
@@ -60,6 +62,7 @@ export interface AllowanceItemFormInterface {
   id?: string;
   listCurrency: CurrencyModel[];
   listAllowanceCategory: AllowanceCategoryModel[];
+  listGrade: BusinessTripGrade[];
 }
 export default function AllowanceItemForm({
   onSuccess,
@@ -67,6 +70,7 @@ export default function AllowanceItemForm({
   id,
   listCurrency,
   listAllowanceCategory,
+  listGrade
 }: AllowanceItemFormInterface) {
   var formSchema = z.object({
     code: z.string().min(1, 'Code is required'),
@@ -76,19 +80,32 @@ export default function AllowanceItemForm({
     formula: z.string().min(1, 'Formula is required'),
     allowance_category_id: z.string().min(1, 'Allowance Category is required'),
     request_value: z.string().min(1, 'Required'),
+    grade_option: z.string().min(1, 'Grade must be selected'),
+    grade_all_price: z.string().optional(),
+    grades: z.array(z.object({
+      grade: z.string(),
+      id:z.number(),
+      plafon: z.string()
+    }))
   });
 
   let defaultValues = {
     code: '',
     name: '',
-    type: '',
+    type:'',
     currency_id: '',
-    fixed_value: '',
-    max_value: '',
-    request_value: 'unlimited',
     formula: '',
     allowance_category_id: '',
+    request_value: 'unlimited',
+    grade_option: 'all',
+    grade_all_price: '0',
+    grades: []
   };
+
+   const form = useForm<z.infer<typeof formSchema>>({
+     resolver: zodResolver(formSchema),
+     defaultValues: defaultValues,
+   });
 
 //   console.log('currency_id', listCurrency);
   async function getDetailData() {
@@ -106,10 +123,12 @@ export default function AllowanceItemForm({
     }
   }
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: defaultValues,
-  });
+ 
+
+    const { fields: gradeFields } = useFieldArray({
+      control: form.control,
+      name: `grades`,
+    });
 
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -134,11 +153,11 @@ export default function AllowanceItemForm({
     }
   };
 
-  React.useEffect(() => {
-    if (id && type == AllowanceType.edit) {
-      getDetailData();
-    }
-  }, [id, type]);
+  // React.useEffect(() => {
+  //   if (id && type == AllowanceType.edit) {
+  //     getDetailData();
+  //   }
+  // }, [id, type]);
 
   return (
     <ScrollArea className='h-[600px] w-full'>
@@ -212,10 +231,10 @@ export default function AllowanceItemForm({
                             <SelectValue placeholder='Select type' />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem key='day' value='Day'>
-                              Day
+                            <SelectItem key='DAILY' value='daily'>
+                              DAILY
                             </SelectItem>
-                            <SelectItem key='total' value='total'>
+                            <SelectItem key='TOTAL' value='total'>
                               Total
                             </SelectItem>
                           </SelectContent>
@@ -311,6 +330,100 @@ export default function AllowanceItemForm({
                     </FormItem>
                   )}
                 />
+              </td>
+            </tr>
+            <tr>
+              <td width={200}>Grade</td>
+              <td>
+                <FormField
+                  control={form.control}
+                  name='grade_option'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className='flex flex space-x-1'
+                        >
+                          <FormItem className='flex text-xs items-center space-x-3 space-y-0'>
+                            <FormControl>
+                              <RadioGroupItem value='all' />
+                            </FormControl>
+                            <FormLabel className='text-xs'>All</FormLabel>
+                          </FormItem>
+                          <FormItem className='flex items-center space-x-3 space-y-0'>
+                            <FormControl>
+                              <RadioGroupItem value='grade' />
+                            </FormControl>
+                            <FormLabel className='text-xs'>Grade</FormLabel>
+                          </FormItem>
+                        </RadioGroup>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                {form.getValues('grade_option') == 'all' ? (
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name='grade_all_price'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <MultiSelect
+                      label='grade'
+                      id='id'
+                      options={listGrade}
+                      value={form.getValues('grades')}
+                      onSelect={(value) => {
+                        form.setValue('grades', value.map((item) => {
+                          return {
+                            "id": item.id,
+                            'grade': item.grade,
+                            'price': 0
+                          }
+                        }))
+                      }}
+                    />
+                  </div>
+                )}
+
+                {form.getValues('grade_option') == 'grade' ? (
+                  <div className='mt-4'>
+                    <table>
+                      {gradeFields.map((grade, gradeIndex) => (
+                        <tr>
+                          <td>Grade {grade.grade}</td>
+                          <td>:</td>
+                          <td>
+                            <div>
+                              <FormField
+                                control={form.control}
+                                name={`grades.${gradeIndex}.plafon`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Input {...field} />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </table>
+                  </div>
+                ) : null}
               </td>
             </tr>
 
