@@ -166,44 +166,6 @@ const sidebar = [
           // },
         ],
       },
-
-      {
-        title: 'Master',
-        icon: 'ki-setting-3',
-        route: '/',
-        sub: [
-          {
-            name: 'Master Material',
-            route: LIST_PAGE_MASTER_MATERIAL,
-            roles: '',
-          },
-          {
-            name: 'Asset',
-            route: LIST_PAGE_MASTER_ASSET,
-            roles: '',
-          },
-          {
-            name: 'Cost Center',
-            route: LIST_PAGE_MASTER_COST_CENTER,
-            roles: '',
-          },
-          {
-            name: 'Internal Order',
-            route: LIST_PAGE_MASTER_ORDER,
-            roles: '',
-          },
-          {
-            name: 'Recon Account',
-            route: LIST_PAGE_MASTER_RECON,
-            roles: '',
-          },
-          {
-            name: 'Bank Key',
-            route: LIST_PAGE_MASTER_BANK_KEY,
-            roles: '',
-          },
-        ],
-      },
       {
         title: 'Purchase Requisition',
         icon: 'ki-element-11',
