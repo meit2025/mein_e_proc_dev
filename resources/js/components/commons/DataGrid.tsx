@@ -138,7 +138,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
             width: 150,
             renderCell: (params: any) => (
               <>
-                {actionType == 'dropdown' ? (
+                {actionType === 'dropdown' ? (
                   <>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -184,7 +184,15 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                         gap: '10px', // Add consistent spacing between elements
                       }}
                     >
-                      <i className=' ki-duotone ki-size text-info text-2xl'></i>
+                      {(onDetail || url.detailUrl) && (
+                        <Link
+                          href={`${url.detailUrl}/${params.row.id}`}
+                          onClick={() => onDetail && onDetail(params.row.id)}
+                          alt='detail'
+                        >
+                          <i className=' ki-duotone ki-size text-info text-2xl'></i>
+                        </Link>
+                      )}
 
                       {(onEdit || url.editUrl) && (
                         <Link
