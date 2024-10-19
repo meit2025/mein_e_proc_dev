@@ -9,6 +9,8 @@ import {
 
   import { z } from 'zod';
 
+  import { Inertia } from '@inertiajs/inertia';
+
   import { Button } from '@/components/shacdn/button';
   import { ChevronsUpDown, Plus, UndoIcon, X } from 'lucide-react';
 
@@ -47,6 +49,8 @@ import {
   import { Item } from '@radix-ui/react-dropdown-menu';
   import Detail from '@/Pages/User/Api/Detail';
   import { AllowanceForm } from '../../AllowanceCategory/components/AllowaceForm';
+import axios, { AxiosError } from 'axios';
+import { CREATE_API_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
 
   interface User {
     id: string;
@@ -91,12 +95,8 @@ import {
       request_for: z.string().min(1, 'Request for required'),
       remark: z.string().optional(),
       attachment: z
-        .any()
-        .refine((file) => file?.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
-        .refine(
-          (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
-          'Only .jpg, .jpeg, .png and .webp formats are supported.',
-        )
+        .instanceof(File)
+        .nullable()
         .optional(),
       total_destination: z.number().min(1, 'Total Destinantion Required'),
       destinations: z.array(
@@ -108,6 +108,7 @@ import {
             z.object({
               date: z.date().optional(),
               shift_code: z.string().optional(),
+              shift_start: z.string().optional(),
               shift_end: z.string().optional(),
               start_time: z.string().optional(),
               end_time: z.string().optional(),
@@ -140,7 +141,7 @@ import {
         purpose_type_id: '',
         request_for: '',
         remark: '',
-        // attachment: null,
+        attachment: null,
         total_destination: 1,
         destinations: [
           {
@@ -177,19 +178,36 @@ import {
       setAllowancesProperty();
     };
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
-      // try {
-      //   const response = axios.post(CREATE_API_ALLOWANCE_CATEGORY, values);
+    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+      try {
+        const formData = new FormData();
+        // Append group data
+        formData.append('purpose_type_id', values.purpose_type_id ?? '');
+        formData.append('request_for', values.request_for ?? '');
+        formData.append('remark', values.remark ?? '');
+        formData.append('attachment', values.attachment ?? '');
+        formData.append('total_destination', `${values.total_destination}`);
+        values.destinations.forEach((item) => {
+          formData.append('destinations', JSON.stringify(item));
+        })
 
-      //   console.log(response);
-      //   showToast('succesfully created data', 'success');
-      //   onSuccess?.(true);
-      // } catch (e) {
-      //   const error = e as AxiosError;
+        // const response = axios.post(CREATE_API_BUSINESS_TRIP, formData);
 
-      //   onSuccess?.(false);
-      //   console.log(error);
-      // }
+        await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+
+        // console.log(response);
+        showToast('succesfully created data', 'success');
+        onSuccess?.(true);
+      } catch (e) {
+        const error = e as AxiosError;
+
+        onSuccess?.(false);
+        console.log(error);
+      }
 
       console.log('values bg', values);
     };
@@ -337,7 +355,18 @@ import {
                           Max File: 1000KB
                         </FormLabel>
                         <FormControl>
-                          <Input type='file' {...field} />
+                            <input
+                            className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
+                            type="file"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0]; // Ambil file pertama
+                                if (file) {
+                                    field.onChange(file); // Panggil onChange dengan event untuk react-hook-form
+                                }else {
+                                    field.onChange(null); // Jika tidak ada file, set null
+                                }
+                            }}
+                            />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -415,7 +444,7 @@ import {
     const [endDate, setEndDate] = React.useState<Date>();
 
     const [selectedDestinationIdex, setDestinationIndex] = React.useState<number>(0);
-
+    console.log(destinationField, ' Destination Field')
     return (
       <Tabs defaultValue='destination1' className='w-full'>
         <TabsList className={`flex items-center justify-start space-x-4`}>
@@ -479,9 +508,6 @@ import {
       removeAttendace();
       removeAllowance();
 
-      console.log(momentStart.format('DD/MM/YYYY'));
-      console.log(momentEnd.format('DD/MM/YYYY'));
-
       let detailAllowance = [];
 
       while (momentStart.format('DD/MM/YYYY') <= momentEnd.format('DD/MM/YYYY')) {
@@ -505,7 +531,7 @@ import {
       }
 
       let allowancesForm = listAllowances.map((item:any) => {
-          return {
+              return {
               name: item.name,
               code: item.code,
               default_price: dummyPrice,
@@ -527,7 +553,7 @@ import {
 
       replaceAllowance(allowancesForm);
 
-      // console.log(allowancesField);
+      console.log(allowancesForm, ' Formmm');
       // console.log('destination',destination)
     }
 
@@ -540,7 +566,7 @@ import {
 
     return (
       <TabsContent value={`destination${index + 1}`}>
-        <div>
+        <div key={index}>
           <table className='text-xs mt-4 reimburse-form-detail font-thin'>
             <tr>
               <td width={200}>Destination {destination.destination}</td>
@@ -578,8 +604,6 @@ import {
             <tr>
               <td width={200}>
                 Bussines Trip Date
-                {moment(destination.business_trip_start_date).format('DD-MM-YYYY')}
-                {moment(destination.business_trip_end_date).format('DD-MM-YYYY')}
               </td>
               <td className='flex space-x-2 items-center'>
                 <FormField
@@ -646,86 +670,8 @@ import {
               <td className='text-sm'>Detail Bussines Trip Allowance:</td>
               <td></td>
             </tr>
-
-            {/*
-                {field.allowances.map((allowances, allowanceIndex) => (
-                  <tr>
-                    <td width={300}>{allowances.name}</td>
-                    <td>
-                      <FormField
-                        control={form.control}
-                        name={`destinations.${index}.allowances.${allowanceIndex}.`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input value={field.value} onChange={field.onChange} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </td>
-                  </tr>
-                ))} */}
-
-            {/* <tr>
-                      <td width={300}>Dinner Sector A Domestic</td>
-                      <td>3 Day(s)* 25000 * 100 = IDR 750000</td>
-                    </tr>
-                    <tr>
-                      <td width={300}>Lunch Sector A Domestic</td>
-                      <td>3 Day(s)* 25000 * 100 = IDR 750000</td>
-                    </tr>
-                    <tr>
-                      <td width={300}>Pocket Money Allowance Sector A Domestic</td>
-                      <td>3 Day(s)* 25000 * 100 = IDR 750000</td>
-                    </tr> */}
           </table>
-
-
           <DetailAllowance allowanceField={allowancesField} destinationIndex={index} form={form} />
-
-          {/* <table className='w-3/4 detail-bussiness text-xs text-gray-600 font-light'>
-            <thead>
-              <th>Item</th>
-              <th className='text-right'>SubTotal</th>
-            </thead>
-
-            <tbody> */}
-              {/* {field.allowances.map((allowances, allowanceIndex) => (
-                    <tr>
-                      <td width={300}>{allowances.name}</td>
-                      <td>
-                        <FormField
-                          control={form.control}
-                          name={`destinations.${index}.allowances.${allowanceIndex}.default_price`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-
-                                {form.getValues(
-                                  `destinations.${index}.allowances.${allowanceIndex}.default_price`,
-                                )}
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </td>
-                    </tr>
-                  ))} */}
-
-              {/* <tr>
-                <td width={'50%'} className='flex justify-between pt-8 items-center'>
-                  <span className='italic text-sm'>Total Allowance</span>
-                  <span>IDR</span>
-                </td>
-                <td className='text-right pt-8'>
-                  <span>70.000</span>
-                </td>
-              </tr>
-            </tbody>
-          </table> */}
         </div>
       </TabsContent>
     );
@@ -748,7 +694,7 @@ import {
     React.useEffect(() => {}, [detailAttedanceWatch]);
 
     React.useEffect(() => {
-      console.log(detailAttedanceFields);
+      console.log(detailAttedanceFields, ' Detail Attedance fields');
     }, [detailAttedanceFields]);
     return (
       <table className='text-xs mt-4 reimburse-form-detail font-thin'>
@@ -895,20 +841,18 @@ import {
     form: any;
     destinationIndex: number;
     allowanceField: any;
-    allowanceIndex:number;
   }) {
-
     return (
       <table className='w-full allowance-table'>
         {allowanceField.map((allowance:any, index:any) => (
-          <AllowanceRowInput form={form} allowance={allowance} index={index} destinationIndex={destinationIndex} allowanceIndex={index}/>
+          <AllowanceRowInput form={form} allowance={allowance} destinationIndex={destinationIndex} allowanceIndex={index}/>
         ))}
       </table>
     );
   }
 
 
-  export function AllowanceRowInput({ form, allowance, index, destinationIndex,  allowanceIndex }: { form: any, allowance: any, index:number,destinationIndex: any, allowanceIndex: any }) {
+    export function AllowanceRowInput({ form, allowance, destinationIndex,  allowanceIndex }: { form: any, allowance: any,destinationIndex: any, allowanceIndex: any }) {
       const [isExpanded, setIsExpanded] = React.useState<boolean>(false);
       const handleClikRow = (index:number) => {
           setIsExpanded((prev) => !prev);
@@ -916,7 +860,7 @@ import {
       // Memantau base price jika allowance.type === 'TOTAL'
       const basePrice = useWatch({
           control: form.control,
-          name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${index}.request_price`, // pastikan memantau field request_price
+          name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${0}.request_price`, // pastikan memantau field request_price
       });
 
       // Memantau semua detail harga jika allowance.type !== 'TOTAL'
@@ -940,13 +884,11 @@ import {
           }
       };
 
-
-
       return (
         <>
           <tr key={allowance.id}>
-            <td width={260} style={{ verticalAlign: 'middle' }} className='text-sm'>
-              {allowance.name} {index}
+            <td width={220} style={{ verticalAlign: 'middle' }} className='text-sm'>
+              {allowance.name}
             </td>
             <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>:</td>
             <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
@@ -955,12 +897,18 @@ import {
             <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
               {allowance.type == 'TOTAL' ? (
                 <div className='flex items-center'>
-                  <AllowanceInputForm
-                    form={form}
-                    allowanceIndex={index}
-                    type={allowance.type}
-                    destinationIndex={destinationIndex}
-                  />
+                    <FormField
+                        control={form.control}
+                        name={`destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${0}.request_price`}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormControl>
+                                <Input value={field.value} onChange={field.onChange} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                   <span className='text-sm'>* 100%</span>
                 </div>
               ) : (
@@ -974,12 +922,12 @@ import {
                 </span>
               </div>
             </td>
-            {allowance.type == 'DAY' ? (
+            {allowance.type == 'TOTAL' ? (
               <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
             ) : (
               <td
                 style={{ verticalAlign: 'middle', padding: '2px 5px' }}
-                onClick={() => handleClikRow(index)}
+                onClick={() => handleClikRow(allowanceIndex)}
               >
                 <Button variant='ghost' size='sm' className='w-9 p-0'>
                   <ChevronsUpDown className='h-4 w-4' />
@@ -995,7 +943,6 @@ import {
                 <tr key={detail.id}>
                   <td className='text-end' style={{ verticalAlign: 'middle' }}>
                     <span className='text-sm'>{moment(detail.date).format('DD/MM/YYYY')}</span>{' '}
-                    {detailIndex}
                   </td>
                   <td style={{ padding: '8px 2px', verticalAlign: 'middle' }}>:</td>
                   <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
@@ -1005,7 +952,7 @@ import {
                     <div className='flex mt-1 text-sm justify-between items-center'>
                       <FormField
                         control={form.control}
-                        name={`destinations.${destinationIndex}.allowances.${index}.detail.${detailIndex}.request_price`}
+                        name={`destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${detailIndex}.request_price`}
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
@@ -1018,7 +965,6 @@ import {
                           </FormItem>
                         )}
                       />
-                      {detail.request_price}
                     </div>
                   </td>
                   <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
@@ -1029,7 +975,7 @@ import {
           )}
         </>
       );
-  }
+    }
 
   export function AllowanceInputForm({
     form,
@@ -1046,7 +992,7 @@ import {
       control: form.control,
       name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail`,
     });
-    console.log(allowanceInput,' allowance input nih');
+    // console.log(allowanceInput,' allowance input nih');
   //   console.log(destinationIndex, allowanceIndex);
     return (
       <>
@@ -1054,14 +1000,14 @@ import {
             return (
                 <FormField
                 control={form.control}
-                name={`destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${index}.request_price`}
+                name={`destinations.${destinationIndex}.allowances.${index}.detail.${index}.request_price`}
                 render={({ field }) => (
-                <FormItem>
-                    <FormControl>
-                    <Input value={field.value} onChange={field.onChange} />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
+                    <FormItem>
+                        <FormControl>
+                        <Input value={field.value} onChange={field.onChange} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
                 )}
                 />
             )
@@ -1069,3 +1015,11 @@ import {
       </>
     );
   }
+function showToast(arg0: string, arg1: string) {
+    throw new Error('Function not implemented.');
+}
+
+function onSuccess(arg0: boolean) {
+    throw new Error('Function not implemented.');
+}
+

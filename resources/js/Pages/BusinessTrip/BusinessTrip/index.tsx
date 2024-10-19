@@ -7,7 +7,7 @@ import { GET_MASTER_ASSET } from '@/endpoint/masterAsset/api';
 import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import { GET_LIST_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
+import { DELET_API, EDIT_API, GET_LIST_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
 import { AllowanceCategoryModel } from '../AllowanceCategory/model/AllowanceModel';
 // import AllowanceItemForm from './component/form';
 
@@ -42,9 +42,10 @@ export const Index = ({ listPurposeType, users }: propsType) => {
       </div>
       <DataGridComponent
         columns={columns}
-        actionType='dropdown'
         url={{
           url: GET_LIST_BUSINESS_TRIP,
+          editUrl: EDIT_API,
+          deleteUrl: DELET_API,
         }}
         labelFilter='search'
       />

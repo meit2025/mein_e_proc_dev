@@ -13,7 +13,8 @@ class BusinessTripAttachment extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [];
+    protected $guarded = [];
+    protected $table  = 'business_trip_attachment';
 
     // protected static function newFactory(): BusinessTripAttachmentFactory
     // {

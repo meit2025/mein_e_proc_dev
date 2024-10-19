@@ -23,16 +23,17 @@ export interface UserModel {
 }
 
 export interface AllowanceItemModel {
-  code: string,
-  name: string,
-  purpose_type?: [],
-  currency_id: string,
-  request_value: string,
-  formula:string,
-  type:string,
-  max_value?:string,
-  fixed_value?:string,
-  allowance_category_id:number,
+    id: string,
+    code: string,
+    name: string,
+    purpose_type?: [],
+    currency_id: string,
+    request_value: string,
+    formula:string,
+    type:string,
+    max_value?:string,
+    fixed_value?:string,
+    allowance_category_id:number,
 }
 
 //  'type',
