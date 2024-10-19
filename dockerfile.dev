@@ -27,6 +27,8 @@ gd \
 pgsql \
 pdo \
 pdo_pgsql
+
+RUN docker-php-ext-install pcntl
 # RUN apt-get update && apt-get install -y libldap2-dev && docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ && docker-php-ext-install ldap
 
 RUN apt-get update && \
@@ -60,6 +62,10 @@ RUN composer update
 RUN composer install
 RUN npm install
 RUN npm run build
+
+RUN apt-get update && apt-get install -y supervisor
+RUN mkdir -p /etc/supervisor/conf.d
+COPY ./docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 COPY ./.env /var/www/html/mein/
 COPY ./docker/info.php /var/www/html/mein/public/

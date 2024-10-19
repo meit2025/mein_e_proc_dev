@@ -9,7 +9,7 @@ import { useAlert } from '@/contexts/AlertContext';
 import { Loading } from '../commons/Loading';
 
 interface FormMappingProps {
-  formModel: Array<FormFieldModel<any>>;
+  formModel?: Array<FormFieldModel<any>>;
   url: string;
   redirectUrl?: string;
   methods: ReturnType<typeof useForm>;
@@ -19,6 +19,7 @@ interface FormMappingProps {
   isCustom?: boolean;
   formCustom?: ReactNode;
   formLogic?: ReactNode;
+  disableButtonSubmit?: boolean;
 }
 
 const FormMapping: React.FC<FormMappingProps> = ({
@@ -32,8 +33,9 @@ const FormMapping: React.FC<FormMappingProps> = ({
   isCustom = false,
   formCustom,
   formLogic,
+  disableButtonSubmit = false,
 }) => {
-  const { setError } = methods;
+  const { setError, watch } = methods;
   const { showToast } = useAlert();
   const [isLoadings, setIsLoading] = useState<boolean>(false);
 
@@ -49,7 +51,7 @@ const FormMapping: React.FC<FormMappingProps> = ({
       onSave && (await onSave(response));
       if (redirectUrl) {
         setTimeout(() => {
-          //   window.location.href = redirectUrl;
+          window.location.href = redirectUrl;
         }, 2000);
       }
     } catch (error) {
@@ -80,9 +82,12 @@ const FormMapping: React.FC<FormMappingProps> = ({
             <>{formCustom}</>
           ) : (
             <>
-              {formModel.map((field, index) => (
+              {(formModel ?? []).map((field, index) => (
                 <div key={index} className={`mt-8 ${field.classPosition}`}>
-                  <FormWrapper model={field} />
+                  {!field.conditional ||
+                  watch(field.parameterConditional ?? '') === field.conditional ? (
+                    <FormWrapper model={field} />
+                  ) : null}
                 </div>
               ))}
             </>
@@ -90,14 +95,16 @@ const FormMapping: React.FC<FormMappingProps> = ({
           {formLogic}
         </div>
         {/* Kontainer untuk tombol di kanan bawah */}
-        <div className='flex justify-end mt-8'>
-          <button
-            type='submit'
-            className='bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-all'
-          >
-            Submit
-          </button>
-        </div>
+        {!disableButtonSubmit && (
+          <div className='flex justify-end mt-8'>
+            <button
+              type='submit'
+              className='bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-all'
+            >
+              Submit
+            </button>
+          </div>
+        )}
       </form>
     </FormProvider>
   );

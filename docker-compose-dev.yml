@@ -30,6 +30,36 @@ services:
       - ./postgresql:/var/lib/postgresql/data
     restart: unless-stopped
 
+  laravel-reverb:
+    build:
+      context: .
+      dockerfile: dockerfile.dev
+    command: ['php', 'artisan', 'reverb:start']
+    container_name: laravel-reverb
+    restart: unless-stopped
+    working_dir: /var/www/html/mein
+    volumes:
+      - ./:/var/www/html/mein
+    ports:
+      - 8080:8080
+    expose:
+      - 8080
+    networks:
+      - utama
+
+  laravel-cron:
+    build:
+      context: .
+      dockerfile: dockerfile.dev
+    command: ['php', 'artisan', 'queue:work']
+    container_name: laravel-cron
+    restart: unless-stopped
+    working_dir: /var/www/html/mein
+    volumes:
+      - ./:/var/www/html/mein
+    networks:
+      - utama
+
 
 networks:
   utama:

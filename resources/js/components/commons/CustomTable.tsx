@@ -214,12 +214,12 @@ export function CustomTable({
   const [params, setParams] = React.useState({});
 
   function onChangeFilter(key: string, value: string) {
-    const queryParams:any = {};
+    const queryParams: any = {};
 
     queryParams[key] = value;
     setParams({
       ...params,
-      [key]: value
+      [key]: value,
     });
 
     console.log(params);

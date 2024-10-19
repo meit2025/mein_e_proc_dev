@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/shacdn/form';
 import { useForm } from 'react-hook-form';
 import { Textarea } from '@/components/shacdn/textarea';
-import '../css/business_trip.scss';
+// import '../css/business_trip.scss';
 import { ScrollArea } from '@/components/shacdn/scroll-area';
 import { Separator } from '@/components/shacdn/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';

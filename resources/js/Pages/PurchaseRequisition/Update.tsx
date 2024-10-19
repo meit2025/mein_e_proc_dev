@@ -7,6 +7,9 @@ import { formModel } from './model/formModel';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@/axiosInstance';
 import { usePage } from '@inertiajs/react';
+import PageOne from './model/pageOne';
+import { DETAIL_PR, EDIT_PR } from '@/endpoint/purchaseRequisition/api';
+import { LIST_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
 
 const Update = ({ id }: { id: number }) => {
   const { props } = usePage();
@@ -16,17 +19,20 @@ const Update = ({ id }: { id: number }) => {
     reValidateMode: 'onChange',
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [items, setItems] = useState<any[]>([]);
+  const [vendors, setVendors] = useState<any[]>([]);
 
   const getdetail = useCallback(
     async () => {
-      console.log('ini id', id);
       setIsLoading(true);
       try {
-        const response = await axiosInstance.get(DETAIL_SECRET(props.id));
+        const response = await axiosInstance.get(DETAIL_PR(props.id));
         const data = response.data;
-        methods.reset(data.data);
+        methods.reset(data);
+        setItems(data.item);
+        setVendors(data.vendor);
       } catch (error) {
-        console.error('Error fetching detail:', error);
+        console.log(error);
       } finally {
         setIsLoading(false);
       }
@@ -45,9 +51,10 @@ const Update = ({ id }: { id: number }) => {
           <FormMapping
             isLoading={isLoading}
             methods={methods}
-            formModel={formModel}
-            url={`${EDIT_SECRET}/${props.id}`}
-            redirectUrl={LIST_PAGE_SECRET}
+            formCustom={<PageOne item={items} vendor={vendors} />}
+            url={`${EDIT_PR}/${props.id}`}
+            redirectUrl={LIST_PAGE_PR}
+            isCustom={true}
           />
         </div>
       </div>

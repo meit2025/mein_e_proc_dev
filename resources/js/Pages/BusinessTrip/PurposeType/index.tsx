@@ -11,15 +11,18 @@ import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import { GET_LIST_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/api';
 import { AllowanceCategoryModel } from '../AllowanceCategory/model/AllowanceModel';
-import AllowanceItemForm from './component/form';
+import PurposeTypeForm from './component/form';
+import { AllowanceItemModel } from '../AllowanceItem/models/models';
 
 
 interface propsType {
-    listAllowanceCategory: AllowanceCategoryModel[],
-    listCurrency: any[]
+  // listAllowanceCategory: AllowanceCategoryModel[];
+  listAllowance: AllowanceItemModel[];
+
+  // listCurrency: any[];
 }
 export const Index = (
-    {listAllowanceCategory, listCurrency}: propsType
+    {listAllowance}: propsType
 ) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
@@ -37,8 +40,13 @@ export const Index = (
           onClose={() => setOpenForm(false)}
           open={openForm}
           onOpenChange={openFormHandler}
+          
         >
-            <AllowanceItemForm listCurrency={listCurrency} listAllowanceCategory={listAllowanceCategory} />
+            <PurposeTypeForm onSuccess={(value) => {
+              if(value) {
+                setOpenForm(false);
+              }
+            }} listAllowanceModel={listAllowance} />
         </CustomDialog>
       </div>
       <DataGridComponent

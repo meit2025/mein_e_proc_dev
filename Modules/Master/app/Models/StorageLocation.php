@@ -4,7 +4,6 @@ namespace Modules\Master\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\Master\Database\Factories\StorageLocationFactory;
 
 class StorageLocation extends Model
 {
@@ -13,7 +12,11 @@ class StorageLocation extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'plant',
+        'storage_location',
+        'storage_location_desc',
+    ];
 
     // protected static function newFactory(): StorageLocationFactory
     // {

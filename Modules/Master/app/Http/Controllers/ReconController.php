@@ -13,12 +13,6 @@ class ReconController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->get('per_page', 10);
-        $sortBy = $request->get('sort_by', 'id');
-        $sortDirection = $request->get('sort_direction', 'asc');
-
-        $query = MasterRecont::query();
-
         $filterableColumns =  [
             'account',
             'account_long_text',
@@ -26,23 +20,7 @@ class ReconController extends Controller
             'recon_acc',
         ];
 
-        foreach ($request->all() as $key => $value) {
-            if (in_array($key, $filterableColumns)) {
-                list($operator, $filterValue) = array_pad(explode(',', $value, 2), 2, null);
-                $query = $this->applyColumnFilter($query, $key, $operator, $filterValue); // Use the helper function
-            }
-        }
-
-        if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('account', 'like', '%' . $request->search . '%')
-                    ->orWhere('account_long_text', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        $query->orderBy($sortBy, $sortDirection);
-        $data = $query->paginate($perPage);
-
+        $data = $this->filterAndPaginate($request, MasterRecont::class, $filterableColumns);
         return $this->successResponse($data);
     }
 

@@ -5,6 +5,7 @@ use Modules\BusinessTrip\Http\Controllers\AllowanceCategoryController;
 use Modules\BusinessTrip\Http\Controllers\AllowanceItemController;
 use Modules\BusinessTrip\Http\Controllers\BusinessTripController;
 use Modules\BusinessTrip\Http\Controllers\BusinessTripDeclarationController;
+use Modules\BusinessTrip\Http\Controllers\BusinessTripGradeController;
 use Modules\BusinessTrip\Http\Controllers\PurposeTypeController;
 use Modules\BusinessTrip\Models\AllowanceItem;
 use Modules\BusinessTrip\Models\BusinessTrip;
@@ -26,7 +27,7 @@ use Modules\BusinessTrip\Models\BusinessTrip;
 
 
 // Route::get('/business-trip', [BusinessTripController::class, 'index'])->name('bussiness-trip.index');
-Route::get('/allowance-category', [AllowanceCategoryController::class, 'index'])->name('allowance-category.index');
+// Route::get('/allowance-category', [AllowanceCategoryController::class, 'index'])->name('allowance-category.index');
 
 
 
@@ -38,6 +39,7 @@ Route::group(['prefix' => 'business-trip'], function () {
     Route::get('/allowance-category', [AllowanceCategoryController::class, 'index'])->name('allowance-category.index');
     Route::get('/allowance-item', [AllowanceItemController::class, 'index'])->name('allowance-item.index');
     Route::get('/purpose-type', [PurposeTypeController::class, 'index'])->name('purpose-type.index');
+    Route::get('/grade', [BusinessTripGradeController::class, 'index'])->name('business-grade.index');
 
 });
 Route::group(['prefix' => 'api/'], function () {
@@ -106,6 +108,18 @@ Route::group(['prefix' => 'api/'], function () {
         // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
         Route::get('/detail/{id}', [PurposeTypeController::class, 'detailAPI'])->name('allowance-category.detail');
+
+        // Route::delete('/delete/{id}', [MasterMaterialController::class, 'destroy'])->name('master.master-material.destroy');
+
+
+    });
+
+    Route::group(['prefix' => 'business-grade'], function () {
+        Route::get('/list', [BusinessTripGradeController::class, 'listAPI'])->name('business-grade-list.index');
+        Route::post('/create', [BusinessTripGradeController::class, 'storeAPI'])->name('business-grade.store');
+        // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
+        // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
+        Route::get('/detail/{id}', [BusinessTripGradeController::class, 'detailAPI'])->name('business-grade.detail');
 
         // Route::delete('/delete/{id}', [MasterMaterialController::class, 'destroy'])->name('master.master-material.destroy');
 

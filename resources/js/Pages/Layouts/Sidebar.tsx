@@ -16,7 +16,15 @@ import { LIST_PAGE_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/page';
 import { LIST_PAGE_PURPOSE_TYPE } from '@/endpoint/purpose-type/page';
 import { LIST_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
 import { LIST_PAGE_BUSINESS_TRIP } from '@/endpoint/business-trip/page';
-import { LIST_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
+import { LIST_PAGE_BUSINESS_GRADE } from '@/endpoint/business-grade/page';
+import { LIST_PAGE_MASTER_DOKUMENT_TYPE } from '@/endpoint/dokumentType/page';
+import { LIST_PAGE_MASTER_VALUATION_TYPE } from '@/endpoint/valuationType/page';
+import { LIST_PAGE_MASTER_PURCHASING_GROUP } from '@/endpoint/purchasingGroup/page';
+import { LIST_PAGE_MASTER_ACCOUNT_ASSIGNMENT_CATEGORY } from '@/endpoint/accountAssignmentCategory/page';
+import { LIST_PAGE_MASTER_ITEM_CATEGORY } from '@/endpoint/ItemCategory/page';
+import { LIST_PAGE_MASTER_STORAGE_LOCATION } from '@/endpoint/storageLocation/page';
+import { LIST_PAGE_APPROVAL_ROUTE } from '@/endpoint/approvalRoute/page';
+import { LIST_PAGE_SETTING_APPROVAL } from '@/endpoint/settingApproval/page';
 // import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
@@ -145,9 +153,10 @@ const sidebar = [
             route: LIST_PAGE_BUSINESS_TRIP,
             roles: '',
           },
+
           {
-            name: 'Business Trip Declaration',
-            route: LIST_PAGE_BUSINESS_TRIP_DECLARATION,
+            name: 'Business Trip Grade',
+            route: LIST_PAGE_BUSINESS_GRADE,
             roles: '',
           },
           // {
@@ -155,44 +164,6 @@ const sidebar = [
           //   route: LIST_PAGE_ALLOWANCE_CATEGORY,
           //   roles: '',
           // },
-        ],
-      },
-
-      {
-        title: 'Master',
-        icon: 'ki-setting-3',
-        route: '/',
-        sub: [
-          {
-            name: 'Master Material',
-            route: LIST_PAGE_MASTER_MATERIAL,
-            roles: '',
-          },
-          {
-            name: 'Asset',
-            route: LIST_PAGE_MASTER_ASSET,
-            roles: '',
-          },
-          {
-            name: 'Cost Center',
-            route: LIST_PAGE_MASTER_COST_CENTER,
-            roles: '',
-          },
-          {
-            name: 'Internal Order',
-            route: LIST_PAGE_MASTER_ORDER,
-            roles: '',
-          },
-          {
-            name: 'Recon Account',
-            route: LIST_PAGE_MASTER_RECON,
-            roles: '',
-          },
-          {
-            name: 'Bank Key',
-            route: LIST_PAGE_MASTER_BANK_KEY,
-            roles: '',
-          },
         ],
       },
       {
@@ -272,32 +243,32 @@ const sidebar = [
         sub: [
           {
             name: 'Dokument Type',
-            route: LIST_PAGE_USER,
+            route: LIST_PAGE_MASTER_DOKUMENT_TYPE,
             roles: '',
           },
           {
             name: 'Valuation Type',
-            route: LIST_PAGE_ROLE,
+            route: LIST_PAGE_MASTER_VALUATION_TYPE,
             roles: '',
           },
           {
             name: 'Purchasing Groups',
-            route: LIST_PAGE_ROLE,
+            route: LIST_PAGE_MASTER_PURCHASING_GROUP,
             roles: '',
           },
           {
             name: 'Account Assignment Categories',
-            route: LIST_PAGE_ROLE,
+            route: LIST_PAGE_MASTER_ACCOUNT_ASSIGNMENT_CATEGORY,
             roles: '',
           },
           {
             name: 'Item Categories',
-            route: LIST_PAGE_ROLE,
+            route: LIST_PAGE_MASTER_ITEM_CATEGORY,
             roles: '',
           },
           {
             name: 'Storage Locations',
-            route: LIST_PAGE_ROLE,
+            route: LIST_PAGE_MASTER_STORAGE_LOCATION,
             roles: '',
           },
         ],
@@ -309,12 +280,12 @@ const sidebar = [
         sub: [
           {
             name: 'Approval',
-            route: LIST_PAGE_USER,
+            route: LIST_PAGE_APPROVAL_ROUTE,
             roles: '',
           },
           {
-            name: 'Approval Conditional',
-            route: LIST_PAGE_ROLE,
+            name: 'Setting Approval',
+            route: LIST_PAGE_SETTING_APPROVAL,
             roles: '',
           },
         ],

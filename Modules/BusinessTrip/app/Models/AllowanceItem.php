@@ -33,7 +33,9 @@ class AllowanceItem extends Model
         'currency_id',
         'allowance_category_id',
         'code',
-        'name'
+        'name',
+        'grade_option',
+        'grade_all_price'
     ];
 
     // protected static function newFactory(): AllowanceItemFactory
@@ -45,6 +47,14 @@ class AllowanceItem extends Model
         return $this->belongsTo(AllowanceCategory::class ,'allowance_category_id', 'id');
     }
 
+    public function allowancePurposeType()
+    {
+        return $this->hasMany(PurposeTypeAllowance::class, 'allowance_items_id', 'id');
+    }
+
+    public function allowanceGrades() {
+        return $this->hasMany(BusinessTripGradeAllowance::class, 'allowance_item_id', 'id');
+    }
 }
 
 

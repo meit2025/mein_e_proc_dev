@@ -3,7 +3,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { CSSProperties } from 'react';
 
 interface FormSwitchProps {
-  fieldLabel: string;
+  fieldLabel?: string;
   fieldName: string;
   isRequired?: boolean;
   disabled?: boolean;
@@ -11,6 +11,7 @@ interface FormSwitchProps {
   requiredMessage?: string;
   classNames?: string;
   defaultChecked?: boolean;
+  note?: string;
 }
 
 const FormSwitch: React.FC<FormSwitchProps> = ({
@@ -22,6 +23,7 @@ const FormSwitch: React.FC<FormSwitchProps> = ({
   requiredMessage,
   classNames,
   defaultChecked = false,
+  note,
 }) => {
   const {
     control,
@@ -31,9 +33,11 @@ const FormSwitch: React.FC<FormSwitchProps> = ({
   return (
     <div className='w-full'>
       <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
-        <label className='form-label max-w-32'>
-          {fieldLabel} <span className='text-red-700'> {isRequired ? '*' : ''}</span>
-        </label>
+        {fieldLabel && (
+          <label className='form-label max-w-32'>
+            {fieldLabel} <span className='text-red-700'> {isRequired ? '*' : ''}</span>
+          </label>
+        )}
         <Controller
           name={fieldName}
           control={control}
@@ -51,6 +55,7 @@ const FormSwitch: React.FC<FormSwitchProps> = ({
             </div>
           )}
         />
+        <span>{note}</span>
       </div>
       <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
         <label className='form-label max-w-32'>{''}</label>

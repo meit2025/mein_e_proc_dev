@@ -1,0 +1,83 @@
+<?php
+
+namespace Modules\Master\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Modules\Master\Models\AccountAssignmentCategory;
+
+class AccountAssignmentCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+    //  'account',
+    //  'description',
+    public function index(Request $request)
+    {
+        $filterableColumns = [
+            'account',
+            'description',
+        ];
+        $data = $this->filterAndPaginate($request, AccountAssignmentCategory::class, $filterableColumns);
+        return $this->successResponse($data);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return view('master::create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $dataInsert = $request->all();
+        $data = AccountAssignmentCategory::create($dataInsert);
+        return $this->successResponse($data);
+    }
+
+    /**
+     * Show the specified resource.
+     */
+    public function show($id)
+    {
+        $data = AccountAssignmentCategory::find($id);
+        return $this->successResponse($data);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($id)
+    {
+        return view('master::edit');
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $id)
+    {
+        //
+        $dataInsert = $request->all();
+        $data = AccountAssignmentCategory::find($id)->update($dataInsert);
+        return $this->successResponse($data);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($id)
+    {
+        //
+        $data = AccountAssignmentCategory::find($id)->delete();
+        return $this->successResponse($data);
+    }
+}

@@ -1,15 +1,21 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Master\Http\Controllers\AccountAssignmentCategoryController;
 use Modules\Master\Http\Controllers\AssetController;
 use Modules\Master\Http\Controllers\BankKeyController;
 use Modules\Master\Http\Controllers\CostCenterController;
+use Modules\Master\Http\Controllers\DokumentTypeController;
 use Modules\Master\Http\Controllers\DropdownMasterController;
+use Modules\Master\Http\Controllers\ItemCategoryController;
 use Modules\Master\Http\Controllers\MasterBusinessPartnerController;
 use Modules\Master\Http\Controllers\MasterController;
 use Modules\Master\Http\Controllers\MasterMaterialController;
 use Modules\Master\Http\Controllers\OrderController;
+use Modules\Master\Http\Controllers\PurchasingGroupController;
 use Modules\Master\Http\Controllers\ReconController;
+use Modules\Master\Http\Controllers\StorageLocationController;
+use Modules\Master\Http\Controllers\ValuationTypeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -98,8 +104,105 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/detail/{id}', [MasterBusinessPartnerController::class, 'show'])->name('master.business.show');
             Route::delete('/delete/{id}', [MasterBusinessPartnerController::class, 'destroy'])->name('master.business.destroy');
         });
+
         Route::group(['prefix' => 'dropdown'], function () {
             Route::get('/', [DropdownMasterController::class, 'dropdown'])->name('master.dropdown');
+        });
+    });
+
+    Route::group(['prefix' => 'master-pr'], function () {
+        Route::group(['prefix' => 'dokument-type'], function () {
+            Route::inertia('/',  'MasterPr/DokumentType/Index');
+            Route::inertia('/create',  'MasterPr/DokumentType/Create');
+            Route::inertia('/update/{id}',  'MasterPr/DokumentType/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+        });
+
+        Route::group(['prefix' => 'valuation-type'], function () {
+            Route::inertia('/',  'MasterPr/ValuationType/Index');
+            Route::inertia('/create',  'MasterPr/ValuationType/Create');
+            Route::inertia('/update/{id}',  'MasterPr/ValuationType/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+        });
+
+        Route::group(['prefix' => 'purchasing-group'], function () {
+            Route::inertia('/',  'MasterPr/PurchasingGroup/Index');
+            Route::inertia('/create',  'MasterPr/PurchasingGroup/Create');
+            Route::inertia('/update/{id}',  'MasterPr/PurchasingGroup/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+        });
+
+        Route::group(['prefix' => 'account-assignment-category'], function () {
+            Route::inertia('/',  'MasterPr/AccountAssignmentCategory/Index');
+            Route::inertia('/create',  'MasterPr/AccountAssignmentCategory/Create');
+            Route::inertia('/update/{id}',  'MasterPr/AccountAssignmentCategory/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+        });
+
+
+        Route::group(['prefix' => 'item-category'], function () {
+            Route::inertia('/',  'MasterPr/ItemCategory/Index');
+            Route::inertia('/create',  'MasterPr/ItemCategory/Create');
+            Route::inertia('/update/{id}',  'MasterPr/ItemCategory/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+        });
+
+
+        Route::group(['prefix' => 'storage-location'], function () {
+            Route::inertia('/',  'MasterPr/StorageLocation/Index');
+            Route::inertia('/create',  'MasterPr/StorageLocation/Create');
+            Route::inertia('/update/{id}',  'MasterPr/StorageLocation/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+        });
+    });
+    Route::group(['prefix' => 'api/master-pr', 'middleware' => 'auth'], function () {
+        Route::group(['prefix' => 'dokument-type'], function () {
+            Route::get('/list', [DokumentTypeController::class, 'index'])->name('master.dokument-type.index');
+            Route::post('/create', [DokumentTypeController::class, 'store'])->name('master.dokument-type.store');
+            Route::post('/update/{id}', [DokumentTypeController::class, 'update'])->name('master.dokument-type.update');
+            Route::get('/detail/{id}', [DokumentTypeController::class, 'show'])->name('master.dokument-type.show');
+            Route::delete('/delete/{id}', [DokumentTypeController::class, 'destroy'])->name('master.dokument-type.destroy');
+        });
+        Route::group(['prefix' => 'valuation-type'], function () {
+            Route::get('/list', [ValuationTypeController::class, 'index'])->name('master.valuation-type.index');
+            Route::post('/create', [ValuationTypeController::class, 'store'])->name('master.valuation-type.store');
+            Route::post('/update/{id}', [ValuationTypeController::class, 'update'])->name('master.valuation-type.update');
+            Route::get('/detail/{id}', [ValuationTypeController::class, 'show'])->name('master.valuation-type.show');
+            Route::delete('/delete/{id}', [ValuationTypeController::class, 'destroy'])->name('master.valuation-type.destroy');
+        });
+        Route::group(['prefix' => 'purchasing-group'], function () {
+            Route::get('/list', [PurchasingGroupController::class, 'index'])->name('master.purchasing-group.index');
+            Route::post('/create', [PurchasingGroupController::class, 'store'])->name('master.purchasing-group.store');
+            Route::post('/update/{id}', [PurchasingGroupController::class, 'update'])->name('master.purchasing-group.update');
+            Route::get('/detail/{id}', [PurchasingGroupController::class, 'show'])->name('master.purchasing-group.show');
+            Route::delete('/delete/{id}', [PurchasingGroupController::class, 'destroy'])->name('master.purchasing-group.destroy');
+        });
+        Route::group(['prefix' => 'account-assignment-category'], function () {
+            Route::get('/list', [AccountAssignmentCategoryController::class, 'index'])->name('master.account-assignment-category.index');
+            Route::post('/create', [AccountAssignmentCategoryController::class, 'store'])->name('master.account-assignment-category.store');
+            Route::post('/update/{id}', [AccountAssignmentCategoryController::class, 'update'])->name('master.account-assignment-category.update');
+            Route::get('/detail/{id}', [AccountAssignmentCategoryController::class, 'show'])->name('master.account-assignment-category.show');
+            Route::delete('/delete/{id}', [AccountAssignmentCategoryController::class, 'destroy'])->name('master.account-assignment-category.destroy');
+        });
+        Route::group(['prefix' => 'item-category'], function () {
+            Route::get('/list', [ItemCategoryController::class, 'index'])->name('master.item-category.index');
+            Route::post('/create', [ItemCategoryController::class, 'store'])->name('master.item-category.store');
+            Route::post('/update/{id}', [ItemCategoryController::class, 'update'])->name('master.item-category.update');
+            Route::get('/detail/{id}', [ItemCategoryController::class, 'show'])->name('master.item-category.show');
+            Route::delete('/delete/{id}', [ItemCategoryController::class, 'destroy'])->name('master.item-category.destroy');
+        });
+        Route::group(['prefix' => 'storage-location'], function () {
+            Route::get('/list', [StorageLocationController::class, 'index'])->name('master.storage-location.index');
+            Route::post('/create', [StorageLocationController::class, 'store'])->name('master.storage-location.store');
+            Route::post('/update/{id}', [StorageLocationController::class, 'update'])->name('master.storage-location.update');
+            Route::get('/detail/{id}', [StorageLocationController::class, 'show'])->name('master.storage-location.show');
+            Route::delete('/delete/{id}', [StorageLocationController::class, 'destroy'])->name('master.storage-location.destroy');
         });
     });
 });
