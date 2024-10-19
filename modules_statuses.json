@@ -4,6 +4,7 @@
     "Auth": true,
     "Approval": true,
     "BussinesTrip": true,
+    "BusinessTrip": true,
     "Gateway": true,
     "User": true,
     "PurchaseRequisition": true

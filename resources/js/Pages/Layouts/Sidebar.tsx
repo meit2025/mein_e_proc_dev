@@ -149,7 +149,7 @@ const sidebar = [
           },
 
           {
-            name: 'Business Trip',
+            name: 'Business Trip Request',
             route: LIST_PAGE_BUSINESS_TRIP,
             roles: '',
           },
