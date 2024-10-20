@@ -160,6 +160,7 @@ class AllowanceItemController extends Controller
 
             $store->currency_id = $request->currency_id;
             $store->code = $request->code;
+            $store->material_number = $request->material_number;
             $store->name= $request->name;
             $store->request_value = $request->request_value;
             $store->allowance_category_id = $request->allowance_category_id;
