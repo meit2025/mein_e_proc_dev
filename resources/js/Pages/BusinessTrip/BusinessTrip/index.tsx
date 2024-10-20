@@ -2,7 +2,7 @@ import MainLayout from '@/Pages/Layouts/MainLayout';
 import React, { ReactNode } from 'react';
 import DataGridComponent from '@/components/commons/DataGrid';
 
-import { columns, UserModel } from './models/models';
+import { BusinessTripType, columns, UserModel } from './models/models';
 import { GET_MASTER_ASSET } from '@/endpoint/masterAsset/api';
 import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
@@ -11,16 +11,19 @@ import { DELET_API, EDIT_API, GET_LIST_BUSINESS_TRIP } from '@/endpoint/business
 import { AllowanceCategoryModel } from '../AllowanceCategory/model/AllowanceModel';
 // import AllowanceItemForm from './component/form';
 
-import {
-  BussinessTripFormV1
-} from './components/BussinessTripFormV1';
+import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
 import { PurposeTypeModel } from '../PurposeType/models/models';
 interface propsType {
-  listPurposeType: PurposeTypeModel[],
-  users: UserModel[]
+  listPurposeType: PurposeTypeModel[];
+  users: UserModel[];
 }
 export const Index = ({ listPurposeType, users }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
+
+  const [businessTripForm, setBusinessTripForm] = React.useState({
+    type: BusinessTripType.create,
+    id: undefined,
+  });
 
   function openFormHandler() {
     setOpenForm(!openForm);
@@ -37,14 +40,26 @@ export const Index = ({ listPurposeType, users }: propsType) => {
           open={openForm}
           onOpenChange={openFormHandler}
         >
-          <BussinessTripFormV1 users={users} listPurposeType={listPurposeType} />
+          <BussinessTripFormV1
+            users={users}
+            listPurposeType={listPurposeType}
+            type={businessTripForm.type}
+            id={businessTripForm.id}
+          />
         </CustomDialog>
       </div>
       <DataGridComponent
         columns={columns}
+        actionType='dropdown'
+        onEdit={(value) => {
+          setBusinessTripForm({
+            type: BusinessTripType.edit,
+            id: value.toString(),
+          });
+          setOpenForm(true);
+        }}
         url={{
           url: GET_LIST_BUSINESS_TRIP,
-          editUrl: EDIT_API,
           deleteUrl: DELET_API,
         }}
         labelFilter='search'

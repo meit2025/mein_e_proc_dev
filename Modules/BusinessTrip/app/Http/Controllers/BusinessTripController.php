@@ -52,9 +52,13 @@ class BusinessTripController extends Controller
     /**
      * Show the specified resource.
      */
-    public function show($id)
+    public function showAPI($id)
     {
-        return view('businesstrip::show');
+        $findData  = BusinessTrip::find($id);
+        //  attachment
+        $findData->attachment = BusinessTripAttachment::where('business_trip_id', $id)->first();
+
+        return $this->successResponse($findData);
     }
 
     /**
@@ -81,7 +85,8 @@ class BusinessTripController extends Controller
         //
     }
 
-    public function storeAPI(Request $request) {
+    public function storeAPI(Request $request)
+    {
         $rules = [
             'purpose_type_id' => 'required',
             'request_for' => 'required',
@@ -90,7 +95,7 @@ class BusinessTripController extends Controller
 
         $validator =  Validator::make($request->all(), $rules);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return $this->errorResponse("erorr", 400, $validator->errors());
         }
 
@@ -111,8 +116,8 @@ class BusinessTripController extends Controller
             if ($request->attachment != null) {
                 BusinessTripAttachment::create([
                     'business_trip_id' => $businessTrip->id,
-                    'file_path' => explode('/',$request->attachment->store('business_trip','public'))[0],
-                    'file_name' => explode('/',$request->attachment->store('business_trip','public'))[1],
+                    'file_path' => explode('/', $request->attachment->store('business_trip', 'public'))[0],
+                    'file_name' => explode('/', $request->attachment->store('business_trip', 'public'))[1],
                 ]);
             }
 
@@ -143,23 +148,23 @@ class BusinessTripController extends Controller
                             'business_trip_destination_id' => $businessTripDestination->id,
                             'business_trip_id' => $businessTrip->id,
                             'price' => $detail['request_price'],
-                            'allowance_item_id' => AllowanceItem::where('code',$allowance['code'])->first()?->id,
+                            'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
                         ]);
                     }
-                }else{
+                } else {
                     foreach ($allowance['detail'] as $detail) {
                         BusinessTripDetailDestinationDayTotal::create([
                             'business_trip_destination_id' => $businessTripDestination->id,
-                            'date'=> $detail['date'],
+                            'date' => $detail['date'],
                             'business_trip_id' => $businessTrip->id,
                             'price' => $detail['request_price'],
-                            'allowance_item_id' => AllowanceItem::where('code',$allowance['code'])->first()?->id,
+                            'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
                         ]);
                     }
                 }
             }
             DB::commit();
-        }catch(\Exception $e) {
+        } catch (\Exception $e) {
             dd($e);
             DB::rollBack();
         }

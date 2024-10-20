@@ -15,7 +15,7 @@ class PurposeTypeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    
+
     public function index()
     {
 
@@ -72,27 +72,27 @@ class PurposeTypeController extends Controller
         //
     }
 
-    public function detailAPI($id) {
+    public function detailAPI($id)
+    {
         $find = PurposeType::with(['listAllowance'])->find($id);
         return $this->successResponse($find);
-
     }
 
     public function storeApi(Request $request)
     {
-        
+
         $rules = [
             'code' => 'required',
             'name' => 'required',
             'allowances.*' => 'required',
             'attedance_status' => 'required'
-         ];
+        ];
 
-         $validator =  Validator::make($request->all(), $rules);
+        $validator =  Validator::make($request->all(), $rules);
 
-         if($validator->fails()) {
+        if ($validator->fails()) {
             return $this->errorResponse('erorr created', 400, $validator->errors());
-         }
+        }
 
         DB::beginTransaction();
 
@@ -107,10 +107,10 @@ class PurposeTypeController extends Controller
 
             $allowances = [];
 
-            foreach($allowances as $allowance_id) {
+            foreach ($allowances as $allowance_id) {
                 array_push($allowances, [
                     'allowance_items_id' => $allowance_id,
-                    'purpose_type_id'=> $purpose->id
+                    'purpose_type_id' => $purpose->id
                 ]);
             }
 
@@ -119,19 +119,15 @@ class PurposeTypeController extends Controller
             DB::commit();
 
             return $this->successResponse($purpose, 'Successfully creeted purpose type');
-
-
-            
-
-        }
-        catch(\Exception $e) {
+        } catch (\Exception $e) {
             dd($e);
 
             DB::rollBack();
         }
     }
 
-    public function getAllowanceByPurposeAPI($id) {
+    public function getAllowanceByPurposeAPI($id)
+    {
         $listAllowances =  AllowanceItem::whereIn('id', PurposeTypeAllowance::where('purpose_type_id', $id)->get()->pluck('allowance_items_id')->toArray())->get();
 
         return $this->successResponse($listAllowances);
