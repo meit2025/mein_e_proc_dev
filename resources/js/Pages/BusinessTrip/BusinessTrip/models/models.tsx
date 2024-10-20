@@ -7,33 +7,39 @@ export const columns: GridColDef[] = [
 ];
 
 export interface CurrencyModel {
-    code: string,
-    name: string
+  code: string;
+  name: string;
 }
 
 export interface BusinessTripModel {
-    request_no: string,
-    id: string,
+  request_no: string;
+  id: string;
 }
 
 export interface UserModel {
-  name: string,
-  id: string,
-  nip:string
+  name: string;
+  id: string;
+  nip: string;
 }
 
 export interface AllowanceItemModel {
-    id: string,
-    code: string,
-    name: string,
-    purpose_type?: [],
-    currency_id: string,
-    request_value: string,
-    formula:string,
-    type:string,
-    max_value?:string,
-    fixed_value?:string,
-    allowance_category_id:number,
+  id: string;
+  code: string;
+  name: string;
+  purpose_type?: [];
+  currency_id: string;
+  request_value: string;
+  formula: string;
+  type: string;
+  max_value?: string;
+  fixed_value?: string;
+  allowance_category_id: number;
+}
+
+export enum BusinessTripType {
+  create,
+  edit,
+  update,
 }
 
 //  'type',
