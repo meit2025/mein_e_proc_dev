@@ -48,6 +48,7 @@ import { CREATE_API_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/api';
 import { AxiosError } from 'axios';
 import { MultiSelect } from '@/components/commons/MultiSelect';
 import { BusinessTripGrade } from '../../BusinessGrade/model/model';
+import { MaterialModel } from '@/Pages/Master/MasterMaterial/model/listModel';
 // 
 
 export enum AllowanceType {
@@ -63,6 +64,7 @@ export interface AllowanceItemFormInterface {
   listCurrency: CurrencyModel[];
   listAllowanceCategory: AllowanceCategoryModel[];
   listGrade: BusinessTripGrade[];
+  listMaterial: MaterialModel[]
 }
 export default function AllowanceItemForm({
   onSuccess,
@@ -70,12 +72,14 @@ export default function AllowanceItemForm({
   id,
   listCurrency,
   listAllowanceCategory,
-  listGrade
+  listGrade,
+  listMaterial
 }: AllowanceItemFormInterface) {
   var formSchema = z.object({
     code: z.string().min(1, 'Code is required'),
     name: z.string().min(1, 'Name is required'),
     type: z.string().min(1, 'Type is required'),
+    material_number: z.string().min(1, "Material number required"),
     currency_id: z.string().min(1, 'Currency is required'),
     formula: z.string().min(1, 'Formula is required'),
     allowance_category_id: z.string().min(1, 'Allowance Category is required'),
@@ -246,6 +250,49 @@ export default function AllowanceItemForm({
                 />
               </td>
             </tr>
+
+            <tr>
+              <td width={200}>Material Number</td>
+              <td>
+                <FormField
+                  control={form.control}
+                  name='material_number'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
+                          value={field.value} // Set the current value from React Hook Form
+                        >
+                          <SelectTrigger className='w-[200px]'>
+                            <SelectValue placeholder='Select Material Number' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {/* <SelectItem key='DAILY' value='daily'>
+                              DAILY
+                            </SelectItem>
+                            <SelectItem key='TOTAL' value='total'>
+                              Total
+                            </SelectItem> */}
+
+                              {
+                                listMaterial.map((material) => (
+                                  <SelectItem key={material.material_number} value={material.material_number}>
+                                    {
+                                      material.material_number
+                                    }
+                                  </SelectItem>
+                                ))
+                              }
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </td>
+            </tr>
             <tr>
               <td width={200}>Currency</td>
               <td>
@@ -385,13 +432,16 @@ export default function AllowanceItemForm({
                       options={listGrade}
                       value={form.getValues('grades')}
                       onSelect={(value) => {
-                        form.setValue('grades', value.map((item) => {
-                          return {
-                            "id": item.id,
-                            'grade': item.grade,
-                            'price': 0
-                          }
-                        }))
+                        form.setValue(
+                          'grades',
+                          value.map((item) => {
+                            return {
+                              id: item.id,
+                              grade: item.grade,
+                              price: 0,
+                            };
+                          }),
+                        );
                       }}
                     />
                   </div>
