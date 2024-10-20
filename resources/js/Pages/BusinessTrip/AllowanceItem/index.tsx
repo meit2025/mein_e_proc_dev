@@ -13,15 +13,17 @@ import { GET_LIST_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/api';
 import { AllowanceCategoryModel } from '../AllowanceCategory/model/AllowanceModel';
 import AllowanceItemForm from './component/form';
 import { BusinessTripGrade } from '../BusinessGrade/model/model';
+import { MaterialModel } from '@/Pages/Master/MasterMaterial/model/listModel';
 
 
 interface propsType {
     listAllowanceCategory: AllowanceCategoryModel[],
     listCurrency: any[],
-    listGrade: BusinessTripGrade[]
+    listGrade: BusinessTripGrade[],
+    listMaterial: MaterialModel[],
 }
 export const Index = (
-    {listAllowanceCategory, listCurrency, listGrade}: propsType
+    {listAllowanceCategory, listCurrency, listGrade, listMaterial}: propsType
 ) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
@@ -40,7 +42,7 @@ export const Index = (
           open={openForm}
           onOpenChange={openFormHandler}
         >
-            <AllowanceItemForm listGrade={listGrade} listCurrency={listCurrency} listAllowanceCategory={listAllowanceCategory} />
+            <AllowanceItemForm listMaterial={listMaterial} listGrade={listGrade} listCurrency={listCurrency} listAllowanceCategory={listAllowanceCategory} />
         </CustomDialog>
       </div>
       <DataGridComponent

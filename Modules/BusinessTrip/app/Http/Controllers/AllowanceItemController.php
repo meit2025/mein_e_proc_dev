@@ -11,6 +11,7 @@ use Modules\BusinessTrip\Models\AllowanceCategory;
 use Modules\BusinessTrip\Models\AllowanceItem;
 use Modules\BusinessTrip\Models\BusinessTripGrade;
 use Modules\BusinessTrip\Models\BusinessTripGradeAllowance;
+use Modules\Master\Models\MasterMaterial;
 
 class AllowanceItemController extends Controller
 {
@@ -25,9 +26,11 @@ class AllowanceItemController extends Controller
         $listAllowanceCategory = AllowanceCategory::get();
         $listCurrency =  Currency::get();
         $listGrade =  BusinessTripGrade::get();
+        $listMaterial =  MasterMaterial::get();
 
 
-        return inertia('BusinessTrip/AllowanceItem/index',compact('listAllowanceCategory', 'listCurrency', 'listGrade'));
+
+        return inertia('BusinessTrip/AllowanceItem/index',compact('listAllowanceCategory', 'listCurrency', 'listGrade', 'listMaterial'));
     }
 
     /**
@@ -131,7 +134,8 @@ class AllowanceItemController extends Controller
             'currency_id' =>'required',
             'type' => 'required',
             'formula' => 'required',
-            'grade_option' => 'required'
+            'grade_option' => 'required',
+            'material_number' => 'required'
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -156,6 +160,7 @@ class AllowanceItemController extends Controller
 
             $store->currency_id = $request->currency_id;
             $store->code = $request->code;
+            $store->material_number = $request->material_number;
             $store->name= $request->name;
             $store->request_value = $request->request_value;
             $store->allowance_category_id = $request->allowance_category_id;
