@@ -1,0 +1,1 @@
+const e=[{field:"purchasing_group",headerName:"purchasing group",width:200,filterable:!0},{field:"purchasing_group_desc",headerName:"purchasing group description",width:200,filterable:!0}];export{e as columns};
