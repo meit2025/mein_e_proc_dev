@@ -128,43 +128,8 @@ const sidebar = [
       {
         title: 'Bussiness Trip',
         icon: 'ki-element-11',
-        route: '/',
-        sub: [
-          {
-            name: 'Allowance Category',
-            route: LIST_PAGE_ALLOWANCE_CATEGORY,
-            roles: '',
-          },
-
-          {
-            name: 'Allowance Item',
-            route: LIST_PAGE_ALLOWANCE_ITEM,
-            roles: '',
-          },
-
-          {
-            name: 'Purpose Type',
-            route: LIST_PAGE_PURPOSE_TYPE,
-            roles: '',
-          },
-
-          {
-            name: 'Business Trip',
-            route: LIST_PAGE_BUSINESS_TRIP,
-            roles: '',
-          },
-
-          {
-            name: 'Business Trip Grade',
-            route: LIST_PAGE_BUSINESS_GRADE,
-            roles: '',
-          },
-          // {
-          //   name: 'Bank Key',
-          //   route: LIST_PAGE_ALLOWANCE_CATEGORY,
-          //   roles: '',
-          // },
-        ],
+        route: LIST_PAGE_BUSINESS_TRIP,
+        sub: []
       },
 
       {
@@ -343,6 +308,41 @@ const sidebar = [
             route: LIST_PAGE_ROLE,
             roles: '',
           },
+        ],
+      },
+      {
+        title: 'Master Business Trip ',
+        icon: 'ki-element-11',
+        route: '/',
+        sub: [
+          {
+            name: 'Allowance Category',
+            route: LIST_PAGE_ALLOWANCE_CATEGORY,
+            roles: '',
+          },
+
+          {
+            name: 'Allowance Item',
+            route: LIST_PAGE_ALLOWANCE_ITEM,
+            roles: '',
+          },
+
+          {
+            name: 'Purpose Type',
+            route: LIST_PAGE_PURPOSE_TYPE,
+            roles: '',
+          },
+
+          {
+            name: 'Business Trip Grade',
+            route: LIST_PAGE_BUSINESS_GRADE,
+            roles: '',
+          },
+          // {
+          //   name: 'Bank Key',
+          //   route: LIST_PAGE_ALLOWANCE_CATEGORY,
+          //   roles: '',
+          // },
         ],
       },
     ],
