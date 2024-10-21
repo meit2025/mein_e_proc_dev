@@ -88,16 +88,20 @@ export const BussinessTripFormV1 = ({
   listPurposeType,
   type,
   id,
+  role,
+  idUser,
 }: {
   users: User[];
   listPurposeType: PurposeTypeModel[];
   type: BusinessTripType;
   id: string;
+  role: string;
+  idUser: string;
 }) => {
   const formSchema = z.object({
     purpose_type_id: z.string().min(1, 'Purpose type required'),
     request_for: z.string().min(1, 'Request for required'),
-    remark: z.string().optional(),
+    remark: z.string().min(1, 'Remark is required'),
     attachment: z.instanceof(File).nullable().optional(),
     total_destination: z.number().min(1, 'Total Destinantion Required'),
     destinations: z.array(
@@ -187,8 +191,9 @@ export const BussinessTripFormV1 = ({
 
   async function handlePurposeType(value: string) {
     form.setValue('purpose_type_id', value || '');
+    let userid = idUser || '';
     // console.log(value);
-    let url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value);
+    let url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
 
     try {
       let response = await axiosInstance.get(url);
@@ -260,6 +265,8 @@ export const BussinessTripFormV1 = ({
     form.setValue('destinations', destinationForm);
   }
 
+  function getUser() {}
+
   const {
     fields: destinationField,
     append,
@@ -275,7 +282,7 @@ export const BussinessTripFormV1 = ({
     if (id && type == BusinessTripType.edit) {
       getDetailData();
     }
-  }, [totalDestination, listAllowances, id, type]);
+  }, [totalDestination, listAllowances, id, type, role, idUser]);
   return (
     <ScrollArea className='h-[600px] w-full '>
       <Form {...form}>
@@ -317,35 +324,54 @@ export const BussinessTripFormV1 = ({
             </tr>
 
             <tr>
-              <td width={200}>Request For </td>
+              <td width={200}>Request For</td>
               <td>
-                {' '}
                 <FormField
                   control={form.control}
                   name='request_for'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => field.onChange(value)}
-                          value={field.value}
-                        >
-                          <SelectTrigger className='w-[200px] py-2'>
-                            <SelectValue placeholder='-- Select Bussiness Purpose Type --' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {users.map((item) => (
-                              <SelectItem value={item.id.toString()}>{item.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    // Jika role adalah 'user', set value default sebagai currentUserId
+                    if (role === 'user' && !field.value) {
+                      field.onChange(idUser.toString());
+                    }
+
+                    return (
+                      <FormItem>
+                        <FormControl>
+                          <Select
+                            onValueChange={(value) => field.onChange(value)}
+                            value={field.value}
+                            disabled={role === 'user'} // Disable select for user role
+                          >
+                            <SelectTrigger className='w-[200px] py-2'>
+                              <SelectValue placeholder='-- Select Business Purpose Type --' />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {role === 'admin'
+                                ? users.map((item) => (
+                                    <SelectItem key={item.id} value={item.id.toString()}>
+                                      {item.name}
+                                    </SelectItem>
+                                  ))
+                                : // If role is user, show only the logged-in user's name
+                                  users
+                                    .filter((user) => user.id === idUser)
+                                    .map((item) => (
+                                      <SelectItem key={item.id} value={item.id.toString()}>
+                                        {item.name}
+                                      </SelectItem>
+                                    ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
               </td>
             </tr>
+
             <tr>
               <td width={200}>Remark</td>
               <td>
@@ -554,21 +580,22 @@ export function BussinessDestinationForm({
       momentStart = momentStart.add(1, 'days');
       detailAttedanceAppend(object);
     }
-
+    console.log(listAllowances, ' allowance');
     let allowancesForm = listAllowances.map((item: any) => {
       return {
         name: item.name,
         code: item.code,
-        default_price: dummyPrice,
+        default_price: item.grade_all_price,
         type: item.type,
-        subtotal: dummyPrice,
+        subtotal: item.grade_all_price,
         currency: item.currency_id,
+        request_value: item.request_value,
         detail:
           item.type == 'total'
             ? [
                 {
                   date: undefined,
-                  request_price: dummyPrice,
+                  request_price: item.grade_all_price,
                 },
               ]
             : detailAllowance,
@@ -918,6 +945,24 @@ export function AllowanceRowInput({
       return total;
     }
   };
+  console.log(allowance, ' cek euy');
+  const handleInputChange = (field: any) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(event.target.value) || 0;
+
+    if (allowance.request_value === 'unlimited') {
+      // No restrictions on input value
+      field.onChange(event);
+    } else if (allowance.request_value === 'up to max value') {
+      if (value <= allowance.subtotal) {
+        field.onChange(event);
+      } else {
+        alert(`Value cannot exceed the subtotal of IDR ${allowance.subtotal}`);
+      }
+    } else if (allowance.request_value === 'fixed value') {
+      // Do not allow changes for fixed value
+      alert(`This value is fixed and cannot be changed.`);
+    }
+  };
 
   return (
     <>
@@ -938,7 +983,7 @@ export function AllowanceRowInput({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input value={field.value} onChange={field.onChange} />
+                      <Input value={field.value} onChange={handleInputChange(field)} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -947,7 +992,10 @@ export function AllowanceRowInput({
               <span className='text-sm'>* 100%</span>
             </div>
           ) : (
-            <span className='text-sm'> {allowance.detail.length} Days * 0 * 100%</span>
+            <span className='text-sm'>
+              {' '}
+              {allowance.detail.length} Days * {allowance.subtotal} * 100%
+            </span>
           )}
         </td>
         <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
@@ -993,7 +1041,9 @@ export function AllowanceRowInput({
                         <FormControl>
                           <Input
                             value={field.value} // Ensure proper value binding
-                            onChange={field.onChange} // Bind change handler to form control
+                            // onChange={field.onChange} // Bind change handler to form control
+                            onChange={handleInputChange(field)}
+                            disabled={allowance.request_value === 'fixed value'}
                           />
                         </FormControl>
                         <FormMessage />

@@ -25,6 +25,7 @@ import { LIST_PAGE_MASTER_ITEM_CATEGORY } from '@/endpoint/ItemCategory/page';
 import { LIST_PAGE_MASTER_STORAGE_LOCATION } from '@/endpoint/storageLocation/page';
 import { LIST_PAGE_APPROVAL_ROUTE } from '@/endpoint/approvalRoute/page';
 import { LIST_PAGE_SETTING_APPROVAL } from '@/endpoint/settingApproval/page';
+import { LIST_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
 // import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
@@ -128,8 +129,19 @@ const sidebar = [
       {
         title: 'Bussiness Trip',
         icon: 'ki-element-11',
-        route: LIST_PAGE_BUSINESS_TRIP,
-        sub: []
+        route: '/',
+        sub: [
+          {
+            name: 'Business Trip Request',
+            route: LIST_PAGE_BUSINESS_TRIP,
+            roles: '',
+          },
+          {
+            name: 'Business Trip Declaration',
+            route: LIST_PAGE_BUSINESS_TRIP_DECLARATION,
+            roles: '',
+          },
+        ],
       },
       {
         title: 'Purchase Requisition',

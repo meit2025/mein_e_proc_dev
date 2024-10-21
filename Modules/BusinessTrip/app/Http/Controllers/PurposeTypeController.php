@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Modules\BusinessTrip\Models\AllowanceItem;
+use Modules\BusinessTrip\Models\BusinessTripGradeAllowance;
+use Modules\BusinessTrip\Models\BusinessTripGradeUser;
 use Modules\BusinessTrip\Models\PurposeType;
 use Modules\BusinessTrip\Models\PurposeTypeAllowance;
 
@@ -126,10 +128,23 @@ class PurposeTypeController extends Controller
         }
     }
 
-    public function getAllowanceByPurposeAPI($id)
+    public function getAllowanceByPurposeAPI($id, $userid)
     {
         $listAllowances =  AllowanceItem::whereIn('id', PurposeTypeAllowance::where('purpose_type_id', $id)->get()->pluck('allowance_items_id')->toArray())->get();
-
+        foreach ($listAllowances as $allowance) {
+            if ($allowance->grade_option == 'all') {
+                $listAllowances->grade_all_price = $allowance->grade_all_price;
+            } else {
+                // get grade user
+                $grade = BusinessTripGradeUser::where('user_id', $userid)->first();
+                if (is_null($grade)) {
+                    $listAllowances->grade_all_price = 0;
+                } else {
+                    $btgradeAllowance = BusinessTripGradeAllowance::where('grade_id', $grade->grade_id)->where('allowance_items_id', $allowance->id)->first();
+                    $listAllowances->grade_all_price = $btgradeAllowance->plafon;
+                }
+            }
+        }
         return $this->successResponse($listAllowances);
     }
 }
