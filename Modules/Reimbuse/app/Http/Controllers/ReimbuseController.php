@@ -14,6 +14,7 @@ use Modules\Reimbuse\Models\ReimbursePeriod;
 use Modules\Reimbuse\Models\ReimburseQuota;
 use Modules\Reimbuse\Models\ReimburseType;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Modules\Reimbuse\Services\ReimbursementService;
 
 class ReimbuseController extends Controller
@@ -38,7 +39,6 @@ class ReimbuseController extends Controller
 
     public function is_required(Request $request)
     {
-
         $user = $request->user;
         $is_employee = $request->is_employee;
         $type = $request->type;
@@ -72,8 +72,8 @@ class ReimbuseController extends Controller
             }
             $gap_ok = !in_array(False, $progresses);
             $progress_ok = !in_array('Open', $progresses);
-            $plafon_ok = $used_plafon < $quota->plafon;
-            $limit_ok = $used_limit < $quota->limit;
+            $plafon_ok = $used_plafon < ($quota->plafon ?? 0);
+            $limit_ok = $used_limit < ($quota->limit ?? 0);
             $quota['limit'] -= $used_limit;
             $quota['plafon'] -= $used_plafon;
             if ($gap_ok && $progress_ok && $plafon_ok && $limit_ok) {
@@ -93,13 +93,19 @@ class ReimbuseController extends Controller
 
     public function index()
     {
+        $is_Admin = Auth::user()->role === 'admin';
         $reimburses = ReimburseGroup::with('reimburses', 'users')->get();
 
         foreach ($reimburses as $reimburse) {
             $reimburse['status'] = $this->reimbursementService->checkGroupStatus($reimburse->code);
         }
 
-        $users = User::with('families')->select('nip', 'name')->get();
+        if (!$is_Admin) {
+            $users = User::with('families')->where('id', Auth::id())->select('nip', 'name')->get();
+        }else{
+            $users = User::with('families')->select('nip', 'name')->get();
+        }
+
         $types = ['Employee', 'Family'];
         $currencies = Currency::select('code', 'name')->get();
         $periods = ReimbursePeriod::select('id', 'code', 'start', 'end')->get();

@@ -68,13 +68,14 @@ export const ReimburseForm: React.FC<Props> = ({
   users,
   csrf_token,
 }) => {
+  const [activeTab, setActiveTab] = useState('form1');
   const { showToast } = useAlert();
   const { errors } = usePage().props;
   const [formCount, setFormCount] = useState<number>(1);
   const [formData, setFormData] = useState<Reimburse[]>(reimburses);
   const [limits, setLimits] = useState([]);
   const [reimburseTypes, setReimburseTypes] = useState([[]]);
-
+  const [families, setFamilies] = useState([]);
   const formSchema = z.object({
     remark_group: z.string().nonempty('Remark is required'),
     requester: z.string().nonempty('Requester is required'),
@@ -144,9 +145,21 @@ export const ReimburseForm: React.FC<Props> = ({
     }
   }, [reimbursement]);
 
-  const handleFormCountChange = (value: number) => {
-    setFormCount(value);
+  async function selectedEmployee(value) {
+    try {
+      const response = await axios.get(`/family/show/${value}`);
+      const typeData = response.data;
+      setFamilies(typeData);
+      form.setValue('requester', value);
+    } catch (error) {
+      const resultError = error as AxiosError;
+      const err = resultError.response.data;
+      showToast(err.message, err.status);
+    }
+  }
 
+  const handleFormCountChange = (value) => {
+    setFormCount(value);
     const currentForms = form.getValues('forms');
     const newForms = Array.from({ length: value }).map((_, index) => {
       return (
@@ -168,33 +181,44 @@ export const ReimburseForm: React.FC<Props> = ({
     form.setValue('formCount', value.toString());
   };
 
+  const handleTabChange = (tabValue) => {
+    setActiveTab(tabValue);
+  };
+
   async function selectedTypeCode(index, value) {
-    const selectedType = types.find((type) => type.code === value);
     try {
       const response = await axios.get(`/reimburse/type/${value}`);
       const typeData = response.data;
-
-      setLimits((prevLimits) => {
-        const updatedLimits = [...prevLimits];
-        updatedLimits[index] = {
-          plafon: selectedType?.plafon ?? 0,
-          claim: selectedType?.claim_limit ?? 'Unlimited',
-        };
-        return updatedLimits;
-      });
-
       setReimburseTypes((prevTypes) => {
         const updatedTypes = [...prevTypes];
         updatedTypes[index] = typeData.data;
         return updatedTypes;
       });
-
       form.setValue(`forms.${index}.type`, value);
     } catch (error) {
       const resultError = error as AxiosError;
       const err = resultError.response.data;
       showToast(err.message, err.status);
     }
+  }
+
+  async function checkBalance(index, user, is_employee, type, period) {
+    const response = await axios.post('/reimburse/is_required', {
+      user,
+      is_employee,
+      type,
+      period,
+    });
+    const selectedType = response.data.data;
+    setLimits((prevLimits) => {
+      const updatedLimits = [...prevLimits];
+      updatedLimits[index] = {
+        plafon: selectedType?.plafon ?? 0,
+        limit: selectedType?.limit ?? 'Unlimited',
+      };
+      return updatedLimits;
+    });
+    form.setValue(`forms.${index}.family`, user);
   }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -282,7 +306,7 @@ export const ReimburseForm: React.FC<Props> = ({
                         <FormControl>
                           <Select
                             disabled={reimbursement !== null}
-                            onValueChange={(value) => field.onChange(value)}
+                            onValueChange={(value) => selectedEmployee(value)}
                             value={field.value}
                           >
                             <SelectTrigger className='w-[200px]'>
@@ -340,12 +364,19 @@ export const ReimburseForm: React.FC<Props> = ({
 
           <Separator className='my-4' />
 
-          {Array.from({ length: form.watch('formCount') || 1 }).map((_, index) => (
-            <Tabs key={index} defaultValue={`form${index + 1}`} className='w-full'>
-              <TabsList className='grid w-full grid-cols-2'>
-                <TabsTrigger value={`form${index + 1}`}>Form {index + 1}</TabsTrigger>
-              </TabsList>
-              <TabsContent value={`form${index + 1}`}>
+          <Tabs value={activeTab} onValueChange={handleTabChange} className='w-full'>
+            <TabsList className={`flex items-center justify-start space-x-4`}>
+              {' '}
+              {/* Flexbox for horizontal layout */}
+              {Array.from({ length: form.watch('formCount') || 1 }).map((_, index) => (
+                <TabsTrigger key={index} value={`form${index + 1}`}>
+                  Form {index + 1}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            {Array.from({ length: form.watch('formCount') || 1 }).map((_, index) => (
+              <TabsContent key={index} value={`form${index + 1}`}>
                 <FormField
                   control={form.control}
                   name={`forms.${index}.id`}
@@ -422,6 +453,40 @@ export const ReimburseForm: React.FC<Props> = ({
                       </tr>
 
                       <tr>
+                        <td width={200}>Family</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.family`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Select
+                                    onValueChange={(value) =>
+                                      checkBalance(index, value, false, 'PS1', 'pd-01')
+                                    }
+                                    value={field.value}
+                                  >
+                                    <SelectTrigger className='w-[200px]'>
+                                      <SelectValue placeholder='-' />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {families.map((family) => (
+                                        <SelectItem key={family.id} value={family.id}>
+                                          {family.name} ({family.status})
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
+
+                      <tr>
                         <td width={200}>Period Date</td>
                         <td>
                           <FormField
@@ -479,7 +544,7 @@ export const ReimburseForm: React.FC<Props> = ({
 
                       <tr>
                         <td width={200}>Limit per claim</td>
-                        <td>{limits[index]?.claim || '-'}</td>
+                        <td>{limits[index]?.limit || '-'}</td>
                       </tr>
 
                       <tr>
@@ -643,8 +708,8 @@ export const ReimburseForm: React.FC<Props> = ({
                   </table>
                 </div>
               </TabsContent>
-            </Tabs>
-          ))}
+            ))}
+          </Tabs>
 
           <Separator className='my-4' />
           <div className='mt-4 flex justify-end'>

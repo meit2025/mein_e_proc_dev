@@ -34,7 +34,7 @@ class UsersTableSeeder extends Seeder
             [
                 'nip'               =>  '23456',
                 'division'          =>  'IT',
-                'role'              =>  'user',
+                'role'              =>  'admin',
                 'job_level'         =>  'manager',
                 'immediate_spv'     =>  '00001',
                 'name'              =>  'John',
@@ -54,7 +54,7 @@ class UsersTableSeeder extends Seeder
                 'name'              =>  'Doe',
                 'email'             =>  'staff@gmail.com',
                 'email_verified_at' =>  now(),
-                'grade_reimburse'   =>  Grade::inRandomOrder()->first()->id,
+                'grade_reimburse'   =>  '1',
                 'password'          =>  Hash::make('password'),
                 'created_at'        =>  now(),
                 'updated_at'        =>  now(),

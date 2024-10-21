@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FamilyController;
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\Http\Controllers\AuthController;
 use Modules\Reimbuse\Http\Controllers\ReimbuseController;
@@ -19,5 +20,6 @@ use Modules\Reimbuse\Http\Controllers\ReimbuseController;
 
 Route::resource('/reimburse', ReimbuseController::class);
 Route::get('/reimburse/type/{type}', [ReimbuseController::class, 'getTypeData']);
-Route::get('/reimburse/is_required', [ReimbuseController::class, 'is_required']);
+Route::post('/reimburse/is_required', [ReimbuseController::class, 'is_required']);
 
+Route::get('/family/show/{employee}', [FamilyController::class, 'show']);
