@@ -27,6 +27,7 @@ class User extends Authenticatable
         'immediate_spv',
         'email_verified_at',
         'username',
+        'is_admin'
     ];
 
     /**
