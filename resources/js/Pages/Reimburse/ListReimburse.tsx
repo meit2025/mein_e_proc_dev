@@ -19,11 +19,27 @@ import './css/reimburse.scss';
 
 import MainLayout from '../Layouts/MainLayout';
 
+interface Quota {
+  id: string;
+  user: User[];
+  period: Period[];
+  type: Type[];
+  limit: number;
+  plafon: number;
+}
+
+interface Family {
+  id: string;
+  name: string;
+  status: string;
+  bod: string;
+}
+
 interface Reimburse {
   id: string;
-  rn: string;
   remark: string;
   type: string;
+  family: Family[];
   currency: string;
   balance: number;
   receipt_date: Date;
@@ -46,11 +62,6 @@ interface Group {
   reimburses: Reimburse[];
 }
 
-interface Type {
-  code: string;
-  name: string;
-}
-
 interface Currency {
   code: string;
   name: string;
@@ -66,7 +77,7 @@ interface Period {
 interface Props {
   groups: Group[];
   users: User[];
-  types: Type[];
+  types: string[];
   periods: Period[];
   currencies: Currency[];
   csrf_token: string;
@@ -108,7 +119,6 @@ const ListReimburse: React.FC<Props> = ({
     setOpen(false);
   };
 
-  // Helper function to format numbers with commas
   function numberWithCommas(x: number) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }

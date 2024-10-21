@@ -2,6 +2,7 @@
 
 namespace Modules\Reimbuse\Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Modules\Reimbuse\Models\ReimburseGroup;
 
@@ -16,12 +17,9 @@ class ReimburseGroupSeeder extends Seeder
             [
                 [
                     'code'      =>  'Asal123',
-                    'remark'    =>  'Reimburse Persalinan'
+                    'remark'    =>  'Reimburse Persalinan',
+                    'requester' =>  User::inRandomOrder()->first()->nip
                 ],
-                [
-                    'code'      =>  'Asal321',
-                    'remark'    =>  'Reimburse Ibadah Haji'
-                ]
             ]
         );
     }

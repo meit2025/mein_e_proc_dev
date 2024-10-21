@@ -15,44 +15,32 @@ class Reimburse extends Model
 {
     use HasFactory, UniqueCode, SoftDeletes;
 
-    protected $guarded = ['id'];
-    protected $primaryKey = 'rn';
-    protected $keyType = 'string';
-    public $incrementing = false;
+    // protected static function boot()
+    // {
+    //     parent::boot();
+    //     static::creating(function ($reimburse) {
+    //         $reimburse->rn = self::generateUniqueRn();
+    //     });
+    // }
 
-    protected static function boot()
-    {
-        parent::boot();
+    // private static function generateUniqueRn()
+    // {
+    //     do {
+    //         // Generate a random string (e.g., 10 characters long)
+    //         $rn = Str::random(10);
+    //     } while (self::where('rn', $rn)->exists());
 
-        // Generate unique 'rn' before creating the model
-        static::creating(function ($reimburse) {
-            $reimburse->rn = self::generateUniqueRn();
-        });
-    }
-
-    /**
-     * Generate a unique RN code.
-     *
-     * @return string
-     */
-    private static function generateUniqueRn()
-    {
-        do {
-            // Generate a random string (e.g., 10 characters long)
-            $rn = Str::random(10);
-        } while (self::where('rn', $rn)->exists());
-
-        return $rn;
-    }
+    //     return $rn;
+    // }
 
     /**
      * The attributes that are mass assignable.
      */
     protected $fillable = [
-        "rn", //request number
-        "group", // group for combine reimburse
-        "type", // reimburse type or purpose
-        "remark", // reimburse detail (free text)
+        "group",
+        "type",
+        "remark",
+        "for",
         "balance",
         "receipt_date",
         "start_date",

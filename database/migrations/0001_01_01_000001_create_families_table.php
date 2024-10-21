@@ -11,11 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reimburse_attachments', function (Blueprint $table) {
+        Schema::create('families', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('reimburse')->constrained('reimburses')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->longText('url');
+            $table->string('user');
+            $table->string('name');
+            $table->enum('status', ['wife', 'child']);
+            $table->date('bod');
             $table->timestamps();
+
+            $table->foreign('user')->references('nip')->on('users')->cascadeOnUpdate()->cascadeOnDelete();
         });
     }
 
@@ -24,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reimburse_attachments');
+        Schema::dropIfExists('families');
     }
 };
