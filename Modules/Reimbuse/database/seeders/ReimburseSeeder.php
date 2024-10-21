@@ -3,6 +3,7 @@
 namespace Modules\Reimbuse\Database\Seeders;
 
 use App\Models\Currency;
+use App\Models\Family;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Modules\Reimbuse\Models\Reimburse;
@@ -20,19 +21,20 @@ class ReimburseSeeder extends Seeder
     {
         $faker = Faker::create();
         for ($i = 0; $i < 10; $i++) {
+            $group = ReimburseGroup::inRandomOrder()->first()->code;
+            $user = ReimburseGroup::where('code', $group)->first()->requester;
             Reimburse::insert(
                 [
-                    "rn"            =>  $faker->unique()->unixTime(),
-                    "group"         =>  ReimburseGroup::inRandomOrder()->first()->code,
+                    "group"         =>  $group,
                     "type"          =>  ReimburseType::inRandomOrder()->first()->code,
-                    "requester"     =>  User::inRandomOrder()->first()->nip,
+                    "currency"      =>  Currency::inRandomOrder()->first()->code,
                     "remark"        =>  $faker->sentence(),
+                    "for"           =>  Family::where('user', $user)->inRandomOrder()->first()->id,
                     "balance"       =>  $faker->randomFloat(2, 100000, 1000000),
                     "receipt_date"  =>  $faker->date(),
                     "start_date"    =>  $faker->date(),
                     "end_date"      =>  $faker->date($format = 'Y-m-d', $max = '+3 days'),
                     "period"        =>  ReimbursePeriod::inRandomOrder()->first()->code,
-                    "currency"      =>  Currency::inRandomOrder()->first()->code
                 ]
             );
         }

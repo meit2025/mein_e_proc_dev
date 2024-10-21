@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('reimburses', function (Blueprint $table) {
             $table->id();
-            $table->string('rn')->unique();
             $table->string('group');
             $table->string('type');
             $table->string('currency');
             $table->longText('remark');
+            $table->string('for');
             $table->double('balance');
             $table->date('receipt_date');
             $table->date('start_date');
