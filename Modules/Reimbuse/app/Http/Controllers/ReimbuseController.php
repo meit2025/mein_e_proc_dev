@@ -72,18 +72,14 @@ class ReimbuseController extends Controller
             }
             $gap_ok = !in_array(False, $progresses);
             $progress_ok = !in_array('Open', $progresses);
-            $plafon_ok = $used_plafon < ($quota->plafon ?? 0);
-            $limit_ok = $used_limit < ($quota->limit ?? 0);
-            $quota['limit'] -= $used_limit;
-            $quota['plafon'] -= $used_plafon;
-            if ($gap_ok && $progress_ok && $plafon_ok && $limit_ok) {
+            $used_plafon < ($quota->plafon ?? 0) ? $quota['plafon'] -= $used_plafon : $quota['plafon'] = 0;
+            $used_limit < ($quota->limit ?? 0) ? $quota['limit'] -= $used_plafon : $quota['limit'] = 0;
+            if ($gap_ok && $progress_ok) {
                 return $this->successResponse($quota);
             } else {
                 $message = [];
                 $gap_ok ? $message[] = null : $message[] = " period has not 1 year or more,";
                 $progress_ok ? $message[] = null : $message[] = " previous progress is open,";
-                $plafon_ok ? $message[] = null : $message[] = " Balance is run out,";
-                $limit_ok ? $message[] = null : $message[] = " Limit has exceeded.";
                 return $this->errorResponse(implode("", $message), 400);
             }
         } catch (\Exception $e) {
