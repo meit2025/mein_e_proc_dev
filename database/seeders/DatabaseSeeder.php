@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
             ReimbursePeriodSeeder::class,
             ReimburseGroupSeeder::class,
             ReimburseSeeder::class,
-            // ReimburseProgressSeeder::class
+            ReimburseProgressSeeder::class,
             ReimburseQuotaSeeder::class
         ]);
     }

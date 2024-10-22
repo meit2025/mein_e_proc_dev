@@ -17,19 +17,13 @@ class ReimburseProgressSeeder extends Seeder
     public function run(): void
     {
         $faker = Faker::create();
-        $sum_group = ReimburseGroup::count();
-        for ($i = 0; $i < $sum_group; $i++) {
-            $user = User::select('immediate_spv', 'nip')->inRandomOrder()->first();
-            if($user->immediate_spv !== null){
-                ReimburseProgress::create(
-                    [
-                        "reimburse" =>  Reimburse::inRandomOrder()->first()->rn,
-                        "approver"  =>  $user->immediate_spv,
-                        "notes"     =>  $faker->sentence(),
-                        "status"    =>  ['Approved', 'Rejected', 'Open'][rand(0, 2)]
-                    ]
-                );
-            }
-        }
+        ReimburseProgress::create(
+            [
+                "group"     =>  'Asal123',
+                "approver"  =>  '23456',
+                "notes"     =>  $faker->sentence(),
+                "status"    =>  ['Approved', 'Rejected', 'Open'][rand(0, 2)]
+            ]
+        );
     }
 }
