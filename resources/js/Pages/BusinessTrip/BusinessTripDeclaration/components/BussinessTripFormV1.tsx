@@ -84,7 +84,7 @@ const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/web
 export const BussinessTripFormV1 = ({
   users,
   listPurposeType,
-  listBusinessTrip
+  listBusinessTrip,
 }: {
   users: User[];
   listPurposeType: PurposeTypeModel[];
@@ -198,8 +198,6 @@ export const BussinessTripFormV1 = ({
     console.log('values bg', values);
   };
 
-
-
   function setAllowancesProperty() {
     let destinationForm = [];
 
@@ -220,6 +218,10 @@ export const BussinessTripFormV1 = ({
     form.setValue('destinations', destinationForm);
   }
 
+  async function handleGetBusinessTrip(value: string) {
+    console.log(value);
+  }
+
   const {
     fields: destinationField,
     append,
@@ -230,10 +232,7 @@ export const BussinessTripFormV1 = ({
     name: 'destinations',
   });
 
-
-
   React.useEffect(() => {
-
     setAllowancesProperty();
   }, [totalDestination, listAllowances]);
   return (
@@ -249,30 +248,30 @@ export const BussinessTripFormV1 = ({
               <td width={200}>Request No.</td>
               <td>
                 {' '}
-                    <FormField
-                    control={form.control}
-                    name='request_no'
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormControl>
-                            <Select
-                            onValueChange={(value) => field.onChange(value)}
-                            value={field.value}
-                            >
-                            <SelectTrigger className='w-[200px] py-2'>
-                                <SelectValue placeholder='-- Select One --' />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {listBusinessTrip.map((item) => (
-                                <SelectItem value={item.id.toString()}>{item.request_no}</SelectItem>
-                                ))}
-                            </SelectContent>
-                            </Select>
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
+                <FormField
+                  control={form.control}
+                  name='request_no'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => handleGetBusinessTrip(value)}
+                          value={field.value}
+                        >
+                          <SelectTrigger className='w-[200px] py-2'>
+                            <SelectValue placeholder='-- Select One --' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {listBusinessTrip.map((item) => (
+                              <SelectItem value={item.id.toString()}>{item.request_no}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </td>
             </tr>
             <tr>
@@ -302,20 +301,20 @@ export const BussinessTripFormV1 = ({
               <td width={200}>File Attachment</td>
               <td>
                 {/* <FormField
-                  control={form.control}
-                  name='attachment'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className='text-xs text-gray-500 font-extralight mb-1'>
-                        Max File: 1000KB
-                      </FormLabel>
-                      <FormControl>
-                        <Input type='file' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
+                    control={form.control}
+                    name='attachment'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className='text-xs text-gray-500 font-extralight mb-1'>
+                          Max File: 1000KB
+                        </FormLabel>
+                        <FormControl>
+                          <Input type='file' {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  /> */}
               </td>
             </tr>
 
@@ -470,31 +469,30 @@ export function BussinessDestinationForm({
       detailAllowance.push({
         date: momentStart.toDate(),
         request_price: 0,
-
       });
 
       momentStart = momentStart.add(1, 'days');
       detailAttedanceAppend(object);
     }
 
-    let allowancesForm = listAllowances.map((item:any) => {
-        return {
-            name: item.name,
-            code: item.code,
-            default_price: dummyPrice,
-            type: item.type,
-            subtotal: dummyPrice,
-            currency: item.currency_id,
-            detail:
-            item.type == 'TOTAL'
-                ? [
-                    {
-                    date: undefined,
-                    request_price: dummyPrice,
-                    },
-                ]
-                : detailAllowance,
-        };
+    let allowancesForm = listAllowances.map((item: any) => {
+      return {
+        name: item.name,
+        code: item.code,
+        default_price: dummyPrice,
+        type: item.type,
+        subtotal: dummyPrice,
+        currency: item.currency_id,
+        detail:
+          item.type == 'TOTAL'
+            ? [
+                {
+                  date: undefined,
+                  request_price: dummyPrice,
+                },
+              ]
+            : detailAllowance,
+      };
     });
 
     replaceAllowance(allowancesForm);
@@ -585,10 +583,10 @@ export function BussinessDestinationForm({
                       <CustomDatePicker
                         initialDate={destination.business_trip_end_date}
                         onDateChange={(value) => {
-                        //   updateDestination(index, {
-                        //     ...destination,
-                        //     business_trip_end_date: value,
-                        //   });
+                          //   updateDestination(index, {
+                          //     ...destination,
+                          //     business_trip_end_date: value,
+                          //   });
 
                           endDateHandler(value);
                         }}
@@ -620,64 +618,17 @@ export function BussinessDestinationForm({
           </tr>
 
           {/*
-              {field.allowances.map((allowances, allowanceIndex) => (
-                <tr>
-                  <td width={300}>{allowances.name}</td>
-                  <td>
-                    <FormField
-                      control={form.control}
-                      name={`destinations.${index}.allowances.${allowanceIndex}.`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input value={field.value} onChange={field.onChange} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                </tr>
-              ))} */}
-
-          {/* <tr>
-                    <td width={300}>Dinner Sector A Domestic</td>
-                    <td>3 Day(s)* 25000 * 100 = IDR 750000</td>
-                  </tr>
-                  <tr>
-                    <td width={300}>Lunch Sector A Domestic</td>
-                    <td>3 Day(s)* 25000 * 100 = IDR 750000</td>
-                  </tr>
-                  <tr>
-                    <td width={300}>Pocket Money Allowance Sector A Domestic</td>
-                    <td>3 Day(s)* 25000 * 100 = IDR 750000</td>
-                  </tr> */}
-        </table>
-
-
-        <DetailAllowance allowanceField={allowancesField} destinationIndex={index} form={form} />
-
-        {/* <table className='w-3/4 detail-bussiness text-xs text-gray-600 font-light'>
-          <thead>
-            <th>Item</th>
-            <th className='text-right'>SubTotal</th>
-          </thead>
-
-          <tbody> */}
-            {/* {field.allowances.map((allowances, allowanceIndex) => (
+                {field.allowances.map((allowances, allowanceIndex) => (
                   <tr>
                     <td width={300}>{allowances.name}</td>
                     <td>
                       <FormField
                         control={form.control}
-                        name={`destinations.${index}.allowances.${allowanceIndex}.default_price`}
+                        name={`destinations.${index}.allowances.${allowanceIndex}.`}
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
-
-                              {form.getValues(
-                                `destinations.${index}.allowances.${allowanceIndex}.default_price`,
-                              )}
+                              <Input value={field.value} onChange={field.onChange} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -687,22 +638,67 @@ export function BussinessDestinationForm({
                   </tr>
                 ))} */}
 
-            {/* <tr>
-              <td width={'50%'} className='flex justify-between pt-8 items-center'>
-                <span className='italic text-sm'>Total Allowance</span>
-                <span>IDR</span>
-              </td>
-              <td className='text-right pt-8'>
-                <span>70.000</span>
-              </td>
-            </tr>
-          </tbody>
-        </table> */}
+          {/* <tr>
+                      <td width={300}>Dinner Sector A Domestic</td>
+                      <td>3 Day(s)* 25000 * 100 = IDR 750000</td>
+                    </tr>
+                    <tr>
+                      <td width={300}>Lunch Sector A Domestic</td>
+                      <td>3 Day(s)* 25000 * 100 = IDR 750000</td>
+                    </tr>
+                    <tr>
+                      <td width={300}>Pocket Money Allowance Sector A Domestic</td>
+                      <td>3 Day(s)* 25000 * 100 = IDR 750000</td>
+                    </tr> */}
+        </table>
+
+        <DetailAllowance allowanceField={allowancesField} destinationIndex={index} form={form} />
+
+        {/* <table className='w-3/4 detail-bussiness text-xs text-gray-600 font-light'>
+            <thead>
+              <th>Item</th>
+              <th className='text-right'>SubTotal</th>
+            </thead>
+
+            <tbody> */}
+        {/* {field.allowances.map((allowances, allowanceIndex) => (
+                    <tr>
+                      <td width={300}>{allowances.name}</td>
+                      <td>
+                        <FormField
+                          control={form.control}
+                          name={`destinations.${index}.allowances.${allowanceIndex}.default_price`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+
+                                {form.getValues(
+                                  `destinations.${index}.allowances.${allowanceIndex}.default_price`,
+                                )}
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </td>
+                    </tr>
+                  ))} */}
+
+        {/* <tr>
+                <td width={'50%'} className='flex justify-between pt-8 items-center'>
+                  <span className='italic text-sm'>Total Allowance</span>
+                  <span>IDR</span>
+                </td>
+                <td className='text-right pt-8'>
+                  <span>70.000</span>
+                </td>
+              </tr>
+            </tbody>
+          </table> */}
       </div>
     </TabsContent>
   );
 }
-
 
 export function DetailAttedances({
   form,
@@ -741,7 +737,7 @@ export function DetailAttedances({
               <th>End Time</th>
             </thead>
             <tbody>
-              {detailAttedanceFields.map((attedance:any, index:any) => (
+              {detailAttedanceFields.map((attedance: any, index: any) => (
                 <tr key={attedance.index}>
                   <td>
                     {moment(attedance.date).format('DD/MM/YYYY')}
@@ -868,105 +864,125 @@ export function DetailAllowance({
   form: any;
   destinationIndex: number;
   allowanceField: any;
-  allowanceIndex:number;
+  allowanceIndex: number;
 }) {
   console.log('allowance field', allowanceField);
   console.log('allowance index', allowanceIndex);
 
   return (
     <table className='w-full allowance-table'>
-      {allowanceField.map((allowance:any, index:any) => (
-        <AllowanceRowInput form={form} allowance={allowance} index={index} destinationIndex={destinationIndex} allowanceIndex={allowanceIndex}/>
+      {allowanceField.map((allowance: any, index: any) => (
+        <AllowanceRowInput
+          form={form}
+          allowance={allowance}
+          index={index}
+          destinationIndex={destinationIndex}
+          allowanceIndex={allowanceIndex}
+        />
       ))}
     </table>
   );
 }
 
+export function AllowanceRowInput({
+  form,
+  allowance,
+  index,
+  destinationIndex,
+  allowanceIndex,
+}: {
+  form: any;
+  allowance: any;
+  index: number;
+  destinationIndex: any;
+  allowanceIndex: any;
+}) {
+  const [isExpanded, setIsExpanded] = React.useState<boolean>(false);
+  const handleClikRow = (index: number) => {
+    setIsExpanded((prev) => !prev);
+  };
+  return (
+    <>
+      <tr key={allowance.id}>
+        <td width={260} style={{ verticalAlign: 'middle' }} className='text-sm'>
+          {allowance.name}
+        </td>
+        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>:</td>
+        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+          {allowance.type == 'TOTAL' ? <span className='text-sm'>IDR</span> : <span></span>}
+        </td>
+        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+          {allowance.type == 'TOTAL' ? (
+            <div className='flex items-center'>
+              <AllowanceInputForm
+                form={form}
+                allowanceIndex={index}
+                type={allowance.type}
+                destinationIndex={destinationIndex}
+              />
+              <span className='text-sm'>* 100%</span>
+            </div>
+          ) : (
+            <span className='text-sm'> {allowance.detail.length} Days * 0 * 100%</span>
+          )}
+        </td>
+        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+          <div className='flex items-center'>
+            <span className='text-sm' style={{ padding: '2px 5px' }}>
+              = IDR 150000
+            </span>
+          </div>
+        </td>
+        {allowance.type == 'TOTAL' ? (
+          <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
+        ) : (
+          <td
+            style={{ verticalAlign: 'middle', padding: '2px 5px' }}
+            onClick={() => handleClikRow(index)}
+          >
+            <Button variant='ghost' size='sm' className='w-9 p-0'>
+              <ChevronsUpDown className='h-4 w-4' />
+              <span className='sr-only'>Toggle</span>
+            </Button>
+          </td>
+        )}
+      </tr>
 
-export function AllowanceRowInput({ form, allowance, index,destinationIndex, allowanceIndex }: { form: any, allowance: any, index:number,destinationIndex: any, allowanceIndex: any }) {
-    const [isExpanded, setIsExpanded] = React.useState<boolean>(false);
-    const handleClikRow = (index:number) => {
-        setIsExpanded((prev) => !prev);
-    }
-    return (
+      {isExpanded && (
         <>
-            <tr key={allowance.id}>
-                <td width={260} style={{ verticalAlign: 'middle' }} className='text-sm'>{allowance.name}</td>
-                <td style={{ verticalAlign: 'middle',padding: '2px 5px' }}>:</td>
-                <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-                {allowance.type == 'TOTAL' ? (
-                    <span className='text-sm'>IDR</span>
-                ) : (
-                    <span></span>
-                )}
-                </td>
-                <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-                {allowance.type == 'TOTAL' ? (
-                    <div className='flex items-center'>
-                        <AllowanceInputForm
-                            form={form}
-                            allowanceIndex={index}
-                            type={allowance.type}
-                            destinationIndex={destinationIndex}
-                        />
-                        <span className='text-sm'>* 100%</span>
-                    </div>
-                ) : (
-                    <span className='text-sm'> {allowance.detail.length} Days * 0 * 100%</span>
-                )}
-                </td>
-                <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-                    <div className='flex items-center'>
-                    <span className='text-sm' style={{padding: '2px 5px'}}>= IDR 150000</span>
-                    </div>
-                </td>
-                {allowance.type == 'TOTAL' ? (
-                    <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
-                ) : (
-                    <td style={{ verticalAlign: 'middle', padding: '2px 5px' }} onClick={() => handleClikRow(index)}>
-                        <Button variant='ghost' size='sm' className='w-9 p-0'>
-                            <ChevronsUpDown className='h-4 w-4' />
-                            <span className='sr-only'>Toggle</span>
-                        </Button>
-                    </td>
-                )}
+          {allowance.detail.map((detail: any, detailIndex: number) => (
+            <tr key={detail.id}>
+              <td className='text-end' style={{ verticalAlign: 'middle' }}>
+                <span className='text-sm'>10/10/2024</span>
+              </td>
+              <td style={{ padding: '8px 2px', verticalAlign: 'middle' }}>:</td>
+              <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+                <span className='text-sm'>IDR</span>
+              </td>
+              <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+                <div className='flex mt-1 text-sm justify-between items-center'>
+                  <FormField
+                    control={form.control}
+                    name={`destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${detailIndex}.request_price`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input value={field.value} onChange={field.onChange} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </td>
+              <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
+              <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
             </tr>
-
-            {isExpanded && (
-                <>
-                {allowance.detail.map((detail: any, detailIndex: number) => (
-                  <tr key={detail.id}>
-                    <td className="text-end" style={{ verticalAlign: 'middle' }}>
-                      <span className="text-sm">10/10/2024</span>
-                    </td>
-                    <td style={{ padding: '8px 2px', verticalAlign: 'middle' }}>:</td>
-                    <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-                      <span className="text-sm">IDR</span>
-                    </td>
-                    <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-                      <div className="flex mt-1 text-sm justify-between items-center">
-                        <FormField
-                          control={form.control}
-                          name={`destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${detailIndex}.request_price`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input value={field.value} onChange={field.onChange} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </td>
-                    <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
-                    <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
-                  </tr>
-                ))}
-              </>
-            )}
+          ))}
         </>
-    );
+      )}
+    </>
+  );
 }
 
 export function AllowanceInputForm({
@@ -985,7 +1001,7 @@ export function AllowanceInputForm({
     control: form.control,
     name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail`,
   });
-  console.log(allowanceInput,' allowance input nih');
+  console.log(allowanceInput, ' allowance input nih');
   console.log(destinationIndex, allowanceIndex);
   return (
     <>
