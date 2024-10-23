@@ -36,7 +36,8 @@ class AllowanceItem extends Model
         'name',
         'grade_option',
         'grade_all_price',
-        'material_number'
+        'material_number',
+        'material_group'
     ];
 
     // protected static function newFactory(): AllowanceItemFactory

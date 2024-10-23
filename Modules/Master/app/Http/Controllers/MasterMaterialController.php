@@ -80,4 +80,10 @@ class MasterMaterialController extends Controller
     {
         //
     }
+
+    public function getListMaterialByMaterialGroupAPI($material_group) {
+        $listMaterial = MasterMaterial::where('material_group', $material_group)->get();
+
+        return $this->successResponse($listMaterial);
+    }
 }

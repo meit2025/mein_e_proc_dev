@@ -27,10 +27,11 @@ class AllowanceItemController extends Controller
         $listCurrency =  Currency::get();
         $listGrade =  BusinessTripGrade::get();
         $listMaterial =  MasterMaterial::get();
+        $listMaterialGroup = MasterMaterial::select('material_group')->get()->pluck('material_group');
 
 
 
-        return inertia('BusinessTrip/AllowanceItem/index',compact('listAllowanceCategory', 'listCurrency', 'listGrade', 'listMaterial'));
+        return inertia('BusinessTrip/AllowanceItem/index',compact('listAllowanceCategory', 'listCurrency', 'listGrade', 'listMaterial', 'listMaterialGroup'));
     }
 
     /**
@@ -74,8 +75,9 @@ class AllowanceItemController extends Controller
                 'type' =>strtoupper($map->type),
                 'purpose_type' => join(' , ', $purposeTypeRelations),
                 'grade_option' => $map->grade_option,
-                'grades' => join(' ,',$gradeRelations)
-
+                'plafon' => ($map->grade_option == 'all') ? $map->grade_all_price : join(" , ", $gradeRelations),
+                'material_number' => $map->material_number,
+                'material_group' => $map->material_group,
             ];
         });
 
@@ -135,7 +137,8 @@ class AllowanceItemController extends Controller
             'type' => 'required',
             'formula' => 'required',
             'grade_option' => 'required',
-            'material_number' => 'required'
+            'material_number' => 'required',
+            'material_group' => 'required'
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -161,6 +164,7 @@ class AllowanceItemController extends Controller
             $store->currency_id = $request->currency_id;
             $store->code = $request->code;
             $store->material_number = $request->material_number;
+            $store->material_group = $request->material_group;
             $store->name= $request->name;
             $store->request_value = $request->request_value;
             $store->allowance_category_id = $request->allowance_category_id;
