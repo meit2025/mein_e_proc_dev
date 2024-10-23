@@ -57,7 +57,17 @@ class BusinessTripController extends Controller
         $findData  = BusinessTrip::find($id);
         //  attachment
         $findData->attachment = BusinessTripAttachment::where('business_trip_id', $id)->first();
+        // destination
+        // detail_attedances
+        // allowances
+        $findData->destination = BusinessTripDestination::where('business_trip_id', $id)->with(['detailAttendance'])->first();
+        $allowances = [];
 
+        $destinationTotal = BusinessTripDetailDestinationTotal::where('business_trip_destination_id', $findData->destination->id)->with(['allowance'])->get();
+        // dd($destinationTotal);
+
+        $findData->destination->allowances = BusinessTripDetailDestinationTotal::where('business_trip_destination_id', $findData->destination->id)->with(['allowanceItem'])->get();
+        $findData->destination->allowances = BusinessTripDetailDestinationDayTotal::where('business_trip_destination_id', $findData->destination->id)->with(['allowanceItem'])->get();
         return $this->successResponse($findData);
     }
 
@@ -102,6 +112,7 @@ class BusinessTripController extends Controller
         $destinations = json_decode($request->destinations, true);
 
         try {
+            dd($request->all());
             DB::beginTransaction();
             $businessTrip = BusinessTrip::create([
                 'request_no' => '123',
@@ -111,6 +122,9 @@ class BusinessTripController extends Controller
                 'total_destination' => $request->total_destination,
                 'created_by' => auth()->user()->id,
                 'type' => 'request',
+                'cash_advance' => $request->cash_advance == "true" ? 1 : 0,
+                'total_percent' => $request->total_percent,
+                'total_cash_advance' => $request->total_cash_advance,
             ]);
 
             if ($request->attachment != null) {
@@ -120,7 +134,6 @@ class BusinessTripController extends Controller
                     'file_name' => explode('/', $request->attachment->store('business_trip', 'public'))[1],
                 ]);
             }
-
             $businessTripDestination = BusinessTripDestination::create([
                 'business_trip_id' => $businessTrip->id,
                 'destination' => $destinations['destination'],

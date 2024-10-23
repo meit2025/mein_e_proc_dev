@@ -29,4 +29,9 @@ class BusinessTripDetailDestinationDayTotal extends Model
     // {
     //     // return BusinessTripDetailDestinationDayTotalFactory::new();
     // }
+
+    function allowance()
+    {
+        return $this->belongsTo(allowanceItem::class, 'allowance_items_id', 'id');
+    }
 }

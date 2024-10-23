@@ -15,7 +15,14 @@ import { Button } from '@/components/shacdn/button';
 import { ChevronsUpDown, Plus, UndoIcon, X } from 'lucide-react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FieldArray, FieldArrayWithId, useFieldArray, useForm, useWatch } from 'react-hook-form';
+import {
+  FieldArray,
+  FieldArrayWithId,
+  useFieldArray,
+  useForm,
+  useFormContext,
+  useWatch,
+} from 'react-hook-form';
 import { Textarea } from '@/components/shacdn/textarea';
 
 import '../css/index.scss';
@@ -51,6 +58,8 @@ import Detail from '@/Pages/User/Api/Detail';
 import { AllowanceForm } from '../../AllowanceCategory/components/AllowaceForm';
 import axios, { AxiosError } from 'axios';
 import { CREATE_API_BUSINESS_TRIP, GET_DETAIL_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
+import FormSwitch from '@/components/Input/formSwitchCustom';
+import FormAutocomplete from '@/components/Input/formDropdown';
 
 interface User {
   id: string;
@@ -88,18 +97,25 @@ export const BussinessTripFormV1 = ({
   listPurposeType,
   type,
   id,
+  role,
+  idUser,
 }: {
   users: User[];
   listPurposeType: PurposeTypeModel[];
   type: BusinessTripType;
   id: string;
+  role: string;
+  idUser: string;
 }) => {
   const formSchema = z.object({
     purpose_type_id: z.string().min(1, 'Purpose type required'),
     request_for: z.string().min(1, 'Request for required'),
-    remark: z.string().optional(),
+    remark: z.string().min(1, 'Remark is required'),
     attachment: z.instanceof(File).nullable().optional(),
     total_destination: z.number().min(1, 'Total Destinantion Required'),
+    cash_advance: z.boolean().nullable().optional(),
+    total_percent: z.string().nullable().optional(),
+    total_cash_advance: z.string().nullable().optional(),
     destinations: z.array(
       z.object({
         destination: z.string().optional(),
@@ -144,6 +160,9 @@ export const BussinessTripFormV1 = ({
       remark: '',
       attachment: null,
       total_destination: 1,
+      cash_advance: false,
+      total_percent: '0',
+      total_cash_advance: '0',
       destinations: [
         {
           detail_attedances: [],
@@ -162,17 +181,37 @@ export const BussinessTripFormV1 = ({
     try {
       let response = await axios.get(url);
       console.log(response, ' Response Detail');
+
+      //   const allowance = {
+      //     name: item.name,
+      //     code: item.code,
+      //     default_price: item.grade_all_price,
+      //     type: item.type,
+      //     subtotal: item.grade_all_price,
+      //     currency: item.currency_id,
+      //     request_value: item.request_value,
+      //     detail:
+      //       item.type == 'total'
+      //         ? [
+      //             {
+      //               date: undefined,
+      //               request_price: item.grade_all_price,
+      //             },
+      //           ]
+      //         : detailAllowance,
+      //   };
+
       form.reset({
         purpose_type_id: response.data.data.purpose_type_id,
         request_for: response.data.data.request_for,
         remark: response.data.data.remarks,
         attachment: null,
-        total_destination: 1,
+        total_destination: response.data.data.total_destination,
         destinations: [
           {
-            detail_attedances: [],
+            detail_attedances: response.data.data.destination.detail_attedances,
             allowances: [],
-            destination: '',
+            destination: response.data.data.destination.destination,
             business_trip_start_date: new Date(),
             business_trip_end_date: new Date(),
           },
@@ -187,8 +226,9 @@ export const BussinessTripFormV1 = ({
 
   async function handlePurposeType(value: string) {
     form.setValue('purpose_type_id', value || '');
+    let userid = idUser || '';
     // console.log(value);
-    let url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value);
+    let url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
 
     try {
       let response = await axiosInstance.get(url);
@@ -207,6 +247,7 @@ export const BussinessTripFormV1 = ({
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log(values);
     try {
       const formData = new FormData();
       // Append group data
@@ -215,6 +256,9 @@ export const BussinessTripFormV1 = ({
       formData.append('remark', values.remark ?? '');
       formData.append('attachment', values.attachment ?? '');
       formData.append('total_destination', `${values.total_destination}`);
+      formData.append('cash_advance', `${values.cash_advance}`);
+      formData.append('total_percent', `${values.total_percent}`);
+      formData.append('total_cash_advance', `${values.total_cash_advance}`);
       values.destinations.forEach((item) => {
         formData.append('destinations', JSON.stringify(item));
       });
@@ -260,6 +304,8 @@ export const BussinessTripFormV1 = ({
     form.setValue('destinations', destinationForm);
   }
 
+  function getUser() {}
+
   const {
     fields: destinationField,
     append,
@@ -275,7 +321,7 @@ export const BussinessTripFormV1 = ({
     if (id && type == BusinessTripType.edit) {
       getDetailData();
     }
-  }, [totalDestination, listAllowances, id, type]);
+  }, [totalDestination, listAllowances, id, type, role, idUser]);
   return (
     <ScrollArea className='h-[600px] w-full '>
       <Form {...form}>
@@ -317,35 +363,54 @@ export const BussinessTripFormV1 = ({
             </tr>
 
             <tr>
-              <td width={200}>Request For </td>
+              <td width={200}>Request For</td>
               <td>
-                {' '}
                 <FormField
                   control={form.control}
                   name='request_for'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => field.onChange(value)}
-                          value={field.value}
-                        >
-                          <SelectTrigger className='w-[200px] py-2'>
-                            <SelectValue placeholder='-- Select Bussiness Purpose Type --' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {users.map((item) => (
-                              <SelectItem value={item.id.toString()}>{item.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    // Jika role adalah 'user', set value default sebagai currentUserId
+                    if (role === 'user' && !field.value) {
+                      field.onChange(idUser.toString());
+                    }
+
+                    return (
+                      <FormItem>
+                        <FormControl>
+                          <Select
+                            onValueChange={(value) => field.onChange(value)}
+                            value={field.value}
+                            disabled={role === 'user'} // Disable select for user role
+                          >
+                            <SelectTrigger className='w-[200px] py-2'>
+                              <SelectValue placeholder='-- Select Business Purpose Type --' />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {role === 'admin'
+                                ? users.map((item) => (
+                                    <SelectItem key={item.id} value={item.id.toString()}>
+                                      {item.name}
+                                    </SelectItem>
+                                  ))
+                                : // If role is user, show only the logged-in user's name
+                                  users
+                                    .filter((user) => user.id === idUser)
+                                    .map((item) => (
+                                      <SelectItem key={item.id} value={item.id.toString()}>
+                                        {item.name}
+                                      </SelectItem>
+                                    ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
               </td>
             </tr>
+
             <tr>
               <td width={200}>Remark</td>
               <td>
@@ -554,21 +619,22 @@ export function BussinessDestinationForm({
       momentStart = momentStart.add(1, 'days');
       detailAttedanceAppend(object);
     }
-
+    // console.log(listAllowances, ' allowance');
     let allowancesForm = listAllowances.map((item: any) => {
       return {
         name: item.name,
         code: item.code,
-        default_price: dummyPrice,
+        default_price: item.grade_all_price,
         type: item.type,
-        subtotal: dummyPrice,
+        subtotal: item.grade_all_price,
         currency: item.currency_id,
+        request_value: item.request_value,
         detail:
           item.type == 'total'
             ? [
                 {
                   date: undefined,
-                  request_price: dummyPrice,
+                  request_price: item.grade_all_price,
                 },
               ]
             : detailAllowance,
@@ -587,6 +653,30 @@ export function BussinessDestinationForm({
       business_trip_end_date: value,
     });
   }
+
+  const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
+
+  const handleCashAdvanceChange = (value: boolean) => {
+    setIsCashAdvance(value);
+  };
+
+  const { setValue } = useFormContext();
+
+  // Monitor total_percent value from form
+  const totalPercent = useWatch({
+    control: form.control,
+    name: 'total_percent',
+  });
+
+  // Assuming allowance is calculated elsewhere, let's mock it for now
+  const allowance = 1000000; // Example: allowance is 1,000,000
+
+  // Calculate total based on totalPercent and allowance
+  React.useEffect(() => {
+    const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
+    const total = (percentValue / 100) * allowance; // Multiply percent with allowance
+    setValue('total_cash_advance', total.toFixed(2)); // Save the total in total_cash_advance field
+  }, [totalPercent, allowance, setValue]); // Recalculate when totalPercent or allowance changes
 
   return (
     <TabsContent value={`destination${index + 1}`}>
@@ -694,8 +784,101 @@ export function BussinessDestinationForm({
           </tr>
         </table>
         <DetailAllowance allowanceField={allowancesField} destinationIndex={index} form={form} />
+        <table className='w-full text-sm mt-10'>
+          <tr>
+            <td className='w-[20%]'>Cash Advance</td>
+            <td className='w-[80%] flex'>
+              <FormSwitch
+                fieldName={'cash_advance'}
+                isRequired={false}
+                disabled={false}
+                onChanges={(e) => handleCashAdvanceChange(e.target.checked)}
+              />
+              {isCashAdvance && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name='total_percent'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Select
+                            // onValueChange={(value) => handlePurposeType(value)}
+                            value={field.value || ''}
+                            onValueChange={(value) => field.onChange(value)}
+                          >
+                            <SelectTrigger className='w-[200px]'>
+                              <SelectValue placeholder='-- Select Option --' />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value='10'>10</SelectItem>
+                              <SelectItem value='25'>25</SelectItem>
+                              <SelectItem value='50'>50</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={'total_cash_advance'}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input value={field.value || ''} disabled={true} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+            </td>
+          </tr>
+        </table>
       </div>
+      {/* disini */}
+      <ResultTotalItem allowanceField={allowancesField} />
     </TabsContent>
+  );
+}
+
+export function ResultTotalItem({ allowanceField }: { allowanceField: any }) {
+  return (
+    <>
+      <table className='w-full text-sm mt-10'>
+        <thead>
+          <tr>
+            <th className='w-[50%]'>Item</th>
+            <th className='w-[50%]'>Sub Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {allowanceField.map((allowance: any, index: number) => (
+            <tr key={allowance.id}>
+              <td>{allowance.name}</td>
+              <td className='flex justify-between pr-4'>
+                <span>IDR</span>
+                <span></span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot className='mt-4'>
+          <tr>
+            <td>
+              <i>Total Allowance</i>
+            </td>
+            <td className='flex justify-between pr-4'>
+              <span>IDR</span>
+              <span></span>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </>
   );
 }
 
@@ -919,6 +1102,24 @@ export function AllowanceRowInput({
     }
   };
 
+  const handleInputChange = (field: any) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(event.target.value) || 0;
+
+    if (allowance.request_value === 'unlimited') {
+      // No restrictions on input value
+      field.onChange(event);
+    } else if (allowance.request_value === 'up to max value') {
+      if (value <= allowance.subtotal) {
+        field.onChange(event);
+      } else {
+        alert(`Value cannot exceed the subtotal of IDR ${allowance.subtotal}`);
+      }
+    } else if (allowance.request_value === 'fixed value') {
+      // Do not allow changes for fixed value
+      alert(`This value is fixed and cannot be changed.`);
+    }
+  };
+
   return (
     <>
       <tr key={allowance.id}>
@@ -938,7 +1139,7 @@ export function AllowanceRowInput({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input value={field.value} onChange={field.onChange} />
+                      <Input value={field.value} onChange={handleInputChange(field)} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -947,7 +1148,10 @@ export function AllowanceRowInput({
               <span className='text-sm'>* 100%</span>
             </div>
           ) : (
-            <span className='text-sm'> {allowance.detail.length} Days * 0 * 100%</span>
+            <span className='text-sm'>
+              {' '}
+              {allowance.detail.length} Days * {allowance.subtotal} * 100%
+            </span>
           )}
         </td>
         <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
@@ -964,7 +1168,7 @@ export function AllowanceRowInput({
             style={{ verticalAlign: 'middle', padding: '2px 5px' }}
             onClick={() => handleClikRow(allowanceIndex)}
           >
-            <Button variant='ghost' size='sm' className='w-9 p-0'>
+            <Button variant='ghost' type='button' size='sm' className='w-9 p-0'>
               <ChevronsUpDown className='h-4 w-4' />
               <span className='sr-only'>Toggle</span>
             </Button>
@@ -993,7 +1197,9 @@ export function AllowanceRowInput({
                         <FormControl>
                           <Input
                             value={field.value} // Ensure proper value binding
-                            onChange={field.onChange} // Bind change handler to form control
+                            // onChange={field.onChange} // Bind change handler to form control
+                            onChange={handleInputChange(field)}
+                            disabled={allowance.request_value === 'fixed value'}
                           />
                         </FormControl>
                         <FormMessage />
