@@ -6,7 +6,5 @@ export const EDIT_API = `${ROUTE_API}/update`;
 export const GET_DETAIL_PURPOSE_TYPE = (id: any) => `${ROUTE_API}/detail/${id}`;
 export const DELET_API = `${ROUTE_API}/delete`;
 
-export const GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE = (id: any) =>
-  `${ROUTE_API}/list-allowances-by-purpose-type/${id}`;
-
-
+export const GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE = (id: any, userid: any) =>
+  `${ROUTE_API}/list-allowances-by-purpose-type/${id}/${userid}`;

@@ -22,17 +22,34 @@ class BusinessTrip extends Model
         'created_by',
         'remarks',
         'total_destination',
-
-
+        'cash_advance',
+        'total_cash_advance',
+        'total_percent',
     ];
 
-   
+
     // protected static function newFactory(): BusinessTripFactory
     // {
     //     // return BusinessTripFactory::new();
     // }
 
-    public function bussinessTripDestination() {
+    public function businessTripDestination()
+    {
         return $this->hasMany(BusinessTripDestination::class, 'business_trip_id', 'id');
+    }
+
+    function purposeType()
+    {
+        return $this->belongsTo(PurposeType::class);
+    }
+
+    function attachment()
+    {
+        return $this->hasMany(BusinessTripAttachment::class, 'business_trip_id', 'id');
+    }
+
+    function detailAttendance()
+    {
+        return $this->hasMany(BusinessTripDetailAttedance::class, 'business_trip_id', 'id');
     }
 }

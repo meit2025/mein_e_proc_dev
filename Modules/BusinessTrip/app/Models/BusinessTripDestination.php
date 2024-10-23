@@ -20,6 +20,18 @@ class BusinessTripDestination extends Model
         'business_trip_id'
     ];
 
+    function detailAttendance() {
+        return $this->hasMany(BusinessTripDetailAttedance::class, 'business_trip_destination_id', 'id');
+    }
+
+    function detailDestinationDay() {
+        return $this->hasMany(BusinessTripDetailDestinationDayTotal::class, 'business_trip_destination_id', 'id');
+    }
+
+    function detailDestinationToal() {
+        return $this->hasMany(BusinessTripDetailDestinationTotal::class, 'business_trip_destination_id', 'id');
+    }
+
     //   $table->string('destination');
     //         $table->date('business_trip_start_date');
     //         $table->date('business_trip_end_date');

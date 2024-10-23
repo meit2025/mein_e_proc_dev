@@ -13,12 +13,13 @@ class BusinessTripDetailDestinationDayTotal extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [
-        'date',
-        'business_trip_destination_id',
-        'business_trip_id',
-        'price'
-    ];
+    protected $guarded = [];
+    // protected $fillable = [
+    //     'date',
+    //     'business_trip_destination_id',
+    //     'business_trip_id',
+    //     'price'
+    // ];
     //  $table->date('date');
     //         $table->unsignedBigInteger('business_trip_destination_id');
     //         $table->unsignedBigInteger('business_trip_id');
@@ -28,4 +29,9 @@ class BusinessTripDetailDestinationDayTotal extends Model
     // {
     //     // return BusinessTripDetailDestinationDayTotalFactory::new();
     // }
+
+    function allowance()
+    {
+        return $this->belongsTo(allowanceItem::class, 'allowance_items_id', 'id');
+    }
 }

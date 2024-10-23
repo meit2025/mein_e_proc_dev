@@ -31,7 +31,7 @@ class ReimbursementService
         if ($progressRecords->contains('status', 'Rejected')) {
             return 'Rejected';
         }
-        if ($progressRecords->contains('status', 'Open')) {
+        if ($progressRecords->contains('status', 'Open') || $progressRecords->count() == 0) {
             return 'Open';
         }
         return 'Finished';
@@ -43,7 +43,7 @@ class ReimbursementService
             DB::beginTransaction();
 
             $group = ReimburseGroup::create([
-                'code'   => $this->generateUniqueGroupCode(),
+                'request_number'   => $this->generateUniqueGroupCode(),
                 'remark' => $groupData['remark'],
                 'requester' => $groupData['requester'],
             ]);
@@ -54,7 +54,7 @@ class ReimbursementService
                     return $validator->errors();
                 }
                 $validatedData = $validator->validated();
-                $validatedData['group'] = $group->code;
+                $validatedData['group'] = $group->request_number;
 
                 $validatedData['receipt_date'] = Carbon::parse($form['receipt_date'])->format('Y-m-d');
                 $validatedData['start_date'] = Carbon::parse($form['start_date'])->format('Y-m-d');
@@ -66,7 +66,7 @@ class ReimbursementService
                     foreach ($form['attachments'] as $file) {
                         $filePath = $file->store('reimburse_attachments', 'public');
                         ReimburseAttachment::create([
-                            'reimburse' => $reimburse->rn,
+                            'reimburse' => $reimburse->id,
                             'url' => $filePath,
                         ]);
                     }
@@ -97,22 +97,18 @@ class ReimbursementService
                 }
 
                 $validatedData = $validator->validated();
-                $reimburse = Reimburse::where('rn', $form['rn'])->first();
+                $reimburse = Reimburse::where('id', $form['id'])->first();
                 if ($reimburse) {
-                    // Update reimbursement details
                     $reimburse->update($validatedData);
 
-                    // Handle file attachments
                     if (isset($form['attachment'])) {
-                        // Delete old attachments
                         foreach ($reimburse->attachments as $attachment) {
-                            Storage::delete($attachment->path); // Delete from storage
-                            $attachment->delete(); // Delete record from the database
+                            Storage::delete($attachment->path);
+                            $attachment->delete();
                         }
 
-                        // Store new attachments
                         foreach ($form['attachment'] as $file) {
-                            $path = $file->store('reimburse_attachments'); // Store file
+                            $path = $file->store('reimburse_attachments');
                             ReimburseAttachment::create([
                                 'reimburse_id' => $reimburse->id,
                                 'path' => $path,
@@ -130,26 +126,18 @@ class ReimbursementService
         }
     }
 
-
-
-    // Function to generate progress based on the immediate_spv hierarchy
     protected function generateProgress($group, $user)
     {
         $approver = $user->immediate_spv;
         while ($approver) {
-            // Find the approver user
             $approverUser = User::where('nip', $approver)->first();
-            if (!$approverUser) break;  // Stop if the approver doesn't exist
-
-            // Create the progress entry
+            if (!$approverUser) break;
             ReimburseProgress::create([
-                'group' => $group->code,
+                'group' => $group->request_number,
                 'approver' => $approverUser->nip,
                 'notes' => '',
                 'status' => 'Open'
             ]);
-
-            // Move up to the next supervisor
             $approver = $approverUser->immediate_spv;
         }
     }

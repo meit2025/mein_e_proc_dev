@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Modules\BusinessTrip\Models\AllowanceItem;
+use Modules\BusinessTrip\Models\BusinessTripGradeAllowance;
+use Modules\BusinessTrip\Models\BusinessTripGradeUser;
 use Modules\BusinessTrip\Models\PurposeType;
 use Modules\BusinessTrip\Models\PurposeTypeAllowance;
 
@@ -15,7 +17,7 @@ class PurposeTypeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    
+
     public function index()
     {
 
@@ -72,27 +74,27 @@ class PurposeTypeController extends Controller
         //
     }
 
-    public function detailAPI($id) {
+    public function detailAPI($id)
+    {
         $find = PurposeType::with(['listAllowance'])->find($id);
         return $this->successResponse($find);
-
     }
 
     public function storeApi(Request $request)
     {
-        
+
         $rules = [
             'code' => 'required',
             'name' => 'required',
             'allowances.*' => 'required',
             'attedance_status' => 'required'
-         ];
+        ];
 
-         $validator =  Validator::make($request->all(), $rules);
+        $validator =  Validator::make($request->all(), $rules);
 
-         if($validator->fails()) {
+        if ($validator->fails()) {
             return $this->errorResponse('erorr created', 400, $validator->errors());
-         }
+        }
 
         DB::beginTransaction();
 
@@ -107,10 +109,10 @@ class PurposeTypeController extends Controller
 
             $allowances = [];
 
-            foreach($allowances as $allowance_id) {
+            foreach ($allowances as $allowance_id) {
                 array_push($allowances, [
                     'allowance_items_id' => $allowance_id,
-                    'purpose_type_id'=> $purpose->id
+                    'purpose_type_id' => $purpose->id
                 ]);
             }
 
@@ -119,21 +121,30 @@ class PurposeTypeController extends Controller
             DB::commit();
 
             return $this->successResponse($purpose, 'Successfully creeted purpose type');
-
-
-            
-
-        }
-        catch(\Exception $e) {
+        } catch (\Exception $e) {
             dd($e);
 
             DB::rollBack();
         }
     }
 
-    public function getAllowanceByPurposeAPI($id) {
+    public function getAllowanceByPurposeAPI($id, $userid)
+    {
         $listAllowances =  AllowanceItem::whereIn('id', PurposeTypeAllowance::where('purpose_type_id', $id)->get()->pluck('allowance_items_id')->toArray())->get();
-
+        foreach ($listAllowances as $allowance) {
+            if ($allowance->grade_option == 'all') {
+                $listAllowances->grade_all_price = $allowance->grade_all_price;
+            } else {
+                // get grade user
+                $grade = BusinessTripGradeUser::where('user_id', $userid)->first();
+                if (is_null($grade)) {
+                    $listAllowances->grade_all_price = 0;
+                } else {
+                    $btgradeAllowance = BusinessTripGradeAllowance::where('grade_id', $grade->grade_id)->where('allowance_items_id', $allowance->id)->first();
+                    $listAllowances->grade_all_price = $btgradeAllowance->plafon;
+                }
+            }
+        }
         return $this->successResponse($listAllowances);
     }
 }

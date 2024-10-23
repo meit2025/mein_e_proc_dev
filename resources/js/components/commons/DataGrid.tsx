@@ -22,7 +22,6 @@ import { CaretSortIcon, ChevronDownIcon, DotsHorizontalIcon } from '@radix-ui/re
 import { Button as ShacdnButton } from '@/components/shacdn/button';
 import { Edit } from 'lucide-react';
 
-
 interface UrlDataGrid {
   url: string;
   addUrl?: string;
@@ -139,7 +138,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
             width: 150,
             renderCell: (params: any) => (
               <>
-                { actionType == 'dropdown' ? (
+                {actionType === 'dropdown' ? (
                   <>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -175,7 +174,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                     </DropdownMenu>
                   </>
                 ) : (
-                   <>
+                  <>
                     <div
                       style={{
                         display: 'flex',
@@ -185,32 +184,36 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                         gap: '10px', // Add consistent spacing between elements
                       }}
                     >
-                      <i className=' ki-duotone ki-size text-info text-2xl'></i>
-          
-                
-                  {(onEdit || url.editUrl) && (
-                    <Link
-                      href={`${url.editUrl}/${params.row.id}`}
-                      onClick={() => onEdit && onEdit(params.row.id)}
-                      alt='edit'
-                    >
-                      <i className=' ki-duotone ki-notepad-edit text-success text-2xl'></i>
-                    </Link>
-                  )}
-                  {(url.deleteUrl || onDelete) && (
-                    <Link href={''} onClick={() => handleDelete(params.row.id)} alt='delete'>
-                      <i className=' ki-duotone ki-trash-square text-danger text-2xl'></i>
-                    </Link>
-                  )}
-                  {buttonActionCustome}
-                </div>
-              </>
-  
+                      {(onDetail || url.detailUrl) && (
+                        <Link
+                          href={`${url.detailUrl}/${params.row.id}`}
+                          onClick={() => onDetail && onDetail(params.row.id)}
+                          alt='detail'
+                        >
+                          <i className=' ki-duotone ki-size text-info text-2xl'></i>
+                        </Link>
+                      )}
+
+                      {(onEdit || url.editUrl) && (
+                        <Link
+                          href={`${url.editUrl}/${params.row.id}`}
+                          onClick={() => onEdit && onEdit(params.row.id)}
+                          alt='edit'
+                        >
+                          <i className=' ki-duotone ki-notepad-edit text-success text-2xl'></i>
+                        </Link>
+                      )}
+                      {(url.deleteUrl || onDelete) && (
+                        <Link href={''} onClick={() => handleDelete(params.row.id)} alt='delete'>
+                          <i className=' ki-duotone ki-trash-square text-danger text-2xl'></i>
+                        </Link>
+                      )}
+                      {buttonActionCustome}
+                    </div>
+                  </>
                 )}
-            
-            </>
-            )
-            
+              </>
+            ),
           },
         ]
       : [];

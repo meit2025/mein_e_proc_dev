@@ -49,6 +49,7 @@ import { AxiosError } from 'axios';
 import { MultiSelect } from '@/components/commons/MultiSelect';
 import { BusinessTripGrade } from '../../BusinessGrade/model/model';
 import { MaterialModel } from '@/Pages/Master/MasterMaterial/model/listModel';
+import { GET_LIST_MASTERIAL_BY_MATERIAL_GROUP } from '@/endpoint/masterMaterial/api';
 // 
 
 export enum AllowanceType {
@@ -64,7 +65,8 @@ export interface AllowanceItemFormInterface {
   listCurrency: CurrencyModel[];
   listAllowanceCategory: AllowanceCategoryModel[];
   listGrade: BusinessTripGrade[];
-  listMaterial: MaterialModel[]
+  listMaterial: MaterialModel[],
+  listMaterialGroup: string[],
 }
 export default function AllowanceItemForm({
   onSuccess,
@@ -73,13 +75,15 @@ export default function AllowanceItemForm({
   listCurrency,
   listAllowanceCategory,
   listGrade,
-  listMaterial
+  listMaterial,
+  listMaterialGroup
 }: AllowanceItemFormInterface) {
   var formSchema = z.object({
     code: z.string().min(1, 'Code is required'),
     name: z.string().min(1, 'Name is required'),
     type: z.string().min(1, 'Type is required'),
     material_number: z.string().min(1, "Material number required"),
+    material_group: z.string().min(1, "Material number required"),
     currency_id: z.string().min(1, 'Currency is required'),
     formula: z.string().min(1, 'Formula is required'),
     allowance_category_id: z.string().min(1, 'Allowance Category is required'),
@@ -92,6 +96,9 @@ export default function AllowanceItemForm({
       plafon: z.string()
     }))
   });
+
+
+  const [materials, setMaterials] = React.useState([]);
 
   let defaultValues = {
     code: '',
@@ -127,6 +134,8 @@ export default function AllowanceItemForm({
     }
   }
 
+
+
  
 
     const { fields: gradeFields } = useFieldArray({
@@ -141,7 +150,7 @@ export default function AllowanceItemForm({
     try {
       const response =  await axiosInstance.post(CREATE_API_ALLOWANCE_ITEM, values);
 
-      console.log('response' , response);
+    
       showToast('success', 'success');
       onSuccess?.(true);
     } catch (e) {
@@ -156,6 +165,23 @@ export default function AllowanceItemForm({
    
     }
   };
+
+
+  async function getMaterials(material_group:string) {
+
+    try {
+      let response = await axiosInstance.get(GET_LIST_MASTERIAL_BY_MATERIAL_GROUP(material_group)); ;
+      
+      form.setValue('material_group', material_group);
+      console.log(response)
+
+        setMaterials(response.data.data);
+        console.log('response', response.data);
+    }
+    catch(e) {    
+      console.log(e)
+    }
+  }
 
   // React.useEffect(() => {
   //   if (id && type == AllowanceType.edit) {
@@ -250,7 +276,50 @@ export default function AllowanceItemForm({
                 />
               </td>
             </tr>
+                  <tr>
+              <td width={200}>Material Group</td>
+              <td>
+                <FormField
+                  control={form.control}
+                  name='material_group'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) =>{
+                            getMaterials(value)
+                          }} // Pass selected value to React Hook Form
+                          value={field.value} // Set the current value from React Hook Form
+                        >
+                          <SelectTrigger className='w-[200px]'>
+                            <SelectValue placeholder='Select Material Number' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {/* <SelectItem key='DAILY' value='daily'>
+                              DAILY
+                            </SelectItem>
+                            <SelectItem key='TOTAL' value='total'>
+                              Total
+                            </SelectItem> */}
 
+                              {
+                                listMaterialGroup.map((material) => (
+                                  <SelectItem key={material} value={material}>
+                                    {
+                                      material
+                                    }
+                                  </SelectItem>
+                                ))
+                              }
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </td>
+            </tr>
             <tr>
               <td width={200}>Material Number</td>
               <td>
@@ -276,7 +345,7 @@ export default function AllowanceItemForm({
                             </SelectItem> */}
 
                               {
-                                listMaterial.map((material) => (
+                                materials.map((material) => (
                                   <SelectItem key={material.material_number} value={material.material_number}>
                                     {
                                       material.material_number
@@ -293,6 +362,8 @@ export default function AllowanceItemForm({
                 />
               </td>
             </tr>
+
+             
             <tr>
               <td width={200}>Currency</td>
               <td>

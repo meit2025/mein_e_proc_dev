@@ -13,11 +13,9 @@ return new class extends Migration
     {
         Schema::create('reimburse_attachments', function (Blueprint $table) {
             $table->id();
-            $table->string('reimburse');
+            $table->foreignId('reimburse')->constrained('reimburses')->cascadeOnDelete()->cascadeOnUpdate();
             $table->longText('url');
             $table->timestamps();
-
-            $table->foreign('reimburse')->references('rn')->on('reimburses')->cascadeOnDelete()->cascadeOnUpdate();
         });
     }
 

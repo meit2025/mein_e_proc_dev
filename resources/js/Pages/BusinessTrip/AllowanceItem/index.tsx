@@ -21,9 +21,10 @@ interface propsType {
     listCurrency: any[],
     listGrade: BusinessTripGrade[],
     listMaterial: MaterialModel[],
+    listMaterialGroup: string[]
 }
 export const Index = (
-    {listAllowanceCategory, listCurrency, listGrade, listMaterial}: propsType
+    {listAllowanceCategory, listCurrency, listGrade, listMaterial, listMaterialGroup}: propsType
 ) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
@@ -42,7 +43,13 @@ export const Index = (
           open={openForm}
           onOpenChange={openFormHandler}
         >
-            <AllowanceItemForm listMaterial={listMaterial} listGrade={listGrade} listCurrency={listCurrency} listAllowanceCategory={listAllowanceCategory} />
+          <AllowanceItemForm
+            listMaterialGroup={listMaterialGroup}
+            listMaterial={listMaterial}
+            listGrade={listGrade}
+            listCurrency={listCurrency}
+            listAllowanceCategory={listAllowanceCategory}
+          />
         </CustomDialog>
       </div>
       <DataGridComponent
