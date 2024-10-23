@@ -1,14 +1,15 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import FormMapping from '@/components/form/FormMapping';
-import { CREATE_SECRET, DETAIL_SECRET, EDIT_SECRET } from '@/endpoint/secret/api';
-import { LIST_PAGE_SECRET } from '@/endpoint/secret/page';
 import { formModel } from './model/formModel';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@/axiosInstance';
 import { usePage } from '@inertiajs/react';
-import { DETAIL_PR, EDIT_PR } from '@/endpoint/purchaseRequisition/api';
-import { LIST_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
+import {
+  DETAIL_MASTER_MATERIAL_GROUP,
+  EDIT_MASTER_MATERIAL_GROUP,
+} from '@/endpoint/materialGroup/api';
+import { LIST_PAGE_MASTER_MATERIAL_GROUP } from '@/endpoint/materialGroup/page';
 
 const Update = ({ id }: { id: number }) => {
   const { props } = usePage();
@@ -18,20 +19,16 @@ const Update = ({ id }: { id: number }) => {
     reValidateMode: 'onChange',
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [items, setItems] = useState<any[]>([]);
-  const [vendors, setVendors] = useState<any[]>([]);
 
   const getdetail = useCallback(
     async () => {
       setIsLoading(true);
       try {
-        const response = await axiosInstance.get(DETAIL_PR(props.id));
+        const response = await axiosInstance.get(DETAIL_MASTER_MATERIAL_GROUP(props.id));
         const data = response.data;
-        methods.reset(data);
-        setItems(data.item);
-        setVendors(data.vendor);
+        methods.reset(data.data);
       } catch (error) {
-        console.log(error);
+        console.error('Error fetching detail:', error);
       } finally {
         setIsLoading(false);
       }
@@ -50,10 +47,9 @@ const Update = ({ id }: { id: number }) => {
           <FormMapping
             isLoading={isLoading}
             methods={methods}
-            // formCustom={<PageOne item={items} vendor={vendors} />}
-            url={`${EDIT_PR}/${props.id}`}
-            redirectUrl={LIST_PAGE_PR}
-            isCustom={true}
+            formModel={formModel}
+            url={`${EDIT_MASTER_MATERIAL_GROUP}/${props.id}`}
+            redirectUrl={LIST_PAGE_MASTER_MATERIAL_GROUP}
           />
         </div>
       </div>
@@ -63,7 +59,7 @@ const Update = ({ id }: { id: number }) => {
 
 // Assign layout to the page
 Update.layout = (page: ReactNode) => (
-  <MainLayout title='Gateway' description='Gateway Secret Update'>
+  <MainLayout title='Material Group' description='Material Group Update'>
     {page}
   </MainLayout>
 );

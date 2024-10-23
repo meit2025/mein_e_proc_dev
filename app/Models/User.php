@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Modules\Master\Models\MasterBusinessPartner;
 use Modules\Reimbuse\Models\ReimburseQuota;
 
 class User extends Authenticatable
@@ -28,7 +29,8 @@ class User extends Authenticatable
         'immediate_spv',
         'email_verified_at',
         'username',
-        'is_admin'
+        'is_admin',
+        'master_business_partner_id'
     ];
 
     /**
@@ -57,6 +59,11 @@ class User extends Authenticatable
     public function families()
     {
         return $this->hasMany(Family::class, 'user', 'nip');
+    }
+
+    public function employee()
+    {
+        return $this->hasOne(MasterBusinessPartner::class, 'id', 'master_business_partner_id');
     }
 
     public function notifikasis()

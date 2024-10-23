@@ -4,9 +4,9 @@ namespace Modules\Master\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\Master\Database\Factories\PajakFactory;
+// use Modules\Master\Database\Factories\MaterialGroupFactory;
 
-class Pajak extends Model
+class MaterialGroup extends Model
 {
     use HasFactory;
 
@@ -14,13 +14,12 @@ class Pajak extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
-        'desimal',
-        'mwszkz',
-        'description'
+        'material_group',
+        'material_group_desc',
     ];
 
-    // protected static function newFactory(): PajakFactory
+    // protected static function newFactory(): MaterialGroupFactory
     // {
-    //     // return PajakFactory::new();
+    //     // return MaterialGroupFactory::new();
     // }
 }

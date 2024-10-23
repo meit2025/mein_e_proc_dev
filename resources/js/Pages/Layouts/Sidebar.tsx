@@ -25,6 +25,9 @@ import { LIST_PAGE_MASTER_ITEM_CATEGORY } from '@/endpoint/ItemCategory/page';
 import { LIST_PAGE_MASTER_STORAGE_LOCATION } from '@/endpoint/storageLocation/page';
 import { LIST_PAGE_APPROVAL_ROUTE } from '@/endpoint/approvalRoute/page';
 import { LIST_PAGE_SETTING_APPROVAL } from '@/endpoint/settingApproval/page';
+import { LIST_PAGE_MASTER_MATERIAL_GROUP } from '@/endpoint/materialGroup/page';
+import { LIST_PAGE_MASTER_UOM } from '@/endpoint/uom/page';
+import { LIST_PAGE_MASTER_PAJAK } from '@/endpoint/pajak/page';
 // import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
@@ -129,7 +132,7 @@ const sidebar = [
         title: 'Bussiness Trip',
         icon: 'ki-element-11',
         route: LIST_PAGE_BUSINESS_TRIP,
-        sub: []
+        sub: [],
       },
       {
         title: 'Purchase Requisition',
@@ -143,7 +146,64 @@ const sidebar = [
     group: 'Setting',
     menu: [
       {
-        title: 'Master',
+        title: 'Gateway',
+        icon: 'ki-key-square',
+        route: '/',
+        sub: [
+          {
+            name: 'Secret',
+            route: LIST_PAGE_SECRET,
+            roles: 'gateway.secret',
+          },
+          {
+            name: 'Api',
+            route: LIST_PAGE_API,
+            roles: '',
+          },
+        ],
+      },
+
+      {
+        title: 'Approval',
+        icon: 'ki-users',
+        route: '/',
+        sub: [
+          {
+            name: 'Approval',
+            route: LIST_PAGE_APPROVAL_ROUTE,
+            roles: '',
+          },
+          {
+            name: 'Setting Approval',
+            route: LIST_PAGE_SETTING_APPROVAL,
+            roles: '',
+          },
+        ],
+      },
+      {
+        title: 'User Management',
+        icon: 'ki-users',
+        route: '/',
+        sub: [
+          {
+            name: 'Users',
+            route: LIST_PAGE_USER,
+            roles: '',
+          },
+          {
+            name: 'Roles',
+            route: LIST_PAGE_ROLE,
+            roles: '',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    group: 'Master',
+    menu: [
+      {
+        title: 'Master SAP',
         icon: 'ki-setting-3',
         route: '/',
         sub: [
@@ -185,23 +245,6 @@ const sidebar = [
         ],
       },
       {
-        title: 'Gateway',
-        icon: 'ki-key-square',
-        route: '/',
-        sub: [
-          {
-            name: 'Secret',
-            route: LIST_PAGE_SECRET,
-            roles: 'gateway.secret',
-          },
-          {
-            name: 'Api',
-            route: LIST_PAGE_API,
-            roles: '',
-          },
-        ],
-      },
-      {
         title: 'Master PR',
         icon: 'ki-users',
         route: '/',
@@ -236,38 +279,19 @@ const sidebar = [
             route: LIST_PAGE_MASTER_STORAGE_LOCATION,
             roles: '',
           },
-        ],
-      },
-      {
-        title: 'Approval',
-        icon: 'ki-users',
-        route: '/',
-        sub: [
           {
-            name: 'Approval',
-            route: LIST_PAGE_APPROVAL_ROUTE,
+            name: 'Material Group',
+            route: LIST_PAGE_MASTER_MATERIAL_GROUP,
             roles: '',
           },
           {
-            name: 'Setting Approval',
-            route: LIST_PAGE_SETTING_APPROVAL,
-            roles: '',
-          },
-        ],
-      },
-      {
-        title: 'User Management',
-        icon: 'ki-users',
-        route: '/',
-        sub: [
-          {
-            name: 'Users',
-            route: LIST_PAGE_USER,
+            name: 'UOM',
+            route: LIST_PAGE_MASTER_UOM,
             roles: '',
           },
           {
-            name: 'Roles',
-            route: LIST_PAGE_ROLE,
+            name: 'Tax',
+            route: LIST_PAGE_MASTER_PAJAK,
             roles: '',
           },
         ],
@@ -300,11 +324,6 @@ const sidebar = [
             route: LIST_PAGE_BUSINESS_GRADE,
             roles: '',
           },
-          // {
-          //   name: 'Bank Key',
-          //   route: LIST_PAGE_ALLOWANCE_CATEGORY,
-          //   roles: '',
-          // },
         ],
       },
     ],

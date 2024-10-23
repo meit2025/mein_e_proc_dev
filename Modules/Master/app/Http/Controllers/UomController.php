@@ -4,16 +4,26 @@ namespace Modules\Master\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Modules\Master\Models\Uom;
 
-class DropdownMasterController extends Controller
+class UomController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('master::index');
+        $filterableColumns =  [
+            'internal_uom',
+            'iso_code',
+            'commercial',
+            'measurement_unit_text',
+            'unit_of_measurement_text',
+        ];
+
+        $data = $this->filterAndPaginate($request, Uom::class, $filterableColumns);
+        return $this->successResponse($data);
     }
 
     /**
@@ -30,6 +40,9 @@ class DropdownMasterController extends Controller
     public function store(Request $request)
     {
         //
+        $dataInsert = $request->all();
+        $data = Uom::create($dataInsert);
+        return $this->successResponse($data);
     }
 
     /**
@@ -37,7 +50,8 @@ class DropdownMasterController extends Controller
      */
     public function show($id)
     {
-        return view('master::show');
+        $data = Uom::find($id);
+        return $this->successResponse($data);
     }
 
     /**
@@ -54,6 +68,9 @@ class DropdownMasterController extends Controller
     public function update(Request $request, $id)
     {
         //
+        $dataInsert = $request->all();
+        $data = Uom::find($id)->update($dataInsert);
+        return $this->successResponse($data);
     }
 
     /**
@@ -62,22 +79,7 @@ class DropdownMasterController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-
-    function dropdown(Request $request)
-    {
-        $data = DB::table($request->tabelname)->select($request->name . ' as label', $request->id . ' as value');
-
-        if($request->key && $request->parameter){
-            $data = $data->where($request->key, $request->parameter);
-        }
-
-        if($request->isNotNull && $request->key){
-            $data = $data->whereNotNull($request->key);
-        }
-
-        $data = $data->get();
+        $data = Uom::find($id)->delete();
         return $this->successResponse($data);
     }
 }

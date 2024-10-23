@@ -31,7 +31,6 @@ const FormWrapper = <T,>({ model, onChangeOutside }: FormWrapperProps<T>) => {
           maxLength={model.maxLength}
           classNames={model.classNames}
           icon={model.icon}
-          iconPosition={model.iconPosition}
         />
       );
     case 'textarea':

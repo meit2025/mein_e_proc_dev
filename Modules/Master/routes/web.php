@@ -11,10 +11,13 @@ use Modules\Master\Http\Controllers\ItemCategoryController;
 use Modules\Master\Http\Controllers\MasterBusinessPartnerController;
 use Modules\Master\Http\Controllers\MasterController;
 use Modules\Master\Http\Controllers\MasterMaterialController;
+use Modules\Master\Http\Controllers\MaterialGroupController;
 use Modules\Master\Http\Controllers\OrderController;
+use Modules\Master\Http\Controllers\PajakController;
 use Modules\Master\Http\Controllers\PurchasingGroupController;
 use Modules\Master\Http\Controllers\ReconController;
 use Modules\Master\Http\Controllers\StorageLocationController;
+use Modules\Master\Http\Controllers\UomController;
 use Modules\Master\Http\Controllers\ValuationTypeController;
 
 /*
@@ -160,6 +163,29 @@ Route::group(['middleware' => 'auth'], function () {
                 'id' => fn() => request()->route('id'),
             ]);
         });
+
+        Route::group(['prefix' => 'material-group'], function () {
+            Route::inertia('/',  'MasterPr/MaterialGroup/Index');
+            Route::inertia('/create',  'MasterPr/MaterialGroup/Create');
+            Route::inertia('/update/{id}',  'MasterPr/MaterialGroup/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+        });
+
+        Route::group(['prefix' => 'uom'], function () {
+            Route::inertia('/',  'MasterPr/Uom/Index');
+            Route::inertia('/create',  'MasterPr/Uom/Create');
+            Route::inertia('/update/{id}',  'MasterPr/Uom/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+        });
+        Route::group(['prefix' => 'pajak'], function () {
+            Route::inertia('/',  'MasterPr/Pajak/Index');
+            Route::inertia('/create',  'MasterPr/Pajak/Create');
+            Route::inertia('/update/{id}',  'MasterPr/Pajak/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+        });
     });
     Route::group(['prefix' => 'api/master-pr', 'middleware' => 'auth'], function () {
         Route::group(['prefix' => 'dokument-type'], function () {
@@ -203,6 +229,29 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/update/{id}', [StorageLocationController::class, 'update'])->name('master.storage-location.update');
             Route::get('/detail/{id}', [StorageLocationController::class, 'show'])->name('master.storage-location.show');
             Route::delete('/delete/{id}', [StorageLocationController::class, 'destroy'])->name('master.storage-location.destroy');
+        });
+
+        Route::group(['prefix' => 'material-group'], function () {
+            Route::get('/list', [MaterialGroupController::class, 'index'])->name('master.material-group.index');
+            Route::post('/create', [MaterialGroupController::class, 'store'])->name('master.material-group.store');
+            Route::post('/update/{id}', [MaterialGroupController::class, 'update'])->name('master.material-group.update');
+            Route::get('/detail/{id}', [MaterialGroupController::class, 'show'])->name('master.material-group.show');
+            Route::delete('/delete/{id}', [MaterialGroupController::class, 'destroy'])->name('master.material-group.destroy');
+        });
+
+        Route::group(['prefix' => 'uom'], function () {
+            Route::get('/list', [UomController::class, 'index'])->name('master.uom.index');
+            Route::post('/create', [UomController::class, 'store'])->name('master.uom.store');
+            Route::post('/update/{id}', [UomController::class, 'update'])->name('master.uom.update');
+            Route::get('/detail/{id}', [UomController::class, 'show'])->name('master.uom.show');
+            Route::delete('/delete/{id}', [UomController::class, 'destroy'])->name('master.uom.destroy');
+        });
+        Route::group(['prefix' => 'pajak'], function () {
+            Route::get('/list', [PajakController::class, 'index'])->name('master.pajak.index');
+            Route::post('/create', [PajakController::class, 'store'])->name('master.pajak.store');
+            Route::post('/update/{id}', [PajakController::class, 'update'])->name('master.pajak.update');
+            Route::get('/detail/{id}', [PajakController::class, 'show'])->name('master.pajak.show');
+            Route::delete('/delete/{id}', [PajakController::class, 'destroy'])->name('master.pajak.destroy');
         });
     });
 });

@@ -50,4 +50,9 @@ class MasterBusinessPartner extends Model
         'purchasing_block',
         'type',
     ];
+
+    public function employee()
+    {
+        return $this->belongsTo(MasterBusinessPartner::class, 'master_business_partner_id', 'id');
+    }
 }

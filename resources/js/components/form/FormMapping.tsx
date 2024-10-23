@@ -84,10 +84,16 @@ const FormMapping: React.FC<FormMappingProps> = ({
             <>
               {(formModel ?? []).map((field, index) => (
                 <div key={index} className={`mt-8 ${field.classPosition}`}>
-                  {!field.conditional ||
-                  watch(field.parameterConditional ?? '') === field.conditional ? (
-                    <FormWrapper model={field} />
-                  ) : null}
+                  {field.fieldCustome ? (
+                    field.fieldCustomeValue
+                  ) : (
+                    <>
+                      {!field.conditional ||
+                      watch(field.parameterConditional ?? '') === field.conditional ? (
+                        <FormWrapper model={field} />
+                      ) : null}
+                    </>
+                  )}
                 </div>
               ))}
             </>

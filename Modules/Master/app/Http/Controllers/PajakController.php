@@ -4,16 +4,26 @@ namespace Modules\Master\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Modules\Master\Models\Pajak;
 
-class DropdownMasterController extends Controller
+class PajakController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    // 'desimal',
+    // 'mwszkz',
+    // 'description'
+    public function index(Request $request)
     {
-        return view('master::index');
+        $filterableColumns =  [
+            'desimal',
+            'mwszkz',
+            'description'
+        ];
+
+        $data = $this->filterAndPaginate($request, Pajak::class, $filterableColumns);
+        return $this->successResponse($data);
     }
 
     /**
@@ -30,6 +40,9 @@ class DropdownMasterController extends Controller
     public function store(Request $request)
     {
         //
+        $dataInsert = $request->all();
+        $data = Pajak::create($dataInsert);
+        return $this->successResponse($data);
     }
 
     /**
@@ -37,7 +50,8 @@ class DropdownMasterController extends Controller
      */
     public function show($id)
     {
-        return view('master::show');
+        $data = Pajak::find($id);
+        return $this->successResponse($data);
     }
 
     /**
@@ -54,6 +68,9 @@ class DropdownMasterController extends Controller
     public function update(Request $request, $id)
     {
         //
+        $dataInsert = $request->all();
+        $data = Pajak::find($id)->update($dataInsert);
+        return $this->successResponse($data);
     }
 
     /**
@@ -62,22 +79,7 @@ class DropdownMasterController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-
-    function dropdown(Request $request)
-    {
-        $data = DB::table($request->tabelname)->select($request->name . ' as label', $request->id . ' as value');
-
-        if($request->key && $request->parameter){
-            $data = $data->where($request->key, $request->parameter);
-        }
-
-        if($request->isNotNull && $request->key){
-            $data = $data->whereNotNull($request->key);
-        }
-
-        $data = $data->get();
+        $data = Pajak::find($id)->delete();
         return $this->successResponse($data);
     }
 }
