@@ -141,7 +141,7 @@ export const BussinessTripFormV1 = ({
             currency: z.string().optional(),
             detail: z.array(
               z.object({
-                date: z.date().optional(),
+                date: z.date().nullish(),
                 request_price: z.any().optional(),
               }),
             ),
@@ -181,25 +181,6 @@ export const BussinessTripFormV1 = ({
     try {
       let response = await axios.get(url);
       console.log(response, ' Response Detail');
-
-      //   const allowance = {
-      //     name: item.name,
-      //     code: item.code,
-      //     default_price: item.grade_all_price,
-      //     type: item.type,
-      //     subtotal: item.grade_all_price,
-      //     currency: item.currency_id,
-      //     request_value: item.request_value,
-      //     detail:
-      //       item.type == 'total'
-      //         ? [
-      //             {
-      //               date: undefined,
-      //               request_price: item.grade_all_price,
-      //             },
-      //           ]
-      //         : detailAllowance,
-      //   };
 
       form.reset({
         purpose_type_id: response.data.data.purpose_type_id,
@@ -599,8 +580,6 @@ export function BussinessDestinationForm({
     removeAttendace();
     removeAllowance();
 
-    let detailAllowance = [];
-
     while (momentStart.format('DD/MM/YYYY') <= momentEnd.format('DD/MM/YYYY')) {
       const object = {
         date: momentStart.toDate(),
@@ -611,33 +590,57 @@ export function BussinessDestinationForm({
         start_time: '08:00',
       };
 
-      detailAllowance.push({
-        date: momentStart.toDate(),
-        request_price: 0,
-      });
-
       momentStart = momentStart.add(1, 'days');
       detailAttedanceAppend(object);
     }
+
+    function generateDetailAllowanceByDate(price: string): any[] {
+      let momentStart = moment(destination.business_trip_start_date);
+      let momentEnd = moment(destination.business_trip_end_date);
+      let detailAllowance = [];
+
+      while (momentStart.format('DD/MM/YYYY') <= momentEnd.format('DD/MM/YYYY')) {
+        const object = {
+          date: momentStart.toDate(),
+          shift_code: 'SHIFTREGULAR',
+          shift_start: '08:00',
+          shift_end: '17:00',
+          end_time: '17:00',
+          start_time: '08:00',
+        };
+        momentStart = momentStart.add(1, 'days');
+
+        detailAllowance.push({
+          date: momentStart.toDate(),
+          request_price: price,
+        });
+
+        console.log('date', momentStart.toDate());
+      }
+
+      console.log(detailAllowance, 'detail allowance')
+      return detailAllowance;
+    }
+
     // console.log(listAllowances, ' allowance');
     let allowancesForm = listAllowances.map((item: any) => {
       return {
         name: item.name,
         code: item.code,
-        default_price: item.grade_all_price,
+        default_price: parseInt(item.grade_all_price),
         type: item.type,
-        subtotal: item.grade_all_price,
+        subtotal: parseInt(item.grade_all_price),
         currency: item.currency_id,
         request_value: item.request_value,
         detail:
-          item.type == 'total'
+          item.type.toLowerCase() == 'total'
             ? [
                 {
-                  date: undefined,
-                  request_price: item.grade_all_price,
+                  date: null,
+                  request_price: parseInt(item.grade_all_price),
                 },
               ]
-            : detailAllowance,
+            : generateDetailAllowanceByDate(item.grade_all_price),
       };
     });
 

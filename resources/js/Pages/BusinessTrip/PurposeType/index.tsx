@@ -13,6 +13,7 @@ import { GET_LIST_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/api';
 import { AllowanceCategoryModel } from '../AllowanceCategory/model/AllowanceModel';
 import PurposeTypeForm from './component/form';
 import { AllowanceItemModel } from '../AllowanceItem/models/models';
+import { GET_LIST_PURPOSE_TYPE } from '@/endpoint/purpose-type/api';
 
 
 interface propsType {
@@ -53,7 +54,7 @@ export const Index = (
         columns={columns}
         actionType='dropdown'
         url={{
-          url: GET_LIST_ALLOWANCE_ITEM,
+          url: GET_LIST_PURPOSE_TYPE,
         }}
         labelFilter='search'
       />

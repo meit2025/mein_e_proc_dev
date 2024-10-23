@@ -154,7 +154,7 @@ class BusinessTripController extends Controller
             }
 
             foreach ($destinations['allowances'] as $key => $allowance) {
-                if ($allowance['type'] == 'TOTAL') {
+                if (strtolower($allowance['type']) == 'total') {
                     foreach ($allowance['detail'] as $detail) {
                         BusinessTripDetailDestinationTotal::create([
                             'business_trip_destination_id' => $businessTripDestination->id,

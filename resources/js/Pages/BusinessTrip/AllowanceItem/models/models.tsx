@@ -6,8 +6,11 @@ export const columns: GridColDef[] = [
   { field: 'category', headerName: 'Category', width: 200, filterable: true },
   { field: 'purpose_type', headerName: 'Purpose Type', width: 200, filterable: true },
   { field: 'type', headerName: 'Type', width: 200, filterable: true },
-  { field: 'grades', headerName: 'Grades', width: 200, filterable: true },
+  // { field: 'grades', headerName: 'Grades', width: 200, filterable: true },
   { field: 'grade_option', headerName: 'Grade Option', width: 200, filterable: true },
+  { field: 'material_group', headerName: 'Material Group', width: 200, filterable: true },
+  { field: 'material_number', headerName: 'Material Number', width: 200, filterable: true },
+  { field: 'plafon', headerName: 'Plafon', width: 200, filterable: true },
 
   { field: 'currency', headerName: 'Currency', width: 200, filterable: true },
 ];
