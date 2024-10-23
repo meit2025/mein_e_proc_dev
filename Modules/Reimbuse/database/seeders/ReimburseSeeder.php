@@ -3,6 +3,7 @@
 namespace Modules\Reimbuse\Database\Seeders;
 
 use App\Models\Currency;
+use App\Models\Family;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Modules\Reimbuse\Models\Reimburse;
@@ -19,22 +20,45 @@ class ReimburseSeeder extends Seeder
     public function run(): void
     {
         $faker = Faker::create();
-        for ($i = 0; $i < 10; $i++) {
-            Reimburse::insert(
+        Reimburse::insert(
+            [
                 [
-                    "rn"            =>  $faker->unique()->unixTime(),
-                    "group"         =>  ReimburseGroup::inRandomOrder()->first()->code,
-                    "type"          =>  ReimburseType::inRandomOrder()->first()->code,
-                    "requester"     =>  User::inRandomOrder()->first()->nip,
+                    "group"         =>  'Asal123',
+                    "type"          =>  'PS1',
+                    "currency"      =>  Currency::inRandomOrder()->first()->code,
                     "remark"        =>  $faker->sentence(),
-                    "balance"       =>  $faker->randomFloat(2, 100000, 1000000),
+                    "for"           =>  '1',
+                    "balance"       =>  25000,
                     "receipt_date"  =>  $faker->date(),
                     "start_date"    =>  $faker->date(),
                     "end_date"      =>  $faker->date($format = 'Y-m-d', $max = '+3 days'),
-                    "period"        =>  ReimbursePeriod::inRandomOrder()->first()->code,
-                    "currency"      =>  Currency::inRandomOrder()->first()->code
+                    "period"        =>  'pd-01',
+                ],
+                [
+                    "group"         =>  'Asal123',
+                    "type"          =>  'IB1',
+                    "currency"      =>  Currency::inRandomOrder()->first()->code,
+                    "remark"        =>  $faker->sentence(),
+                    "for"           =>  '2',
+                    "balance"       =>  25000,
+                    "receipt_date"  =>  $faker->date(),
+                    "start_date"    =>  $faker->date(),
+                    "end_date"      =>  $faker->date($format = 'Y-m-d', $max = '+3 days'),
+                    "period"        =>  'pd-01',
+                ],
+                [
+                    "group"         =>  'Asal123',
+                    "type"          =>  'IB2',
+                    "currency"      =>  Currency::inRandomOrder()->first()->code,
+                    "remark"        =>  $faker->sentence(),
+                    "for"           =>  '12345',
+                    "balance"       =>  25000,
+                    "receipt_date"  =>  $faker->date(),
+                    "start_date"    =>  $faker->date(),
+                    "end_date"      =>  $faker->date($format = 'Y-m-d', $max = '+3 days'),
+                    "period"        =>  'pd-01',
                 ]
-            );
-        }
+            ]
+        );
     }
 }

@@ -1,0 +1,6 @@
+const ROUTE_REIMBURSE_PAGE = '/reimburse';
+
+export const LIST_PAGE_REIMBURSE = `${ROUTE_REIMBURSE_PAGE}`;
+export const CREATE_PAGE_REIMBURSE = `${ROUTE_REIMBURSE_PAGE}/create`;
+export const EDIT_PAGE_REIMBURSE = `${ROUTE_REIMBURSE_PAGE}/update`;
+export const DETAIL_PAGE_REIMBURSE = `${ROUTE_REIMBURSE_PAGE}/detail`;

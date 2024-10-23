@@ -18,7 +18,12 @@ class ReimburseType extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = ["code", "group", "name", "claim_limit", "plafon"];
+    protected $fillable = ["code", "name", "is_employee"];
+
+    public function quotas()
+    {
+        return $this->hasMany(ReimburseQuota::class, 'type', 'code');
+    }
 
     // protected static function newFactory(): ReimburseTypeFactory
     // {

@@ -4,7 +4,7 @@ import { Inertia } from '@inertiajs/inertia';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/shacdn/form';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { Textarea } from '@/components/shacdn/textarea';
 import '../css/reimburse.scss';
 import { ScrollArea } from '@/components/shacdn/scroll-area';
@@ -17,12 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/shacdn/select';
+import axios, { AxiosError } from 'axios';
 import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import { Input } from '@/components/shacdn/input';
+import { useAlert } from '../../../contexts/AlertContext.jsx';
+import { usePage } from '@inertiajs/react';
 
 interface Reimburse {
   id: string;
-  rn: string;
   remark: string;
   type: string;
   currency: string;
@@ -41,7 +43,7 @@ interface User {
 
 interface Group {
   id: string;
-  code: string;
+  request_number: string;
   remark: string;
   status: string;
   users: User;
@@ -52,7 +54,6 @@ interface Props {
   reimbursement: Group | null;
   reimburses: Reimburse[];
   currencies: { id: string; code: string; name: string }[];
-  types: { id: string; code: string; name: string }[];
   periods: { id: string; code: string; start: string; end: string }[];
   users: User[];
   csrf_token: string;
@@ -67,17 +68,26 @@ export const ReimburseForm: React.FC<Props> = ({
   users,
   csrf_token,
 }) => {
+  const [activeTab, setActiveTab] = useState('form1');
+  const { showToast } = useAlert();
+  const { errors } = usePage().props;
   const [formCount, setFormCount] = useState<number>(1);
   const [formData, setFormData] = useState<Reimburse[]>(reimburses);
+  const [limits, setLimits] = useState([]);
+  const [reimburseTypes, setReimburseTypes] = useState([[]]);
+  const [families, setFamilies] = useState([]);
+  const [isFamily, setIsFamily] = useState([[]]);
 
   const formSchema = z.object({
     remark_group: z.string().nonempty('Remark is required'),
     requester: z.string().nonempty('Requester is required'),
     forms: z.array(
       z.object({
-        rn: z.string(),
+        id: z.string(),
         type: z.string().nonempty('Type is required'),
+        reimburse_type: z.string().nonempty('Type is required'),
         period: z.string().nonempty('Period is required'),
+        for: z.string().nonempty('Period is required'),
         remark: z.string().nonempty('Remark is required'),
         balance: z.number().min(1, 'Balance must be at least 1'),
         receipt_date: z.date(),
@@ -97,11 +107,13 @@ export const ReimburseForm: React.FC<Props> = ({
       remark_group: '',
       requester: '',
       forms: Array.from({ length: 1 }).map(() => ({
-        rn: '',
+        id: '',
         type: '',
+        reimburse_type: '',
         remark: '',
         period: '',
         balance: 0,
+        for: '',
         receipt_date: new Date(),
         start_date: new Date(),
         end_date: new Date(),
@@ -119,7 +131,7 @@ export const ReimburseForm: React.FC<Props> = ({
       form.setValue(
         'forms',
         reimbursement.reimburses.map((reimburse) => ({
-          rn: reimburse.rn,
+          id: reimburse.id,
           type: reimburse.type,
           remark: reimburse.remark,
           balance: Number(reimburse.balance),
@@ -137,15 +149,28 @@ export const ReimburseForm: React.FC<Props> = ({
     }
   }, [reimbursement]);
 
-  const handleFormCountChange = (value: number) => {
-    setFormCount(value);
+  async function selectedEmployee(value) {
+    try {
+      const response = await axios.get(`/family/show/${value}`);
+      const typeData = response.data;
+      setFamilies(typeData);
+      form.setValue('requester', value);
+    } catch (error) {
+      const resultError = error as AxiosError;
+      const err = resultError.response.data;
+      showToast(err.message, err.status);
+    }
+  }
 
+  const handleFormCountChange = (value) => {
+    setFormCount(value);
     const currentForms = form.getValues('forms');
     const newForms = Array.from({ length: value }).map((_, index) => {
       return (
         currentForms[index] || {
-          rn: '',
+          id: '',
           type: '',
+          reimburse_type: '',
           remark: '',
           period: '',
           balance: 0,
@@ -160,23 +185,50 @@ export const ReimburseForm: React.FC<Props> = ({
     form.setValue('formCount', value.toString());
   };
 
-  const [limits, setLimits] = useState([]);
+  const handleTabChange = (tabValue) => {
+    setActiveTab(tabValue);
+  };
 
-  const selectedTypeCode = (index, value) => {
-    const selectedType = types.find((type) => type.code === value);
+  async function selectedTypeCode(index, value) {
+    try {
+      const response = await axios.get(`/reimburse/type/${value}`);
+      const typeData = response.data;
+      setReimburseTypes((prevTypes) => {
+        const updatedTypes = [...prevTypes];
+        updatedTypes[index] = typeData.data;
+        return updatedTypes;
+      });
+      setIsFamily((prevIsFamily) => {
+        const updatedIsFamily = [...prevIsFamily];
+        updatedIsFamily[index] = value === 'Family';
+        return updatedIsFamily;
+      });
+      form.setValue(`forms.${index}.type`, value);
+    } catch (error) {
+      const resultError = error as AxiosError;
+      const err = resultError.response.data;
+      showToast(err.message, err.status);
+    }
+  }
 
+  async function checkBalance(index, user, is_employee, type, period) {
+    const response = await axios.post('/reimburse/is_required', {
+      user,
+      is_employee,
+      type,
+      period,
+    });
+    const selectedType = response.data.data;
     setLimits((prevLimits) => {
       const updatedLimits = [...prevLimits];
       updatedLimits[index] = {
-        plafon: selectedType?.plafon ?? 0,
-        claim: selectedType?.claim_limit ?? 'Unlimited',
+        plafon: selectedType?.plafon,
+        limit: selectedType?.limit,
       };
       return updatedLimits;
     });
-
-    // Set the form value for the specific index
-    form.setValue(`forms.${index}.type`, value);
-  };
+    form.setValue(`forms.${index}.for`, user);
+  }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const formData = new FormData();
@@ -187,7 +239,7 @@ export const ReimburseForm: React.FC<Props> = ({
 
     // Append form details and attachments
     values.forms.forEach((form, index) => {
-      formData.append(`forms[${index}][rn]`, form.rn);
+      formData.append(`forms[${index}][id]`, form.id);
       formData.append(`forms[${index}][type]`, form.type);
       formData.append(`forms[${index}][remark]`, form.remark);
       formData.append(`forms[${index}][balance]`, form.balance.toString());
@@ -225,7 +277,7 @@ export const ReimburseForm: React.FC<Props> = ({
             <tbody>
               <tr>
                 <td width={200}>Reimburse Request No.</td>
-                <td>{reimbursement?.code ?? '-'}</td>
+                <td>{reimbursement?.request_number ?? '-'}</td>
               </tr>
               <tr>
                 <td width={200}>Request Status</td>
@@ -263,7 +315,7 @@ export const ReimburseForm: React.FC<Props> = ({
                         <FormControl>
                           <Select
                             disabled={reimbursement !== null}
-                            onValueChange={(value) => field.onChange(value)}
+                            onValueChange={(value) => selectedEmployee(value)}
                             value={field.value}
                           >
                             <SelectTrigger className='w-[200px]'>
@@ -321,15 +373,22 @@ export const ReimburseForm: React.FC<Props> = ({
 
           <Separator className='my-4' />
 
-          {Array.from({ length: form.watch('formCount') || 1 }).map((_, index) => (
-            <Tabs key={index} defaultValue={`form${index + 1}`} className='w-full'>
-              <TabsList className='grid w-full grid-cols-2'>
-                <TabsTrigger value={`form${index + 1}`}>Form {index + 1}</TabsTrigger>
-              </TabsList>
-              <TabsContent value={`form${index + 1}`}>
+          <Tabs value={activeTab} onValueChange={handleTabChange} className='w-full'>
+            <TabsList className={`flex items-center justify-start space-x-4`}>
+              {' '}
+              {/* Flexbox for horizontal layout */}
+              {Array.from({ length: form.watch('formCount') || 1 }).map((_, index) => (
+                <TabsTrigger key={index} value={`form${index + 1}`}>
+                  Form {index + 1}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            {Array.from({ length: form.watch('formCount') || 1 }).map((_, index) => (
+              <TabsContent key={index} value={`form${index + 1}`}>
                 <FormField
                   control={form.control}
-                  name={`forms.${index}.rn`}
+                  name={`forms.${index}.id`}
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -345,7 +404,7 @@ export const ReimburseForm: React.FC<Props> = ({
                     <tbody>
                       <tr>
                         <td width={200}>Type of Reimbursement</td>
-                        <td>
+                        <td className='flex items-center space-x-3'>
                           <FormField
                             control={form.control}
                             name={`forms.${index}.type`}
@@ -360,10 +419,41 @@ export const ReimburseForm: React.FC<Props> = ({
                                 </SelectTrigger>
                                 <SelectContent>
                                   {types.map((type) => (
-                                    <SelectItem key={type.code} value={type.code}>
-                                      {type.name} ({type.code})
+                                    <SelectItem key={type} value={type}>
+                                      {type}
                                     </SelectItem>
                                   ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.reimburse_type`}
+                            render={({ field }) => (
+                              <Select
+                                disabled={
+                                  !reimburseTypes[index] || reimburseTypes[index].length === 0
+                                }
+                                onValueChange={(value) =>
+                                  form.setValue(`forms.${index}.reimburse_type`, value)
+                                }
+                                value={field.value}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder='Select detail' />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {reimburseTypes[index] &&
+                                    reimburseTypes[index].map((reimburseType) => (
+                                      <SelectItem
+                                        key={reimburseType.code}
+                                        value={reimburseType.code}
+                                      >
+                                        {reimburseType.name}
+                                      </SelectItem>
+                                    ))}
                                 </SelectContent>
                               </Select>
                             )}
@@ -405,6 +495,48 @@ export const ReimburseForm: React.FC<Props> = ({
                       </tr>
 
                       <tr>
+                        <td width={200}>Family</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.for`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Select
+                                    disabled={!isFamily[index] || isFamily[index].length === 0}
+                                    onValueChange={(value) =>
+                                      checkBalance(
+                                        index,
+                                        value,
+                                        !isFamily[index],
+                                        form.getValues(`forms.${index}.reimburse_type`),
+                                        form.getValues(`forms.${index}.period`),
+                                      )
+                                    }
+                                    value={field.value}
+                                  >
+                                    <SelectTrigger className='w-[200px]'>
+                                      <SelectValue placeholder='-' />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {families &&
+                                        families.map((family) => (
+                                          <SelectItem key={family.id} value={family.id}>
+                                            {family.name} ({family.status})
+                                          </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
+
+                      <tr>
                         <td width={200}>Remark</td>
                         <td>
                           <FormField
@@ -424,12 +556,12 @@ export const ReimburseForm: React.FC<Props> = ({
 
                       <tr>
                         <td width={200}>Balance</td>
-                        <td>{limits[index]?.plafon || '-'}</td>
+                        <td>{limits[index]?.plafon}</td>
                       </tr>
 
                       <tr>
                         <td width={200}>Limit per claim</td>
-                        <td>{limits[index]?.claim || '-'}</td>
+                        <td>{limits[index]?.limit}</td>
                       </tr>
 
                       <tr>
@@ -593,8 +725,8 @@ export const ReimburseForm: React.FC<Props> = ({
                   </table>
                 </div>
               </TabsContent>
-            </Tabs>
-          ))}
+            ))}
+          </Tabs>
 
           <Separator className='my-4' />
           <div className='mt-4 flex justify-end'>
