@@ -118,7 +118,7 @@ export const BussinessTripFormV1 = ({
     total_cash_advance: z.string().nullable().optional(),
     destinations: z.array(
       z.object({
-        destination: z.string().optional(),
+        destination: z.string().min(1, 'Destinantion Required'),
         business_trip_start_date: z.date().optional(),
         business_trip_end_date: z.date().optional(),
         detail_attedances: z.array(
@@ -535,7 +535,7 @@ export function BussinesTripDestination({
   const [endDate, setEndDate] = React.useState<Date>();
 
   const [selectedDestinationIdex, setDestinationIndex] = React.useState<number>(0);
-  console.log(destinationField, ' Destination Field');
+
   return (
     <Tabs defaultValue='destination1' className='w-full'>
       <TabsList className={`flex items-center justify-start space-x-4`}>
@@ -697,6 +697,7 @@ export function BussinessDestinationForm({
                           updateDestination(index, { ...destination, destination: value });
                         }}
                         defaultValue={destination.destination}
+                        // onValueChange={(value) => field.onChange(value)}
                         // value={field.value}
                       >
                         <SelectTrigger className='w-[200px]'>
@@ -827,7 +828,7 @@ export function BussinessDestinationForm({
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Input value={field.value || ''} disabled={true} />
+                          <Input value={field.value || ''} readOnly={true} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -1199,7 +1200,6 @@ export function AllowanceRowInput({
                             value={field.value} // Ensure proper value binding
                             // onChange={field.onChange} // Bind change handler to form control
                             onChange={handleInputChange(field)}
-                            disabled={allowance.request_value === 'fixed value'}
                           />
                         </FormControl>
                         <FormMessage />
