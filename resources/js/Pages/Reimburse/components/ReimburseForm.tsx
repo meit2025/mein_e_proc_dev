@@ -43,7 +43,7 @@ interface User {
 
 interface Group {
   id: string;
-  code: string;
+  request_number: string;
   remark: string;
   status: string;
   users: User;
@@ -277,7 +277,7 @@ export const ReimburseForm: React.FC<Props> = ({
             <tbody>
               <tr>
                 <td width={200}>Reimburse Request No.</td>
-                <td>{reimbursement?.code ?? '-'}</td>
+                <td>{reimbursement?.request_number ?? '-'}</td>
               </tr>
               <tr>
                 <td width={200}>Request Status</td>

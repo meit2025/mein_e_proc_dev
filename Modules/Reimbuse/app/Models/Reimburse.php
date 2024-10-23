@@ -39,6 +39,7 @@ class Reimburse extends Model
     protected $fillable = [
         "group",
         "type",
+        "currency",
         "remark",
         "for",
         "balance",
@@ -46,7 +47,24 @@ class Reimburse extends Model
         "start_date",
         "end_date",
         "period",
-        "currency",
+        "pembeda",
+        "tracking_number",
+        "item_number",
+        "purchase_requisition_document_type",
+        "valuation_type",
+        "purchase_requisition_closed",
+        'purchasing_group',
+        'purchasing_organization',
+        'account_assignment',
+        'storage_location',
+        'desired_vendor',
+        'material_group',
+        'material_number',
+        'purchase_requisition_unit_of_measure',
+        'purchase_requisition_quantity',
+        'tax_on_sales',
+        'item_category_in_purchasing_document',
+        'plant'
     ];
 
     // protected static function newFactory(): ReimburseFactory

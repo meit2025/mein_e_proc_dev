@@ -15,8 +15,8 @@ class ReimburseQuota extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = ["period", "type", "value", "plafon"];
-    
+    protected $fillable = ["period", "type", "grade", "limit", "plafon"];
+
     // protected static function newFactory(): ReimburseQuotaFactory
     // {
     //     // return ReimburseQuotaFactory::new();
