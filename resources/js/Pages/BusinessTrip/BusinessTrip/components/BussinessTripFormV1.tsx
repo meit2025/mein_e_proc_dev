@@ -247,7 +247,7 @@ export const BussinessTripFormV1 = ({
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+    console.log(values, ' test');
     try {
       const formData = new FormData();
       // Append group data

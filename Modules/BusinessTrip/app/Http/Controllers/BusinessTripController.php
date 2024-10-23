@@ -112,7 +112,6 @@ class BusinessTripController extends Controller
         $destinations = json_decode($request->destinations, true);
 
         try {
-            dd($request->all());
             DB::beginTransaction();
             $businessTrip = BusinessTrip::create([
                 'request_no' => '123',
