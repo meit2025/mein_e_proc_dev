@@ -11,13 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('purchasing_groups', function (Blueprint $table) {
-            $table->id();
-            $table->string('purchasing_group')->nullable();
-            $table->string('purchasing_group_desc')->nullable();
+        
 
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('purchasing_groups')) {
+            Schema::create('purchasing_groups', function (Blueprint $table) {
+                $table->id();
+                $table->string('purchasing_group')->nullable();
+                $table->string('purchasing_group_desc')->nullable();
+
+                $table->timestamps();
+            });
+        }
     }
 
     /**

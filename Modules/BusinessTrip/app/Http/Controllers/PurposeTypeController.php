@@ -80,6 +80,41 @@ class PurposeTypeController extends Controller
         return $this->successResponse($find);
     }
 
+    public function listAPI(Request $request)
+    {
+
+        $query =  PurposeType::query()->with(['listAllowance']);
+
+
+
+        $perPage = $request->get('per_page', 10);
+        $sortBy = $request->get('sort_by', 'id');
+        $sortDirection = $request->get('sort_direction', 'asc');
+        $query->orderBy($sortBy, $sortDirection);
+
+
+        $data = $query->paginate($perPage);
+
+        // dd($data);
+        $data->getCollection()->transform(function ($map) {
+          
+
+            $allowanceTypeRelations = collect($map->listAllowance)->map(function ($relation) {
+                return  $relation->allowanceItem->name;
+            })->toArray();
+            return [
+                'id' => $map->id,
+                'code' => $map->code,
+                'name' => $map->name,
+                'allowances' => join(' , ', $allowanceTypeRelations)
+            ];
+        });
+
+
+
+        return $this->successResponse($data);
+    }
+
     public function storeApi(Request $request)
     {
 
@@ -109,7 +144,7 @@ class PurposeTypeController extends Controller
 
             $allowances = [];
 
-            foreach ($allowances as $allowance_id) {
+            foreach ($request->allowances as $allowance_id) {
                 array_push($allowances, [
                     'allowance_items_id' => $allowance_id,
                     'purpose_type_id' => $purpose->id
@@ -129,22 +164,33 @@ class PurposeTypeController extends Controller
     }
 
     public function getAllowanceByPurposeAPI($id, $userid)
-    {
-        $listAllowances =  AllowanceItem::whereIn('id', PurposeTypeAllowance::where('purpose_type_id', $id)->get()->pluck('allowance_items_id')->toArray())->get();
+    {   
+
+        
+
+        $listPurposeType =
+        PurposeTypeAllowance::where('purpose_type_id', $id)->get()->pluck('allowance_items_id')->toArray();
+
+        $listAllowances =  AllowanceItem::whereIn('id', $listPurposeType)->get();
+
         foreach ($listAllowances as $allowance) {
             if ($allowance->grade_option == 'all') {
                 $listAllowances->grade_all_price = $allowance->grade_all_price;
             } else {
                 // get grade user
                 $grade = BusinessTripGradeUser::where('user_id', $userid)->first();
+                
                 if (is_null($grade)) {
                     $listAllowances->grade_all_price = 0;
                 } else {
-                    $btgradeAllowance = BusinessTripGradeAllowance::where('grade_id', $grade->grade_id)->where('allowance_items_id', $allowance->id)->first();
+                    $btgradeAllowance = BusinessTripGradeAllowance::where('grade_id', $grade->grade_id)->where('allowance_item_id', $allowance->id)->first();
+
+                    // dd($btgradeAllowance);
                     $listAllowances->grade_all_price = $btgradeAllowance->plafon;
                 }
             }
         }
+        
         return $this->successResponse($listAllowances);
     }
 }
