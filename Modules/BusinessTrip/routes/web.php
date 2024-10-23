@@ -73,7 +73,7 @@ Route::group(['prefix' => 'api/'], function () {
         // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
         Route::get('/detail/{id}', [PurposeTypeController::class, 'detailAPI'])->name('purpose-type.detail');
-        Route::get('/list-allowances-by-purpose-type/{id}', [PurposeTypeController::class, 'getAllowanceByPurposeAPI'])->name('purpose-type.list-allowances');
+        Route::get('/list-allowances-by-purpose-type/{id}/{userid}', [PurposeTypeController::class, 'getAllowanceByPurposeAPI'])->name('purpose-type.list-allowances');
 
 
         // Route::delete('/delete/{id}', [MasterMaterialController::class, 'destroy'])->name('master.master-material.destroy');

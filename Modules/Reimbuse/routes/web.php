@@ -18,8 +18,10 @@ use Modules\Reimbuse\Http\Controllers\ReimbuseController;
 
 // Route::get('/login',[AuthController::class, 'index'])->name('auth.login-index');
 
-Route::resource('/reimburse', ReimbuseController::class);
-Route::get('/reimburse/type/{type}', [ReimbuseController::class, 'getTypeData']);
-Route::post('/reimburse/is_required', [ReimbuseController::class, 'is_required']);
+Route::group(['prefix' => 'reimburse', 'middleware' => 'auth'], function () {
+    Route::resource('/', ReimbuseController::class);
+    Route::get('/type/{type}', [ReimbuseController::class, 'getTypeData']);
+    Route::post('/is_required', [ReimbuseController::class, 'is_required']);
+});
 
 Route::get('/family/show/{employee}', [FamilyController::class, 'show']);

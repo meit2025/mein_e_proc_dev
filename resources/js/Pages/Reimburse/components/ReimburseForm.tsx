@@ -43,7 +43,7 @@ interface User {
 
 interface Group {
   id: string;
-  code: string;
+  request_number: string;
   remark: string;
   status: string;
   users: User;
@@ -76,6 +76,8 @@ export const ReimburseForm: React.FC<Props> = ({
   const [limits, setLimits] = useState([]);
   const [reimburseTypes, setReimburseTypes] = useState([[]]);
   const [families, setFamilies] = useState([]);
+  const [isFamily, setIsFamily] = useState([[]]);
+
   const formSchema = z.object({
     remark_group: z.string().nonempty('Remark is required'),
     requester: z.string().nonempty('Requester is required'),
@@ -85,6 +87,7 @@ export const ReimburseForm: React.FC<Props> = ({
         type: z.string().nonempty('Type is required'),
         reimburse_type: z.string().nonempty('Type is required'),
         period: z.string().nonempty('Period is required'),
+        for: z.string().nonempty('Period is required'),
         remark: z.string().nonempty('Remark is required'),
         balance: z.number().min(1, 'Balance must be at least 1'),
         receipt_date: z.date(),
@@ -110,6 +113,7 @@ export const ReimburseForm: React.FC<Props> = ({
         remark: '',
         period: '',
         balance: 0,
+        for: '',
         receipt_date: new Date(),
         start_date: new Date(),
         end_date: new Date(),
@@ -194,6 +198,11 @@ export const ReimburseForm: React.FC<Props> = ({
         updatedTypes[index] = typeData.data;
         return updatedTypes;
       });
+      setIsFamily((prevIsFamily) => {
+        const updatedIsFamily = [...prevIsFamily];
+        updatedIsFamily[index] = value === 'Family';
+        return updatedIsFamily;
+      });
       form.setValue(`forms.${index}.type`, value);
     } catch (error) {
       const resultError = error as AxiosError;
@@ -213,12 +222,12 @@ export const ReimburseForm: React.FC<Props> = ({
     setLimits((prevLimits) => {
       const updatedLimits = [...prevLimits];
       updatedLimits[index] = {
-        plafon: selectedType?.plafon ?? 0,
-        limit: selectedType?.limit ?? 'Unlimited',
+        plafon: selectedType?.plafon,
+        limit: selectedType?.limit,
       };
       return updatedLimits;
     });
-    form.setValue(`forms.${index}.family`, user);
+    form.setValue(`forms.${index}.for`, user);
   }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -268,7 +277,7 @@ export const ReimburseForm: React.FC<Props> = ({
             <tbody>
               <tr>
                 <td width={200}>Reimburse Request No.</td>
-                <td>{reimbursement?.code ?? '-'}</td>
+                <td>{reimbursement?.request_number ?? '-'}</td>
               </tr>
               <tr>
                 <td width={200}>Request Status</td>
@@ -453,40 +462,6 @@ export const ReimburseForm: React.FC<Props> = ({
                       </tr>
 
                       <tr>
-                        <td width={200}>Family</td>
-                        <td>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.family`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Select
-                                    onValueChange={(value) =>
-                                      checkBalance(index, value, false, 'PS1', 'pd-01')
-                                    }
-                                    value={field.value}
-                                  >
-                                    <SelectTrigger className='w-[200px]'>
-                                      <SelectValue placeholder='-' />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {families.map((family) => (
-                                        <SelectItem key={family.id} value={family.id}>
-                                          {family.name} ({family.status})
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                      </tr>
-
-                      <tr>
                         <td width={200}>Period Date</td>
                         <td>
                           <FormField
@@ -520,6 +495,48 @@ export const ReimburseForm: React.FC<Props> = ({
                       </tr>
 
                       <tr>
+                        <td width={200}>Family</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.for`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Select
+                                    disabled={!isFamily[index] || isFamily[index].length === 0}
+                                    onValueChange={(value) =>
+                                      checkBalance(
+                                        index,
+                                        value,
+                                        !isFamily[index],
+                                        form.getValues(`forms.${index}.reimburse_type`),
+                                        form.getValues(`forms.${index}.period`),
+                                      )
+                                    }
+                                    value={field.value}
+                                  >
+                                    <SelectTrigger className='w-[200px]'>
+                                      <SelectValue placeholder='-' />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {families &&
+                                        families.map((family) => (
+                                          <SelectItem key={family.id} value={family.id}>
+                                            {family.name} ({family.status})
+                                          </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
+
+                      <tr>
                         <td width={200}>Remark</td>
                         <td>
                           <FormField
@@ -539,12 +556,12 @@ export const ReimburseForm: React.FC<Props> = ({
 
                       <tr>
                         <td width={200}>Balance</td>
-                        <td>{limits[index]?.plafon || '-'}</td>
+                        <td>{limits[index]?.plafon}</td>
                       </tr>
 
                       <tr>
                         <td width={200}>Limit per claim</td>
-                        <td>{limits[index]?.limit || '-'}</td>
+                        <td>{limits[index]?.limit}</td>
                       </tr>
 
                       <tr>
