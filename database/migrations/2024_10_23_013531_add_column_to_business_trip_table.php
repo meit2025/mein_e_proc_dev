@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('business_trip', function (Blueprint $table) {
-            $table->tinyInteger('id_cash_advance')->default(0);
+            $table->tinyInteger('cash_advance')->default(0);
             $table->double('total_percent')->nullable();
             $table->double('total_cash_advance')->nullable();
         });
@@ -24,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('business_trip', function (Blueprint $table) {
-            $table->dropColumn('id_cash_advance');
+            $table->dropColumn('cash_advance');
             $table->dropColumn('total_percent');
             $table->dropColumn('total_cash_advance');
         });
