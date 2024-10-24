@@ -74,7 +74,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::inertia(
                 '/',
                 'Master/MasterReimburseQuota/Index',
-                compact('listPeriodReimburse', 'listTypeReimburse', 'listGrade')
+                // compact('listPeriodReimburse', 'listTypeReimburse', 'listGrade')
             );
         });
     });
