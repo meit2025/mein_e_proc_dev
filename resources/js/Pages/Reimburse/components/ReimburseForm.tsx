@@ -462,6 +462,17 @@ export const ReimburseForm: React.FC<Props> = ({
                       </tr>
 
                       <tr>
+                        <td width={200}>Material</td>
+                        <td className='flex items-center'>
+                          {/* <CustomDatePicker /> */}
+                          <span className='mx-2'>Group</span>
+                          <td>{reimburseTypes[index]?.material_group}</td>
+                          <span className='mx-2'>Number</span>
+                          <td>{reimburseTypes[index]?.material_number}</td>
+                        </td>
+                      </tr>
+
+                      <tr>
                         <td width={200}>Period Date</td>
                         <td>
                           <FormField

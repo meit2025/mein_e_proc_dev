@@ -45,9 +45,9 @@ class MasterQuotaReimburseController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            'period' => 'required|unique:master_period_reimburses',
-            'type' => 'required|unique:master_type_reimburses',
-            'grade' => 'required||unique:business_trip_grades',
+            'period' => 'required|exists:master_period_reimburses,id',
+            'type' => 'required|exists:master_type_reimburses,id',
+            'grade' => 'required|exists:business_trip_grades,id',
             'plafon' => 'required',
             'limit' => 'required'
         ];
