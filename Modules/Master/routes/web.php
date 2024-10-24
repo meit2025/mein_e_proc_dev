@@ -71,10 +71,13 @@ Route::group(['middleware' => 'auth'], function () {
             // $listPeriodReimburse = MasterPeriodReimburse::get();
             // $listTypeReimburse = MasterTypeReimburse::get();
             // $listGrade = BusinessTripGrade::get();
+            $listPeriodReimburse = [];
+            $listTypeReimburse = [];
+            $listGrade = [];
             Route::inertia(
                 '/',
                 'Master/MasterReimburseQuota/Index',
-                // compact('listPeriodReimburse', 'listTypeReimburse', 'listGrade')
+                compact('listPeriodReimburse', 'listTypeReimburse', 'listGrade')
             );
         });
     });
