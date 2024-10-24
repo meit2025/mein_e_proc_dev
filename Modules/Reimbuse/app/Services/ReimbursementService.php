@@ -15,13 +15,13 @@ use Modules\Reimbuse\Models\ReimburseAttachment;
 class ReimbursementService
 {
     protected $validator_rule = [
-        'type'         =>  'required|string|exists:reimburse_types,code',
+        'type'         =>  'required|string|exists:master_type_reimburses,code',
         'remark'       =>  'nullable',
         'balance'      =>  'required|numeric',
         'receipt_date' =>  'required|date',
         'start_date'   =>  'required|date',
         'end_date'     =>  'required|date',
-        'period'       =>  'required|string|exists:reimburse_periods,code',
+        'period'       =>  'required|string|exists:master_period_reimburses,code',
         'currency'     =>  'required|string|exists:currencies,code'
     ];
 
