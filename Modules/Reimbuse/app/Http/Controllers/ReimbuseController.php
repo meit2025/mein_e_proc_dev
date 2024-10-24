@@ -15,6 +15,7 @@ use Modules\Reimbuse\Models\ReimburseQuota;
 use Modules\Reimbuse\Models\ReimburseType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Modules\Master\Models\MasterTypeReimburse;
 use Modules\Reimbuse\Services\ReimbursementService;
 
 class ReimbuseController extends Controller
@@ -30,7 +31,7 @@ class ReimbuseController extends Controller
     {
         try {
             $res = ($type == 'Employee') ? 1 : 0;
-            $typeData = ReimburseType::where('is_employee', $res)->get();
+            $typeData = MasterTypeReimburse::where('is_employee', $res)->get();
             return $this->successResponse($typeData);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 400);
