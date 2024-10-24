@@ -21,7 +21,7 @@ return new class extends Migration
             $table->date('start_date');
             $table->date('end_date');
             $table->foreignId('period')->constrained('master_period_reimburses')->cascadeOnUpdate();
-            
+
             $table->string('short_text'); // replace remark
             $table->date('item_delivery_data'); // replaced receipt_date
             $table->string('pembeda')->default('reim');

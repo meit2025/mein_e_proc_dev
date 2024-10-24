@@ -68,9 +68,9 @@ Route::group(['middleware' => 'auth'], function () {
             Route::inertia('/',  'Master/MasterReimbursePeriod/Index');
         });
         Route::group(['prefix' => 'reimburse-quota'], function () {
-            $listPeriodReimburse = MasterPeriodReimburse::get();
-            $listTypeReimburse = MasterTypeReimburse::get();
-            $listGrade = BusinessTripGrade::get();
+            // $listPeriodReimburse = MasterPeriodReimburse::get();
+            // $listTypeReimburse = MasterTypeReimburse::get();
+            // $listGrade = BusinessTripGrade::get();
             Route::inertia(
                 '/',
                 'Master/MasterReimburseQuota/Index',
