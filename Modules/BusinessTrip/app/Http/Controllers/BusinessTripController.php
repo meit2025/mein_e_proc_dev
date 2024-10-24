@@ -108,13 +108,12 @@ class BusinessTripController extends Controller
         if ($validator->fails()) {
             return $this->errorResponse("erorr", 400, $validator->errors());
         }
-
         $destinations = json_decode($request->destinations, true);
 
         try {
             DB::beginTransaction();
             $businessTrip = BusinessTrip::create([
-                'request_no' => '123',
+                'request_no' => time(),
                 'purpose_type_id' => $request->purpose_type_id,
                 'request_for' => $request->request_for,
                 'remarks' => $request->remark,
@@ -193,7 +192,7 @@ class BusinessTripController extends Controller
 
         $query->orderBy($sortBy, $sortDirection);
 
-        $data = $query->paginate($perPage);
+        $data = $query->where('type', 'request')->paginate($perPage);
 
         $data->getCollection()->transform(function ($map) {
 
