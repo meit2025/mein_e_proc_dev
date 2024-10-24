@@ -11,18 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reimburse_quotas', function (Blueprint $table) {
+        Schema::create('master_quota_reimburses', function (Blueprint $table) {
             $table->id();
-            $table->string('period');
-            $table->string('type');
-            $table->foreignId('grade')->constrained('grades')->cascadeOnUpdate();
+            $table->foreignId('period')->constrained('master_period_reimburses')->cascadeOnUpdate();
+            $table->foreignId('type')->constrained('master_type_reimburses')->cascadeOnUpdate();
+            $table->tinyInteger('grade');
             $table->integer('limit')->nullable();
             $table->double('plafon')->nullable();
             $table->softDeletes();
             $table->timestamps();
-
-            $table->foreign('period')->references('code')->on('reimburse_periods')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreign('type')->references('code')->on('reimburse_types')->cascadeOnUpdate()->cascadeOnDelete();
         });
     }
 
@@ -31,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reimburse_quotas');
+        Schema::dropIfExists('master_quota_reimburses');
     }
 };

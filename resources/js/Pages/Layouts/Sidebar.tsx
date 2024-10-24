@@ -25,6 +25,9 @@ import { LIST_PAGE_MASTER_ITEM_CATEGORY } from '@/endpoint/ItemCategory/page';
 import { LIST_PAGE_MASTER_STORAGE_LOCATION } from '@/endpoint/storageLocation/page';
 import { LIST_PAGE_APPROVAL_ROUTE } from '@/endpoint/approvalRoute/page';
 import { LIST_PAGE_SETTING_APPROVAL } from '@/endpoint/settingApproval/page';
+import { LIST_PAGE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/page';
+import { LIST_PAGE_REIMBURSE_PERIOD } from '@/endpoint/reimbursePeriod/page';
+import { LIST_PAGE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/page';
 // import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
@@ -129,7 +132,7 @@ const sidebar = [
         title: 'Bussiness Trip',
         icon: 'ki-element-11',
         route: LIST_PAGE_BUSINESS_TRIP,
-        sub: []
+        sub: [],
       },
       {
         title: 'Purchase Requisition',
@@ -305,6 +308,28 @@ const sidebar = [
           //   route: LIST_PAGE_ALLOWANCE_CATEGORY,
           //   roles: '',
           // },
+        ],
+      },
+      {
+        title: 'Master Reimburse',
+        icon: 'ki-key-square',
+        route: '/',
+        sub: [
+          {
+            name: 'Reimburse Type',
+            route: LIST_PAGE_REIMBURSE_TYPE,
+            roles: '',
+          },
+          {
+            name: 'Reimburse Period',
+            route: LIST_PAGE_REIMBURSE_PERIOD,
+            roles: '',
+          },
+          {
+            name: 'Reimburse Quota',
+            route: LIST_PAGE_REIMBURSE_QUOTA,
+            roles: '',
+          },
         ],
       },
     ],

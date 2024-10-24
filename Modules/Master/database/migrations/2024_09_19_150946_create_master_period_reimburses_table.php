@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('grades', function (Blueprint $table) {
+        Schema::create('master_period_reimburses', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('module')->nullable();
+            $table->string('code')->unique();
+            $table->date('start');
+            $table->date('end');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('grades');
+        Schema::dropIfExists('master_period_reimburses');
     }
 };
