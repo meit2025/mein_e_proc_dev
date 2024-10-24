@@ -4,9 +4,11 @@ namespace Modules\PurchaseRequisition\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Modules\PurchaseRequisition\Http\Requests\Procurement as RequestsProcurement;
 use Modules\PurchaseRequisition\Models\Item;
 use Modules\PurchaseRequisition\Models\Procurement;
+use Modules\PurchaseRequisition\Models\Purchase;
 use Modules\PurchaseRequisition\Models\Vendor;
 use Modules\PurchaseRequisition\Models\VendorUnit;
 
@@ -18,16 +20,16 @@ class ProcurementController extends Controller
     public function index(Request $request)
     {
         $filterableColumns = [
-            'const_center',
-            'cost_center_budgeted',
-            'transaction_budgeted',
-            'vendor_remark',
-            'vendor_selected_competitive_lowest_price',
-            'vendor_selected_competitive_price',
-            'vendor_selected_competitive_capable',
-            'selected_vendor_remark',
+            'user_id',
+            'document_type',
+            'purchasing_groups',
+            'account_assignment_categories',
+            'delivery_date',
+            'storage_locations',
+            'total_vendor',
+            'total_item',
         ];
-        $data = $this->filterAndPaginate($request, Procurement::class, $filterableColumns);
+        $data = $this->filterAndPaginate($request, Purchase::class, $filterableColumns);
         return $this->successResponse($data);
     }
 
@@ -44,46 +46,35 @@ class ProcurementController extends Controller
      */
     public function store(RequestsProcurement $request)
     {
-        //
-        // Create the procurement record
-        $procurement = Procurement::create($request->only([
-            'const_center',
-            'cost_center_budgeted',
-            'transaction_budgeted',
-            'vendor_remark',
-            'vendor_selected_competitive_lowest_price',
-            'vendor_selected_competitive_price',
-            'vendor_selected_competitive_capable',
-            'selected_vendor_remark',
-        ]));
 
-        // Create associated items
-        foreach ($request->item as $itemData) {
-            Item::create([
-                'procurement_id' => $procurement->id,
-                'material_number' => $itemData['material_number'],
-                'qty' => $itemData['qty'],
-            ]);
-        }
+        DB::beginTransaction();
+        try {
+            //code...
+            $purchase = Purchase::create($request->all());
 
-        // Create associated vendors and vendor units
-        foreach ($request->vendor as $vendorData) {
-            $vendor = Vendor::create([
-                'procurement_id' => $procurement->id,
-                'vendor' => $vendorData['vendor'],
-                'vendor_winner' => $vendorData['vendor_winner'],
-            ]);
+            $entertain = $purchase->entertainment()->create($request['entertainment']);
 
-            foreach ($vendorData['unit'] as $unitData) {
-                VendorUnit::create([
-                    'vendor_id' => $vendor->id,
-                    'unit_price' => $unitData['unit_price'],
-                    'total_amount' => $unitData['total_amount'],
-                    'other_criteria' => $unitData['other_criteria'],
-                ]);
+            if ($request->is_cashAdvance) {
+                $purchase->cashAdvancePurchases()->create($request['cash_advance_purchases']);
             }
+
+
+            foreach ($request['vendors'] as $vendorData) {
+
+                $vendor = $purchase->vendors()->create(['vendor' => $vendorData['vendor'],  'winner' => $vendorData['winner']]);
+
+                foreach ($vendorData['units'] as $unitData) {
+                    $vendor->units()->create($unitData);
+                }
+            }
+            DB::commit();
+
+            return $this->successResponse($request->all());
+        } catch (\Throwable $th) {
+            //throw $th;
+            DB::rollBack();
+            return $this->errorResponse($th->getMessage());
         }
-        return $this->successResponse($request->all());
     }
 
     /**
@@ -91,7 +82,7 @@ class ProcurementController extends Controller
      */
     public function show($id)
     {
-        $procurement = Procurement::with(['vendor.unit', 'item'])->findOrFail($id);
+        $procurement = Purchase::with('vendors.units', 'entertainment', 'cashAdvancePurchases')->findOrFail($id);
         return response()->json($procurement);
     }
 
@@ -109,49 +100,59 @@ class ProcurementController extends Controller
     public function update(RequestsProcurement $request, $id)
     {
         //
-        $procurement = Procurement::findOrFail($id);
+        DB::beginTransaction();
+        try {
+            //code...
+            // Find the purchase by ID
+            $purchase = Purchase::with('vendors.units')->findOrFail($id);
 
-        // Update procurement details
-        $procurement->update($request->only([
-            'const_center',
-            'cost_center_budgeted',
-            'transaction_budgeted',
-            'vendor_remark',
-            'vendor_selected_competitive_lowest_price',
-            'vendor_selected_competitive_price',
-            'vendor_selected_competitive_capable',
-            'selected_vendor_remark',
-        ]));
+            // Update the purchase fields
+            $purchase->update($request->only([
+                'user_id',
+                'document_type',
+                'purchasing_groups',
+                'account_assignment_categories',
+                'delivery_date',
+                'storage_locations',
+                'total_vendor',
+                'total_item',
+                'is_cashAdvance'
+            ]));
 
-        // Update or recreate items
-        $procurement->items()->delete();
-        foreach ($request->item as $itemData) {
-            Item::create([
-                'procurement_id' => $procurement->id,
-                'material_number' => $itemData['material_number'],
-                'qty' => $itemData['qty'],
-            ]);
-        }
+            $entertain = $purchase->entertainment()->updateOrCreate([
+                'purchase_id' => $id
+            ], $request['entertainment']);
 
-        // Update or recreate vendors and vendor units
-        $procurement->vendors()->delete();
-        foreach ($request->vendor as $vendorData) {
-            $vendor = Vendor::create([
-                'procurement_id' => $procurement->id,
-                'vendor' => $vendorData['vendor'],
-                'vendor_winner' => $vendorData['vendor_winner'],
-            ]);
-
-            foreach ($vendorData['unit'] as $unitData) {
-                VendorUnit::create([
-                    'vendor_id' => $vendor->id,
-                    'unit_price' => $unitData['unit_price'],
-                    'total_amount' => $unitData['total_amount'],
-                    'other_criteria' => $unitData['other_criteria'],
-                ]);
+            if ($request->is_cashAdvance) {
+                $update = $purchase->cashAdvancePurchases()->updateOrCreate([
+                    'purchase_id' => $id
+                ], $request['cash_advance_purchases']);
             }
+
+            // Update vendors and units
+            foreach ($request['vendors'] as $vendorData) {
+                // Check if the vendor exists, if not create it
+                $vendor = $purchase->vendors()->updateOrCreate(
+                    ['vendor' => $vendorData['vendor']],  // Check for existing vendor
+                    ['winner' => $vendorData['winner']]  // No additional fields to update
+                );
+
+                // Update or create units for the vendor
+                foreach ($vendorData['units'] as $unitData) {
+                    $vendor->units()->updateOrCreate(
+                        ['material_number' => $unitData['material_number']],  // Check for existing unit by material number
+                        $unitData  // Update or create with the new data
+                    );
+                }
+            }
+
+            DB::commit();
+            return $this->successResponse($request->all());
+        } catch (\Throwable $th) {
+            //throw $th;
+            DB::rollBack();
+            return $this->errorResponse($th->getMessage());
         }
-        return $this->successResponse($request->all());
     }
 
     /**
@@ -160,7 +161,7 @@ class ProcurementController extends Controller
     public function destroy($id)
     {
         //
-        $procurement = Procurement::findOrFail($id);
+        $procurement = Purchase::findOrFail($id);
         $procurement->delete();
 
         return $this->successResponse($procurement);

@@ -18,6 +18,7 @@ interface FormAutocompleteProps<T> {
   options: Option<T>[];
   placeholder?: string;
   classNames?: string;
+  lengthLabel?: string;
   // eslint-disable-next-line no-unused-vars
   onChangeOutside?: (value: T | null) => void;
 }
@@ -33,6 +34,7 @@ const FormAutocomplete = <T,>({
   placeholder,
   classNames,
   onChangeOutside,
+  lengthLabel = '40',
 }: FormAutocompleteProps<T>) => {
   const {
     control,
@@ -42,7 +44,7 @@ const FormAutocomplete = <T,>({
   return (
     <div className='w-full'>
       <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
-        <label className='form-label max-w-40'>
+        <label className={`form-label max-w-${lengthLabel}`}>
           {fieldLabel} <span className='text-red-700'> {isRequired ? '*' : ''}</span>
         </label>
         <Controller

@@ -34,7 +34,7 @@ const FormSwitch: React.FC<FormSwitchProps> = ({
     <div className='w-full'>
       <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
         {fieldLabel && (
-          <label className='form-label max-w-32'>
+          <label className='form-label max-w-40'>
             {fieldLabel} <span className='text-red-700'> {isRequired ? '*' : ''}</span>
           </label>
         )}

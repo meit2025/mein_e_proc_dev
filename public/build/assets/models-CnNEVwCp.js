@@ -1,0 +1,1 @@
+const e=[{field:"period",headerName:"Period",width:200,filterable:!0},{field:"type",headerName:"Type",width:200,filterable:!0},{field:"grade",headerName:"Grade",width:200,filterable:!0},{field:"limit",headerName:"Limit",width:200,filterable:!0},{field:"plafon",headerName:"Plafon",width:200,filterable:!0}];export{e as columns};

@@ -14,18 +14,18 @@ class Vendor extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
-        'procurement_id',
+        'purchase_id',
         'vendor',
-        'vendor_winner',
+        'winner'
     ];
-
-    public function procurement()
-    {
-        return $this->belongsTo(Procurement::class);
-    }
 
     public function units()
     {
-        return $this->hasMany(VendorUnit::class);
+        return $this->hasMany(Unit::class);
+    }
+
+    public function purchase()
+    {
+        return $this->belongsTo(Purchase::class);
     }
 }

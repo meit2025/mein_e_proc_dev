@@ -184,7 +184,7 @@ export const PageOne = ({ item, vendor }: { item: any[]; vendor: any[] }) => {
                   />
                   <FormSwitch
                     note={'Vendor Winner'}
-                    fieldName={`vendor[${index}].vendor_winner`}
+                    fieldName={`vendors[${index}].vendor_winner`}
                     isRequired={false}
                     disabled={false}
                   />

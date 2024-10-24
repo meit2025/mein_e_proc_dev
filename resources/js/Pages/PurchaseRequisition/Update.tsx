@@ -1,14 +1,16 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import FormMapping from '@/components/form/FormMapping';
-import { CREATE_SECRET, DETAIL_SECRET, EDIT_SECRET } from '@/endpoint/secret/api';
-import { LIST_PAGE_SECRET } from '@/endpoint/secret/page';
+import useDropdownOptionsArray from '@/lib/getDropdownArray';
 import { formModel } from './model/formModel';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@/axiosInstance';
 import { usePage } from '@inertiajs/react';
 import { DETAIL_PR, EDIT_PR } from '@/endpoint/purchaseRequisition/api';
 import { LIST_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
+import { modelDropdowns } from './model/modelDropdown';
+import { FormFieldModel } from '@/interfaces/form/formWrapper';
+import { Loading } from '@/components/commons/Loading';
 
 const Update = ({ id }: { id: number }) => {
   const { props } = usePage();
@@ -18,8 +20,17 @@ const Update = ({ id }: { id: number }) => {
     reValidateMode: 'onChange',
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [items, setItems] = useState<any[]>([]);
-  const [vendors, setVendors] = useState<any[]>([]);
+
+  const [dataModel, setDataModel] = useState(formModel);
+  const { dropdownOptions, getDropdown } = useDropdownOptionsArray();
+
+  useEffect(() => {
+    getDropdown(modelDropdowns, formModel);
+  }, []);
+
+  useEffect(() => {
+    setDataModel(dropdownOptions as FormFieldModel<any>[]);
+  }, [dropdownOptions]);
 
   const getdetail = useCallback(
     async () => {
@@ -28,9 +39,8 @@ const Update = ({ id }: { id: number }) => {
         const response = await axiosInstance.get(DETAIL_PR(props.id));
         const data = response.data;
         methods.reset(data);
-        setItems(data.item);
-        setVendors(data.vendor);
       } catch (error) {
+        setIsLoading(false);
         console.log(error);
       } finally {
         setIsLoading(false);
@@ -45,15 +55,14 @@ const Update = ({ id }: { id: number }) => {
 
   return (
     <>
+      <Loading isLoading={isLoading} />
       <div className='card card-grid h-full min-w-full p-4'>
         <div className='card-body'>
           <FormMapping
-            isLoading={isLoading}
+            formModel={dataModel}
             methods={methods}
-            // formCustom={<PageOne item={items} vendor={vendors} />}
             url={`${EDIT_PR}/${props.id}`}
             redirectUrl={LIST_PAGE_PR}
-            isCustom={true}
           />
         </div>
       </div>

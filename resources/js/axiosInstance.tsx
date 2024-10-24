@@ -6,6 +6,7 @@ const axiosInstance = axios.create({
   baseURL: '/', // Change this to your API base URL
   headers: {
     'X-Requested-With': 'XMLHttpRequest',
+    'Content-Type': 'application/json',
   },
 });
 

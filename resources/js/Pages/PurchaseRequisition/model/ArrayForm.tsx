@@ -1,47 +1,46 @@
 import FormAutocomplete from '@/components/Input/formDropdown';
 import FormInput from '@/components/Input/formInput';
-import FormTextArea from '@/components/Input/formTextArea';
 import useDropdownOptions from '@/lib/getDropdown';
-import { useEffect } from 'react';
+import { Box, Tab, Tabs } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { a11yProps, TabPanel } from './itemForm';
+import { useWatch } from 'react-hook-form';
+import ArrayItem from './ArrayItem';
+import FormSwitch from '@/components/Input/formSwitch';
 
-const ArrayForm = ({ dataIndex }: { dataIndex: number }) => {
-  const { dataDropdown: costCenter, getDropdown: getCostCenter } = useDropdownOptions();
+const ArrayForm = ({
+  dataIndex,
+  subAsset,
+  FetchDataValue,
+}: {
+  dataIndex: number;
+  subAsset: any[][][];
+  FetchDataValue: (value: string, index: number, indexData: number) => void;
+}) => {
   const { dataDropdown: dataVendor, getDropdown: getVendor } = useDropdownOptions();
-  const { dataDropdown: dataMaterial, getDropdown: getMaterialNumber } = useDropdownOptions();
-  const { dataDropdown: dataMaterialGroup, getDropdown: getMaterialGroup } = useDropdownOptions();
-  const { dataDropdown: dataTax, getDropdown: getTax } = useDropdownOptions();
-  const { dataDropdown: dataUom, getDropdown: getUom } = useDropdownOptions();
+
+  const [value, setValue] = useState(0);
+
+  const handleChange = (event: any, newValue: number) => {
+    setValue(newValue);
+  };
+
+  // Watch the 'total_vendor' value
+  const watchData = useWatch({ name: 'total_item' });
+
+  // Determine tabCount, default to 1 if total_vendor is 0 or not set
+  const tabCount = watchData > 0 ? watchData : 1;
 
   useEffect(() => {
-    getCostCenter('', { name: 'cost_center', id: 'id', tabel: 'master_cost_centers' });
     getVendor('', { name: 'name_one', id: 'id', tabel: 'master_business_partners' });
-    getMaterialNumber('', {
-      name: 'material_number',
-      id: 'material_number',
-      tabel: 'master_materials',
-    });
-    getMaterialGroup('', {
-      name: 'material_group_desc',
-      id: 'material_group',
-      tabel: 'material_groups',
-    });
-    getTax('', {
-      name: 'description',
-      id: 'mwszkz',
-      tabel: 'pajaks',
-    });
-    getUom('', {
-      name: 'unit_of_measurement_text',
-      id: 'commercial',
-      tabel: 'uoms',
-    });
   }, []);
+
   return (
     <div>
       <FormAutocomplete<any[]>
         options={dataVendor}
         fieldLabel={'Select Vendor'}
-        fieldName={`item[${dataIndex}].vendor`}
+        fieldName={`vendors[${dataIndex}].vendor`}
         isRequired={true}
         disabled={false}
         style={{
@@ -51,88 +50,44 @@ const ArrayForm = ({ dataIndex }: { dataIndex: number }) => {
         classNames='mt-2'
       />
 
-      <FormAutocomplete<any[]>
-        options={costCenter}
-        fieldLabel={'Cost Center'}
-        fieldName={`item[${dataIndex}].material_number`}
-        isRequired={true}
+      <FormSwitch
+        fieldLabel='Vendor Winner'
+        fieldName={`vendors[${dataIndex}].winner`}
+        isRequired={false}
         disabled={false}
-        style={{
-          width: '58.5rem',
-        }}
-        placeholder={'Cost Center'}
-        classNames='mt-2'
-      />
-
-      <FormAutocomplete<any[]>
-        options={dataMaterialGroup}
-        fieldLabel={'Material Group'}
-        fieldName={`item[${dataIndex}].material_group`}
-        isRequired={true}
-        disabled={false}
-        style={{
-          width: '58.5rem',
-        }}
-        placeholder={'Material Group'}
-        classNames='mt-2'
-      />
-      <FormAutocomplete<any[]>
-        options={dataMaterial}
-        fieldLabel={'Material number'}
-        fieldName={`item[${dataIndex}].material_number`}
-        isRequired={true}
-        disabled={false}
-        style={{
-          width: '58.5rem',
-        }}
-        placeholder={'Material number'}
-        classNames='mt-2'
-      />
-      <FormAutocomplete<any[]>
-        options={dataUom}
-        fieldLabel={'Purchase requisition unit of measure'}
-        fieldName={`item[${dataIndex}].uom`}
-        isRequired={true}
-        disabled={false}
-        style={{
-          width: '58.5rem',
-        }}
-        placeholder={'Purchase requisition unit of measure'}
-        classNames='mt-2'
       />
 
       <FormInput
-        fieldLabel={'Qty'}
-        fieldName={`item[${dataIndex}].qty`}
-        isRequired={false}
-        disabled={false}
-        type={'number'}
-        placeholder={'Enter your qty'}
-      />
-
-      <FormAutocomplete<any[]>
-        options={dataTax}
-        fieldLabel={'Tax on sales'}
-        fieldName={`item[${dataIndex}].tax`}
+        fieldLabel={'Total Item'}
+        fieldName={'total_item'}
         isRequired={true}
         disabled={false}
-        style={{
-          width: '58.5rem',
-        }}
-        placeholder={'Tax on sales'}
-        classNames='mt-2'
+        type={'number'}
+        placeholder={'Enter your Item'}
       />
-      <FormTextArea
-        fieldLabel={'Short Text'}
-        fieldName={`item[${dataIndex}].short_text`}
-        isRequired={false}
-        disabled={false}
-        maxLength={40}
-        classNames='mt-4'
-        style={{
-          width: '58.5rem',
-        }}
-      />
+      <Box sx={{ width: '100%' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={value} onChange={handleChange} aria-label='dynamic tabs example'>
+            {Array.from({ length: tabCount }, (_, indexItem) => (
+              <Tab
+                key={`Item${indexItem}`}
+                label={`Item ${indexItem + 1}`}
+                {...a11yProps(`Item${indexItem}`)}
+              />
+            ))}
+          </Tabs>
+        </Box>
+        {Array.from({ length: tabCount }, (_, indexItem) => (
+          <TabPanel key={indexItem} value={value} index={indexItem}>
+            <ArrayItem
+              dataIndex={dataIndex}
+              ItemIndex={indexItem}
+              FetchDataValue={FetchDataValue}
+              subAsset={subAsset}
+            />
+          </TabPanel>
+        ))}
+      </Box>
     </div>
   );
 };
