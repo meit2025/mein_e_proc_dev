@@ -18,7 +18,8 @@ class BusinessTripGradeController extends Controller
     public function index()
     {
 
-        $listUser =  User::get();
+        $listUserInGrade = BusinessTripGradeUser::select("user_id")->pluck('user_id')->toArray();
+        $listUser =  User::whereNotIn('id', $listUserInGrade)->get();
 
         // return Inertia::render('BusinessTrip/BusinessTrip/index', compact('users', 'listPurposeType'));
 
