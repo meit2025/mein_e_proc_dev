@@ -13,7 +13,11 @@ class Pajak extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'desimal',
+        'mwszkz',
+        'description'
+    ];
 
     // protected static function newFactory(): PajakFactory
     // {

@@ -1,1 +1,0 @@
-const e=[{field:"const_center",headerName:"const center",width:200,filterable:!0},{field:"cost_center_budgeted",headerName:"const center budgeted ",width:200,filterable:!0},{field:"vendor_remark",headerName:"vendor remark",width:200,filterable:!0},{field:"selected_vendor_remark",headerName:"selected vendor remark",width:200,filterable:!0}];export{e as columns};

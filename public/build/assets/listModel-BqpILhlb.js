@@ -1,0 +1,1 @@
+const e=[{field:"request_number",headerName:"Request Number",width:200,filterable:!0},{field:"requester",headerName:"Requester",width:200,filterable:!0},{field:"remark",headerName:"Remark",width:200,filterable:!0}];export{e as columns};

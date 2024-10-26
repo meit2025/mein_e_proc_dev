@@ -15,6 +15,9 @@ use Modules\Reimbuse\Models\ReimburseQuota;
 use Modules\Reimbuse\Models\ReimburseType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Modules\Master\Models\MasterPeriodReimburse;
+use Modules\Master\Models\MasterQuotaReimburse;
+use Modules\Master\Models\MasterTypeReimburse;
 use Modules\Reimbuse\Services\ReimbursementService;
 
 class ReimbuseController extends Controller
@@ -30,7 +33,7 @@ class ReimbuseController extends Controller
     {
         try {
             $res = ($type == 'Employee') ? 1 : 0;
-            $typeData = ReimburseType::where('is_employee', $res)->get();
+            $typeData = MasterTypeReimburse::where('is_employee', $res)->get();
             return $this->successResponse($typeData);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 400);
@@ -49,7 +52,7 @@ class ReimbuseController extends Controller
             } else {
                 $grade = User::select('grade_reimburse')->where('nip', $user)->first()->grade_reimburse;
             }
-            $quota = ReimburseQuota::select('period', 'type', 'grade', 'limit', 'plafon')
+            $quota = MasterQuotaReimburse::select('period', 'type', 'grade', 'limit', 'plafon')
                 ->where('grade', $grade)
                 ->where('period', $period)
                 ->where('type', $type)
@@ -104,7 +107,7 @@ class ReimbuseController extends Controller
 
         $types = ['Employee', 'Family'];
         $currencies = Currency::select('code', 'name')->get();
-        $periods = ReimbursePeriod::select('id', 'code', 'start', 'end')->get();
+        $periods = MasterPeriodReimburse::select('id', 'code', 'start', 'end')->get();
         $csrf_token = csrf_token();
 
         return Inertia::render('Reimburse/ListReimburse', [

@@ -132,7 +132,7 @@ const ListReimburse: React.FC<Props> = ({
     {
       accessorKey: 'users.name',
       header: 'Request For',
-      cell: ({ row }) => <div className='lowercase'>{row.original.users.name}</div>,
+      cell: ({ row }) => <div className='lowercase'>{row?.original?.users?.name}</div>,
     },
     {
       accessorKey: 'remark',
@@ -145,7 +145,7 @@ const ListReimburse: React.FC<Props> = ({
       cell: ({ row }) => {
         const reimburses = row.original.reimburses;
         const sumBalance = reimburses.reduce(
-          (sum, reimburse) => sum + parseFloat(reimburse.balance),
+          (sum, reimburse) => sum + parseFloat(reimburse?.balance),
           0,
         );
         return <div>{`IDR. ${numberWithCommas(sumBalance)}`}</div>;

@@ -1,22 +1,40 @@
 import { StatusBolean } from '@/components/commons/StatusBolean';
 import { GridColDef } from '@mui/x-data-grid';
 export const columns: GridColDef[] = [
-  { field: 'const_center', headerName: 'const center', width: 200, filterable: true },
+  { field: 'document_type', headerName: 'document type', width: 200, filterable: true },
   {
-    field: 'cost_center_budgeted',
-    headerName: 'const center budgeted ',
+    field: 'purchasing_groups',
+    headerName: 'purchasing groups',
     width: 200,
     filterable: true,
   },
   {
-    field: 'vendor_remark',
-    headerName: 'vendor remark',
+    field: 'account_assignment_categories',
+    headerName: 'account assignment categories',
     width: 200,
     filterable: true,
   },
   {
-    field: 'selected_vendor_remark',
-    headerName: 'selected vendor remark',
+    field: 'delivery_date',
+    headerName: 'delivery date',
+    width: 200,
+    filterable: true,
+  },
+  {
+    field: 'storage_locations',
+    headerName: 'storage locations',
+    width: 200,
+    filterable: true,
+  },
+  {
+    field: 'total_vendor',
+    headerName: 'total vendor',
+    width: 200,
+    filterable: true,
+  },
+  {
+    field: 'total_item',
+    headerName: 'total item',
     width: 200,
     filterable: true,
   },

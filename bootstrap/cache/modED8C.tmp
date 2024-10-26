@@ -1,0 +1,27 @@
+<?php return array (
+  'providers' => 
+  array (
+    0 => 'Modules\\Approval\\Providers\\ApprovalServiceProvider',
+    1 => 'Modules\\Auth\\Providers\\AuthServiceProvider',
+    2 => 'Modules\\BusinessTripDeclaration\\Providers\\BusinessTripDeclarationServiceProvider',
+    3 => 'Modules\\Gateway\\Providers\\GatewayServiceProvider',
+    4 => 'Modules\\Master\\Providers\\MasterServiceProvider',
+    5 => 'Modules\\PurchaseRequisition\\Providers\\PurchaseRequisitionServiceProvider',
+    6 => 'Modules\\Reimbuse\\Providers\\ReimbuseServiceProvider',
+    7 => 'Modules\\User\\Providers\\UserServiceProvider',
+  ),
+  'eager' => 
+  array (
+    0 => 'Modules\\Approval\\Providers\\ApprovalServiceProvider',
+    1 => 'Modules\\Auth\\Providers\\AuthServiceProvider',
+    2 => 'Modules\\BusinessTripDeclaration\\Providers\\BusinessTripDeclarationServiceProvider',
+    3 => 'Modules\\Gateway\\Providers\\GatewayServiceProvider',
+    4 => 'Modules\\Master\\Providers\\MasterServiceProvider',
+    5 => 'Modules\\PurchaseRequisition\\Providers\\PurchaseRequisitionServiceProvider',
+    6 => 'Modules\\Reimbuse\\Providers\\ReimbuseServiceProvider',
+    7 => 'Modules\\User\\Providers\\UserServiceProvider',
+  ),
+  'deferred' => 
+  array (
+  ),
+);

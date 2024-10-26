@@ -17,7 +17,7 @@ class BusinessTripDeclarationController extends Controller
     public function index()
     {
         $users = User::select('nip', 'name', 'id')->get();
-        $listBusinessTrip = BusinessTrip::all();
+        $listBusinessTrip = BusinessTrip::where('type', 'request')->get();
 
         $listPurposeType = PurposeType::select('name', 'code', 'id')->get();
         return Inertia::render('BusinessTrip/BusinessTripDeclaration/index', compact('users', 'listPurposeType', 'listBusinessTrip'));
@@ -49,14 +49,62 @@ class BusinessTripDeclarationController extends Controller
         $data->name_purpose = $data->purposeType->name;
         $destinations = [];
         foreach ($data->businessTripDestination as $key => $value) {
+            // Inisialisasi array allowances dengan kunci allowance_id
+            $allowances = [];
+
+            // Mengisi data allowance dari detailDestinationDay
+            foreach ($value->detailDestinationDay as $row) {
+                $allowanceId = $row->allowance->id;
+                if (!isset($allowances[$allowanceId])) {
+                    $allowances[$allowanceId] = [
+                        'name' => $row->allowance->name,
+                        'code' => $row->allowance->code,
+                        'default_price' => $row->allowance->default_price,
+                        'type' => $row->allowance->type,
+                        'subtotal' => $row->allowance->subtotal,
+                        'currency' => $row->allowance->currency,
+                        'detail' => [] // Array untuk menampung detail
+                    ];
+                }
+
+                // Tambahkan detail allowance
+                $allowances[$allowanceId]['detail'][] = [
+                    'date' => $row->date, // Sesuaikan dengan nama kolom tanggal di detailDestinationDay
+                    'request_price' => $row->price // Sesuaikan dengan kolom request_price di detailDestinationDay
+                ];
+            }
+
+            // Mengisi data allowance dari detailDestinationTotal
+            foreach ($value->detailDestinationTotal as $row) {
+                $allowanceId = $row->allowance->id;
+                if (!isset($allowances[$allowanceId])) {
+                    $allowances[$allowanceId] = [
+                        'name' => $row->allowance->name,
+                        'code' => $row->allowance->code,
+                        'default_price' => $row->allowance->default_price,
+                        'type' => $row->allowance->type,
+                        'subtotal' => $row->allowance->subtotal,
+                        'currency' => $row->allowance->currency,
+                        'detail' => []
+                    ];
+                }
+
+                // Tambahkan detail allowance
+                $allowances[$allowanceId]['detail'][] = [
+                    'date' => '', // Sesuaikan dengan nama kolom tanggal di detailDestinationTotal
+                    'request_price' => $row->price // Sesuaikan dengan kolom request_price di detailDestinationTotal
+                ];
+            }
+
             $destinations[] = [
                 'destination' => $value->destination,
                 'business_trip_start_date' => $value->business_trip_start_date,
                 'business_trip_end_date' => $value->business_trip_end_date,
+                'detail_attedances' => $value->detailAttendance->makeHidden(['created_at', 'updated_at']),
+                'allowances' => $allowances,
             ];
         }
-        // $data->detail_attedances = $data->detailAttendance->makeHidden(['created_at', 'updated_at']);
-
+        $data->destinations = $destinations;
         return $this->successResponse($data);
     }
 

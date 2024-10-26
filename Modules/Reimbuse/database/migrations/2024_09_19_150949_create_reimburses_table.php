@@ -14,16 +14,16 @@ return new class extends Migration
         Schema::create('reimburses', function (Blueprint $table) {
             $table->id();
             $table->string('group');
-            $table->string('type');
+            $table->foreignId('type')->constrained('master_type_reimburses')->cascadeOnUpdate();
             $table->string('currency');
-            $table->string('remark'); // Short Text
             $table->string('for');
             $table->double('balance');
-            $table->date('receipt_date'); // Item Delivery Date
             $table->date('start_date');
             $table->date('end_date');
-            $table->string('period');
+            $table->foreignId('period')->constrained('master_period_reimburses')->cascadeOnUpdate();
 
+            $table->string('short_text'); // replace remark
+            $table->date('item_delivery_data'); // replaced receipt_date
             $table->string('pembeda')->default('reim');
             $table->string('tracking_number')->nullable();
             $table->tinyInteger('item_number')->default(1);
@@ -35,9 +35,7 @@ return new class extends Migration
             $table->char('account_assignment')->default('Y');
             $table->string('storage_location')->default('0001');
             $table->string('desired_vendor'); // requester
-            $table->string('material_group');
-            $table->string('material_number');
-            $table->string('purchase_requisition_unit_of_measure');
+            $table->string('purchase_requisition_unit_of_measure')->nullable();
             $table->tinyInteger('purchase_requisition_quantity')->default(1);
             $table->double('tax_on_sales')->default(0);
             $table->string('item_category_in_purchasing_document')->nullable();
@@ -46,9 +44,8 @@ return new class extends Migration
             $table->softDeletes();
             $table->timestamps();
 
-            $table->foreign('period')->references('code')->on('reimburse_periods')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreign('desired_vendor')->references('nip')->on('users')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreign('group')->references('code')->on('reimburse_groups')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreign('type')->references('code')->on('reimburse_types')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreign('currency')->references('code')->on('currencies')->cascadeOnDelete()->cascadeOnUpdate();
         });
     }

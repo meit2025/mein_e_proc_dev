@@ -12,8 +12,6 @@ class AccountAssignmentCategoryController extends Controller
      * Display a listing of the resource.
      */
 
-    //  'account',
-    //  'description',
     public function index(Request $request)
     {
         $filterableColumns = [

@@ -162,7 +162,7 @@ export const ReimburseForm: React.FC<Props> = ({
     }
   }
 
-  const handleFormCountChange = (value) => {
+  const handleFormCountChange = (value: any) => {
     setFormCount(value);
     const currentForms = form.getValues('forms');
     const newForms = Array.from({ length: value }).map((_, index) => {
@@ -374,7 +374,7 @@ export const ReimburseForm: React.FC<Props> = ({
           <Separator className='my-4' />
 
           <Tabs value={activeTab} onValueChange={handleTabChange} className='w-full'>
-            <TabsList className={`flex items-center justify-start space-x-4`}>
+            <TabsList className={'flex items-center justify-start space-x-4'}>
               {' '}
               {/* Flexbox for horizontal layout */}
               {Array.from({ length: form.watch('formCount') || 1 }).map((_, index) => (
@@ -458,6 +458,17 @@ export const ReimburseForm: React.FC<Props> = ({
                               </Select>
                             )}
                           />
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td width={200}>Material</td>
+                        <td className='flex items-center'>
+                          {/* <CustomDatePicker /> */}
+                          <span className='mx-2'>Group</span>
+                          <td>{reimburseTypes[index]?.material_group}</td>
+                          <span className='mx-2'>Number</span>
+                          <td>{reimburseTypes[index]?.material_number}</td>
                         </td>
                       </tr>
 

@@ -67,7 +67,22 @@ class DropdownMasterController extends Controller
 
     function dropdown(Request $request)
     {
-        $data = DB::table($request->tabelname)->select($request->name . ' as label', $request->id . ' as value')->get();
+        $data = DB::table($request->tabelname)->select($request->name . ' as label', $request->id . ' as value');
+
+        if ($request->key && $request->parameter) {
+            $data = $data->where($request->key, $request->parameter);
+        }
+
+        if ($request->isNotNull && $request->key) {
+            $data = $data->whereNotNull($request->key);
+        }
+
+        if ($request->groupBy) {
+            $groupByColumns = explode(',', $request->groupBy);
+            $data = $data->groupBy($groupByColumns);
+        }
+
+        $data = $data->get();
         return $this->successResponse($data);
     }
 }

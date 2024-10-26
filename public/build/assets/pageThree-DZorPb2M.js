@@ -1,1 +1,0 @@
-import{j as r}from"./app-BIOi_O7g.js";/* empty css            */const d=()=>r.jsx(r.Fragment,{children:r.jsx("div",{className:"w-full mt-8 border rounded-md shadow-md",children:"tiga"})});export{d as PageThree,d as default};

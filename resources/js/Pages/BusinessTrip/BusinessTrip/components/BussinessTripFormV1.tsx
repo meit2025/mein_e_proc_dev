@@ -618,11 +618,10 @@ export function BussinessDestinationForm({
         console.log('date', momentStart.toDate());
       }
 
-      console.log(detailAllowance, 'detail allowance')
+      console.log(detailAllowance, 'detail allowance');
       return detailAllowance;
     }
 
-    // console.log(listAllowances, ' allowance');
     let allowancesForm = listAllowances.map((item: any) => {
       return {
         name: item.name,

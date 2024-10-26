@@ -14,6 +14,7 @@ interface FormInputProps {
   minLength?: number;
   maxLength?: number;
   classNames?: string;
+  lengthLabel?: string;
   icon?: ReactNode;
   onChanges?: (data: any) => void;
 }
@@ -32,6 +33,7 @@ const FormInput: React.FC<FormInputProps> = ({
   classNames,
   icon,
   onChanges,
+  lengthLabel = 40,
 }) => {
   const {
     control,
@@ -41,7 +43,7 @@ const FormInput: React.FC<FormInputProps> = ({
   return (
     <div className='w-full mt-8'>
       <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
-        <label className='form-label max-w-32'>
+        <label className={`form-label max-w-${lengthLabel}`}>
           {fieldLabel} <span className='text-red-700'> {isRequired ? '*' : ''}</span>
         </label>
         <Controller

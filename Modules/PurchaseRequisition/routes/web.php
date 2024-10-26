@@ -34,4 +34,12 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/detail/{id}', [ProcurementController::class, 'show'])->name('pr.purchase-requisition.show');
         Route::delete('/delete/{id}', [ProcurementController::class, 'destroy'])->name('pr.purchase-requisition.destroy');
     });
+    Route::group(['prefix' => 'api/pr/purchase-requisition-sap', 'middleware' => 'auth'], function () {
+        // Route::get('/list', [ProcurementController::class, 'index'])->name('pr.purchase-requisition.index');
+        // Route::post('/create', [ProcurementController::class, 'store'])->name('pr.purchase-requisition.store');
+        // Route::post('/update/{id}', [ProcurementController::class, 'update'])->name('pr.purchase-requisition.update');
+        // Route::get('/detail/{id}', [ProcurementController::class, 'show'])->name('pr.purchase-requisition.show');
+        // Route::get('/detail/{id}', [ProcurementController::class, 'show'])->name('pr.purchase-requisition.show');
+        Route::get('/text/{id}', [PurchaseRequisitionController::class, 'textData'])->name('pr.purchase-requisition-sap.destroy');
+    });
 });

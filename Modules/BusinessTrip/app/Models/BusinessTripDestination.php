@@ -20,16 +20,28 @@ class BusinessTripDestination extends Model
         'business_trip_id'
     ];
 
-    function detailAttendance() {
+    function detailAttendance()
+    {
         return $this->hasMany(BusinessTripDetailAttedance::class, 'business_trip_destination_id', 'id');
     }
 
-    function detailDestinationDay() {
+    function detailDestinationDay()
+    {
         return $this->hasMany(BusinessTripDetailDestinationDayTotal::class, 'business_trip_destination_id', 'id');
     }
 
-    function detailDestinationToal() {
+    function detailDestinationTotal()
+    {
         return $this->hasMany(BusinessTripDetailDestinationTotal::class, 'business_trip_destination_id', 'id');
+    }
+
+    public function combinedDetailDestinations()
+    {
+        // Pastikan kedua relasi selalu mengembalikan koleksi meskipun kosong
+        $dayDetails = $this->detailDestinationDay ?? collect();
+        $totalDetails = $this->detailDestinationTotal ?? collect();
+
+        return $dayDetails->merge($totalDetails);
     }
 
     //   $table->string('destination');

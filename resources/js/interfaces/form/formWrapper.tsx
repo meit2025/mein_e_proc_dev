@@ -2,9 +2,9 @@ import { CSSProperties, ReactNode } from 'react';
 import { InputType, Option, TextType } from './variable';
 
 export interface FormFieldModel<T = any> {
-  type: InputType;
-  name: string;
-  label: string;
+  type?: InputType;
+  name?: string;
+  label?: string;
   options?: Option<T>[];
   placeholder?: string;
   required?: boolean;
@@ -25,4 +25,6 @@ export interface FormFieldModel<T = any> {
   conditional?: boolean;
   valueConditional?: any;
   parameterConditional?: string;
+  fieldCustome?: boolean;
+  fieldCustomeValue?: ReactNode;
 }
