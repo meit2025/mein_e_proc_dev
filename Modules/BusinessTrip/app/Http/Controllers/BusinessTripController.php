@@ -108,7 +108,6 @@ class BusinessTripController extends Controller
         if ($validator->fails()) {
             return $this->errorResponse("erorr", 400, $validator->errors());
         }
-        $destinations = json_decode($request->destinations, true);
 
         try {
             DB::beginTransaction();
@@ -132,48 +131,52 @@ class BusinessTripController extends Controller
                     'file_name' => explode('/', $request->attachment->store('business_trip', 'public'))[1],
                 ]);
             }
-            $businessTripDestination = BusinessTripDestination::create([
-                'business_trip_id' => $businessTrip->id,
-                'destination' => $destinations['destination'],
-                'business_trip_start_date' => date('Y-m-d', strtotime($destinations['business_trip_start_date'])),
-                'business_trip_end_date' => date('Y-m-d', strtotime($destinations['business_trip_end_date'])),
-            ]);
 
-            foreach ($destinations['detail_attedances'] as $key => $destination) {
-                $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
-                    'business_trip_destination_id' => $businessTripDestination->id,
+            foreach ($request->destinations as $key => $value) {
+                $data_destination = json_decode($value, true);
+                $businessTripDestination = BusinessTripDestination::create([
                     'business_trip_id' => $businessTrip->id,
-                    'date' => $destination['date'],
-                    'shift_code' => $destination['shift_code'],
-                    'shift_start' => $destination['shift_start'],
-                    'shift_end' => $destination['shift_end'],
-                    'start_time' => $destination['start_time'],
-                    'end_time' => $destination['end_time'],
+                    'destination' => $data_destination['destination'],
+                    'business_trip_start_date' => date('Y-m-d', strtotime($data_destination['business_trip_start_date'])),
+                    'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
                 ]);
-            }
+                foreach ($data_destination['detail_attedances'] as $key => $destination) {
+                    $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
+                        'business_trip_destination_id' => $businessTripDestination->id,
+                        'business_trip_id' => $businessTrip->id,
+                        'date' => $destination['date'],
+                        'shift_code' => $destination['shift_code'],
+                        'shift_start' => $destination['shift_start'],
+                        'shift_end' => $destination['shift_end'],
+                        'start_time' => $destination['start_time'],
+                        'end_time' => $destination['end_time'],
+                    ]);
+                }
 
-            foreach ($destinations['allowances'] as $key => $allowance) {
-                if (strtolower($allowance['type']) == 'total') {
-                    foreach ($allowance['detail'] as $detail) {
-                        BusinessTripDetailDestinationTotal::create([
-                            'business_trip_destination_id' => $businessTripDestination->id,
-                            'business_trip_id' => $businessTrip->id,
-                            'price' => $detail['request_price'],
-                            'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
-                        ]);
-                    }
-                } else {
-                    foreach ($allowance['detail'] as $detail) {
-                        BusinessTripDetailDestinationDayTotal::create([
-                            'business_trip_destination_id' => $businessTripDestination->id,
-                            'date' => $detail['date'],
-                            'business_trip_id' => $businessTrip->id,
-                            'price' => $detail['request_price'],
-                            'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
-                        ]);
+                foreach ($data_destination['allowances'] as $key => $allowance) {
+                    if (strtolower($allowance['type']) == 'total') {
+                        foreach ($allowance['detail'] as $detail) {
+                            BusinessTripDetailDestinationTotal::create([
+                                'business_trip_destination_id' => $businessTripDestination->id,
+                                'business_trip_id' => $businessTrip->id,
+                                'price' => $detail['request_price'],
+                                'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
+                            ]);
+                        }
+                    } else {
+                        foreach ($allowance['detail'] as $detail) {
+                            BusinessTripDetailDestinationDayTotal::create([
+                                'business_trip_destination_id' => $businessTripDestination->id,
+                                'date' => $detail['date'],
+                                'business_trip_id' => $businessTrip->id,
+                                'price' => $detail['request_price'],
+                                'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
+                            ]);
+                        }
                     }
                 }
             }
+
             DB::commit();
         } catch (\Exception $e) {
             dd($e);

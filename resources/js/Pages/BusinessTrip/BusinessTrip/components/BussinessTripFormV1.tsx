@@ -240,8 +240,8 @@ export const BussinessTripFormV1 = ({
       formData.append('cash_advance', `${values.cash_advance}`);
       formData.append('total_percent', `${values.total_percent}`);
       formData.append('total_cash_advance', `${values.total_cash_advance}`);
-      values.destinations.forEach((item) => {
-        formData.append('destinations', JSON.stringify(item));
+      values.destinations.forEach((item, index) => {
+        formData.append(`destinations[${index}]`, JSON.stringify(item));
       });
 
       // const response = axios.post(CREATE_API_BUSINESS_TRIP, formData);
@@ -622,6 +622,7 @@ export function BussinessDestinationForm({
       return detailAllowance;
     }
 
+    // console.log(listAllowances, ' allowance');
     let allowancesForm = listAllowances.map((item: any) => {
       return {
         name: item.name,

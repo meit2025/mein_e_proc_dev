@@ -27,6 +27,7 @@ class BusinessTrip extends Model
         'total_cash_advance',
         'total_percent',
         'type',
+        'parent_id',
     ];
 
 
