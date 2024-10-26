@@ -122,11 +122,11 @@ export const BussinessTripFormV1 = ({
 
   async function handleGetBusinessTrip(value: string) {
     form.setValue('request_no', value || '');
-    let url = GET_DETAIL_BUSINESS_TRIP_DECLARATION(value);
+    const url = GET_DETAIL_BUSINESS_TRIP_DECLARATION(value);
 
     try {
-      let response = await axiosInstance.get(url);
-      let businessTripData = response.data.data;
+      const response = await axiosInstance.get(url);
+      const businessTripData = response.data.data;
 
       form.setValue('remark', businessTripData.remarks || '');
       form.setValue('attachment', businessTripData.attachment || null);
@@ -153,12 +153,12 @@ export const BussinessTripFormV1 = ({
   const [totalDestination, setTotalDestination] = React.useState<string>('');
 
   const totalDestinationHandler = (value: string) => {
-    let valueToInt = parseInt(value);
+    const valueToInt = parseInt(value);
     setTotalDestination(value);
   };
 
   function setAllowancesProperty(destinations: any[]) {
-    let destinationForm = destinations.map((destination) => ({
+    const destinationForm = destinations.map((destination) => ({
       destination: destination.destination || '', // Adjust field names as needed
       business_trip_start_date: new Date(destination.business_trip_start_date),
       business_trip_end_date: new Date(destination.business_trip_end_date),
@@ -346,7 +346,7 @@ export function BussinesTripDestination({
 }) {
   return (
     <Tabs defaultValue='destination1' className='w-full'>
-      <TabsList className={`flex items-center justify-start space-x-4`}>
+      <TabsList className={'flex items-center justify-start space-x-4'}>
         {destinationField.map((field: any, index: number) => (
           <TabsTrigger value={`destination${index + 1}`}>Destination {index + 1}</TabsTrigger>
         ))}
@@ -385,7 +385,7 @@ export function BussinessDestinationForm({
     remove: removeAttendace,
   } = useFieldArray({
     control: form.control,
-    name: `destinations.${index}.detail_attedances`,
+    name: `destinations[${index}].detail_attedances`,
   });
 
   const {
@@ -403,7 +403,7 @@ export function BussinessDestinationForm({
 
   function detailAttedancesGenerate() {
     let momentStart = moment(destination.business_trip_start_date);
-    let momentEnd = moment(destination.business_trip_end_date);
+    const momentEnd = moment(destination.business_trip_end_date);
     removeAttendace();
     removeAllowance();
 
@@ -423,8 +423,8 @@ export function BussinessDestinationForm({
 
     function generateDetailAllowanceByDate(price: string): any[] {
       let momentStart = moment(destination.business_trip_start_date);
-      let momentEnd = moment(destination.business_trip_end_date);
-      let detailAllowance = [];
+      const momentEnd = moment(destination.business_trip_end_date);
+      const detailAllowance = [];
 
       while (momentStart.format('DD/MM/YYYY') <= momentEnd.format('DD/MM/YYYY')) {
         const object = {
@@ -450,7 +450,7 @@ export function BussinessDestinationForm({
     }
 
     // console.log(listAllowances, ' allowance');
-    let allowancesForm = listAllowances.map((item: any) => {
+    const allowancesForm = listAllowances.map((item: any) => {
       return {
         name: item.name,
         code: item.code,
@@ -600,7 +600,7 @@ export function DetailAttedances({
   detailAttedanceFields: any;
   updateAttedanceFields: any;
 }) {
-  const detailAttedanceWatch = form.watch(`destinations.${destinationIndex}.detail_attedances`);
+  const detailAttedanceWatch = form.watch(`destinations[${destinationIndex}].detail_attedances`);
 
   React.useEffect(() => {}, [detailAttedanceWatch]);
 
@@ -626,7 +626,7 @@ export function DetailAttedances({
               <th>End Time</th>
             </thead>
             <tbody>
-              {detailAttedanceFields.map((attedance: any, index: any) => (
+              {detailAttedanceWatch.map((attedance: any, index: any) => (
                 <tr key={attedance.index}>
                   <td>
                     {moment(attedance.date).format('DD/MM/YYYY')}
@@ -823,7 +823,7 @@ export function AllowanceRowInput({
       }
     } else if (allowance.request_value === 'fixed value') {
       // Do not allow changes for fixed value
-      alert(`This value is fixed and cannot be changed.`);
+      alert('This value is fixed and cannot be changed.');
     }
   };
 
