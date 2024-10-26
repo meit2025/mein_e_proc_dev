@@ -109,6 +109,7 @@ class BusinessTripController extends Controller
             return $this->errorResponse("erorr", 400, $validator->errors());
         }
         $destinations = json_decode($request->destinations, true);
+        dd($request->all(), $destinations);
 
         try {
             DB::beginTransaction();

@@ -622,6 +622,7 @@ export function BussinessDestinationForm({
       return detailAllowance;
     }
 
+    // console.log(listAllowances, ' allowance');
     let allowancesForm = listAllowances.map((item: any) => {
       return {
         name: item.name,
