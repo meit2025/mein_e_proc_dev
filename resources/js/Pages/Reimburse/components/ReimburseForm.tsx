@@ -87,7 +87,7 @@ export const ReimburseForm: React.FC<Props> = ({
         type: z.string().nonempty('Type is required'),
         reimburse_type: z.string().nonempty('Type is required'),
         period: z.string().nonempty('Period is required'),
-        for: z.string().nonempty('Period is required'),
+        for: z.string(),
         remark: z.string().nonempty('Remark is required'),
         balance: z.number().min(1, 'Balance must be at least 1'),
         receipt_date: z.date(),

@@ -61,20 +61,16 @@ Route::group(['middleware' => 'auth'], function () {
             Route::inertia('/',  'Master/MasterBusinessPartner/Index');
         });
         Route::group(['prefix' => 'reimburse-type'], function () {
-            // $listMaterial = MasterMaterial::get();
-            $listMaterial = [];
+            $listMaterial = MasterMaterial::get();
             Route::inertia('/', 'Master/MasterReimburseType/Index', compact('listMaterial'));
         });
         Route::group(['prefix' => 'reimburse-period'], function () {
             Route::inertia('/',  'Master/MasterReimbursePeriod/Index');
         });
         Route::group(['prefix' => 'reimburse-quota'], function () {
-            // $listPeriodReimburse = MasterPeriodReimburse::get();
-            // $listTypeReimburse = MasterTypeReimburse::get();
-            // $listGrade = BusinessTripGrade::get();
-            $listPeriodReimburse = [];
-            $listTypeReimburse = [];
-            $listGrade = [];
+            $listPeriodReimburse = MasterPeriodReimburse::get();
+            $listTypeReimburse = MasterTypeReimburse::get();
+            $listGrade = BusinessTripGrade::get();
             Route::inertia(
                 '/',
                 'Master/MasterReimburseQuota/Index',
