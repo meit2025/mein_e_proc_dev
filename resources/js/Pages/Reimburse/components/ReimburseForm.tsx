@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { Textarea } from '@/components/shacdn/textarea';
 import '../css/reimburse.scss';
 import { ScrollArea } from '@/components/shacdn/scroll-area';
+import axiosInstance from '@/axiosInstance';
 import { Separator } from '@/components/shacdn/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
 import {
@@ -25,11 +26,11 @@ import { usePage } from '@inertiajs/react';
 
 interface Reimburse {
   id: string;
-  remark: string;
+  short_text: string;
   type: string;
   currency: string;
   balance: number;
-  receipt_date: Date;
+  item_delivery_data: Date;
   start_date: Date;
   end_date: Date;
   period: string;
@@ -75,33 +76,11 @@ export const ReimburseForm: React.FC<Props> = ({
   const [formData, setFormData] = useState<Reimburse[]>(reimburses);
   const [limits, setLimits] = useState([]);
   const [reimburseTypes, setReimburseTypes] = useState([[]]);
+  const [requester, setRequester] = useState();
   const [families, setFamilies] = useState([]);
   const [isFamily, setIsFamily] = useState([[]]);
 
-  const formSchema = z.object({
-    remark_group: z.string().nonempty('Remark is required'),
-    requester: z.string().nonempty('Requester is required'),
-    forms: z.array(
-      z.object({
-        id: z.string(),
-        type: z.string().nonempty('Type is required'),
-        reimburse_type: z.string().nonempty('Type is required'),
-        period: z.string().nonempty('Period is required'),
-        for: z.string().nonempty('Period is required'),
-        remark: z.string().nonempty('Remark is required'),
-        balance: z.number().min(1, 'Balance must be at least 1'),
-        receipt_date: z.date(),
-        start_date: z.date(),
-        end_date: z.date(),
-        currency: z.string().nonempty('Currency is required'),
-        attachment: z.array(z.instanceof(File)).optional(),
-      }),
-    ),
-    formCount: z.string().nonempty('Currency is required'),
-  });
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm({
     defaultValues: {
       formCount: '1',
       remark_group: '',
@@ -110,11 +89,11 @@ export const ReimburseForm: React.FC<Props> = ({
         id: '',
         type: '',
         reimburse_type: '',
-        remark: '',
+        short_text: '',
         period: '',
         balance: 0,
-        for: '',
-        receipt_date: new Date(),
+        for: requester,
+        item_delivery_data: new Date(),
         start_date: new Date(),
         end_date: new Date(),
         currency: 'IDR',
@@ -133,11 +112,11 @@ export const ReimburseForm: React.FC<Props> = ({
         reimbursement.reimburses.map((reimburse) => ({
           id: reimburse.id,
           type: reimburse.type,
-          remark: reimburse.remark,
+          short_text: reimburse.short_text,
           balance: Number(reimburse.balance),
           currency: reimburse.currency,
           period: reimburse.period,
-          receipt_date: new Date(reimburse.receipt_date),
+          item_delivery_data: new Date(reimburse.item_delivery_data),
           start_date: new Date(reimburse.start_date),
           end_date: new Date(reimburse.end_date),
           attachment: reimburse.attachment || null,
@@ -154,6 +133,7 @@ export const ReimburseForm: React.FC<Props> = ({
       const response = await axios.get(`/family/show/${value}`);
       const typeData = response.data;
       setFamilies(typeData);
+      setRequester(value);
       form.setValue('requester', value);
     } catch (error) {
       const resultError = error as AxiosError;
@@ -171,10 +151,10 @@ export const ReimburseForm: React.FC<Props> = ({
           id: '',
           type: '',
           reimburse_type: '',
-          remark: '',
+          short_text: '',
           period: '',
           balance: 0,
-          receipt_date: new Date(),
+          item_delivery_data: new Date(),
           start_date: new Date(),
           end_date: new Date(),
           currency: 'IDR',
@@ -231,43 +211,50 @@ export const ReimburseForm: React.FC<Props> = ({
   }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const formData = new FormData();
-
-    // Append group data
-    formData.append('remark_group', values.remark_group);
-    formData.append('requester', values.requester);
-
-    // Append form details and attachments
-    values.forms.forEach((form, index) => {
-      formData.append(`forms[${index}][id]`, form.id);
-      formData.append(`forms[${index}][type]`, form.type);
-      formData.append(`forms[${index}][remark]`, form.remark);
-      formData.append(`forms[${index}][balance]`, form.balance.toString());
-      formData.append(`forms[${index}][period]`, form.period);
-      formData.append(`forms[${index}][currency]`, form.currency);
-      formData.append(`forms[${index}][receipt_date]`, form.receipt_date.toISOString());
-      formData.append(`forms[${index}][start_date]`, form.start_date.toISOString());
-      formData.append(`forms[${index}][end_date]`, form.end_date.toISOString());
-      form.attachment.forEach((file) => {
-        formData.append(`forms[${index}][attachments][]`, file);
-      });
-    });
-
-    if (reimbursement) {
-      Inertia.put(`/reimburse/${reimbursement.id}`, values, {
-        headers: {
-          'X-CSRF-TOKEN': csrf_token,
-        },
-      });
-    } else {
-      await Inertia.post('/reimburse', formData, {
-        headers: {
-          'X-CSRF-TOKEN': csrf_token,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+    try {
+      const response = await axiosInstance.post('/reimburse', values);
+      showToast(response.message, 'success');
+    } catch (e) {
+      showToast(e.message, 'error');
     }
   };
+
+//   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+//     const formData = new FormData();
+
+//     formData.append('remark_group', values.remark_group);
+//     formData.append('requester', values.requester);
+
+//     values.forms.forEach((form, index) => {
+//       formData.append(`forms[${index}][id]`, form.id);
+//       formData.append(`forms[${index}][type]`, form.type);
+//       formData.append(`forms[${index}][short_text]`, form.short_text);
+//       formData.append(`forms[${index}][balance]`, form.balance.toString());
+//       formData.append(`forms[${index}][period]`, form.period);
+//       formData.append(`forms[${index}][currency]`, form.currency);
+//       formData.append(`forms[${index}][item_delivery_data]`, form.item_delivery_data.toISOString());
+//       formData.append(`forms[${index}][start_date]`, form.start_date.toISOString());
+//       formData.append(`forms[${index}][end_date]`, form.end_date.toISOString());
+//       form.attachment.forEach((file) => {
+//         formData.append(`forms[${index}][attachments][]`, file);
+//       });
+//     });
+
+//     if (reimbursement) {
+//       Inertia.put(`/reimburse/${reimbursement.id}`, values, {
+//         headers: {
+//           'X-CSRF-TOKEN': csrf_token,
+//         },
+//       });
+//     } else {
+//       await Inertia.post('/reimburse', formData, {
+//         headers: {
+//           'X-CSRF-TOKEN': csrf_token,
+//           'Content-Type': 'multipart/form-data',
+//         },
+//       });
+//     }
+//   };
 
   return (
     <ScrollArea className='h-[600px] w-full'>
@@ -323,7 +310,7 @@ export const ReimburseForm: React.FC<Props> = ({
                             </SelectTrigger>
                             <SelectContent>
                               {users.map((user) => (
-                                <SelectItem key={user.id} value={user.nip}>
+                                <SelectItem key={user.nip} value={user.nip}>
                                   {user.name} [{user.nip}]
                                 </SelectItem>
                               ))}
@@ -531,12 +518,11 @@ export const ReimburseForm: React.FC<Props> = ({
                                       <SelectValue placeholder='-' />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      {families &&
-                                        families.map((family) => (
-                                          <SelectItem key={family.id} value={family.id}>
-                                            {family.name} ({family.status})
-                                          </SelectItem>
-                                        ))}
+                                      {families.map((family) => (
+                                        <SelectItem key={family.id} value={family.id}>
+                                          {family.name}
+                                        </SelectItem>
+                                      ))}
                                     </SelectContent>
                                   </Select>
                                 </FormControl>
@@ -552,7 +538,7 @@ export const ReimburseForm: React.FC<Props> = ({
                         <td>
                           <FormField
                             control={form.control}
-                            name={`forms.${index}.remark`}
+                            name={`forms.${index}.short_text`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormControl>
@@ -580,7 +566,7 @@ export const ReimburseForm: React.FC<Props> = ({
                         <td>
                           <FormField
                             control={form.control}
-                            name={`forms.${index}.receipt_date`}
+                            name={`forms.${index}.item_delivery_data`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormControl>
@@ -691,7 +677,6 @@ export const ReimburseForm: React.FC<Props> = ({
                                     disabled={reimbursement !== null}
                                     type='number'
                                     placeholder='0.0'
-                                    max={limits[index]?.plafon}
                                     {...field}
                                     onChange={(e) => field.onChange(Number(e.target.value))}
                                     value={field.value || 0.0}

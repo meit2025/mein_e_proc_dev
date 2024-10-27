@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Modules\BusinessTrip\Models\BusinessTripGrade;
 use Modules\Master\Http\Controllers\AccountAssignmentCategoryController;
@@ -8,6 +9,7 @@ use Modules\Master\Http\Controllers\BankKeyController;
 use Modules\Master\Http\Controllers\CostCenterController;
 use Modules\Master\Http\Controllers\DokumentTypeController;
 use Modules\Master\Http\Controllers\DropdownMasterController;
+use Modules\Master\Http\Controllers\FamilyController;
 use Modules\Master\Http\Controllers\ItemCategoryController;
 use Modules\Master\Http\Controllers\MasterBusinessPartnerController;
 use Modules\Master\Http\Controllers\MasterMaterialController;
@@ -73,6 +75,10 @@ Route::group(['middleware' => 'auth'], function () {
                 'Master/MasterReimburseQuota/Index',
                 compact('listPeriodReimburse', 'listTypeReimburse', 'listGrade')
             );
+        });
+        Route::group(['prefix' => 'family'], function () {
+            $user = User::with('families')->get();
+            Route::inertia('/',  'Master/Family/Index', compact('user'));
         });
     });
 
@@ -152,6 +158,14 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/update/{id}', [MasterQuotaReimburseController::class, 'update'])->name('master.reimburse-quota.update');
             Route::get('/detail/{id}', [MasterQuotaReimburseController::class, 'show'])->name('master.reimburse-quota.show');
             Route::delete('/delete/{id}', [MasterQuotaReimburseController::class, 'destroy'])->name('master.reimburse-quota.destroy');
+        });
+
+        Route::group(['prefix' => 'family'], function () {
+            Route::get('/list', [FamilyController::class, 'index'])->name('master.family.index');
+            Route::post('/create', [FamilyController::class, 'store'])->name('master.family.store');
+            Route::post('/update/{id}', [FamilyController::class, 'update'])->name('master.family.update');
+            Route::get('/detail/{id}', [FamilyController::class, 'show'])->name('master.family.show');
+            Route::delete('/delete/{id}', [FamilyController::class, 'destroy'])->name('master.family.destroy');
         });
 
         Route::group(['prefix' => 'dropdown'], function () {

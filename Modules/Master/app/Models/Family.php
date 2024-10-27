@@ -1,13 +1,16 @@
 <?php
 
-namespace App\Models;
+namespace Modules\Master\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Family extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['name', 'user', 'status', 'bod'];
 
     public function user()
     {
