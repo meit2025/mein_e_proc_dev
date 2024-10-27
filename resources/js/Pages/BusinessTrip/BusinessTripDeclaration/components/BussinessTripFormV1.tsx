@@ -753,6 +753,8 @@ export function DetailAllowance({
   destinationIndex: number;
   allowanceField: any;
 }) {
+  const allowanceFieldWatch = form.watch(`destinations[${destinationIndex}].detail_attedances`);
+  console.log(allowanceFieldWatch);
   return (
     <table className='w-full allowance-table'>
       {allowanceField.map((allowance: any, index: any) => (
