@@ -207,6 +207,11 @@ const sidebar = [
             roles: '',
           },
           {
+            name: 'Family',
+            route: LIST_PAGE_FAMILY,
+            roles: '',
+          },
+          {
             name: 'Roles',
             route: LIST_PAGE_ROLE,
             roles: '',

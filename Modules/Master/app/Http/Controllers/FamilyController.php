@@ -4,6 +4,8 @@ namespace Modules\Master\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Modules\Master\Models\Family;
 
 class FamilyController extends Controller
@@ -49,7 +51,30 @@ class FamilyController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $rules = [
+            'name' => 'required',
+            'status' => 'required|in:wife,child',
+            'bod' => 'required|date',
+            'user' => 'required|exists:users,nip',
+        ];
+
+        try {
+            foreach ($request->families as $family) {
+                DB::beginTransaction();
+                $family['user'] = $request->user;
+                $validator = Validator::make($family, $rules);
+                if ($validator->fails()) {
+                    return $this->errorResponse($validator->errors());
+                }
+                $validatedData = $validator->validated();
+                Family::create($validatedData);
+            }
+            DB::commit();
+            return $this->successResponse("Create Family Member Successfully");
+        } catch (\Exception  $e) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**

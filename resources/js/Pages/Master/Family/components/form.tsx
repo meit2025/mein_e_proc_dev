@@ -112,6 +112,20 @@ export const FamilyHeaderForm = ({ onSuccess, type = FormType.create, id, user }
 
   function getUser() {}
 
+  function setAllowancesProperty() {
+    let familyForm = [];
+
+    let familyCount = parseInt(totalFamily);
+
+    for (let i = 0; i < familyCount; i++) {
+      familyForm.push({
+        family: '',
+      });
+    }
+
+    form.setValue('families', familyForm);
+  }
+
   const {
     fields: familyField,
     append,
@@ -122,6 +136,9 @@ export const FamilyHeaderForm = ({ onSuccess, type = FormType.create, id, user }
     name: 'families',
   });
 
+  React.useEffect(() => {
+    setAllowancesProperty();
+  }, [totalFamily, id, type]);
   return (
     <ScrollArea className='h-[600px] w-full '>
       <Form {...form}>
@@ -218,7 +235,7 @@ export function TabFamily({
     <Tabs defaultValue='family1' className='w-full'>
       <TabsList className={`flex items-center justify-start space-x-4`}>
         {familyField.map((field: any, index: number) => (
-          <TabsTrigger value={`family${index + 1}`}>Family {index + 1}</TabsTrigger>
+          <TabsTrigger value={`family${index + 1}`}>Member - {index + 1}</TabsTrigger>
         ))}
       </TabsList>
 
@@ -243,28 +260,66 @@ export function FamilyForm({
       <div key={index}>
         <table className='text-xs mt-4 reimburse-form-detail font-thin'>
           <tr>
+            <td width={200}>
+              Name <span className='text-red-500'>*</span>
+            </td>
+            <td>
+              <FormField
+                control={form.control}
+                name={`families.${index}.name`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        type='text'
+                        placeholder='John Doe'
+                        {...field}
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </td>
+          </tr>
+          <tr>
             <td width={200}>Family Type</td>
             <td>
               <FormField
                 control={form.control}
-                name={`families.${index}.type`}
+                name={`families.${index}.status`}
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Select
-                        onValueChange={(value) => {
-                          updateFamily(index, { ...family, family: value });
-                        }}
-                        defaultValue=''
-                      >
+                      <Select onValueChange={(value) => field.onChange(value)} value={field.value}>
                         <SelectTrigger className='w-[200px]'>
-                          <SelectValue placeholder='Destination' />
+                          <SelectValue placeholder='Child / Wife' />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value='wife'>Wife</SelectItem>
                           <SelectItem value='child'>Child</SelectItem>
                         </SelectContent>
                       </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td width={200}>Birth of Date</td>
+            <td>
+              <FormField
+                control={form.control}
+                name={`families.${index}.bod`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <CustomDatePicker onDateChange={(date) => field.onChange(date)} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
