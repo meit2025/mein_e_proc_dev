@@ -35,10 +35,8 @@ import * as React from 'react';
 import axiosInstance from '@/axiosInstance';
 
 import { useAlert } from '@/contexts/AlertContext';
-import { RadioGroup, RadioGroupItem } from '@/components/shacdn/radio-group';
 import { AxiosError } from 'axios';
 import { FormType } from '@/lib/utils';
-import { MultiSelect } from '@/components/commons/MultiSelect';
 import { MaterialModel } from '@/Pages/Master/MasterMaterial/model/listModel';
 import { CREATE_API_REIMBURSE_TYPE, GET_DETAIL_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
 
@@ -55,32 +53,32 @@ export default function ReimburseTypeForm({
   id,
   listMaterial,
 }: props) {
-  var formSchema = z.object({
+  const formSchema = z.object({
     code: z.string().min(1, 'Code is required'),
     name: z.string().min(1, 'Name is required'),
-    is_employee: z.boolean('Type of it is required'),
+    is_employee: z.boolean(),
     material_group: z.string().min(1, 'Material group required'),
     material_number: z.string().min(1, 'Material number required'),
   });
 
-  let defaultValues = {
+  const defaultValues = {
     code: '',
     name: '',
     is_employee: true,
   };
 
   async function getDetailData() {
-    let url = GET_DETAIL_REIMBURSE_TYPE(id);
+    const url = GET_DETAIL_REIMBURSE_TYPE(id);
 
     try {
-      let response = await axiosInstance.get(url);
+      const response = await axiosInstance.get(url);
 
       form.reset({
         code: response.data.data.code,
         name: response.data.data.name,
       });
     } catch (e) {
-      let error = e as AxiosError;
+      const error = e as AxiosError;
     }
   }
 
@@ -94,7 +92,7 @@ export default function ReimburseTypeForm({
     try {
       const response = await axiosInstance.post(CREATE_API_REIMBURSE_TYPE, values);
       onSuccess?.(true);
-      showToast(response.message, 'success');
+      showToast(response?.message, 'success');
     } catch (e) {
       onSuccess?.(false);
       showToast(e.message, 'error');
@@ -119,7 +117,7 @@ export default function ReimburseTypeForm({
               <td>
                 <FormField
                   control={form.control}
-                  disabled={type == FormType.edit}
+                  disabled={type === FormType.edit}
                   name='code'
                   render={({ field }) => (
                     <FormItem>
@@ -213,10 +211,7 @@ export default function ReimburseTypeForm({
                           </SelectTrigger>
                           <SelectContent>
                             {listMaterial.map((material) => (
-                              <SelectItem
-                                key={material.id}
-                                value={material.material_group}
-                              >
+                              <SelectItem key={material.id} value={material.material_group}>
                                 {material.material_group}
                               </SelectItem>
                             ))}
@@ -248,10 +243,7 @@ export default function ReimburseTypeForm({
                           </SelectTrigger>
                           <SelectContent>
                             {listMaterial.map((material) => (
-                              <SelectItem
-                                key={material.id}
-                                value={material.material_number}
-                              >
+                              <SelectItem key={material.id} value={material.material_number}>
                                 {material.material_number}
                               </SelectItem>
                             ))}

@@ -31,13 +31,18 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ScrollArea } from '@/components/shacdn/scroll-area';
 import * as React from 'react';
-import { GET_DETAIL_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/api';
+import {
+  CREATE_API_BUSINESS_TRIP_DECLARATION,
+  GET_DETAIL_BUSINESS_TRIP_DECLARATION,
+} from '@/endpoint/business-trip-declaration/api';
 import { AllowanceItemModel, BusinessTripModel } from '../models/models';
 import axiosInstance from '@/axiosInstance';
 import moment from 'moment';
 import FormSwitch from '@/components/Input/formSwitchCustom';
 import { Button } from '@/components/shacdn/button';
 import { ChevronsUpDown, Plus, UndoIcon, X } from 'lucide-react';
+import axios, { AxiosError } from 'axios';
+import { Inertia } from '@inertiajs/inertia';
 
 interface Props {
   listBusinessTrip: BusinessTripModel[];
@@ -53,9 +58,6 @@ export const BussinessTripFormV1 = ({
     remark: z.string().min(1, 'Remark is required'),
     attachment: z.instanceof(File).nullable().optional(),
     total_destination: z.number().min(1, 'Total Destinantion Required'),
-    cash_advance: z.boolean().nullable().optional(),
-    total_percent: z.string().nullable().optional(),
-    total_cash_advance: z.string().nullable().optional(),
     destinations: z.array(
       z.object({
         destination: z.string().min(1, 'Destinantion Required'),
@@ -63,7 +65,7 @@ export const BussinessTripFormV1 = ({
         business_trip_end_date: z.date().optional(),
         detail_attedances: z.array(
           z.object({
-            date: z.date().optional(),
+            date: z.string().optional(),
             shift_code: z.string().optional(),
             shift_start: z.string().optional(),
             shift_end: z.string().optional(),
@@ -75,13 +77,13 @@ export const BussinessTripFormV1 = ({
           z.object({
             name: z.string().optional(),
             code: z.string().optional(),
-            default_price: z.number().optional(),
+            // default_price: z.string().optional(),
             type: z.string().optional(),
-            subtotal: z.number().optional(),
-            currency: z.string().optional(),
+            subtotal: z.string().optional(),
+            // currency: z.string().optional(),
             detail: z.array(
               z.object({
-                date: z.date().nullish(),
+                date: z.string().nullish(),
                 request_price: z.any().optional(),
               }),
             ),
@@ -97,22 +99,47 @@ export const BussinessTripFormV1 = ({
       remark: '',
       attachment: null,
       total_destination: 1,
-      cash_advance: false,
-      total_percent: '0',
-      total_cash_advance: '0',
       destinations: [
         {
-          detail_attedances: [],
-          allowances: [],
           destination: '',
           business_trip_start_date: new Date(),
           business_trip_end_date: new Date(),
+          detail_attedances: [],
+          allowances: [],
         },
       ],
     },
   });
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values, ' test');
+    console.log(values, ' data');
+    try {
+      const formData = new FormData();
+      // Append group data
+      formData.append('request_no', values.request_no ?? '');
+      formData.append('remark', values.remark ?? '');
+      formData.append('attachment', values.attachment ?? '');
+      formData.append('total_destination', `${values.total_destination}`);
+      values.destinations.forEach((item, index) => {
+        formData.append(`destinations[${index}]`, JSON.stringify(item));
+      });
+
+      // const response = axios.post(CREATE_API_BUSINESS_TRIP, formData);
+
+      await Inertia.post(CREATE_API_BUSINESS_TRIP_DECLARATION, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      // console.log(response);
+      showToast('succesfully created data', 'success');
+      onSuccess?.(true);
+    } catch (e) {
+      const error = e as AxiosError;
+
+      onSuccess?.(false);
+      console.log(error);
+    }
   };
 
   const [businessTripDetail, setBusinessTripDetail] = React.useState<BusinessTripModel[]>([]);
@@ -129,13 +156,13 @@ export const BussinessTripFormV1 = ({
       const businessTripData = response.data.data;
 
       form.setValue('remark', businessTripData.remarks || '');
-      form.setValue('attachment', businessTripData.attachment || null);
-      form.setValue('total_destination', businessTripData.total_destination || 1);
-      form.setValue('cash_advance', businessTripData.cash_advance || false);
-      form.setValue('total_percent', businessTripData.total_percent || '0');
-      form.setValue('total_cash_advance', businessTripData.total_cash_advance || '0');
+      //   form.setValue('attachment', businessTripData.attachment || null);
+      //   form.setValue('total_destination', businessTripData.total_destination || 1);
+      //   form.setValue('cash_advance', businessTripData.cash_advance || false);
+      //   form.setValue('total_percent', businessTripData.total_percent || '0');
+      //   form.setValue('total_cash_advance', businessTripData.total_cash_advance || '0');
 
-      form.setValue('destinations', businessTripData.total_cash_advance || '0');
+      //   form.setValue('destinations', businessTripData.total_cash_advance || '0');
 
       setBusinessTripDetail(response.data.data as BusinessTripModel[]);
       setListDestination(businessTripData.destinations);
@@ -325,6 +352,8 @@ export const BussinessTripFormV1 = ({
             listAllowances={listAllowances}
             totalDestination={form.getValues('total_destination').toString()}
           />
+
+          <Button type='submit'>submit</Button>
         </form>
       </Form>
     </ScrollArea>
@@ -396,7 +425,7 @@ export function BussinessDestinationForm({
     replace: replaceAllowance,
   } = useFieldArray({
     control: form.control,
-    name: `destinations.${index}.allowances`,
+    name: `destinations[${index}].allowances`,
   });
 
   //generate detail
@@ -601,7 +630,6 @@ export function DetailAttedances({
   updateAttedanceFields: any;
 }) {
   const detailAttedanceWatch = form.watch(`destinations[${destinationIndex}].detail_attedances`);
-
   React.useEffect(() => {}, [detailAttedanceWatch]);
 
   React.useEffect(() => {
@@ -753,11 +781,13 @@ export function DetailAllowance({
   destinationIndex: number;
   allowanceField: any;
 }) {
-  const allowanceFieldWatch = form.watch(`destinations[${destinationIndex}].detail_attedances`);
-  console.log(allowanceFieldWatch);
+  const detailAllowanceceWatch = form.watch(`destinations[${destinationIndex}].allowances`);
+
+  React.useEffect(() => {}, [detailAllowanceceWatch]);
   return (
     <table className='w-full allowance-table'>
-      {allowanceField.map((allowance: any, index: any) => (
+      {detailAllowanceceWatch.map((allowance: any, index: any) => (
+        // eslint-disable-next-line react/jsx-key
         <AllowanceRowInput
           form={form}
           allowance={allowance}
@@ -781,19 +811,19 @@ export function AllowanceRowInput({
   allowanceIndex: any;
 }) {
   const [isExpanded, setIsExpanded] = React.useState<boolean>(false);
+  const [total, setTotal] = React.useState<number>(0);
   const handleClikRow = (index: number) => {
     setIsExpanded((prev) => !prev);
   };
-  // Memantau base price jika allowance.type === 'TOTAL'
+
   const basePrice = useWatch({
     control: form.control,
-    name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${0}.request_price`, // pastikan memantau field request_price
+    name: `destinations[${destinationIndex}].allowances[${allowanceIndex}].detail[${0}].request_price`, // pastikan memantau field request_price
   });
 
-  // Memantau semua detail harga jika allowance.type !== 'TOTAL'
   const details = useWatch({
     control: form.control,
-    name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail`,
+    name: `destinations[${destinationIndex}].allowances[${allowanceIndex}].detail`,
   });
 
   const calculateTotal = () => {
@@ -811,21 +841,55 @@ export function AllowanceRowInput({
     }
   };
 
-  const handleInputChange = (field: any) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(event.target.value) || 0;
+  const handleChange = (index: number, value: string) => {
+    // Parsing the input value to a float
+    const parsedValue = parseFloat(value);
 
-    if (allowance.request_value === 'unlimited') {
-      // No restrictions on input value
-      field.onChange(event);
-    } else if (allowance.request_value === 'up to max value') {
-      if (value <= allowance.subtotal) {
-        field.onChange(event);
-      } else {
-        alert(`Value cannot exceed the subtotal of IDR ${allowance.subtotal}`);
-      }
-    } else if (allowance.request_value === 'fixed value') {
-      // Do not allow changes for fixed value
-      alert('This value is fixed and cannot be changed.');
+    // Ensure the value is a number or 0
+    const requestPrice = isNaN(parsedValue) ? 0 : parsedValue;
+
+    // Get the allowance type to apply validation logic
+    const allowanceType = allowance.request_value; // Assuming `allowance` has a property 'type'
+
+    // Define the validation logic based on the allowance type
+    let isValid = true;
+
+    console.log(allowanceType);
+
+    switch (allowanceType) {
+      case 'unlimited':
+        // No restrictions, any input is valid
+        isValid = true;
+        break;
+
+      case 'fixed value':
+        // Fixed nominal, you can set a predefined fixed value
+        const fixedValue = allowance.subtotal; // Example fixed value, change as needed
+        if (requestPrice !== fixedValue) {
+          alert(`Please enter the fixed value of IDR ${fixedValue}`);
+          isValid = false;
+        }
+        break;
+
+      case 'up to max value':
+        // Set a maximum value limit
+        const maxValue = allowance.subtotal; // Example max value, change as needed
+        if (requestPrice > maxValue) {
+          alert(`The value should not exceed IDR ${maxValue}`);
+          isValid = false;
+        }
+        break;
+
+      default:
+        isValid = false;
+    }
+
+    // Update the form value only if the input is valid
+    if (isValid) {
+      form.setValue(
+        `destinations[${destinationIndex}].allowances[${allowanceIndex}].detail[${index}].request_price`,
+        requestPrice,
+      );
     }
   };
 
@@ -844,11 +908,14 @@ export function AllowanceRowInput({
             <div className='flex items-center'>
               <FormField
                 control={form.control}
-                name={`destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${0}.request_price`}
+                name={`destinations[${destinationIndex}].allowances[${allowanceIndex}].detail[${0}].request_price`}
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input value={field.value} onChange={handleInputChange(field)} />
+                      <Input
+                        value={field.value}
+                        onChange={(e) => handleChange(0, e.target.value)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -865,7 +932,7 @@ export function AllowanceRowInput({
         </td>
         <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
           <div className='flex items-center'>
-            <span className='text-sm' style={{ padding: '2px 5px' }}>
+            <span className='text-sm total' style={{ padding: '2px 5px' }}>
               = IDR {calculateTotal()}
             </span>
           </div>
@@ -900,14 +967,13 @@ export function AllowanceRowInput({
                 <div className='flex mt-1 text-sm justify-between items-center'>
                   <FormField
                     control={form.control}
-                    name={`destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${detailIndex}.request_price`}
+                    name={`destinations[${destinationIndex}].allowances[${allowanceIndex}].detail[${detailIndex}].request_price`}
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
                           <Input
                             value={field.value} // Ensure proper value binding
-                            // onChange={field.onChange} // Bind change handler to form control
-                            onChange={handleInputChange(field)}
+                            onChange={(e) => handleChange(detailIndex, e.target.value)}
                           />
                         </FormControl>
                         <FormMessage />
