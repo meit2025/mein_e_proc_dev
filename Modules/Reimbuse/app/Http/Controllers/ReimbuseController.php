@@ -15,6 +15,7 @@ use Modules\Master\Models\Family;
 use Modules\Master\Models\MasterPeriodReimburse;
 use Modules\Master\Models\MasterQuotaReimburse;
 use Modules\Master\Models\MasterTypeReimburse;
+use Modules\Master\Models\PurchasingGroup;
 use Modules\Reimbuse\Services\ReimbursementService;
 
 class ReimbuseController extends Controller
@@ -103,17 +104,19 @@ class ReimbuseController extends Controller
         }
 
         $types = ['Employee', 'Family'];
+        $purchasing_group = PurchasingGroup::select('id', 'purchasing_group', 'purchasing_group_desc')->get();
         $currencies = Currency::select('code', 'name')->get();
         $periods = MasterPeriodReimburse::select('id', 'code', 'start', 'end')->get();
         $csrf_token = csrf_token();
 
         return Inertia::render('Reimburse/ListReimburse', [
-            'groups'        =>  $reimburses,
-            'users'         =>  $users,
-            'types'         =>  $types,
-            'currencies'    =>  $currencies,
-            'periods'       =>  $periods,
-            'csrf_token'    =>  $csrf_token
+            'purchasing_groups' =>  $purchasing_group,
+            'groups'            =>  $reimburses,
+            'users'             =>  $users,
+            'types'             =>  $types,
+            'currencies'        =>  $currencies,
+            'periods'           =>  $periods,
+            'csrf_token'        =>  $csrf_token
         ]);
     }
 
@@ -133,7 +136,7 @@ class ReimbuseController extends Controller
             $forms = $data['forms'];
             $response = $this->reimbursementService->storeReimbursements($groupData, $forms);
             if (isset($response['error'])) {
-                $this->errorResponse($response['error']);
+                return $this->errorResponse($response['error']);
             }
             return $this->successResponse("All data has been processed successfully");
         } catch (\Exception  $e) {

@@ -62,9 +62,9 @@ export default function ReimburseQuotaForm({
   listGrade,
 }: props) {
   var formSchema = z.object({
-    period: z.number('Period must choose'),
-    type: z.number('Type must choose'),
-    grade: z.number('Grade must choose'),
+    period: z.string('Period must choose'),
+    type: z.string('Type must choose'),
+    grade: z.string('Grade must choose'),
     limit: z.number('Limit must set'),
     plafon: z.number('Plafon must set'),
   });
@@ -137,7 +137,7 @@ export default function ReimburseQuotaForm({
                           </SelectTrigger>
                           <SelectContent>
                             {listPeriodReimburse.map((period) => (
-                              <SelectItem key={period.id} value={period.id}>
+                              <SelectItem key={period.id} value={period.id.toString()}>
                                 {period.start} - {period.end}
                               </SelectItem>
                             ))}
@@ -169,7 +169,7 @@ export default function ReimburseQuotaForm({
                           </SelectTrigger>
                           <SelectContent>
                             {listTypeReimburse.map((type) => (
-                              <SelectItem key={type.id} value={type.id}>
+                              <SelectItem key={type.id} value={type.id.toString()}>
                                 {type.name}
                               </SelectItem>
                             ))}
@@ -201,7 +201,7 @@ export default function ReimburseQuotaForm({
                           </SelectTrigger>
                           <SelectContent>
                             {listGrade.map((grade) => (
-                              <SelectItem key={grade.id} value={grade.id}>
+                              <SelectItem key={grade.id} value={grade.id.toString()}>
                                 {grade.grade}
                               </SelectItem>
                             ))}

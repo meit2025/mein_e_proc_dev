@@ -2,8 +2,6 @@
 
 namespace Modules\Reimbuse\Models;
 
-use App\Models\User;
-use App\Traits\UniqueCode;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,7 +11,7 @@ use Illuminate\Support\Str;
 
 class Reimburse extends Model
 {
-    use HasFactory, UniqueCode, SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     // protected static function boot()
     // {
@@ -38,12 +36,13 @@ class Reimburse extends Model
      */
     protected $fillable = [
         "group",
+        "reimburse_type",
         "type",
         "currency",
-        "remark",
+        "short_text",
         "for",
         "balance",
-        "receipt_date",
+        "item_delivery_data",
         "start_date",
         "end_date",
         "period",
@@ -58,17 +57,10 @@ class Reimburse extends Model
         'account_assignment',
         'storage_location',
         'desired_vendor',
-        'material_group',
-        'material_number',
         'purchase_requisition_unit_of_measure',
         'purchase_requisition_quantity',
         'tax_on_sales',
         'item_category_in_purchasing_document',
         'plant'
     ];
-
-    // protected static function newFactory(): ReimburseFactory
-    // {
-    //     // return ReimburseFactory::new();
-    // }
 }

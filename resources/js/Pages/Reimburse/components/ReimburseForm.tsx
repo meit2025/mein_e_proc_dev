@@ -23,35 +23,10 @@ import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import { Input } from '@/components/shacdn/input';
 import { useAlert } from '../../../contexts/AlertContext.jsx';
 import { usePage } from '@inertiajs/react';
-
-interface Reimburse {
-  id: string;
-  short_text: string;
-  type: string;
-  currency: string;
-  balance: number;
-  item_delivery_data: Date;
-  start_date: Date;
-  end_date: Date;
-  period: string;
-}
-
-interface User {
-  id: string;
-  nip: string;
-  name: string;
-}
-
-interface Group {
-  id: string;
-  request_number: string;
-  remark: string;
-  status: string;
-  users: User;
-  reimburses: Reimburse[];
-}
+import { User, Reimburse, Group, PurchasingGroup } from '../model/listModel';
 
 interface Props {
+  purchasing_groups: PurchasingGroup[];
   reimbursement: Group | null;
   reimburses: Reimburse[];
   currencies: { id: string; code: string; name: string }[];
@@ -61,6 +36,7 @@ interface Props {
 }
 
 export const ReimburseForm: React.FC<Props> = ({
+  purchasing_groups,
   reimbursement,
   reimburses,
   currencies,
@@ -89,6 +65,7 @@ export const ReimburseForm: React.FC<Props> = ({
         id: '',
         type: '',
         reimburse_type: '',
+        purchasing_group: '',
         short_text: '',
         period: '',
         balance: 0,
@@ -111,10 +88,11 @@ export const ReimburseForm: React.FC<Props> = ({
         'forms',
         reimbursement.reimburses.map((reimburse) => ({
           id: reimburse.id,
-          type: reimburse.type,
+          reimburse_type: reimburse.reimburse_type,
           short_text: reimburse.short_text,
           balance: Number(reimburse.balance),
           currency: reimburse.currency,
+          purchasing_group: reimburse.purchasing_group,
           period: reimburse.period,
           item_delivery_data: new Date(reimburse.item_delivery_data),
           start_date: new Date(reimburse.start_date),
@@ -123,7 +101,7 @@ export const ReimburseForm: React.FC<Props> = ({
         })),
       );
       reimbursement.reimburses.forEach((reimburse, index) => {
-        selectedTypeCode(index, reimburse.type);
+        selectedTypeCode(index, reimburse.reimburse_type);
       });
     }
   }, [reimbursement]);
@@ -199,6 +177,7 @@ export const ReimburseForm: React.FC<Props> = ({
       period,
     });
     const selectedType = response.data.data;
+    console.log(selectedType);
     setLimits((prevLimits) => {
       const updatedLimits = [...prevLimits];
       updatedLimits[index] = {
@@ -218,43 +197,6 @@ export const ReimburseForm: React.FC<Props> = ({
       showToast(e.message, 'error');
     }
   };
-
-  //   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-  //     const formData = new FormData();
-
-  //     formData.append('remark_group', values.remark_group);
-  //     formData.append('requester', values.requester);
-
-  //     values.forms.forEach((form, index) => {
-  //       formData.append(`forms[${index}][id]`, form.id);
-  //       formData.append(`forms[${index}][type]`, form.type);
-  //       formData.append(`forms[${index}][short_text]`, form.short_text);
-  //       formData.append(`forms[${index}][balance]`, form.balance.toString());
-  //       formData.append(`forms[${index}][period]`, form.period);
-  //       formData.append(`forms[${index}][currency]`, form.currency);
-  //       formData.append(`forms[${index}][item_delivery_data]`, form.item_delivery_data.toISOString());
-  //       formData.append(`forms[${index}][start_date]`, form.start_date.toISOString());
-  //       formData.append(`forms[${index}][end_date]`, form.end_date.toISOString());
-  //       form.attachment.forEach((file) => {
-  //         formData.append(`forms[${index}][attachments][]`, file);
-  //       });
-  //     });
-
-  //     if (reimbursement) {
-  //       Inertia.put(`/reimburse/${reimbursement.id}`, values, {
-  //         headers: {
-  //           'X-CSRF-TOKEN': csrf_token,
-  //         },
-  //       });
-  //     } else {
-  //       await Inertia.post('/reimburse', formData, {
-  //         headers: {
-  //           'X-CSRF-TOKEN': csrf_token,
-  //           'Content-Type': 'multipart/form-data',
-  //         },
-  //       });
-  //     }
-  //   };
 
   return (
     <ScrollArea className='h-[600px] w-full'>
@@ -449,13 +391,35 @@ export const ReimburseForm: React.FC<Props> = ({
                       </tr>
 
                       <tr>
-                        <td width={200}>Material</td>
-                        <td className='flex items-center'>
-                          {/* <CustomDatePicker /> */}
-                          <span className='mx-2'>Group</span>
-                          <td>{reimburseTypes[index]?.material_group}</td>
-                          <span className='mx-2'>Number</span>
-                          <td>{reimburseTypes[index]?.material_number}</td>
+                        <td width={200}>Purchasing Group</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.purchasing_group`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Select
+                                    disabled={reimbursement !== null}
+                                    onValueChange={(value) => field.onChange(value)}
+                                    value={field.value}
+                                  >
+                                    <SelectTrigger className='w-[200px]'>
+                                      <SelectValue placeholder='-' />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {purchasing_groups.map((value) => (
+                                        <SelectItem key={value.id} value={value.id.toString()}>
+                                          {value.purchasing_group_desc} - {value.purchasing_group}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         </td>
                       </tr>
 
@@ -519,7 +483,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                     </SelectTrigger>
                                     <SelectContent>
                                       {families.map((family) => (
-                                        <SelectItem key={family.id} value={family.id}>
+                                        <SelectItem key={family.id} value={family.id.toString()}>
                                           {family.name}
                                         </SelectItem>
                                       ))}
