@@ -17,12 +17,49 @@ use Modules\PurchaseRequisition\Models\Purchase;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
 use Modules\PurchaseRequisition\Models\Unit;
 use Modules\PurchaseRequisition\Models\Vendor;
+use Modules\PurchaseRequisition\Services\BtService;
+use Modules\PurchaseRequisition\Services\ProcurementService;
 
 class PurchaseRequisitionController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    protected $procurementService;
+    protected $bt;
+
+    public function __construct(ProcurementService $procurementService, BtService $bt)
+    {
+        $this->procurementService = $procurementService;
+        $this->bt = $bt;
+    }
+
+    public function generateText($id, $type)
+    {
+        try {
+            switch ($type) {
+                case 'pr':
+                    # code...
+                    $data = $this->procurementService->processTextData($id);
+                    return response()->json(['message' => 'Data processed successfully', 'data' => $data]);
+                    break;
+                case 'bt';
+                    $data = $this->bt->processTextData($id, 'btre');
+                    return response()->json(['message' => 'Data processed successfully', 'data' => $data]);
+                    break;
+                case 'bt-po';
+                    $data = $this->bt->processTextData($id, 'btrde');
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
     public function index(Request $request) {}
 
     /**
@@ -121,7 +158,7 @@ class PurchaseRequisitionController extends Controller
                 $date = Carbon::parse($procurement->created_at);
                 $formattedDate = $date->format('Y.m.d');
 
-                $dateStr = Carbon::parse($procurement->created_at);
+                $dateStr = Carbon::parse($procurement->delivery_date);
                 $formattedDatestr = $dateStr->format('Y.m.d');
 
                 $tax = Pajak::where('mwszkz',  $value->tax)->first();

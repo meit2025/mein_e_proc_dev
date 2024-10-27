@@ -32,7 +32,10 @@ export const Index = ({ listMaterial }: propsType) => {
           open={openForm}
           onOpenChange={openFormHandler}
         >
-          <ReimburseTypeForm listMaterial={listMaterial} />
+          <ReimburseTypeForm
+            listMaterial={listMaterial}
+            onSuccess={(x: boolean) => setOpenForm(!x)}
+          />
         </CustomDialog>
       </div>
       <DataGridComponent

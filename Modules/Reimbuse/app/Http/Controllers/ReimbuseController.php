@@ -101,7 +101,7 @@ class ReimbuseController extends Controller
 
         if (!$is_Admin) {
             $users = User::with('families')->where('id', Auth::id())->select('nip', 'name')->get();
-        }else{
+        } else {
             $users = User::with('families')->select('nip', 'name')->get();
         }
 
@@ -134,7 +134,7 @@ class ReimbuseController extends Controller
         ];
         $forms = $data['forms'];
         $response = $this->reimbursementService->storeReimbursements($groupData, $forms);
-        if (isset($response['error'])) {
+        if (isset($response->error)) {
             return back()->withErrors(['status' => $response['error']]);
         }
         return redirect()->back()->with('status', 'All data has been processed successfully.');

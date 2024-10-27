@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('item_number')->nullable();
             $table->string('document_type')->nullable();
             $table->string('valuation_type')->nullable();
-            $table->string('is_closed');
+            $table->string('is_closed')->nullable();
             $table->string('purchasing_group')->nullable();
             $table->string('purchasing_organization')->nullable();
             $table->string('account_assignment_category')->nullable();

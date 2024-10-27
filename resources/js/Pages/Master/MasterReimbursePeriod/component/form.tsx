@@ -43,6 +43,7 @@ import {
   CREATE_API_REIMBURSE_PERIOD,
   GET_DETAIL_REIMBURSE_PERIOD,
 } from '@/endpoint/reimbursePeriod/api';
+import { Loading } from '@/components/commons/Loading';
 
 export interface props {
   onSuccess?: (value: boolean) => void;
@@ -51,30 +52,30 @@ export interface props {
 }
 
 export default function ReimbursePeriodForm({ onSuccess, type = FormType.create, id }: props) {
-  var formSchema = z.object({
+  const formSchema = z.object({
     code: z.string(),
     start: z.date(),
     end: z.date(),
   });
 
-  let defaultValues = {
+  const defaultValues = {
     code: '',
     start: new Date(),
     end: new Date(),
   };
 
   async function getDetailData() {
-    let url = GET_DETAIL_REIMBURSE_PERIOD(id);
+    const url = GET_DETAIL_REIMBURSE_PERIOD(id);
 
     try {
-      let response = await axiosInstance.get(url);
+      const response = await axiosInstance.get(url);
 
       form.reset({
         id: response.data.data.id,
         code: response.data.data.code,
       });
     } catch (e) {
-      let error = e as AxiosError;
+      const error = e as AxiosError;
     }
   }
 
@@ -87,10 +88,10 @@ export default function ReimbursePeriodForm({ onSuccess, type = FormType.create,
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const response = await axiosInstance.post(CREATE_API_REIMBURSE_PERIOD, values);
-      onSuccess?.(true);
-      showToast(response.message, 'success');
+      onSuccess && onSuccess(true);
+      showToast(response?.data?.message, 'success');
     } catch (e) {
-      onSuccess?.(false);
+      onSuccess && onSuccess(false);
       showToast(e.message, 'error');
     }
   };
@@ -142,9 +143,7 @@ export default function ReimbursePeriodForm({ onSuccess, type = FormType.create,
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <CustomDatePicker
-                          onDateChange={(date) => field.onChange(date)}
-                        />
+                        <CustomDatePicker onDateChange={(date) => field.onChange(date)} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -162,9 +161,7 @@ export default function ReimbursePeriodForm({ onSuccess, type = FormType.create,
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <CustomDatePicker
-                          onDateChange={(date) => field.onChange(date)}
-                        />
+                        <CustomDatePicker onDateChange={(date) => field.onChange(date)} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
