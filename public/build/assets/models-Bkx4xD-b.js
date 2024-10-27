@@ -1,0 +1,1 @@
+const e=[{field:"user",headerName:"Family Member of",width:200,filterable:!0},{field:"name",headerName:"Name",width:200,filterable:!0},{field:"bod",headerName:"Birth of Date",width:200,filterable:!0},{field:"status",headerName:"As",width:200,filterable:!0}];export{e as columns};
