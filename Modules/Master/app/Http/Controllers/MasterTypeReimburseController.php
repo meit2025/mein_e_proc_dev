@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Inertia\Inertia;
+use Modules\Master\Models\MasterMaterial;
 use Modules\Master\Models\MasterTypeReimburse;
 
 class MasterTypeReimburseController extends Controller
@@ -16,6 +18,7 @@ class MasterTypeReimburseController extends Controller
     public function index(Request $request)
     {
         try {
+            $listMaterial = MasterMaterial::get();
             $filterableColumns =  [
                 'code',
                 'name',
@@ -25,7 +28,10 @@ class MasterTypeReimburseController extends Controller
             ];
 
             $data = $this->filterAndPaginate($request, MasterTypeReimburse::class, $filterableColumns);
-            return $this->successResponse($data);
+            return Inertia::render(
+                'Master/MasterReimburseType/Index',
+                compact('data', 'listMaterial')
+            );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }

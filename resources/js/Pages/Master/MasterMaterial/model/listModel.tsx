@@ -14,12 +14,11 @@ export const columns: GridColDef[] = [
   { field: 'old_material_number', headerName: 'Old material number', width: 200, filterable: true },
 ];
 
-
 export interface MaterialModel {
-  material_group: string,
-  material_number: string,
-  material_type: string,
-  material_description: string,
-  industry: string,
-  old_material_number: string
+  material_group: string;
+  material_number: string;
+  material_type: string;
+  material_description: string;
+  industry: string;
+  old_material_number: string;
 }

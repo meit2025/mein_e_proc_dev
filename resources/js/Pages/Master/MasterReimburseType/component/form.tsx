@@ -35,12 +35,12 @@ import * as React from 'react';
 import axiosInstance from '@/axiosInstance';
 
 import { useAlert } from '@/contexts/AlertContext';
-import { RadioGroup, RadioGroupItem } from '@/components/shacdn/radio-group';
 import { AxiosError } from 'axios';
 import { FormType } from '@/lib/utils';
-import { MultiSelect } from '@/components/commons/MultiSelect';
 import { MaterialModel } from '@/Pages/Master/MasterMaterial/model/listModel';
 import { CREATE_API_REIMBURSE_TYPE, GET_DETAIL_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
+import useDropdownOptions from '@/lib/getDropdown';
+import { Loading } from '@/components/commons/Loading';
 
 export interface props {
   onSuccess?: (value: boolean) => void;
@@ -55,32 +55,36 @@ export default function ReimburseTypeForm({
   id,
   listMaterial,
 }: props) {
-  var formSchema = z.object({
+  const formSchema = z.object({
     code: z.string().min(1, 'Code is required'),
     name: z.string().min(1, 'Name is required'),
-    is_employee: z.boolean('Type of it is required'),
+    is_employee: z.boolean(),
     material_group: z.string().min(1, 'Material group required'),
     material_number: z.string().min(1, 'Material number required'),
   });
 
-  let defaultValues = {
+  const { dataDropdown: materialGroup, getDropdown: getMaterialGroup } = useDropdownOptions();
+  const { dataDropdown: materialNumber, getDropdown: getMaterialNumber } = useDropdownOptions();
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+
+  const defaultValues = {
     code: '',
     name: '',
     is_employee: true,
   };
 
   async function getDetailData() {
-    let url = GET_DETAIL_REIMBURSE_TYPE(id);
+    const url = GET_DETAIL_REIMBURSE_TYPE(id);
 
     try {
-      let response = await axiosInstance.get(url);
+      const response = await axiosInstance.get(url);
 
       form.reset({
         code: response.data.data.code,
         name: response.data.data.name,
       });
     } catch (e) {
-      let error = e as AxiosError;
+      const error = e as AxiosError;
     }
   }
 
@@ -91,24 +95,40 @@ export default function ReimburseTypeForm({
 
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
     try {
       const response = await axiosInstance.post(CREATE_API_REIMBURSE_TYPE, values);
-      onSuccess?.(true);
-      showToast(response.message, 'success');
+      console.log('ini respone', response);
+      onSuccess && onSuccess(true);
+      showToast(response?.data?.message, 'success');
     } catch (e) {
-      onSuccess?.(false);
+      onSuccess && onSuccess(false);
       showToast(e.message, 'error');
     }
+    setIsLoading(false);
   };
 
   React.useEffect(() => {
-    if (id && type == FormType.edit) {
+    if (id && type === FormType.edit) {
       getDetailData();
     }
+
+    getMaterialGroup('', {
+      name: 'material_group_desc',
+      id: 'material_group',
+      tabel: 'material_groups',
+    });
+
+    getMaterialNumber('', {
+      name: 'material_number',
+      id: 'material_number',
+      tabel: 'master_materials',
+    });
   }, [id, type]);
 
   return (
     <ScrollArea className='h-[600px] w-full'>
+      <Loading isLoading={isLoading} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <table className='text-xs mt-4 table font-thin'>
@@ -119,7 +139,7 @@ export default function ReimburseTypeForm({
               <td>
                 <FormField
                   control={form.control}
-                  disabled={type == FormType.edit}
+                  disabled={type === FormType.edit}
                   name='code'
                   render={({ field }) => (
                     <FormItem>
@@ -212,12 +232,9 @@ export default function ReimburseTypeForm({
                             <SelectValue placeholder='-' />
                           </SelectTrigger>
                           <SelectContent>
-                            {listMaterial.map((material) => (
-                              <SelectItem
-                                key={material.id}
-                                value={material.material_group}
-                              >
-                                {material.material_group}
+                            {materialGroup.map((material) => (
+                              <SelectItem key={material.id} value={material.value}>
+                                {material.label}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -247,12 +264,9 @@ export default function ReimburseTypeForm({
                             <SelectValue placeholder='-' />
                           </SelectTrigger>
                           <SelectContent>
-                            {listMaterial.map((material) => (
-                              <SelectItem
-                                key={material.id}
-                                value={material.material_number}
-                              >
-                                {material.material_number}
+                            {materialNumber.map((material) => (
+                              <SelectItem key={material.value} value={material.value}>
+                                {material.label}
                               </SelectItem>
                             ))}
                           </SelectContent>

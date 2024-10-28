@@ -1,10 +1,22 @@
-import { GridColDef } from '@mui/x-data-grid';
+import { FamilyModel } from '@/Pages/Master/Family/models/models';
 
 export const columns: GridColDef[] = [
-  { field: 'request_number', headerName: 'Request Number', width: 200, filterable: true },
-  { field: 'requester', headerName: 'Requester', width: 200, filterable: true },
-  { field: 'remark', headerName: 'Remark', width: 200, filterable: true },
+  { field: 'code', headerName: 'Request Number', width: 200, filterable: true },
+  { field: 'requester', headerName: 'Request For', width: 200, filterable: true },
+  { field: 'balance', headerName: 'Remark', width: 200, filterable: true },
+  { field: 'sum_form', headerName: 'Form', width: 200, filterable: true },
+  { field: 'sum_balance', headerName: 'Balance', width: 200, filterable: true },
+  { field: 'status', headerName: 'Status', width: 200, filterable: true },
 ];
+
+export interface Quota {
+  id: string;
+  user: User[];
+  period: Period[];
+  type: Type[];
+  limit: number;
+  plafon: number;
+}
 
 export interface Family {
   id: string;
@@ -13,17 +25,9 @@ export interface Family {
   bod: string;
 }
 
-export interface Group {
-  id: string;
-  request_number: string;
-  requester: User[];
-  remark: string;
-}
-
 export interface Reimburse {
   id: string;
   remark: string;
-  group: Group[];
   type: string;
   family: Family[];
   currency: string;
@@ -35,9 +39,17 @@ export interface Reimburse {
 }
 
 export interface User {
-  id: string;
   nip: string;
   name: string;
+}
+
+export interface Group {
+  id: string;
+  code: string;
+  remark: string;
+  status: string;
+  users: User;
+  reimburses: Reimburse[];
 }
 
 export interface Currency {
@@ -50,4 +62,10 @@ export interface Period {
   code: string;
   start: string;
   end: string;
+}
+
+export interface PurchasingGroup {
+  id: string;
+  purchasing_group: string;
+  purchasing_group_desc: string;
 }

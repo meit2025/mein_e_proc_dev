@@ -32,6 +32,7 @@ import { LIST_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-de
 import { LIST_PAGE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/page';
 import { LIST_PAGE_REIMBURSE_PERIOD } from '@/endpoint/reimbursePeriod/page';
 import { LIST_PAGE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/page';
+import { LIST_PAGE_FAMILY } from '@/endpoint/family/page';
 // import { Link } from '@inertiajs/inertia-react';
 
 export const RuteTitle = (title: string) => {
@@ -206,6 +207,11 @@ const sidebar = [
             roles: '',
           },
           {
+            name: 'Family',
+            route: LIST_PAGE_FAMILY,
+            roles: '',
+          },
+          {
             name: 'Roles',
             route: LIST_PAGE_ROLE,
             roles: '',
@@ -307,6 +313,16 @@ const sidebar = [
           {
             name: 'Tax',
             route: LIST_PAGE_MASTER_PAJAK,
+            roles: '',
+          },
+          {
+            name: 'Family',
+            route: LIST_PAGE_FAMILY,
+            roles: '',
+          },
+          {
+            name: 'Roles',
+            route: LIST_PAGE_ROLE,
             roles: '',
           },
         ],

@@ -15,14 +15,18 @@ use Modules\Reimbuse\Models\ReimburseAttachment;
 class ReimbursementService
 {
     protected $validator_rule = [
-        'type'         =>  'required|string|exists:master_type_reimburses,code',
-        'remark'       =>  'nullable',
-        'balance'      =>  'required|numeric',
-        'receipt_date' =>  'required|date',
-        'start_date'   =>  'required|date',
-        'end_date'     =>  'required|date',
-        'period'       =>  'required|string|exists:master_period_reimburses,code',
-        'currency'     =>  'required|string|exists:currencies,code'
+        'reimburse_type'        =>  'required|exists:master_type_reimburses,code',
+        'short_text'            =>  'nullable',
+        'balance'               =>  'required|numeric',
+        'item_delivery_data'    =>  'required|date',
+        'start_date'            =>  'required|date',
+        'end_date'              =>  'required|date',
+        'period'                =>  'required|string|exists:master_period_reimburses,code',
+        'currency'              =>  'required|string|exists:currencies,code',
+        'for'                   =>  'required',
+        'desired_vendor'        =>  'required',
+        'type'                  =>  'required|in:Employee,Family',
+        'purchasing_group'      =>  'required|exists:purchasing_groups,id',
     ];
 
     public function checkGroupStatus(string $groupCode): string
@@ -43,20 +47,24 @@ class ReimbursementService
             DB::beginTransaction();
 
             $group = ReimburseGroup::create([
-                'request_number'   => $this->generateUniqueGroupCode(),
+                'code'   => $this->generateUniqueGroupCode(),
                 'remark' => $groupData['remark'],
                 'requester' => $groupData['requester'],
             ]);
 
             foreach ($forms as $form) {
+                if (!isset($form->for)) {
+                    $form['for'] = $groupData['requester'];
+                }
+                $form['desired_vendor'] = $groupData['requester'];
                 $validator = Validator::make($form, $this->validator_rule);
                 if ($validator->fails()) {
-                    return $validator->errors();
+                    DB::rollBack();
+                    return ['error' => $validator->errors()];
                 }
                 $validatedData = $validator->validated();
-                $validatedData['group'] = $group->request_number;
-
-                $validatedData['receipt_date'] = Carbon::parse($form['receipt_date'])->format('Y-m-d');
+                $validatedData['group'] = $group->code;
+                $validatedData['item_delivery_data'] = Carbon::parse($form['item_delivery_data'])->format('Y-m-d');
                 $validatedData['start_date'] = Carbon::parse($form['start_date'])->format('Y-m-d');
                 $validatedData['end_date'] = Carbon::parse($form['end_date'])->format('Y-m-d');
 
@@ -80,7 +88,7 @@ class ReimbursementService
             return "Reimbursements and progress stored successfully.";
         } catch (\Exception $e) {
             DB::rollBack();
-            return $e->getMessage();
+            return ['error' => $e->getMessage()];
         }
     }
 
@@ -133,7 +141,7 @@ class ReimbursementService
             $approverUser = User::where('nip', $approver)->first();
             if (!$approverUser) break;
             ReimburseProgress::create([
-                'group' => $group->request_number,
+                'group' => $group->code,
                 'approver' => $approverUser->nip,
                 'notes' => '',
                 'status' => 'Open'

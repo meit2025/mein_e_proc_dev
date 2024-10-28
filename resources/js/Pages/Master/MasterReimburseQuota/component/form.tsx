@@ -42,7 +42,10 @@ import { MultiSelect } from '@/components/commons/MultiSelect';
 import { ListTypeModel } from '../../MasterReimburseType/models/models';
 import { ListPeriodModel } from '../../MasterReimbursePeriod/models/models';
 import { BusinessTripGrade } from '@/Pages/BusinessTrip/BusinessGrade/model/model';
-import { CREATE_API_REIMBURSE_QUOTA, GET_DETAIL_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
+import {
+  CREATE_API_REIMBURSE_QUOTA,
+  GET_DETAIL_REIMBURSE_QUOTA,
+} from '@/endpoint/reimburseQuota/api';
 
 export interface props {
   onSuccess?: (value: boolean) => void;
@@ -61,15 +64,15 @@ export default function ReimburseQuotaForm({
   listPeriodReimburse,
   listGrade,
 }: props) {
-  var formSchema = z.object({
-    period: z.number('Period must choose'),
-    type: z.number('Type must choose'),
-    grade: z.number('Grade must choose'),
+  const formSchema = z.object({
+    period: z.string('Period must choose'),
+    type: z.string('Type must choose'),
+    grade: z.string('Grade must choose'),
     limit: z.number('Limit must set'),
     plafon: z.number('Plafon must set'),
   });
 
-  let defaultValues = {
+  const defaultValues = {
     period: '',
     type: '',
     grade: '',
@@ -78,16 +81,16 @@ export default function ReimburseQuotaForm({
   };
 
   async function getDetailData() {
-    let url = GET_DETAIL_REIMBURSE_QUOTA(id);
+    const url = GET_DETAIL_REIMBURSE_QUOTA(id);
 
     try {
-      let response = await axiosInstance.get(url);
+      const response = await axiosInstance.get(url);
 
       form.reset({
         id: response.data.data.id,
       });
     } catch (e) {
-      let error = e as AxiosError;
+      const error = e as AxiosError;
     }
   }
 
@@ -101,7 +104,7 @@ export default function ReimburseQuotaForm({
     try {
       const response = await axiosInstance.post(CREATE_API_REIMBURSE_QUOTA, values);
       onSuccess?.(true);
-      showToast(response.message, 'success');
+      showToast(response?.data?.message, 'success');
     } catch (e) {
       onSuccess?.(false);
       showToast(e.message, 'error');
@@ -137,7 +140,7 @@ export default function ReimburseQuotaForm({
                           </SelectTrigger>
                           <SelectContent>
                             {listPeriodReimburse.map((period) => (
-                              <SelectItem key={period.id} value={period.id}>
+                              <SelectItem key={period.id} value={period.id.toString()}>
                                 {period.start} - {period.end}
                               </SelectItem>
                             ))}
@@ -169,7 +172,7 @@ export default function ReimburseQuotaForm({
                           </SelectTrigger>
                           <SelectContent>
                             {listTypeReimburse.map((type) => (
-                              <SelectItem key={type.id} value={type.id}>
+                              <SelectItem key={type.id} value={type.id.toString()}>
                                 {type.name}
                               </SelectItem>
                             ))}
@@ -201,7 +204,7 @@ export default function ReimburseQuotaForm({
                           </SelectTrigger>
                           <SelectContent>
                             {listGrade.map((grade) => (
-                              <SelectItem key={grade.id} value={grade.id}>
+                              <SelectItem key={grade.id} value={grade.id.toString()}>
                                 {grade.grade}
                               </SelectItem>
                             ))}

@@ -11,7 +11,7 @@ import { ListTypeModel } from '../MasterReimburseType/models/models';
 import { ListPeriodModel } from '../MasterReimbursePeriod/models/models';
 import { BusinessTripGrade } from '@/Pages/BusinessTrip/BusinessGrade/model/model';
 import ReimburseQuotaForm from './component/form';
-import { GET_LIST_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
+import { LIST_PAGE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/page';
 
 interface propsType {
   listTypeReimburse: ListTypeModel[];
@@ -48,7 +48,7 @@ export const Index = ({ listTypeReimburse, listPeriodReimburse, listGrade }: pro
         columns={columns}
         actionType='dropdown'
         url={{
-          url: GET_LIST_REIMBURSE_QUOTA,
+          url: LIST_PAGE_REIMBURSE_QUOTA,
         }}
         labelFilter='search'
       />

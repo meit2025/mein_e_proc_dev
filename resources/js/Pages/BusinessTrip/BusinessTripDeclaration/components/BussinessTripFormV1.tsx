@@ -787,6 +787,7 @@ export function DetailAllowance({
   return (
     <table className='w-full allowance-table'>
       {detailAllowanceceWatch.map((allowance: any, index: any) => (
+        // eslint-disable-next-line react/jsx-key
         <AllowanceRowInput
           form={form}
           allowance={allowance}
