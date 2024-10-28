@@ -13,9 +13,6 @@ services:
       - ./:/var/www/html/mein
     networks:
       - utama
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
 
   postgresql-mein:
     container_name: postgresql-mein
