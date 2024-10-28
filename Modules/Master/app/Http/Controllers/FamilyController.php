@@ -3,9 +3,11 @@
 namespace Modules\Master\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Inertia\Inertia;
 use Modules\Master\Models\Family;
 
 class FamilyController extends Controller
@@ -16,6 +18,7 @@ class FamilyController extends Controller
     public function index(Request $request)
     {
         try {
+            $user = User::with('families')->get();
             $query =  Family::query()->with(['user']);
             $perPage = $request->get('per_page', 10);
             $sortBy = $request->get('sort_by', 'id');
@@ -32,7 +35,10 @@ class FamilyController extends Controller
                     'user' => "( " . $map->user->nip . " )" . " - " . $map->user->name,
                 ];
             });
-            return $this->successResponse($data);
+            return Inertia::render(
+                'Master/Family/Index',
+                compact('data', 'user')
+            );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }

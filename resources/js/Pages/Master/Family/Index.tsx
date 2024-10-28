@@ -6,9 +6,9 @@ import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { columns, FamilyModel, UserModel } from './models/models';
 import { FamilyHeaderForm } from './components/form';
-import { GET_LIST_FAMILY } from '@/endpoint/family/api';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import { FormType } from '@/lib/utils';
+import { LIST_PAGE_FAMILY } from '@/endpoint/family/page';
 
 interface propsType {
   user: UserModel[];
@@ -40,7 +40,7 @@ export const Index = ({ user }: propsType) => {
         columns={columns}
         actionType='dropdown'
         url={{
-          url: GET_LIST_FAMILY,
+          url: LIST_PAGE_FAMILY,
         }}
         labelFilter='search'
       />

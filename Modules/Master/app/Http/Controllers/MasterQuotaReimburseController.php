@@ -6,7 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Inertia\Inertia;
+use Modules\BusinessTrip\Models\BusinessTripGrade;
+use Modules\Master\Models\MasterPeriodReimburse;
 use Modules\Master\Models\MasterQuotaReimburse;
+use Modules\Master\Models\MasterTypeReimburse;
 
 class MasterQuotaReimburseController extends Controller
 {
@@ -23,9 +27,14 @@ class MasterQuotaReimburseController extends Controller
                 'limit',
                 'plafon'
             ];
-
             $data = $this->filterAndPaginate($request, MasterQuotaReimburse::class, $filterableColumns);
-            return $this->successResponse($data);
+            $listPeriodReimburse = MasterPeriodReimburse::get();
+            $listTypeReimburse = MasterTypeReimburse::get();
+            $listGrade = BusinessTripGrade::get();
+            return Inertia::render(
+                'Master/MasterReimburseQuota/Index',
+                compact('data', 'listPeriodReimburse', 'listTypeReimburse', 'listGrade')
+            );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }

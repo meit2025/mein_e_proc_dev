@@ -8,7 +8,7 @@ import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import { MaterialModel } from '@/Pages/Master/MasterMaterial/model/listModel';
 import ReimburseTypeForm from './component/form';
-import { GET_LIST_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
+import { LIST_PAGE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/page';
 
 interface propsType {
   listMaterial: MaterialModel[];
@@ -39,7 +39,7 @@ export const Index = ({ listMaterial }: propsType) => {
         columns={columns}
         actionType='dropdown'
         url={{
-          url: GET_LIST_REIMBURSE_TYPE,
+          url: LIST_PAGE_REIMBURSE_TYPE,
         }}
         labelFilter='search'
       />
