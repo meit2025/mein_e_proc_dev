@@ -65,7 +65,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['prefix' => 'reimburse-period'], function () {
             Route::inertia('/',  'Master/MasterReimbursePeriod/Index');
         });
-        Route::get('reimburse-type/', [MasterTypeReimburseController::class, 'index'])->name('master.reimburse-type.index');
+        Route::get('reimburse-type/', [MasterTypeReimburseController::class, 'index'])->name('type.master.reimburse-type.index');
         Route::get('reimburse-quota/', [MasterQuotaReimburseController::class, 'index'])->name('master.reimburse-quota.index');
         Route::get('family/', [FamilyController::class, 'index'])->name('master.family.index');
     });
