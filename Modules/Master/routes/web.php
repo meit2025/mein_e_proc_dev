@@ -62,27 +62,12 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['prefix' => 'business-partner'], function () {
             Route::inertia('/',  'Master/MasterBusinessPartner/Index');
         });
-        Route::group(['prefix' => 'reimburse-type'], function () {
-            $listMaterial = MasterMaterial::get();
-            Route::inertia('/', 'Master/MasterReimburseType/Index', compact('listMaterial'));
-        });
         Route::group(['prefix' => 'reimburse-period'], function () {
             Route::inertia('/',  'Master/MasterReimbursePeriod/Index');
         });
-        Route::group(['prefix' => 'reimburse-quota'], function () {
-            $listPeriodReimburse = MasterPeriodReimburse::get();
-            $listTypeReimburse = MasterTypeReimburse::get();
-            $listGrade = BusinessTripGrade::get();
-            Route::inertia(
-                '/',
-                'Master/MasterReimburseQuota/Index',
-                compact('listPeriodReimburse', 'listTypeReimburse', 'listGrade')
-            );
-        });
-        Route::group(['prefix' => 'family'], function () {
-            $user = User::with('families')->get();
-            Route::inertia('/',  'Master/Family/Index', compact('user'));
-        });
+        Route::get('reimburse-type/', [MasterTypeReimburseController::class, 'index'])->name('master.reimburse-type.index');
+        Route::get('reimburse-quota/', [MasterQuotaReimburseController::class, 'index'])->name('master.reimburse-quota.index');
+        Route::get('family/', [FamilyController::class, 'index'])->name('master.family.index');
     });
 
     Route::group(['prefix' => 'api/master', 'middleware' => 'auth'], function () {
@@ -156,7 +141,6 @@ Route::group(['middleware' => 'auth'], function () {
         });
 
         Route::group(['prefix' => 'reimburse-quota'], function () {
-            Route::get('/list', [MasterQuotaReimburseController::class, 'index'])->name('master.reimburse-quota.index');
             Route::post('/create', [MasterQuotaReimburseController::class, 'store'])->name('master.reimburse-quota.store');
             Route::post('/update/{id}', [MasterQuotaReimburseController::class, 'update'])->name('master.reimburse-quota.update');
             Route::get('/detail/{id}', [MasterQuotaReimburseController::class, 'show'])->name('master.reimburse-quota.show');
@@ -164,7 +148,6 @@ Route::group(['middleware' => 'auth'], function () {
         });
 
         Route::group(['prefix' => 'family'], function () {
-            Route::get('/list', [FamilyController::class, 'index'])->name('master.family.index');
             Route::post('/create', [FamilyController::class, 'store'])->name('master.family.store');
             Route::post('/update/{id}', [FamilyController::class, 'update'])->name('master.family.update');
             Route::get('/detail/{id}', [FamilyController::class, 'show'])->name('master.family.show');
