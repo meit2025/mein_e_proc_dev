@@ -82,8 +82,8 @@ Route::group(['prefix' => 'api/'], function () {
     });
 
     Route::group(['prefix' => 'business-trip'], function () {
-        Route::get('/list', [BusinessTripController::class, 'listAPI'])->name('business-trip-list.index');
-        Route::post('/create', [BusinessTripController::class, 'storeAPI'])->name('business-trip.store');
+        Route::get('/list', [BusinessTripController::class, 'listAPI'])->name('trip.business-trip-list.index');
+        Route::post('/create', [BusinessTripController::class, 'storeAPI'])->name('trip.business-trip.store');
         // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
         Route::get('/detail/{id}', [BusinessTripController::class, 'showAPI'])->name('business-trip.detail');
