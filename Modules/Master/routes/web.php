@@ -62,10 +62,6 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['prefix' => 'business-partner'], function () {
             Route::inertia('/',  'Master/MasterBusinessPartner/Index');
         });
-        Route::group(['prefix' => 'reimburse-type'], function () {
-            $listMaterial = MasterMaterial::get();
-            Route::inertia('/', 'Master/MasterReimburseType/Index', compact('listMaterial'));
-        });
         Route::group(['prefix' => 'reimburse-period'], function () {
             Route::inertia('/',  'Master/MasterReimbursePeriod/Index');
         });
