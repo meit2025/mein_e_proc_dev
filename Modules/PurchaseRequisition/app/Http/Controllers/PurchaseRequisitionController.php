@@ -17,6 +17,7 @@ use Modules\PurchaseRequisition\Models\Purchase;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
 use Modules\PurchaseRequisition\Models\Unit;
 use Modules\PurchaseRequisition\Models\Vendor;
+use Modules\PurchaseRequisition\Services\BtPOService;
 use Modules\PurchaseRequisition\Services\BtService;
 use Modules\PurchaseRequisition\Services\ProcurementService;
 
@@ -27,11 +28,13 @@ class PurchaseRequisitionController extends Controller
      */
     protected $procurementService;
     protected $bt;
+    protected $btPO;
 
-    public function __construct(ProcurementService $procurementService, BtService $bt)
+    public function __construct(ProcurementService $procurementService, BtService $bt, BtPOService $btPO)
     {
         $this->procurementService = $procurementService;
         $this->bt = $bt;
+        $this->btPO = $btPO;
     }
 
     public function generateText($id, $type)
@@ -48,7 +51,8 @@ class PurchaseRequisitionController extends Controller
                     return response()->json(['message' => 'Data processed successfully', 'data' => $data]);
                     break;
                 case 'bt-po';
-                    $data = $this->bt->processTextData($id, 'btrde');
+                    $data = $this->btPO->processTextData($id);
+                    return response()->json(['message' => 'Data processed successfully', 'data' => $data]);
                     break;
 
                 default:

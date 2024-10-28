@@ -37,7 +37,7 @@ class BtService
                 $reqno++;
                 $datainsert = $this->preparePurchaseRequisitionData($BusinessTrip, $btName, $value, $reqno, $BusinessAttachment);
                 $array[] = $datainsert;
-
+                PurchaseRequisition::create($datainsert);
                 if ($BusinessTrip->cash_advance) {
                     $datainsertCash = $this->prepareCashAdvanceData($BusinessTrip, $value, $reqno);
                     CashAdvance::create($datainsertCash);
@@ -57,6 +57,8 @@ class BtService
         }
     }
 
+
+
     private function preparePurchaseRequisitionData($BusinessTrip, $btName, $item, $reqno, $BusinessAttachment)
     {
         $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y.m.d');
@@ -65,8 +67,9 @@ class BtService
             throw new Exception('alloean Item Not set materila number');
         }
         return [
+
             'purchase_id' => $BusinessTrip->id,
-            'code_transaction' => $btName,
+            'code_transaction' => $btName, // code_transaction
             'purchase_requisition_number' => $reqno,
             'item_number' => $getAllowanceItem->material_number,
             'requisitioner_name' => $BusinessTrip->requestFor->employee->partner_number ?? '',
@@ -87,7 +90,7 @@ class BtService
             'quantity' => '1',
             'netpr' => '',
             'waers' => '',
-            'tax_code' => '',
+            'tax_code' => 'V0',
             'item_category' => '', // pstyp
             'short_text' => $BusinessTrip->remark,
             'plant' => 'ID01',
@@ -184,15 +187,24 @@ class BtService
         return [
             'purchase_id' => $BusinessTrip->id,
             'code_transaction' => 'dp',
-            'company_code' => '1600',
-            'currency' => 'IDR',
+            'belnr' => '', // belnr
+            'company_code' => '1600', // bukrs
+            'gjahr' => '', // gjahr
+            'currency' => 'IDR', // waers
             'document_date' => $formattedDate,
+            'budat' => '', // budat
+            'monat' => '', // monat
             'reference' => $BusinessTrip->request_no,
             'document_header_text' => $BusinessTrip->remarks,
             'vendor_code' => $BusinessTrip->requestFor->employee->partner_number ?? '',
             'amount' => $BusinessTrip->total_cash_advance,
+            'saknr' => '', //saknr
+            'hkont' => '', //hkont
             'amount_local_currency' => $BusinessTrip->total_cash_advance,
             'tax_code' => $item->tax ?? 'V0',
+            'dzfbdt' => '', //dzfbdt
+            'purchasing_document' => '', //ebeln
+            'purchasing_document_item' => '1', //ebelp
             'assigment' => $reqno,
             'text' => 'DP ' . $BusinessTrip->total_percent,
             'profit_center' => '0000000100',
