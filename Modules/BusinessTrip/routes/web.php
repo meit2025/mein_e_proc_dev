@@ -60,7 +60,7 @@ Route::group(['prefix' => 'api/'], function () {
         Route::post('/create', [AllowanceItemController::class, 'storeAPI'])->name('allowance-item.store');
         // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
-        Route::get('/detail/{id}', [AllowanceCategoryController::class, 'showAPI'])->name('allowance-category.detail');
+        Route::get('/detail/{id}', [AllowanceCategoryController::class, 'showAPI'])->name('item.allowance-category.detail');
 
         // Route::delete('/delete/{id}', [MasterMaterialController::class, 'destroy'])->name('master.master-material.destroy');
 
@@ -98,7 +98,7 @@ Route::group(['prefix' => 'api/'], function () {
         Route::post('/create', [BusinessTripDeclarationController::class, 'storeAPI'])->name('business-trip-declaration.store');
         // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
-        Route::get('/detail/{id}', [BusinessTripDeclarationController::class, 'showAPI'])->name('allowance-category.detail');
+        Route::get('/detail/{id}', [BusinessTripDeclarationController::class, 'showAPI'])->name('trip.allowance-category.detail');
     });
 
     Route::group(['prefix' => 'purpose-type-allowance'], function () {
@@ -106,7 +106,7 @@ Route::group(['prefix' => 'api/'], function () {
         Route::post('/create', [BusinessTripController::class, 'storeAPI'])->name('business-trip.store');
         // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
-        Route::get('/detail/{id}', [PurposeTypeController::class, 'detailAPI'])->name('allowance-category.detail');
+        Route::get('/detail/{id}', [PurposeTypeController::class, 'detailAPI'])->name('type.allowance-category.detail');
 
         // Route::delete('/delete/{id}', [MasterMaterialController::class, 'destroy'])->name('master.master-material.destroy');
 
