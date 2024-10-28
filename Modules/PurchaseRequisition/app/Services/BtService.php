@@ -28,25 +28,32 @@ class BtService
 
 
             $latestRequisition = PurchaseRequisition::orderBy('purchase_requisition_number', 'desc')->first();
-            $reqno = $latestRequisition ? (int) $latestRequisition->purchase_requisition_number : 0;
+            $reqno = $latestRequisition ? (int) $latestRequisition->purchase_requisition_number : 4300000022;
 
             $array = [];
             $arrayCash = [];
 
             foreach ($BusinessTripDetailDestinationTotal as $key => $value) {
                 $reqno++;
-                $datainsert = $this->preparePurchaseRequisitionData($BusinessTrip, $btName, $value, $reqno, $BusinessAttachment);
+                $datainsert = $this->preparePurchaseRequisitionData($BusinessTrip, $btName, $value, $reqno, $BusinessAttachment, $key + 1);
+
+                $dataMapping = $datainsert;
+                $dataMapping['purchase_id'] = $BusinessTrip->id;
+                PurchaseRequisition::create($dataMapping);
                 $array[] = $datainsert;
-                PurchaseRequisition::create($datainsert);
                 if ($BusinessTrip->cash_advance) {
                     $datainsertCash = $this->prepareCashAdvanceData($BusinessTrip, $value, $reqno);
-                    CashAdvance::create($datainsertCash);
+
+                    $newDataInser = $datainsertCash;
+                    $newDataInser['amount'] = $BusinessTrip->total_cash_advance;
+                    $newDataInser['purchase_id'] = $BusinessTrip->id;
+                    CashAdvance::create($newDataInser);
                     $arrayCash[] = $datainsertCash;
                 }
                 # code...
             }
 
-            $this->generateFiles($array, $arrayCash);
+            $this->generateFiles($array, $arrayCash, $reqno);
 
             DB::commit();
             return $array;
@@ -57,56 +64,54 @@ class BtService
         }
     }
 
-
-
-    private function preparePurchaseRequisitionData($BusinessTrip, $btName, $item, $reqno, $BusinessAttachment)
+    private function preparePurchaseRequisitionData($BusinessTrip, $btName, $item, $reqno, $BusinessAttachment, $indx)
     {
-        $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y.m.d');
+        $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y-m-d');
         $getAllowanceItem = AllowanceItem::where('id', $item->allowance_item_id)->first();
         if ($getAllowanceItem && $getAllowanceItem->material_number == '') {
             throw new Exception('alloean Item Not set materila number');
         }
-        return [
 
-            'purchase_id' => $BusinessTrip->id,
+        return [
             'code_transaction' => $btName, // code_transaction
-            'purchase_requisition_number' => $reqno,
-            'item_number' => $getAllowanceItem->material_number,
-            'requisitioner_name' => $BusinessTrip->requestFor->employee->partner_number ?? '',
-            'requisition_date' => $formattedDate,
+            'purchase_requisition_number' => $reqno, // banfn
+            'item_number' => $indx, //
+            'requisitioner_name' => $BusinessTrip->requestFor->employee->partner_number ?? '', // afnam
+            'requisition_date' => $formattedDate, // badat
             'requirement_tracking_number' => '', // bednr
-            'document_type' => 'ZSUN',
-            'valuation_type' => '',
+            'document_type' => 'ZSUN', //bsart
+            'valuation_type' => '', //bwtar
             'is_closed' => '', // ebakz
-            'purchasing_group' => 'A01', // perlu input
-            'purchasing_organization' => '1600',
-            'account_assignment_category' => 'Y',
-            'item_delivery_date' => $formattedDate,
-            'storage_location' => '001',
-            'desired_vendor' => $BusinessTrip->requestFor->employee->partner_number ?? '',
-            'material_group' => $getAllowanceItem->material_group,
+            'purchasing_group' => 'A01', // perlu input // ekgrp
+            'purchasing_organization' => '1600', // ekorg
+            'account_assignment_category' => 'Y', // knttp
+            'item_delivery_date' => $formattedDate, // lfdat
+            'storage_location' => '0001', // lgort
+            'desired_vendor' => $BusinessTrip->requestFor->employee->partner_number ?? '', // lifnr
+            'material_group' => $getAllowanceItem->material_group ?? 'NC_SRVC', // matkl
             'material_number' => $getAllowanceItem->material_number, // matnr
-            'unit_of_measure' => '%',
-            'quantity' => '1',
-            'netpr' => '',
-            'waers' => '',
-            'tax_code' => 'V0',
+            'unit_of_measure' => 'AU', // meins
+            'quantity' => '1', // menge
+            'netpr' => $item->price, // NILAI NYA
+            'waers' => 'IDR', // MATA UANG
+            'tax_code' => 'V0', // mwskz
             'item_category' => '', // pstyp
-            'short_text' => $BusinessTrip->remark,
-            'plant' => 'ID01',
-            'cost_center' => '0000000100',
-            'order_number' => '',
-            'asset_subnumber' => '',
-            'main_asset_number' => '',
-            'tanggal_entertainment' => '',
+            'short_text' => $BusinessTrip->remark, // txz01
+            'plant' => 'ID01', // werks
+            'cost_center' => '0000000100', // kostl
+            'order_number' => '', // AUFNR
+            'asset_subnumber' => '', // anln2
+            'main_asset_number' => '', // anln1
+            'tanggal_entertainment' => '', // b81
             'tempat_entertainment' => '',
             'alamat_entertainment' => '',
             'jenis_entertainment' => '',
             'nama_entertainment' => '',
             'posisi_entertainment' => '',
+            'nama_perusahaan' => '',
             'jenis_usaha_entertainment' => '',
             'jenis_kegiatan_entertainment' => '',
-            'header_not' => '',
+            'header_not' => '', // b01
             'B01' => $BusinessTrip->remark,
             'B03' => $BusinessTrip->remark,
             'B04' => $BusinessTrip->remark,
@@ -182,29 +187,29 @@ class BtService
 
         $findBusinessTripDestination = $this->findBusinessTripDestination($item->business_trip_destination_id);
 
-        $formattedDate = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('Y.m.d');
+        $formattedDate = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('Y-m-d');
+        $year = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('Y');
+        $month = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('m');
 
         return [
-            'purchase_id' => $BusinessTrip->id,
-            'code_transaction' => 'dp',
-            'belnr' => '', // belnr
+            'code_transaction' => 'VEN',
+            'belnr' => $BusinessTrip->id, // belnr
             'company_code' => '1600', // bukrs
-            'gjahr' => '', // gjahr
+            'gjahr' =>  $year, // gjahr
             'currency' => 'IDR', // waers
             'document_date' => $formattedDate,
-            'budat' => '', // budat
-            'monat' => '', // monat
+            'budat' => $formattedDate, // budat
+            'monat' => $month, // monat
             'reference' => $BusinessTrip->request_no,
             'document_header_text' => $BusinessTrip->remarks,
             'vendor_code' => $BusinessTrip->requestFor->employee->partner_number ?? '',
-            'amount' => $BusinessTrip->total_cash_advance,
             'saknr' => '', //saknr
             'hkont' => '', //hkont
             'amount_local_currency' => $BusinessTrip->total_cash_advance,
             'tax_code' => $item->tax ?? 'V0',
-            'dzfbdt' => '', //dzfbdt
+            'dzfbdt' => $formattedDate, //dzfbdt
             'purchasing_document' => '', //ebeln
-            'purchasing_document_item' => '1', //ebelp
+            'purchasing_document_item' => '', //ebelp
             'assigment' => $reqno,
             'text' => 'DP ' . $BusinessTrip->total_percent,
             'profit_center' => '0000000100',
@@ -212,18 +217,18 @@ class BtService
         ];
     }
 
-    private function generateFiles($array, $arrayCash)
+    private function generateFiles($array, $arrayCash, $nopr)
     {
         $timestamp = date('Ymd_His');
 
         // Generate Purchase Requisition File
-        $filename = 'INB_PRCRT_' . 1 . '_' . $timestamp . '.txt';
+        $filename = 'INB_PRCRT_' . $nopr . '_' . $timestamp . '.txt';
         $fileContent = $this->convertArrayToFileContent($array);
         Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
 
         // Generate Cash Advance File (if applicable)
         if (!empty($arrayCash)) {
-            $filenameAc = 'INB_PRDP_' . 1 . '_' . $timestamp . '.txt';
+            $filenameAc = 'INB_DPCRT_' . $nopr . '_' . $timestamp . '.txt';
             $fileContentAc = $this->convertArrayToFileContent($arrayCash);
             Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filenameAc, $fileContentAc);
         }

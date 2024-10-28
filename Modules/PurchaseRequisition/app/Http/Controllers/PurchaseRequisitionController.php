@@ -47,7 +47,7 @@ class PurchaseRequisitionController extends Controller
                     return response()->json(['message' => 'Data processed successfully', 'data' => $data]);
                     break;
                 case 'bt';
-                    $data = $this->bt->processTextData($id, 'btre');
+                    $data = $this->bt->processTextData($id, 'BTRE');
                     return response()->json(['message' => 'Data processed successfully', 'data' => $data]);
                     break;
                 case 'bt-po';
@@ -160,10 +160,10 @@ class PurchaseRequisitionController extends Controller
                 $reqno = $reqno + 1;
                 $vendor = MasterBusinessPartner::find($value->vendor_id);
                 $date = Carbon::parse($procurement->created_at);
-                $formattedDate = $date->format('Y.m.d');
+                $formattedDate = $date->format('Y-m-d');
 
                 $dateStr = Carbon::parse($procurement->delivery_date);
-                $formattedDatestr = $dateStr->format('Y.m.d');
+                $formattedDatestr = $dateStr->format('Y-m-d');
 
                 $tax = Pajak::where('mwszkz',  $value->tax)->first();
 
@@ -319,10 +319,10 @@ class PurchaseRequisitionController extends Controller
                 $reqno = $reqno + 1;
                 $vendor = MasterBusinessPartner::find($value->vendor_id);
                 $date = Carbon::parse($procurement->created_at);
-                $formattedDate = $date->format('Y.m.d');
+                $formattedDate = $date->format('Y-m-d');
 
                 $dateStr = Carbon::parse($procurement->created_at);
-                $formattedDatestr = $dateStr->format('Y.m.d');
+                $formattedDatestr = $dateStr->format('Y-m-d');
 
                 $tax = Pajak::where('mwszkz',  $value->tax)->first();
 

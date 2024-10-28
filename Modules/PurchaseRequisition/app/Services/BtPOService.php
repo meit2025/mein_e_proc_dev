@@ -65,6 +65,8 @@ class BtPOService
         try {
 
             $BusinessTrip = $this->findBusinessTripPr($id);
+            $attachment = $this->findBusinessAttachment($id);
+
 
 
             $array = [];
@@ -74,13 +76,13 @@ class BtPOService
             $increment = 1;
             foreach ($BusinessTrip as $key => $value) {
                 # code...
-                $data = $this->preparePurchaseRequisitionData($value, $increment, $reqno);
+                $data = $this->preparePurchaseRequisitionData($value, $increment, $reqno, $attachment);
                 PurchaseOrder::create($data);
                 $array[] = $data;
                 $increment++;
             }
 
-            $this->generateFiles($array, $arrayCash);
+            $this->generateFiles($array, $arrayCash, $reqno);
 
             DB::commit();
             return $array;
@@ -91,11 +93,11 @@ class BtPOService
         }
     }
 
-    private function preparePurchaseRequisitionData($BusinessTrip, $increment, $reqno)
+    private function preparePurchaseRequisitionData($BusinessTrip, $increment, $reqno, $attachment)
     {
-        $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y.m.d');
+        $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y-m-d');
         $data = [
-            'code_transaction' => 'btrde',
+            'code_transaction' => 'btre',
             'purchasing_document_date' => $formattedDate, // bedat
             'purchasing_document_type' => 'YSUN', // bsart
             'company_code' => '1600', //bukrs
@@ -116,10 +118,10 @@ class BtPOService
             'delivery_completed_indicator' => '', // elikz
             'final_invoice_indicator' => '', // erekz
             'account_assignment_category' => 'Y', // knttp
-            'storage_location' => '001', // lgort
-            'material_group' => '', //matkl
+            'storage_location' => '0001', // lgort
+            'material_group' => $BusinessTrip->material_group, //matkl
             'material_number' => $BusinessTrip->material_number, // matnr
-            'po_unit_of_measure' => '', // meins
+            'po_unit_of_measure' => $BusinessTrip->uom, // meins
             'po_quantity' => 1, // menge
             'tax_code' => $BusinessTrip->tax_code, //mwskz
             'net_price' => '100000', // netpr
@@ -147,19 +149,14 @@ class BtPOService
             'F01' => '', //           F01
             'F03' => '', //           F03
             'F04' => '', //           F04
-            'Attachment_link' => '', //           Attachment_link
-
-            'deletion_indicator' => '',
-            'status' => '',
-            'code' => '',
-            'message' => '',
+            'Attachment_link' => $attachment, //           Attachment_link
         ];
         return $data;
     }
 
     private function findBusinessTripPr($id)
     {
-        $items = PurchaseRequisition::where('purchase_id', $id)->where('code_transaction', 'btre')->get();
+        $items = PurchaseRequisition::where('purchase_id', $id)->where('code_transaction', 'BTRE')->get();
         return $items;
     }
 
@@ -176,12 +173,12 @@ class BtPOService
         return $attachmentString;
     }
 
-    private function generateFiles($array, $arrayCash)
+    private function generateFiles($array, $arrayCash, $reqno)
     {
         $timestamp = date('Ymd_His');
 
         // Generate Purchase Requisition File
-        $filename = 'INB_POCRT_' . 1 . '_' . $timestamp . '.txt';
+        $filename = 'INB_POCRT_' . $reqno . '_' . $timestamp . '.txt';
         $fileContent = $this->convertArrayToFileContent($array);
         Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
     }

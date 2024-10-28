@@ -105,8 +105,8 @@ class ProcurementService
 
     private function preparePurchaseRequisitionData($procurement, $vendor, $item, $businessPartner, $reqno, $entertainment)
     {
-        $formattedDate = Carbon::parse($procurement->created_at)->format('Y.m.d');
-        $delivery_date = Carbon::parse($procurement->delivery_date)->format('Y.m.d');
+        $formattedDate = Carbon::parse($procurement->created_at)->format('Y-m-d');
+        $delivery_date = Carbon::parse($procurement->delivery_date)->format('Y-m-d');
 
         return [
             'purchase_id' => $procurement->id,
