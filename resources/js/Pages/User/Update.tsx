@@ -7,6 +7,8 @@ import { formModel } from './model/formModel';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@/axiosInstance';
 import { usePage } from '@inertiajs/react';
+import { FormFieldModel } from '@/interfaces/form/formWrapper';
+import useDropdownOptions from '@/lib/getDropdown';
 
 const Update = ({ id }: { id: number }) => {
   const { props } = usePage();
@@ -19,7 +21,6 @@ const Update = ({ id }: { id: number }) => {
 
   const getdetail = useCallback(
     async () => {
-      console.log('ini id', id);
       setIsLoading(true);
       try {
         const response = await axiosInstance.get(DETAIL_USER(props.id));
@@ -34,9 +35,29 @@ const Update = ({ id }: { id: number }) => {
     [methods, props.id], // Include `methods` in the dependency array
   );
 
+  const [dataModel, setDataModel] = useState(formModel);
+  const { dropdownOptions, getDropdown } = useDropdownOptions();
+
+  useEffect(() => {
+    getDropdown(
+      'master_business_partner_id',
+      {
+        name: 'name_one',
+        id: 'id',
+        tabel: 'master_business_partners',
+        where: {
+          key: 'type',
+          parameter: 'employee',
+        },
+      },
+      formModel,
+    );
+  }, []);
+
   useEffect(() => {
     getdetail();
-  }, [getdetail]);
+    setDataModel(dropdownOptions as FormFieldModel<any>[]);
+  }, [dropdownOptions, getdetail]);
 
   return (
     <>
@@ -45,7 +66,7 @@ const Update = ({ id }: { id: number }) => {
           <FormMapping
             isLoading={isLoading}
             methods={methods}
-            formModel={formModel}
+            formModel={dataModel}
             url={`${EDIT_USER}/${props.id}`}
             redirectUrl={LIST_PAGE_USER}
           />

@@ -103,9 +103,9 @@ export const BussinessTripFormV1 = ({
   users: User[];
   listPurposeType: PurposeTypeModel[];
   type: BusinessTripType;
-  id: string;
-  role: string;
-  idUser: string;
+  id: string | undefined;
+  role: string | undefined;
+  idUser: number | undefined;
 }) => {
   const formSchema = z.object({
     purpose_type_id: z.string().min(1, 'Purpose type required'),
@@ -180,7 +180,7 @@ export const BussinessTripFormV1 = ({
 
     try {
       let response = await axios.get(url);
-      console.log(response, ' Response Detail');
+      //   console.log(response, ' Response Detail');
 
       form.reset({
         purpose_type_id: response.data.data.purpose_type_id,
@@ -240,8 +240,8 @@ export const BussinessTripFormV1 = ({
       formData.append('cash_advance', `${values.cash_advance}`);
       formData.append('total_percent', `${values.total_percent}`);
       formData.append('total_cash_advance', `${values.total_cash_advance}`);
-      values.destinations.forEach((item) => {
-        formData.append('destinations', JSON.stringify(item));
+      values.destinations.forEach((item, index) => {
+        formData.append(`destinations[${index}]`, JSON.stringify(item));
       });
 
       // const response = axios.post(CREATE_API_BUSINESS_TRIP, formData);
@@ -310,7 +310,7 @@ export const BussinessTripFormV1 = ({
           <table className='text-xs mt-4 reimburse-form-table font-thin'>
             <tr>
               <td width={200}>Request No.</td>
-              <td>Test-12321</td>
+              <td>ODR-2023</td>
             </tr>
             <tr>
               <td width={200}>Bussiness Trip Purpose Type</td>
@@ -618,7 +618,7 @@ export function BussinessDestinationForm({
         console.log('date', momentStart.toDate());
       }
 
-      console.log(detailAllowance, 'detail allowance')
+      console.log(detailAllowance, 'detail allowance');
       return detailAllowance;
     }
 
@@ -671,14 +671,16 @@ export function BussinessDestinationForm({
     name: 'total_percent',
   });
 
+  const [totalAllowance, setTotalAllowance] = React.useState(0);
+
   // Assuming allowance is calculated elsewhere, let's mock it for now
-  const allowance = 1000000; // Example: allowance is 1,000,000
+  const allowance = totalAllowance; // Example: allowance is 1,000,000
 
   // Calculate total based on totalPercent and allowance
   React.useEffect(() => {
     const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
     const total = (percentValue / 100) * allowance; // Multiply percent with allowance
-    setValue('total_cash_advance', total.toFixed(2)); // Save the total in total_cash_advance field
+    setValue('total_cash_advance', total.toFixed(0)); // Save the total in total_cash_advance field
   }, [totalPercent, allowance, setValue]); // Recalculate when totalPercent or allowance changes
 
   return (
@@ -790,16 +792,21 @@ export function BussinessDestinationForm({
         <DetailAllowance allowanceField={allowancesField} destinationIndex={index} form={form} />
         <table className='w-full text-sm mt-10'>
           <tr>
-            <td className='w-[20%]'>Cash Advance</td>
-            <td className='w-[80%] flex'>
+            <td className='w-[50%]'>Cash Advance</td>
+            <td className='w-[50%] pb-0'>
               <FormSwitch
                 fieldName={'cash_advance'}
                 isRequired={false}
                 disabled={false}
                 onChanges={(e) => handleCashAdvanceChange(e.target.checked)}
               />
-              {isCashAdvance && (
-                <>
+            </td>
+          </tr>
+          {isCashAdvance && (
+            <>
+              <tr>
+                <td className='w-[50%]'>Total Percent</td>
+                <td className='w-[50%]'>
                   <FormField
                     control={form.control}
                     name='total_percent'
@@ -808,10 +815,10 @@ export function BussinessDestinationForm({
                         <FormControl>
                           <Select
                             // onValueChange={(value) => handlePurposeType(value)}
-                            value={field.value || ''}
+                            value={field.value || undefined}
                             onValueChange={(value) => field.onChange(value)}
                           >
-                            <SelectTrigger className='w-[200px]'>
+                            <SelectTrigger className='w-[50%] mb-2'>
                               <SelectValue placeholder='-- Select Option --' />
                             </SelectTrigger>
                             <SelectContent>
@@ -831,25 +838,68 @@ export function BussinessDestinationForm({
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Input value={field.value || ''} readOnly={true} />
+                          <Input value={field.value || ''} readOnly={true} className='w-[50%]' />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </>
-              )}
-            </td>
-          </tr>
+                </td>
+              </tr>
+            </>
+          )}
         </table>
       </div>
       {/* disini */}
-      <ResultTotalItem allowanceField={allowancesField} />
+      <ResultTotalItem
+        allowanceField={allowancesField}
+        destinationIndex={index}
+        form={form}
+        setTotalAllowance={setTotalAllowance}
+      />
     </TabsContent>
   );
 }
 
-export function ResultTotalItem({ allowanceField }: { allowanceField: any }) {
+export function ResultTotalItem({
+  allowanceField,
+  destinationIndex,
+  form,
+  setTotalAllowance,
+}: {
+  allowanceField: any;
+  destinationIndex: number;
+  form: any;
+  setTotalAllowance: any;
+}) {
+  const [grandTotal, setGrandTotal] = React.useState(0);
+
+  React.useEffect(() => {
+    // Hitung ulang total allowance setiap kali allowanceField atau form berubah
+    const newTotal = allowanceField.reduce((totalSum: number, allowance: any, index: number) => {
+      const details = form.getValues(`destinations.${destinationIndex}.allowances.${index}.detail`);
+
+      const itemTotal = calculateTotal(allowance, details);
+      return totalSum + itemTotal;
+    }, 0);
+
+    setGrandTotal(newTotal);
+    setTotalAllowance(newTotal);
+  }, [allowanceField, form.watch()]); // Menggunakan form.watch() agar memantau perubahan input
+
+  // Fungsi untuk menghitung total per allowance
+  const calculateTotal = (allowance: any, details: any) => {
+    if (allowance.type === 'total') {
+      const basePrice = parseFloat(details[0]?.request_price || 0);
+      return basePrice;
+    } else {
+      return details?.reduce(
+        (sum: number, item: any) => sum + parseFloat(item.request_price || 0),
+        0,
+      );
+    }
+  };
+
   return (
     <>
       <table className='w-full text-sm mt-10'>
@@ -861,13 +911,12 @@ export function ResultTotalItem({ allowanceField }: { allowanceField: any }) {
         </thead>
         <tbody>
           {allowanceField.map((allowance: any, index: number) => (
-            <tr key={allowance.id}>
-              <td>{allowance.name}</td>
-              <td className='flex justify-between pr-4'>
-                <span>IDR</span>
-                <span></span>
-              </td>
-            </tr>
+            <ResultPerItem
+              allowance={allowance}
+              destinationIndex={destinationIndex}
+              form={form}
+              allowanceIndex={index}
+            />
           ))}
         </tbody>
         <tfoot className='mt-4'>
@@ -876,13 +925,64 @@ export function ResultTotalItem({ allowanceField }: { allowanceField: any }) {
               <i>Total Allowance</i>
             </td>
             <td className='flex justify-between pr-4'>
-              <span>IDR</span>
-              <span></span>
+              <span>
+                <i>IDR</i>
+              </span>
+              <span>
+                <i>{grandTotal}</i>
+              </span>
             </td>
           </tr>
         </tfoot>
       </table>
     </>
+  );
+}
+
+export function ResultPerItem({
+  allowance,
+  destinationIndex,
+  form,
+  allowanceIndex,
+}: {
+  allowance: any;
+  destinationIndex: number;
+  form: any;
+  allowanceIndex: number;
+}) {
+  const basePrice = useWatch({
+    control: form.control,
+    name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${0}.request_price`, // pastikan memantau field request_price
+  });
+  // Memantau semua detail harga jika allowance.type !== 'TOTAL'
+  const details = useWatch({
+    control: form.control,
+    name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail`,
+  });
+
+  const calculateTotal = () => {
+    if (allowance.type === 'total') {
+      // Pastikan basePrice tidak NaN atau undefined
+      const price = parseFloat(basePrice || 0);
+      return price * 1; // Menghitung total dengan basePrice
+    } else {
+      let total = 0;
+      details?.forEach((detail: any) => {
+        const price = parseFloat(detail.request_price || 0); // Pastikan parsing harga detail
+        total += price; // Menghitung total dari setiap detail
+      });
+      return total;
+    }
+  };
+
+  return (
+    <tr key={allowance.id}>
+      <td>{allowance.name}</td>
+      <td className='flex justify-between pr-4'>
+        <span>IDR</span>
+        <span>{calculateTotal()}</span>
+      </td>
+    </tr>
   );
 }
 
@@ -902,7 +1002,7 @@ export function DetailAttedances({
   React.useEffect(() => {}, [detailAttedanceWatch]);
 
   React.useEffect(() => {
-    console.log(detailAttedanceFields, ' Detail Attedance fields');
+    // console.log(detailAttedanceFields, ' Detail Attedance fields');
   }, [detailAttedanceFields]);
   return (
     <table className='text-xs mt-4 reimburse-form-detail font-thin'>

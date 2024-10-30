@@ -1,0 +1,6 @@
+const ROUTE_MASTER_PAJAK_PAGE = '/master-pr/pajak';
+
+export const LIST_PAGE_MASTER_PAJAK = `${ROUTE_MASTER_PAJAK_PAGE}`;
+export const CREATE_PAGE_MASTER_PAJAK = `${ROUTE_MASTER_PAJAK_PAGE}/create`;
+export const EDIT_PAGE_MASTER_PAJAK = `${ROUTE_MASTER_PAJAK_PAGE}/update`;
+export const DETAIL_PAGE_MASTER_PAJAK = `${ROUTE_MASTER_PAJAK_PAGE}/detail`;

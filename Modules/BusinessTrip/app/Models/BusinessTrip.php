@@ -2,6 +2,7 @@
 
 namespace Modules\BusinessTrip\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 // use Modules\BusinessTrip\Database\Factories\BusinessTripFactory;
@@ -25,6 +26,8 @@ class BusinessTrip extends Model
         'cash_advance',
         'total_cash_advance',
         'total_percent',
+        'type',
+        'parent_id',
     ];
 
 
@@ -51,5 +54,10 @@ class BusinessTrip extends Model
     function detailAttendance()
     {
         return $this->hasMany(BusinessTripDetailAttedance::class, 'business_trip_id', 'id');
+    }
+
+    function requestFor()
+    {
+        return $this->belongsTo(User::class, 'request_for', 'id');
     }
 }

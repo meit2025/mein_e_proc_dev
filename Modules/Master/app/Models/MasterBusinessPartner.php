@@ -4,6 +4,8 @@ namespace Modules\Master\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\PurchaseRequisition\Models\Vendor;
+
 // use Modules\Master\Database\Factories\MasterBusinessPartnerFactory;
 
 class MasterBusinessPartner extends Model
@@ -50,4 +52,14 @@ class MasterBusinessPartner extends Model
         'purchasing_block',
         'type',
     ];
+
+    public function employee()
+    {
+        return $this->belongsTo(MasterBusinessPartner::class, 'master_business_partner_id', 'id');
+    }
+
+    public function vendor()
+    {
+        return $this->belongsTo(Vendor::class,  'vendor', 'id');
+    }
 }

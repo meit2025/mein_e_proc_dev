@@ -4,17 +4,18 @@ namespace Modules\Reimbuse\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Currency;
-use App\Models\Family;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Modules\Reimbuse\Models\Reimburse;
 use Modules\Reimbuse\Models\ReimburseGroup;
-use Modules\Reimbuse\Models\ReimbursePeriod;
-use Modules\Reimbuse\Models\ReimburseQuota;
-use Modules\Reimbuse\Models\ReimburseType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Modules\Master\Models\Family;
+use Modules\Master\Models\MasterPeriodReimburse;
+use Modules\Master\Models\MasterQuotaReimburse;
+use Modules\Master\Models\MasterTypeReimburse;
+use Modules\Master\Models\PurchasingGroup;
 use Modules\Reimbuse\Services\ReimbursementService;
 
 class ReimbuseController extends Controller
@@ -30,7 +31,7 @@ class ReimbuseController extends Controller
     {
         try {
             $res = ($type == 'Employee') ? 1 : 0;
-            $typeData = ReimburseType::where('is_employee', $res)->get();
+            $typeData = MasterTypeReimburse::where('is_employee', $res)->get();
             return $this->successResponse($typeData);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 400);
@@ -49,7 +50,7 @@ class ReimbuseController extends Controller
             } else {
                 $grade = User::select('grade_reimburse')->where('nip', $user)->first()->grade_reimburse;
             }
-            $quota = ReimburseQuota::select('period', 'type', 'grade', 'limit', 'plafon')
+            $quota = MasterQuotaReimburse::select('period', 'type', 'grade', 'limit', 'plafon')
                 ->where('grade', $grade)
                 ->where('period', $period)
                 ->where('type', $type)
@@ -98,22 +99,24 @@ class ReimbuseController extends Controller
 
         if (!$is_Admin) {
             $users = User::with('families')->where('id', Auth::id())->select('nip', 'name')->get();
-        }else{
+        } else {
             $users = User::with('families')->select('nip', 'name')->get();
         }
 
         $types = ['Employee', 'Family'];
+        $purchasing_group = PurchasingGroup::select('id', 'purchasing_group', 'purchasing_group_desc')->get();
         $currencies = Currency::select('code', 'name')->get();
-        $periods = ReimbursePeriod::select('id', 'code', 'start', 'end')->get();
+        $periods = MasterPeriodReimburse::select('id', 'code', 'start', 'end')->get();
         $csrf_token = csrf_token();
 
         return Inertia::render('Reimburse/ListReimburse', [
-            'groups'        =>  $reimburses,
-            'users'         =>  $users,
-            'types'         =>  $types,
-            'currencies'    =>  $currencies,
-            'periods'       =>  $periods,
-            'csrf_token'    =>  $csrf_token
+            'purchasing_groups' =>  $purchasing_group,
+            'groups'            =>  $reimburses,
+            'users'             =>  $users,
+            'types'             =>  $types,
+            'currencies'        =>  $currencies,
+            'periods'           =>  $periods,
+            'csrf_token'        =>  $csrf_token
         ]);
     }
 
@@ -125,16 +128,20 @@ class ReimbuseController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
-        $groupData = [
-            'remark' => $data['remark_group'],
-            'requester'    => $data['requester'],
-        ];
-        $forms = $data['forms'];
-        $response = $this->reimbursementService->storeReimbursements($groupData, $forms);
-        if (isset($response['error'])) {
-            return back()->withErrors(['status' => $response['error']]);
+        try {
+            $groupData = [
+                'remark' => $data['remark_group'],
+                'requester'    => $data['requester'],
+            ];
+            $forms = $data['forms'];
+            $response = $this->reimbursementService->storeReimbursements($groupData, $forms);
+            if (isset($response['error'])) {
+                return $this->errorResponse($response['error']);
+            }
+            return $this->successResponse("All data has been processed successfully");
+        } catch (\Exception  $e) {
+            return $this->errorResponse($e->getMessage());
         }
-        return redirect()->back()->with('status', 'All data has been processed successfully.');
     }
 
     public function update(Request $request, $id)

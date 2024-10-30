@@ -1,21 +1,32 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
+use Modules\BusinessTrip\Models\BusinessTripGrade;
 use Modules\Master\Http\Controllers\AccountAssignmentCategoryController;
 use Modules\Master\Http\Controllers\AssetController;
 use Modules\Master\Http\Controllers\BankKeyController;
 use Modules\Master\Http\Controllers\CostCenterController;
 use Modules\Master\Http\Controllers\DokumentTypeController;
 use Modules\Master\Http\Controllers\DropdownMasterController;
+use Modules\Master\Http\Controllers\FamilyController;
 use Modules\Master\Http\Controllers\ItemCategoryController;
 use Modules\Master\Http\Controllers\MasterBusinessPartnerController;
-use Modules\Master\Http\Controllers\MasterController;
 use Modules\Master\Http\Controllers\MasterMaterialController;
+use Modules\Master\Http\Controllers\MaterialGroupController;
+use Modules\Master\Http\Controllers\MasterPeriodReimburseController;
+use Modules\Master\Http\Controllers\MasterQuotaReimburseController;
+use Modules\Master\Http\Controllers\MasterTypeReimburseController;
 use Modules\Master\Http\Controllers\OrderController;
+use Modules\Master\Http\Controllers\PajakController;
 use Modules\Master\Http\Controllers\PurchasingGroupController;
 use Modules\Master\Http\Controllers\ReconController;
 use Modules\Master\Http\Controllers\StorageLocationController;
+use Modules\Master\Http\Controllers\UomController;
 use Modules\Master\Http\Controllers\ValuationTypeController;
+use Modules\Master\Models\MasterMaterial;
+use Modules\Master\Models\MasterPeriodReimburse;
+use Modules\Master\Models\MasterTypeReimburse;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +62,12 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['prefix' => 'business-partner'], function () {
             Route::inertia('/',  'Master/MasterBusinessPartner/Index');
         });
+        Route::group(['prefix' => 'reimburse-period'], function () {
+            Route::inertia('/',  'Master/MasterReimbursePeriod/Index');
+        });
+        Route::get('reimburse-type/', [MasterTypeReimburseController::class, 'index'])->name('type.master.reimburse-type.index');
+        Route::get('reimburse-quota/', [MasterQuotaReimburseController::class, 'index'])->name('master.reimburse-quota.index');
+        Route::get('family/', [FamilyController::class, 'index'])->name('master.family.index');
     });
 
     Route::group(['prefix' => 'api/master', 'middleware' => 'auth'], function () {
@@ -105,6 +122,36 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/update/{id}', [MasterBusinessPartnerController::class, 'update'])->name('master.business.update');
             Route::get('/detail/{id}', [MasterBusinessPartnerController::class, 'show'])->name('master.business.show');
             Route::delete('/delete/{id}', [MasterBusinessPartnerController::class, 'destroy'])->name('master.business.destroy');
+        });
+
+        Route::group(['prefix' => 'reimburse-type'], function () {
+            Route::get('/list', [MasterTypeReimburseController::class, 'index'])->name('master.reimburse-type.index');
+            Route::post('/create', [MasterTypeReimburseController::class, 'store'])->name('master.reimburse-type.store');
+            Route::post('/update/{id}', [MasterTypeReimburseController::class, 'update'])->name('master.reimburse-type.update');
+            Route::get('/detail/{id}', [MasterTypeReimburseController::class, 'show'])->name('master.reimburse-type.show');
+            Route::delete('/delete/{id}', [MasterTypeReimburseController::class, 'destroy'])->name('master.reimburse-type.destroy');
+        });
+
+        Route::group(['prefix' => 'reimburse-period'], function () {
+            Route::get('/list', [MasterPeriodReimburseController::class, 'index'])->name('master.reimburse-period.index');
+            Route::post('/create', [MasterPeriodReimburseController::class, 'store'])->name('master.reimburse-period.store');
+            Route::post('/update/{id}', [MasterPeriodReimburseController::class, 'update'])->name('master.reimburse-period.update');
+            Route::get('/detail/{id}', [MasterPeriodReimburseController::class, 'show'])->name('master.reimburse-period.show');
+            Route::delete('/delete/{id}', [MasterPeriodReimburseController::class, 'destroy'])->name('master.reimburse-period.destroy');
+        });
+
+        Route::group(['prefix' => 'reimburse-quota'], function () {
+            Route::post('/create', [MasterQuotaReimburseController::class, 'store'])->name('master.reimburse-quota.store');
+            Route::post('/update/{id}', [MasterQuotaReimburseController::class, 'update'])->name('master.reimburse-quota.update');
+            Route::get('/detail/{id}', [MasterQuotaReimburseController::class, 'show'])->name('master.reimburse-quota.show');
+            Route::delete('/delete/{id}', [MasterQuotaReimburseController::class, 'destroy'])->name('master.reimburse-quota.destroy');
+        });
+
+        Route::group(['prefix' => 'family'], function () {
+            Route::post('/create', [FamilyController::class, 'store'])->name('master.family.store');
+            Route::post('/update/{id}', [FamilyController::class, 'update'])->name('master.family.update');
+            Route::get('/detail/{id}', [FamilyController::class, 'show'])->name('master.family.show');
+            Route::delete('/delete/{id}', [FamilyController::class, 'destroy'])->name('master.family.destroy');
         });
 
         Route::group(['prefix' => 'dropdown'], function () {
@@ -162,6 +209,29 @@ Route::group(['middleware' => 'auth'], function () {
                 'id' => fn() => request()->route('id'),
             ]);
         });
+
+        Route::group(['prefix' => 'material-group'], function () {
+            Route::inertia('/',  'MasterPr/MaterialGroup/Index');
+            Route::inertia('/create',  'MasterPr/MaterialGroup/Create');
+            Route::inertia('/update/{id}',  'MasterPr/MaterialGroup/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+        });
+
+        Route::group(['prefix' => 'uom'], function () {
+            Route::inertia('/',  'MasterPr/Uom/Index');
+            Route::inertia('/create',  'MasterPr/Uom/Create');
+            Route::inertia('/update/{id}',  'MasterPr/Uom/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+        });
+        Route::group(['prefix' => 'pajak'], function () {
+            Route::inertia('/',  'MasterPr/Pajak/Index');
+            Route::inertia('/create',  'MasterPr/Pajak/Create');
+            Route::inertia('/update/{id}',  'MasterPr/Pajak/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+        });
     });
     Route::group(['prefix' => 'api/master-pr', 'middleware' => 'auth'], function () {
         Route::group(['prefix' => 'dokument-type'], function () {
@@ -205,6 +275,29 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/update/{id}', [StorageLocationController::class, 'update'])->name('master.storage-location.update');
             Route::get('/detail/{id}', [StorageLocationController::class, 'show'])->name('master.storage-location.show');
             Route::delete('/delete/{id}', [StorageLocationController::class, 'destroy'])->name('master.storage-location.destroy');
+        });
+
+        Route::group(['prefix' => 'material-group'], function () {
+            Route::get('/list', [MaterialGroupController::class, 'index'])->name('master.material-group.index');
+            Route::post('/create', [MaterialGroupController::class, 'store'])->name('master.material-group.store');
+            Route::post('/update/{id}', [MaterialGroupController::class, 'update'])->name('master.material-group.update');
+            Route::get('/detail/{id}', [MaterialGroupController::class, 'show'])->name('master.material-group.show');
+            Route::delete('/delete/{id}', [MaterialGroupController::class, 'destroy'])->name('master.material-group.destroy');
+        });
+
+        Route::group(['prefix' => 'uom'], function () {
+            Route::get('/list', [UomController::class, 'index'])->name('master.uom.index');
+            Route::post('/create', [UomController::class, 'store'])->name('master.uom.store');
+            Route::post('/update/{id}', [UomController::class, 'update'])->name('master.uom.update');
+            Route::get('/detail/{id}', [UomController::class, 'show'])->name('master.uom.show');
+            Route::delete('/delete/{id}', [UomController::class, 'destroy'])->name('master.uom.destroy');
+        });
+        Route::group(['prefix' => 'pajak'], function () {
+            Route::get('/list', [PajakController::class, 'index'])->name('master.pajak.index');
+            Route::post('/create', [PajakController::class, 'store'])->name('master.pajak.store');
+            Route::post('/update/{id}', [PajakController::class, 'update'])->name('master.pajak.update');
+            Route::get('/detail/{id}', [PajakController::class, 'show'])->name('master.pajak.show');
+            Route::delete('/delete/{id}', [PajakController::class, 'destroy'])->name('master.pajak.destroy');
         });
     });
 });

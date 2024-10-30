@@ -32,6 +32,6 @@ class BusinessTripDetailDestinationDayTotal extends Model
 
     function allowance()
     {
-        return $this->belongsTo(allowanceItem::class, 'allowance_items_id', 'id');
+        return $this->belongsTo(allowanceItem::class, 'allowance_item_id', 'id');
     }
 }

@@ -34,4 +34,9 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/detail/{id}', [ProcurementController::class, 'show'])->name('pr.purchase-requisition.show');
         Route::delete('/delete/{id}', [ProcurementController::class, 'destroy'])->name('pr.purchase-requisition.destroy');
     });
+    Route::group(['prefix' => 'api/pr/purchase-requisition-sap', 'middleware' => 'auth'], function () {
+
+        Route::get('/text/{id}', [PurchaseRequisitionController::class, 'textData'])->name('pr.purchase-requisition-sap.destroy');
+        Route::get('/text/{id}/{type}', [PurchaseRequisitionController::class, 'generateText'])->name('pr.generate-text-sap.destroy');
+    });
 });

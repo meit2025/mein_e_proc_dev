@@ -18,61 +18,7 @@ import { ReimburseForm } from './components/ReimburseForm';
 import './css/reimburse.scss';
 
 import MainLayout from '../Layouts/MainLayout';
-
-interface Quota {
-  id: string;
-  user: User[];
-  period: Period[];
-  type: Type[];
-  limit: number;
-  plafon: number;
-}
-
-interface Family {
-  id: string;
-  name: string;
-  status: string;
-  bod: string;
-}
-
-interface Reimburse {
-  id: string;
-  remark: string;
-  type: string;
-  family: Family[];
-  currency: string;
-  balance: number;
-  receipt_date: Date;
-  start_date: Date;
-  end_date: Date;
-  period: string;
-}
-
-interface User {
-  nip: string;
-  name: string;
-}
-
-interface Group {
-  id: string;
-  code: string;
-  remark: string;
-  status: string;
-  users: User;
-  reimburses: Reimburse[];
-}
-
-interface Currency {
-  code: string;
-  name: string;
-}
-
-interface Period {
-  id: string;
-  code: string;
-  start: string;
-  end: string;
-}
+import { Currency, Group, Period, PurchasingGroup, User } from './model/listModel';
 
 interface Props {
   groups: Group[];
@@ -80,10 +26,12 @@ interface Props {
   types: string[];
   periods: Period[];
   currencies: Currency[];
+  purchasing_groups: PurchasingGroup[];
   csrf_token: string;
 }
 
 const ListReimburse: React.FC<Props> = ({
+  purchasing_groups,
   groups,
   users,
   types,
@@ -132,7 +80,7 @@ const ListReimburse: React.FC<Props> = ({
     {
       accessorKey: 'users.name',
       header: 'Request For',
-      cell: ({ row }) => <div className='lowercase'>{row.original.users.name}</div>,
+      cell: ({ row }) => <div className='lowercase'>{row?.original?.users?.name}</div>,
     },
     {
       accessorKey: 'remark',
@@ -145,7 +93,7 @@ const ListReimburse: React.FC<Props> = ({
       cell: ({ row }) => {
         const reimburses = row.original.reimburses;
         const sumBalance = reimburses.reduce(
-          (sum, reimburse) => sum + parseFloat(reimburse.balance),
+          (sum, reimburse) => sum + parseFloat(reimburse?.balance),
           0,
         );
         return <div>{`IDR. ${numberWithCommas(sumBalance)}`}</div>;
@@ -209,6 +157,7 @@ const ListReimburse: React.FC<Props> = ({
       <div>
         <CustomDialog className='md:max-w-[800px]' open={open} onClose={handleCloseForm}>
           <ReimburseForm
+            purchasing_groups={purchasing_groups}
             users={users}
             types={types}
             currencies={currencies}
