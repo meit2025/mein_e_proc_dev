@@ -18,26 +18,28 @@ import { ReimburseForm } from './components/ReimburseForm';
 import './css/reimburse.scss';
 
 import MainLayout from '../Layouts/MainLayout';
-import { Currency, Group, Period, PurchasingGroup, User } from './model/listModel';
+import { Currency, Group, Period, PurchasingGroup, User, Tax, CostCenter } from './model/listModel';
 
 interface Props {
   groups: Group[];
   users: User[];
-  types: string[];
+  categories: string[];
   periods: Period[];
   currencies: Currency[];
   purchasing_groups: PurchasingGroup[];
-  csrf_token: string;
+  taxes: Tax[];
+  cost_center: CostCenter[];
 }
 
 const ListReimburse: React.FC<Props> = ({
   purchasing_groups,
   groups,
   users,
-  types,
+  categories,
   currencies,
+  taxes,
+  cost_center,
   periods,
-  csrf_token,
 }) => {
   const [open, setOpen] = useState(false);
   const [currentReimbursement, setCurrentReimbursement] = useState<Group | null>(null);
@@ -112,16 +114,6 @@ const ListReimburse: React.FC<Props> = ({
       cell: ({ row }) => <div>{row.getValue('status') ?? '-'}</div>,
     },
     {
-      accessorKey: 'paid_status',
-      header: () => <div className='text-left'>Paid Status</div>,
-      cell: ({ row }) => <div>{row.getValue('paid_status') ?? '-'}</div>,
-    },
-    {
-      accessorKey: 'source',
-      header: () => <div className='text-left'>Source</div>,
-      cell: ({ row }) => <div>{row.getValue('source') ?? '-'}</div>,
-    },
-    {
       accessorKey: 'id',
       id: 'actions',
       enableHiding: false,
@@ -159,10 +151,11 @@ const ListReimburse: React.FC<Props> = ({
           <ReimburseForm
             purchasing_groups={purchasing_groups}
             users={users}
-            types={types}
+            categories={categories}
             currencies={currencies}
             periods={periods}
-            csrf_token={csrf_token}
+            taxes={taxes}
+            cost_center={cost_center}
             reimbursement={currentReimbursement}
           />
         </CustomDialog>

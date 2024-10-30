@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Modules\Master\Models\Family;
+use Modules\Master\Models\MasterBusinessPartner;
 
 class User extends Authenticatable
 {

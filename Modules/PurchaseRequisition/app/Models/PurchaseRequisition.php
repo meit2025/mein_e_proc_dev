@@ -54,6 +54,9 @@ class PurchaseRequisition extends Model
         'posisi_entertainment',
         'jenis_usaha_entertainment',
         'jenis_kegiatan_entertainment',
+        'status',
+        'code',
+        'message',
     ];
 
     // Define the relationship with Purchase

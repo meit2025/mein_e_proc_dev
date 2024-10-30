@@ -28,11 +28,11 @@ class Purchase extends Model
 
     public function getCreatedAtFormattedAttribute()
     {
-        return $this->created_at->format('y.m.d'); // Format as DD.MM.YY
+        return $this->created_at->format('y-m-d'); // Format as DD.MM.YY
     }
     public function getDeliveryDateFormattedAttribute()
     {
-        return $this->created_at->format('y.m.d'); // Format as DD.MM.YY
+        return $this->created_at->format('y-m-d'); // Format as DD.MM.YY
     }
 
     public function vendors()

@@ -27,6 +27,8 @@ class ReimbursementService
         'desired_vendor'        =>  'required',
         'type'                  =>  'required|in:Employee,Family',
         'purchasing_group'      =>  'required|exists:purchasing_groups,id',
+        'tax_on_sales'          =>  'required|exists:pajaks,id',
+        'cost_center'           =>  'required|exists:master_cost_centers,id',
     ];
 
     public function checkGroupStatus(string $groupCode): string

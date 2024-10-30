@@ -17,6 +17,7 @@ use Modules\PurchaseRequisition\Models\Purchase;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
 use Modules\PurchaseRequisition\Models\Unit;
 use Modules\PurchaseRequisition\Models\Vendor;
+use Modules\PurchaseRequisition\Services\BtPOService;
 use Modules\PurchaseRequisition\Services\BtService;
 use Modules\PurchaseRequisition\Services\ProcurementService;
 
@@ -27,11 +28,13 @@ class PurchaseRequisitionController extends Controller
      */
     protected $procurementService;
     protected $bt;
+    protected $btPO;
 
-    public function __construct(ProcurementService $procurementService, BtService $bt)
+    public function __construct(ProcurementService $procurementService, BtService $bt, BtPOService $btPO)
     {
         $this->procurementService = $procurementService;
         $this->bt = $bt;
+        $this->btPO = $btPO;
     }
 
     public function generateText($id, $type)
@@ -44,11 +47,12 @@ class PurchaseRequisitionController extends Controller
                     return response()->json(['message' => 'Data processed successfully', 'data' => $data]);
                     break;
                 case 'bt';
-                    $data = $this->bt->processTextData($id, 'btre');
+                    $data = $this->bt->processTextData($id, 'BTRE');
                     return response()->json(['message' => 'Data processed successfully', 'data' => $data]);
                     break;
                 case 'bt-po';
-                    $data = $this->bt->processTextData($id, 'btrde');
+                    $data = $this->btPO->processTextData($id);
+                    return response()->json(['message' => 'Data processed successfully', 'data' => $data]);
                     break;
 
                 default:
@@ -156,10 +160,10 @@ class PurchaseRequisitionController extends Controller
                 $reqno = $reqno + 1;
                 $vendor = MasterBusinessPartner::find($value->vendor_id);
                 $date = Carbon::parse($procurement->created_at);
-                $formattedDate = $date->format('Y.m.d');
+                $formattedDate = $date->format('Y-m-d');
 
                 $dateStr = Carbon::parse($procurement->delivery_date);
-                $formattedDatestr = $dateStr->format('Y.m.d');
+                $formattedDatestr = $dateStr->format('Y-m-d');
 
                 $tax = Pajak::where('mwszkz',  $value->tax)->first();
 
@@ -315,10 +319,10 @@ class PurchaseRequisitionController extends Controller
                 $reqno = $reqno + 1;
                 $vendor = MasterBusinessPartner::find($value->vendor_id);
                 $date = Carbon::parse($procurement->created_at);
-                $formattedDate = $date->format('Y.m.d');
+                $formattedDate = $date->format('Y-m-d');
 
                 $dateStr = Carbon::parse($procurement->created_at);
-                $formattedDatestr = $dateStr->format('Y.m.d');
+                $formattedDatestr = $dateStr->format('Y-m-d');
 
                 $tax = Pajak::where('mwszkz',  $value->tax)->first();
 
