@@ -23,16 +23,18 @@ import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import { Input } from '@/components/shacdn/input';
 import { useAlert } from '../../../contexts/AlertContext.jsx';
 import { usePage } from '@inertiajs/react';
-import { User, Reimburse, Group, PurchasingGroup } from '../model/listModel';
+import { User, Reimburse, Group, PurchasingGroup, Tax, CostCenter } from '../model/listModel';
 
 interface Props {
   purchasing_groups: PurchasingGroup[];
   reimbursement: Group | null;
   reimburses: Reimburse[];
   currencies: { id: string; code: string; name: string }[];
+  categories: string;
   periods: { id: string; code: string; start: string; end: string }[];
   users: User[];
-  csrf_token: string;
+  taxes: Tax[];
+  cost_center: CostCenter[];
 }
 
 export const ReimburseForm: React.FC<Props> = ({
@@ -40,10 +42,11 @@ export const ReimburseForm: React.FC<Props> = ({
   reimbursement,
   reimburses,
   currencies,
-  types,
+  categories,
   periods,
   users,
-  csrf_token,
+  taxes,
+  cost_center
 }) => {
   const [activeTab, setActiveTab] = useState('form1');
   const { showToast } = useAlert();
@@ -69,6 +72,8 @@ export const ReimburseForm: React.FC<Props> = ({
         short_text: '',
         period: '',
         balance: 0,
+        tax_on_sales: '',
+        cost_center: '',
         for: requester,
         item_delivery_data: new Date(),
         start_date: new Date(),
@@ -92,6 +97,8 @@ export const ReimburseForm: React.FC<Props> = ({
           short_text: reimburse.short_text,
           balance: Number(reimburse.balance),
           currency: reimburse.currency,
+          tax_on_sales: reimburse.tax_on_sales,
+          cost_center: reimburse.cost_center,
           purchasing_group: reimburse.purchasing_group,
           period: reimburse.period,
           item_delivery_data: new Date(reimburse.item_delivery_data),
@@ -131,6 +138,8 @@ export const ReimburseForm: React.FC<Props> = ({
           reimburse_type: '',
           short_text: '',
           period: '',
+          tax_on_sales: '',
+          cost_center: '',
           balance: 0,
           item_delivery_data: new Date(),
           start_date: new Date(),
@@ -347,9 +356,9 @@ export const ReimburseForm: React.FC<Props> = ({
                                   <SelectValue placeholder='Select type' />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {types.map((type) => (
-                                    <SelectItem key={type} value={type}>
-                                      {type}
+                                  {categories.map((category) => (
+                                    <SelectItem key={category} value={category}>
+                                      {category}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -485,6 +494,72 @@ export const ReimburseForm: React.FC<Props> = ({
                                       {families.map((family) => (
                                         <SelectItem key={family.id} value={family.id.toString()}>
                                           {family.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td width={200}>Tax</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.tax_on_sales`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Select
+                                    disabled={reimbursement !== null}
+                                    onValueChange={(value) => field.onChange(value)}
+                                    value={field.value}
+                                  >
+                                    <SelectTrigger className='w-[200px]'>
+                                      <SelectValue placeholder='-' />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {taxes.map((tax) => (
+                                        <SelectItem key={tax.id} value={tax.id.toString()}>
+                                          {tax.mwszkz}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td width={200}>Cost Center</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.cost_center`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Select
+                                    disabled={reimbursement !== null}
+                                    onValueChange={(value) => field.onChange(value)}
+                                    value={field.value}
+                                  >
+                                    <SelectTrigger className='w-[200px]'>
+                                      <SelectValue placeholder='-' />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {cost_center.map((value) => (
+                                        <SelectItem key={value.id} value={value.id.toString()}>
+                                          {value.cost_center}
                                         </SelectItem>
                                       ))}
                                     </SelectContent>

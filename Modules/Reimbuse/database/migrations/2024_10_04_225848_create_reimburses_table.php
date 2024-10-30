@@ -24,8 +24,11 @@ return new class extends Migration
             $table->string('period');
 
             $table->foreignId('purchasing_group')->constrained('purchasing_groups')->cascadeOnUpdate();
+            $table->foreignId('tax_on_sales')->constrained('pajaks')->cascadeOnUpdate();
+            $table->foreignId('cost_center')->constrained('master_cost_centers')->cascadeOnUpdate();
             $table->string('short_text'); // replace remark
             $table->date('item_delivery_data'); // replaced receipt_date
+            $table->string('desired_vendor'); // requester
             $table->string('pembeda')->default('reim');
             $table->string('tracking_number')->nullable();
             $table->tinyInteger('item_number')->default(1);
@@ -35,10 +38,8 @@ return new class extends Migration
             $table->string('purchasing_organization')->default('1600');
             $table->char('account_assignment')->default('Y');
             $table->string('storage_location')->default('0001');
-            $table->string('desired_vendor'); // requester
             $table->string('purchase_requisition_unit_of_measure')->nullable();
             $table->tinyInteger('purchase_requisition_quantity')->default(1);
-            $table->double('tax_on_sales')->default(0);
             $table->string('item_category_in_purchasing_document')->nullable();
             $table->string('plant')->default('ID01');
 

@@ -13,10 +13,28 @@ export interface Quota {
   id: string;
   user: User[];
   period: Period[];
-  type: Type[];
+  type: TypeReimburse[];
   limit: number;
   plafon: number;
 }
+
+export interface Tax {
+  id: string;
+  mwszkz: number;
+}
+
+export interface CostCenter {
+  id: string;
+  cost_center: string;
+}
+
+export interface TypeReimburse {
+  code: string;
+  name: string;
+  is_employee: boolean;
+  material_group: string;
+  material_number: string;
+} 
 
 export interface Family {
   id: string;

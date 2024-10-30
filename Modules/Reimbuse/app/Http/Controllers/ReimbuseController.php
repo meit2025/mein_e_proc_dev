@@ -12,9 +12,11 @@ use Modules\Reimbuse\Models\ReimburseGroup;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Modules\Master\Models\Family;
+use Modules\Master\Models\MasterCostCenter;
 use Modules\Master\Models\MasterPeriodReimburse;
 use Modules\Master\Models\MasterQuotaReimburse;
 use Modules\Master\Models\MasterTypeReimburse;
+use Modules\Master\Models\Pajak;
 use Modules\Master\Models\PurchasingGroup;
 use Modules\Reimbuse\Services\ReimbursementService;
 
@@ -42,7 +44,7 @@ class ReimbuseController extends Controller
     {
         $user = $request->user;
         $is_employee = $request->is_employee;
-        $type = $request->type;
+        $category = $request->category;
         $period = $request->period;
         try {
             if (!$is_employee) {
@@ -53,12 +55,12 @@ class ReimbuseController extends Controller
             $quota = MasterQuotaReimburse::select('period', 'type', 'grade', 'limit', 'plafon')
                 ->where('grade', $grade)
                 ->where('period', $period)
-                ->where('type', $type)
+                ->where('type', $category)
                 ->first();
             $used = Reimburse::where('for', $user)
                 ->select('group', 'balance', 'updated_at')
                 ->where('period', $period)
-                ->where('type', $type);
+                ->where('type', $category);
             $progress = $used->get()->unique('group');
             $used_plafon = $used->sum('balance');
             $used_limit = $used->count();
@@ -91,10 +93,10 @@ class ReimbuseController extends Controller
     public function index()
     {
         $is_Admin = Auth::user()->role === 'admin';
-        $reimburses = ReimburseGroup::with('reimburses', 'users')->get();
+        $groups = ReimburseGroup::with('reimburses', 'users')->get();
 
-        foreach ($reimburses as $reimburse) {
-            $reimburse['status'] = $this->reimbursementService->checkGroupStatus($reimburse->code);
+        foreach ($groups as $group) {
+            $group['status'] = $this->reimbursementService->checkGroupStatus($group->code);
         }
 
         if (!$is_Admin) {
@@ -103,21 +105,17 @@ class ReimbuseController extends Controller
             $users = User::with('families')->select('nip', 'name')->get();
         }
 
-        $types = ['Employee', 'Family'];
-        $purchasing_group = PurchasingGroup::select('id', 'purchasing_group', 'purchasing_group_desc')->get();
+        $categories = ['Employee', 'Family'];
+        $purchasing_groups = PurchasingGroup::select('id', 'purchasing_group', 'purchasing_group_desc')->get();
         $currencies = Currency::select('code', 'name')->get();
         $periods = MasterPeriodReimburse::select('id', 'code', 'start', 'end')->get();
-        $csrf_token = csrf_token();
+        $cost_center = MasterCostCenter::select('id', 'cost_center')->get();
+        $taxes = Pajak::select('id', 'mwszkz')->get();
 
-        return Inertia::render('Reimburse/ListReimburse', [
-            'purchasing_groups' =>  $purchasing_group,
-            'groups'            =>  $reimburses,
-            'users'             =>  $users,
-            'types'             =>  $types,
-            'currencies'        =>  $currencies,
-            'periods'           =>  $periods,
-            'csrf_token'        =>  $csrf_token
-        ]);
+        return Inertia::render(
+            'Reimburse/ListReimburse',
+            compact('purchasing_groups', 'groups', 'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes')
+        );
     }
 
     public function create()
