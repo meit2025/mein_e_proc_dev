@@ -130,6 +130,7 @@ class ReimbuseController extends Controller
             $groupData = [
                 'remark' => $data['remark_group'],
                 'requester'    => $data['requester'],
+                'cost_center'    => $data['cost_center'],
             ];
             $forms = $data['forms'];
             $response = $this->reimbursementService->storeReimbursements($groupData, $forms);
