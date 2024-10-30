@@ -31,7 +31,11 @@ use Modules\BusinessTrip\Models\BusinessTrip;
 
 
 
-Route::prefix('business-trip')->group(function () {});
+Route::group(['middleware' => 'auth'], function () {
+    Route::prefix('business-trip')->group(function () {
+        Route::get('/print/{id}', [BusinessTripController::class, 'printAPI'])->name('business-trip.print');
+    });
+});
 
 Route::group(['prefix' => 'business-trip'], function () {
     Route::get('/', [BusinessTripController::class, 'index'])->name('bussiness-trip.index');
@@ -82,15 +86,12 @@ Route::group(['prefix' => 'api/'], function () {
     });
 
     Route::group(['prefix' => 'business-trip'], function () {
-        Route::get('/list', [BusinessTripController::class, 'listAPI'])->name('trip.business-trip-list.index');
-        Route::post('/create', [BusinessTripController::class, 'storeAPI'])->name('trip.business-trip.store');
+        Route::get('/list', [BusinessTripController::class, 'listAPI'])->name('business-trip-list.index');
+        Route::post('/create', [BusinessTripController::class, 'storeAPI'])->name('business-trip.store');
+        Route::get('/detail/{id}', [BusinessTripController::class, 'showAPI'])->name('business-trip.detail');
         // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
-        Route::get('/detail/{id}', [BusinessTripController::class, 'showAPI'])->name('business-trip.detail');
-
         // Route::delete('/delete/{id}', [MasterMaterialController::class, 'destroy'])->name('master.master-material.destroy');
-
-
     });
 
     Route::group(['prefix' => 'business-trip-declaration'], function () {
@@ -98,7 +99,10 @@ Route::group(['prefix' => 'api/'], function () {
         Route::post('/create', [BusinessTripDeclarationController::class, 'storeAPI'])->name('business-trip-declaration.store');
         // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
-        Route::get('/detail/{id}', [BusinessTripDeclarationController::class, 'showAPI'])->name('trip.allowance-category.detail');
+        Route::get('/detail/{id}', [BusinessTripDeclarationController::class, 'showAPI'])->name('allowance-category.detail');
+        Route::get('/print', function () {
+            return view('print-bt-declaration');
+        });
     });
 
     Route::group(['prefix' => 'purpose-type-allowance'], function () {

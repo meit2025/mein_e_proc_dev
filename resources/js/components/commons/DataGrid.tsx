@@ -44,6 +44,7 @@ interface DataGridProps {
   buttonActionCustome?: ReactNode;
 }
 
+
 const DataGridComponent: React.FC<DataGridProps> = ({
   columns,
   buttonCustome,
@@ -169,7 +170,6 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                             </span>
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem>View payment details</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </>
