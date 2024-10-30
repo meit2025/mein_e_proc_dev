@@ -50,7 +50,8 @@ import { MultiSelect } from '@/components/commons/MultiSelect';
 import { BusinessTripGrade } from '../../BusinessGrade/model/model';
 import { MaterialModel } from '@/Pages/Master/MasterMaterial/model/listModel';
 import { GET_LIST_MASTERIAL_BY_MATERIAL_GROUP } from '@/endpoint/masterMaterial/api';
-// 
+import { FormType } from '@/lib/utils';
+//
 
 export enum AllowanceType {
   create,
@@ -60,126 +61,137 @@ export enum AllowanceType {
 
 export interface AllowanceItemFormInterface {
   onSuccess?: (value: boolean) => void;
-  type?: AllowanceType;
+  type?: FormType;
   id?: string;
+  editUrl?: string;
+  detailUrl?: string;
+  createUrl?: string;
   listCurrency: CurrencyModel[];
   listAllowanceCategory: AllowanceCategoryModel[];
   listGrade: BusinessTripGrade[];
-  listMaterial: MaterialModel[],
-  listMaterialGroup: string[],
+  listMaterial: MaterialModel[];
+  listMaterialGroup: string[];
 }
 export default function AllowanceItemForm({
   onSuccess,
-  type = AllowanceType.create,
+  type = FormType.create,
+  detailUrl,
   id,
   listCurrency,
   listAllowanceCategory,
   listGrade,
   listMaterial,
-  listMaterialGroup
+  createUrl,
+  editUrl,
+  listMaterialGroup,
 }: AllowanceItemFormInterface) {
-  var formSchema = z.object({
+  const formSchema = z.object({
     code: z.string().min(1, 'Code is required'),
     name: z.string().min(1, 'Name is required'),
     type: z.string().min(1, 'Type is required'),
-    material_number: z.string().min(1, "Material number required"),
-    material_group: z.string().min(1, "Material number required"),
+    material_number: z.string().min(1, 'Material number required'),
+    material_group: z.string().min(1, 'Material number required'),
     currency_id: z.string().min(1, 'Currency is required'),
     formula: z.string().min(1, 'Formula is required'),
     allowance_category_id: z.string().min(1, 'Allowance Category is required'),
     request_value: z.string().min(1, 'Required'),
     grade_option: z.string().min(1, 'Grade must be selected'),
     grade_all_price: z.string().optional(),
-    grades: z.array(z.object({
-      grade: z.string(),
-      id:z.number(),
-      plafon: z.string()
-    }))
+    grades: z.array(
+      z.object({
+        grade: z.string(),
+        id: z.number(),
+        plafon: z.string(),
+      }),
+    ),
   });
-
 
   const [materials, setMaterials] = React.useState([]);
 
-  let defaultValues = {
+  const defaultValues = {
     code: '',
     name: '',
-    type:'',
+    type: '',
     currency_id: '',
     formula: '',
     allowance_category_id: '',
     request_value: 'unlimited',
     grade_option: 'all',
     grade_all_price: '0',
-    grades: []
+    grades: [],
   };
 
-   const form = useForm<z.infer<typeof formSchema>>({
-     resolver: zodResolver(formSchema),
-     defaultValues: defaultValues,
-   });
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: defaultValues,
+  });
 
-//   console.log('currency_id', listCurrency);
+  //   console.log('currency_id', listCurrency);
   async function getDetailData() {
-    let url = GET_DETAIL_ALLOWANCE_CATEGORY(id);
-
     try {
-      let response = await axiosInstance.get(url);
+      const response = await axiosInstance.get(detailUrl ?? '');
 
+      const allowance = response.data.data.allowance;
+      const grades = response.data.data.grades;
       form.reset({
-        code: response.data.data.code,
-        name: response.data.data.name,
+        code: allowance.code,
+        name: allowance.name,
+        type: allowance.type,
+        material_number: allowance.material_number,
+        material_group: allowance.material_group,
+        currency_id: allowance.currency_id,
+        formula: allowance.formula,
+        allowance_category_id: allowance.allowance_category_id,
+        request_value: allowance.request_value,
+        grade_option: allowance.grade_option,
+        grade_all_price: allowance.grade_all_price,
+        grades: grades,
       });
+
+      getMaterials(allowance.material_group);
     } catch (e) {
-      let error = e as AxiosError;
+      const error = e as AxiosError;
     }
   }
 
+  const { fields: gradeFields } = useFieldArray({
+    control: form.control,
+    name: `grades`,
+  });
 
-
- 
-
-    const { fields: gradeFields } = useFieldArray({
-      control: form.control,
-      name: `grades`,
-    });
+  console.log('type', type);
 
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-
-    console.log(values);
     try {
-      const response =  await axiosInstance.post(CREATE_API_ALLOWANCE_ITEM, values);
+      console.log(values);
+      if (type === FormType.create) {
+        const response = await axiosInstance.post(createUrl ?? '', values);
+      } else if (type === FormType.edit) {
+        const response = await axiosInstance.put(editUrl ?? '', values);
+      }
 
-    
       showToast('success', 'success');
       onSuccess?.(true);
     } catch (e) {
-  
-
-
-      
-     
       onSuccess?.(false);
 
       showToast('Please Check the input', 'error');
-   
     }
   };
 
-
-  async function getMaterials(material_group:string) {
-
+  async function getMaterials(material_group: string) {
     try {
-      let response = await axiosInstance.get(GET_LIST_MASTERIAL_BY_MATERIAL_GROUP(material_group)); ;
-      
-      form.setValue('material_group', material_group);
-      console.log(response)
+      const response = await axiosInstance.get(
+        GET_LIST_MASTERIAL_BY_MATERIAL_GROUP(material_group),
+      );
 
-        setMaterials(response.data.data);
-        console.log('response', response.data);
-    }
-    catch(e) {    
-      console.log(e)
+      form.setValue('material_group', material_group);
+
+      setMaterials(response.data.data);
+      console.log('response', response.data);
+    } catch (e) {
+      console.log(e);
     }
   }
 
@@ -188,6 +200,12 @@ export default function AllowanceItemForm({
   //     getDetailData();
   //   }
   // }, [id, type]);
+
+  React.useEffect(() => {
+    if (type === FormType.detail || type === FormType.edit) {
+      getDetailData();
+    }
+  }, [type]);
 
   return (
     <ScrollArea className='h-[600px] w-full'>
@@ -201,7 +219,7 @@ export default function AllowanceItemForm({
               <td>
                 <FormField
                   control={form.control}
-                  disabled={type == AllowanceType.edit}
+                  disabled={type == FormType.edit}
                   name='code'
                   render={({ field }) => (
                     <FormItem>
@@ -276,7 +294,7 @@ export default function AllowanceItemForm({
                 />
               </td>
             </tr>
-                  <tr>
+            <tr>
               <td width={200}>Material Group</td>
               <td>
                 <FormField
@@ -286,8 +304,8 @@ export default function AllowanceItemForm({
                     <FormItem>
                       <FormControl>
                         <Select
-                          onValueChange={(value) =>{
-                            getMaterials(value)
+                          onValueChange={(value) => {
+                            getMaterials(value);
                           }} // Pass selected value to React Hook Form
                           value={field.value} // Set the current value from React Hook Form
                         >
@@ -302,15 +320,11 @@ export default function AllowanceItemForm({
                               Total
                             </SelectItem> */}
 
-                              {
-                                listMaterialGroup.map((material) => (
-                                  <SelectItem key={material} value={material}>
-                                    {
-                                      material
-                                    }
-                                  </SelectItem>
-                                ))
-                              }
+                            {listMaterialGroup.map((material) => (
+                              <SelectItem key={material} value={material}>
+                                {material}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -344,15 +358,14 @@ export default function AllowanceItemForm({
                               Total
                             </SelectItem> */}
 
-                              {
-                                materials.map((material) => (
-                                  <SelectItem key={material.material_number} value={material.material_number}>
-                                    {
-                                      material.material_number
-                                    }
-                                  </SelectItem>
-                                ))
-                              }
+                            {materials.map((material: any) => (
+                              <SelectItem
+                                key={material.material_number}
+                                value={material.material_number}
+                              >
+                                {material.material_number}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -363,7 +376,6 @@ export default function AllowanceItemForm({
               </td>
             </tr>
 
-             
             <tr>
               <td width={200}>Currency</td>
               <td>
@@ -481,7 +493,7 @@ export default function AllowanceItemForm({
                     </FormItem>
                   )}
                 />
-                {form.getValues('grade_option') == 'all' ? (
+                {form.getValues('grade_option') === 'all' ? (
                   <div>
                     <FormField
                       control={form.control}
@@ -501,7 +513,7 @@ export default function AllowanceItemForm({
                       label='grade'
                       id='id'
                       options={listGrade}
-                      value={form.getValues('grades')}
+                      value={form.getValues('grades').map((item) => item.id)}
                       onSelect={(value) => {
                         form.setValue(
                           'grades',
@@ -509,7 +521,7 @@ export default function AllowanceItemForm({
                             return {
                               id: item.id,
                               grade: item.grade,
-                              price: 0,
+                              plafon: 0,
                             };
                           }),
                         );
@@ -518,11 +530,11 @@ export default function AllowanceItemForm({
                   </div>
                 )}
 
-                {form.getValues('grade_option') == 'grade' ? (
+                {form.getValues('grade_option') === 'grade' ? (
                   <div className='mt-4'>
                     <table>
                       {gradeFields.map((grade, gradeIndex) => (
-                        <tr>
+                        <tr key={grade}>
                           <td>Grade {grade.grade}</td>
                           <td>:</td>
                           <td>

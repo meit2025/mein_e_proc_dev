@@ -10,18 +10,16 @@ import { AllowanceForm, AllowanceType } from './components/AllowaceForm';
 import { GET_LIST_ALLOWANCE_CATEGORY } from '@/endpoint/allowance-category/api';
 
 export const Index = () => {
+  const [openForm, setOpenForm] = React.useState<boolean>(false);
 
-    const [openForm, setOpenForm] = React.useState<boolean>(false);
-
-    const [allowanceForm, setAllowanceForm] = React.useState({
-        type:AllowanceType.create,
-        id: undefined
-    });
-
+  const [allowanceForm, setAllowanceForm] = React.useState({
+    type: AllowanceType.create,
+    id: undefined,
+  });
 
   function openFormHandler() {
-        setOpenForm(!openForm);
-    }
+    setOpenForm(!openForm);
+  }
   return (
     <>
       <div className='flex md:mb-4 mb-2 w-full justify-end'>
@@ -30,10 +28,11 @@ export const Index = () => {
         </Button>
 
         <CustomDialog
-            onClose={() => setOpenForm(false)}
-        open={openForm} onOpenChange={openFormHandler}>
+          onClose={() => setOpenForm(false)}
+          open={openForm}
+          onOpenChange={openFormHandler}
+        >
           <AllowanceForm
-            
             type={allowanceForm.type}
             id={allowanceForm.id}
             onSuccess={(value) => {
@@ -48,11 +47,11 @@ export const Index = () => {
         columns={columns}
         actionType='dropdown'
         onEdit={(value) => {
-            setAllowanceForm({
-                type: AllowanceType.edit,
-                id: value.toString()
-            });
-            setOpenForm(true);
+          setAllowanceForm({
+            type: AllowanceType.edit,
+            id: value.toString(),
+          });
+          setOpenForm(true);
         }}
         url={{
           url: GET_LIST_ALLOWANCE_CATEGORY,
