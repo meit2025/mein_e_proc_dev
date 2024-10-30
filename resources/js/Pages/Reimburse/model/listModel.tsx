@@ -45,15 +45,19 @@ export interface Family {
 
 export interface Reimburse {
   id: string;
-  remark: string;
-  type: string;
-  family: Family[];
-  currency: string;
+  for: string;
+  group: string;
+  reimburse_type: string;
+  short_text: string;
   balance: number;
-  receipt_date: Date;
+  currency: string;
+  tax_on_sales: string;
+  purchasing_group: string;
+  period: string;
+  type: string;
+  item_delivery_data: Date;
   start_date: Date;
   end_date: Date;
-  period: string;
 }
 
 export interface User {
@@ -66,6 +70,7 @@ export interface Group {
   code: string;
   remark: string;
   status: string;
+  cost_center: string;
   users: User;
   reimburses: Reimburse[];
 }

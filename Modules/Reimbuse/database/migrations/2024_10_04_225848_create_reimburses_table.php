@@ -25,7 +25,6 @@ return new class extends Migration
 
             $table->foreignId('purchasing_group')->constrained('purchasing_groups')->cascadeOnUpdate();
             $table->foreignId('tax_on_sales')->constrained('pajaks')->cascadeOnUpdate();
-            $table->foreignId('cost_center')->constrained('master_cost_centers')->cascadeOnUpdate();
             $table->string('short_text'); // replace remark
             $table->date('item_delivery_data'); // replaced receipt_date
             $table->string('desired_vendor'); // requester

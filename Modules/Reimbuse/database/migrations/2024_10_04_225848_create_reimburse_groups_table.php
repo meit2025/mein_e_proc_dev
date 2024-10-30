@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->longText('remark');
             $table->string('requester');
+            $table->foreignId('cost_center')->constrained('master_cost_centers')->cascadeOnUpdate();
             $table->softDeletes();
             $table->timestamps();
 
