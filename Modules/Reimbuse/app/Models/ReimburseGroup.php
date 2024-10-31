@@ -17,7 +17,8 @@ class ReimburseGroup extends Model
     protected $fillable = [
         "code",
         "remark",
-        "requester"
+        "requester",
+        "cost_center",
     ];
     
     public function reimburses()

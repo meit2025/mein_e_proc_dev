@@ -36,7 +36,6 @@ class Reimburse extends Model
      */
     protected $fillable = [
         "group",
-        "cost_center",
         "reimburse_type",
         "type",
         "currency",
