@@ -53,7 +53,7 @@ class BusinessTripDeclarationController extends Controller
      */
     public function showAPI($id)
     {
-        $data = BusinessTrip::find($id);
+        $data = BusinessTrip::with(['costCenter', 'pajak', 'purchasingGroup'])->where('id', $id)->get();
         $data->name_request = $data->requestFor->name;
         $data->name_purpose = $data->purposeType->name;
         $destinations = [];
