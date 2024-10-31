@@ -111,7 +111,7 @@ export const BussinessTripFormV1 = ({
     },
   });
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values, ' data');
+    // console.log(values, ' data');
     try {
       const formData = new FormData();
       // Append group data
@@ -166,12 +166,12 @@ export const BussinessTripFormV1 = ({
 
       setBusinessTripDetail(response.data.data as BusinessTripModel[]);
       setListDestination(businessTripData.destinations);
-      console.log(businessTripData, ' businessTripData');
-      console.log(businessTripData.destinations, ' businessTripData.destinations');
-      // console.log(businessTripDetail, ' businessTripDetail');
-      //   setListAllowances(businessTripData.allowances as AllowanceItemModel[]);
       setTotalDestination(businessTripData.total_destination);
       setAllowancesProperty(businessTripData.destinations);
+      console.log(businessTripData, ' businessTripData');
+      //   console.log(businessTripData.destinations, ' businessTripData.destinations');
+      // console.log(businessTripDetail, ' businessTripDetail');
+      //   setListAllowances(businessTripData.allowances as AllowanceItemModel[]);
     } catch (e) {
       console.log(e);
     }
@@ -192,7 +192,7 @@ export const BussinessTripFormV1 = ({
       allowances: destination.allowances || [],
       detail_attedances: destination.detail_attedances || [],
     }));
-    console.log(destinationForm, ' destinationForm');
+    // console.log(destinationForm, ' destinationForm');
     form.setValue('destinations', destinationForm);
   }
 
@@ -471,10 +471,10 @@ export function BussinessDestinationForm({
           request_price: price,
         });
 
-        console.log('date', momentStart.toDate());
+        // console.log('date', momentStart.toDate());
       }
 
-      console.log(detailAllowance, 'detail allowance');
+      //   console.log(detailAllowance, 'detail allowance');
       return detailAllowance;
     }
 
@@ -502,7 +502,7 @@ export function BussinessDestinationForm({
 
     replaceAllowance(allowancesForm);
 
-    console.log(allowancesForm, ' Formmm');
+    // console.log(allowancesForm, ' Formmm');
     // console.log('destination',destination)
   }
 
@@ -536,7 +536,7 @@ export function BussinessDestinationForm({
     const total = (percentValue / 100) * allowance; // Multiply percent with allowance
     setValue('total_cash_advance', total.toFixed(2)); // Save the total in total_cash_advance field
   }, [totalPercent, allowance, setValue]); // Recalculate when totalPercent or allowance changes
-  console.log(destination, 'destinationxxxx');
+  //   console.log(destination, 'destinationxxxx');
   return (
     <TabsContent value={`destination${index + 1}`}>
       <div key={index}>
@@ -633,7 +633,7 @@ export function DetailAttedances({
   React.useEffect(() => {}, [detailAttedanceWatch]);
 
   React.useEffect(() => {
-    console.log(detailAttedanceFields, ' Detail Attedance fields');
+    // console.log(detailAttedanceFields, ' Detail Attedance fields');
   }, [detailAttedanceFields]);
   return (
     <table className='text-xs mt-4 reimburse-form-detail font-thin'>
@@ -854,7 +854,7 @@ export function AllowanceRowInput({
     // Define the validation logic based on the allowance type
     let isValid = true;
 
-    console.log(allowanceType);
+    // console.log(allowanceType);
 
     switch (allowanceType) {
       case 'unlimited':
