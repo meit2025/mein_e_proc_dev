@@ -90,7 +90,7 @@ export default function AllowanceItemForm({
     name: z.string().min(1, 'Name is required'),
     type: z.string().min(1, 'Type is required'),
     material_number: z.string().min(1, 'Material number required'),
-    material_group: z.string().min(1, 'Material number required'),
+    material_group: z.string().min(1, 'Material Group required'),
     currency_id: z.string().min(1, 'Currency is required'),
     formula: z.string().min(1, 'Formula is required'),
     allowance_category_id: z.string().min(1, 'Allowance Category is required'),
@@ -132,12 +132,15 @@ export default function AllowanceItemForm({
       const response = await axiosInstance.get(detailUrl ?? '');
 
       const allowance = response.data.data.allowance;
+      getMaterials(allowance.material_group);
+
       const grades = response.data.data.grades;
+
       form.reset({
         code: allowance.code,
         name: allowance.name,
         type: allowance.type,
-        material_number: allowance.material_number,
+        material_number: allowance.material_group,
         material_group: allowance.material_group,
         currency_id: allowance.currency_id,
         formula: allowance.formula,
@@ -148,7 +151,8 @@ export default function AllowanceItemForm({
         grades: grades,
       });
 
-      getMaterials(allowance.material_group);
+      // form.setValue('material_number', allowance.material_number);
+      // form.setValue('request_value', allowance.request_value);
     } catch (e) {
       const error = e as AxiosError;
     }
@@ -189,7 +193,6 @@ export default function AllowanceItemForm({
       form.setValue('material_group', material_group);
 
       setMaterials(response.data.data);
-      console.log('response', response.data);
     } catch (e) {
       console.log(e);
     }
@@ -205,7 +208,7 @@ export default function AllowanceItemForm({
     if (type === FormType.detail || type === FormType.edit) {
       getDetailData();
     }
-  }, [type]);
+  }, []);
 
   return (
     <ScrollArea className='h-[600px] w-full'>
@@ -219,13 +222,13 @@ export default function AllowanceItemForm({
               <td>
                 <FormField
                   control={form.control}
-                  disabled={type == FormType.edit}
                   name='code'
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
                         <Input
                           type='text'
+                          readOnly={type === FormType.edit}
                           placeholder='Insert code'
                           {...field}
                           value={field.value || ''}
@@ -335,7 +338,7 @@ export default function AllowanceItemForm({
               </td>
             </tr>
             <tr>
-              <td width={200}>Material Number</td>
+              <td width={200}>Material Number {form.getValues('material_number')}</td>
               <td>
                 <FormField
                   control={form.control}
@@ -345,7 +348,7 @@ export default function AllowanceItemForm({
                       <FormControl>
                         <Select
                           onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
-                          value={field.value} // Set the current value from React Hook Form
+                          defaultValue={form.getValues('material_number')} // Set the current value from React Hook Form
                         >
                           <SelectTrigger className='w-[200px]'>
                             <SelectValue placeholder='Select Material Number' />
@@ -561,7 +564,7 @@ export default function AllowanceItemForm({
             </tr>
 
             <tr>
-              <td width={200}>Request Value</td>
+              <td width={200}>Request Value {form.getValues('request_value')}</td>
               <td>
                 <FormField
                   control={form.control}

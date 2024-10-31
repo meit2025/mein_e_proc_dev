@@ -77,7 +77,17 @@ class PurposeTypeController extends Controller
     public function detailAPI($id)
     {
         $find = PurposeType::with(['listAllowance'])->find($id);
-        return $this->successResponse($find);
+
+        $purpose =  PurposeType::find($id);
+        $purposeTypeAllowances =  PurposeTypeAllowance::where('purpose_type_id', $id)->get()->transform(function ($transform) {
+            return $transform->allowance_items_id;
+        });
+
+        $context = [
+            'purpose' => $purpose,
+            'allowances' => $purposeTypeAllowances
+        ];
+        return $this->successResponse($context);
     }
 
     public function listAPI(Request $request)
@@ -97,7 +107,7 @@ class PurposeTypeController extends Controller
 
         // dd($data);
         $data->getCollection()->transform(function ($map) {
-          
+
 
             $allowanceTypeRelations = collect($map->listAllowance)->map(function ($relation) {
                 return  $relation->allowanceItem->name;
@@ -163,13 +173,60 @@ class PurposeTypeController extends Controller
         }
     }
 
-    public function getAllowanceByPurposeAPI($id, $userid)
-    {   
+    public function updateAPI($id, Request $request)
+    {
 
-        
+        $rules = [
+            // 'code' => 'required',
+            'name' => 'required',
+            'allowances.*' => 'required',
+            'attedance_status' => 'required'
+        ];
+
+        $validator =  Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('erorr created', 400, $validator->errors());
+        }
+
+        DB::beginTransaction();
+
+        try {
+            PurposeTypeAllowance::where('purpose_type_id', $id)->delete();
+
+            $purpose = PurposeType::find($id);
+
+            // $purpose->code =  $request->code;
+            $purpose->name = $request->name;
+            $purpose->attedance_status = $request->attedance_status;
+            $purpose->save();
+            $allowances = [];
+            foreach ($request->allowances as $allowance_id) {
+                array_push($allowances, [
+                    'allowance_items_id' => $allowance_id,
+                    'purpose_type_id' => $purpose->id
+                ]);
+            }
+
+            PurposeTypeAllowance::insert($allowances);
+
+            DB::commit();
+
+            return $this->successResponse($purpose, 'Successfully update purpose type');
+        } catch (\Exception $e) {
+            dd($e);
+
+            DB::rollBack();
+        }
+    }
+
+    public function getAllowanceByPurposeAPI($id, $userid)
+    {
+
+
 
         $listPurposeType =
-        PurposeTypeAllowance::where('purpose_type_id', $id)->get()->pluck('allowance_items_id')->toArray();
+            PurposeTypeAllowance::where('purpose_type_id', $id)->get()->pluck('allowance_items_id')->toArray();
 
         $listAllowances =  AllowanceItem::whereIn('id', $listPurposeType)->get();
 
@@ -179,7 +236,7 @@ class PurposeTypeController extends Controller
             } else {
                 // get grade user
                 $grade = BusinessTripGradeUser::where('user_id', $userid)->first();
-                
+
                 if (is_null($grade)) {
                     $listAllowances->grade_all_price = 0;
                 } else {
@@ -190,7 +247,7 @@ class PurposeTypeController extends Controller
                 }
             }
         }
-        
+
         return $this->successResponse($listAllowances);
     }
 }

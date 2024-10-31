@@ -7,14 +7,19 @@ import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import { AllowanceForm, AllowanceType } from './components/AllowaceForm';
-import { GET_LIST_ALLOWANCE_CATEGORY } from '@/endpoint/allowance-category/api';
+import {
+  CREATE_API_ALLOWANCE_CATEGORY,
+  GET_DETAIL_ALLOWANCE_CATEGORY,
+  GET_LIST_ALLOWANCE_CATEGORY,
+  UPDATE_ALLOWANCE_CATEGORY,
+} from '@/endpoint/allowance-category/api';
 
 export const Index = () => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
   const [allowanceForm, setAllowanceForm] = React.useState({
     type: AllowanceType.create,
-    id: undefined,
+    id: 0,
   });
 
   function openFormHandler() {
@@ -35,10 +40,11 @@ export const Index = () => {
           <AllowanceForm
             type={allowanceForm.type}
             id={allowanceForm.id}
+            detailUrl={GET_DETAIL_ALLOWANCE_CATEGORY(allowanceForm.id)}
+            updateUrl={UPDATE_ALLOWANCE_CATEGORY(allowanceForm.id)}
+            createUrl={CREATE_API_ALLOWANCE_CATEGORY}
             onSuccess={(value) => {
-              if (value) {
-                setOpenForm(false);
-              }
+              setOpenForm(false);
             }}
           />
         </CustomDialog>
@@ -49,9 +55,11 @@ export const Index = () => {
         onEdit={(value) => {
           setAllowanceForm({
             type: AllowanceType.edit,
-            id: value.toString(),
+            id: value,
           });
           setOpenForm(true);
+
+          console.log(allowanceForm);
         }}
         url={{
           url: GET_LIST_ALLOWANCE_CATEGORY,
