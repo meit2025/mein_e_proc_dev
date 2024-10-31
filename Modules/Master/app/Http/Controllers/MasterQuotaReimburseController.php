@@ -14,10 +14,7 @@ use Modules\Master\Models\MasterTypeReimburse;
 
 class MasterQuotaReimburseController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    public function list(Request $request)
     {
         try {
             $filterableColumns =  [
@@ -28,12 +25,24 @@ class MasterQuotaReimburseController extends Controller
                 'plafon'
             ];
             $data = $this->filterAndPaginate($request, MasterQuotaReimburse::class, $filterableColumns);
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        try {
+            
             $listPeriodReimburse = MasterPeriodReimburse::get();
             $listTypeReimburse = MasterTypeReimburse::get();
             $listGrade = BusinessTripGrade::get();
             return Inertia::render(
                 'Master/MasterReimburseQuota/Index',
-                compact('data', 'listPeriodReimburse', 'listTypeReimburse', 'listGrade')
+                compact('listPeriodReimburse', 'listTypeReimburse', 'listGrade')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());

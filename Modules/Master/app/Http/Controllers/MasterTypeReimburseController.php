@@ -12,13 +12,9 @@ use Modules\Master\Models\MasterTypeReimburse;
 
 class MasterTypeReimburseController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    public function list(Request $request)
     {
         try {
-            $listMaterial = MasterMaterial::get();
             $filterableColumns =  [
                 'code',
                 'name',
@@ -26,11 +22,23 @@ class MasterTypeReimburseController extends Controller
                 'material_group',
                 'material_number'
             ];
-
             $data = $this->filterAndPaginate($request, MasterTypeReimburse::class, $filterableColumns);
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        try {
+            $listMaterial = MasterMaterial::get();
             return Inertia::render(
                 'Master/MasterReimburseType/Index',
-                compact('data', 'listMaterial')
+                compact('listMaterial')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());

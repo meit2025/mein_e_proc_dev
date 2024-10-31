@@ -29,9 +29,9 @@ import { LIST_PAGE_MASTER_MATERIAL_GROUP } from '@/endpoint/materialGroup/page';
 import { LIST_PAGE_MASTER_UOM } from '@/endpoint/uom/page';
 import { LIST_PAGE_MASTER_PAJAK } from '@/endpoint/pajak/page';
 import { LIST_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
-import { LIST_PAGE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/page';
+import { PAGE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/page';
 import { LIST_PAGE_REIMBURSE_PERIOD } from '@/endpoint/reimbursePeriod/page';
-import { LIST_PAGE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/page';
+import { PAGE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/page';
 import { LIST_PAGE_FAMILY } from '@/endpoint/family/page';
 // import { Link } from '@inertiajs/inertia-react';
 
@@ -364,7 +364,7 @@ const sidebar = [
         sub: [
           {
             name: 'Reimburse Type',
-            route: LIST_PAGE_REIMBURSE_TYPE,
+            route: PAGE_REIMBURSE_TYPE,
             roles: '',
           },
           {
@@ -374,7 +374,7 @@ const sidebar = [
           },
           {
             name: 'Reimburse Quota',
-            route: LIST_PAGE_REIMBURSE_QUOTA,
+            route: PAGE_REIMBURSE_QUOTA,
             roles: '',
           },
         ],

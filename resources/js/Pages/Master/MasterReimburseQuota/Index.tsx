@@ -6,12 +6,11 @@ import { columns } from './models/models';
 import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import { GET_LIST_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
 import { ListTypeModel } from '../MasterReimburseType/models/models';
 import { ListPeriodModel } from '../MasterReimbursePeriod/models/models';
 import { BusinessTripGrade } from '@/Pages/BusinessTrip/BusinessGrade/model/model';
 import ReimburseQuotaForm from './component/form';
-import { LIST_PAGE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/page';
+import { LIST_API_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
 
 interface propsType {
   listTypeReimburse: ListTypeModel[];
@@ -48,7 +47,7 @@ export const Index = ({ listTypeReimburse, listPeriodReimburse, listGrade }: pro
         columns={columns}
         actionType='dropdown'
         url={{
-          url: LIST_PAGE_REIMBURSE_QUOTA,
+          url: LIST_API_REIMBURSE_QUOTA,
         }}
         labelFilter='search'
       />
