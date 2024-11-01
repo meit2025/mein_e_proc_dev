@@ -40,44 +40,57 @@ import {
   GET_LIST_ALLOWANCE_CATEGORY,
 } from '@/endpoint/allowance-category/api';
 import { useAlert } from '@/contexts/AlertContext';
-import { CREATE_API_BUSINESS_TRIP_GRADE, GET_DETAIL_BUSINESS_TRIP_GRADE } from '@/endpoint/business-grade/api';
+import {
+  CREATE_API_BUSINESS_TRIP_GRADE,
+  GET_DETAIL_BUSINESS_TRIP_GRADE,
+} from '@/endpoint/business-grade/api';
 import { FormType } from '@/lib/utils';
 import { MultiSelect } from '@/components/commons/MultiSelect';
 import { UserModel } from '../../BusinessTrip/models/models';
 
-
 export interface GradeInterface {
   onSuccess?: (value: boolean) => void;
   type?: FormType;
-  id?: string ;
+  id?: string;
   editURL?: string;
-  listUser: UserModel[]
+  detailUrl?: string;
+  createUrl?: string;
+  listUser: UserModel[];
 }
-export function GradeForm({ onSuccess, type = FormType.create, id, editURL, listUser }: GradeInterface) {
-  var formSchema = z.object({
+export function GradeForm({
+  onSuccess,
+  type = FormType.create,
+  id,
+  editURL,
+  detailUrl,
+  createUrl,
+  listUser,
+}: GradeInterface) {
+  const formSchema = z.object({
     grade: z.string().min(1, 'Grade is required'),
     users: z.array(z.number().optional()),
 
     // name: z.string().min(1, 'Name is required'),
   });
-
-  let defaultValues = {
-   grade: '',
-   users: []
+  const defaultValues = {
+    grade: '',
+    users: [],
   };
 
   async function getDetailData() {
-    let url = editURL;
-
     try {
-      let response = await axiosInstance.get(editURL);
-      
+      const response = await axiosInstance.get(detailUrl ?? '');
+
+      const grade = response.data.data.grade;
+      const users = response.data.data.users;
       form.reset({
-        grade: response.data.data.grade,
-   
+        grade: grade.grade,
+        users: users,
       });
+
+      console.log(response);
     } catch (e) {
-      let error = e as AxiosError;
+      const error = e as AxiosError;
     }
   }
 
@@ -89,7 +102,12 @@ export function GradeForm({ onSuccess, type = FormType.create, id, editURL, list
   const { showToast } = useAlert();
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     try {
-      const response = axiosInstance.post(CREATE_API_BUSINESS_TRIP_GRADE, values);
+      let response;
+      if (type === FormType.edit) {
+        response = axiosInstance.put(editURL ?? '', values);
+      } else {
+        response = axiosInstance.post(createUrl ?? '', values);
+      }
 
       console.log(response);
       showToast('succesfully created data', 'success');
@@ -103,10 +121,10 @@ export function GradeForm({ onSuccess, type = FormType.create, id, editURL, list
   };
 
   React.useEffect(() => {
-    if (id && type == FormType.edit) {
+    if (type === FormType.detail || type === FormType.edit) {
       getDetailData();
     }
-  }, [id, type]);
+  }, [type]);
 
   return (
     <ScrollArea className='h-[600px] w-full'>
@@ -145,9 +163,18 @@ export function GradeForm({ onSuccess, type = FormType.create, id, editURL, list
                 Users <span className='text-red-500'>*</span>
               </td>
               <td>
-                <MultiSelect onSelect={(value) => {
-                  form.setValue('users', value.map((map) => map.id))
-                }} value={form.getValues('users')} id='id' label='name' options={listUser} />
+                <MultiSelect
+                  onSelect={(value) => {
+                    form.setValue(
+                      'users',
+                      value.map((map) => map.id),
+                    );
+                  }}
+                  value={form.getValues('users')}
+                  id='id'
+                  label='name'
+                  options={listUser}
+                />
               </td>
             </tr>
           </table>

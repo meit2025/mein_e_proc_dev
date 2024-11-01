@@ -26,14 +26,15 @@ class AllowanceCategoryController extends Controller
         return view('businesstrip::create');
     }
 
-    public function listAPI(Request $request) {
+    public function listAPI(Request $request)
+    {
 
         $query =  AllowanceCategory::query();
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'asc');
 
-        
+
         $query->orderBy($sortBy, $sortDirection);
 
         $data = $query->paginate($perPage);
@@ -54,14 +55,14 @@ class AllowanceCategoryController extends Controller
 
         $validator =  Validator::make($request->all(), $rules);
 
-        if($validator->fails()) {
+        if ($validator->fails()) {
             return $this->errorResponse($validator->errors());
         }
 
         $checkCode =  AllowanceCategory::where('code', $request->code)->first();
 
-        if($checkCode) {
-            return $this->errorResponse('this code '.$request->code.' has been using ');
+        if ($checkCode) {
+            return $this->errorResponse('this code ' . $request->code . ' has been using ');
         }
 
         DB::beginTransaction();
@@ -76,12 +77,49 @@ class AllowanceCategoryController extends Controller
             DB::commit();
 
             return $this->successResponse($allowanceCategory, 'Successfully created allowance category', 201);
-         }
-         catch(\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
 
             return $this->errorResponse($e);
-         } 
+        }
+        //
+    }
+
+    public function updateAPI($id, Request $request)
+    {
+        $rules = [
+            'name' => 'required',
+            // 'code' => 'required',
+        ];
+
+        $validator =  Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return $this->errorResponse($validator->errors());
+        }
+
+        // $checkCode =  AllowanceCategory::where('code', $request->code)->first();
+
+        // if ($checkCode) {
+        //     return $this->errorResponse('this code ' . $request->code . ' has been using ');
+        // }
+
+        DB::beginTransaction();
+
+        try {
+            $allowanceCategory = AllowanceCategory::find($id);
+            $allowanceCategory->name =  $request->name;
+
+            $allowanceCategory->save();
+
+            DB::commit();
+
+            return $this->successResponse($allowanceCategory, 'Successfully created allowance category', 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return $this->errorResponse($e);
+        }
         //
     }
 

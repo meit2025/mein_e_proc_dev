@@ -7,15 +7,16 @@ import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import { GradeForm } from './components/form';
-import { GET_DETAIL_BUSINESS_TRIP_GRADE, GET_LIST_BUSINESS_TRIP_GRADE } from '@/endpoint/business-grade/api';
+import {
+  CREATE_API_BUSINESS_TRIP_GRADE,
+  GET_DETAIL_BUSINESS_TRIP_GRADE,
+  GET_LIST_BUSINESS_TRIP_GRADE,
+  UPDATE_BUSINESS_TRIP_GRADE,
+} from '@/endpoint/business-grade/api';
 import { FormType } from '@/lib/utils';
 import { UserModel } from '../BusinessTrip/models/models';
 
-export const Index = ({
-  listUser
-}: {
-listUser: UserModel[]
-}) => {
+export const Index = ({ listUser }: { listUser: UserModel[] }) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
   const [formType, setFormType] = React.useState({
@@ -40,13 +41,13 @@ listUser: UserModel[]
         >
           <GradeForm
             listUser={listUser}
-            editURL={GET_DETAIL_BUSINESS_TRIP_GRADE(formType.id ?? '')}
+            editURL={UPDATE_BUSINESS_TRIP_GRADE(formType.id ?? '')}
+            detailUrl={GET_DETAIL_BUSINESS_TRIP_GRADE(formType.id ?? '')}
+            createUrl={CREATE_API_BUSINESS_TRIP_GRADE}
             type={formType.type}
             id={formType.id}
             onSuccess={(value) => {
-              // if (value) {
-              //   setOpenForm(false);
-              // }
+              setOpenForm(false);
             }}
           />
         </CustomDialog>

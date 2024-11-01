@@ -2,9 +2,7 @@ import MainLayout from '@/Pages/Layouts/MainLayout';
 import React, { ReactNode } from 'react';
 import DataGridComponent from '@/components/commons/DataGrid';
 
-import {
-    columns
-} from './models/models'
+import { columns } from './models/models';
 import { GET_MASTER_ASSET } from '@/endpoint/masterAsset/api';
 import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
@@ -13,8 +11,13 @@ import { GET_LIST_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/api';
 import { AllowanceCategoryModel } from '../AllowanceCategory/model/AllowanceModel';
 import PurposeTypeForm from './component/form';
 import { AllowanceItemModel } from '../AllowanceItem/models/models';
-import { GET_LIST_PURPOSE_TYPE } from '@/endpoint/purpose-type/api';
-
+import {
+  CREATE_API_PURPOSE_TYPE,
+  GET_DETAIL_PURPOSE_TYPE,
+  GET_LIST_PURPOSE_TYPE,
+  UPDATE_PURPOSE_TYPE,
+} from '@/endpoint/purpose-type/api';
+import { FormType } from '@/lib/utils';
 
 interface propsType {
   // listAllowanceCategory: AllowanceCategoryModel[];
@@ -22,12 +25,18 @@ interface propsType {
 
   // listCurrency: any[];
 }
-export const Index = (
-    {listAllowance}: propsType
-) => {
+export const Index = ({ listAllowance }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
+  const [formType, setFormType] = React.useState({
+    type: FormType.create,
+    id: null,
+  });
 
   function openFormHandler() {
+    setFormType({
+      id: null,
+      type: FormType.create,
+    });
     setOpenForm(!openForm);
   }
   return (
@@ -41,16 +50,29 @@ export const Index = (
           onClose={() => setOpenForm(false)}
           open={openForm}
           onOpenChange={openFormHandler}
-          
         >
-            <PurposeTypeForm onSuccess={(value) => {
-              if(value) {
+          <PurposeTypeForm
+            detailUrl={GET_DETAIL_PURPOSE_TYPE(formType.id)}
+            editUrl={UPDATE_PURPOSE_TYPE(formType.id)}
+            type={formType.type}
+            createUrl={CREATE_API_PURPOSE_TYPE}
+            onSuccess={(value) => {
+              if (value) {
                 setOpenForm(false);
               }
-            }} listAllowanceModel={listAllowance} />
+            }}
+            listAllowanceModel={listAllowance}
+          />
         </CustomDialog>
       </div>
       <DataGridComponent
+        onEdit={(value) => {
+          setFormType({
+            type: FormType.edit,
+            id: value,
+          });
+          setOpenForm(true);
+        }}
         columns={columns}
         actionType='dropdown'
         url={{
