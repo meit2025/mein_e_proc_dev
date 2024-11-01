@@ -17,6 +17,10 @@ use Modules\BusinessTrip\Models\BusinessTripDetailAttedance;
 use Modules\BusinessTrip\Models\BusinessTripDetailDestinationDayTotal;
 use Modules\BusinessTrip\Models\BusinessTripDetailDestinationTotal;
 use Modules\BusinessTrip\Models\PurposeType;
+use Modules\BusinessTrip\Models\PurposeTypeAllowance;
+use Modules\Master\Models\MasterCostCenter;
+use Modules\Master\Models\Pajak;
+use Modules\Master\Models\PurchasingGroup;
 use Modules\Reimbuse\Models\Reimburse;
 use Modules\Reimbuse\Models\ReimburseType;
 
@@ -30,7 +34,10 @@ class BusinessTripController extends Controller
         $users = User::select('nip', 'name', 'id')->get();
 
         $listPurposeType = PurposeType::select('name', 'code', 'id')->get();
-        return Inertia::render('BusinessTrip/BusinessTrip/index', compact('users', 'listPurposeType'));
+        $pajak = Pajak::select('id', 'mwszkz', 'desimal')->get();
+        $costcenter = MasterCostCenter::select('id', 'cost_center', 'controlling_name')->get();
+        $purchasingGroup = PurchasingGroup::select('id', 'purchasing_group')->get();
+        return Inertia::render('BusinessTrip/BusinessTrip/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup'));
     }
 
     /**
@@ -115,6 +122,9 @@ class BusinessTripController extends Controller
                 'request_no' => time(),
                 'purpose_type_id' => $request->purpose_type_id,
                 'request_for' => $request->request_for,
+                'cost_center_id' => $request->cost_center_id,
+                'pajak_id' => $request->pajak_id,
+                'purchasing_group_id' => $request->purchasing_group_id,
                 'remarks' => $request->remark,
                 'total_destination' => $request->total_destination,
                 'created_by' => auth()->user()->id,
@@ -211,5 +221,12 @@ class BusinessTripController extends Controller
 
 
         return $this->successResponse($data);
+    }
+
+    function printAPI($id)
+    {
+        $data = BusinessTrip::find($id);
+        $standar_value = PurposeTypeAllowance::where('purpose_type_id', $data->purpose_type_id)->get();
+        return view('print', compact('data'));
     }
 }

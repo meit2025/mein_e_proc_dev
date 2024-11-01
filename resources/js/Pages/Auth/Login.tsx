@@ -42,8 +42,6 @@ import { useAlert } from '../../contexts/AlertContext.jsx';
 import axiosInstance from '@/axiosInstance.js';
 
 export function LoginForm() {
-  const { errors } = usePage().props;
-
   const [loading, setLoading] = React.useState<boolean>(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -67,8 +65,21 @@ export function LoginForm() {
       showToast(response.data.message, 'success');
       window.location.href = '/';
     } catch (error) {
-      const resultError = error as AxiosError;
-      console.log(resultError);
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        showToast(error.response.data.message, 'error');
+      }
+
+      if (axios.isAxiosError(error) && error.response?.data?.errors) {
+        const serverErrors = error.response.data.errors;
+        // Loop through the errors and set them in the form
+        Object.keys(serverErrors).forEach((field) => {
+          const uniqueMessages = Array.from(new Set(serverErrors[field])); // Remove duplicates
+          form.setError(field as keyof typeof formSchema.shape, {
+            type: 'server',
+            message: uniqueMessages.join(', '), // Join unique error messages
+          });
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -77,7 +88,7 @@ export function LoginForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className=''>
-        <div className='flex flex-col space-y-3'>
+        <div className='flex flex-col space-y-3 p-2'>
           <FormField
             control={form.control}
             name='username'
@@ -87,7 +98,7 @@ export function LoginForm() {
                 <FormControl>
                   <Input placeholder='Username' {...field} />
                 </FormControl>
-                {/* <FormDescription>This is your public display name.</FormDescription> */}
+
                 <FormMessage />
               </FormItem>
             )}
@@ -102,7 +113,6 @@ export function LoginForm() {
                 <FormControl>
                   <PasswordInput placeholder='Password' {...field} />
                 </FormControl>
-                {/* <FormDescription>This is your public display name.</FormDescription> */}
                 <FormMessage />
               </FormItem>
             )}
@@ -134,7 +144,7 @@ export function LoginForm() {
             )}
           />
         </div>
-        <div className='mt-4'>
+        <div className='mt-4 p-2'>
           <Button className='w-full' variant={'blue'} type='submit' disabled={loading}>
             {loading ? (
               <div className='flex justify-center items-center'>
