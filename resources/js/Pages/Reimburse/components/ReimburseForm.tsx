@@ -46,13 +46,12 @@ export const ReimburseForm: React.FC<Props> = ({
   periods,
   users,
   taxes,
-  cost_center
+  cost_center,
 }) => {
   const [activeTab, setActiveTab] = useState('form1');
   const { showToast } = useAlert();
   const { errors } = usePage().props;
   const [formCount, setFormCount] = useState<number>(1);
-  const [formData, setFormData] = useState<Reimburse[]>(reimburses);
   const [limits, setLimits] = useState([]);
   const [reimburseTypes, setReimburseTypes] = useState([[]]);
   const [requester, setRequester] = useState();
@@ -63,49 +62,76 @@ export const ReimburseForm: React.FC<Props> = ({
     defaultValues: {
       formCount: '1',
       remark_group: '',
+      cost_center: '',
       requester: '',
       forms: Array.from({ length: 1 }).map(() => ({
         id: '',
-        type: '',
+        for: '',
+        group: '',
         reimburse_type: '',
-        purchasing_group: '',
         short_text: '',
-        period: '',
         balance: 0,
+        currency: 'IDR',
         tax_on_sales: '',
-        cost_center: '',
-        for: requester,
+        purchasing_group: '',
+        period: '',
+        type: '',
         item_delivery_data: new Date(),
         start_date: new Date(),
         end_date: new Date(),
-        currency: 'IDR',
-        attachment: null,
       })),
     },
   });
 
+  const handleFormCountChange = (value: any) => {
+    setFormCount(value);
+    const currentForms = form.getValues('forms');
+    const newForms = Array.from({ length: value }).map((_, index) => {
+      return (
+        currentForms[index] || {
+          id: '',
+          for: '',
+          group: '',
+          reimburse_type: '',
+          short_text: '',
+          balance: 0,
+          currency: 'IDR',
+          tax_on_sales: '',
+          purchasing_group: '',
+          period: '',
+          type: '',
+          item_delivery_data: new Date(),
+          start_date: new Date(),
+          end_date: new Date(),
+        }
+      );
+    });
+    form.setValue('forms', newForms);
+    form.setValue('formCount', value.toString());
+  };
+
   useEffect(() => {
     if (reimbursement) {
       form.setValue('remark_group', reimbursement.remark);
+      form.setValue('cost_center', reimbursement.cost_center);
       form.setValue('requester', reimbursement.users.nip);
       form.setValue('formCount', reimbursement.reimburses.length.toString());
-      form.setValue(
-        'forms',
-        reimbursement.reimburses.map((reimburse) => ({
-          id: reimburse.id,
-          reimburse_type: reimburse.reimburse_type,
-          short_text: reimburse.short_text,
-          balance: Number(reimburse.balance),
-          currency: reimburse.currency,
-          tax_on_sales: reimburse.tax_on_sales,
-          cost_center: reimburse.cost_center,
-          purchasing_group: reimburse.purchasing_group,
-          period: reimburse.period,
-          item_delivery_data: new Date(reimburse.item_delivery_data),
-          start_date: new Date(reimburse.start_date),
-          end_date: new Date(reimburse.end_date),
-          attachment: reimburse.attachment || null,
-        })),
+      form.setValue('forms', reimbursement.reimburses.map((reimburse) => ({
+        id: reimburse.id,
+        for: reimburse.for,
+        group: reimburse.group,
+        reimburse_type: reimburse.reimburse_type,
+        short_text: reimburse.short_text,
+        balance: Number(reimburse.balance),
+        currency: reimburse.currency,
+        tax_on_sales: reimburse.tax_on_sales,
+        purchasing_group: reimburse.purchasing_group,
+        period: reimburse.period,
+        type: reimburse.type,
+        item_delivery_data: new Date(reimburse.item_delivery_data),
+        start_date: new Date(reimburse.start_date),
+        end_date: new Date(reimburse.end_date),
+      })),
       );
       reimbursement.reimburses.forEach((reimburse, index) => {
         selectedTypeCode(index, reimburse.reimburse_type);
@@ -113,7 +139,7 @@ export const ReimburseForm: React.FC<Props> = ({
     }
   }, [reimbursement]);
 
-  async function selectedEmployee(value) {
+  const selectedEmployee = async (value: any) => {
     try {
       const response = await axios.get(`/family/show/${value}`);
       const typeData = response.data;
@@ -127,36 +153,11 @@ export const ReimburseForm: React.FC<Props> = ({
     }
   }
 
-  const handleFormCountChange = (value: any) => {
-    setFormCount(value);
-    const currentForms = form.getValues('forms');
-    const newForms = Array.from({ length: value }).map((_, index) => {
-      return (
-        currentForms[index] || {
-          id: '',
-          type: '',
-          reimburse_type: '',
-          short_text: '',
-          period: '',
-          tax_on_sales: '',
-          cost_center: '',
-          balance: 0,
-          item_delivery_data: new Date(),
-          start_date: new Date(),
-          end_date: new Date(),
-          currency: 'IDR',
-        }
-      );
-    });
-    form.setValue('forms', newForms);
-    form.setValue('formCount', value.toString());
-  };
-
   const handleTabChange = (tabValue) => {
     setActiveTab(tabValue);
   };
 
-  async function selectedTypeCode(index, value) {
+  const selectedTypeCode = async (index, value) => {
     try {
       const response = await axios.get(`/reimburse/type/${value}`);
       const typeData = response.data;
@@ -178,7 +179,7 @@ export const ReimburseForm: React.FC<Props> = ({
     }
   }
 
-  async function checkBalance(index, user, is_employee, type, period) {
+  const checkBalance = async (index, user, is_employee, type, period) => {
     const response = await axios.post('/reimburse/is_required', {
       user,
       is_employee,
@@ -242,6 +243,40 @@ export const ReimburseForm: React.FC<Props> = ({
                   />
                 </td>
               </tr>
+
+              <tr>
+                <td width={200}>Cost Center</td>
+                <td>
+                  <FormField
+                    control={form.control}
+                    name='cost_center'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Select
+                            disabled={reimbursement !== null}
+                            onValueChange={(value) => field.onChange(value)}
+                            value={field.value}
+                          >
+                            <SelectTrigger className='w-[200px]'>
+                              <SelectValue placeholder='-' />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {cost_center.map((value) => (
+                                <SelectItem key={value.id} value={value.id.toString()}>
+                                  {value.cost_center}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </td>
+              </tr>
+
               <tr>
                 <td width={200}>Employee</td>
                 <td>
@@ -527,39 +562,6 @@ export const ReimburseForm: React.FC<Props> = ({
                                       {taxes.map((tax) => (
                                         <SelectItem key={tax.id} value={tax.id.toString()}>
                                           {tax.mwszkz}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                      </tr>
-
-                      <tr>
-                        <td width={200}>Cost Center</td>
-                        <td>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.cost_center`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Select
-                                    disabled={reimbursement !== null}
-                                    onValueChange={(value) => field.onChange(value)}
-                                    value={field.value}
-                                  >
-                                    <SelectTrigger className='w-[200px]'>
-                                      <SelectValue placeholder='-' />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {cost_center.map((value) => (
-                                        <SelectItem key={value.id} value={value.id.toString()}>
-                                          {value.cost_center}
                                         </SelectItem>
                                       ))}
                                     </SelectContent>

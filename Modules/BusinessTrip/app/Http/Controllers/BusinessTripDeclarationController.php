@@ -16,6 +16,7 @@ use Modules\BusinessTrip\Models\BusinessTripDetailAttedance;
 use Modules\BusinessTrip\Models\BusinessTripDetailDestinationDayTotal;
 use Modules\BusinessTrip\Models\BusinessTripDetailDestinationTotal;
 use Modules\BusinessTrip\Models\PurposeType;
+use Modules\BusinessTrip\Models\PurposeTypeAllowance;
 
 class BusinessTripDeclarationController extends Controller
 {
@@ -52,7 +53,7 @@ class BusinessTripDeclarationController extends Controller
      */
     public function showAPI($id)
     {
-        $data = BusinessTrip::find($id);
+        $data = BusinessTrip::with(['costCenter', 'pajak', 'purchasingGroup'])->where('id', $id)->get();
         $data->name_request = $data->requestFor->name;
         $data->name_purpose = $data->purposeType->name;
         $destinations = [];
@@ -261,5 +262,12 @@ class BusinessTripDeclarationController extends Controller
             dd($e);
             DB::rollBack();
         }
+    }
+
+    function printAPI($id)
+    {
+        $data = BusinessTrip::find($id);
+        $standar_value = PurposeTypeAllowance::where('purpose_type_id', $data->purpose_type_id)->get();
+        return view('print-bt-declaration', compact('data'));
     }
 }

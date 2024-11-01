@@ -14,7 +14,13 @@ use Modules\Reimbuse\Models\ReimburseAttachment;
 
 class ReimbursementService
 {
-    protected $validator_rule = [
+    protected $validator_rule_group = [
+        'remark'        =>  'nullable',
+        'requester'     =>  'required|exists:users,nip',
+        'cost_center'   =>  'required|exists:master_cost_centers,id',
+    ];
+
+    protected $validator_rule_reimburse = [
         'reimburse_type'        =>  'required|exists:master_type_reimburses,code',
         'short_text'            =>  'nullable',
         'balance'               =>  'required|numeric',
@@ -28,7 +34,6 @@ class ReimbursementService
         'type'                  =>  'required|in:Employee,Family',
         'purchasing_group'      =>  'required|exists:purchasing_groups,id',
         'tax_on_sales'          =>  'required|exists:pajaks,id',
-        'cost_center'           =>  'required|exists:master_cost_centers,id',
     ];
 
     public function checkGroupStatus(string $groupCode): string
@@ -47,19 +52,23 @@ class ReimbursementService
     {
         try {
             DB::beginTransaction();
-
-            $group = ReimburseGroup::create([
-                'code'   => $this->generateUniqueGroupCode(),
-                'remark' => $groupData['remark'],
-                'requester' => $groupData['requester'],
-            ]);
+            
+            $validator_group = Validator::make($groupData, $this->validator_rule_group);
+            if ($validator_group->fails()) {
+                DB::rollBack();
+                return ['error' => $validator_group->errors()];
+            }            
+            $validatedDataGroup = $validator_group->validated();
+            
+            $validatedDataGroup['code'] = $this->generateUniqueGroupCode();
+            $group = ReimburseGroup::create($validatedDataGroup);
 
             foreach ($forms as $form) {
                 if (!isset($form->for)) {
                     $form['for'] = $groupData['requester'];
                 }
                 $form['desired_vendor'] = $groupData['requester'];
-                $validator = Validator::make($form, $this->validator_rule);
+                $validator = Validator::make($form, $this->validator_rule_reimburse);
                 if ($validator->fails()) {
                     DB::rollBack();
                     return ['error' => $validator->errors()];
@@ -101,7 +110,7 @@ class ReimbursementService
             DB::beginTransaction();
 
             foreach ($forms as $form) {
-                $validator = Validator::make($form, $this->validator_rule);
+                $validator = Validator::make($form, $this->validator_rule_reimburse);
                 if ($validator->fails()) {
                     return $validator->errors();
                 }

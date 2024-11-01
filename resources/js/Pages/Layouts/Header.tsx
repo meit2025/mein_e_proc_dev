@@ -145,7 +145,7 @@ export default function Header() {
           {/* end mobile logo */}
           {/* <!-- Mega Men --> */}
           <div className='flex items-stretch' id='mega_menu_container'>
-            <div
+            {/* <div
               className='flex items-stretch'
               data-reparent='true'
               data-reparent-mode='prepend|lg:prepend'
@@ -1617,7 +1617,7 @@ export default function Header() {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
           {/* <!-- End of Mega Men --> */}
 
