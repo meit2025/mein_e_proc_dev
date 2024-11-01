@@ -16,17 +16,18 @@ use Modules\Reimbuse\Http\Controllers\ReimbuseController;
 |
 */
 
-// Route::get('/login',[AuthController::class, 'index'])->name('auth.login-index');
+// Route::group(['middleware' => 'auth'], function () {
+Route::group(['prefix' => 'reimburse'], function () {
+    Route::get('/', [ReimbuseController::class, 'index'])->name('reimburse.index');
+    Route::get('/edit/{id}', [ReimbuseController::class, 'edit'])->name('reimburse.edit');
 
-Route::group(['prefix' => 'reimburse', 'middleware' => 'auth'], function () {
-    Route::resource('/', ReimbuseController::class);
-    Route::get('/type/{type}', [ReimbuseController::class, 'getTypeData']);
-    Route::post('/is_required', [ReimbuseController::class, 'is_required']);
-
+    Route::get('/type/{type}', [ReimbuseController::class, 'getTypeData'])->name('reimburse.type');
+    Route::post('/is_required', [ReimbuseController::class, 'is_required'])->name('reimburse.is_required');
 
     Route::inertia('/detail/{id}',  'Reimburse/Detail', [
         'id' => fn() => request()->route('id'),
     ]);
 });
+// });
 
 Route::get('/family/show/{employee}', [FamilyController::class, 'show']);

@@ -1,11 +1,12 @@
 import { FamilyModel } from '@/Pages/Master/Family/models/models';
 
 export const columns: GridColDef[] = [
+  { field: 'id', headerName: 'Request Number', width: 200, filterable: true },
   { field: 'code', headerName: 'Request Number', width: 200, filterable: true },
-  { field: 'requester', headerName: 'Request For', width: 200, filterable: true },
-  { field: 'balance', headerName: 'Remark', width: 200, filterable: true },
-  { field: 'sum_form', headerName: 'Form', width: 200, filterable: true },
-  { field: 'sum_balance', headerName: 'Balance', width: 200, filterable: true },
+  { field: 'request_for', headerName: 'Reimburse for', width: 200, filterable: true },
+  { field: 'remark', headerName: 'Remark', width: 200, filterable: true },
+  { field: 'balance', headerName: 'Total Balance', width: 200, filterable: true },
+  { field: 'form', headerName: 'Reimburse Form', width: 200, filterable: true },
   { field: 'status', headerName: 'Status', width: 200, filterable: true },
 ];
 
@@ -64,14 +65,14 @@ export interface User {
   nip: string;
   name: string;
 }
-
+  
 export interface Group {
   id: string;
   code: string;
   remark: string;
   status: string;
   cost_center: string;
-  users: User;
+  users: User[];
   reimburses: Reimburse[];
 }
 

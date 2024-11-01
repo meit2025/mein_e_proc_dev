@@ -33,7 +33,7 @@ import { PAGE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/page';
 import { LIST_PAGE_REIMBURSE_PERIOD } from '@/endpoint/reimbursePeriod/page';
 import { PAGE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/page';
 import { LIST_PAGE_FAMILY } from '@/endpoint/family/page';
-// import { Link } from '@inertiajs/inertia-react';
+import { PAGE_REIMBURSE } from '@/endpoint/reimburse/page';
 
 export const RuteTitle = (title: string) => {
   return (
@@ -129,7 +129,7 @@ const sidebar = [
       {
         title: 'Reimburse',
         icon: 'ki-element-11',
-        route: '/reimburse',
+        route: PAGE_REIMBURSE,
         sub: [],
       },
 
