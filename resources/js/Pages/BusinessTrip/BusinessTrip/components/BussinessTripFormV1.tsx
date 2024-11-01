@@ -240,13 +240,14 @@ export const BussinessTripFormV1 = ({
   }
 
   const totalDestinationHandler = (value: string) => {
-    let valueToInt = parseInt(value);
+    form.setValue('total_destination', parseInt(value, 10));
     setTotalDestination(value);
     setAllowancesProperty();
+    // let valueToInt = parseInt(value);
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    // console.log(values, ' test');
+    console.log(values, ' test');
     try {
       const formData = new FormData();
       // Append group data
@@ -275,11 +276,11 @@ export const BussinessTripFormV1 = ({
 
       // console.log(response);
       showToast('succesfully created data', 'success');
-      onSuccess?.(true);
+      //   onSuccess?.(true);
     } catch (e) {
       const error = e as AxiosError;
 
-      onSuccess?.(false);
+      //   onSuccess?.(false);
       //   console.log(error);
     }
 
@@ -605,7 +606,10 @@ export const BussinessTripFormV1 = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Select value={totalDestination} onValueChange={totalDestinationHandler}>
+                        <Select
+                          value={field.value.toString()}
+                          onValueChange={totalDestinationHandler}
+                        >
                           <SelectTrigger className='w-[200px] py-2'>
                             <SelectValue placeholder='-- Select Bussiness Trip --' />
                           </SelectTrigger>

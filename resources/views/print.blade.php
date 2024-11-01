@@ -194,6 +194,7 @@
                     @endphp
 
                     @foreach ($groupedItems as $allowanceItemId => $items)
+                    @dd($items)
                         @php
                             // Get the first item in the group for displaying allowance details
                             $firstItem = $items->first();

@@ -5,6 +5,7 @@ namespace Modules\BusinessTrip\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Currency;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -115,7 +116,6 @@ class BusinessTripController extends Controller
         if ($validator->fails()) {
             return $this->errorResponse("erorr", 400, $validator->errors());
         }
-
         try {
             DB::beginTransaction();
             $businessTrip = BusinessTrip::create([
@@ -144,6 +144,7 @@ class BusinessTripController extends Controller
 
             foreach ($request->destinations as $key => $value) {
                 $data_destination = json_decode($value, true);
+                // dd($data_destination);
                 $businessTripDestination = BusinessTripDestination::create([
                     'business_trip_id' => $businessTrip->id,
                     'destination' => $data_destination['destination'],
@@ -154,7 +155,7 @@ class BusinessTripController extends Controller
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
                         'business_trip_destination_id' => $businessTripDestination->id,
                         'business_trip_id' => $businessTrip->id,
-                        'date' => $destination['date'],
+                        'date' => date('Y-m-d', strtotime($destination['date'])),
                         'shift_code' => $destination['shift_code'],
                         'shift_start' => $destination['shift_start'],
                         'shift_end' => $destination['shift_end'],
