@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-const ReimburseDetail = () => {
+const BusinessTripDetail = () => {
   return <p>Detail aja di sini</p>;
 };
 
-export default ReimburseDetail;
+export default BusinessTripDetail;

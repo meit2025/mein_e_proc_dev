@@ -169,6 +169,20 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                             </span>
                           </DropdownMenuItem>
                         )}
+
+                        <DropdownMenuSeparator />
+                        {(onDetail || url.detailUrl) && (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              onDetail && onDetail(params.row.id);
+                              if (url.detailUrl) {
+                                window.location.href = `${url.detailUrl}/${params.row.id}`;
+                              }
+                            }}
+                          >
+                            View details
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </>
