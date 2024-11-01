@@ -40,8 +40,7 @@ export const Index = ({
         </Button>
 
         <CustomDialog onClose={() => setOpen(false)} open={open} onOpenChange={handleOpenForm}>
-          <ReimburseForm2
-          />
+          <ReimburseForm2 />
         </CustomDialog>
       </div>
       <DataGridComponent

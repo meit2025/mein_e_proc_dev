@@ -15,6 +15,7 @@ import {
   DELET_API,
   GET_LIST_BUSINESS_TRIP_DECLARATION,
 } from '@/endpoint/business-trip-declaration/api';
+import { DETAIL_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
 
 interface propsType {
   listPurposeType: PurposeTypeModel[];
@@ -64,6 +65,7 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         url={{
           url: GET_LIST_BUSINESS_TRIP_DECLARATION,
           deleteUrl: DELET_API,
+          detailUrl: DETAIL_PAGE_BUSINESS_TRIP_DECLARATION,
         }}
         labelFilter='search'
       />

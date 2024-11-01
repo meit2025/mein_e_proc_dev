@@ -77,7 +77,17 @@ class PurposeTypeController extends Controller
     public function detailAPI($id)
     {
         $find = PurposeType::with(['listAllowance'])->find($id);
-        return $this->successResponse($find);
+
+        $purpose =  PurposeType::find($id);
+        $purposeTypeAllowances =  PurposeTypeAllowance::where('purpose_type_id', $id)->get()->transform(function ($transform) {
+            return $transform->allowance_items_id;
+        });
+
+        $context = [
+            'purpose' => $purpose,
+            'allowances' => $purposeTypeAllowances
+        ];
+        return $this->successResponse($context);
     }
 
     public function listAPI(Request $request)
@@ -163,32 +173,79 @@ class PurposeTypeController extends Controller
         }
     }
 
+    public function updateAPI($id, Request $request)
+    {
+
+        $rules = [
+            // 'code' => 'required',
+            'name' => 'required',
+            'allowances.*' => 'required',
+            'attedance_status' => 'required'
+        ];
+
+        $validator =  Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('erorr created', 400, $validator->errors());
+        }
+
+        DB::beginTransaction();
+
+        try {
+            PurposeTypeAllowance::where('purpose_type_id', $id)->delete();
+
+            $purpose = PurposeType::find($id);
+
+            // $purpose->code =  $request->code;
+            $purpose->name = $request->name;
+            $purpose->attedance_status = $request->attedance_status;
+            $purpose->save();
+            $allowances = [];
+            foreach ($request->allowances as $allowance_id) {
+                array_push($allowances, [
+                    'allowance_items_id' => $allowance_id,
+                    'purpose_type_id' => $purpose->id
+                ]);
+            }
+
+            PurposeTypeAllowance::insert($allowances);
+
+            DB::commit();
+
+            return $this->successResponse($purpose, 'Successfully update purpose type');
+        } catch (\Exception $e) {
+            dd($e);
+
+            DB::rollBack();
+        }
+    }
+
     public function getAllowanceByPurposeAPI($id, $userid)
     {
-        $listPurposeType = PurposeTypeAllowance::where('purpose_type_id', $id)->get()->pluck('allowance_items_id')->toArray();
+
+
+
+        $listPurposeType =
+            PurposeTypeAllowance::where('purpose_type_id', $id)->get()->pluck('allowance_items_id')->toArray();
 
         $listAllowances =  AllowanceItem::whereIn('id', $listPurposeType)->get();
         foreach ($listAllowances as $allowance) {
-            $allowance->grade_price = $allowance->grade_price;
+            if ($allowance->grade_option == 'all') {
+                $listAllowances->grade_all_price = $allowance->grade_all_price;
+            } else {
+                // get grade user
+                $grade = BusinessTripGradeUser::where('user_id', $userid)->first();
+
+                if (is_null($grade)) {
+                    $listAllowances->grade_all_price = 0;
+                } else {
+                    $btgradeAllowance = BusinessTripGradeAllowance::where('grade_id', $grade->grade_id)->where('allowance_item_id', $allowance->id)->first();
+
+                    // dd($btgradeAllowance);
+                    $listAllowances->grade_all_price = $btgradeAllowance->plafon;
+                }
+            }
         }
-
-        // foreach ($listAllowances as $allowance) {
-        //     if ($allowance->grade_option == 'all') {
-        //         $listAllowances->grade_all_price = $allowance->grade_all_price;
-        //     } else {
-        //         // get grade user
-        //         $grade = BusinessTripGradeUser::where('user_id', $userid)->first();
-
-        //         if (is_null($grade)) {
-        //             $listAllowances->grade_all_price = 0;
-        //         } else {
-        //             $btgradeAllowance = BusinessTripGradeAllowance::where('grade_id', $grade->grade_id)->where('allowance_item_id', $allowance->id)->first();
-
-        //             // dd($btgradeAllowance);
-        //             $listAllowances->grade_all_price = $btgradeAllowance->plafon;
-        //         }
-        //     }
-        // }
 
         return $this->successResponse($listAllowances);
     }

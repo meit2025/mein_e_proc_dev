@@ -22,6 +22,11 @@ Route::group(['prefix' => 'reimburse', 'middleware' => 'auth'], function () {
     Route::resource('/', ReimbuseController::class);
     Route::get('/type/{type}', [ReimbuseController::class, 'getTypeData']);
     Route::post('/is_required', [ReimbuseController::class, 'is_required']);
+
+
+    Route::inertia('/detail/{id}',  'Reimburse/Detail', [
+        'id' => fn() => request()->route('id'),
+    ]);
 });
 
 Route::get('/family/show/{employee}', [FamilyController::class, 'show']);

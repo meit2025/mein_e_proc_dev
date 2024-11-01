@@ -32,7 +32,6 @@
         }
 
         .info-table {
-            width: 100%;
             margin-bottom: 20px;
             border-collapse: collapse;
         }
@@ -40,6 +39,11 @@
         .info-table td {
             padding: 5px;
         }
+        .info-table tr {
+            border-bottom: 1px solid #656565;
+        }
+
+        .info-table td:first-child { background-color:#eaeaea }
 
         .detail-table, .value-table {
             margin-top: 10px;
@@ -79,7 +83,6 @@
         .tabs {
             display: flex;
             margin-top: 20px;
-            margin-bottom: 10px;
         }
 
         .tab-button {
@@ -111,20 +114,20 @@
 
 <div class="container">
     <h2>Attendance Onduty Request</h2>
-    <p><strong>Request No.:</strong> ODR-2023-08-0011530</p>
+    <p><strong>Request No.:</strong> {{$data->request_no}}</p>
     <p><strong>Company:</strong> PT. Mitsubishi Electric Indonesia</p>
-    <p><strong>Request for:</strong> Nofarian</p>
-    <p><strong>Requested By:</strong> Nofarian</p>
+    <p><strong>Request for:</strong> {{$data->requestFor->name}}</p>
+    <p><strong>Requested By:</strong> {{$data->requestedBy->name}}</p>
     <p><strong>Status:</strong> <span class="status-approved">Fully Approved</span></p>
 
     <table class="info-table">
         <tr>
             <td><strong>Purpose Type</strong></td>
-            <td>Domestic Sector B (Jawa & Madura)</td>
+            <td>{{$data->purposeType->name}}</td>
         </tr>
         <tr>
             <td><strong>Pusat Biaya</strong></td>
-            <td>103 (103. IT)</td>
+            <td>{{$data->costCenter->cost_center}}</td>
         </tr>
         <tr>
             <td><strong>Start Date</strong></td>
@@ -136,7 +139,7 @@
         </tr>
         <tr>
             <td><strong>Remark</strong></td>
-            <td>IPVPN Upgrade</td>
+            <td>{{$data->remarks}}</td>
         </tr>
         <tr>
             <td><strong>Attachment File</strong></td>
@@ -145,326 +148,170 @@
     </table>
 
     <div class="tabs">
-        <button class="tab-button active" onclick="openTab(event, 'Semarang')">Semarang</button>
-        <button class="tab-button" onclick="openTab(event, 'Jakarta')">Jakarta</button>
+        {{-- LOOPING DESTINASI --}}
+        @foreach ($data->businessTripDestination as $key => $item)
+            <button class="tab-button {{$key == 0 ? 'active' : ''}}" onclick="openTab(event, '{{$item->destination}}')">{{$item->destination}}</button>
+        @endforeach
     </div>
 
-    <div id="Semarang" class="tab-content active">
-        <h3>Detail Semarang</h3>
-        <table class="detail-table">
-            <tr>
-                <th>Date</th>
-                <th>Shift</th>
-                <th>Shift Start</th>
-                <th>Shift End</th>
-                <th>Actual Start</th>
-                <th>Actual End</th>
-            </tr>
-            <tr>
-                <td>17/08/2023</td>
-                <td>OFF</td>
-                <td>00:00:00</td>
-                <td>00:00:00</td>
-                <td>08:00:00</td>
-                <td>17:00:00</td>
-            </tr>
-        </table>
-        <div class="tables-wrapper">
-            <table class="value-table">
-                <caption>Standard Value</caption>
+    @foreach ($data->businessTripDestination as $idx => $row)
+        <div id="{{$row->destination}}" class="tab-content {{$key == 0 ? 'active' : ''}}">
+            <h3>Detail {{$row->destination}}</h3>
+            <table class="detail-table">
                 <tr>
-                    <th>Item Name</th>
-                    <th>Currency Code</th>
-                    <th>Value</th>
-                    <th>Total Days</th>
-                    <th>Total</th>
+                    <th>Date</th>
+                    <th>Shift</th>
+                    <th>Shift Start</th>
+                    <th>Shift End</th>
+                    <th>Actual Start</th>
+                    <th>Actual End</th>
                 </tr>
-                <tr>
-                    <td>Breakfast Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>15,000</td>
-                    <td>1</td>
-                    <td>15,000</td>
-                </tr>
-                <tr>
-                    <td>Dinner Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>40,000</td>
-                    <td>1</td>
-                    <td>40,000</td>
-                </tr>
-                <tr>
-                    <td>Gasoline Total (TOTAL)</td>
-                    <td>IDR</td>
-                    <td>0</td>
-                    <td>-</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>Lunch Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>30,000</td>
-                    <td>1</td>
-                    <td>30,000</td>
-                </tr>
-                <tr>
-                    <td><strong>Total Standard Value</strong></td>
-                    <td>IDR</td>
-                    <td></td>
-                    <td></td>
-                    <td><strong>225,000</strong></td>
-                </tr>
+                @foreach ($row->detailAttendance as $detail)
+                    <tr>
+                        <td>{{date('d/m/Y',strtotime($detail->date))}}</td>
+                        <td>{{$detail->shift_code}}</td>
+                        <td>{{$detail->shift_start}}</td>
+                        <td>{{$detail->shift_end}}</td>
+                        <td>{{$detail->start_time}}</td>
+                        <td>{{$detail->end_time}}</td>
+                    </tr>
+                @endforeach
             </table>
+            <div class="tables-wrapper">
+                <table class="value-table">
+                    <caption>Standard Value</caption>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Currency Code</th>
+                        <th>Value</th>
+                        <th>Total Days</th>
+                        <th>Total</th>
+                    </tr>
+                    @php
+                        // Group items by allowance_item_id
+                        $groupedItems = $row->detailDestinationDay->groupBy('allowance_item_id');
+                        $total_standar = 0;
+                    @endphp
 
-            <table class="value-table">
-                <caption>Requested Value</caption>
-                <tr>
-                    <th>Item Name</th>
-                    <th>Currency Code</th>
-                    <th>Value</th>
-                    <th>Total Days</th>
-                    <th>Total</th>
-                </tr>
-                <tr>
-                    <td>Breakfast Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>15,000</td>
-                    <td>1</td>
-                    <td>15,000</td>
-                </tr>
-                <tr>
-                    <td>Dinner Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>40,000</td>
-                    <td>1</td>
-                    <td>40,000</td>
-                </tr>
-                <tr>
-                    <td>Gasoline Total (TOTAL)</td>
-                    <td>IDR</td>
-                    <td>0</td>
-                    <td>-</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>Lunch Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>30,000</td>
-                    <td>1</td>
-                    <td>30,000</td>
-                </tr>
-                <tr>
-                    <td>Other Allowances (TOTAL)</td>
-                    <td>IDR</td>
-                    <td>500,000</td>
-                    <td>-</td>
-                    <td>500,000</td>
-                </tr>
-                <tr>
-                    <td>Pocket Money Allowance Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>140,000</td>
-                    <td>1</td>
-                    <td>140,000</td>
-                </tr>
-                <tr>
-                    <td><strong>Total Requested Value</strong></td>
-                    <td>IDR</td>
-                    <td></td>
-                    <td></td>
-                    <td><strong>725,000</strong></td>
-                </tr>
-            </table>
+                    @foreach ($groupedItems as $allowanceItemId => $items)
+                        @php
+                            // Get the first item in the group for displaying allowance details
+                            $firstItem = $items->first();
+                            $totalCount = $items->count(); // Count of items in this group
+                            $totalPrice = $items->sum('price'); // Sum of prices in this group
+                        @endphp
+                        <tr>
+                            <td>{{ $firstItem->allowance->name }} ({{ $firstItem->allowance->type }})</td>
+                            <td>{{ $firstItem->allowance->currency_id }}</td>
+                            <td>{{ $firstItem->allowance->grade_price }}</td>
+                            <td>{{ $totalCount }}</td>
+                            <td>{{ $firstItem->allowance->grade_price * $totalCount }}</td>
+                        </tr>
+                        @php
+                            $total_standar += $firstItem->allowance->grade_price * $totalCount;
+                        @endphp
+                    @endforeach
 
-            <table class="value-table">
-                <caption>Declared Value</caption>
-                <tr>
-                    <th>Item Name</th>
-                    <th>Currency Code</th>
-                    <th>Value</th>
-                    <th>Total Days</th>
-                    <th>Total</th>
-                </tr>
-                <tr>
-                    <td>Breakfast Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>15,000</td>
-                    <td>1</td>
-                    <td>15,000</td>
-                </tr>
-                <tr>
-                    <td>Dinner Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>40,000</td>
-                    <td>1</td>
-                    <td>40,000</td>
-                </tr>
-                <tr>
-                    <td>Gasoline Total (TOTAL)</td>
-                    <td>IDR</td>
-                    <td>0</td>
-                    <td>-</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>Lunch Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>30,000</td>
-                    <td>1</td>
-                    <td>30,000</td>
-                </tr>
-                <tr>
-                    <td>Other Allowances (TOTAL)</td>
-                    <td>IDR</td>
-                    <td>500,000</td>
-                    <td>-</td>
-                    <td>500,000</td>
-                </tr>
-                <tr>
-                    <td>Pocket Money Allowance Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>140,000</td>
-                    <td>1</td>
-                    <td>140,000</td>
-                </tr>
-                <tr>
-                    <td><strong>Total Requested Value</strong></td>
-                    <td>IDR</td>
-                    <td></td>
-                    <td></td>
-                    <td><strong>725,000</strong></td>
-                </tr>
-            </table>
+                    @php
+                        // Group items by allowance_item_id
+                        $groupedItemsTotal = $row->detailDestinationTotal->groupBy('allowance_item_id');
+                    @endphp
+
+                    @foreach ($groupedItemsTotal as $allowanceItemId => $items)
+                        @php
+                            // Get the first item in the group for displaying allowance details
+                            $firstItem = $items->first();
+                            $totalCount = $items->count(); // Count of items in this group
+                            $totalPrice = $items->sum('price'); // Sum of prices in this group
+                        @endphp
+                        <tr>
+                            <td>{{ $firstItem->allowance->name }} ({{ $firstItem->allowance->type }})</td>
+                            <td>{{ $firstItem->allowance->currency_id }}</td>
+                            <td>{{ $firstItem->allowance->grade_price }}</td>
+                            <td>{{ $totalCount }}</td>
+                            <td>{{ $firstItem->allowance->grade_price * $totalCount }}</td>
+                        </tr>
+                        @php
+                            $total_standar += $firstItem->allowance->grade_price * $totalCount;
+                        @endphp
+                    @endforeach
+                    <tr>
+                        <td><strong>Total Standar Value</strong></td>
+                        <td>IDR</td>
+                        <td></td>
+                        <td></td>
+                        <td>{{$total_standar}}</td>
+                    </tr>
+                </table>
+
+                <table class="value-table">
+                    <caption>Requested Value</caption>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Currency Code</th>
+                        <th>Value</th>
+                        <th>Total Days</th>
+                        <th>Total</th>
+                    </tr>
+                    @php
+                        // Group items by allowance_item_id
+                        $groupedItems = $row->detailDestinationDay->groupBy('allowance_item_id');
+                        $total_request = 0;
+                    @endphp
+
+                    @foreach ($groupedItems as $allowanceItemId => $items)
+                        @php
+                            // Get the first item in the group for displaying allowance details
+                            $firstItem = $items->first();
+                            $totalCount = $items->count(); // Count of items in this group
+                            $totalPrice = $items->sum('price'); // Sum of prices in this group
+                        @endphp
+                        <tr>
+                            <td>{{ $firstItem->allowance->name }} ({{ $firstItem->allowance->type }})</td>
+                            <td>{{ $firstItem->allowance->currency_id }}</td>
+                            <td>{{ $firstItem->price }}</td>
+                            <td>{{ $totalCount }}</td>
+                            <td>{{ $totalPrice }}</td>
+                        </tr>
+                        @php
+                            $total_request += $totalPrice;
+                        @endphp
+                    @endforeach
+
+                    @php
+                        // Group items by allowance_item_id
+                        $groupedItemsTotal = $row->detailDestinationTotal->groupBy('allowance_item_id');
+                    @endphp
+
+                    @foreach ($groupedItemsTotal as $allowanceItemId => $items)
+                        @php
+                            // Get the first item in the group for displaying allowance details
+                            $firstItem = $items->first();
+                            $totalCount = $items->count(); // Count of items in this group
+                            $totalPrice = $items->sum('price'); // Sum of prices in this group
+                        @endphp
+                        <tr>
+                            <td>{{ $firstItem->allowance->name }} ({{ $firstItem->allowance->type }})</td>
+                            <td>{{ $firstItem->allowance->currency_id }}</td>
+                            <td>{{ $firstItem->allowance->grade_price }}</td>
+                            <td>{{ $totalCount }}</td>
+                            <td>{{ $firstItem->allowance->grade_price * $totalCount }}</td>
+                        </tr>
+                        @php
+                            $total_request += $firstItem->allowance->grade_price * $totalCount;
+                        @endphp
+                    @endforeach
+                    <tr>
+                        <td><strong>Total Request Value</strong></td>
+                        <td>IDR</td>
+                        <td></td>
+                        <td></td>
+                        <td>{{$total_request}}</td>
+                    </tr>
+                </table>
+            </div>
         </div>
-    </div>
-    <div id="Jakarta" class="tab-content active">
-        <h3>Detail Jakarta</h3>
-        <table class="detail-table">
-            <tr>
-                <th>Date</th>
-                <th>Shift</th>
-                <th>Shift Start</th>
-                <th>Shift End</th>
-                <th>Actual Start</th>
-                <th>Actual End</th>
-            </tr>
-            <tr>
-                <td>17/08/2023</td>
-                <td>OFF</td>
-                <td>00:00:00</td>
-                <td>00:00:00</td>
-                <td>08:00:00</td>
-                <td>17:00:00</td>
-            </tr>
-        </table>
-        <div class="tables-wrapper">
-            <table class="value-table">
-                <caption>Standard Value</caption>
-                <tr>
-                    <th>Item Name</th>
-                    <th>Currency Code</th>
-                    <th>Value</th>
-                    <th>Total Days</th>
-                    <th>Total</th>
-                </tr>
-                <tr>
-                    <td>Breakfast Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>15,000</td>
-                    <td>1</td>
-                    <td>15,000</td>
-                </tr>
-                <tr>
-                    <td>Dinner Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>40,000</td>
-                    <td>1</td>
-                    <td>40,000</td>
-                </tr>
-                <tr>
-                    <td>Gasoline Total (TOTAL)</td>
-                    <td>IDR</td>
-                    <td>0</td>
-                    <td>-</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>Lunch Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>30,000</td>
-                    <td>1</td>
-                    <td>30,000</td>
-                </tr>
-                <tr>
-                    <td><strong>Total Standard Value</strong></td>
-                    <td>IDR</td>
-                    <td></td>
-                    <td></td>
-                    <td><strong>225,000</strong></td>
-                </tr>
-            </table>
-
-            <table class="value-table">
-                <caption>Requested Value</caption>
-                <tr>
-                    <th>Item Name</th>
-                    <th>Currency Code</th>
-                    <th>Value</th>
-                    <th>Total Days</th>
-                    <th>Total</th>
-                </tr>
-                <tr>
-                    <td>Breakfast Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>15,000</td>
-                    <td>1</td>
-                    <td>15,000</td>
-                </tr>
-                <tr>
-                    <td>Dinner Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>40,000</td>
-                    <td>1</td>
-                    <td>40,000</td>
-                </tr>
-                <tr>
-                    <td>Gasoline Total (TOTAL)</td>
-                    <td>IDR</td>
-                    <td>0</td>
-                    <td>-</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>Lunch Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>30,000</td>
-                    <td>1</td>
-                    <td>30,000</td>
-                </tr>
-                <tr>
-                    <td>Other Allowances (TOTAL)</td>
-                    <td>IDR</td>
-                    <td>500,000</td>
-                    <td>-</td>
-                    <td>500,000</td>
-                </tr>
-                <tr>
-                    <td>Pocket Money Allowance Sector B Domestic (DAILY)</td>
-                    <td>IDR</td>
-                    <td>140,000</td>
-                    <td>1</td>
-                    <td>140,000</td>
-                </tr>
-                <tr>
-                    <td><strong>Total Requested Value</strong></td>
-                    <td>IDR</td>
-                    <td></td>
-                    <td></td>
-                    <td><strong>725,000</strong></td>
-                </tr>
-            </table>
-        </div>
-    </div>
+    @endforeach
 </div>
 
 <script>

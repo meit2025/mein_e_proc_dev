@@ -12,7 +12,7 @@ export function MultiSelectItem({
 }: React.PropsWithChildren<multiSelectItemInterface>) {
   return (
     <div onClick={onClick} className={'py-2 px-4 ' + (isSelect ? 'bg-gray-200 ' : '')}>
-      {children ? children : null} 
+      {children ? children : null}
     </div>
   );
 }
@@ -24,7 +24,7 @@ export interface multiSelectInterface {
   value: any[];
   onSelect: (value: any) => void;
 }
-export function MultiSelect({ options, label, id, onSelect, value }: multiSelectInterface) {
+export function MultiSelect({ options, label, id, onSelect, value = [] }: multiSelectInterface) {
   const [itemSelect, setItemSelect] = React.useState([]);
   const [rightSelect, setRightSelect] = React.useState([]);
 
@@ -76,10 +76,6 @@ export function MultiSelect({ options, label, id, onSelect, value }: multiSelect
 
     onSelect([...rightValues, ...itemSelect]);
     setItemSelect([]);
-
-
-    console.log(rightValues);
-   
   }
 
   function setToLeftValue() {
@@ -91,17 +87,21 @@ export function MultiSelect({ options, label, id, onSelect, value }: multiSelect
       rightValues.filter((item) => !rightSelect.map((map) => map[id]).includes(item[id])),
     );
 
-
-
     setRightSelect([]);
   }
 
-  console.log('grade');
+  // console.log('value', value);
+  // console.log('options', options);
+  // console.log(
+  //   'right values',
+  //   options.filter((filter) => value.includes(filter[id])),
+  // );
 
   React.useEffect(() => {
     setLeftValues(options.filter((filter) => !value.includes(filter[id])));
     setRightValues(options.filter((filter) => value.includes(filter[id])));
-  }, []);
+  }, [value]);
+
   return (
     <div className='flex items-center space-x-4'>
       <div className='flex-1'>
@@ -136,7 +136,7 @@ export function MultiSelect({ options, label, id, onSelect, value }: multiSelect
               }}
               isSelect={rightSelect.find((find: any) => find[id] == item[id]) ? true : false}
             >
-              {item[label]} 
+              {item[label]}
             </MultiSelectItem>
           ))}
         </ScrollArea>
