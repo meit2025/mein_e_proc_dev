@@ -19,8 +19,8 @@ const FormWrapper = <T,>({ model, onChangeOutside }: FormWrapperProps<T>) => {
     case 'input':
       return (
         <FormInput
-          fieldLabel={model.label}
-          fieldName={model.name}
+          fieldLabel={model.label ?? ''}
+          fieldName={model.name ?? ''}
           isRequired={model.required}
           disabled={model.disabled}
           style={model.style}
@@ -36,8 +36,8 @@ const FormWrapper = <T,>({ model, onChangeOutside }: FormWrapperProps<T>) => {
     case 'textarea':
       return (
         <FormTextArea
-          fieldLabel={model.label}
-          fieldName={model.name}
+          fieldLabel={model.label ?? ''}
+          fieldName={model.name ?? ''}
           isRequired={model.required}
           disabled={model.disabled}
           style={model.style}
@@ -51,8 +51,8 @@ const FormWrapper = <T,>({ model, onChangeOutside }: FormWrapperProps<T>) => {
       return (
         <FormAutocomplete<T>
           options={model.options ?? []}
-          fieldLabel={model.label}
-          fieldName={model.name}
+          fieldLabel={model.label ?? ''}
+          fieldName={model.name ?? ''}
           isRequired={model.required}
           disabled={model.disabled}
           style={model.style}
@@ -66,8 +66,8 @@ const FormWrapper = <T,>({ model, onChangeOutside }: FormWrapperProps<T>) => {
     case 'checkbox':
       return (
         <FormCheckbox
-          fieldLabel={model.label}
-          fieldName={model.name}
+          fieldLabel={model.label ?? ''}
+          fieldName={model.name ?? ''}
           isRequired={model.required}
           disabled={model.disabled}
           style={model.style}
@@ -80,8 +80,8 @@ const FormWrapper = <T,>({ model, onChangeOutside }: FormWrapperProps<T>) => {
       return (
         <FormMultiSelect<T>
           options={model.options ?? []}
-          fieldLabel={model.label}
-          fieldName={model.name}
+          fieldLabel={model.label ?? ''}
+          fieldName={model.name ?? ''}
           isRequired={model.required}
           disabled={model.disabled}
           style={model.style}
@@ -95,8 +95,8 @@ const FormWrapper = <T,>({ model, onChangeOutside }: FormWrapperProps<T>) => {
     case 'switch':
       return (
         <FormSwitch
-          fieldLabel={model.label}
-          fieldName={model.name}
+          fieldLabel={model.label ?? ''}
+          fieldName={model.name ?? ''}
           isRequired={model.required}
           disabled={model.disabled}
           style={model.style}
@@ -108,8 +108,8 @@ const FormWrapper = <T,>({ model, onChangeOutside }: FormWrapperProps<T>) => {
     case 'file':
       return (
         <FormFileUpload
-          fieldLabel={model.label}
-          fieldName={model.name}
+          fieldLabel={model.label ?? ''}
+          fieldName={model.name ?? ''}
           allowedExtensions={model.allowedExtensions}
           disabled={model.disabled}
           onFileChangeOutside={onChangeOutside}

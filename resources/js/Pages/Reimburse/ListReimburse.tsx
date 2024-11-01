@@ -136,7 +136,13 @@ const ListReimburse: React.FC<Props> = ({
               </DropdownMenuItem>{' '}
               <DropdownMenuSeparator />
               <DropdownMenuItem>View customer</DropdownMenuItem>
-              <DropdownMenuItem>View payment details</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  window.location.href = `/reimburse/detail/${reimbursement.id}`;
+                }}
+              >
+                View payment details
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );

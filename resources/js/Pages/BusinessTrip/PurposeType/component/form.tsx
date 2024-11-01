@@ -44,25 +44,33 @@ import { useAlert } from '@/contexts/AlertContext';
 import { AllowanceCategoryModel } from '../../AllowanceCategory/model/AllowanceModel';
 import { RadioGroup, RadioGroupItem } from '@/components/shacdn/radio-group';
 import { CREATE_API_PURPOSE_TYPE } from '@/endpoint/purpose-type/api';
-import { AxiosError } from 'axios';
+import { all, AxiosError } from 'axios';
 import { AllowanceItemModel } from '../../AllowanceItem/models/models';
 import { FormType } from '@/lib/utils';
 import { MultiSelect } from '@/components/commons/MultiSelect';
+import { PurposeTypeModel } from '../models/models';
 //
 
 export interface AllowanceItemFormInterface {
   onSuccess?: (value: boolean) => void;
   type?: FormType;
   id?: string;
+  detailUrl?: string;
+  editUrl?: string;
+  createUrl?: string;
+
   listAllowanceModel: AllowanceItemModel[];
 }
 export default function PurposeTypeForm({
   onSuccess,
   type = FormType.create,
+  editUrl,
+  detailUrl,
+  createUrl,
   id,
   listAllowanceModel,
 }: AllowanceItemFormInterface) {
-  var formSchema = z.object({
+  const formSchema = z.object({
     code: z.string().min(1, 'Code is required'),
     name: z.string().min(1, 'Name is required'),
     all: z.boolean().optional(),
@@ -70,7 +78,7 @@ export default function PurposeTypeForm({
     attedance_status: z.string().min(1, 'Attedance Status is required'),
   });
 
-  let defaultValues = {
+  const defaultValues = {
     code: '',
     name: '',
     all: false,
@@ -78,27 +86,20 @@ export default function PurposeTypeForm({
     attedance_status: '',
   };
 
-  const exampleOptions = [
-    {
-      id: 'fucek',
-      name: 'fucek to',
-    },
-    {
-      id: 'fack',
-      name: 'fack',
-    },
-  ];
-
   //   console.log('currency_id', listCurrency);
   async function getDetailData() {
-    let url = GET_DETAIL_ALLOWANCE_CATEGORY(id);
-
     try {
-      let response = await axiosInstance.get(url);
+      const response = await axiosInstance.get(detailUrl ?? '');
 
+      const purpose = response.data.data.purpose as PurposeTypeModel;
+      const allowances = response.data.data.allowances;
+
+      console.log('allowances', allowances);
       form.reset({
-        code: response.data.data.code,
-        name: response.data.data.name,
+        code: purpose.code,
+        name: purpose.name,
+        attedance_status: purpose.attedance_status,
+        allowances: allowances.map((map) => parseInt(map)),
       });
     } catch (e) {
       let error = e as AxiosError;
@@ -114,9 +115,16 @@ export default function PurposeTypeForm({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log(values);
     try {
-      const response = await axiosInstance.post(CREATE_API_PURPOSE_TYPE, values);
+      // const response = await axiosInstance.post(CREATE_API_PURPOSE_TYPE, values);
+      let response = null;
+      if (type === FormType.edit) {
+        response = await axiosInstance.put(editUrl ?? '', values);
+      } else {
+        response = await axiosInstance.post(createUrl ?? '', values);
+      }
 
-      console.log('response', response);
+      console.log(response, 'response');
+
       showToast('success', 'success');
       onSuccess?.(true);
     } catch (e) {
@@ -129,10 +137,10 @@ export default function PurposeTypeForm({
   // console.log('list allowance',listAllowanceModel)
 
   React.useEffect(() => {
-    if (id && type == FormType.edit) {
+    if (type === FormType.detail || type === FormType.edit) {
       getDetailData();
     }
-  }, [id, type]);
+  }, [type]);
 
   return (
     <ScrollArea className='h-[600px] w-full'>
@@ -146,13 +154,13 @@ export default function PurposeTypeForm({
               <td>
                 <FormField
                   control={form.control}
-                  disabled={type == FormType.edit}
                   name='code'
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
                         <Input
                           type='text'
+                          readOnly={type === FormType.edit}
                           placeholder='Insert code'
                           {...field}
                           value={field.value || ''}
@@ -190,7 +198,7 @@ export default function PurposeTypeForm({
             </tr>
 
             <tr>
-              <td width={200}>Allowances</td>
+              <td width={200}>Allowances {form.getValues('allowances').length}</td>
               <td>
                 {/* <FormField
                   control={form.control}
@@ -209,12 +217,14 @@ export default function PurposeTypeForm({
 
                 <MultiSelect
                   value={form.getValues('allowances')}
-                  id="id"
+                  id='id'
                   label='name'
-
                   options={listAllowanceModel}
                   onSelect={(value) => {
-                    form.setValue('allowances', value.map((map) => map.id));
+                    form.setValue(
+                      'allowances',
+                      value.map((map) => map.id),
+                    );
                   }}
                 />
               </td>

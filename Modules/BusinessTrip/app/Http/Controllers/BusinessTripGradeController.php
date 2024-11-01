@@ -19,7 +19,9 @@ class BusinessTripGradeController extends Controller
     {
 
         $listUserInGrade = BusinessTripGradeUser::select("user_id")->pluck('user_id')->toArray();
-        $listUser =  User::whereNotIn('id', $listUserInGrade)->get();
+        // $listUser =  User::whereNotIn('id', $listUserInGrade)->get();
+        $listUser =  User::get();
+
 
         // return Inertia::render('BusinessTrip/BusinessTrip/index', compact('users', 'listPurposeType'));
 
@@ -74,7 +76,8 @@ class BusinessTripGradeController extends Controller
         //
     }
 
-    public function listAPI(Request $request) {
+    public function listAPI(Request $request)
+    {
 
         $query =  BusinessTripGrade::query()->with(['gradeUsers']);
 
@@ -93,11 +96,11 @@ class BusinessTripGradeController extends Controller
             // dd($map->gradeUsers);
 
 
-            $userRelations = collect($map->gradeUsers)->map(function($relation) {
+            $userRelations = collect($map->gradeUsers)->map(function ($relation) {
                 return $relation->user->name;
             })->toArray();
 
-            
+
             return [
                 'id' => $map->id,
                 'grade' => $map->grade,
@@ -112,31 +115,30 @@ class BusinessTripGradeController extends Controller
 
     public function storeAPI(Request $request)
     {
-        
+
         $rules = [
             'grade' => 'required'
         ];
 
         $validator = Validator::make($request->all(), $rules);
 
-        if($validator->fails()) {
+        if ($validator->fails()) {
             return $this->errorResponse('Erorr creating grade', 400, $validator->errors());
         }
 
         DB::beginTransaction();
 
-        try
-        {
+        try {
             $grade = new BusinessTripGrade();
 
             $grade->grade = $request->grade;
 
-            
+
             $grade->save();
 
             $users = [];
 
-            foreach($request->users as $user) {
+            foreach ($request->users as $user) {
                 array_push($users, [
                     'grade_id' => $grade->id,
                     'user_id' => $user
@@ -148,16 +150,66 @@ class BusinessTripGradeController extends Controller
 
             DB::commit();
             return $this->successResponse($grade, 'Successfully created grade');
-        }
-        catch(\Exception $e) {
+        } catch (\Exception $e) {
             return $this->errorResponse($e);
             DB::rollBack();
         }
     }
 
-    public function detailAPI($id) {
-        $data = BusinessTripGrade::find($id);
+    public function updateAPI($id, Request $request)
+    {
 
-        return $this->successResponse($data);
+        $rules = [
+            'grade' => 'required'
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('Erorr creating grade', 400, $validator->errors());
+        }
+
+        DB::beginTransaction();
+
+        try {
+
+            BusinessTripGradeUser::where('grade_id', $id)->delete();
+
+            $grade =  BusinessTripGrade::find($id);
+
+            $grade->grade = $request->grade;
+
+            $grade->save();
+
+            $users = [];
+
+            foreach ($request->users as $user) {
+                array_push($users, [
+                    'grade_id' => $grade->id,
+                    'user_id' => $user
+                ]);
+            }
+            // dd($users);
+
+            BusinessTripGradeUser::insert($users);
+
+            DB::commit();
+            return $this->successResponse($grade, 'Successfully created grade');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e);
+            DB::rollBack();
+        }
+    }
+
+    public function detailAPI($id)
+    {
+        $grade = BusinessTripGrade::find($id);
+        $users = BusinessTripGradeUser::where('grade_id', $id)->get()->pluck('user_id')->toArray();
+        $context = [
+            'grade' => $grade,
+            'users' => $users
+        ];
+
+        return $this->successResponse($context);
     }
 }

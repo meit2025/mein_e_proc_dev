@@ -2,33 +2,49 @@ import MainLayout from '@/Pages/Layouts/MainLayout';
 import React, { ReactNode } from 'react';
 import DataGridComponent from '@/components/commons/DataGrid';
 
-import {
-    columns
-} from './models/models'
+import { columns } from './models/models';
 import { GET_MASTER_ASSET } from '@/endpoint/masterAsset/api';
 import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import { GET_LIST_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/api';
+import {
+  CREATE_API_ALLOWANCE_ITEM,
+  GET_DETAIL_ALLOWANCE_ITEM,
+  GET_LIST_ALLOWANCE_ITEM,
+  UPDATE_ALLOWANCE_ITEM,
+} from '@/endpoint/allowance-item/api';
 import { AllowanceCategoryModel } from '../AllowanceCategory/model/AllowanceModel';
 import AllowanceItemForm from './component/form';
 import { BusinessTripGrade } from '../BusinessGrade/model/model';
 import { MaterialModel } from '@/Pages/Master/MasterMaterial/model/listModel';
-
+import { FormType } from '@/lib/utils';
 
 interface propsType {
-    listAllowanceCategory: AllowanceCategoryModel[],
-    listCurrency: any[],
-    listGrade: BusinessTripGrade[],
-    listMaterial: MaterialModel[],
-    listMaterialGroup: string[]
+  listAllowanceCategory: AllowanceCategoryModel[];
+  listCurrency: any[];
+  listGrade: BusinessTripGrade[];
+  listMaterial: MaterialModel[];
+  listMaterialGroup: string[];
 }
-export const Index = (
-    {listAllowanceCategory, listCurrency, listGrade, listMaterial, listMaterialGroup}: propsType
-) => {
+export const Index = ({
+  listAllowanceCategory,
+  listCurrency,
+  listGrade,
+  listMaterial,
+  listMaterialGroup,
+}: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
+  const [formType, setFormType] = React.useState({
+    type: FormType.create,
+    id: null,
+  });
+
   function openFormHandler() {
+    setFormType({
+      type: FormType.create,
+      id: null,
+    });
     setOpenForm(!openForm);
   }
   return (
@@ -44,6 +60,10 @@ export const Index = (
           onOpenChange={openFormHandler}
         >
           <AllowanceItemForm
+            type={formType.type}
+            editUrl={UPDATE_ALLOWANCE_ITEM(formType.id)}
+            detailUrl={GET_DETAIL_ALLOWANCE_ITEM(formType.id)}
+            createUrl={CREATE_API_ALLOWANCE_ITEM}
             listMaterialGroup={listMaterialGroup}
             listMaterial={listMaterial}
             listGrade={listGrade}
@@ -55,6 +75,13 @@ export const Index = (
       <DataGridComponent
         columns={columns}
         actionType='dropdown'
+        onEdit={(value) => {
+          setFormType({
+            type: FormType.edit,
+            id: value,
+          });
+          setOpenForm(true);
+        }}
         url={{
           url: GET_LIST_ALLOWANCE_ITEM,
         }}

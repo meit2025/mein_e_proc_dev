@@ -123,11 +123,11 @@
     <table class="info-table">
         <tr>
             <td><strong>Purpose Type</strong></td>
-            <td>{{$data->purposeType->name}}</td>
+            <td>{{$data->purposeType->name ?? ''}}</td>
         </tr>
         <tr>
             <td><strong>Pusat Biaya</strong></td>
-            <td>{{$data->costCenter->cost_center}}</td>
+            <td>{{$data->costCenter->cost_center ?? ''}}</td>
         </tr>
         <tr>
             <td><strong>Start Date</strong></td>
@@ -202,14 +202,14 @@
                             $totalPrice = $items->sum('price'); // Sum of prices in this group
                         @endphp
                         <tr>
-                            <td>{{ $firstItem->allowance->name }} ({{ $firstItem->allowance->type }})</td>
-                            <td>{{ $firstItem->allowance->currency_id }}</td>
-                            <td>{{ $firstItem->allowance->grade_price }}</td>
+                            <td>{{ $firstItem->allowance->name  ?? ''}} ({{ $firstItem->allowance->type ?? '' }})</td>
+                            <td>{{ $firstItem->allowance->currency_id ?? '' }}</td>
+                            <td>{{ $firstItem->allowance->grade_price ?? '' }}</td>
                             <td>{{ $totalCount }}</td>
-                            <td>{{ $firstItem->allowance->grade_price * $totalCount }}</td>
+                            <td>{{ ($firstItem->allowance->grade_price ?? 0) * $totalCount }}</td>
                         </tr>
                         @php
-                            $total_standar += $firstItem->allowance->grade_price * $totalCount;
+                            $total_standar += ($firstItem->allowance->grade_price ?? 0 )* $totalCount;
                         @endphp
                     @endforeach
 
