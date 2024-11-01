@@ -44,7 +44,6 @@ interface DataGridProps {
   buttonActionCustome?: ReactNode;
 }
 
-
 const DataGridComponent: React.FC<DataGridProps> = ({
   columns,
   buttonCustome,

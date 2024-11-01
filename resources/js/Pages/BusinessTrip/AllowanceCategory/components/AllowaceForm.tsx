@@ -50,25 +50,33 @@ export enum AllowanceType {
 export interface AllowanceFormInterface {
   onSuccess?: (value: boolean) => void;
   type?: AllowanceType;
-  id?: string ;
+  detailUrl?: string;
+  updateUrl?: string;
+  createUrl?: string;
+  id?: string;
 }
-export function AllowanceForm({ onSuccess, type = AllowanceType.create, id }: AllowanceFormInterface) {
-  var formSchema = z.object({
+export function AllowanceForm({
+  onSuccess,
+  type = AllowanceType.create,
+  id,
+  createUrl,
+  updateUrl,
+  detailUrl,
+}: AllowanceFormInterface) {
+  const formSchema = z.object({
     code: z.string().min(1, 'Code is required'),
     name: z.string().min(1, 'Name is required'),
   });
 
-  let defaultValues = {
+  const defaultValues = {
     code: '',
     name: '',
   };
 
   async function getDetailData() {
-    let url = GET_DETAIL_ALLOWANCE_CATEGORY(id);
-
     try {
-      let response = await axios.get(url);
-      
+      const response = await axiosInstance.get(detailUrl);
+
       form.reset({
         code: response.data.data.code,
         name: response.data.data.name,
@@ -86,7 +94,13 @@ export function AllowanceForm({ onSuccess, type = AllowanceType.create, id }: Al
   const { showToast } = useAlert();
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     try {
-      const response = axios.post(CREATE_API_ALLOWANCE_CATEGORY, values);
+      let response;
+
+      if (type === AllowanceType.edit) {
+        response = axiosInstance.put(updateUrl ?? '', values);
+      } else {
+        response = axiosInstance.post(createUrl ?? '', values);
+      }
 
       console.log(response);
       showToast('succesfully created data', 'success');
@@ -100,10 +114,10 @@ export function AllowanceForm({ onSuccess, type = AllowanceType.create, id }: Al
   };
 
   React.useEffect(() => {
-    if (id && type == AllowanceType.edit) {
+    if (type === AllowanceType.edit || type === AllowanceType.update) {
       getDetailData();
     }
-  }, [id, type]);
+  }, [type]);
 
   return (
     <ScrollArea className='h-[600px] w-full'>
@@ -117,12 +131,12 @@ export function AllowanceForm({ onSuccess, type = AllowanceType.create, id }: Al
               <td>
                 <FormField
                   control={form.control}
-                  disabled={type == AllowanceType.edit}
                   name='code'
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
                         <Input
+                          readOnly={type === AllowanceType.edit}
                           type='text'
                           placeholder='0.0'
                           {...field}

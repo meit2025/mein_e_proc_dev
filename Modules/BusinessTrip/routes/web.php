@@ -49,7 +49,7 @@ Route::group(['prefix' => 'api/'], function () {
     Route::group(['prefix' => 'allowance-category'], function () {
         Route::get('/list', [AllowanceCategoryController::class, 'listAPI'])->name('allowance-category-list.index');
         Route::post('/create', [AllowanceCategoryController::class, 'storeAPI'])->name('allowance-category.store');
-        // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
+        Route::put('/update/{id}', [AllowanceCategoryController::class, 'updateAPI'])->name('allowance-category.update');
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
         Route::get('/detail/{id}', [AllowanceCategoryController::class, 'showAPI'])->name('allowance-category.detail');
 
@@ -64,7 +64,8 @@ Route::group(['prefix' => 'api/'], function () {
         Route::post('/create', [AllowanceItemController::class, 'storeAPI'])->name('allowance-item.store');
         // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
-        Route::get('/detail/{id}', [AllowanceCategoryController::class, 'showAPI'])->name('item.allowance-category.detail');
+        Route::get('/detail/{id}', [AllowanceItemController::class, 'detailAPI'])->name('allowance-item.detail');
+        Route::put('/update/{id}', [AllowanceItemController::class, 'updateAPI'])->name('allowance-item.update');
 
         // Route::delete('/delete/{id}', [MasterMaterialController::class, 'destroy'])->name('master.master-material.destroy');
 
@@ -77,6 +78,7 @@ Route::group(['prefix' => 'api/'], function () {
         // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
         Route::get('/detail/{id}', [PurposeTypeController::class, 'detailAPI'])->name('purpose-type.detail');
+        Route::put('/update/{id}', [PurposeTypeController::class, 'updateAPI'])->name('purpose-type.update');
         Route::get('/list-allowances-by-purpose-type/{id}/{userid}', [PurposeTypeController::class, 'getAllowanceByPurposeAPI'])->name('purpose-type.list-allowances');
 
 
@@ -120,7 +122,7 @@ Route::group(['prefix' => 'api/'], function () {
     Route::group(['prefix' => 'business-grade'], function () {
         Route::get('/list', [BusinessTripGradeController::class, 'listAPI'])->name('business-grade-list.index');
         Route::post('/create', [BusinessTripGradeController::class, 'storeAPI'])->name('business-grade.store');
-        // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
+        Route::put('/update/{id}', [BusinessTripGradeController::class, 'updateAPI'])->name('business-grade.update');
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
         Route::get('/detail/{id}', [BusinessTripGradeController::class, 'detailAPI'])->name('business-grade.detail');
 
