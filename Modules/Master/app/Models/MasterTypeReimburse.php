@@ -9,7 +9,7 @@ class MasterTypeReimburse extends Model
 {
     use HasFactory;
 
-    protected $fillable = ["code", "name", "is_employee", "material_group", "material_number"];
+    protected $fillable = ["code", "name", "is_employee", "limit", "plafon", "material_group", "material_number", "grade"];
 
     public function quotas()
     {

@@ -6,15 +6,15 @@ import { columns } from './models/models';
 import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import { MaterialModel } from '@/Pages/Master/MasterMaterial/model/listModel';
+import { Grade } from './models/models';
 import ReimburseTypeForm from './component/form';
 import { LIST_API_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
 
 interface propsType {
-  listMaterial: MaterialModel[];
+  listGrades?: Grade[];
 }
 
-export const Index = ({ listMaterial }: propsType) => {
+export const Index = ({ listGrades }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
   function openFormHandler() {
@@ -32,8 +32,7 @@ export const Index = ({ listMaterial }: propsType) => {
           open={openForm}
           onOpenChange={openFormHandler}
         >
-          <ReimburseTypeForm
-            listMaterial={listMaterial}
+          <ReimburseTypeForm listGrades={listGrades}
             onSuccess={(x: boolean) => setOpenForm(!x)}
           />
         </CustomDialog>

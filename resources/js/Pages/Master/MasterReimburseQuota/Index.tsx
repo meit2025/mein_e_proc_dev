@@ -6,19 +6,17 @@ import { columns } from './models/models';
 import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import { ListTypeModel } from '../MasterReimburseType/models/models';
-import { ListPeriodModel } from '../MasterReimbursePeriod/models/models';
-import { BusinessTripGrade } from '@/Pages/BusinessTrip/BusinessGrade/model/model';
-import ReimburseQuotaForm from './component/form';
+import { User } from './models/models';
+import ReimburseQuotaForm from './component/form'
 import { LIST_API_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
+import { ListPeriodModel } from '../MasterReimbursePeriod/models/models';
 
 interface propsType {
-  listTypeReimburse: ListTypeModel[];
   listPeriodReimburse: ListPeriodModel[];
-  listGrade: BusinessTripGrade[];
+  listUsers: User[];
 }
 
-export const Index = ({ listTypeReimburse, listPeriodReimburse, listGrade }: propsType) => {
+export const Index = ({ listPeriodReimburse, listUsers }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
   function openFormHandler() {
@@ -37,9 +35,8 @@ export const Index = ({ listTypeReimburse, listPeriodReimburse, listGrade }: pro
           onOpenChange={openFormHandler}
         >
           <ReimburseQuotaForm
-            listTypeReimburse={listTypeReimburse}
+            listUsers={listUsers}
             listPeriodReimburse={listPeriodReimburse}
-            listGrade={listGrade}
           />
         </CustomDialog>
       </div>

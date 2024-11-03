@@ -10,5 +10,5 @@ class MasterQuotaReimburse extends Model
 {
     use HasFactory;
 
-    protected $fillable = ["period", "type", "grade", "limit", "plafon"];
+    protected $fillable = ["period", "type", "user"];
 }

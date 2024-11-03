@@ -136,6 +136,7 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::group(['prefix' => 'reimburse-quota'], function () {
             Route::get('/', [MasterQuotaReimburseController::class, 'list'])->name('master.reimburse-quota.list');
+            Route::get('/selection_grade/{user_id}', [MasterQuotaReimburseController::class, 'selection_grade'])->name('master.reimburse-quota.selection_grade');
             Route::post('/create', [MasterQuotaReimburseController::class, 'store'])->name('master.reimburse-quota.store');
             Route::post('/update/{id}', [MasterQuotaReimburseController::class, 'update'])->name('master.reimburse-quota.update');
             Route::get('/detail/{id}', [MasterQuotaReimburseController::class, 'show'])->name('master.reimburse-quota.show');
