@@ -17,7 +17,8 @@ interface CustomDatePickerProps {
 
 export function CustomDatePicker({
   className = 'w-[150px]',
-  dateFormat = 'M/d/yyyy',
+  dateFormat = 'dd/MM/yyyy',
+  //   dateFormat = 'M/d/yyyy',
   initialDate,
   disabled = false,
   onDateChange,

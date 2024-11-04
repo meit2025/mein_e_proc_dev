@@ -146,7 +146,6 @@ class BusinessTripController extends Controller
 
             foreach ($request->destinations as $key => $value) {
                 $data_destination = json_decode($value, true);
-                dd($data_destination);
                 $businessTripDestination = BusinessTripDestination::create([
                     'business_trip_id' => $businessTrip->id,
                     'destination' => $data_destination['destination'],

@@ -245,7 +245,6 @@ export const BussinessTripFormV1 = ({
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values, ' test');
     try {
       const formData = new FormData();
       // Append group data
@@ -261,16 +260,20 @@ export const BussinessTripFormV1 = ({
       formData.append('total_percent', `${values.total_percent}`);
       formData.append('total_cash_advance', `${values.total_cash_advance}`);
       values.destinations.forEach((item, index) => {
+        console.log(item);
+        // console.log(item);
         formData.append(`destinations[${index}]`, JSON.stringify(item));
       });
 
-      const response = axios.post(CREATE_API_BUSINESS_TRIP, formData);
+      console.log(formData, ' test');
 
-      await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      //   const response = axios.post(CREATE_API_BUSINESS_TRIP, formData);
+
+      //   await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
+      //     headers: {
+      //       'Content-Type': 'multipart/form-data',
+      //     },
+      //   });
 
       // console.log(response);
       showToast('succesfully created data', 'success');
@@ -806,8 +809,8 @@ export function BussinessDestinationForm({
     }
 
     function generateDetailAllowanceByDate(price: string): any[] {
-      let momentStart = moment(destination.business_trip_start_date);
-      let momentEnd = moment(destination.business_trip_end_date);
+      let momentStart = moment(destination.business_trip_start_date).startOf('day');
+      let momentEnd = moment(destination.business_trip_end_date).startOf('day');
       let detailAllowance = [];
 
       while (momentStart.isBefore(momentEnd) || momentStart.isSame(momentEnd)) {
@@ -900,6 +903,7 @@ export function BussinessDestinationForm({
                       <CustomDatePicker
                         initialDate={destination.business_trip_start_date}
                         onDateChange={(value) => {
+                          console.log(value.toString());
                           updateDestination(index, {
                             ...destination,
                             business_trip_start_date: value,
