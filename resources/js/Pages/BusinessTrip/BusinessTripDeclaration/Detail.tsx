@@ -41,10 +41,7 @@ const Detail = ({ id }: { id: number }) => {
 
 // Assign layout to the page
 Detail.layout = (page: ReactNode) => (
-  <MainLayout
-    title='BusinessTrip Declaration Detail Detail'
-    description='BusinessTrip Declaration Detail Detail'
-  >
+  <MainLayout title='BusinessTrip Declaration Detail' description='BusinessTrip Declaration Detail'>
     {page}
   </MainLayout>
 );

@@ -5,6 +5,7 @@ namespace Modules\BusinessTrip\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Currency;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -61,20 +62,21 @@ class BusinessTripController extends Controller
      */
     public function showAPI($id)
     {
-        $findData  = BusinessTrip::find($id);
-        //  attachment
-        $findData->attachment = BusinessTripAttachment::where('business_trip_id', $id)->first();
-        // destination
-        // detail_attedances
-        // allowances
-        $findData->destination = BusinessTripDestination::where('business_trip_id', $id)->with(['detailAttendance'])->first();
-        $allowances = [];
-
-        $destinationTotal = BusinessTripDetailDestinationTotal::where('business_trip_destination_id', $findData->destination->id)->with(['allowance'])->get();
-        // dd($destinationTotal);
-
-        $findData->destination->allowances = BusinessTripDetailDestinationTotal::where('business_trip_destination_id', $findData->destination->id)->with(['allowanceItem'])->get();
-        $findData->destination->allowances = BusinessTripDetailDestinationDayTotal::where('business_trip_destination_id', $findData->destination->id)->with(['allowanceItem'])->get();
+        $findData  = BusinessTrip::with(
+            [
+                'requestFor',
+                'requestedBy',
+                'purposeType',
+                'costCenter',
+                'pajak',
+                'purchasingGroup',
+                'attachment',
+                'businessTripDestination',
+                'businessTripDestination.detailAttendance',
+                'businessTripDestination.detailDestinationDay',
+                'businessTripDestination.detailDestinationTotal'
+            ]
+        )->where('id', $id)->first();
         return $this->successResponse($findData);
     }
 
@@ -115,8 +117,8 @@ class BusinessTripController extends Controller
         if ($validator->fails()) {
             return $this->errorResponse("erorr", 400, $validator->errors());
         }
-
         try {
+            date_default_timezone_set('Asia/Jakarta');
             DB::beginTransaction();
             $businessTrip = BusinessTrip::create([
                 'request_no' => time(),
@@ -154,7 +156,7 @@ class BusinessTripController extends Controller
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
                         'business_trip_destination_id' => $businessTripDestination->id,
                         'business_trip_id' => $businessTrip->id,
-                        'date' => $destination['date'],
+                        'date' => date('Y-m-d', strtotime($destination['date'])),
                         'shift_code' => $destination['shift_code'],
                         'shift_start' => $destination['shift_start'],
                         'shift_end' => $destination['shift_end'],
