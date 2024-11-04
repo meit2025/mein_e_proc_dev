@@ -47,7 +47,8 @@ const FormMapping: React.FC<FormMappingProps> = ({
           'Content-Type': 'application/json',
         },
       });
-      showToast(response.data.message, 'success');
+
+      showToast(response.data.message ?? 'success', 'success');
       onSave && (await onSave(response));
       if (redirectUrl) {
         setTimeout(() => {

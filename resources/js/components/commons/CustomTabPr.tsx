@@ -1,9 +1,10 @@
-import { useState, ReactNode, Children } from 'react';
+import { useState, ReactNode, Children, useEffect } from 'react';
 import { Tabs, Tab, Box, Typography } from '@mui/material';
 import Pr from '../detailPr/Pr';
 import Dp from '../detailPr/Dp';
 import Logs from '../detailPr/Logs';
 import Po from '../detailPr/Po';
+import Detail from '@/Pages/Reimburse/Detail';
 
 interface TabPanelProps {
   children?: ReactNode;
@@ -13,6 +14,8 @@ interface TabPanelProps {
 
 interface CustomTabProps {
   detailLayout: ReactNode;
+  id: number;
+  type: string;
 }
 
 const TabPanel = ({ children, value, index, ...other }: TabPanelProps) => {
@@ -40,17 +43,59 @@ const a11yProps = (index: number) => {
   };
 };
 
-const CustomTabPr = ({ detailLayout }: CustomTabProps) => {
+const CustomTabPr = ({ detailLayout, id, type }: CustomTabProps) => {
   const [value, setValue] = useState(0);
 
   const handleChange = (event: any, newValue: number) => {
     setValue(newValue);
   };
+  const [tabData, setTabData] = useState([
+    {
+      title: 'Detail',
+      content: detailLayout,
+    },
+    {
+      title: 'Pr',
+      content: <Pr />,
+    },
+    {
+      title: 'Log',
+      content: <Logs />,
+    },
+  ]);
 
-  const TabLabel = ['Detail', 'PR', 'DP', 'PO', 'Logs'];
+  useEffect(() => {
+    if (type === 'PR' || type === 'TRIP') {
+      setTabData((prevTabData) => [
+        ...prevTabData,
+        {
+          title: 'Dp',
+          content: <Dp />,
+        },
+        {
+          title: 'Po',
+          content: <Po />,
+        },
+      ]);
+    } else {
+      setTabData([
+        {
+          title: 'Detail',
+          content: detailLayout,
+        },
+        {
+          title: 'Pr',
+          content: <Pr />,
+        },
+        {
+          title: 'Log',
+          content: <Logs />,
+        },
+      ]);
+    }
+  }, [type, detailLayout]);
 
   // eslint-disable-next-line react/jsx-key
-  const tabContents = [{}, , , ,];
 
   return (
     <div className='card card-grid h-full min-w-full p-4'>
@@ -58,28 +103,16 @@ const CustomTabPr = ({ detailLayout }: CustomTabProps) => {
         <Box sx={{ width: '100%' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={value} onChange={handleChange} aria-label='dynamic tabs example'>
-              {TabLabel.map((label, index) => (
-                <Tab key={index} label={label} {...a11yProps(index)} />
+              {tabData.map((label, index) => (
+                <Tab key={index} label={label.title} {...a11yProps(index)} />
               ))}
             </Tabs>
           </Box>
-
-          <TabPanel key={0} value={value} index={0}>
-            {detailLayout}
-          </TabPanel>
-
-          <TabPanel key={1} value={value} index={1}>
-            <Pr />
-          </TabPanel>
-          <TabPanel key={2} value={value} index={2}>
-            <Dp />
-          </TabPanel>
-          <TabPanel key={3} value={value} index={3}>
-            <Po />
-          </TabPanel>
-          <TabPanel key={4} value={value} index={4}>
-            <Logs />
-          </TabPanel>
+          {tabData.map((label, index) => (
+            <TabPanel key={index} value={value} index={index}>
+              {label.content}
+            </TabPanel>
+          ))}
         </Box>
       </div>
     </div>

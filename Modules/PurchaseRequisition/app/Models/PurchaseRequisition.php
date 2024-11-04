@@ -52,11 +52,14 @@ class PurchaseRequisition extends Model
         'jenis_entertainment',
         'nama_entertainment',
         'posisi_entertainment',
+        'nama_perusahaan',
         'jenis_usaha_entertainment',
         'jenis_kegiatan_entertainment',
         'status',
         'code',
         'message',
+        'attachment',
+        'balance',
     ];
 
     // Define the relationship with Purchase

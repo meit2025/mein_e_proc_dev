@@ -1,4 +1,4 @@
-const ROUTE_ROLE = '/api/role';
+const ROUTE_ROLE = '/api/user-management/role';
 
 export const GET_ROLE = `${ROUTE_ROLE}/list`;
 export const CREATE_ROLE = `${ROUTE_ROLE}/create`;

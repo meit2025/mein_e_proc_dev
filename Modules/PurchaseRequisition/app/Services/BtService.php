@@ -11,13 +11,14 @@ use Modules\BusinessTrip\Models\BusinessTrip;
 use Modules\BusinessTrip\Models\BusinessTripAttachment;
 use Modules\BusinessTrip\Models\BusinessTripDestination;
 use Modules\BusinessTrip\Models\BusinessTripDetailAttedance;
+use Modules\Master\Models\MasterCostCenter;
 use Modules\Master\Models\Pajak;
 use Modules\PurchaseRequisition\Models\CashAdvance;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
 
 class BtService
 {
-    public function processTextData($id, $btName)
+    public function processTextData($id)
     {
         DB::beginTransaction();
         try {
@@ -35,7 +36,7 @@ class BtService
 
             foreach ($BusinessTripDetailDestinationTotal as $key => $value) {
                 $reqno++;
-                $datainsert = $this->preparePurchaseRequisitionData($BusinessTrip, $btName, $value, $reqno, $BusinessAttachment, $key + 1);
+                $datainsert = $this->preparePurchaseRequisitionData($BusinessTrip, $value, $reqno, $BusinessAttachment, $key + 1);
 
                 $dataMapping = $datainsert;
                 $dataMapping['purchase_id'] = $BusinessTrip->id;
@@ -53,7 +54,7 @@ class BtService
                 # code...
             }
 
-            $this->generateFiles($array, $arrayCash, $reqno);
+            // $this->generateFiles($array, $arrayCash, $reqno);
 
             DB::commit();
             return $array;
@@ -64,7 +65,7 @@ class BtService
         }
     }
 
-    private function preparePurchaseRequisitionData($BusinessTrip, $btName, $item, $reqno, $BusinessAttachment, $indx)
+    private function preparePurchaseRequisitionData($BusinessTrip, $item, $reqno, $BusinessAttachment, $indx)
     {
         $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y-m-d');
         $getAllowanceItem = AllowanceItem::where('id', $item->allowance_item_id)->first();
@@ -73,7 +74,7 @@ class BtService
         }
 
         return [
-            'code_transaction' => $btName, // code_transaction
+            'code_transaction' => 'BTRE', // code_transaction
             'purchase_requisition_number' => $reqno, // banfn
             'item_number' => $indx, //
             'requisitioner_name' => $BusinessTrip->requestFor->employee->partner_number ?? '', // afnam
@@ -183,6 +184,7 @@ class BtService
     private function prepareCashAdvanceData($BusinessTrip, $item, $reqno)
     {
         $tax = Pajak::where('mwszkz', $item->tax ?? 'V0')->first();
+        $findCostCenter = MasterCostCenter::find($BusinessTrip->cost_center_id)->first();
         $taxAmount = $BusinessTrip->total_cash_advance - ($BusinessTrip->total_cash_advance * (($tax->desimal ?? 0) / 100));
 
         $findBusinessTripDestination = $this->findBusinessTripDestination($item->business_trip_destination_id);
@@ -192,7 +194,7 @@ class BtService
         $month = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('m');
 
         return [
-            'code_transaction' => 'VEN',
+            'code_transaction' => 'BTRE',
             'belnr' => $BusinessTrip->id, // belnr
             'company_code' => '1600', // bukrs
             'gjahr' =>  $year, // gjahr
@@ -212,30 +214,30 @@ class BtService
             'purchasing_document_item' => '', //ebelp
             'assigment' => $reqno,
             'text' => 'DP ' . $BusinessTrip->total_percent,
-            'profit_center' => '0000000100',
+            'profit_center' => $findCostCenter->cost_center,
             'tax_amount' => $taxAmount,
         ];
     }
 
-    private function generateFiles($array, $arrayCash, $nopr)
-    {
-        $timestamp = date('Ymd_His');
+    // private function generateFiles($array, $arrayCash, $nopr)
+    // {
+    //     $timestamp = date('Ymd_His');
 
-        // Generate Purchase Requisition File
-        $filename = 'INB_PRCRT_' . $nopr . '_' . $timestamp . '.txt';
-        $fileContent = $this->convertArrayToFileContent($array);
-        Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
+    //     // Generate Purchase Requisition File
+    //     $filename = 'INB_PRCRT_' . $nopr . '_' . $timestamp . '.txt';
+    //     $fileContent = $this->convertArrayToFileContent($array);
+    //     Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
 
-        // Generate Cash Advance File (if applicable)
-        if (!empty($arrayCash)) {
-            $filenameAc = 'INB_DPCRT_' . $nopr . '_' . $timestamp . '.txt';
-            $fileContentAc = $this->convertArrayToFileContent($arrayCash);
-            Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filenameAc, $fileContentAc);
-        }
-    }
+    //     // Generate Cash Advance File (if applicable)
+    //     if (!empty($arrayCash)) {
+    //         $filenameAc = 'INB_DPCRT_' . $nopr . '_' . $timestamp . '.txt';
+    //         $fileContentAc = $this->convertArrayToFileContent($arrayCash);
+    //         Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filenameAc, $fileContentAc);
+    //     }
+    // }
 
-    private function convertArrayToFileContent($array)
-    {
-        return implode(PHP_EOL, array_map(fn($item) => implode("|", $item), $array)) . PHP_EOL;
-    }
+    // private function convertArrayToFileContent($array)
+    // {
+    //     return implode(PHP_EOL, array_map(fn($item) => implode("|", $item), $array)) . PHP_EOL;
+    // }
 }

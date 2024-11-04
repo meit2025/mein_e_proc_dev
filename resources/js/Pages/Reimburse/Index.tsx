@@ -66,7 +66,8 @@ export const Index = ({
             type={formType.type}
             onSuccess={(value) => {
               setOpenForm(false);
-            }} />
+            }}
+          />
         </CustomDialog>
       </div>
       <DataGridComponent
@@ -80,7 +81,7 @@ export const Index = ({
           setOpenForm(true);
         }}
         url={{
-          url: LIST_REIMBURSE
+          url: LIST_REIMBURSE,
         }}
         labelFilter='search'
       />

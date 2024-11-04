@@ -37,6 +37,9 @@ class CashAdvance extends Model
         'assigment',
         'text',
         'profit_center',
+        'gjahr',
+        'budat',
+        'monat',
     ];
 
 

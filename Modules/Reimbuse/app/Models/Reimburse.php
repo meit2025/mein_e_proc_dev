@@ -61,6 +61,7 @@ class Reimburse extends Model
         'purchase_requisition_quantity',
         'tax_on_sales',
         'item_category_in_purchasing_document',
-        'plant'
+        'plant',
+        'uom',
     ];
 }

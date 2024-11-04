@@ -1,4 +1,4 @@
-const ROUTE_ROLE_PAGE = '/user-management/roles';
+const ROUTE_ROLE_PAGE = '/user-management/role';
 
 export const LIST_PAGE_ROLE = `${ROUTE_ROLE_PAGE}`;
 export const CREATE_PAGE_ROLE = `${ROUTE_ROLE_PAGE}/create`;

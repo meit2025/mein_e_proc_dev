@@ -25,6 +25,7 @@ import { useAlert } from '../../../contexts/AlertContext.jsx';
 import { usePage } from '@inertiajs/react';
 import { Currency, Period, PurchasingGroup, User, Tax, CostCenter } from '../model/listModel';
 import { FormType } from '@/lib/utils';
+import useDropdownOptions from '@/lib/getDropdown';
 
 interface Props {
   onSuccess?: (value: boolean) => void;
@@ -64,6 +65,7 @@ export const ReimburseForm: React.FC<Props> = ({
   const [requester, setRequester] = useState();
   const [families, setFamilies] = useState([]);
   const [isFamily, setIsFamily] = useState([[]]);
+  const { dataDropdown: dataUom, getDropdown: getUom } = useDropdownOptions();
 
   const form = useForm({
     defaultValues: {
@@ -80,6 +82,7 @@ export const ReimburseForm: React.FC<Props> = ({
         balance: 0,
         currency: 'IDR',
         tax_on_sales: '',
+        uom: '',
         purchasing_group: '',
         period: '',
         type: '',
@@ -125,22 +128,25 @@ export const ReimburseForm: React.FC<Props> = ({
       form.setValue('cost_center', data.cost_center);
       form.setValue('requester', data.users.nip);
       form.setValue('formCount', data.reimburses.length.toString());
-      form.setValue('forms', data.reimburses.map((reimburse) => ({
-        id: reimburse.id,
-        for: reimburse.for,
-        group: reimburse.group,
-        reimburse_type: reimburse.reimburse_type,
-        short_text: reimburse.short_text,
-        balance: Number(reimburse.balance),
-        currency: reimburse.currency,
-        tax_on_sales: reimburse.tax_on_sales,
-        purchasing_group: reimburse.purchasing_group,
-        period: reimburse.period,
-        type: reimburse.type,
-        item_delivery_data: new Date(reimburse.item_delivery_data),
-        start_date: new Date(reimburse.start_date),
-        end_date: new Date(reimburse.end_date),
-      })));
+      form.setValue(
+        'forms',
+        data.reimburses.map((reimburse) => ({
+          id: reimburse.id,
+          for: reimburse.for,
+          group: reimburse.group,
+          reimburse_type: reimburse.reimburse_type,
+          short_text: reimburse.short_text,
+          balance: Number(reimburse.balance),
+          currency: reimburse.currency,
+          tax_on_sales: reimburse.tax_on_sales,
+          purchasing_group: reimburse.purchasing_group,
+          period: reimburse.period,
+          type: reimburse.type,
+          item_delivery_data: new Date(reimburse.item_delivery_data),
+          start_date: new Date(reimburse.start_date),
+          end_date: new Date(reimburse.end_date),
+        })),
+      );
       data.reimburses.forEach((reimburse, index) => {
         selectedTypeCode(index, reimburse.reimburse_type);
       });
@@ -152,9 +158,17 @@ export const ReimburseForm: React.FC<Props> = ({
 
   useEffect(() => {
     if (type === FormType.edit) {
-      getDetailData()
+      getDetailData();
     }
   });
+
+  useEffect(() => {
+    getUom('', {
+      name: 'unit_of_measurement_text',
+      id: 'id',
+      tabel: 'uoms',
+    });
+  }, []);
 
   const selectedEmployee = async (value: any) => {
     try {
@@ -168,7 +182,7 @@ export const ReimburseForm: React.FC<Props> = ({
       const err = resultError.response.data;
       showToast(err.message, 'error');
     }
-  }
+  };
 
   const handleTabChange = (tabValue) => {
     setActiveTab(tabValue);
@@ -213,7 +227,7 @@ export const ReimburseForm: React.FC<Props> = ({
       return updatedLimits;
     });
     form.setValue(`forms.${index}.for`, user);
-  }
+  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -254,10 +268,7 @@ export const ReimburseForm: React.FC<Props> = ({
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Textarea
-                            placeholder='Insert remark'
-                            {...field}
-                          />
+                          <Textarea placeholder='Insert remark' {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -577,6 +588,37 @@ export const ReimburseForm: React.FC<Props> = ({
                                       {taxes.map((tax) => (
                                         <SelectItem key={tax.id} value={tax.id.toString()}>
                                           {tax.mwszkz}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width={200}>Uom</td>
+                        <td>
+                          <FormField
+                            control={form.control}
+                            name={`forms.${index}.uom`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Select
+                                    onValueChange={(value) => field.onChange(value)}
+                                    value={field.value}
+                                  >
+                                    <SelectTrigger className='w-[200px]'>
+                                      <SelectValue placeholder='-' />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {(dataUom ?? []).map((uom, index) => (
+                                        <SelectItem key={uom.value} value={uom.value.toString()}>
+                                          {uom.label}
                                         </SelectItem>
                                       ))}
                                     </SelectContent>
