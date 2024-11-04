@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Master\Models\MasterCostCenter;
+use Modules\Master\Models\Pajak;
+use Modules\Master\Models\PurchasingGroup;
 
 // use Modules\BusinessTrip\Database\Factories\BusinessTripFactory;
 

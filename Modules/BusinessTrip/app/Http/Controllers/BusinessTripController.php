@@ -62,20 +62,21 @@ class BusinessTripController extends Controller
      */
     public function showAPI($id)
     {
-        $findData  = BusinessTrip::find($id);
-        //  attachment
-        $findData->attachment = BusinessTripAttachment::where('business_trip_id', $id)->first();
-        // destination
-        // detail_attedances
-        // allowances
-        $findData->destination = BusinessTripDestination::where('business_trip_id', $id)->with(['detailAttendance'])->first();
-        $allowances = [];
-
-        $destinationTotal = BusinessTripDetailDestinationTotal::where('business_trip_destination_id', $findData->destination->id)->with(['allowance'])->get();
-        // dd($destinationTotal);
-
-        $findData->destination->allowances = BusinessTripDetailDestinationTotal::where('business_trip_destination_id', $findData->destination->id)->with(['allowanceItem'])->get();
-        $findData->destination->allowances = BusinessTripDetailDestinationDayTotal::where('business_trip_destination_id', $findData->destination->id)->with(['allowanceItem'])->get();
+        $findData  = BusinessTrip::with(
+            [
+                'requestFor',
+                'requestedBy',
+                'purposeType',
+                'costCenter',
+                'pajak',
+                'purchasingGroup',
+                'attachment',
+                'businessTripDestination',
+                'businessTripDestination.detailAttendance',
+                'businessTripDestination.detailDestinationDay',
+                'businessTripDestination.detailDestinationTotal'
+            ]
+        )->where('id', $id)->first();
         return $this->successResponse($findData);
     }
 
@@ -117,6 +118,7 @@ class BusinessTripController extends Controller
             return $this->errorResponse("erorr", 400, $validator->errors());
         }
         try {
+            date_default_timezone_set('Asia/Jakarta');
             DB::beginTransaction();
             $businessTrip = BusinessTrip::create([
                 'request_no' => time(),
@@ -144,7 +146,7 @@ class BusinessTripController extends Controller
 
             foreach ($request->destinations as $key => $value) {
                 $data_destination = json_decode($value, true);
-                // dd($data_destination);
+                dd($data_destination);
                 $businessTripDestination = BusinessTripDestination::create([
                     'business_trip_id' => $businessTrip->id,
                     'destination' => $data_destination['destination'],

@@ -44,10 +44,10 @@ Route::group(['prefix' => 'business-trip'], function () {
     Route::get('/allowance-item', [AllowanceItemController::class, 'index'])->name('allowance-item.index');
     Route::get('/purpose-type', [PurposeTypeController::class, 'index'])->name('purpose-type.index');
     Route::get('/grade', [BusinessTripGradeController::class, 'index'])->name('business-grade.index');
-    Route::inertia('/detail-page/{id}',  'BusinessTrip/BusinessTripDeclaration/Detail', [
+    Route::inertia('/detail-page/{id}',  'BusinessTrip/BusinessTrip/Detail', [
         'id' => fn() => request()->route('id'),
     ]);
-    Route::inertia('/business-trip-declaration/detail-page/{id}',  'BusinessTrip/BusinessTrip/Detail', [
+    Route::inertia('/business-trip-declaration/detail-page/{id}',  'BusinessTrip/BusinessTripDeclaration/Detail', [
         'id' => fn() => request()->route('id'),
     ]);
 });

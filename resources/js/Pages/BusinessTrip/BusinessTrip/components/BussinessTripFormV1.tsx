@@ -231,8 +231,6 @@ export const BussinessTripFormV1 = ({
 
     try {
       let response = await axiosInstance.get(url);
-
-      //   console.log(response.data, ' list allowance');
       setListAllowances(response.data.data as AllowanceItemModel[]);
     } catch (e) {
       //   console.log(e);
@@ -266,7 +264,7 @@ export const BussinessTripFormV1 = ({
         formData.append(`destinations[${index}]`, JSON.stringify(item));
       });
 
-      // const response = axios.post(CREATE_API_BUSINESS_TRIP, formData);
+      const response = axios.post(CREATE_API_BUSINESS_TRIP, formData);
 
       await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
         headers: {
@@ -842,7 +840,6 @@ export function BussinessDestinationForm({
             : generateDetailAllowanceByDate(item.grade_price),
       };
     });
-
     replaceAllowance(allowancesForm);
   }
 
@@ -925,12 +922,12 @@ export function BussinessDestinationForm({
                       <CustomDatePicker
                         initialDate={destination.business_trip_end_date}
                         onDateChange={(value) => {
-                          //   updateDestination(index, {
-                          //     ...destination,
-                          //     business_trip_end_date: value,
-                          //   });
+                          updateDestination(index, {
+                            ...destination,
+                            business_trip_end_date: value,
+                          });
 
-                          endDateHandler(value);
+                          //   endDateHandler(value);
                         }}
                       />
                     </FormControl>
@@ -1333,7 +1330,6 @@ export function AllowanceRowInput({
       alert(`This value is fixed and cannot be changed.`);
     }
   };
-
   return (
     <>
       <tr key={allowance.id}>

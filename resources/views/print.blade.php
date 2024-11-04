@@ -188,6 +188,7 @@
                         <th>Total</th>
                     </tr>
                     @php
+                    dd($row->groupDestination);
                         // Group items by allowance_item_id
                         $groupedItems = $row->detailDestinationDay->groupBy('allowance_item_id');
                         $total_standar = 0;
