@@ -220,6 +220,23 @@ class AllowanceItemController extends Controller
         return $this->successResponse($context);
     }
 
+    public function deleteAPI($id)
+    {
+        DB::beginTransaction();
+        try {
+            $AllowanceItem =  AllowanceItem::find($id);
+            $AllowanceItem->delete();
+
+            DB::commit();
+
+            return $this->successResponse([], 'Successfully delete Allowance item');
+        } catch (\Exception  $e) {
+            DB::rollBack();
+
+            return $this->errorResponse($e);
+        }
+    }
+
 
     public function updateAPI($id, Request $request)
     {

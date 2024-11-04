@@ -13,11 +13,13 @@ import PurposeTypeForm from './component/form';
 import { AllowanceItemModel } from '../AllowanceItem/models/models';
 import {
   CREATE_API_PURPOSE_TYPE,
+  DELETE_API_PURPOSE_TYPE,
   GET_DETAIL_PURPOSE_TYPE,
   GET_LIST_PURPOSE_TYPE,
   UPDATE_PURPOSE_TYPE,
 } from '@/endpoint/purpose-type/api';
 import { FormType } from '@/lib/utils';
+import { ConfirmationDeleteModal } from '@/components/commons/ConfirmationDeleteModal';
 
 interface propsType {
   // listAllowanceCategory: AllowanceCategoryModel[];
@@ -46,6 +48,7 @@ export const Index = ({ listAllowance }: propsType) => {
           <PlusIcon />
         </Button>
 
+        <ConfirmationDeleteModal open={false} onDelete={() => {}} onCancel={() => {}} />
         <CustomDialog
           onClose={() => setOpenForm(false)}
           open={openForm}
@@ -75,8 +78,10 @@ export const Index = ({ listAllowance }: propsType) => {
         }}
         columns={columns}
         actionType='dropdown'
+        deleteConfirmationText='Are you sure delete this purpose type?'
         url={{
           url: GET_LIST_PURPOSE_TYPE,
+          deleteUrl: DELETE_API_PURPOSE_TYPE,
         }}
         labelFilter='search'
       />

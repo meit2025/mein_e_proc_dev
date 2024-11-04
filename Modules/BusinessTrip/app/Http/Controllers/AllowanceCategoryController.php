@@ -123,6 +123,14 @@ class AllowanceCategoryController extends Controller
         //
     }
 
+    public function deleteAPI($id)
+    {
+        $allowanceCategory =  AllowanceCategory::find($id);
+        $allowanceCategory->delete();
+
+        return $this->successResponse([], 'Successfully deleted data');
+    }
+
     /**
      * Show the specified resource.
      */
