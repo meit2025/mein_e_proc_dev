@@ -58,6 +58,7 @@ COPY ./docker/000-default.conf /etc/apache2/sites-available/000-default.conf
 # SSL and PHP settings
 COPY ./docker/max_size.ini /usr/local/etc/php/conf.d/max_size.ini
 RUN a2ensite default-ssl
+RUN apache2ctl configtest
 
 # Restart Apache
 RUN service apache2 restart
