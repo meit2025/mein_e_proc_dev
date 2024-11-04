@@ -59,9 +59,7 @@ Route::group(['prefix' => 'api/'], function () {
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
         Route::get('/detail/{id}', [AllowanceCategoryController::class, 'showAPI'])->name('allowance-category.detail');
 
-        // Route::delete('/delete/{id}', [MasterMaterialController::class, 'destroy'])->name('master.master-material.destroy');
-
-
+        Route::delete('/delete/{id}', [AllowanceCategoryController::class, 'deleteAPI'])->name('allowance-category.destroy');
     });
 
 
@@ -72,10 +70,7 @@ Route::group(['prefix' => 'api/'], function () {
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
         Route::get('/detail/{id}', [AllowanceItemController::class, 'detailAPI'])->name('allowance-item.detail');
         Route::put('/update/{id}', [AllowanceItemController::class, 'updateAPI'])->name('allowance-item.update');
-
-        // Route::delete('/delete/{id}', [MasterMaterialController::class, 'destroy'])->name('master.master-material.destroy');
-
-
+        Route::delete('/delete/{id}', [AllowanceItemController::class, 'deleteAPI'])->name('allowance-item.delete');
     });
 
     Route::group(['prefix' => 'purpose-type'], function () {
@@ -88,9 +83,7 @@ Route::group(['prefix' => 'api/'], function () {
         Route::get('/list-allowances-by-purpose-type/{id}/{userid}', [PurposeTypeController::class, 'getAllowanceByPurposeAPI'])->name('purpose-type.list-allowances');
 
 
-        // Route::delete('/delete/{id}', [MasterMaterialController::class, 'destroy'])->name('master.master-material.destroy');
-
-
+        Route::delete('/delete/{id}', [PurposeTypeController::class, 'deleteAPI'])->name('purpose-type.delete');
     });
 
     Route::group(['prefix' => 'business-trip'], function () {
@@ -132,8 +125,6 @@ Route::group(['prefix' => 'api/'], function () {
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
         Route::get('/detail/{id}', [BusinessTripGradeController::class, 'detailAPI'])->name('business-grade.detail');
 
-        // Route::delete('/delete/{id}', [MasterMaterialController::class, 'destroy'])->name('master.master-material.destroy');
-
-
+        Route::delete('/delete/{id}', [BusinessTripGradeController::class, 'deleteAPI'])->name('business-grade.destroy');
     });
 });

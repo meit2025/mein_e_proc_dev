@@ -29,11 +29,12 @@ import { LIST_PAGE_MASTER_MATERIAL_GROUP } from '@/endpoint/materialGroup/page';
 import { LIST_PAGE_MASTER_UOM } from '@/endpoint/uom/page';
 import { LIST_PAGE_MASTER_PAJAK } from '@/endpoint/pajak/page';
 import { LIST_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
-import { LIST_PAGE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/page';
+import { PAGE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/page';
 import { LIST_PAGE_REIMBURSE_PERIOD } from '@/endpoint/reimbursePeriod/page';
-import { LIST_PAGE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/page';
+import { PAGE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/page';
 import { LIST_PAGE_FAMILY } from '@/endpoint/family/page';
-// import { Link } from '@inertiajs/inertia-react';
+import { PAGE_REIMBURSE } from '@/endpoint/reimburse/page';
+import { LIST_PAGE_MASTER_PERMISSION } from '@/endpoint/permission/page';
 
 export const RuteTitle = (title: string) => {
   return (
@@ -47,9 +48,10 @@ export const RuteTitle = (title: string) => {
 
 export const Singel = (menu: any, url: string) => {
   const isActive = url === menu.route;
+
   return (
     <div
-      className={`menu-item  menu-item-active:text-primary menu-link-hover:!text-primary ${isActive ? 'active' : ''}`}
+      className={`menu-item  menu-item-active:text-primary menu-link-hover:!text-primary ${isActive ? 'active text-blue-500' : ''}`}
     >
       <Link
         className='menu-link border border-transparent items-center grow menu-item-active:bg-secondary-active dark:menu-item-active:bg-coal-300 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-secondary-active dark:hover:bg-coal-300 dark:hover:border-gray-100 hover:rounded-lg'
@@ -95,8 +97,9 @@ export const MultiMenu = (menu: any, url: string) => {
       <div className='menu-accordion gap-0.5 pl-[10px] relative before:absolute before:left-[20px] before:top-0 before:bottom-0 before:border-l before:border-gray-200'>
         {menu.sub.map((sub: any, subkey: number) => {
           const isSubActive = url === sub.route;
+
           return (
-            <div key={subkey} className={`menu-item ${isSubActive ? 'menu-item-active' : ''}`}>
+            <div key={subkey} className={`menu-item ${isSubActive ? 'active' : ''}`}>
               <Link
                 className='menu-link border border-transparent items-center grow menu-item-active:bg-secondary-active dark:menu-item-active:bg-coal-300 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-secondary-active dark:hover:bg-coal-300 dark:hover:border-gray-100 hover:rounded-lg gap-[14px] pl-[10px] pr-[10px] py-[8px]'
                 href={sub.route}
@@ -129,7 +132,7 @@ const sidebar = [
       {
         title: 'Reimburse',
         icon: 'ki-element-11',
-        route: '/reimburse',
+        route: PAGE_REIMBURSE,
         sub: [],
       },
 
@@ -162,6 +165,12 @@ const sidebar = [
     group: 'Setting',
     menu: [
       {
+        title: 'Setting',
+        icon: 'ki-setting-2',
+        route: LIST_PAGE_SETTING_APPROVAL,
+        sub: [],
+      },
+      {
         title: 'Gateway',
         icon: 'ki-key-square',
         route: '/',
@@ -181,17 +190,12 @@ const sidebar = [
 
       {
         title: 'Approval',
-        icon: 'ki-users',
+        icon: 'ki-copy-success',
         route: '/',
         sub: [
           {
             name: 'Approval',
             route: LIST_PAGE_APPROVAL_ROUTE,
-            roles: '',
-          },
-          {
-            name: 'Setting Approval',
-            route: LIST_PAGE_SETTING_APPROVAL,
             roles: '',
           },
         ],
@@ -209,6 +213,11 @@ const sidebar = [
           {
             name: 'Family',
             route: LIST_PAGE_FAMILY,
+            roles: '',
+          },
+          {
+            name: 'Role Permission',
+            route: LIST_PAGE_MASTER_PERMISSION,
             roles: '',
           },
           {
@@ -267,7 +276,7 @@ const sidebar = [
       },
       {
         title: 'Master PR',
-        icon: 'ki-users',
+        icon: 'ki-wrench',
         route: '/',
         sub: [
           {
@@ -315,21 +324,11 @@ const sidebar = [
             route: LIST_PAGE_MASTER_PAJAK,
             roles: '',
           },
-          {
-            name: 'Family',
-            route: LIST_PAGE_FAMILY,
-            roles: '',
-          },
-          {
-            name: 'Roles',
-            route: LIST_PAGE_ROLE,
-            roles: '',
-          },
         ],
       },
       {
         title: 'Master Business Trip ',
-        icon: 'ki-element-11',
+        icon: 'ki-book-square',
         route: '/',
         sub: [
           {
@@ -359,12 +358,12 @@ const sidebar = [
       },
       {
         title: 'Master Reimburse',
-        icon: 'ki-key-square',
+        icon: 'ki-paper-plane',
         route: '/',
         sub: [
           {
             name: 'Reimburse Type',
-            route: LIST_PAGE_REIMBURSE_TYPE,
+            route: PAGE_REIMBURSE_TYPE,
             roles: '',
           },
           {
@@ -374,7 +373,7 @@ const sidebar = [
           },
           {
             name: 'Reimburse Quota',
-            route: LIST_PAGE_REIMBURSE_QUOTA,
+            route: PAGE_REIMBURSE_QUOTA,
             roles: '',
           },
         ],
@@ -384,7 +383,8 @@ const sidebar = [
 ];
 
 export default function Sidebar() {
-  const { component: url } = usePage();
+  const { url } = usePage();
+
   return (
     <div
       className='sidebar dark:bg-coal-600 bg-light border-r border-r-gray-200 dark:border-r-coal-100 fixed top-0 bottom-0 z-20 hidden lg:flex flex-col items-stretch shrink-0'
@@ -436,11 +436,11 @@ export default function Sidebar() {
                   {item.group !== '' && RuteTitle(item.group)}{' '}
                   {item.menu.map((menu) => {
                     if (menu.sub.length > 0) {
-                      return MultiMenu(menu, url as string);
+                      return MultiMenu(menu, url.toLowerCase() as string);
                     }
 
                     if (menu.sub.length === 0) {
-                      return Singel(menu, url as string);
+                      return Singel(menu, url.toLowerCase() as string);
                     }
                   })}
                 </div>

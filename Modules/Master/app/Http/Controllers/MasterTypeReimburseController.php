@@ -7,30 +7,47 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
-use Modules\Master\Models\MasterMaterial;
+use Modules\BusinessTrip\Models\BusinessTripGrade;
 use Modules\Master\Models\MasterTypeReimburse;
 
 class MasterTypeReimburseController extends Controller
 {
+    public function list(Request $request)
+    {
+        try {
+            $query =  MasterTypeReimburse::query();
+            $perPage = $request->get('per_page', 10);
+            $sortBy = $request->get('sort_by', 'id');
+            $sortDirection = $request->get('sort_direction', 'asc');
+            $query->orderBy($sortBy, $sortDirection);
+            $data = $query->paginate($perPage);
+            $data->getCollection()->transform(function ($map) {
+                $map = json_decode($map);
+                return [
+                    'id' => $map->id,
+                    'code' => $map->code,
+                    'plafon' => $map->plafon,
+                    'is_employee' => $map->is_employee ? 'Employee' : 'Family',
+                    'material_group' => $map->material_group,
+                    'material_number' => $map->material_number,
+                ];
+            });
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
         try {
-            $listMaterial = MasterMaterial::get();
-            $filterableColumns =  [
-                'code',
-                'name',
-                'is_employee',
-                'material_group',
-                'material_number'
-            ];
-
-            $data = $this->filterAndPaginate($request, MasterTypeReimburse::class, $filterableColumns);
+            $listGrades = BusinessTripGrade::select('id', 'grade')->get();
             return Inertia::render(
                 'Master/MasterReimburseType/Index',
-                compact('data', 'listMaterial')
+                compact('listGrades')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -53,9 +70,12 @@ class MasterTypeReimburseController extends Controller
         $rules = [
             'code' => 'required|unique:master_type_reimburses',
             'name' => 'required',
+            'limit' => 'required|min:1|numeric',
+            'plafon' => 'required|min:1|numeric',
             'is_employee' => 'required|boolean',
             'material_group' => 'required',
-            'material_number' => 'required'
+            'material_number' => 'required',
+            'grade' => 'required|exists:business_trip_grades,id'
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -87,7 +107,12 @@ class MasterTypeReimburseController extends Controller
      */
     public function edit($id)
     {
-        return view('master::edit');
+        try {
+            $groups = MasterTypeReimburse::where('id', $id)->get();
+            return $this->successResponse($groups);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**

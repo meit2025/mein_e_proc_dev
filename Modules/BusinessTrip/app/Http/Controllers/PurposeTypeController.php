@@ -231,4 +231,21 @@ class PurposeTypeController extends Controller
 
         return $this->successResponse($listAllowances);
     }
+
+    public function deleteAPI($id)
+    {
+        DB::beginTransaction();
+        try {
+            $findPurposeType =  PurposeType::find($id);
+            $findPurposeType->delete();
+
+            DB::commit();
+
+            return $this->successResponse([], 'Successfully delete purpose type');
+        } catch (\Exception  $e) {
+            DB::rollBack();
+
+            return $this->errorResponse($e);
+        }
+    }
 }

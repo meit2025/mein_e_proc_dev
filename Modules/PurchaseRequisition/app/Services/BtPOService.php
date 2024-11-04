@@ -5,60 +5,13 @@ namespace Modules\PurchaseRequisition\Services;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Modules\BusinessTrip\Models\AllowanceItem;
-use Modules\BusinessTrip\Models\BusinessTrip;
+use Modules\Approval\Models\SettingApproval;
 use Modules\BusinessTrip\Models\BusinessTripAttachment;
-use Modules\BusinessTrip\Models\BusinessTripDestination;
-use Modules\BusinessTrip\Models\BusinessTripDetailAttedance;
-use Modules\Master\Models\Pajak;
-use Modules\PurchaseRequisition\Models\CashAdvance;
 use Modules\PurchaseRequisition\Models\PurchaseOrder;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
 
 class BtPOService
 {
-
-    //                       TYPE char4,
-    //                       TYPE char12,
-    //                       TYPE char10,
-    //                       TYPE char10,
-    //                       TYPE char5,
-    //                       TYPE char5,
-    //                       TYPE char1,
-    //                       TYPE char1,
-    //                       TYPE char1,
-    //                       TYPE char4,
-    //                       TYPE char9,
-    //                       TYPE char40,
-    //                       TYPE char3,
-    //                       TYPE char20,
-    //                       TYPE char2,
-    //                       TYPE char20,
-    //                       TYPE char1,
-    //                       TYPE char1,
-    //                       TYPE text40,
-    //                       TYPE char1,
-    //                       TYPE char1,
-    //                       TYPE char4,
-    //                       TYPE char12,
-    //                       TYPE char4,
-    //                       TYPE char12,
-    //                       TYPE char10,
-    //           F81              TYPE string,
-    //           F82              TYPE string,
-    //           F83              TYPE string,
-    //           F84              TYPE string,
-    //           F85              TYPE string,
-    //           F86              TYPE string,
-    //           F87              TYPE string,
-    //           F88              TYPE string,
-    //           F89              TYPE string,
-    //           F02              Type String
-    //           F01              TYPE string
-    //           F03              TYPE string
-    //           F04              TYPE string
-    //           Attachment_link Type String
     public function processTextData($id)
     {
         DB::beginTransaction();
@@ -66,24 +19,42 @@ class BtPOService
 
             $BusinessTrip = $this->findBusinessTripPr($id);
             $attachment = $this->findBusinessAttachment($id);
-
-
-
             $array = [];
-            $arrayCash = [];
-            $latestRequisition = PurchaseRequisition::orderBy('purchase_requisition_number', 'desc')->first();
-            $reqno = $latestRequisition ? (int) $latestRequisition->purchase_requisition_number : 0;
+            // Collect SettingApproval values
+            $settings = SettingApproval::whereIn('key', [
+                'dokumenType_reimburse',
+                'PurchasingOrganization',
+                'AccountAssignmentCategory',
+                'StorageLocation',
+                'PurchaseRequisitionQuantity',
+                'plant',
+                'companyCode',
+                'TermsofPaymentKey'
+            ])->pluck('value', 'key');
+
+            $dokumenType = $settings['dokumenType_reimburse'];
+            $reqno = (int) SettingApproval::where('key', 'dokumenType_' . $dokumenType)->lockForUpdate()->value('value') + 1;
             $increment = 1;
+
             foreach ($BusinessTrip as $key => $value) {
                 # code...
-                $data = $this->preparePurchaseRequisitionData($value, $increment, $reqno, $attachment);
+                $data = $this->preparePurchaseRequisitionData(
+                    $value,
+                    $increment,
+                    $reqno,
+                    $attachment,
+                    $dokumenType,
+                    $settings['companyCode'],
+                    $settings['TermsofPaymentKey'],
+                    $settings['AccountAssignmentCategory'],
+                    $settings['StorageLocation'],
+                    $settings['PurchasingOrganization'],
+                );
                 PurchaseOrder::create($data);
                 $array[] = $data;
-                $increment++;
             }
 
-            $this->generateFiles($array, $arrayCash, $reqno);
-
+            SettingApproval::where('key', 'dokumenType_' . $dokumenType)->update(['value' => $reqno]);
             DB::commit();
             return $array;
         } catch (Exception $e) {
@@ -93,22 +64,32 @@ class BtPOService
         }
     }
 
-    private function preparePurchaseRequisitionData($BusinessTrip, $increment, $reqno, $attachment)
-    {
+    private function preparePurchaseRequisitionData(
+        $BusinessTrip,
+        $increment,
+        $reqno,
+        $attachment,
+        $dokumenType,
+        $companyCode,
+        $TermsofPaymentKey,
+        $AccountAssignmentCategory,
+        $StorageLocation,
+        $PurchasingOrganization,
+    ) {
         $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y-m-d');
         $data = [
             'code_transaction' => 'btre',
             'purchasing_document_date' => $formattedDate, // bedat
-            'purchasing_document_type' => 'YSUN', // bsart
-            'company_code' => '1600', //bukrs
+            'purchasing_document_type' => $dokumenType, // bsart
+            'company_code' => $companyCode, //bukrs
             'purchasing_document_number' => $reqno, //ebeln
             'purchasing_group' => $BusinessTrip->purchasing_group, // ekgrp
-            'purchasing_organization' =>  '1600', // ekorg
+            'purchasing_organization' =>  $PurchasingOrganization, // ekorg
             'incoterms_part1' => '', // inco1
             'incoterms_part2' => '', // inco2
             'vendor_account_number' => $BusinessTrip->desired_vendor, // lifnr
             'currency_key' => 'IDR', // waers
-            'terms_of_payment_key' => 'D030', //zterm
+            'terms_of_payment_key' => $TermsofPaymentKey, //zterm
             'requisitioner_name' => $BusinessTrip->desired_vendor, //afnam
             'purchase_requisition_number'  => $BusinessTrip->purchase_requisition_number, // banfn
             'requirement_tracking_number' => '', // bednr
@@ -117,14 +98,14 @@ class BtPOService
             'item_number_of_purchasing_document' => $increment, // ebelp
             'delivery_completed_indicator' => '', // elikz
             'final_invoice_indicator' => '', // erekz
-            'account_assignment_category' => 'Y', // knttp
-            'storage_location' => '0001', // lgort
+            'account_assignment_category' => $AccountAssignmentCategory, // knttp
+            'storage_location' => $StorageLocation, // lgort
             'material_group' => $BusinessTrip->material_group, //matkl
             'material_number' => $BusinessTrip->material_number, // matnr
             'po_unit_of_measure' => $BusinessTrip->uom, // meins
             'po_quantity' => 1, // menge
             'tax_code' => $BusinessTrip->tax_code, //mwskz
-            'net_price' => '100000', // netpr
+            'net_price' => $BusinessTrip->balance, // netpr
             'item_category' => '', // pstyp
             'invoice_receipt_indicator' => '', // repos
             'short_text' => $BusinessTrip->remark, // txz01
@@ -149,7 +130,7 @@ class BtPOService
             'F01' => '', //           F01
             'F03' => '', //           F03
             'F04' => '', //           F04
-            'Attachment_link' => $attachment, //           Attachment_link
+            'attachment_link' => $attachment, //           Attachment_link
         ];
         return $data;
     }
@@ -171,20 +152,5 @@ class BtPOService
             return "{$title};{$url}";
         })->implode('$');
         return $attachmentString;
-    }
-
-    private function generateFiles($array, $arrayCash, $reqno)
-    {
-        $timestamp = date('Ymd_His');
-
-        // Generate Purchase Requisition File
-        $filename = 'INB_POCRT_' . $reqno . '_' . $timestamp . '.txt';
-        $fileContent = $this->convertArrayToFileContent($array);
-        Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
-    }
-
-    private function convertArrayToFileContent($array)
-    {
-        return implode(PHP_EOL, array_map(fn($item) => implode("|", $item), $array)) . PHP_EOL;
     }
 }

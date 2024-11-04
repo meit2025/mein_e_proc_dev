@@ -7,10 +7,17 @@ import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import { GET_LIST_REIMBURSE_PERIOD } from '@/endpoint/reimbursePeriod/api';
+import { FormType } from '@/lib/utils';
 import ReimbursePeriodForm from './component/form';
+import { STORE_REIMBURSE_PERIOD, EDIT_REIMBURSE_PERIOD, UPDATE_REIMBURSE_PERIOD } from '@/endpoint/reimbursePeriod/api';
 
 export const Index = () => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
+
+  const [formType, setFormType] = React.useState({
+    type: FormType.create,
+    id: undefined,
+  });
 
   function openFormHandler() {
     setOpenForm(!openForm);
@@ -27,12 +34,24 @@ export const Index = () => {
           open={openForm}
           onOpenChange={openFormHandler}
         >
-          <ReimbursePeriodForm />
+          <ReimbursePeriodForm
+            type={formType.type}
+            storeURL={STORE_REIMBURSE_PERIOD}
+            editURL={EDIT_REIMBURSE_PERIOD(formType.id ?? '')}
+            updateURL={UPDATE_REIMBURSE_PERIOD(formType.id ?? '')}
+          />
         </CustomDialog>
       </div>
       <DataGridComponent
         columns={columns}
         actionType='dropdown'
+        onEdit={(value) => {
+          setFormType({
+            type: FormType.edit,
+            id: value.toString(),
+          });
+          setOpenForm(true);
+        }}
         url={{
           url: GET_LIST_REIMBURSE_PERIOD,
         }}

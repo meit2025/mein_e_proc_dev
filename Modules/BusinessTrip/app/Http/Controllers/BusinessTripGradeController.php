@@ -19,8 +19,8 @@ class BusinessTripGradeController extends Controller
     {
 
         $listUserInGrade = BusinessTripGradeUser::select("user_id")->pluck('user_id')->toArray();
-        // $listUser =  User::whereNotIn('id', $listUserInGrade)->get();
-        $listUser =  User::get();
+        $listUser =  User::whereNotIn('id', $listUserInGrade)->get();
+        // $listUser =  User::get();
 
 
         // return Inertia::render('BusinessTrip/BusinessTrip/index', compact('users', 'listPurposeType'));
@@ -205,11 +205,30 @@ class BusinessTripGradeController extends Controller
     {
         $grade = BusinessTripGrade::find($id);
         $users = BusinessTripGradeUser::where('grade_id', $id)->get()->pluck('user_id')->toArray();
+        $listUserInGrade = BusinessTripGradeUser::where('grade_id', '<>', $id)->select("user_id")->pluck('user_id')->toArray();
+        $listUser =  User::whereNotIn('id', $listUserInGrade)->get();
         $context = [
             'grade' => $grade,
-            'users' => $users
+            'users' => $users,
+            'listUser' => $listUser,
         ];
 
         return $this->successResponse($context);
+    }
+
+    public function deleteAPI($id)
+    {
+        DB::beginTransaction();
+        try {
+            $BusinessTripGrade =  BusinessTripGrade::find($id);
+            $BusinessTripGrade->delete();
+
+            DB::commit();
+
+            return $this->successResponse([], 'Successfully delete Business Grade');
+        } catch (\Exception  $e) {
+            DB::rollBack();
+            return $this->errorResponse($e);
+        }
     }
 }

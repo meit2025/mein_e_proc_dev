@@ -1,6 +1,6 @@
 import { Checkbox, FormControlLabel, FormHelperText } from '@mui/material';
 import { Controller, useFormContext } from 'react-hook-form';
-import { CSSProperties } from 'react';
+import { CSSProperties, useEffect } from 'react';
 
 interface FormCheckboxProps {
   fieldLabel: string;
@@ -10,6 +10,7 @@ interface FormCheckboxProps {
   style?: CSSProperties;
   requiredMessage?: string;
   classNames?: string;
+  onChange?: (checked: boolean) => void;
 }
 
 const FormCheckbox: React.FC<FormCheckboxProps> = ({
@@ -20,6 +21,7 @@ const FormCheckbox: React.FC<FormCheckboxProps> = ({
   style,
   requiredMessage,
   classNames,
+  onChange,
 }) => {
   const {
     control,
@@ -36,7 +38,19 @@ const FormCheckbox: React.FC<FormCheckboxProps> = ({
       render={({ field }) => (
         <div style={style} className={classNames}>
           <FormControlLabel
-            control={<Checkbox {...field} checked={!!field.value} disabled={disabled} />}
+            control={
+              <Checkbox
+                {...field}
+                checked={field.value}
+                disabled={disabled}
+                onChange={(e) => {
+                  field.onChange(e.target.checked); // Update form state
+                  if (onChange) {
+                    onChange(e.target.checked); // Trigger optional onChange callback
+                  }
+                }}
+              />
+            }
             label={fieldLabel}
           />
           {errors[fieldName] && (

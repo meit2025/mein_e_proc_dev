@@ -81,6 +81,12 @@ return [
             'level' => env('LOG_LEVEL', 'critical'),
             'replace_placeholders' => true,
         ],
+        'reim_txt' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/reim_txt_' . date('Y-m-d') . '.log'),
+            'level' => 'debug',
+            'days' => 14,
+        ],
 
         'papertrail' => [
             'driver' => 'monolog',
@@ -89,7 +95,7 @@ return [
             'handler_with' => [
                 'host' => env('PAPERTRAIL_URL'),
                 'port' => env('PAPERTRAIL_PORT'),
-                'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'),
+                'connectionString' => 'tls://' . env('PAPERTRAIL_URL') . ':' . env('PAPERTRAIL_PORT'),
             ],
             'processors' => [PsrLogMessageProcessor::class],
         ],

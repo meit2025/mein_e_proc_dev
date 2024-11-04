@@ -1,1 +1,0 @@
-const e=[{field:"code",headerName:"Code",width:200,filterable:!0},{field:"name",headerName:"Name",width:200,filterable:!0},{field:"is_employee",headerName:"Is for Employee",width:200,filterable:!0},{field:"material_group",headerName:"Material Group",width:200,filterable:!0},{field:"material_number",headerName:"Material Number",width:200,filterable:!0}];export{e as columns};

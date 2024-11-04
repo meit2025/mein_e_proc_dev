@@ -90,32 +90,61 @@ class ReimbuseController extends Controller
         }
     }
 
+    public function list(Request $request)
+    {
+        try {
+            $query =  ReimburseGroup::query()->with(['reimburses']);
+            $perPage = $request->get('per_page', 10);
+            $sortBy = $request->get('sort_by', 'id');
+            $sortDirection = $request->get('sort_direction', 'asc');
+            $query->orderBy($sortBy, $sortDirection);
+            $data = $query->paginate($perPage);
+            $data->getCollection()->transform(function ($map) {
+                $balance = 0;
+                foreach ($map->reimburses as $reimburse) {
+                    $balance += $reimburse->balance;
+                }
+                $map = json_decode($map);
+                return [
+                    'id' => $map->id,
+                    'code' => $map->code,
+                    'request_for' => $map->requester,
+                    'remark' => $map->remark,
+                    'balance' => $balance,
+                    'form' => count($map->reimburses),
+                    'status' => $this->reimbursementService->checkGroupStatus($map->code),
+                ];
+            });
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
     public function index()
     {
-        $is_Admin = Auth::user()->role === 'admin';
-        $groups = ReimburseGroup::with('reimburses', 'users')->get();
+        try {
+            $is_Admin = Auth::user()->role === 'admin';
 
-        foreach ($groups as $group) {
-            $group['status'] = $this->reimbursementService->checkGroupStatus($group->code);
+            if (!$is_Admin) {
+                $users = User::with('families')->where('id', Auth::id())->select('nip', 'name')->get();
+            } else {
+                $users = User::with('families')->select('nip', 'name')->get();
+            }
+
+            $categories = ['Employee', 'Family'];
+            $purchasing_groups = PurchasingGroup::select('id', 'purchasing_group', 'purchasing_group_desc')->get();
+            $currencies = Currency::select('code', 'name')->get();
+            $periods = MasterPeriodReimburse::select('id', 'code', 'start', 'end')->get();
+            $cost_center = MasterCostCenter::select('id', 'cost_center')->get();
+            $taxes = Pajak::select('id', 'mwszkz')->get();
+            return Inertia::render(
+                'Reimburse/Index',
+                compact('purchasing_groups', 'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes')
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
         }
-
-        if (!$is_Admin) {
-            $users = User::with('families')->where('id', Auth::id())->select('nip', 'name')->get();
-        } else {
-            $users = User::with('families')->select('nip', 'name')->get();
-        }
-
-        $categories = ['Employee', 'Family'];
-        $purchasing_groups = PurchasingGroup::select('id', 'purchasing_group', 'purchasing_group_desc')->get();
-        $currencies = Currency::select('code', 'name')->get();
-        $periods = MasterPeriodReimburse::select('id', 'code', 'start', 'end')->get();
-        $cost_center = MasterCostCenter::select('id', 'cost_center')->get();
-        $taxes = Pajak::select('id', 'mwszkz')->get();
-
-        return Inertia::render(
-            'Reimburse/ListReimburse',
-            compact('purchasing_groups', 'groups', 'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes')
-        );
     }
 
     public function create()
@@ -143,7 +172,17 @@ class ReimbuseController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function edit($id)
+    {
+        try {
+            $groups = ReimburseGroup::where('id', $id)->with('reimburses', 'users')->get();
+            return $this->successResponse($groups);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    public function update(Request $request)
     {
         $data = $request->all();
         $forms = $data['forms'];

@@ -66,6 +66,8 @@ export function GradeForm({
   createUrl,
   listUser,
 }: GradeInterface) {
+  const [users, setUsers] = React.useState<UserModel>([]);
+
   const formSchema = z.object({
     grade: z.string().min(1, 'Grade is required'),
     users: z.array(z.number().optional()),
@@ -83,12 +85,13 @@ export function GradeForm({
 
       const grade = response.data.data.grade;
       const users = response.data.data.users;
+      const listUser = response.data.data.listUser;
+
+      setUsers(listUser);
       form.reset({
         grade: grade.grade,
         users: users,
       });
-
-      console.log(response);
     } catch (e) {
       const error = e as AxiosError;
     }
@@ -123,6 +126,8 @@ export function GradeForm({
   React.useEffect(() => {
     if (type === FormType.detail || type === FormType.edit) {
       getDetailData();
+    } else {
+      setUsers(listUser);
     }
   }, [type]);
 
@@ -173,7 +178,7 @@ export function GradeForm({
                   value={form.getValues('users')}
                   id='id'
                   label='name'
-                  options={listUser}
+                  options={users}
                 />
               </td>
             </tr>

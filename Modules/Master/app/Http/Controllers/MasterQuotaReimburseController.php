@@ -3,37 +3,64 @@
 namespace Modules\Master\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
-use Modules\BusinessTrip\Models\BusinessTripGrade;
+use Modules\BusinessTrip\Models\BusinessTripGradeUser;
 use Modules\Master\Models\MasterPeriodReimburse;
 use Modules\Master\Models\MasterQuotaReimburse;
 use Modules\Master\Models\MasterTypeReimburse;
 
 class MasterQuotaReimburseController extends Controller
 {
+    public function selection_grade($user_id)
+    {
+        try {
+            $grade = BusinessTripGradeUser::where('user_id', $user_id)->with('grade')->first()->grade->id;
+            $type = MasterTypeReimburse::where('grade', $grade)->get();
+            return $this->successResponse($type);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    public function list(Request $request)
+    {
+
+        try {
+            $query =  MasterQuotaReimburse::query()->with('user', 'period', 'type');
+            $perPage = $request->get('per_page', 10);
+            $sortBy = $request->get('sort_by', 'id');
+            $sortDirection = $request->get('sort_direction', 'asc');
+            $query->orderBy($sortBy, $sortDirection);
+            $data = $query->paginate($perPage);
+            $data->getCollection()->transform(function ($map) {
+                $map = json_decode($map);
+                return [
+                    'id' => $map->id,
+                    'period' => $map->period->code,
+                    'type' => $map->type->name,
+                    'user' => $map->user->name,
+                ];
+            });
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
         try {
-            $filterableColumns =  [
-                'period',
-                'type',
-                'grade',
-                'limit',
-                'plafon'
-            ];
-            $data = $this->filterAndPaginate($request, MasterQuotaReimburse::class, $filterableColumns);
             $listPeriodReimburse = MasterPeriodReimburse::get();
-            $listTypeReimburse = MasterTypeReimburse::get();
-            $listGrade = BusinessTripGrade::get();
+            $listUsers = User::select('id', 'nip', 'name')->get();
             return Inertia::render(
                 'Master/MasterReimburseQuota/Index',
-                compact('data', 'listPeriodReimburse', 'listTypeReimburse', 'listGrade')
+                compact('listPeriodReimburse', 'listUsers')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -54,11 +81,9 @@ class MasterQuotaReimburseController extends Controller
     public function store(Request $request)
     {
         $rules = [
+            'user' => 'required|exists:users,id',
             'period' => 'required|exists:master_period_reimburses,id',
-            'type' => 'required|exists:master_type_reimburses,id',
-            'grade' => 'required|exists:business_trip_grades,id',
-            'plafon' => 'required',
-            'limit' => 'required'
+            'type' => 'required|exists:master_type_reimburses,id'
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -90,7 +115,12 @@ class MasterQuotaReimburseController extends Controller
      */
     public function edit($id)
     {
-        return view('master::edit');
+        try {
+            $groups = MasterQuotaReimburse::where('id', $id)->get();
+            return $this->successResponse($groups);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**

@@ -54,6 +54,7 @@ class PurchaseOrder extends Model
         'status',
         'code',
         'message',
+        'attachment_link'
     ];
 
     // protected static function newFactory(): PurchaseOrderFactory

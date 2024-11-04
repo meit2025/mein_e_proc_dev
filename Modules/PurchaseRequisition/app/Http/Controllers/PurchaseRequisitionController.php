@@ -20,6 +20,7 @@ use Modules\PurchaseRequisition\Models\Vendor;
 use Modules\PurchaseRequisition\Services\BtPOService;
 use Modules\PurchaseRequisition\Services\BtService;
 use Modules\PurchaseRequisition\Services\ProcurementService;
+use Modules\PurchaseRequisition\Services\ReimburseServices;
 
 class PurchaseRequisitionController extends Controller
 {
@@ -29,12 +30,14 @@ class PurchaseRequisitionController extends Controller
     protected $procurementService;
     protected $bt;
     protected $btPO;
+    protected $reimburseServices;
 
-    public function __construct(ProcurementService $procurementService, BtService $bt, BtPOService $btPO)
+    public function __construct(ProcurementService $procurementService, BtService $bt, BtPOService $btPO, ReimburseServices $reimburseServices)
     {
         $this->procurementService = $procurementService;
         $this->bt = $bt;
         $this->btPO = $btPO;
+        $this->reimburseServices = $reimburseServices;
     }
 
     public function generateText($id, $type)
@@ -52,6 +55,11 @@ class PurchaseRequisitionController extends Controller
                     break;
                 case 'bt-po';
                     $data = $this->btPO->processTextData($id);
+                    return response()->json(['message' => 'Data processed successfully', 'data' => $data]);
+                    break;
+
+                case 'reim';
+                    $data = $this->reimburseServices->processTextData($id);
                     return response()->json(['message' => 'Data processed successfully', 'data' => $data]);
                     break;
 

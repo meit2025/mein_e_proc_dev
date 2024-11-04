@@ -7,6 +7,7 @@ import axiosInstance from '@/axiosInstance'; // Pastikan mengimport axiosInstanc
 import { Link } from '@inertiajs/react';
 import axios from 'axios';
 import { useAlert } from '@/contexts/AlertContext';
+import { ConfirmationDeleteModal } from './ConfirmationDeleteModal';
 
 import {
   DropdownMenu,
@@ -20,7 +21,7 @@ import {
 
 import { CaretSortIcon, ChevronDownIcon, DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { Button as ShacdnButton } from '@/components/shacdn/button';
-import { Edit } from 'lucide-react';
+import { Edit, Trash, Trash2Icon } from 'lucide-react';
 
 interface UrlDataGrid {
   url: string;
@@ -42,6 +43,8 @@ interface DataGridProps {
   onDetail?: (id: number) => Promise<void> | void;
   actionType?: string;
   buttonActionCustome?: ReactNode;
+  deleteConfirmationText?: string;
+  titleConfirmationText?: string;
 }
 
 const DataGridComponent: React.FC<DataGridProps> = ({
@@ -56,6 +59,8 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   defaultSearch,
   actionType,
   buttonActionCustome,
+  deleteConfirmationText,
+  titleConfirmationText,
 }) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -65,6 +70,8 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   });
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
+  const [modalDelete, setModalDelete] = useState<number | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [rowCount, setRowCount] = useState(0);
   const [search, setSearch] = useState('');
   const { showToast } = useAlert();
@@ -106,10 +113,15 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   }, [fetchRows, filterModel, paginationModel, search, sortModel]); // Tidak lagi menyebabkan looping tak terbatas
 
   const handleDelete = async (id: number) => {
+    setDeleteLoading(true);
     try {
       const request = await axiosInstance.delete(`${url.deleteUrl}/${id}`);
-      console.log(request?.data);
       showToast(request?.data?.message || 'Record deleted successfully', 'success');
+
+      // set delete loading
+      setDeleteLoading(false);
+      setModalDelete(null);
+
       onDelete && (await onDelete(id));
       fetchRows(paginationModel.page, paginationModel.pageSize, search, sortModel, filterModel);
     } catch (error) {
@@ -120,6 +132,10 @@ const DataGridComponent: React.FC<DataGridProps> = ({
         showToast('An unexpected error occurred', 'error');
       }
     }
+  };
+
+  const openConfirmationDelete = (id: number) => {
+    setModalDelete(id);
   };
 
   // Kondisi untuk menambahkan kolom "Actions" jika salah satu aksi tersedia
@@ -162,10 +178,13 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                         {/* <DropdownMenuItem>View customer</DropdownMenuItem> */}
 
                         {(url.deleteUrl || onDelete) && (
-                          <DropdownMenuItem onClick={() => handleDelete(params.row.id)}>
+                          <DropdownMenuItem
+                            className='bg-red-400 text-white hover:!bg-red-500 hover:!text-white transition-all duration-300'
+                            onClick={() => openConfirmationDelete(params.row.id)}
+                          >
                             <span className='flex items-center  text-sm space-x-2'>
                               <span>Delete</span>
-                              <Edit size={14} />
+                              <Trash2Icon size={14} />
                             </span>
                           </DropdownMenuItem>
                         )}
@@ -234,6 +253,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   return (
     <Box>
       {/* DataGrid with the action buttons */}
+
       <Box sx={{ height: '45rem', width: '100%', overflowX: 'auto' }}>
         <div className='lg:col-span-2'>
           <div className='grid'>
@@ -295,6 +315,15 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                 </div>
               </div>
               <div className='card-body'>
+                <ConfirmationDeleteModal
+                  isLoading={deleteLoading}
+                  description={deleteConfirmationText}
+                  open={modalDelete !== null}
+                  onClose={() => {
+                    setModalDelete(null);
+                  }}
+                  onDelete={() => handleDelete(modalDelete ?? 0)}
+                />
                 <div data-datatable='true' data-datatable-page-size={paginationModel.pageSize}>
                   <div className='scrollable-x-auto'>
                     <DataGrid

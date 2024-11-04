@@ -52,14 +52,14 @@ class ReimbursementService
     {
         try {
             DB::beginTransaction();
-            
+
             $validator_group = Validator::make($groupData, $this->validator_rule_group);
             if ($validator_group->fails()) {
                 DB::rollBack();
                 return ['error' => $validator_group->errors()];
-            }            
+            }
             $validatedDataGroup = $validator_group->validated();
-            
+
             $validatedDataGroup['code'] = $this->generateUniqueGroupCode();
             $group = ReimburseGroup::create($validatedDataGroup);
 

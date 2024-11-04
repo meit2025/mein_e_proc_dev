@@ -63,7 +63,7 @@ abstract class Controller
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'asc');
 
-        $query = $model::query();
+        $query = $model instanceof \Illuminate\Database\Eloquent\Builder ? $model : $model::query();
 
         foreach ($request->all() as $key => $value) {
             if (in_array($key, $filterableColumns)) {

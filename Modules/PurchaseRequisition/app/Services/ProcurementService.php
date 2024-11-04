@@ -51,7 +51,7 @@ class ProcurementService
             }
 
             // Generate and store files
-            $this->generateFiles($array, $arrayCash);
+            // $this->generateFiles($array, $arrayCash);
 
             DB::commit();
             return $array;
@@ -110,7 +110,7 @@ class ProcurementService
 
         return [
             'purchase_id' => $procurement->id,
-            'code_transaction' => 'ven', // code_transaction
+            'code_transaction' => 'VEN', // code_transaction
             'purchase_requisition_number' => $reqno, //banfn
             'item_number' => $item->material_number,  // bnfpo
             'requisitioner_name' => $businessPartner ? $businessPartner->partner_number : '', // afnam
@@ -160,21 +160,23 @@ class ProcurementService
         $tax = Pajak::where('mwszkz', $item->tax)->first();
         $taxAmount = $item->total_amount - ($item->total_amount * ($tax->desimal / 100));
 
+        $formattedDate = Carbon::parse($cashData->document_date)->format('Y-m-d');
+        $year = Carbon::parse($cashData->document_date)->format('Y');
+        $month = Carbon::parse($cashData->document_date)->format('m');
+
         return [
             'purchase_id' => $procurement->id,
-            'code_transaction' => 'dp',  // code_transaction
-            'belnr' => '', // belnr
+            'code_transaction' => 'VEN',  // code_transaction
+            'belnr' =>  $procurement->id, // belnr
             'company_code' => '1600',
-            'gjahr' => '', // gjahr
+            'gjahr' => $year, // gjahr
             'currency' => 'IDR', // waers
-            'document_date' => $cashData->document_date, // bldat
-            'budat' => '', // budat
-            'monat' => '', // monat
+            'document_date' => $formattedDate, // bldat
+            'budat' => $formattedDate, // budat
+            'monat' => $month, // monat
             'reference' => $cashData->reference,  // xblnr
             'document_header_text' => $cashData->document_header_text, // bktxt
             'vendor_code' => $vendor->masterBusinesPartnerss->partner_number,  // lifnr
-            'amount' => $item->total_amount, // lifnr
-            'amount_local_currency' => $item->total_amount,
             'saknr' => '', //saknr
             'hkont' => '', //hkont
             'amount_local_currency' => $item->total_amount, //dmbtr
@@ -187,25 +189,25 @@ class ProcurementService
         ];
     }
 
-    private function generateFiles($array, $arrayCash)
-    {
-        $timestamp = date('Ymd_His');
+    // private function generateFiles($array, $arrayCash)
+    // {
+    //     $timestamp = date('Ymd_His');
 
-        // Generate Purchase Requisition File
-        $filename = 'INB_PRCRT_' . 1 . '_' . $timestamp . '.txt';
-        $fileContent = $this->convertArrayToFileContent($array);
-        Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
+    //     // Generate Purchase Requisition File
+    //     $filename = 'INB_PRCRT_' . 1 . '_' . $timestamp . '.txt';
+    //     $fileContent = $this->convertArrayToFileContent($array);
+    //     Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
 
-        // Generate Cash Advance File (if applicable)
-        if (!empty($arrayCash)) {
-            $filenameAc = 'INB_PRDP_' . 1 . '_' . $timestamp . '.txt';
-            $fileContentAc = $this->convertArrayToFileContent($arrayCash);
-            Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filenameAc, $fileContentAc);
-        }
-    }
+    //     // Generate Cash Advance File (if applicable)
+    //     if (!empty($arrayCash)) {
+    //         $filenameAc = 'INB_PRDP_' . 1 . '_' . $timestamp . '.txt';
+    //         $fileContentAc = $this->convertArrayToFileContent($arrayCash);
+    //         Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filenameAc, $fileContentAc);
+    //     }
+    // }
 
-    private function convertArrayToFileContent($array)
-    {
-        return implode(PHP_EOL, array_map(fn($item) => implode("|", $item), $array)) . PHP_EOL;
-    }
+    // private function convertArrayToFileContent($array)
+    // {
+    //     return implode(PHP_EOL, array_map(fn($item) => implode("|", $item), $array)) . PHP_EOL;
+    // }
 }

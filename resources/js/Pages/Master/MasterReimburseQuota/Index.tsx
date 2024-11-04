@@ -6,21 +6,25 @@ import { columns } from './models/models';
 import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import { GET_LIST_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
-import { ListTypeModel } from '../MasterReimburseType/models/models';
+import { User } from './models/models';
+import ReimburseQuotaForm from './component/form'
+import { LIST_API_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
+import { FormType } from '@/lib/utils';
 import { ListPeriodModel } from '../MasterReimbursePeriod/models/models';
-import { BusinessTripGrade } from '@/Pages/BusinessTrip/BusinessGrade/model/model';
-import ReimburseQuotaForm from './component/form';
-import { LIST_PAGE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/page';
+import { STORE_REIMBURSE_QUOTA, EDIT_REIMBURSE_QUOTA, UPDATE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
 
 interface propsType {
-  listTypeReimburse: ListTypeModel[];
   listPeriodReimburse: ListPeriodModel[];
-  listGrade: BusinessTripGrade[];
+  listUsers: User[];
 }
 
-export const Index = ({ listTypeReimburse, listPeriodReimburse, listGrade }: propsType) => {
+export const Index = ({ listPeriodReimburse, listUsers }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
+
+  const [formType, setFormType] = React.useState({
+    type: FormType.create,
+    id: undefined,
+  });
 
   function openFormHandler() {
     setOpenForm(!openForm);
@@ -38,17 +42,27 @@ export const Index = ({ listTypeReimburse, listPeriodReimburse, listGrade }: pro
           onOpenChange={openFormHandler}
         >
           <ReimburseQuotaForm
-            listTypeReimburse={listTypeReimburse}
+            type={formType.type}
+            listUsers={listUsers}
+            storeURL={STORE_REIMBURSE_QUOTA}
+            editURL={EDIT_REIMBURSE_QUOTA(formType.id ?? '')}
+            updateURL={UPDATE_REIMBURSE_QUOTA(formType.id ?? '')}
             listPeriodReimburse={listPeriodReimburse}
-            listGrade={listGrade}
           />
         </CustomDialog>
       </div>
       <DataGridComponent
         columns={columns}
         actionType='dropdown'
+        onEdit={(value) => {
+          setFormType({
+            type: FormType.edit,
+            id: value.toString(),
+          });
+          setOpenForm(true);
+        }}
         url={{
-          url: LIST_PAGE_REIMBURSE_QUOTA,
+          url: LIST_API_REIMBURSE_QUOTA,
         }}
         labelFilter='search'
       />

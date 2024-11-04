@@ -7,4 +7,4 @@ export const GET_DETAIL_ALLOWANCE_ITEM = (id: any) => `${ROUTE_API}/detail/${id}
 
 export const UPDATE_ALLOWANCE_ITEM = (id: any) => `${ROUTE_API}/update/${id}`;
 
-export const DELET_API = `${ROUTE_API}/delete`;
+export const DELETE_API_ALLOWANCE_ITEM = `${ROUTE_API}/delete`;
