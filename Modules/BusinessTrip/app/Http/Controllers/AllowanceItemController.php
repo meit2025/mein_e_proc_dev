@@ -137,7 +137,7 @@ class AllowanceItemController extends Controller
             'request_value' => 'required',
             'currency_id' => 'required',
             'type' => 'required',
-            'formula' => 'required',
+            // 'formula' => 'required',
             'grade_option' => 'required',
             'material_number' => 'required',
             'material_group' => 'required'
@@ -171,7 +171,7 @@ class AllowanceItemController extends Controller
             $store->request_value = $request->request_value;
             $store->allowance_category_id = $request->allowance_category_id;
             $store->currency_id = $request->currency_id;
-            $store->formula = $request->formula;
+            // $store->formula = $request->formula;
             $store->grade_option = $request->grade_option;
             $store->grade_all_price = $request->grade_all_price;
 
@@ -248,7 +248,7 @@ class AllowanceItemController extends Controller
             'request_value' => 'required',
             'currency_id' => 'required',
             'type' => 'required',
-            'formula' => 'required',
+            // 'formula' => 'required',
             'grade_option' => 'required',
             'material_number' => 'required',
             'material_group' => 'required'
@@ -272,7 +272,7 @@ class AllowanceItemController extends Controller
             $store->request_value = $request->request_value;
             $store->allowance_category_id = $request->allowance_category_id;
             $store->currency_id = $request->currency_id;
-            $store->formula = $request->formula;
+            // $store->formula = $request->formula;
             $store->grade_option = $request->grade_option;
             $store->grade_all_price = $request->grade_all_price;
 
