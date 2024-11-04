@@ -11,6 +11,7 @@ use Modules\Master\Database\Seeders\MasterCostCenterSeeder;
 use Modules\Master\Database\Seeders\MasterMaterialSeeder;
 use Modules\Master\Database\Seeders\MasterOrderSeeder;
 use Modules\Master\Database\Seeders\MasterRecontSeeder;
+use Modules\Master\Database\Seeders\MaterialGroupSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,6 +22,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             GatewaySeedSeeder::class,
+            MaterialGroupSeeder::class,
             MasterMaterialSeeder::class,
             MasterAssetSeeder::class,
             MasterOrderSeeder::class,
