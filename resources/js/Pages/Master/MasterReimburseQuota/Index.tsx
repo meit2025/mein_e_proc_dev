@@ -9,7 +9,9 @@ import { CustomDialog } from '@/components/commons/CustomDialog';
 import { User } from './models/models';
 import ReimburseQuotaForm from './component/form'
 import { LIST_API_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
+import { FormType } from '@/lib/utils';
 import { ListPeriodModel } from '../MasterReimbursePeriod/models/models';
+import { STORE_REIMBURSE_QUOTA, EDIT_REIMBURSE_QUOTA, UPDATE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
 
 interface propsType {
   listPeriodReimburse: ListPeriodModel[];
@@ -18,6 +20,11 @@ interface propsType {
 
 export const Index = ({ listPeriodReimburse, listUsers }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
+
+  const [formType, setFormType] = React.useState({
+    type: FormType.create,
+    id: undefined,
+  });
 
   function openFormHandler() {
     setOpenForm(!openForm);
@@ -35,7 +42,11 @@ export const Index = ({ listPeriodReimburse, listUsers }: propsType) => {
           onOpenChange={openFormHandler}
         >
           <ReimburseQuotaForm
+            type={formType.type}
             listUsers={listUsers}
+            storeURL={STORE_REIMBURSE_QUOTA}
+            editURL={EDIT_REIMBURSE_QUOTA(formType.id ?? '')}
+            updateURL={UPDATE_REIMBURSE_QUOTA(formType.id ?? '')}
             listPeriodReimburse={listPeriodReimburse}
           />
         </CustomDialog>
@@ -43,6 +54,13 @@ export const Index = ({ listPeriodReimburse, listUsers }: propsType) => {
       <DataGridComponent
         columns={columns}
         actionType='dropdown'
+        onEdit={(value) => {
+          setFormType({
+            type: FormType.edit,
+            id: value.toString(),
+          });
+          setOpenForm(true);
+        }}
         url={{
           url: LIST_API_REIMBURSE_QUOTA,
         }}

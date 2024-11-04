@@ -8,7 +8,8 @@ import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import { Grade } from './models/models';
 import ReimburseTypeForm from './component/form';
-import { LIST_API_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
+import { FormType } from '@/lib/utils';
+import { LIST_API_REIMBURSE_TYPE, EDIT_REIMBURSE_TYPE, UPDATE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
 
 interface propsType {
   listGrades?: Grade[];
@@ -16,6 +17,11 @@ interface propsType {
 
 export const Index = ({ listGrades }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
+
+  const [formType, setFormType] = React.useState({
+    type: FormType.create,
+    id: undefined,
+  });
 
   function openFormHandler() {
     setOpenForm(!openForm);
@@ -32,7 +38,11 @@ export const Index = ({ listGrades }: propsType) => {
           open={openForm}
           onOpenChange={openFormHandler}
         >
-          <ReimburseTypeForm listGrades={listGrades}
+          <ReimburseTypeForm
+            type={formType.type}
+            listGrades={listGrades}
+            editURL={EDIT_REIMBURSE_TYPE(formType.id ?? '')}
+            updateURL={UPDATE_REIMBURSE_TYPE(formType.id ?? '')}
             onSuccess={(x: boolean) => setOpenForm(!x)}
           />
         </CustomDialog>
@@ -40,6 +50,13 @@ export const Index = ({ listGrades }: propsType) => {
       <DataGridComponent
         columns={columns}
         actionType='dropdown'
+        onEdit={(value) => {
+          setFormType({
+            type: FormType.edit,
+            id: value.toString(),
+          });
+          setOpenForm(true);
+        }}
         url={{
           url: LIST_API_REIMBURSE_TYPE,
         }}

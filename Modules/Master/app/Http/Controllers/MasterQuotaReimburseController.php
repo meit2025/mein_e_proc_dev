@@ -28,12 +28,23 @@ class MasterQuotaReimburseController extends Controller
 
     public function list(Request $request)
     {
+
         try {
-            $filterableColumns =  [
-                'period',
-                'type'
-            ];
-            $data = $this->filterAndPaginate($request, MasterQuotaReimburse::class, $filterableColumns);
+            $query =  MasterQuotaReimburse::query()->with('user', 'period', 'type');
+            $perPage = $request->get('per_page', 10);
+            $sortBy = $request->get('sort_by', 'id');
+            $sortDirection = $request->get('sort_direction', 'asc');
+            $query->orderBy($sortBy, $sortDirection);
+            $data = $query->paginate($perPage);
+            $data->getCollection()->transform(function ($map) {
+                $map = json_decode($map);
+                return [
+                    'id' => $map->id,
+                    'period' => $map->period->code,
+                    'type' => $map->type->name,
+                    'user' => $map->user->name,
+                ];
+            });
             return $this->successResponse($data);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -104,7 +115,12 @@ class MasterQuotaReimburseController extends Controller
      */
     public function edit($id)
     {
-        return view('master::edit');
+        try {
+            $groups = MasterQuotaReimburse::where('id', $id)->get();
+            return $this->successResponse($groups);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**

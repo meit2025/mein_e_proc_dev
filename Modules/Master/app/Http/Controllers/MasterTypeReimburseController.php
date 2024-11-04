@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Modules\BusinessTrip\Models\BusinessTripGrade;
-use Modules\Master\Models\MasterMaterial;
 use Modules\Master\Models\MasterTypeReimburse;
 
 class MasterTypeReimburseController extends Controller
@@ -108,7 +107,12 @@ class MasterTypeReimburseController extends Controller
      */
     public function edit($id)
     {
-        return view('master::edit');
+        try {
+            $groups = MasterTypeReimburse::where('id', $id)->get();
+            return $this->successResponse($groups);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**

@@ -31,13 +31,15 @@ import { useAlert } from '@/contexts/AlertContext';
 import { AxiosError } from 'axios';
 import { FormType } from '@/lib/utils';
 import { Grade } from '../models/models';
-import { CREATE_API_REIMBURSE_TYPE, GET_DETAIL_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
+import { CREATE_API_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
 import useDropdownOptions from '@/lib/getDropdown';
 import { Loading } from '@/components/commons/Loading';
 
 export interface props {
   onSuccess?: (value: boolean) => void;
   listGrades?: Grade[];
+  editURL?: string,
+  updateURL?: string,
   type?: FormType;
   id?: string;
 }
@@ -45,7 +47,9 @@ export interface props {
 export default function ReimburseTypeForm({
   onSuccess,
   listGrades,
-  type = FormType.create,
+  editURL,
+  updateURL,
+  type,
   id,
 }: props) {
   const formSchema = z.object({
@@ -69,25 +73,30 @@ export default function ReimburseTypeForm({
     is_employee: true,
   };
 
-  async function getDetailData() {
-    const url = GET_DETAIL_REIMBURSE_TYPE(id);
-
-    try {
-      const response = await axiosInstance.get(url);
-
-      form.reset({
-        code: response.data.data.code,
-        name: response.data.data.name,
-      });
-    } catch (e) {
-      const error = e as AxiosError;
-    }
-  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues,
   });
+
+  async function getDetailData() {
+    try {
+      const response = await axiosInstance.get(editURL);
+      const data = response.data.data[0];
+      form.reset({
+        code: data.code,
+        name: data.name,
+        limit: data.limit,
+        plafon: data.plafon,
+        is_employee: data.is_employee,
+        grade: data.grade,
+        material_group: data.material_group,
+        material_number: data.material_number,
+      });
+    } catch (e) {
+      const error = e as AxiosError;
+    }
+  }
 
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -104,10 +113,6 @@ export default function ReimburseTypeForm({
   };
 
   React.useEffect(() => {
-    if (id && type === FormType.edit) {
-      getDetailData();
-    }
-
     getMaterialGroup('', {
       name: 'material_group_desc',
       id: 'material_group',
@@ -119,6 +124,10 @@ export default function ReimburseTypeForm({
       id: 'material_number',
       tabel: 'master_materials',
     });
+    
+    if (type === FormType.edit) {
+      getDetailData();
+    }
   }, [id, type]);
 
   return (

@@ -38,20 +38,17 @@ import { useAlert } from '@/contexts/AlertContext';
 import { RadioGroup, RadioGroupItem } from '@/components/shacdn/radio-group';
 import { AxiosError } from 'axios';
 import { FormType } from '@/lib/utils';
-import { MultiSelect } from '@/components/commons/MultiSelect';
-import {
-  CREATE_API_REIMBURSE_PERIOD,
-  GET_DETAIL_REIMBURSE_PERIOD,
-} from '@/endpoint/reimbursePeriod/api';
 import { Loading } from '@/components/commons/Loading';
 
 export interface props {
   onSuccess?: (value: boolean) => void;
+  storeUrl?: string;
+  editURL?: string;
+  updateURL?: string;
   type?: FormType;
-  id?: string;
 }
 
-export default function ReimbursePeriodForm({ onSuccess, type = FormType.create, id }: props) {
+export default function ReimbursePeriodForm({ onSuccess, type, storeURL, editURL, updateURL }: props) {
   const formSchema = z.object({
     code: z.string(),
     start: z.date(),
@@ -65,14 +62,13 @@ export default function ReimbursePeriodForm({ onSuccess, type = FormType.create,
   };
 
   async function getDetailData() {
-    const url = GET_DETAIL_REIMBURSE_PERIOD(id);
-
     try {
-      const response = await axiosInstance.get(url);
-
+      const response = await axiosInstance.get(editURL);
+      const data = response.data.data[0];
       form.reset({
-        id: response.data.data.id,
-        code: response.data.data.code,
+        code: data.code,
+        start: data.start,
+        end: data.end,
       });
     } catch (e) {
       const error = e as AxiosError;
@@ -87,7 +83,7 @@ export default function ReimbursePeriodForm({ onSuccess, type = FormType.create,
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const response = await axiosInstance.post(CREATE_API_REIMBURSE_PERIOD, values);
+      const response = await axiosInstance.post(storeURL, values);
       onSuccess && onSuccess(true);
       showToast(response?.data?.message, 'success');
     } catch (e) {
@@ -97,10 +93,10 @@ export default function ReimbursePeriodForm({ onSuccess, type = FormType.create,
   };
 
   React.useEffect(() => {
-    if (id && type == FormType.edit) {
+    if (type === FormType.edit) {
       getDetailData();
     }
-  }, [id, type]);
+  }, [type]);
 
   return (
     <ScrollArea className='h-[600px] w-full'>

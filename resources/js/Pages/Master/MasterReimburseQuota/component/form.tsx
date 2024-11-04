@@ -4,21 +4,12 @@ import {
   FormField,
   FormItem,
   FormMessage,
-  FormLabel,
 } from '@/components/shacdn/form';
-
 import { z } from 'zod';
-
 import { Button } from '@/components/shacdn/button';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Textarea } from '@/components/shacdn/textarea';
-
 import { ScrollArea } from '@/components/shacdn/scroll-area';
-
-import { Checkbox } from '@/components/shacdn/checkbox';
-
 import '../css/index.scss';
 
 import {
@@ -36,26 +27,27 @@ import { useAlert } from '@/contexts/AlertContext';
 import { AxiosError } from 'axios';
 import { FormType } from '@/lib/utils';
 import { ListPeriodModel } from '../../MasterReimbursePeriod/models/models';
-import {
-  CREATE_API_REIMBURSE_QUOTA,
-  GET_DETAIL_REIMBURSE_QUOTA,
-} from '@/endpoint/reimburseQuota/api';
 import { User } from '../models/models';
 
 export interface props {
   onSuccess?: (value: boolean) => void;
   type?: FormType;
   id?: string;
+  storeURL?: string;
+  editURL?: string;
+  updateURL?: string;
   listPeriodReimburse: ListPeriodModel[];
   listUsers: User[];
 }
 
 export default function ReimburseQuotaForm({
   onSuccess,
-  type = FormType.create,
-  id,
+  type,
   listPeriodReimburse,
   listUsers,
+  storeURL,
+  editURL,
+  updateURL
 }: props) {
 
   const formSchema = z.object({
@@ -77,25 +69,11 @@ export default function ReimburseQuotaForm({
 
   const [listReimburseTypes, setListReimburseType] = React.useState([]);
 
-  async function getDetailData() {
-    const url = GET_DETAIL_REIMBURSE_QUOTA(id);
-
-    try {
-      const response = await axiosInstance.get(url);
-      form.reset({
-        id: response.data.data.id,
-      });
-    } catch (e) {
-      const error = e as AxiosError;
-    }
-  }
-
   async function getSelectionType(user_id) {
     const url = `/api/master/reimburse-quota/selection_grade/${user_id}`;
     try {
       const response = await axiosInstance.get(url);
       const data = response.data.data;
-      console.log(data);
       setListReimburseType(data);
     } catch (e) {
       const error = e as AxiosError;
@@ -103,10 +81,25 @@ export default function ReimburseQuotaForm({
     form.setValue('user', user_id);
   }
 
+  async function getDetailData() {
+    try {
+      const response = await axiosInstance.get(editURL);
+      const data = response.data.data[0];
+      await getSelectionType(data.user);
+      form.reset({
+        period: data.period,
+        user: data.user,
+        type: data.type,
+      });
+    } catch (e) {
+      const error = e as AxiosError;
+    }
+  }
+
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const response = await axiosInstance.post(CREATE_API_REIMBURSE_QUOTA, values);
+      const response = await axiosInstance.post(storeURL, values);
       onSuccess?.(true);
       showToast(response?.data?.message, 'success');
     } catch (e) {
@@ -116,10 +109,10 @@ export default function ReimburseQuotaForm({
   };
 
   React.useEffect(() => {
-    if (id && type == FormType.edit) {
+    if (type === FormType.edit) {
       getDetailData();
     }
-  }, [id, type]);
+  }, [type]);
 
   return (
     <ScrollArea className='h-[600px] w-full'>
