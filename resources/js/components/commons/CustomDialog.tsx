@@ -39,7 +39,6 @@ const CustomDialog = ({
   onClose,
   children,
   className,
-  onSave
 }: PropsWithChildren<CustomDialogProps>) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -79,9 +78,11 @@ const CustomDialog = ({
               Close
             </Button>
           ) : null}
-         {onSave ? ( <Button type='submit' onClick={onSubmit}>
-            Save changes
-          </Button>) : null}
+          {onSubmit ? (
+            <Button type='submit' onClick={onSubmit}>
+              Save changes
+            </Button>
+          ) : null}
         </DialogFooter>
       </DialogContent>
     </Dialog>

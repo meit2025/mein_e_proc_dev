@@ -9,6 +9,7 @@ import { CustomDialog } from '@/components/commons/CustomDialog';
 import { AllowanceForm, AllowanceType } from './components/AllowaceForm';
 import {
   CREATE_API_ALLOWANCE_CATEGORY,
+  DELETE_ALLOWANCE_CATEGORY,
   GET_DETAIL_ALLOWANCE_CATEGORY,
   GET_LIST_ALLOWANCE_CATEGORY,
   UPDATE_ALLOWANCE_CATEGORY,
@@ -58,11 +59,10 @@ export const Index = () => {
             id: value,
           });
           setOpenForm(true);
-
-          console.log(allowanceForm);
         }}
         url={{
           url: GET_LIST_ALLOWANCE_CATEGORY,
+          deleteUrl: DELETE_ALLOWANCE_CATEGORY,
         }}
         labelFilter='search'
       />

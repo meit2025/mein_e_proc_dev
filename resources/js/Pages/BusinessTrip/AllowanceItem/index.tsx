@@ -9,6 +9,7 @@ import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import {
   CREATE_API_ALLOWANCE_ITEM,
+  DELETE_API_ALLOWANCE_ITEM,
   GET_DETAIL_ALLOWANCE_ITEM,
   GET_LIST_ALLOWANCE_ITEM,
   UPDATE_ALLOWANCE_ITEM,
@@ -84,6 +85,7 @@ export const Index = ({
         }}
         url={{
           url: GET_LIST_ALLOWANCE_ITEM,
+          deleteUrl: DELETE_API_ALLOWANCE_ITEM,
         }}
         labelFilter='search'
       />

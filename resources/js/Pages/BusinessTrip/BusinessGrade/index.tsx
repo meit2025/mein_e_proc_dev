@@ -9,6 +9,7 @@ import { CustomDialog } from '@/components/commons/CustomDialog';
 import { GradeForm } from './components/form';
 import {
   CREATE_API_BUSINESS_TRIP_GRADE,
+  DELETE_API_BUSINESS_GRADE,
   GET_DETAIL_BUSINESS_TRIP_GRADE,
   GET_LIST_BUSINESS_TRIP_GRADE,
   UPDATE_BUSINESS_TRIP_GRADE,
@@ -55,6 +56,7 @@ export const Index = ({ listUser }: { listUser: UserModel[] }) => {
       <DataGridComponent
         columns={columns}
         actionType='dropdown'
+        deleteConfirmationText='Are you sure delete this business grade?'
         onEdit={(value) => {
           setFormType({
             type: FormType.edit,
@@ -64,6 +66,7 @@ export const Index = ({ listUser }: { listUser: UserModel[] }) => {
         }}
         url={{
           url: GET_LIST_BUSINESS_TRIP_GRADE,
+          deleteUrl: DELETE_API_BUSINESS_GRADE,
         }}
         labelFilter='search'
       />
