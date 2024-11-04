@@ -194,10 +194,10 @@ export const BussinessTripFormV1 = ({
   });
 
   async function getDetailData() {
-    let url = GET_DETAIL_BUSINESS_TRIP(id);
+    const url = GET_DETAIL_BUSINESS_TRIP(id);
 
     try {
-      let response = await axios.get(url);
+      const response = await axios.get(url);
       //   console.log(response, ' Response Detail');
 
       form.reset({
@@ -217,7 +217,7 @@ export const BussinessTripFormV1 = ({
         ],
       });
     } catch (e) {
-      let error = e as AxiosError;
+      const error = e as AxiosError;
     }
   }
 
@@ -225,12 +225,12 @@ export const BussinessTripFormV1 = ({
 
   async function handlePurposeType(value: string) {
     form.setValue('purpose_type_id', value || '');
-    let userid = idUser || '';
+    const userid = idUser || '';
     // console.log(value);
-    let url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
+    const url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
 
     try {
-      let response = await axiosInstance.get(url);
+      const response = await axiosInstance.get(url);
       setListAllowances(response.data.data as AllowanceItemModel[]);
     } catch (e) {
       //   console.log(e);
@@ -260,9 +260,12 @@ export const BussinessTripFormV1 = ({
       formData.append('total_percent', `${values.total_percent}`);
       formData.append('total_cash_advance', `${values.total_cash_advance}`);
       values.destinations.forEach((item, index) => {
-        console.log(item);
-        // console.log(item);
-        formData.append(`destinations[${index}]`, JSON.stringify(item));
+        const itemCopy = {
+          ...item,
+          business_trip_start_date: moment(item.business_trip_start_date).format('YYYY-MM-DD'),
+          business_trip_end_date: moment(item.business_trip_end_date).format('YYYY-MM-DD'),
+        };
+        formData.append(`destinations[${index}]`, JSON.stringify(itemCopy));
       });
 
       console.log(formData, ' test');
@@ -289,9 +292,9 @@ export const BussinessTripFormV1 = ({
   };
 
   function setAllowancesProperty() {
-    let destinationForm = [];
+    const destinationForm = [];
 
-    let destinationCount = parseInt(totalDestination);
+    const destinationCount = parseInt(totalDestination);
 
     for (let i = 0; i < destinationCount; i++) {
       destinationForm.push({
@@ -730,7 +733,7 @@ export function BussinesTripDestination({
 
   return (
     <Tabs defaultValue='destination1' className='w-full'>
-      <TabsList className={`flex items-center justify-start space-x-4`}>
+      <TabsList className={'flex items-center justify-start space-x-4'}>
         {destinationField.map((field: any, index: number) => (
           <TabsTrigger value={`destination${index + 1}`}>Destination {index + 1}</TabsTrigger>
         ))}
@@ -790,7 +793,7 @@ export function BussinessDestinationForm({
 
   function detailAttedancesGenerate() {
     let momentStart = moment(destination.business_trip_start_date).startOf('day');
-    let momentEnd = moment(destination.business_trip_end_date).startOf('day');
+    const momentEnd = moment(destination.business_trip_end_date).startOf('day');
     removeAttendace();
     removeAllowance();
 
@@ -810,8 +813,8 @@ export function BussinessDestinationForm({
 
     function generateDetailAllowanceByDate(price: string): any[] {
       let momentStart = moment(destination.business_trip_start_date).startOf('day');
-      let momentEnd = moment(destination.business_trip_end_date).startOf('day');
-      let detailAllowance = [];
+      const momentEnd = moment(destination.business_trip_end_date).startOf('day');
+      const detailAllowance = [];
 
       while (momentStart.isBefore(momentEnd) || momentStart.isSame(momentEnd)) {
         detailAllowance.push({
@@ -823,7 +826,7 @@ export function BussinessDestinationForm({
       return detailAllowance;
     }
 
-    let allowancesForm = listAllowances.map((item: any) => {
+    const allowancesForm = listAllowances.map((item: any) => {
       return {
         name: item.name,
         code: item.code,
@@ -926,6 +929,7 @@ export function BussinessDestinationForm({
                       <CustomDatePicker
                         initialDate={destination.business_trip_end_date}
                         onDateChange={(value) => {
+                          console.log('end date', value);
                           updateDestination(index, {
                             ...destination,
                             business_trip_end_date: value,
@@ -1331,7 +1335,7 @@ export function AllowanceRowInput({
       }
     } else if (allowance.request_value === 'fixed value') {
       // Do not allow changes for fixed value
-      alert(`This value is fixed and cannot be changed.`);
+      alert('This value is fixed and cannot be changed.');
     }
   };
   return (
