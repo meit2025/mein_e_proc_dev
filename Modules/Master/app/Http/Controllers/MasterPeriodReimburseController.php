@@ -77,7 +77,12 @@ class MasterPeriodReimburseController extends Controller
      */
     public function edit($id)
     {
-        return view('master::edit');
+        try {
+            $groups = MasterPeriodReimburse::where('id', $id)->get();
+            return $this->successResponse($groups);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**
