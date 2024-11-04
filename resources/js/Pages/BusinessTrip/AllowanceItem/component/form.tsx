@@ -92,7 +92,7 @@ export default function AllowanceItemForm({
     material_number: z.string().min(1, 'Material number required'),
     material_group: z.string().min(1, 'Material Group required'),
     currency_id: z.string().min(1, 'Currency is required'),
-    formula: z.string().min(1, 'Formula is required'),
+    // formula: z.string().min(1, 'Formula is required'),
     allowance_category_id: z.string().min(1, 'Allowance Category is required'),
     request_value: z.string().min(1, 'Required'),
     grade_option: z.string().min(1, 'Grade must be selected'),
@@ -113,7 +113,7 @@ export default function AllowanceItemForm({
     name: '',
     type: '',
     currency_id: '',
-    formula: '',
+    // formula: '',
     allowance_category_id: '',
     request_value: 'unlimited',
     grade_option: 'all',
@@ -143,7 +143,7 @@ export default function AllowanceItemForm({
         material_number: allowance.material_group,
         material_group: allowance.material_group,
         currency_id: allowance.currency_id,
-        formula: allowance.formula,
+        // formula: allowance.formula,
         allowance_category_id: allowance.allowance_category_id,
         request_value: allowance.request_value,
         grade_option: allowance.grade_option,
@@ -448,7 +448,7 @@ export default function AllowanceItemForm({
                 <ScrollArea className='h-[250px] border rounded-lg p-6 w-full'></ScrollArea>
               </td>
             </tr>
-            <tr>
+            {/* <tr>
               <td width={200}>Formula</td>
               <td>
                 <FormField
@@ -464,7 +464,7 @@ export default function AllowanceItemForm({
                   )}
                 />
               </td>
-            </tr>
+            </tr> */}
             <tr>
               <td width={200}>Grade</td>
               <td>
