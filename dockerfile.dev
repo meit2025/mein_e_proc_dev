@@ -32,7 +32,7 @@ RUN a2enmod rewrite headers ssl
 RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /etc/ssl/private/apache-selfsigned.key \
     -out /etc/ssl/certs/apache-selfsigned.crt \
-    -subj "/C=US/ST=State/L=City/O=Company/OU=Org/CN=mein.id"
+    -subj "/C=US/ST=State/L=City/O=Company/OU=Org/CN=dev-mein.majapahit.id"
 
 # Copy Source Code
 COPY . /var/www/html/mein
@@ -63,4 +63,4 @@ RUN a2ensite default-ssl
 RUN service apache2 restart
 
 # Expose HTTP and HTTPS ports
-EXPOSE 80 443
+EXPOSE 80 443 8080
