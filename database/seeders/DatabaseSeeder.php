@@ -3,7 +3,14 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Modules\Gateway\Database\Seeders\GatewaySeedSeeder;
 use Modules\Master\Database\Seeders\FamilySeeder;
+use Modules\Master\Database\Seeders\MasterAssetSeeder;
+use Modules\Master\Database\Seeders\MasterBankKeySeeder;
+use Modules\Master\Database\Seeders\MasterCostCenterSeeder;
+use Modules\Master\Database\Seeders\MasterMaterialSeeder;
+use Modules\Master\Database\Seeders\MasterOrderSeeder;
+use Modules\Master\Database\Seeders\MasterRecontSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,6 +20,13 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            GatewaySeedSeeder::class,
+            MasterMaterialSeeder::class,
+            MasterAssetSeeder::class,
+            MasterOrderSeeder::class,
+            MasterCostCenterSeeder::class,
+            MasterRecontSeeder::class,
+            MasterBankKeySeeder::class,
             UsersTableSeeder::class,
             FamilySeeder::class,
             CurrencySeeder::class,
