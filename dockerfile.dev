@@ -1,75 +1,66 @@
 FROM php:8.2-apache-buster
-# Update and setup git
+
+# Update and install necessary packages
 RUN set -eux; \
     apt-get update; \
     apt-get install -y \
     git \
     gpg \
-    curl
+    curl \
+    sendmail \
+    libpng-dev \
+    zlib1g-dev \
+    zip \
+    unzip \
+    libzip-dev \
+    libpq-dev \
+    libldap2-dev \
+    libssl-dev \
+    openssl \
+    vim
 
 # Install Composer
-RUN set -eux; \
-curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer;
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer;
 
+# PHP Extensions
+RUN docker-php-ext-install zip gd pgsql pdo pdo_pgsql pcntl ldap
 
-# Install module
-RUN apt-get update -y && apt-get install -y sendmail libpng-dev
-RUN apt-get update && \
-    apt-get install -y \
-        zlib1g-dev \
-        zip \
-        unzip \
-        curl \
-        libzip-dev\
-        libpq-dev
-RUN docker-php-ext-install zip \
-gd \
-pgsql \
-pdo \
-pdo_pgsql
+# Enable Apache modules
+RUN a2enmod rewrite headers ssl
 
-RUN docker-php-ext-install pcntl
-# RUN apt-get update && apt-get install -y libldap2-dev && docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ && docker-php-ext-install ldap
-
-RUN apt-get update && \
-    apt-get install -y \
-        libldap2-dev \
-        libssl-dev \
-    && docker-php-ext-configure ldap \
-    && docker-php-ext-install ldap
-
-# Enable module
-RUN a2enmod rewrite
-
-# Enable module Header
-RUN a2enmod headers
-
-# install Vim
-RUN apt-get install -y vim
+# Generate Self-Signed SSL Certificate
+RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/ssl/private/apache-selfsigned.key \
+    -out /etc/ssl/certs/apache-selfsigned.crt \
+    -subj "/C=US/ST=State/L=City/O=Company/OU=Org/CN=dev-mein.majapahit.id"
 
 # Copy Source Code
-
-# Copy existing application directory contents
-# COPY ./publikasi /var/www
-# Copy existing application directory permissions
-
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-RUN apt-get install -y nodejs
-
 COPY . /var/www/html/mein
 WORKDIR /var/www/html/mein
-RUN composer update
-RUN composer install
-RUN npm install
-RUN npm run build
 
+# Composer and NPM setup
+RUN composer install
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs
+RUN npm install && npm run build
+
+# Supervisor setup
 RUN apt-get update && apt-get install -y supervisor
 RUN mkdir -p /etc/supervisor/conf.d
 COPY ./docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-COPY ./.env /var/www/html/mein/
-COPY ./docker/info.php /var/www/html/mein/public/
+# Set permissions
 RUN chown -R www-data:www-data /var/www/html/mein
+
+# Apache Configuration
 RUN rm /etc/apache2/sites-available/000-default.conf
 COPY ./docker/000-default.conf /etc/apache2/sites-available/000-default.conf
+
+# SSL and PHP settings
 COPY ./docker/max_size.ini /usr/local/etc/php/conf.d/max_size.ini
+RUN apache2ctl configtest
+
+# Restart Apache
+RUN service apache2 restart
+
+# Expose HTTP and HTTPS ports
+EXPOSE 80 443 8080

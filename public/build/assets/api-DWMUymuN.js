@@ -1,1 +1,0 @@
-const P="/api/purpose-type",s=`${P}/list`,t=`${P}/create`,T=E=>`${P}/detail/${E}`,a=E=>`${P}/update/${E}`,e=(E,_)=>`${P}/list-allowances-by-purpose-type/${E}/${_}`;export{t as C,e as G,a as U,T as a,s as b};

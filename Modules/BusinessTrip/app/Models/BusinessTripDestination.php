@@ -35,6 +35,11 @@ class BusinessTripDestination extends Model
         return $this->hasMany(BusinessTripDetailDestinationTotal::class, 'business_trip_destination_id', 'id');
     }
 
+    function groupDestination()
+    {
+        dd($this->detailDestinationDay->groupBy('allowance_item_id'));
+    }
+
     public function combinedDetailDestinations()
     {
         // Pastikan kedua relasi selalu mengembalikan koleksi meskipun kosong
