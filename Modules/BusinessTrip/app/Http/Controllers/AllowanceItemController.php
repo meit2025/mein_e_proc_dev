@@ -12,6 +12,7 @@ use Modules\BusinessTrip\Models\AllowanceItem;
 use Modules\BusinessTrip\Models\BusinessTrip;
 use Modules\BusinessTrip\Models\BusinessTripGrade;
 use Modules\BusinessTrip\Models\BusinessTripGradeAllowance;
+use Modules\BusinessTrip\Models\PurposeTypeAllowance;
 use Modules\Master\Models\MasterMaterial;
 
 class AllowanceItemController extends Controller
@@ -61,7 +62,12 @@ class AllowanceItemController extends Controller
         // dd($data);
         $data->getCollection()->transform(function ($map) {
             $gradeRelations = collect($map->allowanceGrades)->map(function ($relation) {
-                return 'Grade ' . $relation->grade->grade . ": " . $relation->plafon;
+
+                if ($relation->grade) {
+                    return 'Grade ' . ($relation->grade ? $relation->grade->grade : '') . ": " . $relation->plafon;
+                }
+
+                return '';
             })->toArray();
 
             $purposeTypeRelations = collect($map->allowancePurposeType)->map(function ($relation) {
@@ -71,7 +77,7 @@ class AllowanceItemController extends Controller
                 'id' => $map->id,
                 'code' => $map->code,
                 'name' => $map->name,
-                'category' => $map->allowanceCategory->name,
+                'category' => $map->allowanceCategory ? $map->allowanceCategory->name : '',
                 'currency' => $map->currency_id,
                 'type' => strtoupper($map->type),
                 'purpose_type' => join(' , ', $purposeTypeRelations),
@@ -152,9 +158,7 @@ class AllowanceItemController extends Controller
         $checkCode =  AllowanceItem::where('code', $request->code)->first();
 
         if ($checkCode) {
-            return $this->errorResponse('Errors', 400, [
-                'code' => $request->code . ' has been using'
-            ]);
+            return $this->errorResponse($request->code . ' has been using', 400);
         }
 
 
@@ -208,7 +212,7 @@ class AllowanceItemController extends Controller
             ->transform(function ($map) {
                 return [
                     'id' => $map->grade_id,
-                    'grade' => $map->grade->grade,
+                    'grade' => $map->grade ? $map->grade->grade : '',
                     'allowance_item_id' => $map->allowance_item_id,
                     'plafon' => $map->plafon
                 ];
@@ -226,6 +230,9 @@ class AllowanceItemController extends Controller
         try {
             $AllowanceItem =  AllowanceItem::find($id);
             $AllowanceItem->delete();
+
+            PurposeTypeAllowance::where('allowance_items_id', $id)->delete();
+            BusinessTripGradeAllowance::where('allowance_item_id', $id)->delete();
 
             DB::commit();
 

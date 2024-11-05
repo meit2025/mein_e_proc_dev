@@ -6,7 +6,7 @@ import { GET_MASTER_ASSET } from '@/endpoint/masterAsset/api';
 import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import { AllowanceForm, AllowanceType } from './components/AllowaceForm';
+import { AllowanceForm } from './components/AllowaceForm';
 import {
   CREATE_API_ALLOWANCE_CATEGORY,
   DELETE_ALLOWANCE_CATEGORY,
@@ -62,7 +62,7 @@ export const Index = () => {
         actionType='dropdown'
         onEdit={(value) => {
           setAllowanceForm({
-            type: AllowanceType.edit,
+            type: FormType.edit,
             id: value,
           });
           setOpenForm(true);

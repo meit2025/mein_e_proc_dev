@@ -178,9 +178,10 @@ export default function AllowanceItemForm({
       showToast('success', 'success');
       onSuccess?.(true);
     } catch (e) {
-      onSuccess?.(false);
-
-      showToast('Please Check the input', 'error');
+      if (e.response) {
+        // console.log(e.response.data.data);
+        showToast(e.response.data.message, 'error');
+      }
     }
   };
 
@@ -441,13 +442,13 @@ export default function AllowanceItemForm({
                 />
               </td>
             </tr>
-
+            {/* 
             <tr>
               <td width={200}>Purpose Type</td>
               <td>
                 <ScrollArea className='h-[250px] border rounded-lg p-6 w-full'></ScrollArea>
               </td>
-            </tr>
+            </tr> */}
             {/* <tr>
               <td width={200}>Formula</td>
               <td>
