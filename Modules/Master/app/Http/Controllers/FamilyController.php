@@ -12,13 +12,9 @@ use Modules\Master\Models\Family;
 
 class FamilyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    public function list(Request $request)
     {
         try {
-            $user = User::with('families')->get();
             $query =  Family::query()->with(['user']);
             $perPage = $request->get('per_page', 10);
             $sortBy = $request->get('sort_by', 'id');
@@ -35,9 +31,22 @@ class FamilyController extends Controller
                     'user' => "( " . $map->user->nip . " )" . " - " . $map->user->name,
                 ];
             });
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        try {
+            $user = User::with('families')->get();
             return Inertia::render(
                 'Master/Family/Index',
-                compact('data', 'user')
+                compact('user')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -57,6 +66,7 @@ class FamilyController extends Controller
      */
     public function store(Request $request)
     {
+        return $request->all();
         $rules = [
             'name' => 'required',
             'status' => 'required|in:wife,child',
@@ -96,7 +106,12 @@ class FamilyController extends Controller
      */
     public function edit($id)
     {
-        return view('master::edit');
+        try {
+            $data = Family::where('user', $id)->get();
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**

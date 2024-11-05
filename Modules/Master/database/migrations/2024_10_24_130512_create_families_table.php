@@ -13,13 +13,11 @@ return new class extends Migration
     {
         Schema::create('families', function (Blueprint $table) {
             $table->id();
-            $table->string('user');
+            $table->foreignId('user')->constrained('users')->cascadeOnUpdate();
             $table->string('name');
             $table->enum('status', ['wife', 'child']);
             $table->date('bod');
             $table->timestamps();
-
-            $table->foreign('user')->references('nip')->on('users')->cascadeOnUpdate()->cascadeOnDelete();
         });
     }
 

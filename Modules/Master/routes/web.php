@@ -144,9 +144,10 @@ Route::group(['middleware' => 'auth'], function () {
         });
 
         Route::group(['prefix' => 'family'], function () {
+            Route::get('/', [FamilyController::class, 'list'])->name('master.family.list');
             Route::post('/create', [FamilyController::class, 'store'])->name('master.family.store');
             Route::post('/update/{id}', [FamilyController::class, 'update'])->name('master.family.update');
-            Route::get('/detail/{id}', [FamilyController::class, 'show'])->name('master.family.show');
+            Route::get('/edit/{id}', [FamilyController::class, 'edit'])->name('master.family.edit');
             Route::delete('/delete/{id}', [FamilyController::class, 'destroy'])->name('master.family.destroy');
         });
 
