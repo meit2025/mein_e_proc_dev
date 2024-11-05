@@ -14,16 +14,23 @@ import {
   GET_LIST_ALLOWANCE_CATEGORY,
   UPDATE_ALLOWANCE_CATEGORY,
 } from '@/endpoint/allowance-category/api';
+import { FormType } from '@/lib/utils';
 
 export const Index = () => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
   const [allowanceForm, setAllowanceForm] = React.useState({
-    type: AllowanceType.create,
-    id: 0,
+    type: FormType.create,
+    id: null,
   });
 
   function openFormHandler() {
+    console.log('allowance form', allowanceForm);
+    setAllowanceForm({
+      type: FormType.create,
+      id: null,
+    });
+
     setOpenForm(!openForm);
   }
   return (
@@ -36,7 +43,7 @@ export const Index = () => {
         <CustomDialog
           onClose={() => setOpenForm(false)}
           open={openForm}
-          onOpenChange={openFormHandler}
+          // onOpenChange={openFormHandler}
         >
           <AllowanceForm
             type={allowanceForm.type}
