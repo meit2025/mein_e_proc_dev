@@ -66,7 +66,7 @@ export function GradeForm({
   createUrl,
   listUser,
 }: GradeInterface) {
-  const [users, setUsers] = React.useState<UserModel>([]);
+  const [users, setUsers] = React.useState<UserModel[]>([]);
 
   const formSchema = z.object({
     grade: z.string().min(1, 'Grade is required'),
@@ -143,7 +143,6 @@ export function GradeForm({
               <td>
                 <FormField
                   control={form.control}
-                  disabled={type == FormType.edit}
                   name='grade'
                   render={({ field }) => (
                     <FormItem>

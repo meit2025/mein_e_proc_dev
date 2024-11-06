@@ -253,6 +253,8 @@ class PurposeTypeController extends Controller
             $findPurposeType =  PurposeType::find($id);
             $findPurposeType->delete();
 
+            PurposeTypeAllowance::where('purpose_type_id', $id)->delete();
+
             DB::commit();
 
             return $this->successResponse([], 'Successfully delete purpose type');

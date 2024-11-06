@@ -70,6 +70,9 @@ export const Index = ({
             listGrade={listGrade}
             listCurrency={listCurrency}
             listAllowanceCategory={listAllowanceCategory}
+            onSuccess={() => {
+              setOpenForm(false);
+            }}
           />
         </CustomDialog>
       </div>
