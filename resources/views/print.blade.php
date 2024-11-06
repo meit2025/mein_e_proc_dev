@@ -188,14 +188,12 @@
                         <th>Total</th>
                     </tr>
                     @php
-                    dd($row->groupDestination);
                         // Group items by allowance_item_id
                         $groupedItems = $row->detailDestinationDay->groupBy('allowance_item_id');
                         $total_standar = 0;
                     @endphp
 
                     @foreach ($groupedItems as $allowanceItemId => $items)
-                    @dd($items)
                         @php
                             // Get the first item in the group for displaying allowance details
                             $firstItem = $items->first();
