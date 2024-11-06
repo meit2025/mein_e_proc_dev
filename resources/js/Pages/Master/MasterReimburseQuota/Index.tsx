@@ -51,6 +51,9 @@ export const Index = ({ listPeriodReimburse, listReimburseType, listUser }: prop
             updateURL={UPDATE_REIMBURSE_QUOTA(formType.id ?? '')}
             listPeriodReimburse={listPeriodReimburse}
             listReimburseType={listReimburseType}
+            onSuccess={(value) => {
+              setOpenForm(false);
+            }}
           />
         </CustomDialog>
       </div>

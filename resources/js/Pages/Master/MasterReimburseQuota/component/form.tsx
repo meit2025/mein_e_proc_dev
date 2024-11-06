@@ -145,38 +145,6 @@ export default function ReimburseQuotaForm({
               </td>
             </tr>
 
-            {/* <tr>
-              <td width={200}>User</td>
-              <td>
-                <FormField
-                  control={form.control}
-                  name='user'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => getSelectionType(value)}
-                          value={field.value?.toString()}
-                        >
-                          <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='-' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {listUsers.map((user) => (
-                              <SelectItem key={user.id.toString()} value={user.id.toString()}>
-                                ({user.nip}) {user.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </td>
-            </tr> */}
-
             <tr>
               <td width={200}>
                 Users <span className='text-red-500'>*</span>
