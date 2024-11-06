@@ -60,6 +60,7 @@ class PurchaseRequisition extends Model
         'message',
         'attachment',
         'balance',
+        'attachment_link'
     ];
 
     // Define the relationship with Purchase

@@ -32,10 +32,10 @@ class TextPrServices
                 $arrayCash[] = $dataCash;
             }
 
-            $this->generateFiles($array, $arrayCash, $reqno);
+            $generate = $this->generateFiles($array, $arrayCash, $reqno);
 
             DB::commit();
-            return $array;
+            return $generate;
         } catch (Exception $e) {
             dd($e);
             DB::rollBack();
@@ -131,12 +131,18 @@ class TextPrServices
         $fileContent = $this->convertArrayToFileContent($array);
         Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
 
+        $filenameAc = '';
         // Generate Cash Advance File (if applicable)
         if (!empty($arrayCash)) {
             $filenameAc = 'INB_DPCRT_' . $nopr . '_' . $timestamp . '.txt';
             $fileContentAc = $this->convertArrayToFileContent($arrayCash);
             Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filenameAc, $fileContentAc);
         }
+
+        return [
+            'filename' => $filename,
+            'filenameAc' => $filenameAc,
+        ];
     }
 
     private function convertArrayToFileContent($array)

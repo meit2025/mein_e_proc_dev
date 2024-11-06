@@ -3,6 +3,7 @@
 namespace Modules\PurchaseRequisition\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SapJobs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\PurchaseRequisition\Http\Requests\Procurement as RequestsProcurement;
@@ -68,6 +69,7 @@ class ProcurementController extends Controller
                 }
             }
             DB::commit();
+            SapJobs::dispatch($purchase->id, 'PR');
 
             return $this->successResponse($request->all());
         } catch (\Throwable $th) {

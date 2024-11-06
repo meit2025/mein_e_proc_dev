@@ -35,6 +35,7 @@ class BusinessTrip extends Model
         'cost_center_id',
         'pajak_id',
         'purchasing_group_id',
+        'uom_id'
     ];
 
 

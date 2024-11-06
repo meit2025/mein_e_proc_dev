@@ -21,6 +21,7 @@ use Modules\PurchaseRequisition\Services\BtPOService;
 use Modules\PurchaseRequisition\Services\BtService;
 use Modules\PurchaseRequisition\Services\ProcurementService;
 use Modules\PurchaseRequisition\Services\ReimburseServices;
+use Modules\PurchaseRequisition\Services\TextPrServices;
 
 class PurchaseRequisitionController extends Controller
 {
@@ -31,13 +32,15 @@ class PurchaseRequisitionController extends Controller
     protected $bt;
     protected $btPO;
     protected $reimburseServices;
+    protected $txtpr;
 
-    public function __construct(ProcurementService $procurementService, BtService $bt, BtPOService $btPO, ReimburseServices $reimburseServices)
+    public function __construct(ProcurementService $procurementService, BtService $bt, BtPOService $btPO, ReimburseServices $reimburseServices, TextPrServices $txtpr)
     {
         $this->procurementService = $procurementService;
         $this->bt = $bt;
         $this->btPO = $btPO;
         $this->reimburseServices = $reimburseServices;
+        $this->txtpr = $txtpr;
     }
 
     public function generateText($id, $type)
@@ -72,7 +75,114 @@ class PurchaseRequisitionController extends Controller
         }
     }
 
-    public function index(Request $request) {}
+    public function downloadtext($id, $type)
+    {
+        try {
+            $pr = $this->txtpr->processTextData($id, $type);
+
+            $prDownload = null;
+            $caDownload = null;
+
+            // Check if the PR file exists and download it
+            if (Storage::disk(env('STORAGE_UPLOAD', 'local'))->exists($pr['filename'])) {
+                $prDownload = Storage::disk(env('STORAGE_UPLOAD', 'local'))->path($pr['filename']);
+            } else {
+                return response()->json(['error' => 'Purchase Requisition file not found'], 404);
+            }
+
+            // Check if the Cash Advance file exists and download it
+            if (!empty($pr['filenameAc'])) {
+                if (Storage::disk(env('STORAGE_UPLOAD', 'local'))->exists($pr['filenameAc'])) {
+                    $caDownload = Storage::disk(env('STORAGE_UPLOAD', 'local'))->path($pr['filenameAc']);
+                } else {
+                    return response()->json(['error' => 'Cash Advance file not found'], 404);
+                }
+            }
+
+            // Return both files for download (you can zip them or download them separately)
+            if ($prDownload != '' && $caDownload != '') {
+                return response()->download($prDownload)->withHeaders([
+                    'Content-Type' => 'text/plain',
+                    'Content-Disposition' => 'attachment; filename="' . basename($pr['filename']) . '"'
+                ]);
+            }
+
+            // If there's only the PR file
+            if ($prDownload) {
+                return response()->download($prDownload)->withHeaders([
+                    'Content-Type' => 'text/plain',
+                    'Content-Disposition' => 'attachment; filename="' . basename($pr['filename']) . '"'
+                ]);
+            }
+
+            // If there's only the Cash Advance file
+            if ($caDownload) {
+                return response()->download($caDownload)->withHeaders([
+                    'Content-Type' => 'text/plain',
+                    'Content-Disposition' => 'attachment; filename="' . basename($pr['filenameAc']) . '"'
+                ]);
+            }
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    public function index(Request $request)
+    {
+        $filterableColumns = [
+            'requisitioner_name',
+            'requisition_date',
+            'purchase_requisition_number',
+            'requirement_tracking_number',
+            'item_number',
+            'document_type',
+            'valuation_type',
+            'is_closed',
+            'purchasing_group',
+            'purchasing_organization',
+            'account_assignment_category',
+            'item_delivery_date',
+            'storage_location',
+            'desired_vendor',
+            'material_group',
+            'material_number',
+            'unit_of_measure',
+            'quantity',
+            'tax_code',
+            'item_category',
+            'short_text',
+            'plant',
+            'deletion_indicator',
+            'cost_center',
+            'order_number',
+            'asset_subnumber',
+            'main_asset_number',
+            'purchase_id',
+
+            'code_transaction',
+
+            'header_not',
+            'tanggal_entertainment',
+            'tempat_entertainment',
+            'alamat_entertainment',
+            'jenis_entertainment',
+            'nama_entertainment',
+            'posisi_entertainment',
+            'nama_perusahaan',
+            'jenis_usaha_entertainment',
+            'jenis_kegiatan_entertainment',
+            'status',
+            'code',
+            'message',
+            'attachment',
+            'balance',
+            'attachment_link'
+        ];
+        $pr = PurchaseRequisition::where('purchase_id', $request->data_id)->where('code_transaction', $request->type_code_transaction);
+        $data = $this->filterAndPaginate($request, $pr, $filterableColumns);
+        return $this->successResponse($data);
+    }
+
 
     /**
      * Show the form for creating a new resource.
@@ -97,7 +207,7 @@ class PurchaseRequisitionController extends Controller
     /**
      * Show the specified resource.
      */
-    public function show($id)
+    public function show($id, $type)
     {
         return view('purchaserequisition::show');
     }

@@ -175,7 +175,7 @@ class ReimburseServices
 
         return [
             'purchase_id' => $reim->id,
-            'code_transaction' => 'reim', // code_transaction
+            'code_transaction' => 'REIM', // code_transaction
             'purchase_requisition_number' => $reqno, //banfn
             'item_number' => $index,  // bnfpo
             'requisitioner_name' => $businessPartner ? $businessPartner->partner_number : '', // afnam

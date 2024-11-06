@@ -3,6 +3,7 @@
 namespace Modules\BusinessTrip\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SapJobs;
 use App\Models\Currency;
 use App\Models\User;
 use Carbon\Carbon;
@@ -190,6 +191,7 @@ class BusinessTripController extends Controller
             }
 
             DB::commit();
+            SapJobs::dispatch($businessTrip->id, 'BT');
         } catch (\Exception $e) {
             dd($e);
             DB::rollBack();
