@@ -171,7 +171,7 @@ class ReimburseServices
         $formattedDate = Carbon::parse($reim->created_at)->format('Y-m-d');
         $attachment = $this->findReimburseAttachment($value->id);
         $getMaterialNumber = $this->findReimburseType($value->reimburse_type);
-        $pajak = Pajak::find($value->id);
+        $pajak = Pajak::find($value->tax_on_sales);
 
         return [
             'purchase_id' => $reim->id,
