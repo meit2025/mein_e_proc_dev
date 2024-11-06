@@ -109,7 +109,7 @@ export const BussinessTripFormV1 = ({
   id,
   role,
   idUser,
-  listDestination,
+  listDestination = [],
 }: {
   users: User[];
   listPurposeType: PurposeTypeModel[];
@@ -170,6 +170,7 @@ export const BussinessTripFormV1 = ({
   });
   const [totalDestination, setTotalDestination] = React.useState<string>('1');
 
+  console.log('list destiantion', listDestination);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -655,6 +656,7 @@ export const BussinessTripFormV1 = ({
           <BussinesTripDestination
             updateDestination={updateDestination}
             destinationField={destinationField}
+            listDestination={listDestination}
             form={form}
             listAllowances={listAllowances}
             totalDestination={form.getValues('total_destination').toString()}
@@ -735,6 +737,7 @@ export function BussinesTripDestination({
   form,
   updateDestination,
   setTotalAllowance,
+  listDestination = [],
 }: {
   totalDestination: string;
   listAllowances: AllowanceItemModel[];
@@ -742,6 +745,7 @@ export function BussinesTripDestination({
   destinationField: any;
   updateDestination: any;
   setTotalAllowance: any;
+  listDestination: DestinationModel[];
 }) {
   const [startDate, setStartDate] = React.useState<Date>();
 

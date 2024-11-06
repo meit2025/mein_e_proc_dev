@@ -85,6 +85,7 @@ export const Index = ({
           onOpenChange={openFormHandler}
         >
           <BussinessTripFormV1
+            listDestination={listDestination}
             users={users}
             idUser={userId}
             role={userRole}
