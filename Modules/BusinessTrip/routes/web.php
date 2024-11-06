@@ -6,6 +6,7 @@ use Modules\BusinessTrip\Http\Controllers\AllowanceItemController;
 use Modules\BusinessTrip\Http\Controllers\BusinessTripController;
 use Modules\BusinessTrip\Http\Controllers\BusinessTripDeclarationController;
 use Modules\BusinessTrip\Http\Controllers\BusinessTripGradeController;
+use Modules\BusinessTrip\Http\Controllers\DestinationController;
 use Modules\BusinessTrip\Http\Controllers\PurposeTypeController;
 use Modules\BusinessTrip\Models\AllowanceItem;
 use Modules\BusinessTrip\Models\BusinessTrip;
@@ -43,6 +44,8 @@ Route::group(['prefix' => 'business-trip'], function () {
     Route::get('/allowance-category', [AllowanceCategoryController::class, 'index'])->name('allowance-category.index');
     Route::get('/allowance-item', [AllowanceItemController::class, 'index'])->name('allowance-item.index');
     Route::get('/purpose-type', [PurposeTypeController::class, 'index'])->name('purpose-type.index');
+    Route::get('/destination', [DestinationController::class, 'index'])->name('destination-page.index');
+
     Route::get('/grade', [BusinessTripGradeController::class, 'index'])->name('business-grade.index');
     Route::inertia('/detail-page/{id}',  'BusinessTrip/BusinessTrip/Detail', [
         'id' => fn() => request()->route('id'),
@@ -126,5 +129,15 @@ Route::group(['prefix' => 'api/'], function () {
         Route::get('/detail/{id}', [BusinessTripGradeController::class, 'detailAPI'])->name('business-grade.detail');
 
         Route::delete('/delete/{id}', [BusinessTripGradeController::class, 'deleteAPI'])->name('business-grade.destroy');
+    });
+
+    Route::group(['prefix' => 'destination'], function () {
+        Route::get('/list', [DestinationController::class, 'listAPI'])->name('destination-api.index');
+        Route::post('/create', [DestinationController::class, 'storeAPI'])->name('destination-api.store');
+        Route::put('/update/{id}', [DestinationController::class, 'updateAPI'])->name('destination-api.update');
+        // // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
+        Route::get('/detail/{id}', [DestinationController::class, 'detailAPI'])->name('destination-api.detail');
+
+        Route::delete('/delete/{id}', [DestinationController::class, 'deleteAPI'])->name('destination-api.destroy');
     });
 });
