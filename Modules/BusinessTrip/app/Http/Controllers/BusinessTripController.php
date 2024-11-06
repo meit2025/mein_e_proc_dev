@@ -75,7 +75,9 @@ class BusinessTripController extends Controller
                 'businessTripDestination',
                 'businessTripDestination.detailAttendance',
                 'businessTripDestination.detailDestinationDay',
-                'businessTripDestination.detailDestinationTotal'
+                'businessTripDestination.detailDestinationDay.allowance',
+                'businessTripDestination.detailDestinationTotal',
+                'businessTripDestination.detailDestinationTotal.allowance'
             ]
         )->where('id', $id)->first();
         return $this->successResponse($findData);
@@ -107,19 +109,7 @@ class BusinessTripController extends Controller
 
     public function storeAPI(Request $request)
     {
-        $rules = [
-            'purpose_type_id' => 'required',
-            'request_for' => 'required',
-            'destination.*' => 'required'
-        ];
-
-        $validator =  Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return $this->errorResponse("erorr", 400, $validator->errors());
-        }
         try {
-            date_default_timezone_set('Asia/Jakarta');
             DB::beginTransaction();
             $businessTrip = BusinessTrip::create([
                 'request_no' => time(),
@@ -165,7 +155,6 @@ class BusinessTripController extends Controller
                         'end_time' => $destination['end_time'],
                     ]);
                 }
-
                 foreach ($data_destination['allowances'] as $key => $allowance) {
                     if (strtolower($allowance['type']) == 'total') {
                         foreach ($allowance['detail'] as $detail) {
@@ -174,6 +163,7 @@ class BusinessTripController extends Controller
                                 'business_trip_id' => $businessTrip->id,
                                 'price' => $detail['request_price'],
                                 'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
+                                'standard_value' => $detail['standard_value'],
                             ]);
                         }
                     } else {
@@ -184,6 +174,7 @@ class BusinessTripController extends Controller
                                 'business_trip_id' => $businessTrip->id,
                                 'price' => $detail['request_price'],
                                 'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
+                                'standard_value' => $detail['standard_value'],
                             ]);
                         }
                     }

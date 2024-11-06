@@ -223,6 +223,8 @@ class BusinessTripGradeController extends Controller
             $BusinessTripGrade =  BusinessTripGrade::find($id);
             $BusinessTripGrade->delete();
 
+            BusinessTripGradeUser::where('grade_id', $id)->delete();
+
             DB::commit();
 
             return $this->successResponse([], 'Successfully delete Business Grade');

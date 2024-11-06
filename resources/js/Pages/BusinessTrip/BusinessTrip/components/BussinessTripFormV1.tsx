@@ -264,19 +264,34 @@ export const BussinessTripFormV1 = ({
           ...item,
           business_trip_start_date: moment(item.business_trip_start_date).format('YYYY-MM-DD'),
           business_trip_end_date: moment(item.business_trip_end_date).format('YYYY-MM-DD'),
+          detail_attedances: item.detail_attedances.map((detail) => {
+            return {
+              ...detail,
+              date: moment(detail.date).format('YYYY-MM-DD'),
+            };
+          }),
+          allowances: item.allowances.map((allowance) => {
+            return {
+              ...allowance,
+              detail: allowance.detail.map((detail) => {
+                return {
+                  ...detail,
+                  date: detail?.date != null ? moment(detail.date).format('YYYY-MM-DD') : null,
+                };
+              }),
+            };
+          }),
         };
         formData.append(`destinations[${index}]`, JSON.stringify(itemCopy));
       });
 
       console.log(formData, ' test');
 
-      //   const response = axios.post(CREATE_API_BUSINESS_TRIP, formData);
-
-      //   await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
-      //     headers: {
-      //       'Content-Type': 'multipart/form-data',
-      //     },
-      //   });
+      await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
       // console.log(response);
       showToast('succesfully created data', 'success');
@@ -999,8 +1014,31 @@ export function ResultTotalItem({
       return totalSum + itemTotal;
     }, 0);
 
+    const alldestinations = form.getValues('destinations');
+
+    const totalAll = alldestinations.reduce(
+      (destinationSum: number, destination: any, destinationIndex: number) => {
+        const allowances = destination.allowances || [];
+
+        const allowanceTotal = allowances.reduce(
+          (allowanceSum: number, allowance: any, index: number) => {
+            const details = form.getValues(
+              `destinations.${destinationIndex}.allowances.${index}.detail`,
+            );
+
+            const itemTotal = calculateTotal(allowance, details);
+            return allowanceSum + itemTotal;
+          },
+          0,
+        );
+
+        return destinationSum + allowanceTotal;
+      },
+      0,
+    );
+
     setGrandTotal(newTotal);
-    setTotalAllowance(newTotal);
+    setTotalAllowance(totalAll);
   }, [allowanceField, form.watch()]); // Menggunakan form.watch() agar memantau perubahan input
   // Fungsi untuk menghitung total per allowance
   const calculateTotal = (allowance: any, details: any) => {
