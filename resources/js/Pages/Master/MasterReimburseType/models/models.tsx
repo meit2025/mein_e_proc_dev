@@ -12,3 +12,8 @@ export interface Grade {
   id: string;
   grade: string;
 }
+
+export interface ReimburseTypeModel {
+  id: string;
+  code: string;
+}

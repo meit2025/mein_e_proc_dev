@@ -26,7 +26,9 @@ import axiosInstance from '@/axiosInstance';
 import { useAlert } from '@/contexts/AlertContext';
 import { AxiosError } from 'axios';
 import { FormType } from '@/lib/utils';
+import { MultiSelect } from '@/components/commons/MultiSelect';
 import { ListPeriodModel } from '../../MasterReimbursePeriod/models/models';
+import { ReimburseTypeModel } from '../../MasterReimburseType/models/models';
 import { User } from '../models/models';
 
 export interface props {
@@ -37,29 +39,33 @@ export interface props {
   editURL?: string;
   updateURL?: string;
   listPeriodReimburse: ListPeriodModel[];
-  listUsers: User[];
+  listReimburseType: ReimburseTypeModel[];
+  listUser: User[];
 }
 
 export default function ReimburseQuotaForm({
   onSuccess,
-  type,
-  listPeriodReimburse,
-  listUsers,
+  type = FormType.create,
+  listUser,
   storeURL,
   editURL,
+  listPeriodReimburse,
+  listReimburseType,
   updateURL
 }: props) {
 
+  const [users, setUsers] = React.useState<User>([]);
+  
   const formSchema = z.object({
     period: z.string('Period must choose'),
     type: z.string('Type must choose'),
-    user: z.string('User must choose')
+    users: z.array(z.number().optional()),
   });
 
   const defaultValues = {
     period: '',
     type: '',
-    user: ''
+    users: [],
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -67,41 +73,35 @@ export default function ReimburseQuotaForm({
     defaultValues: defaultValues,
   });
 
-  const [listReimburseTypes, setListReimburseType] = React.useState([]);
-
-  async function getSelectionType(user_id) {
-    const url = `/api/master/reimburse-quota/selection_grade/${user_id}`;
-    try {
-      const response = await axiosInstance.get(url);
-      const data = response.data.data;
-      setListReimburseType(data);
-    } catch (e) {
-      const error = e as AxiosError;
-    }
-    form.setValue('user', user_id);
-  }
-
   async function getDetailData() {
     try {
       const response = await axiosInstance.get(editURL);
-      const data = response.data.data[0];
-      await getSelectionType(data.user);
+      const data = response.data.data;
+      // await getSelectionType(data.users);
+      
       form.reset({
-        period: data.period,
-        user: data.user,
-        type: data.type,
+        period: data.period.toString(),
+        type: data.type.toString(),
+        users: data.users,
       });
     } catch (e) {
       const error = e as AxiosError;
     }
   }
-
+  
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const response = await axiosInstance.post(storeURL, values);
+      
+      let response;
+      if (type === FormType.edit) {
+        response = await axiosInstance.put(updateURL ?? '', values);
+      } else {
+        response = await axiosInstance.post(storeURL ?? '', values);
+      }
+      
       onSuccess?.(true);
-      showToast(response?.data?.message, 'success');
+      showToast(response?.data?.data, 'success');
     } catch (e) {
       onSuccess?.(false);
       showToast(e.message, 'error');
@@ -110,10 +110,12 @@ export default function ReimburseQuotaForm({
 
   React.useEffect(() => {
     if (type === FormType.edit) {
-      getDetailData();
-    }
+      getDetailData()
+    };
+    setUsers(listUser);
   }, [type]);
-
+  
+  
   return (
     <ScrollArea className='h-[600px] w-full'>
       <Form {...form}>
@@ -152,33 +154,21 @@ export default function ReimburseQuotaForm({
             </tr>
 
             <tr>
-              <td width={200}>User</td>
+              <td width={200}>
+                Users <span className='text-red-500'>*</span>
+              </td>
               <td>
-                <FormField
-                  control={form.control}
-                  name='user'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => getSelectionType(value)}
-                          value={field.value?.toString()}
-                        >
-                          <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='-' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {listUsers.map((user) => (
-                              <SelectItem key={user.id.toString()} value={user.id.toString()}>
-                                ({user.nip}) {user.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <MultiSelect
+                  onSelect={(value) => {
+                    form.setValue(
+                      'users',
+                      value.map((map) => map.id),
+                    );
+                  }}
+                  value={form.getValues('users')}
+                  id='id'
+                  label='name'
+                  options={users}
                 />
               </td>
             </tr>
@@ -200,7 +190,7 @@ export default function ReimburseQuotaForm({
                             <SelectValue placeholder='-' />
                           </SelectTrigger>
                           <SelectContent>
-                            {listReimburseTypes.map((type) => (
+                            {listReimburseType.map((type) => (
                               <SelectItem key={type.id} value={type.id.toString()}>
                                 {type.name}
                               </SelectItem>
