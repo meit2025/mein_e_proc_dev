@@ -27,6 +27,11 @@ class BusinessTripDestination extends Model
         return $this->hasMany(BusinessTripDetailAttedance::class, 'business_trip_destination_id', 'id');
     }
 
+    function getDetailDestinationDay()
+    {
+        return $this->hasMany(BusinessTripDetailDestinationDayTotal::class, 'business_trip_destination_id', 'id');
+    }
+
     function detailDestinationDay()
     {
         return $this->hasMany(BusinessTripDetailDestinationDayTotal::class, 'business_trip_destination_id', 'id')

@@ -166,7 +166,7 @@ class BusinessTripController extends Controller
                                 'business_trip_id' => $businessTrip->id,
                                 'price' => $detail['request_price'],
                                 'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
-                                'standard_value' => $detail['standard_value'],
+                                'standard_value' => $allowance['subtotal'],
                             ]);
                         }
                     } else {
@@ -177,7 +177,7 @@ class BusinessTripController extends Controller
                                 'business_trip_id' => $businessTrip->id,
                                 'price' => $detail['request_price'],
                                 'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
-                                'standard_value' => $detail['standard_value'],
+                                'standard_value' => $allowance['subtotal'],
                             ]);
                         }
                     }
