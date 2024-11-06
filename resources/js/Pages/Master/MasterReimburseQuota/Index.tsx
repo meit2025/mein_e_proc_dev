@@ -8,7 +8,7 @@ import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import { User } from './models/models';
 import ReimburseQuotaForm from './component/form'
-import { LIST_API_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
+import { LIST_API_REIMBURSE_QUOTA, DESTROY_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
 import { FormType } from '@/lib/utils';
 import { ListPeriodModel } from '../MasterReimbursePeriod/models/models';
 import { ReimburseTypeModel } from '../MasterReimburseType/models/models';
@@ -30,6 +30,10 @@ export const Index = ({ listPeriodReimburse, listReimburseType, listUser }: prop
 
   function openFormHandler() {
     setOpenForm(!openForm);
+    setFormType({
+      type: FormType.create,
+      id: undefined,
+    });
   }
   return (
     <>
@@ -44,6 +48,9 @@ export const Index = ({ listPeriodReimburse, listReimburseType, listUser }: prop
           onOpenChange={openFormHandler}
         >
           <ReimburseQuotaForm
+            onSuccess={(value) => {
+              setOpenForm(false);
+            }}
             type={formType.type}
             listUser={listUser}
             storeURL={STORE_REIMBURSE_QUOTA}
@@ -51,9 +58,6 @@ export const Index = ({ listPeriodReimburse, listReimburseType, listUser }: prop
             updateURL={UPDATE_REIMBURSE_QUOTA(formType.id ?? '')}
             listPeriodReimburse={listPeriodReimburse}
             listReimburseType={listReimburseType}
-            onSuccess={(value) => {
-              setOpenForm(false);
-            }}
           />
         </CustomDialog>
       </div>
@@ -69,7 +73,7 @@ export const Index = ({ listPeriodReimburse, listReimburseType, listUser }: prop
         }}
         url={{
           url: LIST_API_REIMBURSE_QUOTA,
-          deleteUrl: LIST_API_REIMBURSE_QUOTA,
+          deleteUrl: DESTROY_REIMBURSE_QUOTA,
         }}
         labelFilter='search'
       />

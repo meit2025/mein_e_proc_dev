@@ -45,7 +45,7 @@ export interface props {
 
 export default function ReimburseQuotaForm({
   onSuccess,
-  type,
+  type = FormType.create,
   listUser,
   storeURL,
   editURL,
@@ -80,8 +80,8 @@ export default function ReimburseQuotaForm({
       // await getSelectionType(data.users);
       
       form.reset({
-        period: data.period,
-        type: data.type,
+        period: data.period.toString(),
+        type: data.type.toString(),
         users: data.users,
       });
     } catch (e) {
@@ -92,9 +92,16 @@ export default function ReimburseQuotaForm({
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const response = await axiosInstance.post(storeURL, values);
+      
+      let response;
+      if (type === FormType.edit) {
+        response = await axiosInstance.put(updateURL ?? '', values);
+      } else {
+        response = await axiosInstance.post(storeURL ?? '', values);
+      }
+      
       onSuccess?.(true);
-      showToast(response?.data?.message, 'success');
+      showToast(response?.data?.data, 'success');
     } catch (e) {
       onSuccess?.(false);
       showToast(e.message, 'error');
@@ -107,6 +114,7 @@ export default function ReimburseQuotaForm({
     };
     setUsers(listUser);
   }, [type]);
+  
   
   return (
     <ScrollArea className='h-[600px] w-full'>

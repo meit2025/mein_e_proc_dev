@@ -140,7 +140,39 @@ class MasterQuotaReimburseController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $rules = [
+            'users' => 'required',
+            'period' => 'required|exists:master_period_reimburses,id',
+            'type' => 'required|exists:master_type_reimburses,id'
+        ];
+
+        $validator  = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return $this->errorResponse($validator->errors());
+        }
+        DB::beginTransaction();
+        try {
+            $getData        = MasterQuotaReimburse::find($id);
+            $validatedData  = $validator->validated();
+            $editData      = collect($validatedData)->except('users');
+            
+            $getData->fill($editData->toArray());
+            $getData->save();
+
+            $validatedData['users'] = array_map(function($user) use($getData) {
+                return [
+                    'user_id' => $user,
+                    'quota_reimburses_id' => $getData->id
+                ];
+            }, $validatedData['users']);
+
+            MasterQuotaReimburseUser::insert($validatedData['users']);
+            DB::commit();
+            return $this->successResponse("Edit Reimburse Quota Successfully");
+        } catch (\Exception  $e) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**
@@ -148,6 +180,17 @@ class MasterQuotaReimburseController extends Controller
      */
     public function destroy($id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            MasterQuotaReimburse::find($id)->delete();
+            MasterQuotaReimburseUser::where('quota_reimburses_id', $id)->delete();
+
+            DB::commit();
+
+            return $this->successResponse([], 'Delete Reimburse Quota Successfully');
+        } catch (\Exception  $e) {
+            DB::rollBack();
+            return $this->errorResponse($e);
+        }
     }
 }
