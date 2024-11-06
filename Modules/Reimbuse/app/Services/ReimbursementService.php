@@ -2,6 +2,7 @@
 
 namespace Modules\Reimbuse\Services;
 
+use App\Jobs\SapJobs;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -94,6 +95,8 @@ class ReimbursementService
 
             $requester = User::where('nip', $groupData['requester'])->first();
             $this->generateProgress($group, $requester);
+
+            SapJobs::dispatch($group->id, 'REIM');
 
             DB::commit();
             return "Reimbursements and progress stored successfully.";

@@ -78,7 +78,7 @@ class BtPOService
     ) {
         $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y-m-d');
         $data = [
-            'code_transaction' => 'btre',
+            'code_transaction' => 'BTRE',
             'purchasing_document_date' => $formattedDate, // bedat
             'purchasing_document_type' => $dokumenType, // bsart
             'company_code' => $companyCode, //bukrs

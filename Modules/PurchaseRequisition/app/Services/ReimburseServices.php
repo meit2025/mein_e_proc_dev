@@ -171,11 +171,11 @@ class ReimburseServices
         $formattedDate = Carbon::parse($reim->created_at)->format('Y-m-d');
         $attachment = $this->findReimburseAttachment($value->id);
         $getMaterialNumber = $this->findReimburseType($value->reimburse_type);
-        $pajak = Pajak::find($value->id);
+        $pajak = Pajak::find($value->tax_on_sales);
 
         return [
             'purchase_id' => $reim->id,
-            'code_transaction' => 'reim', // code_transaction
+            'code_transaction' => 'REIM', // code_transaction
             'purchase_requisition_number' => $reqno, //banfn
             'item_number' => $index,  // bnfpo
             'requisitioner_name' => $businessPartner ? $businessPartner->partner_number : '', // afnam

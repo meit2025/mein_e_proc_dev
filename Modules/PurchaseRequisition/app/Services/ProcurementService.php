@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Exception;
+use Modules\Approval\Models\SettingApproval;
 use Modules\Master\Models\MasterBusinessPartner;
 use Modules\Master\Models\Pajak;
 use Modules\PurchaseRequisition\Models\CashAdvance;
@@ -31,15 +32,33 @@ class ProcurementService
             $array = [];
             $arrayCash = [];
 
-            $latestRequisition = PurchaseRequisition::orderBy('purchase_requisition_number', 'desc')->first();
-            $reqno = $latestRequisition ? (int) $latestRequisition->purchase_requisition_number : 0;
+            $settings = SettingApproval::whereIn('key', [
+                'dokumenType_bussinessTrip',
+                'PurchasingOrganization',
+                'AccountAssignmentCategory',
+                'StorageLocation',
+                'PurchaseRequisitionQuantity',
+                'plant',
+                'companyCode',
+                'TermsofPaymentKey'
+            ])->pluck('value', 'key');
+
+            $reqno = (int) SettingApproval::where('key', 'dokumenType_' . $procurement->document_type)->lockForUpdate()->value('value') + 1;
 
             $entertainment = Entertainment::where('purchase_id', $vendor->id)->first();
             $cashData = CashAdvancePurchases::where('purchase_id', $vendor->id)->first();
 
-            foreach ($items as $value) {
-                $reqno++;
-                $datainsert = $this->preparePurchaseRequisitionData($procurement, $vendor, $value, $businessPartner, $reqno, $entertainment);
+            foreach ($items as $key => $value) {
+                $datainsert = $this->preparePurchaseRequisitionData(
+                    $procurement,
+                    $vendor,
+                    $value,
+                    $businessPartner,
+                    $reqno,
+                    $entertainment,
+                    $key + 1,
+                    $settings
+                );
                 $array[] = $datainsert;
                 PurchaseRequisition::create($datainsert);
 
@@ -50,8 +69,7 @@ class ProcurementService
                 }
             }
 
-            // Generate and store files
-            // $this->generateFiles($array, $arrayCash);
+            SettingApproval::where('key', 'dokumenType_' . $procurement->document_type)->update(['value' => $reqno]);
 
             DB::commit();
             return $array;
@@ -103,7 +121,7 @@ class ProcurementService
         return null;
     }
 
-    private function preparePurchaseRequisitionData($procurement, $vendor, $item, $businessPartner, $reqno, $entertainment)
+    private function preparePurchaseRequisitionData($procurement, $vendor, $item, $businessPartner, $reqno, $entertainment, $inx, $settings)
     {
         $formattedDate = Carbon::parse($procurement->created_at)->format('Y-m-d');
         $delivery_date = Carbon::parse($procurement->delivery_date)->format('Y-m-d');
@@ -112,7 +130,7 @@ class ProcurementService
             'purchase_id' => $procurement->id,
             'code_transaction' => 'VEN', // code_transaction
             'purchase_requisition_number' => $reqno, //banfn
-            'item_number' => $item->material_number,  // bnfpo
+            'item_number' => $inx,  // bnfpo
             'requisitioner_name' => $businessPartner ? $businessPartner->partner_number : '', // afnam
             'requisition_date' => $formattedDate,  // badat
             'requirement_tracking_number' => '', // bednr
@@ -120,7 +138,7 @@ class ProcurementService
             'valuation_type' => '', //bwtar
             'is_closed' => '', // ebakz
             'purchasing_group' => $procurement->purchasing_groups, //bsart
-            'purchasing_organization' => '1600', // ekorg
+            'purchasing_organization' => $settings['PurchasingOrganization'], // ekorg
             'account_assignment_category' => $procurement->account_assignment_categories,  // knttp
             'item_delivery_date' => $delivery_date, // lfdat
             'storage_location' => $procurement->storage_locations,  // lgort
@@ -129,12 +147,12 @@ class ProcurementService
             'material_number' => $item->material_number, // matnr
             'unit_of_measure' => $item->uom,
             'quantity' => $item->qty,
-            'netpr' => '',
-            'waers' => '',
+            'balance' => $item->total_amount,
+            'waers' => 'IDR',
             'tax_code' => $item->tax, // mwskz
             'item_category' => '', // pstyp
             'short_text' => $item->short_text,  // txz01
-            'plant' => 'ID01', // werks
+            'plant' => $settings['plant'], // werks
             'cost_center' => $item->cost_center,  // kostl
             'order_number' => $item->order_number, // AUFNR
             'asset_subnumber' => $item->sub_asset_number,  // anln2
@@ -155,7 +173,7 @@ class ProcurementService
         ];
     }
 
-    private function prepareCashAdvanceData($procurement, $vendor, $item, $cashData, $reqno)
+    private function prepareCashAdvanceData($procurement, $vendor, $item, $cashData, $reqno, $settings)
     {
         $tax = Pajak::where('mwszkz', $item->tax)->first();
         $taxAmount = $item->total_amount - ($item->total_amount * ($tax->desimal / 100));
@@ -168,7 +186,7 @@ class ProcurementService
             'purchase_id' => $procurement->id,
             'code_transaction' => 'VEN',  // code_transaction
             'belnr' =>  $procurement->id, // belnr
-            'company_code' => '1600',
+            'company_code' => $settings['companyCode'],
             'gjahr' => $year, // gjahr
             'currency' => 'IDR', // waers
             'document_date' => $formattedDate, // bldat
@@ -188,26 +206,4 @@ class ProcurementService
             'tax_amount' => $taxAmount,
         ];
     }
-
-    // private function generateFiles($array, $arrayCash)
-    // {
-    //     $timestamp = date('Ymd_His');
-
-    //     // Generate Purchase Requisition File
-    //     $filename = 'INB_PRCRT_' . 1 . '_' . $timestamp . '.txt';
-    //     $fileContent = $this->convertArrayToFileContent($array);
-    //     Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
-
-    //     // Generate Cash Advance File (if applicable)
-    //     if (!empty($arrayCash)) {
-    //         $filenameAc = 'INB_PRDP_' . 1 . '_' . $timestamp . '.txt';
-    //         $fileContentAc = $this->convertArrayToFileContent($arrayCash);
-    //         Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filenameAc, $fileContentAc);
-    //     }
-    // }
-
-    // private function convertArrayToFileContent($array)
-    // {
-    //     return implode(PHP_EOL, array_map(fn($item) => implode("|", $item), $array)) . PHP_EOL;
-    // }
 }

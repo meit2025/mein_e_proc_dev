@@ -165,7 +165,7 @@ class PurposeTypeController extends Controller
 
             DB::commit();
 
-            return $this->successResponse($purpose, 'Successfully creeted purpose type');
+            return $this->successResponse($purpose, 'Successfully creeted Destination');
         } catch (\Exception $e) {
             dd($e);
 
@@ -212,7 +212,7 @@ class PurposeTypeController extends Controller
 
             DB::commit();
 
-            return $this->successResponse($purpose, 'Successfully update purpose type');
+            return $this->successResponse($purpose, 'Successfully update Destination');
         } catch (\Exception $e) {
             dd($e);
 
@@ -257,7 +257,7 @@ class PurposeTypeController extends Controller
 
             DB::commit();
 
-            return $this->successResponse([], 'Successfully delete purpose type');
+            return $this->successResponse([], 'Successfully delete Destination');
         } catch (\Exception  $e) {
             DB::rollBack();
 

@@ -3,6 +3,7 @@
 namespace Modules\BusinessTrip\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SapJobs;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -256,6 +257,9 @@ class BusinessTripDeclarationController extends Controller
                     }
                 }
             }
+
+            SapJobs::dispatch($dataBusiness->id, 'BTPO');
+
 
             DB::commit();
         } catch (\Exception $e) {

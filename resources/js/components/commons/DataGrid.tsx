@@ -307,7 +307,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                       startIcon={<i className='ki-filled ki-folder-down' />}
                       style={{ marginBottom: '10px' }} // Add margin for spacing
                     >
-                      Export
+                      Export TXT
                     </Button>
                   )}
 

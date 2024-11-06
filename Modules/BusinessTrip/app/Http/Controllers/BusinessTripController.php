@@ -3,6 +3,7 @@
 namespace Modules\BusinessTrip\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SapJobs;
 use App\Models\Currency;
 use App\Models\User;
 use Carbon\Carbon;
@@ -17,6 +18,7 @@ use Modules\BusinessTrip\Models\BusinessTripDestination;
 use Modules\BusinessTrip\Models\BusinessTripDetailAttedance;
 use Modules\BusinessTrip\Models\BusinessTripDetailDestinationDayTotal;
 use Modules\BusinessTrip\Models\BusinessTripDetailDestinationTotal;
+use Modules\BusinessTrip\Models\Destination;
 use Modules\BusinessTrip\Models\PurposeType;
 use Modules\BusinessTrip\Models\PurposeTypeAllowance;
 use Modules\Master\Models\MasterCostCenter;
@@ -38,7 +40,9 @@ class BusinessTripController extends Controller
         $pajak = Pajak::select('id', 'mwszkz', 'desimal')->get();
         $costcenter = MasterCostCenter::select('id', 'cost_center', 'controlling_name')->get();
         $purchasingGroup = PurchasingGroup::select('id', 'purchasing_group')->get();
-        return Inertia::render('BusinessTrip/BusinessTrip/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup'));
+
+        $listDestination = Destination::get();
+        return Inertia::render('BusinessTrip/BusinessTrip/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup', 'listDestination'));
     }
 
     /**
@@ -181,6 +185,7 @@ class BusinessTripController extends Controller
             }
 
             DB::commit();
+            SapJobs::dispatch($businessTrip->id, 'BT');
         } catch (\Exception $e) {
             dd($e);
             DB::rollBack();
