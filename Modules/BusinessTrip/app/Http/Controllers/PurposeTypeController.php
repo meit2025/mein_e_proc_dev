@@ -223,10 +223,24 @@ class PurposeTypeController extends Controller
     public function getAllowanceByPurposeAPI($id, $userid)
     {
         $listPurposeType = PurposeTypeAllowance::where('purpose_type_id', $id)->get()->pluck('allowance_items_id')->toArray();
-
         $listAllowances =  AllowanceItem::whereIn('id', $listPurposeType)->get();
         foreach ($listAllowances as $allowance) {
-            $allowance->grade_price = $allowance->grade_price;
+            if ($allowance->grade_option === 'all') {
+                $grade_price = $allowance->grade_all_price;
+            } elseif ($allowance->grade_option === 'grade') {
+                $grade_user = BusinessTripGradeUser::where('user_id', $userid)->first();
+                if ($grade_user) {
+                    $grade_allowance = BusinessTripGradeAllowance::where('grade_id', $grade_user->grade_id)->where('allowance_item_id', $allowance->id)->first();
+                    if ($grade_allowance) {
+                        $grade_price = $grade_allowance->plafon;
+                    } else {
+                        $grade_price = 0;
+                    }
+                } else {
+                    $grade_price = 0;
+                }
+            }
+            $allowance->grade_price = $grade_price;
         }
 
         return $this->successResponse($listAllowances);

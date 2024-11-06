@@ -40,6 +40,7 @@ class AllowanceItem extends Model
         'material_number',
         'material_group'
     ];
+    protected $appends = ['grade_price'];
 
     // protected static function newFactory(): AllowanceItemFactory
     // {
