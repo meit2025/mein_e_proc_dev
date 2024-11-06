@@ -66,6 +66,7 @@ import axios, { AxiosError } from 'axios';
 import { CREATE_API_BUSINESS_TRIP, GET_DETAIL_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
 import FormSwitch from '@/components/Input/formSwitchCustom';
 import FormAutocomplete from '@/components/Input/formDropdown';
+import { DestinationModel } from '../../Destination/models/models';
 
 interface User {
   id: string;
@@ -108,6 +109,7 @@ export const BussinessTripFormV1 = ({
   id,
   role,
   idUser,
+  listDestination,
 }: {
   users: User[];
   listPurposeType: PurposeTypeModel[];
@@ -118,6 +120,7 @@ export const BussinessTripFormV1 = ({
   id: string | undefined;
   role: string | undefined;
   idUser: number | undefined;
+  listDestination: DestinationModel[];
 }) => {
   const formSchema = z.object({
     purpose_type_id: z.string().min(1, 'Purpose type required'),
@@ -762,6 +765,7 @@ export function BussinesTripDestination({
           form={form}
           index={index}
           setTotalAllowance={setTotalAllowance}
+          listDestination={listDestination}
         />
       ))}
     </Tabs>
@@ -775,6 +779,7 @@ export function BussinessDestinationForm({
   updateDestination,
   listAllowances,
   setTotalAllowance,
+  listDestination,
 }: {
   form: any;
   index: number;
@@ -782,6 +787,7 @@ export function BussinessDestinationForm({
   updateDestination: any;
   listAllowances: any;
   setTotalAllowance: any;
+  listDestination: DestinationModel[];
 }) {
   const {
     fields: detailAttedanceFields,
@@ -897,8 +903,13 @@ export function BussinessDestinationForm({
                           <SelectValue placeholder='Destination' />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value='jakarta'>Jakarta</SelectItem>
-                          <SelectItem value='banyuwangi'>Banyuwangi</SelectItem>
+                          {listDestination.map((map) => (
+                            <SelectItem value={map.destination} className='uppercase'>
+                              {map.destination}
+                            </SelectItem>
+                          ))}
+
+                          {/* <SelectItem value='banyuwangi'>Banyuwangi</SelectItem> */}
                         </SelectContent>
                       </Select>
                     </FormControl>

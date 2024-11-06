@@ -11,16 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('families', function (Blueprint $table) {
-            $table->id();
-            $table->string('user');
-            $table->string('name');
-            $table->enum('status', ['wife', 'child']);
-            $table->date('bod');
-            $table->timestamps();
 
-            $table->foreign('user')->references('nip')->on('users')->cascadeOnUpdate()->cascadeOnDelete();
-        });
+        if (!Schema::hasTable('families')) {
+            Schema::create('families', function (Blueprint $table) {
+                $table->id();
+                $table->string('user');
+                $table->string('name');
+                $table->enum('status', ['wife', 'child']);
+                $table->date('bod');
+                $table->timestamps();
+
+                $table->foreign('user')->references('nip')->on('users')->cascadeOnUpdate()->cascadeOnDelete();
+            });
+        }
     }
 
     /**
