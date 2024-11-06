@@ -936,7 +936,6 @@ export function BussinessDestinationForm({
                       <CustomDatePicker
                         initialDate={destination.business_trip_start_date}
                         onDateChange={(value) => {
-                          console.log(value.toString());
                           updateDestination(index, {
                             ...destination,
                             business_trip_start_date: value,
