@@ -22,7 +22,7 @@ class BtPOService
             $array = [];
             // Collect SettingApproval values
             $settings = SettingApproval::whereIn('key', [
-                'dokumenType_reimburse',
+                'dokumenType_po',
                 'PurchasingOrganization',
                 'AccountAssignmentCategory',
                 'StorageLocation',
