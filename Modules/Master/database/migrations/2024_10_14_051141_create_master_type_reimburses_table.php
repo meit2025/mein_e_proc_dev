@@ -11,20 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::dropIfExists('master_type_reimburses');
-        Schema::create('master_type_reimburses', function (Blueprint $table) {
-            $table->id();
-            $table->string('code')->unique();
-            $table->string('name');
-            $table->boolean('is_employee');
-            $table->integer('limit')->nullable();
-            $table->double('plafon')->nullable();
-            $table->string('material_group');
-            $table->string('material_number');
-            $table->foreignId('grade')->constrained('business_trip_grades')->cascadeOnUpdate();
-            $table->softDeletes();
-            $table->timestamps();
-        });
+        // Schema::create('master_type_reimburses', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->string('code')->unique();
+        //     $table->string('name');
+        //     $table->boolean('is_employee');
+        //     $table->integer('limit')->nullable();
+        //     $table->double('plafon')->nullable();
+        //     $table->string('material_group');
+        //     $table->string('material_number');
+        //     $table->foreignId('grade')->constrained('business_trip_grades')->cascadeOnUpdate();
+        //     $table->softDeletes();
+        //     $table->timestamps();
+        // });
     }
 
     /**
