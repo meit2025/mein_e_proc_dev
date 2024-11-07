@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::dropIfExists('master_type_reimburses');
         Schema::create('master_type_reimburses', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
