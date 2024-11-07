@@ -103,6 +103,7 @@ class TextPoServices
         $filename = 'INB_POCRT_' . $nopr . '_' . $timestamp . '.txt';
         $fileContent = $this->convertArrayToFileContent($array);
         Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
+        Storage::disk('local')->put($filename, $fileContent);
     }
 
     private function convertArrayToFileContent($array)

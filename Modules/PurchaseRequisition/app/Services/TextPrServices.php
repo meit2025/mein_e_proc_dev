@@ -48,7 +48,7 @@ class TextPrServices
         return [
             'code_transaction' => $pr->code_transaction, // code_transaction
             'purchase_requisition_number' => $pr->purchase_requisition_number, // banfn
-            'item_number' => $pr->item_number, //
+            'item_number' => $pr->item_number, //bnfpo
             'requisitioner_name' => $pr->requisitioner_name, // afnam
             'requisition_date' => $pr->requisition_date, // badat
             'requirement_tracking_number' => $pr->requirement_tracking_number, // bednr
@@ -65,7 +65,7 @@ class TextPrServices
             'material_number' => $pr->material_number, // matnr
             'unit_of_measure' => $pr->unit_of_measure, // meins
             'quantity' => $pr->quantity, // menge
-            'balance' => $pr->balance, // NILAI NYA
+            'balance' => $pr->balance, // NILAI NYA//netpr
             'waers' => 'IDR', // MATA UANG
             'tax_code' => $pr->tax_code, // mwskz
             'item_category' => $pr->item_category, // pstyp
@@ -97,7 +97,7 @@ class TextPrServices
 
 
         return [
-            'code_transaction' => 'VEN',
+            'code_transaction' => $ca->code_transaction,
             'belnr' => $ca->id, // belnr
             'company_code' => $ca->company_code, // bukrs
             'gjahr' =>  $ca->gjahr, // gjahr

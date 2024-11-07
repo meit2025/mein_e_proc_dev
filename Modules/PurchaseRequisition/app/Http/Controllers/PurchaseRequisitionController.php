@@ -22,6 +22,7 @@ use Modules\PurchaseRequisition\Services\BtPOService;
 use Modules\PurchaseRequisition\Services\BtService;
 use Modules\PurchaseRequisition\Services\ProcurementService;
 use Modules\PurchaseRequisition\Services\ReimburseServices;
+use Modules\PurchaseRequisition\Services\TextPoServices;
 use Modules\PurchaseRequisition\Services\TextPrServices;
 
 class PurchaseRequisitionController extends Controller
@@ -34,14 +35,16 @@ class PurchaseRequisitionController extends Controller
     protected $btPO;
     protected $reimburseServices;
     protected $txtpr;
+    protected $txtpo;
 
-    public function __construct(ProcurementService $procurementService, BtService $bt, BtPOService $btPO, ReimburseServices $reimburseServices, TextPrServices $txtpr)
+    public function __construct(ProcurementService $procurementService, BtService $bt, BtPOService $btPO, ReimburseServices $reimburseServices, TextPrServices $txtpr, TextPoServices $txtpo)
     {
         $this->procurementService = $procurementService;
         $this->bt = $bt;
         $this->btPO = $btPO;
         $this->reimburseServices = $reimburseServices;
         $this->txtpr = $txtpr;
+        $this->txtpo = $txtpo;
     }
 
     public function generateText($id, $type)
@@ -80,6 +83,16 @@ class PurchaseRequisitionController extends Controller
     {
         try {
             $pr = $this->txtpr->processTextData($id, $type);
+
+            return $this->successResponse('success send to sap');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+    public function downloadPo($id, $type)
+    {
+        try {
+            $pr = $this->txtpo->processTextData($id, $type);
 
             return $this->successResponse('success send to sap');
         } catch (\Exception $e) {
