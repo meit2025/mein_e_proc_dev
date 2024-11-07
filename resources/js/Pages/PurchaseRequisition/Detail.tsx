@@ -1,11 +1,11 @@
 /* eslint-disable react/jsx-key */
-import { ReactNode, useCallback, useEffect, useState } from 'react';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import axiosInstance from '@/axiosInstance';
-import { DETAIL_API } from '@/endpoint/getway/api';
-import { Loading } from '@/components/commons/Loading';
 import CustomTabPr from '@/components/commons/CustomTabPr';
-import BusinessTripDetail from './components/BusinessTripDetail';
+import { Loading } from '@/components/commons/Loading';
+import { DETAIL_PR } from '@/endpoint/purchaseRequisition/api';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
+import PrDetail from './PrDetail';
 
 const Detail = ({ id }: { id: number }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -15,7 +15,7 @@ const Detail = ({ id }: { id: number }) => {
     async () => {
       setIsLoading(true);
       try {
-        const response = await axiosInstance.get(DETAIL_API(id));
+        const response = await axiosInstance.get(DETAIL_PR(id));
         const data = response.data;
         setData(data.data);
       } catch (error) {
@@ -34,14 +34,14 @@ const Detail = ({ id }: { id: number }) => {
   return (
     <>
       <Loading isLoading={isLoading} />
-      <CustomTabPr detailLayout={<BusinessTripDetail />} id={id} type='BTRE' />
+      <CustomTabPr detailLayout={<PrDetail />} id={id} type='VEN' />
     </>
   );
 };
 
 // Assign layout to the page
 Detail.layout = (page: ReactNode) => (
-  <MainLayout title='Business Trip Detail' description='Business Trip Detail'>
+  <MainLayout title='Puchase Request Detail' description='Puchase Request Detail'>
     {page}
   </MainLayout>
 );

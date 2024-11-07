@@ -14,6 +14,7 @@ use Modules\PurchaseRequisition\Models\CashAdvance;
 use Modules\PurchaseRequisition\Models\CashAdvancePurchases;
 use Modules\PurchaseRequisition\Models\Entertainment;
 use Modules\PurchaseRequisition\Models\Purchase;
+use Modules\PurchaseRequisition\Models\PurchaseOrder;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
 use Modules\PurchaseRequisition\Models\Unit;
 use Modules\PurchaseRequisition\Models\Vendor;
@@ -178,7 +179,98 @@ class PurchaseRequisitionController extends Controller
             'balance',
             'attachment_link'
         ];
+
         $pr = PurchaseRequisition::where('purchase_id', $request->data_id)->where('code_transaction', $request->type_code_transaction);
+        $data = $this->filterAndPaginate($request, $pr, $filterableColumns);
+        return $this->successResponse($data);
+    }
+
+    public function indexDp(Request $request)
+    {
+        $filterableColumns = [
+            'purchase_id',
+            'code_transaction',
+            'company_code',
+            'document_type',
+            'currency',
+            'document_date',
+            'reference',
+            'document_header_text',
+            'item',
+            'posting_key',
+            'gl_indicator',
+            'target_spesial',
+            'vendor_code',
+            'amount',
+            'amount_local_currency',
+            'tax_amount',
+            'tax_code',
+            'due_on',
+            'payment_method',
+            'purchasing_document',
+            'purchasing_document_item',
+            'assigment',
+            'text',
+            'profit_center',
+            'gjahr',
+            'budat',
+            'monat',
+        ];
+        $pr = CashAdvance::where('purchase_id', $request->data_id)->where('code_transaction', $request->type_code_transaction);
+        $data = $this->filterAndPaginate($request, $pr, $filterableColumns);
+        return $this->successResponse($data);
+    }
+
+    public function indexPo(Request $request)
+    {
+        $filterableColumns = [
+            'main_asset_number',
+            'asset_subnumber',
+            'order_number',
+            'purchasing_document_number',
+            'item_number_of_purchasing_document',
+            'cost_center',
+            'purchasing_document_date',
+            'purchasing_document_type',
+            'company_code',
+            'purchasing_group',
+            'purchasing_organization',
+            'incoterms_part1',
+            'incoterms_part2',
+            'vendor_account_number',
+            'currency_key',
+            'terms_of_payment_key',
+            'requisitioner_name',
+            'purchase_requisition_number',
+            'requirement_tracking_number',
+            'item_number_of_purchase_requisition',
+            'delivery_completed_indicator',
+            'final_invoice_indicator',
+            'account_assignment_category',
+            'storage_location',
+            'deletion_indicator',
+            'material_group',
+            'material_number',
+            'po_unit_of_measure',
+            'po_quantity',
+            'tax_code',
+            'net_price',
+            'item_category',
+            'invoice_receipt_indicator',
+            'short_text',
+            'gr_based_invoice_verification',
+            'goods_receipt_indicator',
+            'plant',
+            'status',
+            'code',
+            'message',
+            'attachment_link'
+        ];
+
+        // get pr
+        $prdata = PurchaseRequisition::where('purchase_id', $request->data_id)->where('code_transaction', $request->type_code_transaction)->first();
+
+        $pr = PurchaseOrder::where('purchase_requisition_number', $prdata->purchase_requisition_number);
         $data = $this->filterAndPaginate($request, $pr, $filterableColumns);
         return $this->successResponse($data);
     }
