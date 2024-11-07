@@ -130,6 +130,7 @@ class TextPrServices
         $filename = 'INB_PRCRT_' . $nopr . '_' . $timestamp . '.txt';
         $fileContent = $this->convertArrayToFileContent($array);
         Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
+        Storage::disk('local')->put($filename, $fileContent);
 
         $filenameAc = '';
         // Generate Cash Advance File (if applicable)
@@ -137,6 +138,7 @@ class TextPrServices
             $filenameAc = 'INB_DPCRT_' . $nopr . '_' . $timestamp . '.txt';
             $fileContentAc = $this->convertArrayToFileContent($arrayCash);
             Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filenameAc, $fileContentAc);
+            Storage::disk('local')->put($filenameAc, $fileContentAc);
         }
 
         return [
