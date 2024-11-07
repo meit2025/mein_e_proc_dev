@@ -40,16 +40,11 @@ import {
   GET_LIST_ALLOWANCE_CATEGORY,
 } from '@/endpoint/allowance-category/api';
 import { useAlert } from '@/contexts/AlertContext';
-
-export enum AllowanceType {
-  create,
-  edit,
-  update,
-}
+import { FormType } from '@/lib/utils';
 
 export interface AllowanceFormInterface {
   onSuccess?: (value: boolean) => void;
-  type?: AllowanceType;
+  type?: FormType;
   detailUrl?: string;
   updateUrl?: string;
   createUrl?: string;
@@ -57,7 +52,7 @@ export interface AllowanceFormInterface {
 }
 export function AllowanceForm({
   onSuccess,
-  type = AllowanceType.create,
+  type = FormType.create,
   id,
   createUrl,
   updateUrl,
@@ -75,7 +70,7 @@ export function AllowanceForm({
 
   async function getDetailData() {
     try {
-      const response = await axiosInstance.get(detailUrl);
+      const response = await axiosInstance.get(detailUrl ?? '');
 
       form.reset({
         code: response.data.data.code,
@@ -96,7 +91,7 @@ export function AllowanceForm({
     try {
       let response;
 
-      if (type === AllowanceType.edit) {
+      if (type === FormType.edit) {
         response = axiosInstance.put(updateUrl ?? '', values);
       } else {
         response = axiosInstance.post(createUrl ?? '', values);
@@ -113,8 +108,10 @@ export function AllowanceForm({
     }
   };
 
+  console.log(type);
+
   React.useEffect(() => {
-    if (type === AllowanceType.edit || type === AllowanceType.update) {
+    if (type === FormType.edit || type === FormType.detail) {
       getDetailData();
     }
   }, [type]);
@@ -136,7 +133,7 @@ export function AllowanceForm({
                     <FormItem>
                       <FormControl>
                         <Input
-                          readOnly={type === AllowanceType.edit}
+                          readOnly={type === FormType.edit}
                           type='text'
                           placeholder='0.0'
                           {...field}

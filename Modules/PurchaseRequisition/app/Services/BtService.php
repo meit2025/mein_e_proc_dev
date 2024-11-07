@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Modules\Approval\Models\SettingApproval;
 use Modules\BusinessTrip\Models\AllowanceItem;
 use Modules\BusinessTrip\Models\BusinessTrip;
 use Modules\BusinessTrip\Models\BusinessTripAttachment;
@@ -13,6 +14,8 @@ use Modules\BusinessTrip\Models\BusinessTripDestination;
 use Modules\BusinessTrip\Models\BusinessTripDetailAttedance;
 use Modules\Master\Models\MasterCostCenter;
 use Modules\Master\Models\Pajak;
+use Modules\Master\Models\PurchasingGroup;
+use Modules\Master\Models\Uom;
 use Modules\PurchaseRequisition\Models\CashAdvance;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
 
@@ -27,23 +30,39 @@ class BtService
             $BusinessAttachment = $this->findBusinessAttachment($id);
             $BusinessTripDetailDestinationTotal = $this->findBusinessTripDetailDestinationTotal($id);
 
-
-            $latestRequisition = PurchaseRequisition::orderBy('purchase_requisition_number', 'desc')->first();
-            $reqno = $latestRequisition ? (int) $latestRequisition->purchase_requisition_number : 4300000022;
+            $settings = SettingApproval::whereIn('key', [
+                'dokumenType_bussinessTrip',
+                'PurchasingOrganization',
+                'AccountAssignmentCategory',
+                'StorageLocation',
+                'PurchaseRequisitionQuantity',
+                'plant',
+                'companyCode',
+                'TermsofPaymentKey'
+            ])->pluck('value', 'key');
 
             $array = [];
             $arrayCash = [];
+            $dokumenType = $settings['dokumenType_bussinessTrip'];
+            $reqno = (int) SettingApproval::where('key', 'dokumenType_' . $dokumenType)->lockForUpdate()->value('value') + 1;
 
             foreach ($BusinessTripDetailDestinationTotal as $key => $value) {
-                $reqno++;
-                $datainsert = $this->preparePurchaseRequisitionData($BusinessTrip, $value, $reqno, $BusinessAttachment, $key + 1);
+                $datainsert = $this->preparePurchaseRequisitionData(
+                    $BusinessTrip,
+                    $value,
+                    $reqno,
+                    $BusinessAttachment,
+                    $key + 1,
+                    $dokumenType,
+                    $settings
+                );
 
                 $dataMapping = $datainsert;
                 $dataMapping['purchase_id'] = $BusinessTrip->id;
                 PurchaseRequisition::create($dataMapping);
                 $array[] = $datainsert;
                 if ($BusinessTrip->cash_advance) {
-                    $datainsertCash = $this->prepareCashAdvanceData($BusinessTrip, $value, $reqno);
+                    $datainsertCash = $this->prepareCashAdvanceData($BusinessTrip, $value, $reqno, $settings);
 
                     $newDataInser = $datainsertCash;
                     $newDataInser['amount'] = $BusinessTrip->total_cash_advance;
@@ -55,6 +74,7 @@ class BtService
             }
 
             // $this->generateFiles($array, $arrayCash, $reqno);
+            SettingApproval::where('key', 'dokumenType_' . $dokumenType)->update(['value' => $reqno]);
 
             DB::commit();
             return $array;
@@ -65,13 +85,25 @@ class BtService
         }
     }
 
-    private function preparePurchaseRequisitionData($BusinessTrip, $item, $reqno, $BusinessAttachment, $indx)
-    {
+    private function preparePurchaseRequisitionData(
+        $BusinessTrip,
+        $item,
+        $reqno,
+        $BusinessAttachment,
+        $indx,
+        $dokumenType,
+        $settings,
+    ) {
         $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y-m-d');
         $getAllowanceItem = AllowanceItem::where('id', $item->allowance_item_id)->first();
         if ($getAllowanceItem && $getAllowanceItem->material_number == '') {
             throw new Exception('alloean Item Not set materila number');
         }
+
+        $purchasingGroup = PurchasingGroup::find($BusinessTrip->purchasing_group_id);
+        $uom = Uom::find($BusinessTrip->uom_id);
+        $pajak = Pajak::find($BusinessTrip->pajak_id);
+        $costCenter = MasterCostCenter::find($BusinessTrip->pajak_id);
 
         return [
             'code_transaction' => 'BTRE', // code_transaction
@@ -80,26 +112,26 @@ class BtService
             'requisitioner_name' => $BusinessTrip->requestFor->employee->partner_number ?? '', // afnam
             'requisition_date' => $formattedDate, // badat
             'requirement_tracking_number' => '', // bednr
-            'document_type' => 'ZSUN', //bsart
+            'document_type' => $dokumenType, //bsart
             'valuation_type' => '', //bwtar
             'is_closed' => '', // ebakz
-            'purchasing_group' => 'A01', // perlu input // ekgrp
-            'purchasing_organization' => '1600', // ekorg
-            'account_assignment_category' => 'Y', // knttp
+            'purchasing_group' => $purchasingGroup->purchasing_group, // perlu input // ekgrp
+            'purchasing_organization' => $settings['PurchasingOrganization'], // ekorg
+            'account_assignment_category' => $settings['AccountAssignmentCategory'], // knttp
             'item_delivery_date' => $formattedDate, // lfdat
-            'storage_location' => '0001', // lgort
+            'storage_location' => $settings['StorageLocation'], // lgort
             'desired_vendor' => $BusinessTrip->requestFor->employee->partner_number ?? '', // lifnr
-            'material_group' => $getAllowanceItem->material_group ?? 'NC_SRVC', // matkl
+            'material_group' => $getAllowanceItem->material_group, // matkl
             'material_number' => $getAllowanceItem->material_number, // matnr
-            'unit_of_measure' => 'AU', // meins
+            'unit_of_measure' => $uom->commercial ?? '', // meins
             'quantity' => '1', // menge
-            'netpr' => $item->price, // NILAI NYA
+            'balance' => $item->price, // NILAI NYA
             'waers' => 'IDR', // MATA UANG
-            'tax_code' => 'V0', // mwskz
+            'tax_code' => $pajak->mwszkz ?? 'V0', // mwskz
             'item_category' => '', // pstyp
             'short_text' => $BusinessTrip->remark, // txz01
-            'plant' => 'ID01', // werks
-            'cost_center' => '0000000100', // kostl
+            'plant' => $settings['plant'], // werks
+            'cost_center' => $costCenter->cost_center, // kostl
             'order_number' => '', // AUFNR
             'asset_subnumber' => '', // anln2
             'main_asset_number' => '', // anln1
@@ -116,7 +148,7 @@ class BtService
             'B01' => $BusinessTrip->remark,
             'B03' => $BusinessTrip->remark,
             'B04' => $BusinessTrip->remark,
-            'Attachment_link' => $BusinessAttachment,
+            'attachment_link' => $BusinessAttachment,
         ];
     }
 
@@ -181,9 +213,9 @@ class BtService
         return $mergedQuery;
     }
 
-    private function prepareCashAdvanceData($BusinessTrip, $item, $reqno)
+    private function prepareCashAdvanceData($BusinessTrip, $item, $reqno, $settings)
     {
-        $tax = Pajak::where('mwszkz', $item->tax ?? 'V0')->first();
+        $tax = Pajak::where('id', $BusinessTrip->pajak_id ?? '1')->first();
         $findCostCenter = MasterCostCenter::find($BusinessTrip->cost_center_id)->first();
         $taxAmount = $BusinessTrip->total_cash_advance - ($BusinessTrip->total_cash_advance * (($tax->desimal ?? 0) / 100));
 
@@ -192,11 +224,10 @@ class BtService
         $formattedDate = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('Y-m-d');
         $year = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('Y');
         $month = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('m');
-
         return [
             'code_transaction' => 'BTRE',
             'belnr' => $BusinessTrip->id, // belnr
-            'company_code' => '1600', // bukrs
+            'company_code' => $settings['companyCode'], // bukrs
             'gjahr' =>  $year, // gjahr
             'currency' => 'IDR', // waers
             'document_date' => $formattedDate,
@@ -208,7 +239,7 @@ class BtService
             'saknr' => '', //saknr
             'hkont' => '', //hkont
             'amount_local_currency' => $BusinessTrip->total_cash_advance,
-            'tax_code' => $item->tax ?? 'V0',
+            'tax_code' => $tax->mwszkz ?? 'V0',
             'dzfbdt' => $formattedDate, //dzfbdt
             'purchasing_document' => '', //ebeln
             'purchasing_document_item' => '', //ebelp
@@ -218,26 +249,4 @@ class BtService
             'tax_amount' => $taxAmount,
         ];
     }
-
-    // private function generateFiles($array, $arrayCash, $nopr)
-    // {
-    //     $timestamp = date('Ymd_His');
-
-    //     // Generate Purchase Requisition File
-    //     $filename = 'INB_PRCRT_' . $nopr . '_' . $timestamp . '.txt';
-    //     $fileContent = $this->convertArrayToFileContent($array);
-    //     Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
-
-    //     // Generate Cash Advance File (if applicable)
-    //     if (!empty($arrayCash)) {
-    //         $filenameAc = 'INB_DPCRT_' . $nopr . '_' . $timestamp . '.txt';
-    //         $fileContentAc = $this->convertArrayToFileContent($arrayCash);
-    //         Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filenameAc, $fileContentAc);
-    //     }
-    // }
-
-    // private function convertArrayToFileContent($array)
-    // {
-    //     return implode(PHP_EOL, array_map(fn($item) => implode("|", $item), $array)) . PHP_EOL;
-    // }
 }

@@ -17,17 +17,16 @@ class SapJobs implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     protected $id;
     protected $type;
-    protected $reim;
+
 
     /**
      * Create a new job instance.
      */
-    public function __construct($id,  $type, ReimburseServices $reim)
+    public function __construct($id,  $type)
     {
         //
         $this->id = $id;
         $this->type = $type;
-        $this->reim = $reim;
     }
 
     /**
@@ -35,16 +34,32 @@ class SapJobs implements ShouldQueue
      */
     public function handle(): void
     {
-        //
+        // Instantiate services within the job
+        $reim = new ReimburseServices();
+        $bt = new BtService();
+        $btpo = new BtPOService();
+        $procurement = new ProcurementService();
+
+        // Switch case to handle different types
         switch ($this->type) {
             case 'REIM':
+                $reim->processTextData($this->id);
+                break;
 
-                $this->reim->processTextData($this->id);
-                # code...
+            case 'BT':
+                $bt->processTextData($this->id);
+                break;
+
+            case 'BTPO':
+                $btpo->processTextData($this->id);
+                break;
+
+            case 'PR':
+                $procurement->processTextData($this->id);
                 break;
 
             default:
-                # code...
+                // Handle unknown type case
                 break;
         }
     }

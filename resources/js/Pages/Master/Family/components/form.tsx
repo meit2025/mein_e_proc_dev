@@ -26,7 +26,7 @@ import { Input } from '@/components/shacdn/input';
 import * as React from 'react';
 import axiosInstance from '@/axiosInstance';
 import axios, { AxiosError } from 'axios';
-import { CREATE_API_FAMILY } from '@/endpoint/family/api';
+import { CREATE_API_FAMILY, EDIT_FAMILY } from '@/endpoint/family/api';
 
 interface propsType {
   onSuccess?: (value: boolean) => void;
@@ -52,11 +52,10 @@ export const FamilyHeaderForm = ({ onSuccess, idUser }: propsType) => {
   };
 
 
-  const [formCount, setFormCount] = useState<number>(1);
   const [totalFamily, setTotalFamily] = React.useState<string>('1');
 
   const handleFormCountChange = (value: any) => {
-    setFormCount(value);
+    setTotalFamily(value);
     const currentForms = form.getValues('families');
     const newForms = Array.from({ length: value }).map((_, index) => {
       return (
@@ -64,7 +63,7 @@ export const FamilyHeaderForm = ({ onSuccess, idUser }: propsType) => {
           id: '',
           name: '',
           status: '',
-          bod: '',
+          bod: new Date(),
         }
       );
     });
@@ -74,29 +73,56 @@ export const FamilyHeaderForm = ({ onSuccess, idUser }: propsType) => {
 
   async function getDetailData() {
     try {
-      let response = await axiosInstance.get(EDIT_FAMILY(idUser ?? ''));
-      let data = response.data.data;
-      if (data.length > 0) {
-        form.setValue('total_family', (data.length.toString() === '0') ? '1' : data.length.toString());
+      const response = await axiosInstance.get(EDIT_FAMILY(idUser ?? ''));
+      const data = response.data.data;
+      if (data && data.length > 0) {
+        form.setValue('total_family', data.length.toString());
         form.setValue(
           'families',
           data.map((val) => ({
             id: val.id ?? '',
             status: val.status ?? '',
             name: val.name ?? '',
-            bod: new Date(val.bod ?? ''),
+            bod: val.bod ? new Date(val.bod) : new Date(),
           })),
         );
+      } else {
+        form.setValue('total_family', '1');
+        form.setValue('families', [
+          {
+            id: '',
+            name: '',
+            status: '',
+            bod: new Date(),
+          },
+        ]);
       }
-    } catch (e) {
-      let error = e as AxiosError;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        showToast(error.message, 'error');
+      } else {
+        showToast('Unknown error occurred', 'error');
+      }
+
+      form.setValue('total_family', '1');
+      form.setValue('families', [
+        {
+          id: '',
+          name: '',
+          status: '',
+          bod: new Date(),
+        },
+      ]);
     }
   }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log('bgst')
     try {
-      const response = await axiosInstance.post(CREATE_API_FAMILY, values);
+      const updatedValues = {
+        ...values,
+        user: idUser
+      };
+      const response = await axiosInstance.post(CREATE_API_FAMILY, updatedValues);
       onSuccess?.(true);
       showToast(response.message, 'success');
     } catch (e) {
@@ -122,7 +148,7 @@ export const FamilyHeaderForm = ({ onSuccess, idUser }: propsType) => {
 
   useEffect(() => {
     getDetailData();
-  }, [totalFamily])
+  }, [totalFamily]);
 
   return (
     <ScrollArea className='h-[600px] w-full '>
@@ -183,9 +209,10 @@ export const FamilyHeaderForm = ({ onSuccess, idUser }: propsType) => {
                     <FormItem>
                       <FormControl>
                         <Input
+                          type='text'
                           className='sr-only'
                           {...field}
-                          value={field.value || ''}
+                          value={field.value.toString() || ''}
                           onChange={(e) => field.onChange(e.target.value)}
                         />
                       </FormControl>
@@ -254,7 +281,14 @@ export const FamilyHeaderForm = ({ onSuccess, idUser }: propsType) => {
                           render={({ field }) => (
                             <FormItem>
                               <FormControl>
-                                <CustomDatePicker onDateChange={(date) => field.onChange(date)} />
+                                <CustomDatePicker
+                                  initialDate={
+                                    field.value instanceof Date
+                                      ? field.value
+                                      : new Date(field.value)
+                                  }
+                                  onDateChange={(date) => field.onChange(date)}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>

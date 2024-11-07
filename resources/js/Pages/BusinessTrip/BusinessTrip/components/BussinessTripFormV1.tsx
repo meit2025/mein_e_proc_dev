@@ -66,6 +66,7 @@ import axios, { AxiosError } from 'axios';
 import { CREATE_API_BUSINESS_TRIP, GET_DETAIL_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
 import FormSwitch from '@/components/Input/formSwitchCustom';
 import FormAutocomplete from '@/components/Input/formDropdown';
+import { DestinationModel } from '../../Destination/models/models';
 
 interface User {
   id: string;
@@ -108,6 +109,7 @@ export const BussinessTripFormV1 = ({
   id,
   role,
   idUser,
+  listDestination = [],
 }: {
   users: User[];
   listPurposeType: PurposeTypeModel[];
@@ -118,6 +120,7 @@ export const BussinessTripFormV1 = ({
   id: string | undefined;
   role: string | undefined;
   idUser: number | undefined;
+  listDestination: DestinationModel[];
 }) => {
   const formSchema = z.object({
     purpose_type_id: z.string().min(1, 'Purpose type required'),
@@ -167,6 +170,7 @@ export const BussinessTripFormV1 = ({
   });
   const [totalDestination, setTotalDestination] = React.useState<string>('1');
 
+  console.log('list destiantion', listDestination);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -264,19 +268,34 @@ export const BussinessTripFormV1 = ({
           ...item,
           business_trip_start_date: moment(item.business_trip_start_date).format('YYYY-MM-DD'),
           business_trip_end_date: moment(item.business_trip_end_date).format('YYYY-MM-DD'),
+          detail_attedances: item.detail_attedances.map((detail) => {
+            return {
+              ...detail,
+              date: moment(detail.date).format('YYYY-MM-DD'),
+            };
+          }),
+          allowances: item.allowances.map((allowance) => {
+            return {
+              ...allowance,
+              detail: allowance.detail.map((detail) => {
+                return {
+                  ...detail,
+                  date: detail?.date != null ? moment(detail.date).format('YYYY-MM-DD') : null,
+                };
+              }),
+            };
+          }),
         };
         formData.append(`destinations[${index}]`, JSON.stringify(itemCopy));
       });
 
       console.log(formData, ' test');
 
-      //   const response = axios.post(CREATE_API_BUSINESS_TRIP, formData);
-
-      //   await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
-      //     headers: {
-      //       'Content-Type': 'multipart/form-data',
-      //     },
-      //   });
+      await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
       // console.log(response);
       showToast('succesfully created data', 'success');
@@ -637,6 +656,7 @@ export const BussinessTripFormV1 = ({
           <BussinesTripDestination
             updateDestination={updateDestination}
             destinationField={destinationField}
+            listDestination={listDestination}
             form={form}
             listAllowances={listAllowances}
             totalDestination={form.getValues('total_destination').toString()}
@@ -717,6 +737,7 @@ export function BussinesTripDestination({
   form,
   updateDestination,
   setTotalAllowance,
+  listDestination = [],
 }: {
   totalDestination: string;
   listAllowances: AllowanceItemModel[];
@@ -724,6 +745,7 @@ export function BussinesTripDestination({
   destinationField: any;
   updateDestination: any;
   setTotalAllowance: any;
+  listDestination: DestinationModel[];
 }) {
   const [startDate, setStartDate] = React.useState<Date>();
 
@@ -747,6 +769,7 @@ export function BussinesTripDestination({
           form={form}
           index={index}
           setTotalAllowance={setTotalAllowance}
+          listDestination={listDestination}
         />
       ))}
     </Tabs>
@@ -760,6 +783,7 @@ export function BussinessDestinationForm({
   updateDestination,
   listAllowances,
   setTotalAllowance,
+  listDestination,
 }: {
   form: any;
   index: number;
@@ -767,6 +791,7 @@ export function BussinessDestinationForm({
   updateDestination: any;
   listAllowances: any;
   setTotalAllowance: any;
+  listDestination: DestinationModel[];
 }) {
   const {
     fields: detailAttedanceFields,
@@ -882,8 +907,13 @@ export function BussinessDestinationForm({
                           <SelectValue placeholder='Destination' />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value='jakarta'>Jakarta</SelectItem>
-                          <SelectItem value='banyuwangi'>Banyuwangi</SelectItem>
+                          {listDestination.map((map) => (
+                            <SelectItem value={map.destination} className='uppercase'>
+                              {map.destination}
+                            </SelectItem>
+                          ))}
+
+                          {/* <SelectItem value='banyuwangi'>Banyuwangi</SelectItem> */}
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -906,7 +936,6 @@ export function BussinessDestinationForm({
                       <CustomDatePicker
                         initialDate={destination.business_trip_start_date}
                         onDateChange={(value) => {
-                          console.log(value.toString());
                           updateDestination(index, {
                             ...destination,
                             business_trip_start_date: value,
@@ -999,8 +1028,31 @@ export function ResultTotalItem({
       return totalSum + itemTotal;
     }, 0);
 
+    const alldestinations = form.getValues('destinations');
+
+    const totalAll = alldestinations.reduce(
+      (destinationSum: number, destination: any, destinationIndex: number) => {
+        const allowances = destination.allowances || [];
+
+        const allowanceTotal = allowances.reduce(
+          (allowanceSum: number, allowance: any, index: number) => {
+            const details = form.getValues(
+              `destinations.${destinationIndex}.allowances.${index}.detail`,
+            );
+
+            const itemTotal = calculateTotal(allowance, details);
+            return allowanceSum + itemTotal;
+          },
+          0,
+        );
+
+        return destinationSum + allowanceTotal;
+      },
+      0,
+    );
+
     setGrandTotal(newTotal);
-    setTotalAllowance(newTotal);
+    setTotalAllowance(totalAll);
   }, [allowanceField, form.watch()]); // Menggunakan form.watch() agar memantau perubahan input
   // Fungsi untuk menghitung total per allowance
   const calculateTotal = (allowance: any, details: any) => {

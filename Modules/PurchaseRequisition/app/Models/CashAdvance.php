@@ -15,6 +15,7 @@ class CashAdvance extends Model
      */
     protected $fillable = [
         'purchase_id',
+        'code_transaction',
         'company_code',
         'document_type',
         'currency',

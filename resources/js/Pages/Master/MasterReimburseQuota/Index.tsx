@@ -8,17 +8,19 @@ import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import { User } from './models/models';
 import ReimburseQuotaForm from './component/form'
-import { LIST_API_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
+import { LIST_API_REIMBURSE_QUOTA, DESTROY_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
 import { FormType } from '@/lib/utils';
 import { ListPeriodModel } from '../MasterReimbursePeriod/models/models';
+import { ReimburseTypeModel } from '../MasterReimburseType/models/models';
 import { STORE_REIMBURSE_QUOTA, EDIT_REIMBURSE_QUOTA, UPDATE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
 
 interface propsType {
   listPeriodReimburse: ListPeriodModel[];
-  listUsers: User[];
+  listReimburseType: ReimburseTypeModel[];
+  listUser: User[];
 }
 
-export const Index = ({ listPeriodReimburse, listUsers }: propsType) => {
+export const Index = ({ listPeriodReimburse, listReimburseType, listUser }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
   const [formType, setFormType] = React.useState({
@@ -28,6 +30,10 @@ export const Index = ({ listPeriodReimburse, listUsers }: propsType) => {
 
   function openFormHandler() {
     setOpenForm(!openForm);
+    setFormType({
+      type: FormType.create,
+      id: undefined,
+    });
   }
   return (
     <>
@@ -42,12 +48,16 @@ export const Index = ({ listPeriodReimburse, listUsers }: propsType) => {
           onOpenChange={openFormHandler}
         >
           <ReimburseQuotaForm
+            onSuccess={(value) => {
+              setOpenForm(false);
+            }}
             type={formType.type}
-            listUsers={listUsers}
+            listUser={listUser}
             storeURL={STORE_REIMBURSE_QUOTA}
             editURL={EDIT_REIMBURSE_QUOTA(formType.id ?? '')}
             updateURL={UPDATE_REIMBURSE_QUOTA(formType.id ?? '')}
             listPeriodReimburse={listPeriodReimburse}
+            listReimburseType={listReimburseType}
           />
         </CustomDialog>
       </div>
@@ -63,6 +73,7 @@ export const Index = ({ listPeriodReimburse, listUsers }: propsType) => {
         }}
         url={{
           url: LIST_API_REIMBURSE_QUOTA,
+          deleteUrl: DESTROY_REIMBURSE_QUOTA,
         }}
         labelFilter='search'
       />

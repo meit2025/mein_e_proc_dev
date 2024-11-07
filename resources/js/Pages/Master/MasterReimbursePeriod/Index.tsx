@@ -20,6 +20,10 @@ export const Index = () => {
   });
 
   function openFormHandler() {
+    setFormType({
+      type: FormType.create,
+      id: null,
+    })
     setOpenForm(!openForm);
   }
   return (

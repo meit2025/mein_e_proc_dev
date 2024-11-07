@@ -23,12 +23,14 @@ import { AllowanceCategoryModel } from '../AllowanceCategory/model/AllowanceMode
 import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
 import { PurposeTypeModel } from '../PurposeType/models/models';
 import { DETAIL_PAGE_BUSINESS_TRIP } from '@/endpoint/business-trip/page';
+import { DestinationModel } from '../Destination/models/models';
 interface propsType {
   listPurposeType: PurposeTypeModel[];
   users: UserModel[];
   pajak: Pajak[];
   costcenter: Costcenter[];
   purchasingGroup: PurchasingGroup[];
+  listDestination: DestinationModel[];
 }
 
 interface UserAuth {
@@ -50,6 +52,7 @@ export const Index = ({
   pajak,
   costcenter,
   purchasingGroup,
+  listDestination,
 }: propsType) => {
   console.log(costcenter);
   const [openForm, setOpenForm] = React.useState<boolean>(false);
@@ -82,6 +85,7 @@ export const Index = ({
           onOpenChange={openFormHandler}
         >
           <BussinessTripFormV1
+            listDestination={listDestination}
             users={users}
             idUser={userId}
             role={userRole}

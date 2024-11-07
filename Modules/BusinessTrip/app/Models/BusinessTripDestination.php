@@ -4,6 +4,8 @@ namespace Modules\BusinessTrip\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
+
 // use Modules\BusinessTrip\Database\Factories\BusinessTripDestinationFactory;
 
 class BusinessTripDestination extends Model
@@ -25,9 +27,16 @@ class BusinessTripDestination extends Model
         return $this->hasMany(BusinessTripDetailAttedance::class, 'business_trip_destination_id', 'id');
     }
 
-    function detailDestinationDay()
+    function getDetailDestinationDay()
     {
         return $this->hasMany(BusinessTripDetailDestinationDayTotal::class, 'business_trip_destination_id', 'id');
+    }
+
+    function detailDestinationDay()
+    {
+        return $this->hasMany(BusinessTripDetailDestinationDayTotal::class, 'business_trip_destination_id', 'id')
+            ->select('business_trip_destination_id', 'allowance_item_id', DB::raw('SUM(price) as price'), DB::raw('count(*) as total'))
+            ->groupBy('business_trip_destination_id', 'allowance_item_id');
     }
 
     function detailDestinationTotal()
@@ -37,7 +46,7 @@ class BusinessTripDestination extends Model
 
     function groupDestination()
     {
-        dd($this->detailDestinationDay->groupBy('allowance_item_id'));
+        return $this->detailDestinationDay->groupBy('allowance_item_id');
     }
 
     public function combinedDetailDestinations()

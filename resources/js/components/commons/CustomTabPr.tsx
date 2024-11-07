@@ -56,7 +56,7 @@ const CustomTabPr = ({ detailLayout, id, type }: CustomTabProps) => {
     },
     {
       title: 'Pr',
-      content: <Pr />,
+      content: <Pr id={id} type={type} />,
     },
     {
       title: 'Log',
@@ -85,7 +85,7 @@ const CustomTabPr = ({ detailLayout, id, type }: CustomTabProps) => {
         },
         {
           title: 'Pr',
-          content: <Pr />,
+          content: <Pr id={id} type={type} />,
         },
         {
           title: 'Log',

@@ -66,14 +66,13 @@ class FamilyController extends Controller
      */
     public function store(Request $request)
     {
-        return $request->all();
         $rules = [
+            'id' => 'nullable|exists:families,id',
             'name' => 'required',
             'status' => 'required|in:wife,child',
             'bod' => 'required|date',
-            'user' => 'required|exists:users,nip',
+            'user' => 'required|exists:users,id',
         ];
-
         try {
             foreach ($request->families as $family) {
                 DB::beginTransaction();
@@ -83,11 +82,14 @@ class FamilyController extends Controller
                     return $this->errorResponse($validator->errors());
                 }
                 $validatedData = $validator->validated();
-                Family::create($validatedData);
+                Family::updateOrCreate(
+                    ['id' => $family['id'] ?? null],
+                    $validatedData
+                );
+                DB::commit();
             }
-            DB::commit();
-            return $this->successResponse("Create Family Member Successfully");
-        } catch (\Exception  $e) {
+            return $this->successResponse("Create/Update Family Member Successfully");
+        } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse($e->getMessage());
         }
