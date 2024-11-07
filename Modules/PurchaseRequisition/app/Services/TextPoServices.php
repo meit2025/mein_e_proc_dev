@@ -30,7 +30,6 @@ class TextPoServices
             DB::commit();
             return $array;
         } catch (Exception $e) {
-            dd($e);
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
@@ -39,7 +38,7 @@ class TextPoServices
     private function preparePurchaseRequisitionData($pr)
     {
         return [
-            'code_transaction' => $pr->code_transaction,
+            'code_transaction' => 'BTRDE',
             'purchasing_document_date' => $pr->purchasing_document_date, // bedat
             'purchasing_document_type' => $pr->purchasing_document_type, // bsart
             'company_code' => $pr->company_code, //bukrs
