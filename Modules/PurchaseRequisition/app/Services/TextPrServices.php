@@ -98,7 +98,7 @@ class TextPrServices
 
         return [
             'code_transaction' => $ca->code_transaction,
-            'belnr' => $ca->id, // belnr
+            'belnr' => $ca->belnr, // belnr
             'company_code' => $ca->company_code, // bukrs
             'gjahr' =>  $ca->gjahr, // gjahr
             'currency' => 'IDR', // waers
