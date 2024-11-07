@@ -92,7 +92,9 @@ class PurchaseRequisitionController extends Controller
     public function downloadPo($id, $type)
     {
         try {
-            $pr = $this->txtpo->processTextData($id, $type);
+            $prdata = PurchaseRequisition::where('purchase_id', $id)->where('code_transaction', $type)->first();
+
+            $pr = $this->txtpo->processTextData($prdata->purchase_requisition_number, $type);
 
             return $this->successResponse('success send to sap');
         } catch (\Exception $e) {
