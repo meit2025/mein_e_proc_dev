@@ -32,7 +32,7 @@ class BtPOService
                 'TermsofPaymentKey'
             ])->pluck('value', 'key');
 
-            $dokumenType = $settings['dokumenType_reimburse'];
+            $dokumenType = $settings['dokumenType_po'];
             $reqno = (int) SettingApproval::where('key', 'dokumenType_' . $dokumenType)->lockForUpdate()->value('value') + 1;
             $increment = 1;
 
