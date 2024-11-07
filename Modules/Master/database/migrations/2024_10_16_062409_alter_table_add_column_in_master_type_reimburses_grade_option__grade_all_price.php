@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         //
-        // Schema::table('master_type_reimburses', function(Blueprint $table) {
-        //     $table->string('grade_option')->nullable()->after('material_number');
-        //     $table->float('grade_all_price')->default(0)->after('grade_option');
-        //     $table->dropColumn('grade');
-        //     $table->dropColumn('plafon');
-        // });
+        Schema::table('master_type_reimburses', function (Blueprint $table) {
+            $table->string('grade_option')->nullable()->after('material_number');
+            $table->float('grade_all_price')->default(0)->after('grade_option');
+            $table->dropColumn('grade');
+            $table->dropColumn('plafon');
+        });
     }
 
     /**

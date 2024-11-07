@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Schema::create('master_quota_reimburses', function (Blueprint $table) {
-        //     $table->id();
-        //     $table->foreignId('period')->constrained('master_period_reimburses')->cascadeOnUpdate();
-        //     $table->foreignId('type')->constrained('master_type_reimburses')->cascadeOnUpdate();
-        //     $table->softDeletes();
-        //     $table->timestamps();
-        // });
+        Schema::create('master_quota_reimburses', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('period')->constrained('master_period_reimburses')->cascadeOnUpdate();
+            $table->foreignId('type')->constrained('master_type_reimburses')->cascadeOnUpdate();
+            $table->softDeletes();
+            $table->timestamps();
+        });
     }
 
     /**

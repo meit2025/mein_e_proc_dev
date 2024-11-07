@@ -81,48 +81,7 @@ class PurchaseRequisitionController extends Controller
         try {
             $pr = $this->txtpr->processTextData($id, $type);
 
-            $prDownload = null;
-            $caDownload = null;
-
-            // Check if the PR file exists and download it
-            if (Storage::disk(env('STORAGE_UPLOAD', 'local'))->exists($pr['filename'])) {
-                $prDownload = Storage::disk(env('STORAGE_UPLOAD', 'local'))->path($pr['filename']);
-            } else {
-                return response()->json(['error' => 'Purchase Requisition file not found'], 404);
-            }
-
-            // Check if the Cash Advance file exists and download it
-            if (!empty($pr['filenameAc'])) {
-                if (Storage::disk(env('STORAGE_UPLOAD', 'local'))->exists($pr['filenameAc'])) {
-                    $caDownload = Storage::disk(env('STORAGE_UPLOAD', 'local'))->path($pr['filenameAc']);
-                } else {
-                    return response()->json(['error' => 'Cash Advance file not found'], 404);
-                }
-            }
-
-            // Return both files for download (you can zip them or download them separately)
-            if ($prDownload != '' && $caDownload != '') {
-                return response()->download($prDownload)->withHeaders([
-                    'Content-Type' => 'text/plain',
-                    'Content-Disposition' => 'attachment; filename="' . basename($pr['filename']) . '"'
-                ]);
-            }
-
-            // If there's only the PR file
-            if ($prDownload) {
-                return response()->download($prDownload)->withHeaders([
-                    'Content-Type' => 'text/plain',
-                    'Content-Disposition' => 'attachment; filename="' . basename($pr['filename']) . '"'
-                ]);
-            }
-
-            // If there's only the Cash Advance file
-            if ($caDownload) {
-                return response()->download($caDownload)->withHeaders([
-                    'Content-Type' => 'text/plain',
-                    'Content-Disposition' => 'attachment; filename="' . basename($pr['filenameAc']) . '"'
-                ]);
-            }
+            return $this->successResponse('success send to sap');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }

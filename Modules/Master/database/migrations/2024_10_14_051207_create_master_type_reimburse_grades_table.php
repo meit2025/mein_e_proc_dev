@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Schema::create('master_type_reimburse_grades', function (Blueprint $table) {
-        //     $table->id();
-        //     $table->foreignId('grade_id')->constrained('business_trip_grades')->cascadeOnUpdate();
-        //     $table->foreignId('reimburse_type_id')->constrained('master_type_reimburses')->cascadeOnUpdate();
-        //     $table->float('plafon')->default(0);
-        //     $table->timestamps();
-        // });
+        Schema::create('master_type_reimburse_grades', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('grade_id')->constrained('business_trip_grades')->cascadeOnUpdate();
+            $table->foreignId('reimburse_type_id')->constrained('master_type_reimburses')->cascadeOnUpdate();
+            $table->float('plafon')->default(0);
+            $table->timestamps();
+        });
     }
 
     /**
