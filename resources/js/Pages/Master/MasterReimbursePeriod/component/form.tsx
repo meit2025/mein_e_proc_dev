@@ -50,7 +50,7 @@ export interface props {
 
 export default function ReimbursePeriodForm({
   onSuccess,
-  type,
+  type = FormType.create,
   storeURL,
   editURL,
   updateURL,
@@ -63,7 +63,7 @@ export default function ReimbursePeriodForm({
 
   const defaultValues = {
     code: '',
-    start: new Date(),
+    start: null,
     end: null,
   };
 
@@ -151,11 +151,6 @@ export default function ReimbursePeriodForm({
                           initialDate={field.value}
                           onDateChange={(date) => field.onChange(date)}
                         />
-                        {/* <Input
-                          type='date'
-                          {...field}
-                          value={field.value || ''}
-                          onChange={(e) => field.onChange(e.target.value)} /> */}
                       </FormControl>
                       <FormMessage />
                     </FormItem>

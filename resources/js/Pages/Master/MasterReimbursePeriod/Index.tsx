@@ -43,6 +43,7 @@ export const Index = () => {
             storeURL={STORE_REIMBURSE_PERIOD}
             editURL={EDIT_REIMBURSE_PERIOD(formType.id ?? '')}
             updateURL={UPDATE_REIMBURSE_PERIOD(formType.id ?? '')}
+            onSuccess={(x: boolean) => setOpenForm(!x)}
           />
         </CustomDialog>
       </div>
