@@ -290,9 +290,8 @@ export const ReimburseForm: React.FC<Props> = ({
     } catch (e) {
       const error = e as AxiosError;
 
-
       console.log(error);
-
+    }
   };
 
   const { fields: formFields } = useFieldArray({
