@@ -206,7 +206,7 @@ class MasterTypeReimburseController extends Controller
 
             DB::commit();
 
-            return $this->successResponse([], 'Delete Reimburse Quota Successfully');
+            return $this->successResponse([], 'Delete Reimburse Type Successfully');
         } catch (\Exception  $e) {
             DB::rollBack();
             return $this->errorResponse($e);
