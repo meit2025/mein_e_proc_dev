@@ -55,7 +55,7 @@ class SettingApprovalController extends Controller
      */
     public function show($id)
     {
-        $data = SettingApproval::with('userApprovals')->find($id);
+        $data = SettingApproval::find($id);
         return $this->successResponse($data);
     }
 

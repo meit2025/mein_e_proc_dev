@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 import DataGridComponent from '@/components/commons/DataGrid';
 import { DELET_PR, GET_PR } from '@/endpoint/purchaseRequisition/api';
 import { columns } from './model/listModel';
-import { CREATE_PAGE_PR, EDIT_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
+import { CREATE_PAGE_PR, DETAIL_PAGE_PR, EDIT_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
 
 export const Index = () => {
   return (
@@ -15,6 +15,7 @@ export const Index = () => {
           addUrl: CREATE_PAGE_PR,
           editUrl: EDIT_PAGE_PR,
           deleteUrl: DELET_PR,
+          detailUrl: DETAIL_PAGE_PR,
         }}
         labelFilter='search'
       />

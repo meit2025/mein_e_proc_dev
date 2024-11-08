@@ -35,6 +35,7 @@ import { PAGE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/page';
 import { LIST_PAGE_FAMILY } from '@/endpoint/family/page';
 import { PAGE_REIMBURSE } from '@/endpoint/reimburse/page';
 import { LIST_PAGE_MASTER_PERMISSION } from '@/endpoint/permission/page';
+import { LIST_PAGE_DESTINATION } from '@/endpoint/destination/page';
 
 export const RuteTitle = (title: string) => {
   return (
@@ -211,11 +212,6 @@ const sidebar = [
             roles: '',
           },
           {
-            name: 'Family',
-            route: LIST_PAGE_FAMILY,
-            roles: '',
-          },
-          {
             name: 'Role Permission',
             route: LIST_PAGE_MASTER_PERMISSION,
             roles: '',
@@ -352,6 +348,12 @@ const sidebar = [
           {
             name: 'Business Trip Grade',
             route: LIST_PAGE_BUSINESS_GRADE,
+            roles: '',
+          },
+
+          {
+            name: 'Master Destination',
+            route: LIST_PAGE_DESTINATION,
             roles: '',
           },
         ],

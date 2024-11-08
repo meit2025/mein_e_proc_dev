@@ -12,13 +12,9 @@ use Modules\Master\Models\Family;
 
 class FamilyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    public function list(Request $request)
     {
         try {
-            $user = User::with('families')->get();
             $query =  Family::query()->with(['user']);
             $perPage = $request->get('per_page', 10);
             $sortBy = $request->get('sort_by', 'id');
@@ -35,9 +31,22 @@ class FamilyController extends Controller
                     'user' => "( " . $map->user->nip . " )" . " - " . $map->user->name,
                 ];
             });
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        try {
+            $user = User::with('families')->get();
             return Inertia::render(
                 'Master/Family/Index',
-                compact('data', 'user')
+                compact('user')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -58,12 +67,12 @@ class FamilyController extends Controller
     public function store(Request $request)
     {
         $rules = [
+            'id' => 'nullable|exists:families,id',
             'name' => 'required',
             'status' => 'required|in:wife,child',
             'bod' => 'required|date',
-            'user' => 'required|exists:users,nip',
+            'user' => 'required|exists:users,id',
         ];
-
         try {
             foreach ($request->families as $family) {
                 DB::beginTransaction();
@@ -73,11 +82,14 @@ class FamilyController extends Controller
                     return $this->errorResponse($validator->errors());
                 }
                 $validatedData = $validator->validated();
-                Family::create($validatedData);
+                Family::updateOrCreate(
+                    ['id' => $family['id'] ?? null],
+                    $validatedData
+                );
+                DB::commit();
             }
-            DB::commit();
-            return $this->successResponse("Create Family Member Successfully");
-        } catch (\Exception  $e) {
+            return $this->successResponse("Create/Update Family Member Successfully");
+        } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse($e->getMessage());
         }
@@ -96,7 +108,12 @@ class FamilyController extends Controller
      */
     public function edit($id)
     {
-        return view('master::edit');
+        try {
+            $data = Family::where('user', $id)->get();
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**

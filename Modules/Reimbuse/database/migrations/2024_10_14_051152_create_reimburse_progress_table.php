@@ -11,18 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reimburse_progress', function (Blueprint $table) {
-            $table->id();
-            $table->string('group');
-            $table->string('approver');
-            $table->longText('notes');
-            $table->enum('status', ['Approved', 'Rejected', 'Open'])->default('Open');
-            $table->softDeletes();
-            $table->timestamps();
 
-            $table->foreign('group')->references('code')->on('reimburse_groups')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreign('approver')->references('nip')->on('users')->cascadeOnUpdate()->cascadeOnDelete();
-        });
+        if (!Schema::hasTable('reimburse_progress')) {
+            Schema::create('reimburse_progress', function (Blueprint $table) {
+                $table->id();
+                $table->string('group');
+                $table->string('approver');
+                $table->longText('notes');
+                $table->enum('status', ['Approved', 'Rejected', 'Open'])->default('Open');
+                $table->softDeletes();
+                $table->timestamps();
+
+                $table->foreign('group')->references('code')->on('reimburse_groups')->cascadeOnUpdate()->cascadeOnDelete();
+                $table->foreign('approver')->references('nip')->on('users')->cascadeOnUpdate()->cascadeOnDelete();
+            });
+        }
     }
 
     /**

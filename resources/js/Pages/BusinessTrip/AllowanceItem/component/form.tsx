@@ -525,7 +525,7 @@ export default function AllowanceItemForm({
                             return {
                               id: item.id,
                               grade: item.grade,
-                              plafon: 0,
+                              plafon: '',
                             };
                           }),
                         );

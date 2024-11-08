@@ -11,12 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reimburse_attachments', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('reimburse')->constrained('reimburses')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->longText('url');
-            $table->timestamps();
-        });
+
+        if (!Schema::hasTable('reimburse_attachments')) {
+            Schema::create('reimburse_attachments', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('reimburse')->constrained('reimburses')->cascadeOnDelete()->cascadeOnUpdate();
+                $table->longText('url');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

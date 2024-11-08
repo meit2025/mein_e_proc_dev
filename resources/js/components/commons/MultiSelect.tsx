@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { ScrollArea } from '../shacdn/scroll-area';
+import { Checkbox } from '../shacdn/checkbox';
 
 export interface multiSelectItemInterface {
   isSelect: boolean;
@@ -30,6 +31,8 @@ export function MultiSelect({ options, label, id, onSelect, value = [] }: multiS
 
   const [rightValues, setRightValues] = React.useState<any[]>([]);
   const [leftValues, setLeftValues] = React.useState<any[]>([]);
+
+  const [all, setAll] = React.useState<boolean>(false);
 
   // console.log(leftItems)
 
@@ -78,6 +81,21 @@ export function MultiSelect({ options, label, id, onSelect, value = [] }: multiS
     setItemSelect([]);
   }
 
+  function setAllHandler(value: boolean) {
+    setAll(value);
+
+    if (value) {
+      setRightValues(options);
+      onSelect(options);
+      setLeftValues([]);
+    } else {
+      setRightValues([]);
+      onSelect([]);
+
+      setLeftValues(options);
+    }
+  }
+
   function setToLeftValue() {
     setLeftValues([...leftValues, ...rightSelect]);
 
@@ -100,7 +118,22 @@ export function MultiSelect({ options, label, id, onSelect, value = [] }: multiS
   React.useEffect(() => {
     setLeftValues(options.filter((filter) => !value.includes(filter[id])));
     setRightValues(options.filter((filter) => value.includes(filter[id])));
+
+    if (options.length === value.length) {
+      setAll(true);
+    }
   }, [value]);
+
+  React.useEffect(() => {
+    if (rightValues.length === options.length) {
+      console.log('right values', rightValues);
+
+      setAll(true);
+    } else {
+      setAll(false);
+    }
+    console.log(rightValues.length === options.length);
+  }, [rightValues]);
 
   return (
     <div className='flex items-center space-x-4'>
@@ -120,8 +153,20 @@ export function MultiSelect({ options, label, id, onSelect, value = [] }: multiS
           ))}
         </ScrollArea>
       </div>
-      <div className='multi-select-button w-8'>
+      <div className='multi-select-button w-12'>
         <ul className='flex flex-col space-y-4 items-center'>
+          <li onClick={() => setToRightValue()} className='flex flex-col justify-center space-y-1'>
+            <span>All</span>
+            <div>
+              <Checkbox
+                checked={all}
+                onCheckedChange={(value) => {
+                  setAllHandler(value);
+                }}
+              />
+            </div>
+          </li>
+
           <li onClick={() => setToRightValue()}>{'>>'}</li>
           <li onClick={() => setToLeftValue()}>{'<<'}</li>
         </ul>
