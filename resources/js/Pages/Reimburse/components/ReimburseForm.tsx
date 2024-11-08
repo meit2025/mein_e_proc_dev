@@ -266,8 +266,11 @@ export const ReimburseForm: React.FC<Props> = ({
       // onSuccess?.(true);
     } catch (e) {
       const error = e as AxiosError;
+<<<<<<< HEAD
 
       console.log(error);
+=======
+>>>>>>> 8832083 (fixing not closed when success)
     }
   };
 
