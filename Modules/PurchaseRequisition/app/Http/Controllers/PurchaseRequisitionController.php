@@ -14,6 +14,7 @@ use Modules\PurchaseRequisition\Models\CashAdvance;
 use Modules\PurchaseRequisition\Models\CashAdvancePurchases;
 use Modules\PurchaseRequisition\Models\Entertainment;
 use Modules\PurchaseRequisition\Models\Purchase;
+use Modules\PurchaseRequisition\Models\PurchaseOrder;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
 use Modules\PurchaseRequisition\Models\Unit;
 use Modules\PurchaseRequisition\Models\Vendor;
@@ -21,6 +22,7 @@ use Modules\PurchaseRequisition\Services\BtPOService;
 use Modules\PurchaseRequisition\Services\BtService;
 use Modules\PurchaseRequisition\Services\ProcurementService;
 use Modules\PurchaseRequisition\Services\ReimburseServices;
+use Modules\PurchaseRequisition\Services\TextPoServices;
 use Modules\PurchaseRequisition\Services\TextPrServices;
 
 class PurchaseRequisitionController extends Controller
@@ -33,14 +35,16 @@ class PurchaseRequisitionController extends Controller
     protected $btPO;
     protected $reimburseServices;
     protected $txtpr;
+    protected $txtpo;
 
-    public function __construct(ProcurementService $procurementService, BtService $bt, BtPOService $btPO, ReimburseServices $reimburseServices, TextPrServices $txtpr)
+    public function __construct(ProcurementService $procurementService, BtService $bt, BtPOService $btPO, ReimburseServices $reimburseServices, TextPrServices $txtpr, TextPoServices $txtpo)
     {
         $this->procurementService = $procurementService;
         $this->bt = $bt;
         $this->btPO = $btPO;
         $this->reimburseServices = $reimburseServices;
         $this->txtpr = $txtpr;
+        $this->txtpo = $txtpo;
     }
 
     public function generateText($id, $type)
@@ -80,48 +84,19 @@ class PurchaseRequisitionController extends Controller
         try {
             $pr = $this->txtpr->processTextData($id, $type);
 
-            $prDownload = null;
-            $caDownload = null;
+            return $this->successResponse('success send to sap');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+    public function downloadPo($id, $type)
+    {
+        try {
+            $prdata = PurchaseRequisition::where('purchase_id', $id)->where('code_transaction', $type)->first();
 
-            // Check if the PR file exists and download it
-            if (Storage::disk(env('STORAGE_UPLOAD', 'local'))->exists($pr['filename'])) {
-                $prDownload = Storage::disk(env('STORAGE_UPLOAD', 'local'))->path($pr['filename']);
-            } else {
-                return response()->json(['error' => 'Purchase Requisition file not found'], 404);
-            }
+            $pr = $this->txtpo->processTextData($prdata->purchase_requisition_number, $type);
 
-            // Check if the Cash Advance file exists and download it
-            if (!empty($pr['filenameAc'])) {
-                if (Storage::disk(env('STORAGE_UPLOAD', 'local'))->exists($pr['filenameAc'])) {
-                    $caDownload = Storage::disk(env('STORAGE_UPLOAD', 'local'))->path($pr['filenameAc']);
-                } else {
-                    return response()->json(['error' => 'Cash Advance file not found'], 404);
-                }
-            }
-
-            // Return both files for download (you can zip them or download them separately)
-            if ($prDownload != '' && $caDownload != '') {
-                return response()->download($prDownload)->withHeaders([
-                    'Content-Type' => 'text/plain',
-                    'Content-Disposition' => 'attachment; filename="' . basename($pr['filename']) . '"'
-                ]);
-            }
-
-            // If there's only the PR file
-            if ($prDownload) {
-                return response()->download($prDownload)->withHeaders([
-                    'Content-Type' => 'text/plain',
-                    'Content-Disposition' => 'attachment; filename="' . basename($pr['filename']) . '"'
-                ]);
-            }
-
-            // If there's only the Cash Advance file
-            if ($caDownload) {
-                return response()->download($caDownload)->withHeaders([
-                    'Content-Type' => 'text/plain',
-                    'Content-Disposition' => 'attachment; filename="' . basename($pr['filenameAc']) . '"'
-                ]);
-            }
+            return $this->successResponse('success send to sap');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }
@@ -178,7 +153,98 @@ class PurchaseRequisitionController extends Controller
             'balance',
             'attachment_link'
         ];
+
         $pr = PurchaseRequisition::where('purchase_id', $request->data_id)->where('code_transaction', $request->type_code_transaction);
+        $data = $this->filterAndPaginate($request, $pr, $filterableColumns);
+        return $this->successResponse($data);
+    }
+
+    public function indexDp(Request $request)
+    {
+        $filterableColumns = [
+            'purchase_id',
+            'code_transaction',
+            'company_code',
+            'document_type',
+            'currency',
+            'document_date',
+            'reference',
+            'document_header_text',
+            'item',
+            'posting_key',
+            'gl_indicator',
+            'target_spesial',
+            'vendor_code',
+            'amount',
+            'amount_local_currency',
+            'tax_amount',
+            'tax_code',
+            'due_on',
+            'payment_method',
+            'purchasing_document',
+            'purchasing_document_item',
+            'assigment',
+            'text',
+            'profit_center',
+            'gjahr',
+            'budat',
+            'monat',
+        ];
+        $pr = CashAdvance::where('purchase_id', $request->data_id)->where('code_transaction', $request->type_code_transaction);
+        $data = $this->filterAndPaginate($request, $pr, $filterableColumns);
+        return $this->successResponse($data);
+    }
+
+    public function indexPo(Request $request)
+    {
+        $filterableColumns = [
+            'main_asset_number',
+            'asset_subnumber',
+            'order_number',
+            'purchasing_document_number',
+            'item_number_of_purchasing_document',
+            'cost_center',
+            'purchasing_document_date',
+            'purchasing_document_type',
+            'company_code',
+            'purchasing_group',
+            'purchasing_organization',
+            'incoterms_part1',
+            'incoterms_part2',
+            'vendor_account_number',
+            'currency_key',
+            'terms_of_payment_key',
+            'requisitioner_name',
+            'purchase_requisition_number',
+            'requirement_tracking_number',
+            'item_number_of_purchase_requisition',
+            'delivery_completed_indicator',
+            'final_invoice_indicator',
+            'account_assignment_category',
+            'storage_location',
+            'deletion_indicator',
+            'material_group',
+            'material_number',
+            'po_unit_of_measure',
+            'po_quantity',
+            'tax_code',
+            'net_price',
+            'item_category',
+            'invoice_receipt_indicator',
+            'short_text',
+            'gr_based_invoice_verification',
+            'goods_receipt_indicator',
+            'plant',
+            'status',
+            'code',
+            'message',
+            'attachment_link'
+        ];
+
+        // get pr
+        $prdata = PurchaseRequisition::where('purchase_id', $request->data_id)->where('code_transaction', $request->type_code_transaction)->first();
+
+        $pr = PurchaseOrder::where('purchase_requisition_number', $prdata->purchase_requisition_number);
         $data = $this->filterAndPaginate($request, $pr, $filterableColumns);
         return $this->successResponse($data);
     }

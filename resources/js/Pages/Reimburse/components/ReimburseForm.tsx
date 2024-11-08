@@ -231,12 +231,7 @@ export const ReimburseForm: React.FC<Props> = ({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      let response;
-      if (type === FormType.edit) {
-        response = await axiosInstance.put(edit_url ?? '', values);
-      } else {
-        response = await axiosInstance.post(store_url ?? '', values);
-      }
+      await axiosInstance.post(store_url ?? '', values);
       showToast('succesfully created data', 'success');
       onSuccess?.(true);
     } catch (e) {

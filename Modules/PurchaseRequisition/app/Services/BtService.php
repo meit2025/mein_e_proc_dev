@@ -129,7 +129,7 @@ class BtService
             'waers' => 'IDR', // MATA UANG
             'tax_code' => $pajak->mwszkz ?? 'V0', // mwskz
             'item_category' => '', // pstyp
-            'short_text' => $BusinessTrip->remark, // txz01
+            'short_text' => $BusinessTrip->remarks, // txz01
             'plant' => $settings['plant'], // werks
             'cost_center' => $costCenter->cost_center, // kostl
             'order_number' => '', // AUFNR

@@ -1,1 +1,0 @@
-const a=[{field:"request_no",headerName:"Request No.",width:200,filterable:!0},{field:"purpose_type",headerName:"Purpose Type",width:200,filterable:!0},{field:"total_destination",headerName:"Total Destinations",width:200,filterable:!0}];var t=(e=>(e[e.create=0]="create",e[e.edit=1]="edit",e[e.update=2]="update",e))(t||{});export{t as BusinessTripType,a as columns};

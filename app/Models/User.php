@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Modules\BusinessTrip\Models\BusinessTripGrade;
 use Modules\BusinessTrip\Models\BusinessTripGradeUser;
 use Modules\Master\Models\Family;
 use Modules\Master\Models\MasterBusinessPartner;
@@ -64,7 +63,7 @@ class User extends Authenticatable
 
     public function families()
     {
-        return $this->hasMany(Family::class, 'user', 'nip');
+        return $this->hasMany(Family::class, 'user', 'id');
     }
 
     public function employee()

@@ -22,7 +22,7 @@ class BtPOService
             $array = [];
             // Collect SettingApproval values
             $settings = SettingApproval::whereIn('key', [
-                'dokumenType_reimburse',
+                'dokumenType_po',
                 'PurchasingOrganization',
                 'AccountAssignmentCategory',
                 'StorageLocation',
@@ -32,7 +32,7 @@ class BtPOService
                 'TermsofPaymentKey'
             ])->pluck('value', 'key');
 
-            $dokumenType = $settings['dokumenType_reimburse'];
+            $dokumenType = $settings['dokumenType_po'];
             $reqno = (int) SettingApproval::where('key', 'dokumenType_' . $dokumenType)->lockForUpdate()->value('value') + 1;
             $increment = 1;
 
@@ -52,6 +52,7 @@ class BtPOService
                 );
                 PurchaseOrder::create($data);
                 $array[] = $data;
+                $increment++;
             }
 
             SettingApproval::where('key', 'dokumenType_' . $dokumenType)->update(['value' => $reqno]);
@@ -108,7 +109,7 @@ class BtPOService
             'net_price' => $BusinessTrip->balance, // netpr
             'item_category' => '', // pstyp
             'invoice_receipt_indicator' => '', // repos
-            'short_text' => $BusinessTrip->remark, // txz01
+            'short_text' => $BusinessTrip->remarks, // txz01
             'gr_based_invoice_verification' => '', // webre
             'goods_receipt_indicator' => '', // wepos
             'plant' => 'ID01', // werks

@@ -121,7 +121,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['prefix' => 'reimburse-type'], function () {
             Route::get('/', [MasterTypeReimburseController::class, 'list'])->name('master.reimburse-type.list');
             Route::post('/create', [MasterTypeReimburseController::class, 'store'])->name('master.reimburse-type.store');
-            Route::post('/update/{id}', [MasterTypeReimburseController::class, 'update'])->name('master.reimburse-type.update');
+            Route::put('/update/{id}', [MasterTypeReimburseController::class, 'update'])->name('master.reimburse-type.update');
             Route::get('/edit/{id}', [MasterTypeReimburseController::class, 'edit'])->name('master.reimburse-type.edit');
             Route::delete('/delete/{id}', [MasterTypeReimburseController::class, 'destroy'])->name('master.reimburse-type.destroy');
         });
@@ -143,9 +143,10 @@ Route::group(['middleware' => 'auth'], function () {
         });
 
         Route::group(['prefix' => 'family'], function () {
+            Route::get('/', [FamilyController::class, 'list'])->name('master.family.list');
             Route::post('/create', [FamilyController::class, 'store'])->name('master.family.store');
             Route::post('/update/{id}', [FamilyController::class, 'update'])->name('master.family.update');
-            Route::get('/detail/{id}', [FamilyController::class, 'show'])->name('master.family.show');
+            Route::get('/edit/{id}', [FamilyController::class, 'edit'])->name('master.family.edit');
             Route::delete('/delete/{id}', [FamilyController::class, 'destroy'])->name('master.family.destroy');
         });
 
