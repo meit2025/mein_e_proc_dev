@@ -241,7 +241,6 @@ export const ReimburseForm: React.FC<Props> = ({
       onSuccess?.(true);
     } catch (e) {
       const error = e as AxiosError;
-      onSuccess?.(false);
     }
   };
 
