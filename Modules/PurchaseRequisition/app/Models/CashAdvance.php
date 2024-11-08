@@ -41,6 +41,7 @@ class CashAdvance extends Model
         'gjahr',
         'budat',
         'monat',
+
         'extdoc',
         'bukrs',
         'status',
