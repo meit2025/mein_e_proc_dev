@@ -31,8 +31,10 @@ import axiosInstance from '@/axiosInstance';
 import { useAlert } from '@/contexts/AlertContext';
 import { AxiosError } from 'axios';
 import { FormType } from '@/lib/utils';
-import { Grade } from '../models/models';
+import { Grade, MaterialGroupModel } from '../models/models';
+import { MaterialModel } from '../../MasterMaterial/model/listModel';
 import { MultiSelect } from '@/components/commons/MultiSelect';
+import FormAutocomplete from '@/components/Input/formDropdown';
 import { RadioGroup, RadioGroupItem } from '@/components/shacdn/radio-group';
 import { CREATE_API_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
 import useDropdownOptions from '@/lib/getDropdown';
@@ -42,6 +44,8 @@ export interface props {
   onSuccess?: (value: boolean) => void;
   type?: FormType;
   listGrades?: Grade[];
+  listMaterialNumber?: MaterialModel[];
+  listMaterialGroup?: MaterialGroupModel[];
   editURL?: string,
   updateURL?: string,
   id?: string;
@@ -51,17 +55,19 @@ export default function ReimburseTypeForm({
   onSuccess,
   type = FormType.create,
   listGrades,
+  listMaterialNumber,
+  listMaterialGroup,
   editURL,
   updateURL,
   id,
 }: props) {
   const formSchema = z.object({
-    code: z.string().min(1, 'Code is required'),
+    code: z.string(),
     name: z.string().min(1, 'Name is required'),
     is_employee: z.boolean(),
-    limit: z.number().min(1, 'Limit Number Must input >= 1'),
-    material_group: z.string().min(1, 'Material group required'),
-    material_number: z.string().min(1, 'Material number required'),
+    limit: z.number(),
+    material_group: z.string('Material Group must choose'),
+    material_number: z.string('Material Number must choose'),
     grade_option: z.string().min(1, 'Grade must be selected'),
     grade_all_price: z.string().optional(),
     grades: z.array(
@@ -73,20 +79,19 @@ export default function ReimburseTypeForm({
     ),
   });
 
-  const { dataDropdown: materialGroup, getDropdown: getMaterialGroup } = useDropdownOptions();
-  const { dataDropdown: materialNumber, getDropdown: getMaterialNumber } = useDropdownOptions();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-
+  
   const defaultValues = {
     code: '',
     name: '',
+    material_group: '',
+    material_number: '',
     is_employee: true,
     grade_option: 'all',
     grade_all_price: '0',
     grades: [],
   };
-
-
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues,
@@ -95,17 +100,17 @@ export default function ReimburseTypeForm({
   async function getDetailData() {
     try {
       const response = await axiosInstance.get(editURL);
-      const data = response.data.data[0];
+      const data = response.data.data;
       
       form.reset({
-        code: data.code.toString(),
-        name: data.name.toString(),
-        limit: data.limit.toString(),
-        is_employee: data.is_employee.toString(),
-        material_group: data.material_group.toString(),
-        material_number: data.material_number.toString(),
-        grade_option: data.grade_option.toString(),
-        grade_all_price: data.grade_all_price.toString(),
+        code: data.code,
+        name: data.name,
+        limit: data.limit,
+        is_employee: data.is_employee,
+        material_group: data.material_group,
+        material_number: data.material_number,
+        grade_option: data.grade_option,
+        grade_all_price: data.grade_all_price,
         grades: data.grades,
       });
     } catch (e) {
@@ -138,22 +143,11 @@ export default function ReimburseTypeForm({
     setIsLoading(false);
   };
 
-  React.useEffect(() => {
-    getMaterialGroup('', {
-      name: 'material_group_desc',
-      id: 'material_group',
-      tabel: 'material_groups',
-    });
-
-    getMaterialNumber('', {
-      name: 'material_number',
-      id: 'material_number',
-      tabel: 'master_materials',
-    });
-    
+  React.useEffect(() => {    
     if (type === FormType.edit) {
       getDetailData();
     }
+    
   }, []);
 
   return (
@@ -169,7 +163,6 @@ export default function ReimburseTypeForm({
               <td>
                 <FormField
                   control={form.control}
-                  disabled={type === FormType.edit}
                   name='code'
                   render={({ field }) => (
                     <FormItem>
@@ -180,6 +173,7 @@ export default function ReimburseTypeForm({
                           {...field}
                           value={field.value || ''}
                           onChange={(e) => field.onChange(e.target.value)}
+                          disabled={type === FormType.edit}
                         />
                       </FormControl>
                       <FormMessage />
@@ -252,7 +246,6 @@ export default function ReimburseTypeForm({
               <td>
                 <FormField
                   control={form.control}
-                  disabled={type == FormType.edit}
                   name='limit'
                   render={({ field }) => (
                     <FormItem>
@@ -342,7 +335,7 @@ export default function ReimburseTypeForm({
                     <table>
                       {gradeFields.map((grade, gradeIndex) => (
                         <tr key={grade}>
-                          <td>Grade {grade.grade}</td>
+                          <td>Balance {grade.grade}</td>
                           <td>:</td>
                           <td>
                             <div>
@@ -384,9 +377,9 @@ export default function ReimburseTypeForm({
                             <SelectValue placeholder='-' />
                           </SelectTrigger>
                           <SelectContent>
-                            {materialGroup.map((material) => (
-                              <SelectItem key={material.id} value={material.value}>
-                                {material.label}
+                            {listMaterialGroup.map((material) => (
+                              <SelectItem key={material.id} value={material.id.toString()}>
+                                {material.material_group}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -416,9 +409,9 @@ export default function ReimburseTypeForm({
                             <SelectValue placeholder='-' />
                           </SelectTrigger>
                           <SelectContent>
-                            {materialNumber.map((material) => (
-                              <SelectItem key={material.value} value={material.value}>
-                                {material.label}
+                            {listMaterialNumber.map((material) => (
+                              <SelectItem key={material.id} value={material.id.toString()}>
+                                {material.material_number}
                               </SelectItem>
                             ))}
                           </SelectContent>

@@ -18,3 +18,8 @@ export interface ReimburseTypeModel {
   id: string;
   code: string;
 }
+
+export interface MaterialGroupModel {
+  id: string;
+  material_group: string;
+}
