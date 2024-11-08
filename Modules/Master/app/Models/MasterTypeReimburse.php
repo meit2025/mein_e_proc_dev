@@ -38,4 +38,14 @@ class MasterTypeReimburse extends Model
 
         return null; // Jika tidak ada yang cocok
     }
+
+    public function masterMaterial()
+    {
+        return $this->belongsTo(MasterMaterial::class, 'material_number', 'id');
+    }
+
+    public function materialGroup()
+    {
+        return $this->belongsTo(MaterialGroup::class, 'material_group', 'id');
+    }
 }
