@@ -227,10 +227,13 @@ export const BussinessTripFormV1 = ({
 
   const [listAllowances, setListAllowances] = React.useState<AllowanceItemModel[]>([]);
 
+  const [selectedUserId, setSelectedUserId] = React.useState(
+    role === 'user' ? idUser.toString() : '',
+  );
+
   async function handlePurposeType(value: string) {
     form.setValue('purpose_type_id', value || '');
-    const userid = idUser || '';
-    // console.log(value);
+    const userid = role == 'user' ? idUser || '' : selectedUserId || '';
     const url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
 
     try {
@@ -384,7 +387,7 @@ export const BussinessTripFormV1 = ({
           <table className='text-xs mt-4 reimburse-form-table font-thin'>
             <tr>
               <td width={200}>Request No.</td>
-              <td>ODR-2023</td>
+              <td>ODR-YYYY-MM-XXXXXXXX</td>
             </tr>
             <tr>
               <td width={200}>Bussiness Trip Purpose Type</td>
@@ -428,12 +431,14 @@ export const BussinessTripFormV1 = ({
                     if (role === 'user' && !field.value) {
                       field.onChange(idUser.toString());
                     }
-
                     return (
                       <FormItem>
                         <FormControl>
                           <Select
-                            onValueChange={(value) => field.onChange(value)}
+                            onValueChange={(value) => {
+                              setSelectedUserId(value);
+                              field.onChange(value);
+                            }}
                             value={field.value}
                             disabled={role === 'user'} // Disable select for user role
                           >
