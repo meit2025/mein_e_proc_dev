@@ -104,12 +104,12 @@ class BtPOService
             'storage_location' => $StorageLocation, // lgort
             'material_group' => $BusinessTrip->material_group, //matkl
             'material_number' => $BusinessTrip->material_number, // matnr
-            'po_unit_of_measure' => $BusinessTrip->uom, // meins
+            'po_unit_of_measure' => $BusinessTrip->unit_of_measure, // meins
             'po_quantity' => 1, // menge
             'tax_code' => $BusinessTrip->tax_code, //mwskz
             'net_price' => $BusinessTrip->balance, // netpr
             'item_category' => '', // pstyp
-            'invoice_receipt_indicator' => '', // repos
+            'invoice_receipt_indicator' => 'X', // repos
             'short_text' => $BusinessTrip->remarks, // txz01
             'gr_based_invoice_verification' => '', // webre
             'goods_receipt_indicator' => '', // wepos

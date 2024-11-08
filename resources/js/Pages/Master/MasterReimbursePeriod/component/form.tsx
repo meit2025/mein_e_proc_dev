@@ -48,7 +48,13 @@ export interface props {
   type?: FormType;
 }
 
-export default function ReimbursePeriodForm({ onSuccess, type, storeURL, editURL, updateURL }: props) {
+export default function ReimbursePeriodForm({
+  onSuccess,
+  type,
+  storeURL,
+  editURL,
+  updateURL,
+}: props) {
   const formSchema = z.object({
     code: z.string(),
     start: z.date(),
@@ -70,7 +76,7 @@ export default function ReimbursePeriodForm({ onSuccess, type, storeURL, editURL
     try {
       const response = await axiosInstance.get(editURL);
       const data = response.data.data[0];
-      
+
       form.reset({
         code: data.code,
         start: new Date(data.start),
@@ -131,7 +137,7 @@ export default function ReimbursePeriodForm({ onSuccess, type, storeURL, editURL
                 />
               </td>
             </tr>
-            
+
             <tr>
               <td width={200}>Start Date</td>
               <td>
@@ -141,9 +147,10 @@ export default function ReimbursePeriodForm({ onSuccess, type, storeURL, editURL
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <CustomDatePicker 
+                        <CustomDatePicker
                           initialDate={field.value}
-                          onDateChange={(date) => field.onChange(date)} />
+                          onDateChange={(date) => field.onChange(date)}
+                        />
                         {/* <Input
                           type='date'
                           {...field}
@@ -166,9 +173,10 @@ export default function ReimbursePeriodForm({ onSuccess, type, storeURL, editURL
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <CustomDatePicker 
+                        <CustomDatePicker
                           initialDate={field.value}
-                          onDateChange={(date) => field.onChange(date)} />
+                          onDateChange={(date) => field.onChange(date)}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
