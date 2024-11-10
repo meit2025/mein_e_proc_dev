@@ -34,6 +34,10 @@ export function CustomDatePicker({
     }
   };
 
+  React.useEffect(() => {
+    setDate(initialDate);
+  }, [initialDate]);
+
   return (
     <Popover>
       <PopoverTrigger asChild disabled={disabled}>

@@ -13,6 +13,7 @@ interface StructDropdown {
   id: string | number;
   tabel: string;
   where?: WhereProps;
+  search?: string;
 }
 
 const useDropdownOptions = () => {
@@ -28,7 +29,7 @@ const useDropdownOptions = () => {
     setIsLoading(true);
     try {
       const response = await axiosInstance.get(
-        `api/master/dropdown?name=${struct.name}&id=${struct.id}&tabelname=${struct.tabel}&isNotNull=${struct.where?.isNotNull ?? ''}&key=${struct.where?.key ?? ''}&parameter=${struct.where?.parameter ?? ''}&groupBy=${struct.where?.groupBy ?? ''}`,
+        `api/master/dropdown?name=${struct.name}&id=${struct.id}&search=${struct.search}&tabelname=${struct.tabel}&isNotNull=${struct.where?.isNotNull ?? ''}&key=${struct.where?.key ?? ''}&parameter=${struct.where?.parameter ?? ''}&groupBy=${struct.where?.groupBy ?? ''}`,
         {
           headers: {
             'Content-Type': 'application/json',

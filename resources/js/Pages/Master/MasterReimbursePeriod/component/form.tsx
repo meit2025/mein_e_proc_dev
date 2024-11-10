@@ -48,7 +48,13 @@ export interface props {
   type?: FormType;
 }
 
-export default function ReimbursePeriodForm({ onSuccess, type, storeURL, editURL, updateURL }: props) {
+export default function ReimbursePeriodForm({
+  onSuccess,
+  type = FormType.create,
+  storeURL,
+  editURL,
+  updateURL,
+}: props) {
   const formSchema = z.object({
     code: z.string(),
     start: z.date(),
@@ -57,28 +63,30 @@ export default function ReimbursePeriodForm({ onSuccess, type, storeURL, editURL
 
   const defaultValues = {
     code: '',
-    start: new Date(),
-    end: new Date(),
+    start: null,
+    end: null,
   };
-
-  async function getDetailData() {
-    try {
-      const response = await axiosInstance.get(editURL);
-      const data = response.data.data[0];
-      form.reset({
-        code: data.code,
-        start: data.start,
-        end: data.end,
-      });
-    } catch (e) {
-      const error = e as AxiosError;
-    }
-  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues,
   });
+
+  async function getDetailData() {
+    try {
+      const response = await axiosInstance.get(editURL);
+      const data = response.data.data[0];
+
+      form.reset({
+        code: data.code,
+        start: new Date(data.start),
+        // start: data.start,
+        end: new Date(data.end),
+      });
+    } catch (e) {
+      const error = e as AxiosError;
+    }
+  }
 
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -139,7 +147,10 @@ export default function ReimbursePeriodForm({ onSuccess, type, storeURL, editURL
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <CustomDatePicker onDateChange={(date) => field.onChange(date)} />
+                        <CustomDatePicker
+                          initialDate={field.value}
+                          onDateChange={(date) => field.onChange(date)}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -157,7 +168,10 @@ export default function ReimbursePeriodForm({ onSuccess, type, storeURL, editURL
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <CustomDatePicker onDateChange={(date) => field.onChange(date)} />
+                        <CustomDatePicker
+                          initialDate={field.value}
+                          onDateChange={(date) => field.onChange(date)}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -102,23 +102,23 @@ class TextPrServices
             'company_code' => $ca->company_code, // bukrs
             'gjahr' =>  $ca->gjahr, // gjahr
             'currency' => 'IDR', // waers
-            'document_date' => $ca->document_date,
+            'document_date' => $ca->document_date, // bldat
             'budat' => $ca->budat, // budat
             'monat' => $ca->monat, // monat
-            'reference' => $ca->reference,
-            'document_header_text' => $ca->document_header_text,
-            'vendor_code' => $ca->vendor_code ?? '',
+            'reference' => $ca->reference, // xblnr
+            'document_header_text' => $ca->document_header_text, // bktxt
+            'vendor_code' => $ca->vendor_code ?? '', // lifnr
             'saknr' => '', //saknr
             'hkont' => '', //hkont
-            'amount_local_currency' => $ca->amount_local_currency,
-            'tax_code' => $ca->tax_code,
-            'dzfbdt' => $ca->document_date, //dzfbdt
+            'amount_local_currency' => $ca->amount_local_currency, // dmbtr
+            'tax_code' => $ca->tax_code, // mwskz
+            'zfbdt' => $ca->document_date, //zfbdt
             'purchasing_document' => '', //ebeln
             'purchasing_document_item' => '', //ebelp
-            'assigment' => $ca->assigment,
-            'text' => $ca->text,
-            'profit_center' => $ca->profit_center,
-            'tax_amount' => $ca->tax_amount,
+            'assigment' => $ca->assigment, // zuonr
+            'text' => $ca->text, // sgtxt
+            'profit_center' => $ca->profit_center, // prctr
+            'tax_amount' => $ca->tax_amount, // wmwst
         ];
     }
 

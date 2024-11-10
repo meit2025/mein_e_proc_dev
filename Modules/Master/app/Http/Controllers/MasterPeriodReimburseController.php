@@ -57,7 +57,7 @@ class MasterPeriodReimburseController extends Controller
             $validatedData = $validator->validated();
             MasterPeriodReimburse::create($validatedData);
             DB::commit();
-            return $this->successResponse("Create Reimburse Type Successfully");
+            return $this->successResponse("Create Reimburse Period Successfully");
         } catch (\Exception  $e) {
             DB::rollBack();
             return $this->errorResponse($e->getMessage());
@@ -90,7 +90,28 @@ class MasterPeriodReimburseController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $rules = [
+            'start' => 'required|date',
+            'end' => 'required|date',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return $this->errorResponse($validator->errors());
+        }
+        DB::beginTransaction();
+        try {
+            $getData        = MasterPeriodReimburse::find($id);
+            $validatedData = $validator->validated();
+            $getData->fill($validatedData);
+            $getData->save();
+            DB::commit();
+
+            return $this->successResponse("Create Reimburse Period Successfully");
+        } catch (\Exception  $e) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**
@@ -98,6 +119,15 @@ class MasterPeriodReimburseController extends Controller
      */
     public function destroy($id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            MasterPeriodReimburse::find($id)->delete();
+            DB::commit();
+
+            return $this->successResponse([], 'Delete Reimburse Period Successfully');
+        } catch (\Exception  $e) {
+            DB::rollBack();
+            return $this->errorResponse($e);
+        }
     }
 }

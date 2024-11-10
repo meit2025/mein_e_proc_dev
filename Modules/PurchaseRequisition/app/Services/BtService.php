@@ -225,6 +225,7 @@ class BtService
         $year = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('Y');
         $month = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('m');
         return [
+            'extdoc' => $BusinessTrip->id,
             'code_transaction' => 'BTRE',
             'belnr' => $BusinessTrip->id, // belnr
             'company_code' => $settings['companyCode'], // bukrs
