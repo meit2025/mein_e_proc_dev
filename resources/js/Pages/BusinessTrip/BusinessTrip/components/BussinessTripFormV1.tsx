@@ -390,37 +390,6 @@ export const BussinessTripFormV1 = ({
               <td>ODR-YYYY-MM-XXXXXXXX</td>
             </tr>
             <tr>
-              <td width={200}>Bussiness Trip Purpose Type</td>
-              <td>
-                {' '}
-                <FormField
-                  control={form.control}
-                  name='purpose_type_id'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => handlePurposeType(value)}
-                          value={field.value}
-                        >
-                          <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='-- Select Bussiness Purpose Type --' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {listPurposeType.map((item) => (
-                              <SelectItem value={item.id.toString()}>{item.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </td>
-            </tr>
-
-            <tr>
               <td width={200}>Request For</td>
               <td>
                 <FormField
@@ -470,7 +439,36 @@ export const BussinessTripFormV1 = ({
                 />
               </td>
             </tr>
-
+            <tr>
+              <td width={200}>Bussiness Trip Purpose Type</td>
+              <td>
+                {' '}
+                <FormField
+                  control={form.control}
+                  name='purpose_type_id'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => handlePurposeType(value)}
+                          value={field.value}
+                        >
+                          <SelectTrigger className='w-[200px]'>
+                            <SelectValue placeholder='-- Select Bussiness Purpose Type --' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {listPurposeType.map((item) => (
+                              <SelectItem value={item.id.toString()}>{item.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </td>
+            </tr>
             <tr>
               <td width={200}>Cost Center</td>
               <td>
