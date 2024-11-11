@@ -124,8 +124,8 @@ export default function Header() {
         >
           {/* mobile logo */}
           <div className='flex gap-1 lg:hidden items-center -ml-1'>
-            <a className='shrink-0' href='html/demo1.html'>
-              <img className='max-h-[25px] w-full' src='assets/media/app/mini-logo.svg' />
+            <a className='shrink-0' href='/'>
+              <img className='max-h-[25px] w-full' src={Logo} />
             </a>
             <div className='flex items-center'>
               <button
@@ -134,12 +134,12 @@ export default function Header() {
               >
                 <i className='ki-filled ki-menu'></i>
               </button>
-              <button
+              {/* <button
                 className='btn btn-icon btn-light btn-clear btn-sm'
                 data-drawer-toggle='#mega_menu_wrapper'
               >
                 <i className='ki-filled ki-burger-menu-2'></i>
-              </button>
+              </button> */}
             </div>
           </div>
           {/* end mobile logo */}
