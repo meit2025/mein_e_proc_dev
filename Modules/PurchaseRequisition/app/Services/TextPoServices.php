@@ -30,7 +30,6 @@ class TextPoServices
             DB::commit();
             return $array;
         } catch (Exception $e) {
-            dd($e);
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
@@ -39,7 +38,7 @@ class TextPoServices
     private function preparePurchaseRequisitionData($pr)
     {
         return [
-            'code_transaction' => $pr->code_transaction,
+            'code_transaction' => 'BTRDE',
             'purchasing_document_date' => $pr->purchasing_document_date, // bedat
             'purchasing_document_type' => $pr->purchasing_document_type, // bsart
             'company_code' => $pr->company_code, //bukrs
@@ -103,6 +102,7 @@ class TextPoServices
         $filename = 'INB_POCRT_' . $nopr . '_' . $timestamp . '.txt';
         $fileContent = $this->convertArrayToFileContent($array);
         Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
+        Storage::disk('local')->put($filename, $fileContent);
     }
 
     private function convertArrayToFileContent($array)

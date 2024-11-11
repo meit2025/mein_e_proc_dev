@@ -89,6 +89,7 @@ export const BussinessTripFormV1 = ({
             ),
           }),
         ),
+        other: z.any().optional(),
       }),
     ),
   });
@@ -106,12 +107,13 @@ export const BussinessTripFormV1 = ({
           business_trip_end_date: new Date(),
           detail_attedances: [],
           allowances: [],
+          other: [],
         },
       ],
     },
   });
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    // console.log(values, ' data');
+    console.log(values, ' data');
     try {
       const formData = new FormData();
       // Append group data
@@ -154,10 +156,9 @@ export const BussinessTripFormV1 = ({
     try {
       const response = await axiosInstance.get(url);
       const businessTripData = response.data.data;
-
       form.setValue('remark', businessTripData.remarks || '');
       //   form.setValue('attachment', businessTripData.attachment || null);
-      //   form.setValue('total_destination', businessTripData.total_destination || 1);
+      form.setValue('total_destination', businessTripData.total_destination || 1);
       //   form.setValue('cash_advance', businessTripData.cash_advance || false);
       //   form.setValue('total_percent', businessTripData.total_percent || '0');
       //   form.setValue('total_cash_advance', businessTripData.total_cash_advance || '0');
@@ -168,7 +169,6 @@ export const BussinessTripFormV1 = ({
       setListDestination(businessTripData.destinations);
       setTotalDestination(businessTripData.total_destination);
       setAllowancesProperty(businessTripData.destinations);
-      console.log(businessTripData, ' businessTripData');
       //   console.log(businessTripData.destinations, ' businessTripData.destinations');
       // console.log(businessTripDetail, ' businessTripDetail');
       //   setListAllowances(businessTripData.allowances as AllowanceItemModel[]);
@@ -183,6 +183,7 @@ export const BussinessTripFormV1 = ({
     const valueToInt = parseInt(value);
     setTotalDestination(value);
   };
+  console.log(businessTripDetail, 'businessTripDetail');
 
   function setAllowancesProperty(destinations: any[]) {
     const destinationForm = destinations.map((destination) => ({
@@ -191,8 +192,8 @@ export const BussinessTripFormV1 = ({
       business_trip_end_date: new Date(destination.business_trip_end_date),
       allowances: destination.allowances || [],
       detail_attedances: destination.detail_attedances || [],
+      allowances_result_item: destination.allowancesResultItem || [],
     }));
-    // console.log(destinationForm, ' destinationForm');
     form.setValue('destinations', destinationForm);
   }
 
@@ -207,6 +208,8 @@ export const BussinessTripFormV1 = ({
   });
 
   React.useEffect(() => {}, [businessTripDetail, totalDestination]);
+
+  const [totalAllowance, setTotalAllowance] = React.useState(0);
   return (
     <ScrollArea className='h-[600px] w-full '>
       <Form {...form}>
@@ -251,10 +254,23 @@ export const BussinessTripFormV1 = ({
                   <td width={200}>Purpose Type</td>
                   <td className='text-sm'>{businessTripDetail.name_purpose}</td>
                 </tr>
-
                 <tr>
                   <td width={200}>Request for</td>
                   <td className='text-sm'>{businessTripDetail.name_request}</td>
+                </tr>
+                <tr>
+                  <td width={200}>Pajak</td>
+                  <td className='text-sm'>{businessTripDetail?.pajak?.mwszkz}</td>
+                </tr>
+                <tr>
+                  <td width={200}>Cost Center</td>
+                  <td className='text-sm'>{businessTripDetail?.cost_center?.company_code}</td>
+                </tr>
+                <tr>
+                  <td width={200}>Purchasing Group</td>
+                  <td className='text-sm'>
+                    {businessTripDetail?.purchasing_group?.purchasing_group}
+                  </td>
                 </tr>
               </>
             )}
@@ -351,6 +367,8 @@ export const BussinessTripFormV1 = ({
             form={form}
             listAllowances={listAllowances}
             totalDestination={form.getValues('total_destination').toString()}
+            setTotalAllowance={setTotalAllowance}
+            businessTripDetail={businessTripDetail}
           />
 
           <Button type='submit'>submit</Button>
@@ -366,12 +384,16 @@ export function BussinesTripDestination({
   form,
   destinationField,
   updateDestination,
+  setTotalAllowance,
+  businessTripDetail,
 }: {
   totalDestination: string;
   listAllowances: AllowanceItemModel[];
   form: any;
   destinationField: any;
   updateDestination: any;
+  setTotalAllowance: any;
+  businessTripDetail: any;
 }) {
   return (
     <Tabs defaultValue='destination1' className='w-full'>
@@ -388,6 +410,8 @@ export function BussinesTripDestination({
           destination={destination}
           form={form}
           index={index}
+          setTotalAllowance={setTotalAllowance}
+          businessTripDetail={businessTripDetail}
         />
       ))}
     </Tabs>
@@ -400,12 +424,16 @@ export function BussinessDestinationForm({
   destination,
   updateDestination,
   listAllowances,
+  setTotalAllowance,
+  businessTripDetail,
 }: {
   form: any;
   index: number;
   destination: any;
   updateDestination: any;
   listAllowances: any;
+  setTotalAllowance: any;
+  businessTripDetail: any;
 }) {
   const {
     fields: detailAttedanceFields,
@@ -429,14 +457,15 @@ export function BussinessDestinationForm({
   });
 
   //generate detail
+  //   console.log(destination, 'destination');
 
   function detailAttedancesGenerate() {
-    let momentStart = moment(destination.business_trip_start_date);
-    const momentEnd = moment(destination.business_trip_end_date);
+    let momentStart = moment(destination.business_trip_start_date).startOf('day');
+    const momentEnd = moment(destination.business_trip_end_date).startOf('day');
     removeAttendace();
     removeAllowance();
 
-    while (momentStart.format('DD/MM/YYYY') <= momentEnd.format('DD/MM/YYYY')) {
+    while (momentStart.isBefore(momentEnd) || momentStart.isSame(momentEnd)) {
       const object = {
         date: momentStart.toDate(),
         shift_code: 'SHIFTREGULAR',
@@ -451,11 +480,11 @@ export function BussinessDestinationForm({
     }
 
     function generateDetailAllowanceByDate(price: string): any[] {
-      let momentStart = moment(destination.business_trip_start_date);
-      const momentEnd = moment(destination.business_trip_end_date);
+      let momentStart = moment(destination.business_trip_start_date).startOf('day');
+      const momentEnd = moment(destination.business_trip_end_date).startOf('day');
       const detailAllowance = [];
 
-      while (momentStart.format('DD/MM/YYYY') <= momentEnd.format('DD/MM/YYYY')) {
+      while (momentStart.isBefore(momentEnd) || momentStart.isSame(momentEnd)) {
         const object = {
           date: momentStart.toDate(),
           shift_code: 'SHIFTREGULAR',
@@ -528,7 +557,7 @@ export function BussinessDestinationForm({
   });
 
   // Assuming allowance is calculated elsewhere, let's mock it for now
-  const allowance = 1000000; // Example: allowance is 1,000,000
+  const allowance = businessTripDetail.total_cash_advance; // Example: allowance is 1,000,000
 
   // Calculate total based on totalPercent and allowance
   React.useEffect(() => {
@@ -568,20 +597,38 @@ export function BussinessDestinationForm({
           </tr>
         </table>
         <DetailAllowance allowanceField={allowancesField} destinationIndex={index} form={form} />
-        <table className='w-full text-sm mt-10'>
-          <tr>
-            <td className='w-[20%]'>Cash Advance</td>
-            <td className='w-[80%] flex'></td>
-          </tr>
-        </table>
       </div>
       {/* disini */}
-      <ResultTotalItem allowanceField={allowancesField} />
+      <ResultTotalItem
+        allowanceField={allowancesField}
+        destinationIndex={index}
+        form={form}
+        setTotalAllowance={setTotalAllowance}
+      />
+
+      <table className='w-full text-sm mt-10'>
+        <tr>
+          <td className='w-[20%]'>Cash Advance</td>
+          <td className='w-[80%] flex'>{allowance}</td>
+        </tr>
+      </table>
     </TabsContent>
   );
 }
 
-export function ResultTotalItem({ allowanceField }: { allowanceField: any }) {
+export function ResultTotalItem({
+  allowanceField,
+  destinationIndex,
+  form,
+  setTotalAllowance,
+}: {
+  allowanceField: any;
+  destinationIndex: number;
+  form: any;
+  setTotalAllowance: any;
+}) {
+  const resultItem = form.watch(`destinations[${destinationIndex}].allowances`);
+  console.log(resultItem);
   return (
     <>
       <table className='w-full text-sm mt-10'>
@@ -784,6 +831,37 @@ export function DetailAllowance({
   const detailAllowanceceWatch = form.watch(`destinations[${destinationIndex}].allowances`);
 
   React.useEffect(() => {}, [detailAllowanceceWatch]);
+
+  const [otherAllowances, setOtherAllowances] = React.useState<number[]>([]); // Daftar untuk menyimpan allowance tambahan
+
+  const addOtherAllowance = () => {
+    if (otherAllowances.length === 0) {
+      setOtherAllowances([...otherAllowances, otherAllowances.length]);
+    }
+  };
+
+  const watchedAllowances = useWatch({
+    control: form.control,
+    name: otherAllowances.map((_, index) => `destinations.${destinationIndex}.other[${index}]`),
+  });
+
+  const removeAllowanceOther = (indexToRemove: number) => {
+    // Unregister input untuk menghapusnya dari data form
+    form.control.unregister(`destinations.${destinationIndex}.other[${indexToRemove}]`);
+
+    // Menghapus baris dari state
+    setOtherAllowances((prevAllowances) =>
+      prevAllowances.filter((_, index) => index !== indexToRemove),
+    );
+  };
+
+  const calculateTotalOther = () => {
+    return watchedAllowances.reduce((total, allowance) => {
+      const allowanceValue = Number(allowance) || 0;
+      return total + allowanceValue;
+    }, 0);
+  };
+
   return (
     <table className='w-full allowance-table'>
       {detailAllowanceceWatch.map((allowance: any, index: any) => (
@@ -795,6 +873,102 @@ export function DetailAllowance({
           allowanceIndex={index}
         />
       ))}
+      {otherAllowances.length === 0 && (
+        <tr>
+          <td>
+            <Button type='button' className='text-xl' onClick={addOtherAllowance}>
+              +
+            </Button>
+          </td>
+        </tr>
+      )}
+      {otherAllowances.map((_, index) => (
+        <tr key={index}>
+          <td width={220} style={{ verticalAlign: 'middle' }} className='text-sm'>
+            Other Allowance
+          </td>
+          <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>:</td>
+          <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+            <span className='text-sm'>IDR</span>
+          </td>
+          <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+            <div className='flex items-center'>
+              <FormField
+                control={form.control}
+                name={`destinations.${destinationIndex}.other[${index}]`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        value={field.value}
+                        onChange={(e) => {
+                          // Memperbarui nilai field
+                          field.onChange(e); // Menggunakan onChange dari React Hook Form
+                          // Anda dapat melakukan aksi lain di sini, seperti mengupdate elemen lain
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <span className='text-sm'>* 100%</span>
+            </div>
+          </td>
+          <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+            <div className='flex items-center'>
+              <span className='text-sm' style={{ padding: '2px 5px' }}>
+                = IDR {calculateTotalOther()}
+              </span>
+            </div>
+          </td>
+          <td>
+            <Button type='button' className='text-xs' onClick={() => removeAllowanceOther(index)}>
+              X
+            </Button>
+          </td>
+        </tr>
+      ))}
+      {/* <tr>
+        <td width={220} style={{ verticalAlign: 'middle' }} className='text-sm'>
+          Other Allowance
+        </td>
+        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>:</td>
+        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+          <span className='text-sm'>IDR</span>
+        </td>
+        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+          <div className='flex items-center'>
+            <FormField
+              control={form.control}
+              name={`destinations.${destinationIndex}.other`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      value={field.value}
+                      onChange={(e) => {
+                        // Memperbarui nilai field
+                        field.onChange(e); // Menggunakan onChange dari React Hook Form
+                        // Anda dapat melakukan aksi lain di sini, seperti mengupdate elemen lain
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <span className='text-sm'>* 100%</span>
+          </div>
+        </td>
+        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+          <div className='flex items-center'>
+            <span className='text-sm' style={{ padding: '2px 5px' }}>
+              = IDR {calculateTotalOther()}
+            </span>
+          </div>
+        </td>
+      </tr> */}
     </table>
   );
 }

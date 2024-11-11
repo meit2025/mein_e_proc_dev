@@ -36,6 +36,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::prefix('business-trip')->group(function () {
         Route::get('/print/{id}', [BusinessTripController::class, 'printAPI'])->name('business-trip.print');
     });
+    Route::prefix('business-trip-declaration')->group(function () {
+        Route::get('/print/{id}', [BusinessTripDeclarationController::class, 'printAPI'])->name('business-trip-declaration.print');
+    });
 });
 
 Route::group(['prefix' => 'business-trip'], function () {
@@ -103,10 +106,7 @@ Route::group(['prefix' => 'api/'], function () {
         Route::post('/create', [BusinessTripDeclarationController::class, 'storeAPI'])->name('business-trip-declaration.store');
         // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
         // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
-        Route::get('/detail/{id}', [BusinessTripDeclarationController::class, 'showAPI'])->name('allowance-category.detail');
-        Route::get('/print', function () {
-            return view('print-bt-declaration');
-        });
+        Route::get('/detail/{id}', [BusinessTripDeclarationController::class, 'showAPI'])->name('business-trip-declaration.detail');
     });
 
     Route::group(['prefix' => 'purpose-type-allowance'], function () {

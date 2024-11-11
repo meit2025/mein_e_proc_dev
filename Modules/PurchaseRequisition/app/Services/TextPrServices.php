@@ -48,7 +48,7 @@ class TextPrServices
         return [
             'code_transaction' => $pr->code_transaction, // code_transaction
             'purchase_requisition_number' => $pr->purchase_requisition_number, // banfn
-            'item_number' => $pr->item_number, //
+            'item_number' => $pr->item_number, //bnfpo
             'requisitioner_name' => $pr->requisitioner_name, // afnam
             'requisition_date' => $pr->requisition_date, // badat
             'requirement_tracking_number' => $pr->requirement_tracking_number, // bednr
@@ -65,7 +65,7 @@ class TextPrServices
             'material_number' => $pr->material_number, // matnr
             'unit_of_measure' => $pr->unit_of_measure, // meins
             'quantity' => $pr->quantity, // menge
-            'balance' => $pr->balance, // NILAI NYA
+            'balance' => $pr->balance, // NILAI NYA//netpr
             'waers' => 'IDR', // MATA UANG
             'tax_code' => $pr->tax_code, // mwskz
             'item_category' => $pr->item_category, // pstyp
@@ -97,28 +97,28 @@ class TextPrServices
 
 
         return [
-            'code_transaction' => 'VEN',
-            'belnr' => $ca->id, // belnr
+            'code_transaction' => $ca->code_transaction,
+            'belnr' => $ca->belnr, // belnr
             'company_code' => $ca->company_code, // bukrs
             'gjahr' =>  $ca->gjahr, // gjahr
             'currency' => 'IDR', // waers
-            'document_date' => $ca->document_date,
+            'document_date' => $ca->document_date, // bldat
             'budat' => $ca->budat, // budat
             'monat' => $ca->monat, // monat
-            'reference' => $ca->reference,
-            'document_header_text' => $ca->document_header_text,
-            'vendor_code' => $ca->vendor_code ?? '',
+            'reference' => $ca->reference, // xblnr
+            'document_header_text' => $ca->document_header_text, // bktxt
+            'vendor_code' => $ca->vendor_code ?? '', // lifnr
             'saknr' => '', //saknr
             'hkont' => '', //hkont
-            'amount_local_currency' => $ca->amount_local_currency,
-            'tax_code' => $ca->tax_code,
-            'dzfbdt' => $ca->document_date, //dzfbdt
+            'amount_local_currency' => $ca->amount_local_currency, // dmbtr
+            'tax_code' => $ca->tax_code, // mwskz
+            'zfbdt' => $ca->document_date, //zfbdt
             'purchasing_document' => '', //ebeln
             'purchasing_document_item' => '', //ebelp
-            'assigment' => $ca->assigment,
-            'text' => $ca->text,
-            'profit_center' => $ca->profit_center,
-            'tax_amount' => $ca->tax_amount,
+            'assigment' => $ca->assigment, // zuonr
+            'text' => $ca->text, // sgtxt
+            'profit_center' => $ca->profit_center, // prctr
+            'tax_amount' => $ca->tax_amount, // wmwst
         ];
     }
 
@@ -130,6 +130,7 @@ class TextPrServices
         $filename = 'INB_PRCRT_' . $nopr . '_' . $timestamp . '.txt';
         $fileContent = $this->convertArrayToFileContent($array);
         Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
+        Storage::disk('local')->put($filename, $fileContent);
 
         $filenameAc = '';
         // Generate Cash Advance File (if applicable)
@@ -137,6 +138,7 @@ class TextPrServices
             $filenameAc = 'INB_DPCRT_' . $nopr . '_' . $timestamp . '.txt';
             $fileContentAc = $this->convertArrayToFileContent($arrayCash);
             Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filenameAc, $fileContentAc);
+            Storage::disk('local')->put($filenameAc, $fileContentAc);
         }
 
         return [

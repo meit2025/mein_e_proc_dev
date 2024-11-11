@@ -6,7 +6,7 @@ import { columns } from './models/models';
 import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import { GET_LIST_REIMBURSE_PERIOD } from '@/endpoint/reimbursePeriod/api';
+import { GET_LIST_REIMBURSE_PERIOD, DESTROY_REIMBURSE_PERIOD } from '@/endpoint/reimbursePeriod/api';
 import { FormType } from '@/lib/utils';
 import ReimbursePeriodForm from './component/form';
 import { STORE_REIMBURSE_PERIOD, EDIT_REIMBURSE_PERIOD, UPDATE_REIMBURSE_PERIOD } from '@/endpoint/reimbursePeriod/api';
@@ -20,6 +20,10 @@ export const Index = () => {
   });
 
   function openFormHandler() {
+    setFormType({
+      type: FormType.create,
+      id: null,
+    })
     setOpenForm(!openForm);
   }
   return (
@@ -39,6 +43,7 @@ export const Index = () => {
             storeURL={STORE_REIMBURSE_PERIOD}
             editURL={EDIT_REIMBURSE_PERIOD(formType.id ?? '')}
             updateURL={UPDATE_REIMBURSE_PERIOD(formType.id ?? '')}
+            onSuccess={(x: boolean) => setOpenForm(!x)}
           />
         </CustomDialog>
       </div>
@@ -54,6 +59,7 @@ export const Index = () => {
         }}
         url={{
           url: GET_LIST_REIMBURSE_PERIOD,
+          deleteUrl: DESTROY_REIMBURSE_PERIOD
         }}
         labelFilter='search'
       />

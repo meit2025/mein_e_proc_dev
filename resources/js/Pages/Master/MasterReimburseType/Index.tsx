@@ -6,16 +6,19 @@ import { columns } from './models/models';
 import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import { Grade } from './models/models';
+import { Grade, MaterialGroupModel } from './models/models';
+import { MaterialModel } from '../MasterMaterial/model/listModel';
 import ReimburseTypeForm from './component/form';
 import { FormType } from '@/lib/utils';
-import { LIST_API_REIMBURSE_TYPE, EDIT_REIMBURSE_TYPE, UPDATE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
+import { LIST_API_REIMBURSE_TYPE, EDIT_REIMBURSE_TYPE, UPDATE_REIMBURSE_TYPE, DELETE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
 
 interface propsType {
   listGrades?: Grade[];
+  listMaterialNumber?: MaterialModel[];
+  listMaterialGroup?: MaterialGroupModel[];
 }
 
-export const Index = ({ listGrades }: propsType) => {
+export const Index = ({ listGrades, listMaterialNumber, listMaterialGroup }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
   const [formType, setFormType] = React.useState({
@@ -24,6 +27,10 @@ export const Index = ({ listGrades }: propsType) => {
   });
 
   function openFormHandler() {
+    setFormType({
+      type: FormType.create,
+      id: null,
+    })
     setOpenForm(!openForm);
   }
   return (
@@ -41,6 +48,8 @@ export const Index = ({ listGrades }: propsType) => {
           <ReimburseTypeForm
             type={formType.type}
             listGrades={listGrades}
+            listMaterialNumber={listMaterialNumber}
+            listMaterialGroup={listMaterialGroup}
             editURL={EDIT_REIMBURSE_TYPE(formType.id ?? '')}
             updateURL={UPDATE_REIMBURSE_TYPE(formType.id ?? '')}
             onSuccess={(x: boolean) => setOpenForm(!x)}
@@ -59,6 +68,7 @@ export const Index = ({ listGrades }: propsType) => {
         }}
         url={{
           url: LIST_API_REIMBURSE_TYPE,
+          deleteUrl: DELETE_REIMBURSE_TYPE
         }}
         labelFilter='search'
       />

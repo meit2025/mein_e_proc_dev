@@ -126,10 +126,14 @@ class ReimbuseController extends Controller
         try {
             $is_Admin = Auth::user()->role === 'admin';
 
+            $listFamily = [];
             if (!$is_Admin) {
-                $users = User::with('families')->where('id', Auth::id())->select('nip', 'name')->get();
+                $users = User::where('id', Auth::id())->select('nip', 'name')->get();
+
+                $listFamily = Family::where('user', Auth::user()->id)->get();
             } else {
-                $users = User::with('families')->select('nip', 'name')->get();
+                $users = User::select('nip', 'name')->get();
+                $listFamily = Family::where('user', User::select('nip')->pluck('nip')->toArray())->get();
             }
 
             $categories = ['Employee', 'Family'];
@@ -140,7 +144,7 @@ class ReimbuseController extends Controller
             $taxes = Pajak::select('id', 'mwszkz')->get();
             return Inertia::render(
                 'Reimburse/Index',
-                compact('purchasing_groups', 'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes')
+                compact('purchasing_groups', 'listFamily', 'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -162,6 +166,8 @@ class ReimbuseController extends Controller
                 'cost_center'    => $data['cost_center'],
             ];
             $forms = $data['forms'];
+
+
             $response = $this->reimbursementService->storeReimbursements($groupData, $forms);
             if (isset($response['error'])) {
                 return $this->errorResponse($response['error']);

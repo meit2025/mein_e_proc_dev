@@ -63,7 +63,7 @@ class ProcurementService
                 PurchaseRequisition::create($datainsert);
 
                 if ($procurement->is_cashAdvance) {
-                    $datainsertCash = $this->prepareCashAdvanceData($procurement, $vendor, $value, $cashData, $reqno);
+                    $datainsertCash = $this->prepareCashAdvanceData($procurement, $vendor, $value, $cashData, $reqno, $settings);
                     CashAdvance::create($datainsertCash);
                     $arrayCash[] = $datainsertCash;
                 }
@@ -183,6 +183,7 @@ class ProcurementService
         $month = Carbon::parse($cashData->document_date)->format('m');
 
         return [
+            'extdoc' => $procurement->id,
             'purchase_id' => $procurement->id,
             'code_transaction' => 'VEN',  // code_transaction
             'belnr' =>  $procurement->id, // belnr

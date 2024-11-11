@@ -212,11 +212,6 @@ const sidebar = [
             roles: '',
           },
           {
-            name: 'Family',
-            route: LIST_PAGE_FAMILY,
-            roles: '',
-          },
-          {
             name: 'Role Permission',
             route: LIST_PAGE_MASTER_PERMISSION,
             roles: '',

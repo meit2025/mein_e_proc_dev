@@ -8,3 +8,5 @@ export const DETAIL_PR = (id: any) => `${ROUTE_PR}/detail/${id}`;
 export const DELET_PR = `${ROUTE_PR}/delete`;
 
 export const GET_PR_SAP = `${ROUTE_PR_sap}/list`;
+export const GET_DP_SAP = `${ROUTE_PR_sap}/list-dp`;
+export const GET_PO_SAP = `${ROUTE_PR_sap}/list-po`;
