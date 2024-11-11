@@ -137,10 +137,10 @@ class ReimbuseController extends Controller
             if (!$is_Admin) {
                 $users = User::where('id', Auth::id())->select('nip', 'name')->get();
 
-                $listFamily = Family::where('userId', Auth::user()->id)->get();
+                // $listFamily = Family::where('userId', Auth::user()->id)->get();
             } else {
                 $users = User::select('nip', 'name')->get();
-                $listFamily = Family::where('userId', User::select('nip')->pluck('nip')->toArray())->get();
+                // $listFamily = Family::where('userId', User::select('nip')->pluck('nip')->toArray())->get();
             }
 
             $categories = ['Employee', 'Family'];
@@ -151,7 +151,7 @@ class ReimbuseController extends Controller
             $taxes = Pajak::select('id', 'mwszkz')->get();
             return Inertia::render(
                 'Reimburse/Index',
-                compact('purchasing_groups', 'listFamily', 'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes')
+                compact('purchasing_groups',  'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());

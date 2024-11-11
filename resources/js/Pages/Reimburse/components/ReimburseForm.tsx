@@ -267,10 +267,15 @@ export const ReimburseForm: React.FC<Props> = ({
     } catch (e) {
       const error = e as AxiosError;
 <<<<<<< HEAD
+<<<<<<< HEAD
 
       console.log(error);
 =======
 >>>>>>> 8832083 (fixing not closed when success)
+=======
+
+      console.log(error);
+>>>>>>> 6aec34e (adding validation before store in database)
     }
   };
 
