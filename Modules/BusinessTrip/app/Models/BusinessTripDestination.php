@@ -19,7 +19,8 @@ class BusinessTripDestination extends Model
         'destination',
         'business_trip_start_date',
         'business_trip_end_date',
-        'business_trip_id'
+        'business_trip_id',
+        'other_allowance',
     ];
 
     function detailAttendance()

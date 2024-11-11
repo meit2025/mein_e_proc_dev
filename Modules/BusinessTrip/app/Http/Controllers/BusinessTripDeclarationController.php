@@ -271,6 +271,7 @@ class BusinessTripDeclarationController extends Controller
                     'destination' => $data_destination['destination'],
                     'business_trip_start_date' => date('Y-m-d', strtotime($data_destination['business_trip_start_date'])),
                     'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
+                    'other_allowance' => $data_destination['other'][0],
                 ]);
                 foreach ($data_destination['detail_attedances'] as $key => $destination) {
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([

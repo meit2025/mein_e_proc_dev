@@ -89,6 +89,7 @@ export const BussinessTripFormV1 = ({
             ),
           }),
         ),
+        other: z.any().optional(),
       }),
     ),
   });
@@ -106,12 +107,13 @@ export const BussinessTripFormV1 = ({
           business_trip_end_date: new Date(),
           detail_attedances: [],
           allowances: [],
+          other: [],
         },
       ],
     },
   });
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    // console.log(values, ' data');
+    console.log(values, ' data');
     try {
       const formData = new FormData();
       // Append group data
@@ -829,6 +831,37 @@ export function DetailAllowance({
   const detailAllowanceceWatch = form.watch(`destinations[${destinationIndex}].allowances`);
 
   React.useEffect(() => {}, [detailAllowanceceWatch]);
+
+  const [otherAllowances, setOtherAllowances] = React.useState<number[]>([]); // Daftar untuk menyimpan allowance tambahan
+
+  const addOtherAllowance = () => {
+    if (otherAllowances.length === 0) {
+      setOtherAllowances([...otherAllowances, otherAllowances.length]);
+    }
+  };
+
+  const watchedAllowances = useWatch({
+    control: form.control,
+    name: otherAllowances.map((_, index) => `destinations.${destinationIndex}.other[${index}]`),
+  });
+
+  const removeAllowanceOther = (indexToRemove: number) => {
+    // Unregister input untuk menghapusnya dari data form
+    form.control.unregister(`destinations.${destinationIndex}.other[${indexToRemove}]`);
+
+    // Menghapus baris dari state
+    setOtherAllowances((prevAllowances) =>
+      prevAllowances.filter((_, index) => index !== indexToRemove),
+    );
+  };
+
+  const calculateTotalOther = () => {
+    return watchedAllowances.reduce((total, allowance) => {
+      const allowanceValue = Number(allowance) || 0;
+      return total + allowanceValue;
+    }, 0);
+  };
+
   return (
     <table className='w-full allowance-table'>
       {detailAllowanceceWatch.map((allowance: any, index: any) => (
@@ -840,6 +873,102 @@ export function DetailAllowance({
           allowanceIndex={index}
         />
       ))}
+      {otherAllowances.length === 0 && (
+        <tr>
+          <td>
+            <Button type='button' className='text-xl' onClick={addOtherAllowance}>
+              +
+            </Button>
+          </td>
+        </tr>
+      )}
+      {otherAllowances.map((_, index) => (
+        <tr key={index}>
+          <td width={220} style={{ verticalAlign: 'middle' }} className='text-sm'>
+            Other Allowance
+          </td>
+          <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>:</td>
+          <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+            <span className='text-sm'>IDR</span>
+          </td>
+          <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+            <div className='flex items-center'>
+              <FormField
+                control={form.control}
+                name={`destinations.${destinationIndex}.other[${index}]`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        value={field.value}
+                        onChange={(e) => {
+                          // Memperbarui nilai field
+                          field.onChange(e); // Menggunakan onChange dari React Hook Form
+                          // Anda dapat melakukan aksi lain di sini, seperti mengupdate elemen lain
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <span className='text-sm'>* 100%</span>
+            </div>
+          </td>
+          <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+            <div className='flex items-center'>
+              <span className='text-sm' style={{ padding: '2px 5px' }}>
+                = IDR {calculateTotalOther()}
+              </span>
+            </div>
+          </td>
+          <td>
+            <Button type='button' className='text-xs' onClick={() => removeAllowanceOther(index)}>
+              X
+            </Button>
+          </td>
+        </tr>
+      ))}
+      {/* <tr>
+        <td width={220} style={{ verticalAlign: 'middle' }} className='text-sm'>
+          Other Allowance
+        </td>
+        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>:</td>
+        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+          <span className='text-sm'>IDR</span>
+        </td>
+        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+          <div className='flex items-center'>
+            <FormField
+              control={form.control}
+              name={`destinations.${destinationIndex}.other`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      value={field.value}
+                      onChange={(e) => {
+                        // Memperbarui nilai field
+                        field.onChange(e); // Menggunakan onChange dari React Hook Form
+                        // Anda dapat melakukan aksi lain di sini, seperti mengupdate elemen lain
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <span className='text-sm'>* 100%</span>
+          </div>
+        </td>
+        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
+          <div className='flex items-center'>
+            <span className='text-sm' style={{ padding: '2px 5px' }}>
+              = IDR {calculateTotalOther()}
+            </span>
+          </div>
+        </td>
+      </tr> */}
     </table>
   );
 }
