@@ -55,7 +55,8 @@ class PurchaseOrder extends Model
         'code',
         'message',
         'attachment_link',
-        'purchase_id'
+        'purchase_id',
+        'loekz_cancel'
     ];
 
     // protected static function newFactory(): PurchaseOrderFactory
