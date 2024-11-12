@@ -28,14 +28,6 @@ export const modelDropdowns = [
     },
   },
   {
-    dropdown: 'account_assignment_categories',
-    struct: {
-      name: 'description',
-      id: 'account',
-      tabel: 'account_assignment_categories',
-    },
-  },
-  {
     dropdown: 'storage_locations',
     struct: {
       name: 'storage_location_desc',
