@@ -10,10 +10,10 @@ class Family extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'user', 'status', 'bod'];
+    protected $fillable = ['name', 'userId', 'status', 'bod'];
 
     public function user()
     {
-        return $this->hasOne(User::class, 'nip', 'user');
+        return $this->belongsTo(User::class, 'userId', 'id');
     }
 }
