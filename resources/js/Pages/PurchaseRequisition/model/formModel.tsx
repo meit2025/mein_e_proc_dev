@@ -100,17 +100,6 @@ export const formModel: Array<FormFieldModel<any>> = [
     },
   },
   {
-    type: 'select',
-    name: 'account_assignment_categories',
-    label: 'Account Assignment',
-    required: true,
-    options: [],
-    style: {
-      width: '63.3rem',
-    },
-  },
-
-  {
     type: 'input',
     name: 'delivery_date',
     label: 'Delivery Date',

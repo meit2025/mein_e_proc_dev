@@ -1,12 +1,10 @@
-import FormWrapper from '@/components/form/FormWrapper';
-import { FormFieldModel } from '@/interfaces/form/formWrapper';
-import React, { ReactNode, useState } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
-import { FieldValues } from 'react-hook-form';
-import axios from 'axios';
-import { Link } from '@inertiajs/react';
 import axiosInstance from '@/axiosInstance';
+import FormWrapper from '@/components/form/FormWrapper';
 import { useAlert } from '@/contexts/AlertContext';
+import { FormFieldModel } from '@/interfaces/form/formWrapper';
+import axios from 'axios';
+import React, { ReactNode, useState } from 'react';
+import { FieldValues, FormProvider, useForm } from 'react-hook-form';
 import { Loading } from '../commons/Loading';
 
 interface FormMappingProps {
@@ -91,7 +89,7 @@ const FormMapping: React.FC<FormMappingProps> = ({
                   ) : (
                     <>
                       {!field.conditional ||
-                        watch(field.parameterConditional ?? '') === field.conditional ? (
+                      watch(field.parameterConditional ?? '') === field.conditional ? (
                         <FormWrapper model={field} />
                       ) : null}
                     </>
