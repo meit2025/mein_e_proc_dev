@@ -93,45 +93,9 @@ const FormMapping: React.FC<FormMappingProps> = ({
     setIsLoading(false);
   };
 
-  const [openForm, setOpenForm] = React.useState<boolean>(false);
-
-  const idUser = (url) => {
-    let str = url.split("/");
-    return str[str.length - 1];
-  }
-
-  const [formType, setFormType] = React.useState({
-    type: FormType.create,
-    id: undefined,
-  });
-
-  function openFormHandler() {
-    setOpenForm(!openForm);
-  }
-
   return (
     <FormProvider {...methods}>
       <Loading isLoading={isLoading || isLoadings} />
-      <Button
-        onClick={openFormHandler}
-        className='bg-blue-500'
-        style={{ marginRight: '10px', marginBottom: '10px' }}
-      >
-        <i className='ki-filled ki-people'></i>
-        Family Setting
-      </Button>
-
-      <CustomDialog
-        onClose={() => setOpenForm(false)}
-        open={openForm}
-        onOpenChange={openFormHandler}
-      >
-        <FamilyHeaderForm
-          idUser={idUser(url)}
-          onSuccess={(x: boolean) => setOpenForm(!x)}
-        />
-      </CustomDialog>
-
       <form onSubmit={methods.handleSubmit(onSubmit)}>
         <div className={classForm}>
           {isCustom ? (
