@@ -8,24 +8,6 @@ import { Link } from '@inertiajs/react';
 import axiosInstance from '@/axiosInstance';
 import { useAlert } from '@/contexts/AlertContext';
 import { Loading } from '../commons/Loading';
-import { FamilyHeaderForm } from '@/Pages/Master/Family/components/form';
-import { CustomDialog } from '@/components/commons/CustomDialog';
-import { FormType } from '@/lib/utils';
-import { Button } from '@/components/shacdn/button';
-import { LIST_API_FAMILY, CREATE_API_FAMILY, EDIT_FAMILY, UPDATE_FAMILY } from '@/endpoint/family/api';
-
-export interface FamilyModel {
-  name: string;
-  bod: Date;
-  status: string;
-  user: string;
-}
-
-export interface UserModel {
-  nip: String;
-  name: String;
-  families: FamilyModel[];
-}
 
 interface FormMappingProps {
   formModel?: Array<FormFieldModel<any>>;
