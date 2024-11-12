@@ -41,12 +41,11 @@ class ReimbuseController extends Controller
     }
 
 
-    public function checkBalance(Request $request) {
-        
+    public function checkBalance(Request $request)
+    {
+
         $user = $request->user;
         $type = $request->type;
-        
-        $userReimburseTypeBalance =  Reimburse::where('')
     }
     public function is_required(Request $request)
     {
