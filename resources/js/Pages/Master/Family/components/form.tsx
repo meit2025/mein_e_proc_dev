@@ -7,7 +7,7 @@ import {
 } from '@/components/shacdn/form';
 
 import { z } from 'zod';
-
+import moment from 'moment';
 import { Button } from '@/components/shacdn/button';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -89,10 +89,14 @@ export default function FamilyHeaderForm({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       let response;
+      const valueData = {
+        ...values,
+        bod: moment(values.bod).format('YYYY-MM-DD'),
+      }
       if (type === FormType.edit) {
-        response = await axiosInstance.put(updateURL ?? '', values);
+        response = await axiosInstance.put(updateURL ?? '', valueData);
       } else {
-        response = await axiosInstance.post(storeURL ?? '', values);
+        response = await axiosInstance.post(storeURL ?? '', valueData);
       }
       onSuccess && onSuccess(true);
       showToast(response?.data?.message, 'success');
