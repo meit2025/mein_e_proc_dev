@@ -67,11 +67,37 @@ export const ReimburseForm: React.FC<Props> = ({
   const [isFamily, setIsFamily] = useState([[]]);
   const { dataDropdown: dataUom, getDropdown: getUom } = useDropdownOptions();
 
-  const form = useForm({
+  const formSchema = z.object({
+    formCount: z.string().min(1, 'total form must be have value'),
+    remark_group: z.string().optional(),
+    cost_center: z.string().min(1, 'cost center required'),
+    requester: z.string().min(1, 'requester required'),
+    forms: z.array(
+      z.object({
+        id: z.string().optional(),
+        for: z.string().optional(),
+        group: z.string().optional(),
+        reimburse_type: z.string().min(1, 'reimburse type required'),
+        short_text: z.string().optional(),
+        balance: z.string().optional(),
+        currency: z.string().optional(),
+        tax_on_sales: z.string().optional(),
+        uom: z.string().optional(),
+        purchasing_group: z.string().optional(),
+        period: z.string().optional(),
+        type: z.string().optional(),
+        item_delivery_data: z.date(),
+        start_date: z.date(),
+        end_date: z.date(),
+      }),
+    ),
+  });
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       formCount: '1',
-      remark_group: '',
-      cost_center: '',
+      remark_group: 'test',
+      cost_center: 'test',
       requester: '',
       forms: Array.from({ length: 1 }).map(() => ({
         id: '',
@@ -231,11 +257,17 @@ export const ReimburseForm: React.FC<Props> = ({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axiosInstance.post(store_url ?? '', values);
+      const response = await axiosInstance.post(store_url ?? '', values);
+
+      console.log(values);
+
       showToast('succesfully created data', 'success');
-      onSuccess?.(true);
+
+      // onSuccess?.(true);
     } catch (e) {
       const error = e as AxiosError;
+
+      console.log(error);
     }
   };
 

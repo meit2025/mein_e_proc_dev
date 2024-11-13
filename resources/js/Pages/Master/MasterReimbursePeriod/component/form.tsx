@@ -8,26 +8,15 @@ import {
 } from '@/components/shacdn/form';
 
 import { z } from 'zod';
-
+import moment from 'moment';
 import { Button } from '@/components/shacdn/button';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Textarea } from '@/components/shacdn/textarea';
 
 import { ScrollArea } from '@/components/shacdn/scroll-area';
 
-import { Checkbox } from '@/components/shacdn/checkbox';
-
 import '../css/index.scss';
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/shacdn/select';
 import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import { Input } from '@/components/shacdn/input';
 import * as React from 'react';
@@ -35,10 +24,8 @@ import * as React from 'react';
 import axiosInstance from '@/axiosInstance';
 
 import { useAlert } from '@/contexts/AlertContext';
-import { RadioGroup, RadioGroupItem } from '@/components/shacdn/radio-group';
 import { AxiosError } from 'axios';
 import { FormType } from '@/lib/utils';
-import { Loading } from '@/components/commons/Loading';
 
 export interface props {
   onSuccess?: (value: boolean) => void;
@@ -76,7 +63,7 @@ export default function ReimbursePeriodForm({
     try {
       const response = await axiosInstance.get(editURL);
       const data = response.data.data[0];
-
+      
       form.reset({
         code: data.code,
         start: new Date(data.start),
@@ -91,7 +78,17 @@ export default function ReimbursePeriodForm({
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const response = await axiosInstance.post(storeURL, values);
+      let response;
+      const valueData = {
+        ...values,
+        start: moment(values.start).format('YYYY-MM-DD'),
+        end: moment(values.end).format('YYYY-MM-DD'),
+      }
+      if (type === FormType.edit) {
+        response = await axiosInstance.put(updateURL ?? '', valueData);
+      } else {
+        response = await axiosInstance.post(storeURL ?? '', valueData);
+      }
       onSuccess && onSuccess(true);
       showToast(response?.data?.message, 'success');
     } catch (e) {
@@ -118,7 +115,6 @@ export default function ReimbursePeriodForm({
               <td>
                 <FormField
                   control={form.control}
-                  disabled={type == FormType.edit}
                   name='code'
                   render={({ field }) => (
                     <FormItem>
@@ -128,6 +124,7 @@ export default function ReimbursePeriodForm({
                           placeholder='Insert code'
                           {...field}
                           value={field.value || ''}
+                          disabled={type == FormType.edit}
                           onChange={(e) => field.onChange(e.target.value)}
                         />
                       </FormControl>

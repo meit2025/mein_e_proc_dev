@@ -7,19 +7,6 @@ import React, { ReactNode, useState } from 'react';
 import { FieldValues, FormProvider, useForm } from 'react-hook-form';
 import { Loading } from '../commons/Loading';
 
-export interface FamilyModel {
-  name: string;
-  bod: Date;
-  status: string;
-  user: string;
-}
-
-export interface UserModel {
-  nip: String;
-  name: String;
-  families: FamilyModel[];
-}
-
 interface FormMappingProps {
   formModel?: Array<FormFieldModel<any>>;
   url: string;
