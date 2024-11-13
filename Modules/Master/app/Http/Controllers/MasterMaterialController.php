@@ -116,6 +116,7 @@ class MasterMaterialController extends Controller
 
         return $this->successResponse($data);
     }
+<<<<<<< HEAD
 
 
     public function getListMasterMaterialNumberByMaterialGroupAPI($material_group, Request $request)
@@ -167,4 +168,6 @@ class MasterMaterialController extends Controller
 
         return $this->successResponse($data->get());
     }
+=======
+>>>>>>> 47e88d2 (adding async component dropdown)
 }
