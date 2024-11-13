@@ -139,7 +139,7 @@ class ProcurementService
             'is_closed' => '', // ebakz
             'purchasing_group' => $procurement->purchasing_groups, //bsart
             'purchasing_organization' => $settings['PurchasingOrganization'], // ekorg
-            'account_assignment_category' => $procurement->account_assignment_categories,  // knttp
+            'account_assignment_category' => $item->account_assignment_categories,  // knttp
             'item_delivery_date' => $delivery_date, // lfdat
             'storage_location' => $procurement->storage_locations,  // lgort
             'desired_vendor' => $vendor->masterBusinesPartnerss->partner_number ?? '',  // lifnr
@@ -147,7 +147,7 @@ class ProcurementService
             'material_number' => $item->material_number, // matnr
             'unit_of_measure' => $item->uom,
             'quantity' => $item->qty,
-            'balance' => $item->total_amount,
+            'balance' => round($item->total_amount, 0),
             'waers' => 'IDR',
             'tax_code' => $item->tax, // mwskz
             'item_category' => '', // pstyp

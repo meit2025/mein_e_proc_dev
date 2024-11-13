@@ -8,7 +8,6 @@ import { formModel } from './model/formModel';
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
 import useDropdownOptionsArray from '@/lib/getDropdownArray';
 import { modelDropdowns } from './model/modelDropdown';
-import { Loading } from '@/components/commons/Loading';
 
 function Create() {
   const methods = useForm({

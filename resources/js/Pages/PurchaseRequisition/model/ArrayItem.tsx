@@ -26,6 +26,8 @@ const ArrayItem = ({
   const { dataDropdown: dataUom, getDropdown: getUom } = useDropdownOptions();
   const { dataDropdown: dataIo, getDropdown: getIo } = useDropdownOptions();
   const { dataDropdown: dataMainAsset, getDropdown: getMainAssetNumber } = useDropdownOptions();
+  const { dataDropdown: accountAssignment, getDropdown: getAccountAssignment } =
+    useDropdownOptions();
 
   useEffect(() => {
     getCostCenter('', { name: 'desc', id: 'cost_center', tabel: 'master_cost_centers' });
@@ -62,6 +64,11 @@ const ArrayItem = ({
         groupBy: 'asset,desc',
       },
     });
+    getAccountAssignment('', {
+      name: 'description',
+      id: 'account',
+      tabel: 'account_assignment_categories',
+    });
   }, []);
 
   return (
@@ -76,6 +83,19 @@ const ArrayItem = ({
           width: '58.5rem',
         }}
         placeholder={'Cost Center'}
+        classNames='mt-2'
+      />
+
+      <FormAutocomplete<any>
+        options={accountAssignment}
+        fieldLabel={'Account Assignment'}
+        fieldName={`vendors[${dataIndex}].units[${ItemIndex}].account_assignment_categories`}
+        isRequired={true}
+        disabled={false}
+        style={{
+          width: '58.5rem',
+        }}
+        placeholder={'Account Assignment'}
         classNames='mt-2'
       />
 

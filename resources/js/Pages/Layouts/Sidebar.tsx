@@ -36,6 +36,7 @@ import { LIST_PAGE_FAMILY } from '@/endpoint/family/page';
 import { PAGE_REIMBURSE } from '@/endpoint/reimburse/page';
 import { LIST_PAGE_MASTER_PERMISSION } from '@/endpoint/permission/page';
 import { LIST_PAGE_DESTINATION } from '@/endpoint/destination/page';
+import { ScrollArea } from '@/components/shacdn/scroll-area';
 
 export const RuteTitle = (title: string) => {
   return (
@@ -389,7 +390,7 @@ export default function Sidebar() {
 
   return (
     <div
-      className='sidebar dark:bg-coal-600 bg-light border-r border-r-gray-200 dark:border-r-coal-100 fixed top-0 bottom-0 z-20 hidden lg:flex flex-col items-stretch shrink-0'
+      className='sidebar dark:bg-coal-600 bg-light border-e border-e-gray-200 dark:border-e-coal-100 fixed z-20 hidden lg:flex flex-col items-stretch shrink-0'
       data-drawer='true'
       data-drawer-classname='drawer drawer-start top-0 bottom-0'
       data-drawer-enable='true|lg:false'
@@ -399,58 +400,60 @@ export default function Sidebar() {
         className='sidebar-header hidden lg:flex items-center relative justify-between px-3 lg:px-6 shrink-0'
         id='sidebar_header'
       >
-        <a className='dark:hidden' href='html/demo1.html'>
+        <a className='dark:hidden' href='/'>
           <img className='default-logo min-h-[22px] max-w-none' src={Logo} />
           <img className='small-logo min-h-[22px] max-w-none' src={Logo} />
         </a>
-        <a className='hidden dark:block' href='html/demo1.html'>
+        <a className='hidden dark:block' href='/'>
           <img className='default-logo min-h-[22px] max-w-none' src={Logo} />
           <img className='small-logo min-h-[22px] max-w-none' src={Logo} />
         </a>
-        <button
+        {/* <button
           className='btn btn-icon btn-icon-md size-[30px] rounded-lg border border-gray-200 dark:border-gray-300 bg-light text-gray-500 hover:text-gray-700 toggle absolute left-full top-2/4 -translate-x-2/4 -translate-y-2/4'
           data-toggle='body'
           data-toggle-classname='sidebar-collapse'
           id='sidebar_toggle'
         >
           <i className='ki-filled ki-black-left-line toggle-active:rotate-180 transition-all duration-300'></i>
-        </button>
+        </button> */}
       </div>
-      <div className='sidebar-content flex grow shrink-0 py-5 pr-2' id='sidebar_content'>
-        <div
-          className='scrollable-y-hover grow shrink-0 flex pl-2 lg:pl-5 pr-1 lg:pr-3'
-          data-scrollable='true'
-          data-scrollable-dependencies='#sidebar_header'
-          data-scrollable-height='auto'
-          data-scrollable-offset='0px'
-          data-scrollable-wrappers='#sidebar_content'
-          id='sidebar_scrollable'
-        >
+      <ScrollArea>
+        <div className='sidebar-content flex grow shrink-0 py-5 pr-2' id='sidebar_content'>
           <div
-            className='menu flex flex-col grow gap-0.5'
-            data-menu='true'
-            data-menu-accordion-expand-all='false'
-            id='sidebar_menu'
+            className='scrollable-y-hover grow shrink-0 flex pl-2 lg:pl-5 pr-1 lg:pr-3'
+            data-scrollable='true'
+            data-scrollable-dependencies='#sidebar_header'
+            data-scrollable-height='auto'
+            data-scrollable-offset='0px'
+            data-scrollable-wrappers='#sidebar_content'
+            id='sidebar_scrollable'
           >
-            {sidebar.map((item, index) => {
-              return (
-                <div key={index}>
-                  {item.group !== '' && RuteTitle(item.group)}{' '}
-                  {item.menu.map((menu) => {
-                    if (menu.sub.length > 0) {
-                      return MultiMenu(menu, url.toLowerCase() as string);
-                    }
+            <div
+              className='menu flex flex-col grow gap-0.5'
+              data-menu='true'
+              data-menu-accordion-expand-all='false'
+              id='sidebar_menu'
+            >
+              {sidebar.map((item, index) => {
+                return (
+                  <div key={index}>
+                    {item.group !== '' && RuteTitle(item.group)}{' '}
+                    {item.menu.map((menu) => {
+                      if (menu.sub.length > 0) {
+                        return MultiMenu(menu, url.toLowerCase() as string);
+                      }
 
-                    if (menu.sub.length === 0) {
-                      return Singel(menu, url.toLowerCase() as string);
-                    }
-                  })}
-                </div>
-              );
-            })}
+                      if (menu.sub.length === 0) {
+                        return Singel(menu, url.toLowerCase() as string);
+                      }
+                    })}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
+      </ScrollArea>
     </div>
   );
 }

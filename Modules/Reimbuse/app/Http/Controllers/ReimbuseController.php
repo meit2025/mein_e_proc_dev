@@ -40,6 +40,13 @@ class ReimbuseController extends Controller
         }
     }
 
+
+    public function checkBalance(Request $request)
+    {
+
+        $user = $request->user;
+        $type = $request->type;
+    }
     public function is_required(Request $request)
     {
         $user = $request->user;

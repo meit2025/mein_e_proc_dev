@@ -27,7 +27,6 @@ class Procurement extends FormRequest
             'user_id' => 'required|integer|exists:users,id',
             'document_type' => 'required|string|max:255',
             'purchasing_groups' => 'required|string|max:10',
-            'account_assignment_categories' => 'required|string|max:1',
             'delivery_date' => 'required|date',
             'storage_locations' => 'required|string|max:4',
             'total_vendor' => 'required|integer|min:1',
