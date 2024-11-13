@@ -169,7 +169,7 @@ class ProcurementService
             'B01' => $item->short_text,
             'B03' => $item->short_text,
             'B04' => $item->short_text,
-            'Attachment_link' => '',
+            'attachment_link' => '',
         ];
     }
 
