@@ -55,7 +55,7 @@ export function AsyncDropdownComponent({
   label,
   value,
   onSelectChange,
-  placeholder,
+  placeholder = 'Search items ...',
 }: AsyncDropdownType) {
   const [open, setOpen] = React.useState(false);
   //   const [value, setValue] = React.useState('');
@@ -114,6 +114,21 @@ export function AsyncDropdownComponent({
     setOpen(false);
   }
 
+  //   React.useEffect(() => {
+  //     if (open) {
+  //       callAPI();
+  //     }
+  //   }, []);
+
+  console.log(url);
+
+  React.useEffect(() => {
+    if (open) {
+      callAPI();
+    } else {
+      setSearchText('');
+    }
+  }, [open]);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -121,11 +136,9 @@ export function AsyncDropdownComponent({
           variant='outline'
           role='combobox'
           aria-expanded={open}
-          className='w-[200px] justify-between'
+          className='w-[200px] text-xs justify-between'
         >
-          {value
-            ? dropdownList.find((framework) => framework[id] === value)?.[label]
-            : 'Search items ..'}
+          {value ? dropdownList.find((framework) => framework[id] === value)?.[label] : placeholder}
           <ChevronsUpDown className='opacity-50' />
         </Button>
       </PopoverTrigger>
@@ -134,9 +147,9 @@ export function AsyncDropdownComponent({
           <CommandInput
             onKeyDown={onKeyDownHandler}
             onValueChange={(value) => setSearchText(value)}
-            placeholder='Search framework...'
+            placeholder={placeholder}
           />
-          <CommandList>
+          <CommandList className='z-30'>
             {isLoading ? (
               <div className='py-10'>
                 <LoadingSpin />
@@ -146,14 +159,13 @@ export function AsyncDropdownComponent({
                 <CommandEmpty>No framework found. {dropdownList.length}</CommandEmpty>
 
                 {dropdownList.length > 0 ? (
-                  <CommandGroup>
+                  <CommandGroup className='z-30'>
                     {dropdownList.map((framework) => (
                       <CommandItem
+                        className='z-30'
                         key={framework[id]}
                         value={framework[id]}
                         onSelect={(currentValue) => {
-                          // setValue(currentValue === value ? '' : currentValue);
-                          // setOpen(false);
                           onSelectHandler(currentValue);
                         }}
                       >
