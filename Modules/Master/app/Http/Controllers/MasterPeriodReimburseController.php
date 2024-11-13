@@ -107,7 +107,7 @@ class MasterPeriodReimburseController extends Controller
             $getData->save();
             DB::commit();
 
-            return $this->successResponse("Create Reimburse Period Successfully");
+            return $this->successResponse("Edit Reimburse Period Successfully");
         } catch (\Exception  $e) {
             DB::rollBack();
             return $this->errorResponse($e->getMessage());

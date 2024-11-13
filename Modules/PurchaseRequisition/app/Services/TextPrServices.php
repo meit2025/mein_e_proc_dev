@@ -88,7 +88,7 @@ class TextPrServices
             'B01' => $pr->short_text,
             'B03' => $pr->short_text,
             'B04' => $pr->short_text,
-            'Attachment_link' => $pr->Attachment_link,
+            'attachment_link' => $pr->attachment_link,
         ];
     }
 

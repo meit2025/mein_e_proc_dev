@@ -25,6 +25,9 @@ Route::group(['middleware' => 'auth'], function () {
         Route::inertia('/update/{id}', 'User/Update', [
             'id' => fn() => request()->route('id'),
         ]);
+        Route::inertia('/detail/{id}', 'User/Detail', [
+            'id' => fn() => request()->route('id'),
+        ]);
     });
 
     Route::group(['prefix' => 'api/user', 'middleware' => 'auth'], function () {
