@@ -71,6 +71,8 @@ export const BussinessTripFormV1 = ({
             shift_end: z.string().optional(),
             start_time: z.string().optional(),
             end_time: z.string().optional(),
+            request_start_time: z.string().optional(),
+            request_end_time: z.string().optional(),
           }),
         ),
         allowances: z.array(
@@ -690,13 +692,15 @@ export function DetailAttedances({
         </td>
       </tr>
       <tr>
-        <td>
-          <table className='detail-attedance text-xs'>
+        <td className='overflow-x'>
+          <table className='detail-attedance text-xs table-auto overflow-scroll w-full'>
             <thead>
               <th>Date</th>
               <th>Shift code</th>
               <th>Shift Start</th>
               <th>Shift End</th>
+              <th>Request Start Time</th>
+              <th>Request End Time</th>
               <th>Start Time</th>
               <th>End Time</th>
             </thead>
@@ -723,7 +727,6 @@ export function DetailAttedances({
                       )}
                     />
                   </td>
-
                   <td>
                     {attedance.shift_code}
                     <FormField
@@ -799,6 +802,34 @@ export function DetailAttedances({
                     <FormField
                       control={form.control}
                       name={`destinations.${destinationIndex}.detail_attedances.${index}.end_time`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input defaultValue={field.value} onChange={field.onChange} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </td>
+                  <td>
+                    <FormField
+                      control={form.control}
+                      name={`destinations.${destinationIndex}.detail_attedances.${index}.request_start_time`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input defaultValue={field.value} onChange={field.onChange} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </td>
+                  <td>
+                    <FormField
+                      control={form.control}
+                      name={`destinations.${destinationIndex}.detail_attedances.${index}.request_end_time`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
