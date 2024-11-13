@@ -10,6 +10,7 @@ import { LIST_REIMBURSE, UPDATE_REIMBURSE, STORE_REIMBURSE } from '@/endpoint/re
 import { FormType } from '@/lib/utils';
 import { Currency, Period, PurchasingGroup, User, Tax, CostCenter } from './model/listModel';
 import { PAGE_EDIT_REIMBURSE } from '@/endpoint/reimburse/page';
+import { AsyncDropdownComponent } from '@/components/commons/AsyncDropdownComponent';
 
 interface Props {
   users: User[];
@@ -39,6 +40,8 @@ export const Index = ({
   function openFormHandler() {
     setOpenForm(!openForm);
   }
+
+  const [selectValue, setSelectValue] = React.useState('');
 
   return (
     <>
@@ -70,6 +73,16 @@ export const Index = ({
           />
         </CustomDialog>
       </div>
+      <AsyncDropdownComponent
+        onSelectChange={(value) => {
+          setSelectValue(value);
+        }}
+        value={selectValue}
+        filter={['material_number']}
+        id='material_number'
+        label='material_number'
+        url='api/master/master-material/get-dropdown-master-material-number'
+      />
       <DataGridComponent
         columns={columns}
         actionType='dropdown'
