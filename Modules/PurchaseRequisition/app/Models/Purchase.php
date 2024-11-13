@@ -18,7 +18,7 @@ class Purchase extends Model
         'user_id',
         'document_type',
         'purchasing_groups',
-        'account_assignment_categories',
+        // 'account_assignment_categories',
         'delivery_date',
         'storage_locations',
         'total_vendor',

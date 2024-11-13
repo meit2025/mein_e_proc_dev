@@ -12,10 +12,10 @@ use Modules\Master\Models\Family;
 
 class FamilyController extends Controller
 {
-    public function list(Request $request)
+    public function list(Request $request, $userId)
     {
         try {
-            $query =  Family::query()->with(['user']);
+            $query =  Family::query()->where('userId', $userId);
             $perPage = $request->get('per_page', 10);
             $sortBy = $request->get('sort_by', 'id');
             $sortDirection = $request->get('sort_direction', 'asc');
@@ -28,7 +28,6 @@ class FamilyController extends Controller
                     'name' => $map->name,
                     'status' => $map->status,
                     'bod' => $map->bod,
-                    'user' => "( " . $map->user->nip . " )" . " - " . $map->user->name,
                 ];
             });
             return $this->successResponse($data);
@@ -67,29 +66,23 @@ class FamilyController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            'id' => 'nullable|exists:families,id',
             'name' => 'required',
             'status' => 'required|in:wife,child',
             'bod' => 'required|date',
-            'user' => 'required|exists:users,id',
+            'userId' => 'required|exists:users,id',
         ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return $this->errorResponse($validator->errors());
+        }
+        DB::beginTransaction();
         try {
-            foreach ($request->families as $family) {
-                DB::beginTransaction();
-                $family['user'] = $request->user;
-                $validator = Validator::make($family, $rules);
-                if ($validator->fails()) {
-                    return $this->errorResponse($validator->errors());
-                }
-                $validatedData = $validator->validated();
-                Family::updateOrCreate(
-                    ['id' => $family['id'] ?? null],
-                    $validatedData
-                );
-                DB::commit();
-            }
-            return $this->successResponse("Create/Update Family Member Successfully");
-        } catch (\Exception $e) {
+            $validatedData = $validator->validated();
+            Family::create($validatedData);
+            DB::commit();
+            return $this->successResponse("Create Family Data Successfully");
+        } catch (\Exception  $e) {
             DB::rollBack();
             return $this->errorResponse($e->getMessage());
         }
@@ -109,7 +102,7 @@ class FamilyController extends Controller
     public function edit($id)
     {
         try {
-            $data = Family::where('user', $id)->get();
+            $data = Family::find($id);
             return $this->successResponse($data);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -121,7 +114,30 @@ class FamilyController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $rules = [
+            'name' => 'required',
+            'status' => 'required|in:wife,child',
+            'bod' => 'required|date',
+            'userId' => 'required|exists:users,id',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return $this->errorResponse($validator->errors());
+        }
+        DB::beginTransaction();
+        try {
+            $getData        = Family::find($id);
+            $validatedData = $validator->validated();
+            $getData->fill($validatedData);
+            $getData->save();
+            DB::commit();
+
+            return $this->successResponse("Edit Family Data Successfully");
+        } catch (\Exception  $e) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**
@@ -129,6 +145,15 @@ class FamilyController extends Controller
      */
     public function destroy($id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            Family::find($id)->delete();
+            DB::commit();
+
+            return $this->successResponse([], 'Delete Reimburse Period Successfully');
+        } catch (\Exception  $e) {
+            DB::rollBack();
+            return $this->errorResponse($e);
+        }
     }
 }
