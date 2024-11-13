@@ -8,7 +8,7 @@ import {
 } from '@/components/shacdn/form';
 
 import { z } from 'zod';
-
+import moment from 'moment';
 import { Button } from '@/components/shacdn/button';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -63,7 +63,7 @@ export default function ReimbursePeriodForm({
     try {
       const response = await axiosInstance.get(editURL);
       const data = response.data.data[0];
-
+      
       form.reset({
         code: data.code,
         start: new Date(data.start),
@@ -79,10 +79,15 @@ export default function ReimbursePeriodForm({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       let response;
+      const valueData = {
+        ...values,
+        start: moment(values.start).format('YYYY-MM-DD'),
+        end: moment(values.end).format('YYYY-MM-DD'),
+      }
       if (type === FormType.edit) {
-        response = await axiosInstance.put(updateURL ?? '', values);
+        response = await axiosInstance.put(updateURL ?? '', valueData);
       } else {
-        response = await axiosInstance.post(storeURL ?? '', values);
+        response = await axiosInstance.post(storeURL ?? '', valueData);
       }
       onSuccess && onSuccess(true);
       showToast(response?.data?.message, 'success');
