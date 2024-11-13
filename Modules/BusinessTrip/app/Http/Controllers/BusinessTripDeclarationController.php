@@ -160,17 +160,54 @@ class BusinessTripDeclarationController extends Controller
 
             $allowancesResultItem = array_values($allowancesResultItem);
 
+            $detailAttendance = [];
+            foreach ($value->detailAttendance as $row) {
+                $detailAttendance[] = [
+                    'date' => $row->date,
+                    'start_time' => $row->start_time,
+                    'end_time' => $row->end_time,
+                    'shift_code' => $row->shift_code,
+                    'shift_start' => $row->shift_start,
+                    'shift_end' => $row->shift_end,
+                    'request_start_time' => '08:00',
+                    'request_end_time' => '17:00',
+                ];
+            }
+
             $destinations[] = [
                 'destination' => $value->destination,
                 'business_trip_start_date' => $value->business_trip_start_date,
                 'business_trip_end_date' => $value->business_trip_end_date,
-                'detail_attedances' => $value->detailAttendance->makeHidden(['created_at', 'updated_at']),
+                'detail_attedances' => $detailAttendance,
                 'allowances' => $allowances,
                 'allowancesResultItem' => $allowancesResultItem,
             ];
         }
         $data->destinations = $destinations;
         return $this->successResponse($data->makeHidden(['created_at', 'updated_at']));
+    }
+
+
+    public function detailBtDeclareAPI($id)
+    {
+        $findData  = BusinessTrip::with(
+            [
+                'requestFor',
+                'requestedBy',
+                'purposeType',
+                'costCenter',
+                'pajak',
+                'purchasingGroup',
+                'attachment',
+                'businessTripDestination',
+                'businessTripDestination.detailAttendance',
+                'businessTripDestination.detailDestinationDay',
+                'businessTripDestination.detailDestinationDay.allowance',
+                'businessTripDestination.detailDestinationTotal',
+                'businessTripDestination.detailDestinationTotal.allowance'
+            ]
+        )->where('id', $id)->first();
+        return $this->successResponse($findData);
     }
 
     /**
@@ -271,7 +308,7 @@ class BusinessTripDeclarationController extends Controller
                     'destination' => $data_destination['destination'],
                     'business_trip_start_date' => date('Y-m-d', strtotime($data_destination['business_trip_start_date'])),
                     'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
-                    'other_allowance' => $data_destination['other'][0],
+                    'other_allowance' => isset($data_destination['other']) ? $data_destination['other'][0] : 0,
                 ]);
                 foreach ($data_destination['detail_attedances'] as $key => $destination) {
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
@@ -281,8 +318,8 @@ class BusinessTripDeclarationController extends Controller
                         'shift_code' => $destination['shift_code'],
                         'shift_start' => $destination['shift_start'],
                         'shift_end' => $destination['shift_end'],
-                        'start_time' => $destination['start_time'],
-                        'end_time' => $destination['end_time'],
+                        'start_time' => $destination['request_start_time'],
+                        'end_time' => $destination['request_end_time'],
                     ]);
                 }
 
