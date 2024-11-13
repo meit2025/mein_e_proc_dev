@@ -2,7 +2,7 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import axiosInstance from '@/axiosInstance';
-import { DETAIL_API } from '@/endpoint/getway/api';
+import { DETAIL_USER } from '@/endpoint/user/api';
 import CustomTab from '@/components/commons/CustomTab';
 import { contentsTabs, labelsTabs } from './model/detailModel';
 import { Loading } from '@/components/commons/Loading';
@@ -15,7 +15,7 @@ const Detail = ({ id }: { id: number }) => {
     async () => {
       setIsLoading(true);
       try {
-        const response = await axiosInstance.get(DETAIL_API(id));
+        const response = await axiosInstance.get(DETAIL_USER(id));
         const data = response.data;
         setData(data.data);
       } catch (error) {
@@ -41,7 +41,7 @@ const Detail = ({ id }: { id: number }) => {
 
 // Assign layout to the page
 Detail.layout = (page: ReactNode) => (
-  <MainLayout title='Api' description='Api Detail'>
+  <MainLayout title='User' description='User Detail'>
     {page}
   </MainLayout>
 );

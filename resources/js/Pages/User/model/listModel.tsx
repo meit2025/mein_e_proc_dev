@@ -19,3 +19,24 @@ export const columns: GridColDef[] = [
   { field: 'immediate_spv', headerName: 'Immediate SPV', width: 200, filterable: true },
   { field: 'role', headerName: 'Role', width: 200, filterable: true },
 ];
+
+export const columnsValue: GridColDef[] = [
+  {
+    field: 'name',
+    headerName: 'Name',
+    width: 300,
+    filterable: true,
+  },
+  {
+    field: 'status',
+    headerName: 'Status',
+    width: 300,
+    filterable: true,
+  },
+  {
+    field: 'bod',
+    headerName: 'Birth Of Day',
+    width: 300,
+    filterable: true,
+  },
+];
