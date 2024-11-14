@@ -81,9 +81,38 @@ class MasterMaterialController extends Controller
         //
     }
 
-    public function getListMaterialByMaterialGroupAPI($material_group) {
+    public function getListMaterialByMaterialGroupAPI($material_group)
+    {
         $listMaterial = MasterMaterial::where('material_group', $material_group)->get();
 
         return $this->successResponse($listMaterial);
+    }
+
+
+    public function getListMasterMaterialNumberAPI(Request $request)
+    {
+
+        $data = MasterMaterial::query();
+
+
+
+
+        // $data = $data->where('material_number', 'like', '%' . 'm' . '%');
+        if ($request->filter && ($request->search && $request->search != '')) {
+            foreach ($request->filter as $f) {
+                $data = $data->where($f, 'ilike', '%' . $request->search . '%');
+            }
+        } else {
+            return $this->successResponse([]);
+        }
+
+
+
+
+
+        $data =  $data->limit(100)->get();
+
+
+        return $this->successResponse($data);
     }
 }

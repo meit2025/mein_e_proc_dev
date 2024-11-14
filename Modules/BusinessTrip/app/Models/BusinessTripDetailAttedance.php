@@ -24,7 +24,23 @@ class BusinessTripDetailAttedance extends Model
         'date',
     ];
 
-    
+    function getStartTimeAttribute()
+    {
+        return date('H:i', strtotime($this->attributes['start_time']));
+    }
+    function getEndTimeAttribute()
+    {
+        return date('H:i', strtotime($this->attributes['end_time']));
+    }
+
+    function getShiftStartAttribute()
+    {
+        return date('H:i', strtotime($this->attributes['shift_start']));
+    }
+    function getShiftEndAttribute()
+    {
+        return date('H:i', strtotime($this->attributes['shift_end']));
+    }
 
     // protected static function newFactory(): BusinessTripDetailAttedanceFactory
     // {

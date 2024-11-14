@@ -104,9 +104,8 @@ Route::group(['prefix' => 'api/'], function () {
     Route::group(['prefix' => 'business-trip-declaration'], function () {
         Route::get('/list', [BusinessTripDeclarationController::class, 'listAPI'])->name('business-trip-declaration-list.index');
         Route::post('/create', [BusinessTripDeclarationController::class, 'storeAPI'])->name('business-trip-declaration.store');
-        // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
-        // Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
         Route::get('/detail/{id}', [BusinessTripDeclarationController::class, 'showAPI'])->name('business-trip-declaration.detail');
+        Route::get('/detail-bt/{id}', [BusinessTripDeclarationController::class, 'detailBtDeclareAPI'])->name('business-trip-declaration.detail');
     });
 
     Route::group(['prefix' => 'purpose-type-allowance'], function () {

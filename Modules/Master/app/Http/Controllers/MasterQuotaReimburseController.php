@@ -34,7 +34,7 @@ class MasterQuotaReimburseController extends Controller
                 })->toArray();
                 return [
                     'id' => $map->id,
-                    'period' => $map->period->code,
+                    'period' => $map->period->code. ' ( ' . $map->period->start . ' - ' . $map->period->end . ' )',
                     'type' => $map->type->name,
                     'users' => join(',', $userRelations),
                 ];
@@ -50,16 +50,13 @@ class MasterQuotaReimburseController extends Controller
     public function index()
     {
         try {
-            $listPeriodReimburse    = MasterPeriodReimburse::get();
-            $listReimburseType      = MasterTypeReimburse::get();
-
             $listUserInGrade = BusinessTripGradeUser::select("user_id")->pluck('user_id')->toArray();
             $listUser =  User::whereNotIn('id', $listUserInGrade)->get();
 
 
             return Inertia::render(
                 'Master/MasterReimburseQuota/Index',
-                compact('listPeriodReimburse', 'listReimburseType', 'listUser')
+                compact('listUser')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -80,7 +77,7 @@ class MasterQuotaReimburseController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            'users' => 'required',
+            'users' => '',
             'period' => 'required|exists:master_period_reimburses,id',
             'type' => 'required|exists:master_type_reimburses,id'
         ];
@@ -94,8 +91,8 @@ class MasterQuotaReimburseController extends Controller
             $validatedData  = $validator->validated();
             $inputData      = collect($validatedData)->except('users');
             $createData     = MasterQuotaReimburse::create($inputData->toArray());
-            
-            if ($createData) {
+
+            if ($createData && !empty($validatedData['users'])) {
                 $validatedData['users'] = array_map(function($user) use($createData) {
                     return [
                         'user_id' => $user,
@@ -141,7 +138,7 @@ class MasterQuotaReimburseController extends Controller
     public function update(Request $request, $id)
     {
         $rules = [
-            'users' => 'required',
+            'users' => '',
             'period' => 'required|exists:master_period_reimburses,id',
             'type' => 'required|exists:master_type_reimburses,id'
         ];
@@ -160,14 +157,16 @@ class MasterQuotaReimburseController extends Controller
             $getData->save();
 
             MasterQuotaReimburseUser::where('quota_reimburses_id', $id)->delete();
-            $validatedData['users'] = array_map(function($user) use($id) {
-                return [
-                    'user_id' => $user,
-                    'quota_reimburses_id' => $id
-                ];
-            }, $validatedData['users']);
-
-            MasterQuotaReimburseUser::insert($validatedData['users']);
+            if (!empty($validatedData['users'])) {
+                $validatedData['users'] = array_map(function($user) use($id) {
+                    return [
+                        'user_id' => $user,
+                        'quota_reimburses_id' => $id
+                    ];
+                }, $validatedData['users']);
+    
+                MasterQuotaReimburseUser::insert($validatedData['users']);
+            }
             DB::commit();
             return $this->successResponse("Edit Reimburse Quota Successfully");
         } catch (\Exception  $e) {
