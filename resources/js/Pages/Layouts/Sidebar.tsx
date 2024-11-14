@@ -401,12 +401,12 @@ export default function Sidebar() {
         id='sidebar_header'
       >
         <a className='dark:hidden' href='/'>
-          <img className='default-logo min-h-[22px] max-w-none' src={Logo} />
-          <img className='small-logo min-h-[22px] max-w-none' src={Logo} />
+          <img alt='logo' className='default-logo min-h-[22px] max-w-none' src={Logo} />
+          <img alt='logo' className='small-logo min-h-[22px] max-w-none' src={Logo} />
         </a>
         <a className='hidden dark:block' href='/'>
-          <img className='default-logo min-h-[22px] max-w-none' src={Logo} />
-          <img className='small-logo min-h-[22px] max-w-none' src={Logo} />
+          <img alt='logo' className='default-logo min-h-[22px] max-w-none' src={Logo} />
+          <img alt='logo-main' className='small-logo min-h-[22px] max-w-none' src={Logo} />
         </a>
         {/* <button
           className='btn btn-icon btn-icon-md size-[30px] rounded-lg border border-gray-200 dark:border-gray-300 bg-light text-gray-500 hover:text-gray-700 toggle absolute left-full top-2/4 -translate-x-2/4 -translate-y-2/4'
@@ -418,7 +418,13 @@ export default function Sidebar() {
         </button> */}
       </div>
       <ScrollArea>
-        <div className='sidebar-content flex grow shrink-0 py-5 pr-2' id='sidebar_content'>
+        <div
+          className='sidebar-content flex grow shrink-0 py-5 pr-2'
+          id='sidebar_content'
+          style={{
+            height: '93vh',
+          }}
+        >
           <div
             className='scrollable-y-hover grow shrink-0 flex pl-2 lg:pl-5 pr-1 lg:pr-3'
             data-scrollable='true'
@@ -436,15 +442,15 @@ export default function Sidebar() {
             >
               {sidebar.map((item, index) => {
                 return (
-                  <div key={index}>
+                  <div key={`${index}-${item.menu}`}>
                     {item.group !== '' && RuteTitle(item.group)}{' '}
                     {item.menu.map((menu) => {
                       if (menu.sub.length > 0) {
-                        return MultiMenu(menu, url.toLowerCase() as string);
+                        return MultiMenu(menu, url.toLowerCase());
                       }
 
                       if (menu.sub.length === 0) {
-                        return Singel(menu, url.toLowerCase() as string);
+                        return Singel(menu, url.toLowerCase());
                       }
                     })}
                   </div>
