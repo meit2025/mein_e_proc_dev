@@ -36,7 +36,14 @@ export default function MainLayout({ children, title, description }: MainLayoutP
               </div>
             )}
 
-            <div className='container-fixed'> {children}</div>
+            <div
+              className='container-fixed'
+              style={{
+                height: '84vh',
+              }}
+            >
+              {children}
+            </div>
           </main>
           <Footer />
         </div>

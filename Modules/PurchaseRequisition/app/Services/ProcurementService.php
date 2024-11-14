@@ -45,8 +45,8 @@ class ProcurementService
 
             $reqno = (int) SettingApproval::where('key', 'dokumenType_' . $procurement->document_type)->lockForUpdate()->value('value') + 1;
 
-            $entertainment = Entertainment::where('purchase_id', $vendor->id)->first();
-            $cashData = CashAdvancePurchases::where('purchase_id', $vendor->id)->first();
+            $entertainment = Entertainment::where('purchase_id', $id)->first();
+            $cashData = CashAdvancePurchases::where('purchase_id', $id)->first();
 
             foreach ($items as $key => $value) {
                 $datainsert = $this->preparePurchaseRequisitionData(

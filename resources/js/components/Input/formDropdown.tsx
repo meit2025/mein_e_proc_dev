@@ -49,11 +49,10 @@ const FormAutocomplete = <T,>({
     <div className='w-full'>
       <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
         {fieldLabel && (
-            <label className={`form-label max-w-${lengthLabel}`}>
-              {fieldLabel} <span className='text-red-700'> {isRequired ? '*' : ''}</span>
-            </label>
-          )
-        } 
+          <label className={`form-label max-w-${lengthLabel}`}>
+            {fieldLabel} <span className='text-red-700'> {isRequired ? '*' : ''}</span>
+          </label>
+        )}
         <Controller
           name={fieldName}
           control={control}
@@ -74,7 +73,7 @@ const FormAutocomplete = <T,>({
                     onChangeOutside(data ? data.value : null);
                   }
                 }}
-                sx={style}
+                sx={{ ...style, pointerEvents: 'auto', cursor: 'auto' }}
                 disabled={disabled}
                 loading={loading}
                 onInputChange={(_, newInputValue) => {
@@ -88,14 +87,15 @@ const FormAutocomplete = <T,>({
                     placeholder={placeholder}
                     error={Boolean(errors[fieldName])}
                     required={isRequired}
+                    style={{
+                      pointerEvents: 'auto',
+                    }}
                     InputProps={{
                       ...params.InputProps,
                       sx: { height: '36px' },
                       endAdornment: (
                         <>
-                          {loading ? (
-                            <CircularProgress color="inherit" size={20} />
-                          ) : null}
+                          {loading ? <CircularProgress color='inherit' size={20} /> : null}
                           {params.InputProps.endAdornment}
                         </>
                       ),

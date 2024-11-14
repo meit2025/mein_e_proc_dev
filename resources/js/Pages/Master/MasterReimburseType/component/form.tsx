@@ -4,7 +4,7 @@ import {
   FormField,
   FormItem,
   FormMessage,
-  FormLabel
+  FormLabel,
 } from '@/components/shacdn/form';
 
 import { z } from 'zod';
@@ -43,8 +43,8 @@ export interface props {
   onSuccess?: (value: boolean) => void;
   type?: FormType;
   listGrades?: Grade[];
-  editURL?: string,
-  updateURL?: string,
+  editURL?: string;
+  updateURL?: string;
   id?: string;
 }
 
@@ -77,7 +77,7 @@ export default function ReimburseTypeForm({
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const { dataDropdown: dataMaterialGroup, getDropdown: getMaterialGroup } = useDropdownOptions();
   const { dataDropdown: dataMaterialNumber, getDropdown: getMaterialNumber } = useDropdownOptions();
-  
+
   const defaultValues = {
     code: '',
     name: '',
@@ -88,7 +88,7 @@ export default function ReimburseTypeForm({
     grade_all_price: '0',
     grades: [],
   };
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues,
@@ -98,7 +98,7 @@ export default function ReimburseTypeForm({
     try {
       const response = await axiosInstance.get(editURL);
       const data = response.data.data;
-      
+
       form.reset({
         code: data.code,
         name: data.name,
@@ -117,7 +117,7 @@ export default function ReimburseTypeForm({
 
   const { fields: gradeFields } = useFieldArray({
     control: form.control,
-    name: `grades`,
+    name: 'grades',
   });
 
   const { showToast } = useAlert();
@@ -142,10 +142,11 @@ export default function ReimburseTypeForm({
 
   const handleSearchMaterialGroup = async (query: string) => {
     if (query.length > 0) {
-      getMaterialGroup(query, {
+      getMaterialGroup('', {
         name: 'material_group',
         id: 'id',
         tabel: 'material_groups',
+        search: query,
       });
     }
   };
@@ -166,7 +167,7 @@ export default function ReimburseTypeForm({
       id: 'id',
       tabel: 'material_groups',
     });
-    
+
     getMaterialNumber('', {
       name: 'material_number',
       id: 'id',
@@ -176,7 +177,7 @@ export default function ReimburseTypeForm({
     if (type === FormType.edit) {
       getDetailData();
     }
-    
+
     document.body.style.removeProperty('pointer-events');
   }, []);
 
