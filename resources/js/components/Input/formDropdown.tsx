@@ -1,6 +1,6 @@
-import { Autocomplete, TextField, FormHelperText } from '@mui/material';
+import { Autocomplete, TextField, FormHelperText, CircularProgress } from '@mui/material';
 import { Controller, useFormContext } from 'react-hook-form';
-import { CSSProperties } from 'react';
+import { CSSProperties, useEffect } from 'react';
 
 // Define the option type as a generic T for flexibility
 interface Option<T> {
@@ -21,6 +21,8 @@ interface FormAutocompleteProps<T> {
   lengthLabel?: string;
   // eslint-disable-next-line no-unused-vars
   onChangeOutside?: (value: T | null) => void;
+  onSearch?: (query: string) => Promise<Option<T>[]>;
+  loading?: boolean;
 }
 
 const FormAutocomplete = <T,>({
@@ -35,18 +37,26 @@ const FormAutocomplete = <T,>({
   classNames,
   onChangeOutside,
   lengthLabel = '40',
+  onSearch,
+  loading = false,
 }: FormAutocompleteProps<T>) => {
   const {
     control,
     formState: { errors },
   } = useFormContext();
 
+  useEffect(() => {
+    document.body.style.pointerEvents = 'auto';
+  }, []);
+
   return (
-    <div className='w-full'>
+    <div className='w-full' style={{ pointerEvents: 'auto' }}>
       <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
-        <label className={`form-label max-w-${lengthLabel}`}>
-          {fieldLabel} <span className='text-red-700'> {isRequired ? '*' : ''}</span>
-        </label>
+        {fieldLabel && (
+          <label className={`form-label max-w-${lengthLabel}`}>
+            {fieldLabel} <span className='text-red-700'> {isRequired ? '*' : ''}</span>
+          </label>
+        )}
         <Controller
           name={fieldName}
           control={control}
@@ -67,8 +77,17 @@ const FormAutocomplete = <T,>({
                     onChangeOutside(data ? data.value : null);
                   }
                 }}
-                sx={style}
+                sx={{ ...style, pointerEvents: 'auto !important', cursor: 'auto !important' }}
                 disabled={disabled}
+                loading={loading}
+                onClick={(x) => {
+                  console.log(x);
+                }}
+                onInputChange={(_, newInputValue) => {
+                  if (onSearch) {
+                    onSearch(newInputValue);
+                  }
+                }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -77,7 +96,17 @@ const FormAutocomplete = <T,>({
                     required={isRequired}
                     InputProps={{
                       ...params.InputProps,
-                      sx: { height: '36px' },
+                      sx: {
+                        height: '36px',
+                        pointerEvents: 'auto !important',
+                        cursor: 'auto !important',
+                      },
+                      endAdornment: (
+                        <>
+                          {loading ? <CircularProgress color='inherit' size={20} /> : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
                     }}
                   />
                 )}

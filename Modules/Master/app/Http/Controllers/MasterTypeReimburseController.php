@@ -64,7 +64,7 @@ class MasterTypeReimburseController extends Controller
 
             return Inertia::render(
                 'Master/MasterReimburseType/Index',
-                compact('listGrades', 'listMaterialNumber', 'listMaterialGroup')
+                compact('listGrades')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
