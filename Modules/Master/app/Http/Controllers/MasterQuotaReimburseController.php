@@ -157,14 +157,16 @@ class MasterQuotaReimburseController extends Controller
             $getData->save();
 
             MasterQuotaReimburseUser::where('quota_reimburses_id', $id)->delete();
-            $validatedData['users'] = array_map(function($user) use($id) {
-                return [
-                    'user_id' => $user,
-                    'quota_reimburses_id' => $id
-                ];
-            }, $validatedData['users']);
-
-            MasterQuotaReimburseUser::insert($validatedData['users']);
+            if (!empty($validatedData['users'])) {
+                $validatedData['users'] = array_map(function($user) use($id) {
+                    return [
+                        'user_id' => $user,
+                        'quota_reimburses_id' => $id
+                    ];
+                }, $validatedData['users']);
+    
+                MasterQuotaReimburseUser::insert($validatedData['users']);
+            }
             DB::commit();
             return $this->successResponse("Edit Reimburse Quota Successfully");
         } catch (\Exception  $e) {
