@@ -1,4 +1,4 @@
-import { Autocomplete, TextField, FormHelperText } from '@mui/material';
+import { Autocomplete, TextField, FormHelperText, CircularProgress } from '@mui/material';
 import { Controller, useFormContext } from 'react-hook-form';
 import { CSSProperties } from 'react';
 
@@ -21,6 +21,8 @@ interface FormAutocompleteProps<T> {
   lengthLabel?: string;
   // eslint-disable-next-line no-unused-vars
   onChangeOutside?: (value: T | null) => void;
+  onSearch?: (query: string) => Promise<Option<T>[]>;
+  loading?: boolean;
 }
 
 const FormAutocomplete = <T,>({
@@ -35,6 +37,8 @@ const FormAutocomplete = <T,>({
   classNames,
   onChangeOutside,
   lengthLabel = '40',
+  onSearch,
+  loading = false,
 }: FormAutocompleteProps<T>) => {
   const {
     control,
@@ -44,9 +48,12 @@ const FormAutocomplete = <T,>({
   return (
     <div className='w-full'>
       <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
-        <label className={`form-label max-w-${lengthLabel}`}>
-          {fieldLabel} <span className='text-red-700'> {isRequired ? '*' : ''}</span>
-        </label>
+        {fieldLabel && (
+            <label className={`form-label max-w-${lengthLabel}`}>
+              {fieldLabel} <span className='text-red-700'> {isRequired ? '*' : ''}</span>
+            </label>
+          )
+        } 
         <Controller
           name={fieldName}
           control={control}
@@ -69,6 +76,12 @@ const FormAutocomplete = <T,>({
                 }}
                 sx={style}
                 disabled={disabled}
+                loading={loading}
+                onInputChange={(_, newInputValue) => {
+                  if (onSearch) {
+                    onSearch(newInputValue);
+                  }
+                }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -78,6 +91,14 @@ const FormAutocomplete = <T,>({
                     InputProps={{
                       ...params.InputProps,
                       sx: { height: '36px' },
+                      endAdornment: (
+                        <>
+                          {loading ? (
+                            <CircularProgress color="inherit" size={20} />
+                          ) : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
                     }}
                   />
                 )}
