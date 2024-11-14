@@ -154,7 +154,6 @@ class ReimbuseController extends Controller
                 compact('purchasing_groups', 'listFamily', 'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes')
             );
         } catch (\Exception $e) {
-            dd($e);
             return $this->errorResponse($e->getMessage());
         }
     }
