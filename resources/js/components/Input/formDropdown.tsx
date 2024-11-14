@@ -1,6 +1,6 @@
 import { Autocomplete, TextField, FormHelperText, CircularProgress } from '@mui/material';
 import { Controller, useFormContext } from 'react-hook-form';
-import { CSSProperties } from 'react';
+import { CSSProperties, useEffect } from 'react';
 
 // Define the option type as a generic T for flexibility
 interface Option<T> {
@@ -45,8 +45,12 @@ const FormAutocomplete = <T,>({
     formState: { errors },
   } = useFormContext();
 
+  useEffect(() => {
+    document.body.style.pointerEvents = 'auto';
+  }, []);
+
   return (
-    <div className='w-full'>
+    <div className='w-full' style={{ pointerEvents: 'auto' }}>
       <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
         {fieldLabel && (
           <label className={`form-label max-w-${lengthLabel}`}>
@@ -76,6 +80,9 @@ const FormAutocomplete = <T,>({
                 sx={{ ...style, pointerEvents: 'auto !important', cursor: 'auto !important' }}
                 disabled={disabled}
                 loading={loading}
+                onClick={(x) => {
+                  console.log(x);
+                }}
                 onInputChange={(_, newInputValue) => {
                   if (onSearch) {
                     onSearch(newInputValue);

@@ -112,7 +112,7 @@ export default function ReimburseQuotaForm({
   const handleSearchReimbursePeriod = async (query: string) => {
     if (query.length > 0) {
       getReimbursePeriod(query, {
-        name: "CONCAT(`start`, ' - ', `end`)",
+        name: 'start',
         id: 'id',
         tabel: 'master_period_reimburses',
       });
@@ -127,7 +127,7 @@ export default function ReimburseQuotaForm({
     });
     
     getReimbursePeriod('', {
-      name: "CONCAT(`start`, ' - ', `end`)",
+      name: 'start',
       id: 'id',
       tabel: 'master_period_reimburses',
     });
