@@ -73,7 +73,7 @@ const FormAutocomplete = <T,>({
                     onChangeOutside(data ? data.value : null);
                   }
                 }}
-                sx={{ ...style, pointerEvents: 'auto', cursor: 'auto' }}
+                sx={{ ...style, pointerEvents: 'auto !important', cursor: 'auto !important' }}
                 disabled={disabled}
                 loading={loading}
                 onInputChange={(_, newInputValue) => {
@@ -87,12 +87,13 @@ const FormAutocomplete = <T,>({
                     placeholder={placeholder}
                     error={Boolean(errors[fieldName])}
                     required={isRequired}
-                    style={{
-                      pointerEvents: 'auto',
-                    }}
                     InputProps={{
                       ...params.InputProps,
-                      sx: { height: '36px' },
+                      sx: {
+                        height: '36px',
+                        pointerEvents: 'auto !important',
+                        cursor: 'auto !important',
+                      },
                       endAdornment: (
                         <>
                           {loading ? <CircularProgress color='inherit' size={20} /> : null}

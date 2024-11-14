@@ -87,6 +87,7 @@ class DropdownMasterController extends Controller
             $data = $data->groupBy($groupByColumns);
         }
 
+
         $data = $data->limit(75)->get();
         return $this->successResponse($data);
     }
