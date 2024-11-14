@@ -206,6 +206,7 @@ class ProcurementService
             'text' => 'DP ' . $item->tax . ' ' . $cashData->text,
             'profit_center' => $item->cost_center,
             'tax_amount' => $taxAmount,
+            'amount' => $item->total_amount,
         ];
     }
 }
