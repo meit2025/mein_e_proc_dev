@@ -9,7 +9,12 @@ import { CustomDialog } from '@/components/commons/CustomDialog';
 import { Grade } from './models/models';
 import ReimburseTypeForm from './component/form';
 import { FormType } from '@/lib/utils';
-import { LIST_API_REIMBURSE_TYPE, EDIT_REIMBURSE_TYPE, UPDATE_REIMBURSE_TYPE, DELETE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
+import {
+  LIST_API_REIMBURSE_TYPE,
+  EDIT_REIMBURSE_TYPE,
+  UPDATE_REIMBURSE_TYPE,
+  DELETE_REIMBURSE_TYPE,
+} from '@/endpoint/reimburseType/api';
 
 interface propsType {
   listGrades?: Grade[];
@@ -27,7 +32,7 @@ export const Index = ({ listGrades }: propsType) => {
     setFormType({
       type: FormType.create,
       id: null,
-    })
+    });
     setOpenForm(!openForm);
     document.body.style.removeProperty('pointer-events');
   }
@@ -64,7 +69,7 @@ export const Index = ({ listGrades }: propsType) => {
         }}
         url={{
           url: LIST_API_REIMBURSE_TYPE,
-          deleteUrl: DELETE_REIMBURSE_TYPE
+          deleteUrl: DELETE_REIMBURSE_TYPE,
         }}
         labelFilter='search'
       />
