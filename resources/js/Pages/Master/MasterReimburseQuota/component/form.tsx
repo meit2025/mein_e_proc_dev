@@ -11,14 +11,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { ScrollArea } from '@/components/shacdn/scroll-area';
 import '../css/index.scss';
+import FormAutocomplete from '@/components/Input/formDropdown';
+import useDropdownOptions from '@/lib/getDropdown';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/shacdn/select';
 import * as React from 'react';
 
 import axiosInstance from '@/axiosInstance';
@@ -27,8 +22,6 @@ import { useAlert } from '@/contexts/AlertContext';
 import { AxiosError } from 'axios';
 import { FormType } from '@/lib/utils';
 import { MultiSelect } from '@/components/commons/MultiSelect';
-import { ListPeriodModel } from '../../MasterReimbursePeriod/models/models';
-import { ReimburseTypeModel } from '../../MasterReimburseType/models/models';
 import { User } from '../models/models';
 
 export interface props {
@@ -38,8 +31,6 @@ export interface props {
   storeURL?: string;
   editURL?: string;
   updateURL?: string;
-  listPeriodReimburse: ListPeriodModel[];
-  listReimburseType: ReimburseTypeModel[];
   listUser: User[];
 }
 
@@ -49,22 +40,22 @@ export default function ReimburseQuotaForm({
   listUser,
   storeURL,
   editURL,
-  listPeriodReimburse,
-  listReimburseType,
   updateURL
 }: props) {
 
   const [users, setUsers] = React.useState<User>([]);
+  const { dataDropdown: dataReimburseType, getDropdown: getReimburseType } = useDropdownOptions();
+  const { dataDropdown: dataReimbursePeriod, getDropdown: getReimbursePeriod } = useDropdownOptions();
   
   const formSchema = z.object({
-    period: z.string('Period must choose'),
-    type: z.string('Type must choose'),
+    period: z.number('Period must choose'),
+    type: z.number('Type must choose'),
     users: z.array(z.number().optional()),
   });
 
   const defaultValues = {
-    period: '',
-    type: '',
+    period: null,
+    type: null,
     users: [],
   };
 
@@ -108,7 +99,39 @@ export default function ReimburseQuotaForm({
     }
   };
 
+  const handleSearchReimburseType = async (query: string) => {
+    if (query.length > 0) {
+      getReimburseType(query, {
+        name: 'code',
+        id: 'id',
+        tabel: 'master_type_reimburses',
+      });
+    }
+  };
+
+  const handleSearchReimbursePeriod = async (query: string) => {
+    if (query.length > 0) {
+      getReimbursePeriod(query, {
+        name: "CONCAT(`start`, ' - ', `end`)",
+        id: 'id',
+        tabel: 'master_period_reimburses',
+      });
+    }
+  };
+
   React.useEffect(() => {
+    getReimburseType('', {
+      name: 'code',
+      id: 'id',
+      tabel: 'master_type_reimburses',
+    });
+    
+    getReimbursePeriod('', {
+      name: "CONCAT(`start`, ' - ', `end`)",
+      id: 'id',
+      tabel: 'master_period_reimburses',
+    });
+
     if (type === FormType.edit) {
       getDetailData()
     };
@@ -124,31 +147,14 @@ export default function ReimburseQuotaForm({
             <tr>
               <td width={200}>Period</td>
               <td>
-                <FormField
-                  control={form.control}
-                  name='period'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => field.onChange(value)}
-                          value={field.value?.toString()}
-                        >
-                          <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='-' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {listPeriodReimburse.map((period) => (
-                              <SelectItem key={period.id} value={period.id.toString()}>
-                                {period.start} - {period.end}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <FormAutocomplete<any>
+                  options={dataReimbursePeriod}
+                  fieldName='period'
+                  isRequired={true}
+                  disabled={false}
+                  placeholder={'Reimburse Period'}
+                  onSearch={handleSearchReimbursePeriod}
+                  classNames='mt-2 w-full'
                 />
               </td>
             </tr>
@@ -176,31 +182,14 @@ export default function ReimburseQuotaForm({
             <tr>
               <td width={200}>Type</td>
               <td>
-                <FormField
-                  control={form.control}
-                  name='type'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => field.onChange(value)}
-                          value={field.value?.toString()}
-                        >
-                          <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='-' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {listReimburseType.map((type) => (
-                              <SelectItem key={type.id} value={type.id.toString()}>
-                                {type.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <FormAutocomplete<any>
+                  options={dataReimburseType}
+                  fieldName='type'
+                  isRequired={true}
+                  disabled={false}
+                  placeholder={'Reimburse Type'}
+                  onSearch={handleSearchReimburseType}
+                  classNames='mt-2 w-full'
                 />
               </td>
             </tr>

@@ -58,13 +58,10 @@ class MasterTypeReimburseController extends Controller
 
         try {
             $listGrades             = BusinessTripGrade::select('id', 'grade')->get();
-            $listMaterialNumber     = MasterMaterial::get();
-            $listMaterialGroup      = MaterialGroup::get();
-
 
             return Inertia::render(
                 'Master/MasterReimburseType/Index',
-                compact('listGrades', 'listMaterialNumber', 'listMaterialGroup')
+                compact('listGrades')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
