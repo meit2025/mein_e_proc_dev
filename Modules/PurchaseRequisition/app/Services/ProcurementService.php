@@ -48,7 +48,6 @@ class ProcurementService
             $entertainment = Entertainment::where('purchase_id', $id)->first();
             $cashData = CashAdvancePurchases::where('purchase_id', $id)->first();
 
-            dd($cashData);
 
             foreach ($items as $key => $value) {
                 $datainsert = $this->preparePurchaseRequisitionData(
