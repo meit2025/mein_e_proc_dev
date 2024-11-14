@@ -10,7 +10,7 @@ class FamilyController extends Controller
     public function show($employee)
     {
         try {
-            $data = ModelsFamily::where('user', $employee)->get();
+            $data = ModelsFamily::where('userId', $employee)->get();
             return $data;
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 400);

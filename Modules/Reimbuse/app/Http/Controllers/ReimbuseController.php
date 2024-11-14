@@ -137,10 +137,10 @@ class ReimbuseController extends Controller
             if (!$is_Admin) {
                 $users = User::where('id', Auth::id())->select('nip', 'name')->get();
 
-                $listFamily = Family::where('user', Auth::user()->id)->get();
+                $listFamily = Family::where('userId', Auth::user()->id)->get();
             } else {
                 $users = User::select('nip', 'name')->get();
-                $listFamily = Family::where('user', User::select('nip')->pluck('nip')->toArray())->get();
+                $listFamily = Family::where('userId', User::select('nip')->pluck('nip')->toArray())->get();
             }
 
             $categories = ['Employee', 'Family'];

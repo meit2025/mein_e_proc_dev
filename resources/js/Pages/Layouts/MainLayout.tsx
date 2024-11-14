@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import Footer from './Footer';
+import { ScrollArea } from '@/components/shacdn/scroll-area';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -36,7 +37,14 @@ export default function MainLayout({ children, title, description }: MainLayoutP
               </div>
             )}
 
-            <div className='container-fixed'> {children}</div>
+            <div
+              className='container-fixed'
+              style={{
+                height: '100%',
+              }}
+            >
+              <ScrollArea>{children}</ScrollArea>
+            </div>
           </main>
           <Footer />
         </div>
