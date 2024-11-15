@@ -29,6 +29,9 @@ Route::group(['prefix' => 'reimburse'], function () {
     Route::inertia('/detail/{id}',  'Reimburse/Detail', [
         'id' => fn() => request()->route('id'),
     ]);
+
+
+    Route::get('/data-limit-and-balance', [ReimbuseController::class, 'getDataLimitAndBalance'])->name('reimburse.data-limit-balance');
 });
 // });
 

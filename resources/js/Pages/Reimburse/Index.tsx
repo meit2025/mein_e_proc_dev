@@ -21,6 +21,7 @@ interface Props {
   taxes: Tax[];
   cost_center: CostCenter[];
   currentUser: User;
+  latestPeriod: any;
 }
 
 export const Index = ({
@@ -32,6 +33,7 @@ export const Index = ({
   cost_center,
   periods,
   currentUser,
+  latestPeriod,
 }: Props) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
   const [formType, setFormType] = React.useState({
@@ -64,6 +66,7 @@ export const Index = ({
             currencies={currencies}
             periods={periods}
             currentUser={currentUser}
+            latestPeriod={latestPeriod}
             taxes={taxes}
             cost_center={cost_center}
             edit_url={PAGE_EDIT_REIMBURSE(formType.id)}

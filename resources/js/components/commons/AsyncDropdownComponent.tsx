@@ -114,12 +114,6 @@ export function AsyncDropdownComponent({
     setOpen(false);
   }
 
-  //   React.useEffect(() => {
-  //     if (open) {
-  //       callAPI();
-  //     }
-  //   }, []);
-
   console.log(url);
 
   React.useEffect(() => {
@@ -138,7 +132,9 @@ export function AsyncDropdownComponent({
           aria-expanded={open}
           className='w-[200px] text-xs justify-between'
         >
-          {value ? dropdownList.find((framework) => framework[id] === value)?.[label] : placeholder}
+          {value
+            ? dropdownList.find((framework) => String(framework[id]) === String(value))?.[label]
+            : placeholder}
           <ChevronsUpDown className='opacity-50' />
         </Button>
       </PopoverTrigger>
@@ -166,7 +162,7 @@ export function AsyncDropdownComponent({
                         key={framework[id]}
                         value={framework[id]}
                         onSelect={(currentValue) => {
-                          onSelectHandler(currentValue);
+                          onSelectHandler(framework[id]);
                         }}
                       >
                         {framework[label]}
