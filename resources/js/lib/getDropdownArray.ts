@@ -28,7 +28,7 @@ const useDropdownOptionsArray = () => {
       let dataObject = object;
       for (const item of data) {
         const response = await axiosInstance.get(
-          `api/master/dropdown?name=${item.struct.name}&id=${item.struct.id}&tabelname=${item.struct.tabel}&search=${item.struct.search}&isNotNull=${item.struct.where?.isNotNull ?? ''}&key=${item.struct.where?.key ?? ''}&parameter=${item.struct.where?.parameter ?? ''}`,
+          `api/master/dropdown?name=${item.struct.name}&id=${item.struct.id}&tabelname=${item.struct.tabel}&search=${item.struct.search || ''}&isNotNull=${item.struct.where?.isNotNull ?? ''}&key=${item.struct.where?.key ?? ''}&parameter=${item.struct.where?.parameter ?? ''}`,
           {
             headers: {
               'Content-Type': 'application/json',

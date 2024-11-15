@@ -10,6 +10,7 @@ import { LIST_REIMBURSE, UPDATE_REIMBURSE, STORE_REIMBURSE } from '@/endpoint/re
 import { FormType } from '@/lib/utils';
 import { Currency, Period, PurchasingGroup, User, Tax, CostCenter } from './model/listModel';
 import { PAGE_EDIT_REIMBURSE } from '@/endpoint/reimburse/page';
+import { AsyncDropdownComponent } from '@/components/commons/AsyncDropdownComponent';
 
 interface Props {
   users: User[];
@@ -19,6 +20,8 @@ interface Props {
   purchasing_groups: PurchasingGroup[];
   taxes: Tax[];
   cost_center: CostCenter[];
+  currentUser: User;
+  latestPeriod: any;
 }
 
 export const Index = ({
@@ -29,6 +32,8 @@ export const Index = ({
   taxes,
   cost_center,
   periods,
+  currentUser,
+  latestPeriod,
 }: Props) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
   const [formType, setFormType] = React.useState({
@@ -39,6 +44,8 @@ export const Index = ({
   function openFormHandler() {
     setOpenForm(!openForm);
   }
+
+  const [selectValue, setSelectValue] = React.useState('');
 
   return (
     <>
@@ -58,6 +65,8 @@ export const Index = ({
             categories={categories}
             currencies={currencies}
             periods={periods}
+            currentUser={currentUser}
+            latestPeriod={latestPeriod}
             taxes={taxes}
             cost_center={cost_center}
             edit_url={PAGE_EDIT_REIMBURSE(formType.id)}
@@ -70,6 +79,7 @@ export const Index = ({
           />
         </CustomDialog>
       </div>
+
       <DataGridComponent
         columns={columns}
         actionType='dropdown'

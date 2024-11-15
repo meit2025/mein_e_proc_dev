@@ -54,13 +54,17 @@ class MasterTypeReimburseController extends Controller
      */
     public function index()
     {
+
+
         try {
             $listGrades             = BusinessTripGrade::select('id', 'grade')->get();
             $listMaterialNumber     = MasterMaterial::get();
             $listMaterialGroup      = MaterialGroup::get();
+
+
             return Inertia::render(
                 'Master/MasterReimburseType/Index',
-                compact('listGrades', 'listMaterialNumber', 'listMaterialGroup')
+                compact('listGrades')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -89,8 +93,8 @@ class MasterTypeReimburseController extends Controller
             'material_number' => 'required',
             'grade_option' => 'required'
         ];
-        if($request->grade_option == 'all') $rules['grade_all_price'] = 'required';
-        
+        if ($request->grade_option == 'all') $rules['grade_all_price'] = 'required';
+
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return $this->errorResponse($validator->errors());
@@ -98,10 +102,12 @@ class MasterTypeReimburseController extends Controller
         DB::beginTransaction();
         try {
             $validatedData  = $validator->validated();
+
+            // dd($validatedData);
             $createData     = MasterTypeReimburse::create($validatedData);
-            
+
             if ($createData) {
-                $request->grades = array_map(function($grade) use($createData) {
+                $request->grades = array_map(function ($grade) use ($createData) {
                     return [
                         'grade_id' => $grade['id'],
                         'reimburse_type_id' => $createData->id,
@@ -135,15 +141,15 @@ class MasterTypeReimburseController extends Controller
         try {
             $groups             = MasterTypeReimburse::find($id);
             $groups->grades     = MasterTypeReimburseGrades::with('grade')
-            ->where('reimburse_type_id', $id)->get()
-            ->transform(function ($map) {
-                return [
-                    'id' => $map->grade_id,
-                    'grade' => $map->grade ? $map->grade->grade : '',
-                    'reimburse_type_id' => $map->reimburse_type_id,
-                    'plafon' => $map->plafon
-                ];
-            });
+                ->where('reimburse_type_id', $id)->get()
+                ->transform(function ($map) {
+                    return [
+                        'id' => $map->grade_id,
+                        'grade' => $map->grade ? $map->grade->grade : '',
+                        'reimburse_type_id' => $map->reimburse_type_id,
+                        'plafon' => $map->plafon
+                    ];
+                });
             return $this->successResponse($groups);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -163,8 +169,8 @@ class MasterTypeReimburseController extends Controller
             'material_number' => 'required',
             'grade_option' => 'required'
         ];
-        if($request->grade_option == 'all') $rules['grade_all_price'] = 'required';
-        
+        if ($request->grade_option == 'all') $rules['grade_all_price'] = 'required';
+
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return $this->errorResponse($validator->errors());
@@ -177,7 +183,7 @@ class MasterTypeReimburseController extends Controller
             $getData->save();
 
             MasterTypeReimburseGrades::where('reimburse_type_id', $id)->delete();
-            $request->grades = array_map(function($grade) use($id) {
+            $request->grades = array_map(function ($grade) use ($id) {
                 return [
                     'grade_id' => $grade['id'],
                     'reimburse_type_id' => $id,

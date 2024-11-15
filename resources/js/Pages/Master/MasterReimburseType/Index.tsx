@@ -6,19 +6,21 @@ import { columns } from './models/models';
 import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import { Grade, MaterialGroupModel } from './models/models';
-import { MaterialModel } from '../MasterMaterial/model/listModel';
+import { Grade } from './models/models';
 import ReimburseTypeForm from './component/form';
 import { FormType } from '@/lib/utils';
-import { LIST_API_REIMBURSE_TYPE, EDIT_REIMBURSE_TYPE, UPDATE_REIMBURSE_TYPE, DELETE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
+import {
+  LIST_API_REIMBURSE_TYPE,
+  EDIT_REIMBURSE_TYPE,
+  UPDATE_REIMBURSE_TYPE,
+  DELETE_REIMBURSE_TYPE,
+} from '@/endpoint/reimburseType/api';
 
 interface propsType {
   listGrades?: Grade[];
-  listMaterialNumber?: MaterialModel[];
-  listMaterialGroup?: MaterialGroupModel[];
 }
 
-export const Index = ({ listGrades, listMaterialNumber, listMaterialGroup }: propsType) => {
+export const Index = ({ listGrades }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
   const [formType, setFormType] = React.useState({
@@ -30,8 +32,9 @@ export const Index = ({ listGrades, listMaterialNumber, listMaterialGroup }: pro
     setFormType({
       type: FormType.create,
       id: null,
-    })
+    });
     setOpenForm(!openForm);
+    document.body.style.removeProperty('pointer-events');
   }
   return (
     <>
@@ -48,8 +51,6 @@ export const Index = ({ listGrades, listMaterialNumber, listMaterialGroup }: pro
           <ReimburseTypeForm
             type={formType.type}
             listGrades={listGrades}
-            listMaterialNumber={listMaterialNumber}
-            listMaterialGroup={listMaterialGroup}
             editURL={EDIT_REIMBURSE_TYPE(formType.id ?? '')}
             updateURL={UPDATE_REIMBURSE_TYPE(formType.id ?? '')}
             onSuccess={(x: boolean) => setOpenForm(!x)}
@@ -68,7 +69,7 @@ export const Index = ({ listGrades, listMaterialNumber, listMaterialGroup }: pro
         }}
         url={{
           url: LIST_API_REIMBURSE_TYPE,
-          deleteUrl: DELETE_REIMBURSE_TYPE
+          deleteUrl: DELETE_REIMBURSE_TYPE,
         }}
         labelFilter='search'
       />

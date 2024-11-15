@@ -4,7 +4,7 @@ import {
   FormField,
   FormItem,
   FormMessage,
-  FormLabel
+  FormLabel,
 } from '@/components/shacdn/form';
 
 import { z } from 'zod';
@@ -31,23 +31,20 @@ import axiosInstance from '@/axiosInstance';
 import { useAlert } from '@/contexts/AlertContext';
 import { AxiosError } from 'axios';
 import { FormType } from '@/lib/utils';
-import { Grade, MaterialGroupModel } from '../models/models';
-import { MaterialModel } from '../../MasterMaterial/model/listModel';
+import { Grade } from '../models/models';
 import { MultiSelect } from '@/components/commons/MultiSelect';
-import FormAutocomplete from '@/components/Input/formDropdown';
 import { RadioGroup, RadioGroupItem } from '@/components/shacdn/radio-group';
 import { CREATE_API_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
-import useDropdownOptions from '@/lib/getDropdown';
 import { Loading } from '@/components/commons/Loading';
+import FormAutocomplete from '@/components/Input/formDropdown';
+import useDropdownOptions from '@/lib/getDropdown';
 
 export interface props {
   onSuccess?: (value: boolean) => void;
   type?: FormType;
   listGrades?: Grade[];
-  listMaterialNumber?: MaterialModel[];
-  listMaterialGroup?: MaterialGroupModel[];
-  editURL?: string,
-  updateURL?: string,
+  editURL?: string;
+  updateURL?: string;
   id?: string;
 }
 
@@ -55,8 +52,6 @@ export default function ReimburseTypeForm({
   onSuccess,
   type = FormType.create,
   listGrades,
-  listMaterialNumber,
-  listMaterialGroup,
   editURL,
   updateURL,
   id,
@@ -66,8 +61,8 @@ export default function ReimburseTypeForm({
     name: z.string().min(1, 'Name is required'),
     is_employee: z.boolean(),
     limit: z.number(),
-    material_group: z.string('Material Group must choose'),
-    material_number: z.string('Material Number must choose'),
+    material_group: z.number('Material Group must choose'),
+    material_number: z.number('Material Number must choose'),
     grade_option: z.string().min(1, 'Grade must be selected'),
     grade_all_price: z.string().optional(),
     grades: z.array(
@@ -80,18 +75,20 @@ export default function ReimburseTypeForm({
   });
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  
+  const { dataDropdown: dataMaterialGroup, getDropdown: getMaterialGroup } = useDropdownOptions();
+  const { dataDropdown: dataMaterialNumber, getDropdown: getMaterialNumber } = useDropdownOptions();
+
   const defaultValues = {
     code: '',
     name: '',
-    material_group: '',
-    material_number: '',
+    material_group: null,
+    material_number: null,
     is_employee: true,
     grade_option: 'all',
     grade_all_price: '0',
     grades: [],
   };
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues,
@@ -101,14 +98,14 @@ export default function ReimburseTypeForm({
     try {
       const response = await axiosInstance.get(editURL);
       const data = response.data.data;
-      
+
       form.reset({
         code: data.code,
         name: data.name,
         limit: data.limit,
         is_employee: data.is_employee,
-        material_group: data.material_group,
-        material_number: data.material_number,
+        material_group: parseInt(data.material_group),
+        material_number: parseInt(data.material_number),
         grade_option: data.grade_option,
         grade_all_price: data.grade_all_price,
         grades: data.grades,
@@ -120,7 +117,7 @@ export default function ReimburseTypeForm({
 
   const { fields: gradeFields } = useFieldArray({
     control: form.control,
-    name: `grades`,
+    name: 'grades',
   });
 
   const { showToast } = useAlert();
@@ -143,11 +140,45 @@ export default function ReimburseTypeForm({
     setIsLoading(false);
   };
 
-  React.useEffect(() => {    
+  const handleSearchMaterialGroup = async (query: string) => {
+    if (query.length > 0) {
+      getMaterialGroup('', {
+        name: 'material_group',
+        id: 'id',
+        tabel: 'material_groups',
+        search: query,
+      });
+    }
+  };
+
+  const handleSearchMaterialNumber = async (query: string) => {
+    if (query.length > 0) {
+      getMaterialNumber(query, {
+        name: 'material_number',
+        id: 'id',
+        tabel: 'master_materials',
+      });
+    }
+  };
+
+  React.useEffect(() => {
+    getMaterialGroup('', {
+      name: 'material_group',
+      id: 'id',
+      tabel: 'material_groups',
+    });
+
+    getMaterialNumber('', {
+      name: 'material_number',
+      id: 'id',
+      tabel: 'master_materials',
+    });
+
     if (type === FormType.edit) {
       getDetailData();
     }
-    
+
+    document.body.style.removeProperty('pointer-events');
   }, []);
 
   return (
@@ -363,31 +394,14 @@ export default function ReimburseTypeForm({
             <tr>
               <td width={200}>Material Group</td>
               <td>
-                <FormField
-                  control={form.control}
-                  name='material_group'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => field.onChange(value)}
-                          value={field.value}
-                        >
-                          <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='-' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {listMaterialGroup.map((material) => (
-                              <SelectItem key={material.id} value={material.id.toString()}>
-                                {material.material_group}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <FormAutocomplete<any>
+                  options={dataMaterialGroup}
+                  fieldName='material_group'
+                  isRequired={true}
+                  disabled={false}
+                  placeholder={'Material Group'}
+                  onSearch={handleSearchMaterialGroup}
+                  classNames='mt-2 w-full'
                 />
               </td>
             </tr>
@@ -395,31 +409,14 @@ export default function ReimburseTypeForm({
             <tr>
               <td width={200}>Material Number</td>
               <td>
-                <FormField
-                  control={form.control}
-                  name='material_number'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => field.onChange(value)}
-                          value={field.value}
-                        >
-                          <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='-' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {listMaterialNumber.map((material) => (
-                              <SelectItem key={material.id} value={material.id.toString()}>
-                                {material.material_number}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <FormAutocomplete<any>
+                  options={dataMaterialNumber}
+                  fieldName='material_number'
+                  isRequired={true}
+                  disabled={false}
+                  placeholder={'Material Number'}
+                  onSearch={handleSearchMaterialNumber}
+                  classNames='mt-2 w-full'
                 />
               </td>
             </tr>
