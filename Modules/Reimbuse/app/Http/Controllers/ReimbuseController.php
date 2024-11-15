@@ -143,6 +143,8 @@ class ReimbuseController extends Controller
                 // $listFamily = Family::where('userId', User::select('nip')->pluck('nip')->toArray())->get();
             }
 
+            $currentUser = Auth::user();
+
             $categories = ['Employee', 'Family'];
             $purchasing_groups = PurchasingGroup::select('id', 'purchasing_group', 'purchasing_group_desc')->get();
             $currencies = Currency::select('code', 'name')->get();
@@ -151,7 +153,7 @@ class ReimbuseController extends Controller
             $taxes = Pajak::select('id', 'mwszkz')->get();
             return Inertia::render(
                 'Reimburse/Index',
-                compact('purchasing_groups',  'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes')
+                compact('purchasing_groups', 'currentUser',  'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -205,5 +207,13 @@ class ReimbuseController extends Controller
             return back()->withErrors(['status' => $response['error']]);
         }
         return redirect()->back()->with('status', 'Reimbursements updated successfully.');
+    }
+
+
+    public function getFamilyDataAPI($user_id, Request $request)
+    {
+        $listFamily =  Family::where('userId', $user_id)->get();
+
+        return $this->successResponse($listFamily);
     }
 }

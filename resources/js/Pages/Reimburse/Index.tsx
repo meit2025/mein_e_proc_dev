@@ -20,6 +20,7 @@ interface Props {
   purchasing_groups: PurchasingGroup[];
   taxes: Tax[];
   cost_center: CostCenter[];
+  currentUser: User;
 }
 
 export const Index = ({
@@ -30,6 +31,7 @@ export const Index = ({
   taxes,
   cost_center,
   periods,
+  currentUser,
 }: Props) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
   const [formType, setFormType] = React.useState({
@@ -61,6 +63,7 @@ export const Index = ({
             categories={categories}
             currencies={currencies}
             periods={periods}
+            currentUser={currentUser}
             taxes={taxes}
             cost_center={cost_center}
             edit_url={PAGE_EDIT_REIMBURSE(formType.id)}
@@ -73,16 +76,7 @@ export const Index = ({
           />
         </CustomDialog>
       </div>
-      <AsyncDropdownComponent
-        onSelectChange={(value) => {
-          setSelectValue(value);
-        }}
-        value={selectValue}
-        filter={['material_number']}
-        id='material_number'
-        label='material_number'
-        url='api/master/master-material/get-dropdown-master-material-number'
-      />
+
       <DataGridComponent
         columns={columns}
         actionType='dropdown'
