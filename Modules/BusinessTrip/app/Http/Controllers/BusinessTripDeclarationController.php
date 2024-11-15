@@ -190,24 +190,125 @@ class BusinessTripDeclarationController extends Controller
 
     public function detailBtDeclareAPI($id)
     {
-        $findData  = BusinessTrip::with(
-            [
-                'requestFor',
-                'requestedBy',
-                'purposeType',
-                'costCenter',
-                'pajak',
-                'purchasingGroup',
-                'attachment',
-                'businessTripDestination',
-                'businessTripDestination.detailAttendance',
-                'businessTripDestination.detailDestinationDay',
-                'businessTripDestination.detailDestinationDay.allowance',
-                'businessTripDestination.detailDestinationTotal',
-                'businessTripDestination.detailDestinationTotal.allowance'
-            ]
-        )->where('id', $id)->first();
-        return $this->successResponse($findData);
+        $findData  = BusinessTrip::find($id);
+        $data = [];
+        $data['request_no'] = $findData->request_no;
+        $data['remarks'] = $findData->remarks;
+        $data['request_for'] = $findData->requestFor->name;
+        $data['requested_by'] = $findData->requestedBy->name;
+        $data['parent_business_trip_request_no'] = $findData->parentBusinessTrip->request_no;
+        $data['purpose_type_name'] = $findData->purposeType->name;
+        $data['cost_center'] = $findData->costCenter?->cost_center;
+
+        $parentDestination = [];
+        $request_detail_allowance_from_parent = [];
+        foreach ($findData->parentBusinessTrip->businessTripDestination as $parent) {
+            $request_detail_allowance = [];
+            foreach ($parent->detailDestinationDay as $detailDay) {
+                $request_detail_allowance[] = [
+                    'item_name' => $detailDay->allowance->name,
+                    'type' => $detailDay->allowance->type,
+                    'currency_code' => $detailDay->allowance->currency_id,
+                    'value' => (int)$detailDay->price,
+                    'total_day' => $detailDay->total,
+                    'total' => $detailDay->price * $detailDay->total,
+                ];
+            }
+
+
+            foreach ($parent->detailDestinationTotal as $detailTotal) {
+                $request_detail_allowance[] = [
+                    'item_name' => $detailTotal->allowance->name,
+                    'type' => $detailTotal->allowance->type,
+                    'currency_code' => $detailTotal->allowance->currency_id,
+                    'value' => (int)$detailTotal->price,
+                    'total_day' => '-',
+                    'total' => (int)$detailTotal->price,
+                ];
+            }
+
+            // $parentDestination['request_detail_allowance'][] = $request_detail_allowance;
+            $parentRequestAllowanceByDestination[$parent->destination] = $request_detail_allowance;
+        }
+
+        foreach ($findData->businessTripDestination as $destination) {
+            $detail_attendance = [];
+            foreach ($destination->detailAttendance as $detail) {
+                $detail_attendance[] = [
+                    'date' => $detail->date,
+                    'start_time' => $detail->start_time,
+                    'end_time' => $detail->end_time,
+                    'shift_code' => $detail->shift_code,
+                    'shift_start' => $detail->shift_start,
+                    'shift_end' => $detail->shift_end,
+                ];
+            }
+
+
+            // STANDARD
+            $standar_detail_allowance = [];
+            foreach ($destination->detailDestinationDay as $detailDay) {
+                $standar_detail_allowance[] = [
+                    'item_name' => $detailDay->allowance->name,
+                    'type' => $detailDay->allowance->type,
+                    'currency_code' => $detailDay->allowance->currency_id,
+                    'value' => (int)$detailDay->standard_value,
+                    'total_day' => $detailDay->total,
+                    'total' => $detailDay->standard_value * $detailDay->total,
+                ];
+            }
+
+
+            foreach ($destination->detailDestinationTotal as $detailTotal) {
+                $standar_detail_allowance[] = [
+                    'item_name' => $detailTotal->allowance->name,
+                    'type' => $detailTotal->allowance->type,
+                    'currency_code' => $detailTotal->allowance->currency_id,
+                    'value' => (int)$detailTotal->standard_value,
+                    'total_day' => '-',
+                    'total' => (int)$detailTotal->standard_value,
+                ];
+            }
+
+            // DECLARATION
+            $declaration_detail_allowance = [];
+            foreach ($destination->detailDestinationDay as $detailDay) {
+                $declaration_detail_allowance[] = [
+                    'item_name' => $detailDay->allowance->name,
+                    'type' => $detailDay->allowance->type,
+                    'currency_code' => $detailDay->allowance->currency_id,
+                    'value' => (int)$detailDay->price,
+                    'total_day' => $detailDay->total,
+                    'total' => $detailDay->price * $detailDay->total,
+                ];
+            }
+
+
+            foreach ($destination->detailDestinationTotal as $detailTotal) {
+                $declaration_detail_allowance[] = [
+                    'item_name' => $detailTotal->allowance->name,
+                    'type' => $detailTotal->allowance->type,
+                    'currency_code' => $detailTotal->allowance->currency_id,
+                    'value' => (int)$detailTotal->price,
+                    'total_day' => '-',
+                    'total' => (int)$detailTotal->price,
+                ];
+            }
+
+            $request_detail_allowance = $parentRequestAllowanceByDestination[$destination->destination] ?? [];
+
+            $data['business_trip_destination'][] = [
+                'destination' => $destination->destination,
+                'business_trip_start_date' => $destination->business_trip_start_date,
+                'business_trip_end_date' => $destination->business_trip_end_date,
+                'other_allowance' => $destination->other_allowance,
+                'business_trip_detail_attendance' => $detail_attendance,
+                'standar_detail_allowance' => $standar_detail_allowance,
+                'request_detail_allowance' => $request_detail_allowance,
+                'declaration_detail_allowance' => $declaration_detail_allowance,
+            ];
+        }
+        return $this->successResponse($data);
     }
 
     /**
@@ -242,10 +343,9 @@ class BusinessTripDeclarationController extends Controller
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'asc');
 
+        // $query->orderBy($sortBy, $sortDirection);
 
-        $query->orderBy($sortBy, $sortDirection);
-
-        $data = $query->where('type', 'declaration')->paginate($perPage);
+        $data = $query->where('type', 'declaration')->latest()->paginate($perPage);
 
         $data->getCollection()->transform(function ($map) {
 
@@ -279,8 +379,20 @@ class BusinessTripDeclarationController extends Controller
             DB::beginTransaction();
             $dataBusiness = BusinessTrip::find($request->request_no);
 
+            $yearMonth = now()->format('Y-m');
+            $prefix = "DCLR-{$yearMonth}-";
+            // Ambil urutan terakhir berdasarkan bulan dan tahun
+            $latestOrder = BusinessTrip::where('request_no', 'like', "$prefix%")
+                ->latest('id')
+                ->where('type', 'declaration')
+                ->first();
+            // Ambil nomor urut terakhir, atau mulai dari 1 jika belum ada
+            $sequence = $latestOrder ? (int)substr($latestOrder->code, -8) + 1 : 1;
+            // Format menjadi 8 digit
+            $sequence = str_pad($sequence, 8, '0', STR_PAD_LEFT);
+
             $businessTrip = BusinessTrip::create([
-                'request_no' => time(),
+                'request_no' => $prefix . $sequence,
                 'parent_id' => $request->request_no,
                 'purpose_type_id' => $dataBusiness->purpose_type_id,
                 'request_for' => $dataBusiness->request_for,
@@ -288,9 +400,12 @@ class BusinessTripDeclarationController extends Controller
                 'total_destination' => $dataBusiness->total_destination,
                 'created_by' => auth()->user()->id,
                 'type' => 'declaration',
-                // 'cash_advance' => $request->cash_advance == "true" ? 1 : 0,
-                // 'total_percent' => $request->total_percent,
-                // 'total_cash_advance' => $request->total_cash_advance,
+                'cost_center_id' => $dataBusiness->cost_center_id,
+                'pajak_id' => $dataBusiness->pajak_id,
+                'purchasing_group_id' => $dataBusiness->purchasing_group_id,
+                'cash_advance' => $dataBusiness->cash_advance,
+                'total_percent' => $dataBusiness->total_percent,
+                'total_cash_advance' => $dataBusiness->total_cash_advance,
             ]);
 
             if ($request->attachment != null) {
@@ -359,8 +474,124 @@ class BusinessTripDeclarationController extends Controller
 
     function printAPI($id)
     {
-        $data = BusinessTrip::find($id);
-        $standar_value = PurposeTypeAllowance::where('purpose_type_id', $data->purpose_type_id)->get();
+        $findData  = BusinessTrip::find($id);
+        $data = [];
+        $data['request_no'] = $findData->request_no;
+        $data['remarks'] = $findData->remarks;
+        $data['request_for'] = $findData->requestFor->name;
+        $data['requested_by'] = $findData->requestedBy->name;
+        $data['parent_business_trip_request_no'] = $findData->parentBusinessTrip->request_no;
+        $data['purpose_type_name'] = $findData->purposeType->name;
+        $data['cost_center'] = $findData->costCenter?->cost_center;
+
+        $parentDestination = [];
+        $request_detail_allowance_from_parent = [];
+        foreach ($findData->parentBusinessTrip->businessTripDestination as $parent) {
+            $request_detail_allowance = [];
+            foreach ($parent->detailDestinationDay as $detailDay) {
+                $request_detail_allowance[] = [
+                    'item_name' => $detailDay->allowance->name,
+                    'type' => $detailDay->allowance->type,
+                    'currency_code' => $detailDay->allowance->currency_id,
+                    'value' => (int)$detailDay->price,
+                    'total_day' => $detailDay->total,
+                    'total' => $detailDay->price * $detailDay->total,
+                ];
+            }
+
+
+            foreach ($parent->detailDestinationTotal as $detailTotal) {
+                $request_detail_allowance[] = [
+                    'item_name' => $detailTotal->allowance->name,
+                    'type' => $detailTotal->allowance->type,
+                    'currency_code' => $detailTotal->allowance->currency_id,
+                    'value' => (int)$detailTotal->price,
+                    'total_day' => '-',
+                    'total' => (int)$detailTotal->price,
+                ];
+            }
+
+            // $parentDestination['request_detail_allowance'][] = $request_detail_allowance;
+            $parentRequestAllowanceByDestination[$parent->destination] = $request_detail_allowance;
+        }
+
+        foreach ($findData->businessTripDestination as $destination) {
+            $detail_attendance = [];
+            foreach ($destination->detailAttendance as $detail) {
+                $detail_attendance[] = [
+                    'date' => $detail->date,
+                    'start_time' => $detail->start_time,
+                    'end_time' => $detail->end_time,
+                    'shift_code' => $detail->shift_code,
+                    'shift_start' => $detail->shift_start,
+                    'shift_end' => $detail->shift_end,
+                ];
+            }
+
+
+            // STANDARD
+            $standar_detail_allowance = [];
+            foreach ($destination->detailDestinationDay as $detailDay) {
+                $standar_detail_allowance[] = [
+                    'item_name' => $detailDay->allowance->name,
+                    'type' => $detailDay->allowance->type,
+                    'currency_code' => $detailDay->allowance->currency_id,
+                    'value' => (int)$detailDay->standard_value,
+                    'total_day' => $detailDay->total,
+                    'total' => $detailDay->standard_value * $detailDay->total,
+                ];
+            }
+
+
+            foreach ($destination->detailDestinationTotal as $detailTotal) {
+                $standar_detail_allowance[] = [
+                    'item_name' => $detailTotal->allowance->name,
+                    'type' => $detailTotal->allowance->type,
+                    'currency_code' => $detailTotal->allowance->currency_id,
+                    'value' => (int)$detailTotal->standard_value,
+                    'total_day' => '-',
+                    'total' => (int)$detailTotal->standard_value,
+                ];
+            }
+
+            // DECLARATION
+            $declaration_detail_allowance = [];
+            foreach ($destination->detailDestinationDay as $detailDay) {
+                $declaration_detail_allowance[] = [
+                    'item_name' => $detailDay->allowance->name,
+                    'type' => $detailDay->allowance->type,
+                    'currency_code' => $detailDay->allowance->currency_id,
+                    'value' => (int)$detailDay->price,
+                    'total_day' => $detailDay->total,
+                    'total' => $detailDay->price * $detailDay->total,
+                ];
+            }
+
+
+            foreach ($destination->detailDestinationTotal as $detailTotal) {
+                $declaration_detail_allowance[] = [
+                    'item_name' => $detailTotal->allowance->name,
+                    'type' => $detailTotal->allowance->type,
+                    'currency_code' => $detailTotal->allowance->currency_id,
+                    'value' => (int)$detailTotal->price,
+                    'total_day' => '-',
+                    'total' => (int)$detailTotal->price,
+                ];
+            }
+
+            $request_detail_allowance = $parentRequestAllowanceByDestination[$destination->destination] ?? [];
+
+            $data['business_trip_destination'][] = [
+                'destination' => $destination->destination,
+                'business_trip_start_date' => $destination->business_trip_start_date,
+                'business_trip_end_date' => $destination->business_trip_end_date,
+                'other_allowance' => $destination->other_allowance,
+                'business_trip_detail_attendance' => $detail_attendance,
+                'standar_detail_allowance' => $standar_detail_allowance,
+                'request_detail_allowance' => $request_detail_allowance,
+                'declaration_detail_allowance' => $declaration_detail_allowance,
+            ];
+        }
         return view('print-bt-declaration', compact('data'));
     }
 }

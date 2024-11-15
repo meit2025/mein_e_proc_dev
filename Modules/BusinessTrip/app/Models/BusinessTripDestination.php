@@ -36,8 +36,8 @@ class BusinessTripDestination extends Model
     function detailDestinationDay()
     {
         return $this->hasMany(BusinessTripDetailDestinationDayTotal::class, 'business_trip_destination_id', 'id')
-            ->select('business_trip_destination_id', 'allowance_item_id', DB::raw('SUM(price) as price'), DB::raw('count(*) as total'))
-            ->groupBy('business_trip_destination_id', 'allowance_item_id');
+            ->select('business_trip_destination_id', 'allowance_item_id', DB::raw('SUM(price) as price'), DB::raw('count(*) as total'), 'standard_value','percentage')
+            ->groupBy('business_trip_destination_id', 'allowance_item_id', 'standard_value', 'percentage');
     }
 
     function detailDestinationTotal()
