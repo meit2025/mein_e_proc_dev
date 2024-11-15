@@ -58,6 +58,9 @@ class MasterTypeReimburseController extends Controller
 
         try {
             $listGrades             = BusinessTripGrade::select('id', 'grade')->get();
+            $listMaterialNumber     = MasterMaterial::get();
+            $listMaterialGroup      = MaterialGroup::get();
+
 
             return Inertia::render(
                 'Master/MasterReimburseType/Index',
@@ -99,6 +102,8 @@ class MasterTypeReimburseController extends Controller
         DB::beginTransaction();
         try {
             $validatedData  = $validator->validated();
+
+            // dd($validatedData);
             $createData     = MasterTypeReimburse::create($validatedData);
 
             if ($createData) {

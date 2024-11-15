@@ -51,6 +51,7 @@ import { BusinessTripGrade } from '../../BusinessGrade/model/model';
 import { MaterialModel } from '@/Pages/Master/MasterMaterial/model/listModel';
 import { GET_LIST_MASTERIAL_BY_MATERIAL_GROUP } from '@/endpoint/masterMaterial/api';
 import { FormType } from '@/lib/utils';
+import { AsyncDropdownComponent } from '@/components/commons/AsyncDropdownComponent';
 //
 
 export enum AllowanceType {
@@ -69,8 +70,8 @@ export interface AllowanceItemFormInterface {
   listCurrency: CurrencyModel[];
   listAllowanceCategory: AllowanceCategoryModel[];
   listGrade: BusinessTripGrade[];
-  listMaterial: MaterialModel[];
-  listMaterialGroup: string[];
+  // listMaterial: MaterialModel[];
+  // listMaterialGroup: string[];
 }
 export default function AllowanceItemForm({
   onSuccess,
@@ -80,10 +81,10 @@ export default function AllowanceItemForm({
   listCurrency,
   listAllowanceCategory,
   listGrade,
-  listMaterial,
+  // listMaterial,
   createUrl,
   editUrl,
-  listMaterialGroup,
+  // listMaterialGroup,
 }: AllowanceItemFormInterface) {
   const formSchema = z.object({
     code: z.string().min(1, 'Code is required'),
@@ -107,6 +108,7 @@ export default function AllowanceItemForm({
   });
 
   const [materials, setMaterials] = React.useState([]);
+  const [materialURL, setMaterialURL] = React.useState('');
 
   const defaultValues = {
     code: '',
@@ -209,7 +211,7 @@ export default function AllowanceItemForm({
     if (type === FormType.detail || type === FormType.edit) {
       getDetailData();
     }
-  }, []);
+  }, [type]);
 
   return (
     <ScrollArea className='h-[600px] w-full'>
@@ -307,30 +309,24 @@ export default function AllowanceItemForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Select
-                          onValueChange={(value) => {
-                            getMaterials(value);
-                          }} // Pass selected value to React Hook Form
-                          value={field.value} // Set the current value from React Hook Form
-                        >
-                          <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='Select Material Number' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {/* <SelectItem key='DAILY' value='daily'>
-                              DAILY
-                            </SelectItem>
-                            <SelectItem key='TOTAL' value='total'>
-                              Total
-                            </SelectItem> */}
+                        <AsyncDropdownComponent
+                          onSelectChange={(value) => {
+                            field.onChange(value);
 
-                            {listMaterialGroup.map((material) => (
-                              <SelectItem key={material} value={material}>
-                                {material}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                            setMaterialURL(
+                              'api/master/master-material/get-dropdown-master-material-number/by-material-group/' +
+                                value,
+                            );
+
+                            form.setValue('material_number', '');
+                          }}
+                          value={field.value}
+                          placeholder='Select material group'
+                          filter={['material_group']}
+                          id='material_group'
+                          label='material_group'
+                          url='api/master/master-material/get-dropdown-master-material-group'
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -347,31 +343,16 @@ export default function AllowanceItemForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Select
-                          onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
-                          defaultValue={form.getValues('material_number')} // Set the current value from React Hook Form
-                        >
-                          <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='Select Material Number' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {/* <SelectItem key='DAILY' value='daily'>
-                              DAILY
-                            </SelectItem>
-                            <SelectItem key='TOTAL' value='total'>
-                              Total
-                            </SelectItem> */}
-
-                            {materials.map((material: any) => (
-                              <SelectItem
-                                key={material.material_number}
-                                value={material.material_number}
-                              >
-                                {material.material_number}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <AsyncDropdownComponent
+                          onSelectChange={(value) => {
+                            field.onChange(value);
+                          }}
+                          value={field.value}
+                          filter={['material_number']}
+                          id='material_number'
+                          label='material_number'
+                          url={materialURL}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
