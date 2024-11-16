@@ -3,8 +3,15 @@ import { Button } from '@/components/shacdn/button';
 import { Inertia } from '@inertiajs/inertia';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/shacdn/form';
-import { useForm } from 'react-hook-form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@/components/shacdn/form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { Textarea } from '@/components/shacdn/textarea';
 import '../css/reimburse.scss';
 import { ScrollArea } from '@/components/shacdn/scroll-area';
@@ -26,6 +33,7 @@ import { usePage } from '@inertiajs/react';
 import { Currency, Period, PurchasingGroup, User, Tax, CostCenter } from '../model/listModel';
 import { FormType } from '@/lib/utils';
 import useDropdownOptions from '@/lib/getDropdown';
+import { AsyncDropdownComponent } from '@/components/commons/AsyncDropdownComponent';
 
 interface Props {
   onSuccess?: (value: boolean) => void;
@@ -40,6 +48,8 @@ interface Props {
   update_url?: string;
   store_url?: string;
   type?: FormType;
+  currentUser?: User;
+  latestPeriod: any;
 }
 
 export const ReimburseForm: React.FC<Props> = ({
@@ -54,7 +64,9 @@ export const ReimburseForm: React.FC<Props> = ({
   edit_url,
   update_url,
   store_url,
+  latestPeriod,
   type,
+  currentUser,
 }) => {
   const [activeTab, setActiveTab] = useState('form1');
   const { showToast } = useAlert();
@@ -66,6 +78,9 @@ export const ReimburseForm: React.FC<Props> = ({
   const [families, setFamilies] = useState([]);
   const [isFamily, setIsFamily] = useState([[]]);
   const { dataDropdown: dataUom, getDropdown: getUom } = useDropdownOptions();
+  const [familyUrl, setFamilyUrl] = useState('');
+
+  const [detailLimit, setDetailLimit] = useState<any>(null);
 
   const formSchema = z.object({
     formCount: z.string().min(1, 'total form must be have value'),
@@ -77,21 +92,23 @@ export const ReimburseForm: React.FC<Props> = ({
         id: z.string().optional(),
         for: z.string().optional(),
         group: z.string().optional(),
-        reimburse_type: z.string().min(1, 'reimburse type required'),
-        short_text: z.string().optional(),
-        balance: z.string().optional(),
-        currency: z.string().optional(),
-        tax_on_sales: z.string().optional(),
-        uom: z.string().optional(),
-        purchasing_group: z.string().optional(),
-        period: z.string().optional(),
-        type: z.string().optional(),
+        reimburse_type: z.string().min(1, 'reimburse type is required'),
+        short_text: z.string().min(1, 'remarks is required'),
+        balance: z.string().min(1, 'balance required'),
+        currency: z.string().min(1, 'currency required'),
+        tax_on_sales: z.string().min(1, 'currtax_on_salesency required'),
+        uom: z.string().min(1, 'uom required'),
+        purchasing_group: z.string().min(1, 'purchasing_group required'),
+        period: z.string().min(1, 'period required'),
+        type: z.any(),
         item_delivery_data: z.date(),
         start_date: z.date(),
         end_date: z.date(),
       }),
     ),
   });
+
+  // .min(1, 'reimburse type required')
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -99,24 +116,31 @@ export const ReimburseForm: React.FC<Props> = ({
       remark_group: 'test',
       cost_center: 'test',
       requester: '',
-      forms: Array.from({ length: 1 }).map(() => ({
-        id: '',
-        for: '',
-        group: '',
-        reimburse_type: '',
-        short_text: '',
-        balance: 0,
-        currency: 'IDR',
-        tax_on_sales: '',
-        uom: '',
-        purchasing_group: '',
-        period: '',
-        type: '',
-        item_delivery_data: new Date(),
-        start_date: new Date(),
-        end_date: new Date(),
-      })),
+      forms: [
+        {
+          id: '',
+          for: '',
+          group: '',
+          reimburse_type: '',
+          short_text: '',
+          balance: '',
+          currency: 'IDR',
+          tax_on_sales: '',
+          uom: '',
+          purchasing_group: '',
+          period: latestPeriod,
+          type: '',
+          item_delivery_data: new Date(),
+          start_date: new Date(),
+          end_date: new Date(),
+        },
+      ],
     },
+  });
+
+  const { fields: formFields, update: updateForm } = useFieldArray({
+    control: form.control,
+    name: 'forms',
   });
 
   const handleFormCountChange = (value: any) => {
@@ -134,7 +158,7 @@ export const ReimburseForm: React.FC<Props> = ({
           currency: 'IDR',
           tax_on_sales: '',
           purchasing_group: '',
-          period: '',
+          period: latestPeriod['code'],
           type: '',
           item_delivery_data: new Date(),
           start_date: new Date(),
@@ -196,6 +220,35 @@ export const ReimburseForm: React.FC<Props> = ({
     });
   }, []);
 
+  function generateForms(count: string) {
+    const forms = [];
+    for (let i = 0; i < parseInt(count); i++) {
+      const object = {
+        id: '',
+        for: '',
+        group: '',
+        reimburse_type: '',
+        short_text: '',
+        balance: '',
+        currency: '',
+        tax_on_sales: '',
+        uom: '',
+        purchasing_group: '',
+        period: latestPeriod['code'],
+        type: '',
+        item_delivery_data: new Date(),
+        start_date: new Date(),
+        end_date: new Date(),
+      };
+
+      forms.push(object);
+    }
+
+    console.log(forms);
+
+    form.setValue('forms', forms);
+  }
+
   const selectedEmployee = async (value: any) => {
     try {
       const response = await axiosInstance.get(`/family/show/${value}`);
@@ -223,12 +276,11 @@ export const ReimburseForm: React.FC<Props> = ({
         updatedTypes[index] = typeData;
         return updatedTypes;
       });
-      setIsFamily((prevIsFamily) => {
-        const updatedIsFamily = [...prevIsFamily];
-        updatedIsFamily[index] = value === 'Family';
-        return updatedIsFamily;
+
+      updateForm(index, {
+        ...formFields[index],
+        type: value,
       });
-      form.setValue(`forms.${index}.type`, value);
     } catch (error) {
       const resultError = error as AxiosError;
       const err = resultError.response.data;
@@ -270,6 +322,27 @@ export const ReimburseForm: React.FC<Props> = ({
       console.log(error);
     }
   };
+
+  async function getDataByLimit(index: number) {
+    const data = form.getValues(`forms.${index}`);
+    const grade_option = console.log(data);
+    const params = {
+      user: currentUser?.nip,
+      periode: data.period,
+      reimbuse_type_id: data.reimburse_type,
+    };
+    try {
+      const response = await axiosInstance.get('reimburse/data-limit-and-balance', {
+        params: params,
+      });
+
+      setDetailLimit(response.data.data);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  // /data-limit-and-balance
 
   return (
     <ScrollArea className='h-[600px] w-full'>
@@ -376,7 +449,10 @@ export const ReimburseForm: React.FC<Props> = ({
                       <FormItem>
                         <FormControl>
                           <Select
-                            onValueChange={(value) => handleFormCountChange(value)}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              generateForms(value);
+                            }}
                             value={field.value?.toString()}
                           >
                             <SelectTrigger className='w-[200px]'>
@@ -413,434 +489,533 @@ export const ReimburseForm: React.FC<Props> = ({
               ))}
             </TabsList>
 
-            {Array.from({ length: form.watch('formCount') || 1 }).map((_, index) => (
-              <TabsContent key={index} value={`form${index + 1}`}>
-                <FormField
-                  control={form.control}
-                  name={`forms.${index}.id`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input className='sr-only' value={field.value} onChange={field.onChange} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div>
-                  <table className='text-xs mt-4 reimburse-form-detail font-thin'>
-                    <tbody>
-                      <tr>
-                        <td width={200}>Type of Reimbursement</td>
-                        <td className='flex items-center space-x-3'>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.type`}
-                            render={({ field }) => (
-                              <Select
-                                onValueChange={(value) => selectedTypeCode(index, value)}
-                                value={field.value}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder='Select type' />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {categories.map((category) => (
-                                    <SelectItem key={category} value={category}>
-                                      {category}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            )}
+            {formFields.map((formValue: any, index: number) => {
+              return (
+                <TabsContent key={index} value={`form${index + 1}`}>
+                  <FormField
+                    control={form.control}
+                    name={`forms.${index}.id`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            className='sr-only'
+                            value={field.value}
+                            onChange={field.onChange}
                           />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.reimburse_type`}
-                            render={({ field }) => (
-                              <Select
-                                disabled={
-                                  !reimburseTypes[index] || reimburseTypes[index].length === 0
-                                }
-                                onValueChange={(value) =>
-                                  form.setValue(`forms.${index}.reimburse_type`, value)
-                                }
-                                value={field.value}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder='Select detail' />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {reimburseTypes[index] &&
-                                    reimburseTypes[index].map((reimburseType) => (
-                                      <SelectItem
-                                        key={reimburseType.code}
-                                        value={reimburseType.code}
-                                      >
-                                        {reimburseType.name}
+                  <div>
+                    <table className='text-xs mt-4 reimburse-form-detail font-thin'>
+                      <tbody>
+                        <tr>
+                          <td width={200}>Type of Reimbursement {formValue.reimburse_type}</td>
+                          <td className='flex items-center space-x-3'>
+                            <FormField
+                              control={form.control}
+                              name={`forms.${index}.type`}
+                              render={({ field }) => (
+                                <Select
+                                  onValueChange={(value) => selectedTypeCode(index, value)}
+                                  defaultValue={form.type}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder='Select type' />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {categories.map((category) => (
+                                      <SelectItem key={category} value={category}>
+                                        {category}
                                       </SelectItem>
                                     ))}
-                                </SelectContent>
-                              </Select>
-                            )}
-                          />
-                        </td>
-                      </tr>
+                                  </SelectContent>
+                                </Select>
+                              )}
+                            />
 
-                      <tr>
-                        <td width={200}>Purchasing Group</td>
-                        <td>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.purchasing_group`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Select
-                                    onValueChange={(value) => field.onChange(value)}
-                                    value={field.value}
-                                  >
-                                    <SelectTrigger className='w-[200px]'>
-                                      <SelectValue placeholder='-' />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {purchasing_groups.map((value) => (
-                                        <SelectItem key={value.id} value={value.id.toString()}>
-                                          {value.purchasing_group_desc} - {value.purchasing_group}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                      </tr>
-
-                      <tr>
-                        <td width={200}>Period Date</td>
-                        <td>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.period`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Select
-                                    onValueChange={(value) => field.onChange(value)}
-                                    value={field.value}
-                                  >
-                                    <SelectTrigger className='w-[200px]'>
-                                      <SelectValue placeholder='-' />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {periods.map((period) => (
-                                        <SelectItem key={period.code} value={period.code}>
-                                          {period.start} - {period.end} ({period.code})
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                      </tr>
-
-                      <tr>
-                        <td width={200}>Family</td>
-                        <td>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.for`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Select
-                                    disabled={!isFamily[index] || isFamily[index].length === 0}
-                                    onValueChange={(value) =>
-                                      checkBalance(
-                                        index,
-                                        value,
-                                        !isFamily[index],
-                                        form.getValues(`forms.${index}.reimburse_type`),
-                                        form.getValues(`forms.${index}.period`),
-                                      )
+                            <FormField
+                              control={form.control}
+                              name={`forms.${index}.reimburse_type`}
+                              render={({ field }) => (
+                                <Select
+                                  disabled={
+                                    !reimburseTypes[index] || reimburseTypes[index].length === 0
+                                  }
+                                  onValueChange={
+                                    (value) => {
+                                      updateForm(index, {
+                                        ...formValue,
+                                        reimburse_type: value,
+                                      });
                                     }
-                                    value={field.value}
-                                  >
-                                    <SelectTrigger className='w-[200px]'>
-                                      <SelectValue placeholder='-' />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {families.map((family) => (
-                                        <SelectItem key={family.id} value={family.id.toString()}>
-                                          {family.name}
+
+                                    // field.onChange(value)
+                                  }
+                                  defaultValue={formValue.reimburse_type}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder='Select detail' />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {reimburseTypes[index] &&
+                                      reimburseTypes[index].map((reimburseType) => (
+                                        <SelectItem
+                                          key={reimburseType.code}
+                                          value={reimburseType.code}
+                                        >
+                                          {reimburseType.name}
                                         </SelectItem>
                                       ))}
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                      </tr>
+                                  </SelectContent>
+                                </Select>
+                              )}
+                            />
+                          </td>
+                        </tr>
 
-                      <tr>
-                        <td width={200}>Tax</td>
-                        <td>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.tax_on_sales`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Select
-                                    onValueChange={(value) => field.onChange(value)}
-                                    value={field.value}
-                                  >
-                                    <SelectTrigger className='w-[200px]'>
-                                      <SelectValue placeholder='-' />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {taxes.map((tax) => (
-                                        <SelectItem key={tax.id} value={tax.id.toString()}>
-                                          {tax.mwszkz}
+                        <tr>
+                          <td width={200}>Purchasing Group</td>
+                          <td>
+                            <FormField
+                              control={form.control}
+                              name={`forms.${index}.purchasing_group`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Select
+                                      onValueChange={(value) => {
+                                        updateForm(index, {
+                                          ...formValue,
+                                          purchasing_group: value,
+                                        });
+                                      }}
+                                      defaultValue={form.purchasing_group}
+                                    >
+                                      <SelectTrigger className='w-[200px]'>
+                                        <SelectValue placeholder='-' />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {purchasing_groups.map((value) => (
+                                          <SelectItem key={value.id} value={value.id.toString()}>
+                                            {value.purchasing_group_desc} - {value.purchasing_group}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td width={200}>Period Date</td>
+                          <td>
+                            <FormField
+                              control={form.control}
+                              name={`forms.${index}.period`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Select
+                                      onValueChange={(value) => {
+                                        updateForm(index, {
+                                          ...formValue,
+                                          period: value,
+                                        });
+                                        getDataByLimit(index);
+                                      }}
+                                      defaultValue={field.value}
+                                    >
+                                      <SelectTrigger className='w-[200px]'>
+                                        <SelectValue placeholder='-' />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {/* {periods.map((period) => (
+                                          <SelectItem key={period.code} value={period.code}>
+                                            {period.start} - {period.end} ({period.code})
+                                          </SelectItem>
+                                        ))} */}
+
+                                        <SelectItem
+                                          key={latestPeriod?.code}
+                                          value={latestPeriod?.code}
+                                        >
+                                          {latestPeriod?.start} - {latestPeriod?.end} (
+                                          {latestPeriod?.code})
                                         </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <td width={200}>Uom</td>
-                        <td>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.uom`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Select
-                                    onValueChange={(value) => field.onChange(value)}
-                                    value={field.value}
-                                  >
-                                    <SelectTrigger className='w-[200px]'>
-                                      <SelectValue placeholder='-' />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {(dataUom ?? []).map((uom, index) => (
-                                        <SelectItem key={uom.value} value={uom.value.toString()}>
-                                          {uom.label}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                      </tr>
+                                      </SelectContent>
+                                    </Select>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </td>
+                        </tr>
 
-                      <tr>
-                        <td width={200}>Remark</td>
-                        <td>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.short_text`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Textarea placeholder='Insert remark' {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                      </tr>
+                        {formValue.type === 'Family' ? (
+                          <tr>
+                            <td width={200}>Family {formValue.for}</td>
+                            <td>
+                              <FormField
+                                control={form.control}
+                                name={`forms.${index}.for`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      {/* <Select
+                                        // disabled={!isFamily[index] || isFamily[index].length === 0}
+                                        onValueChange={(value) =>
+                                          checkBalance(
+                                            index,
+                                            value,
+                                            !isFamily[index],
+                                            form.getValues(`forms.${index}.reimburse_type`),
+                                            form.getValues(`forms.${index}.period`),
+                                          )
+                                        }
+                                        value={field.value}
+                                      >
+                                        <SelectTrigger className='w-[200px]'>
+                                          <SelectValue placeholder='-' />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {families.map((family) => (
+                                            <SelectItem
+                                              key={family.id}
+                                              value={family.id.toString()}
+                                            >
+                                              {family.name}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select> */}
 
-                      <tr>
-                        <td width={200}>Balance</td>
-                        <td>{limits[index]?.plafon}</td>
-                      </tr>
+                                      <AsyncDropdownComponent
+                                        onSelectChange={(value) => {
+                                          updateForm(index, {
+                                            ...formValue,
+                                            for: String(value),
+                                          });
+                                        }}
+                                        value={formValue.for}
+                                        placeholder='Select Family'
+                                        filter={['name']}
+                                        id='id'
+                                        label='name'
+                                        url={`reimburse/get-data-family/` + currentUser.id}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </td>
+                          </tr>
+                        ) : null}
 
-                      <tr>
-                        <td width={200}>Limit per claim</td>
-                        <td>{limits[index]?.limit}</td>
-                      </tr>
+                        <tr>
+                          <td width={200}>Tax</td>
+                          <td>
+                            <FormField
+                              control={form.control}
+                              name={`forms.${index}.tax_on_sales`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Select
+                                      onValueChange={(value) => {
+                                        updateForm(index, {
+                                          ...formValue,
+                                          tax_on_sales: value,
+                                        });
+                                      }}
+                                      defaultValue={formValue.tax_on_sales}
+                                    >
+                                      <SelectTrigger className='w-[200px]'>
+                                        <SelectValue placeholder='-' />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {taxes.map((tax) => (
+                                          <SelectItem key={tax.id} value={tax.id.toString()}>
+                                            {tax.mwszkz}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width={200}>Uom</td>
+                          <td>
+                            <FormField
+                              control={form.control}
+                              name={`forms.${index}.uom`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Select
+                                      onValueChange={(value) => {
+                                        updateForm(index, {
+                                          ...formValue,
+                                          uom: value,
+                                        });
+                                      }}
+                                      defaultValue={formValue.uom}
+                                    >
+                                      <SelectTrigger className='w-[200px]'>
+                                        <SelectValue placeholder='-' />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {(dataUom ?? []).map((uom, index) => (
+                                          <SelectItem key={uom.value} value={uom.value.toString()}>
+                                            {uom.label}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </td>
+                        </tr>
 
-                      <tr>
-                        <td width={200}>Receipt Date</td>
-                        <td>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.item_delivery_data`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <CustomDatePicker
-                                    initialDate={
-                                      field.value instanceof Date
-                                        ? field.value
-                                        : new Date(field.value)
-                                    }
-                                    onDateChange={(date) => field.onChange(date)}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                      </tr>
+                        <tr>
+                          <td width={200}>Remark</td>
+                          <td>
+                            <FormField
+                              control={form.control}
+                              name={`forms.${index}.short_text`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Textarea
+                                      placeholder='Insert remark'
+                                      onChange={(event) => {
+                                        updateForm(index, {
+                                          ...formValue,
+                                          short_text: event.target.value,
+                                        });
+                                      }}
+                                      defaultValue={formValue.short_text}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </td>
+                        </tr>
 
-                      <tr>
-                        <td width={200}>Claim date</td>
-                        <td className='flex items-center'>
-                          {/* <CustomDatePicker /> */}
-                          <span className='mx-2'>Start Date</span>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.start_date`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <CustomDatePicker
-                                    initialDate={
-                                      field.value instanceof Date
-                                        ? field.value
-                                        : new Date(field.value)
-                                    }
-                                    onDateChange={(date) => field.onChange(date)}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <span className='mx-2'>End Date</span>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.end_date`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <CustomDatePicker
-                                    initialDate={
-                                      field.value instanceof Date
-                                        ? field.value
-                                        : new Date(field.value)
-                                    }
-                                    onDateChange={(date) => field.onChange(date)}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                      </tr>
+                        <tr>
+                          <td width={200}>Sisa Balance</td>
+                          <td>
+                            <span className='font-bold'>{detailLimit?.balance}</span>
+                          </td>
+                        </tr>
 
-                      <tr>
-                        <td width={200}>Reimburse Cost</td>
-                        <td className='flex items-center space-x-3'>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.currency`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Select
-                                    onValueChange={(value) => field.onChange(value)}
-                                    value={field.value}
-                                  >
-                                    <SelectTrigger className='w-[200px]'>
-                                      <SelectValue placeholder='-' />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {currencies.map((currency) => (
-                                        <SelectItem key={currency.code} value={currency.code}>
-                                          {currency.name} ({currency.code})
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                        <tr>
+                          <td width={200}>Sisa Limit</td>
+                          <td>
+                            <span className='font-bold'>{detailLimit?.limit}</span>{' '}
+                          </td>
+                        </tr>
 
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.balance`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input
-                                    type='number'
-                                    placeholder='0.0'
-                                    {...field}
-                                    onChange={(e) => field.onChange(Number(e.target.value))}
-                                    value={field.value || 0.0}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                      </tr>
-
-                      <tr>
-                        <td width={200}>Attachments</td>
-                        <td>
-                          <FormField
-                            control={form.control}
-                            name={`forms.${index}.attachment`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <input
-                                    type='file'
-                                    multiple
-                                    accept='image/*,.pdf,.doc,.docx'
-                                    onChange={(e) => {
-                                      const files = e.target.files;
-                                      if (files) {
-                                        const fileArray = Array.from(files);
-                                        field.onChange(fileArray);
+                        <tr>
+                          <td width={200}>Receipt Date</td>
+                          <td>
+                            <FormField
+                              control={form.control}
+                              name={`forms.${index}.item_delivery_data`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <CustomDatePicker
+                                      initialDate={
+                                        field.value instanceof Date
+                                          ? field.value
+                                          : new Date(field.value)
                                       }
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </TabsContent>
-            ))}
+                                      onDateChange={(date) => field.onChange(date)}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td width={200}>Claim date</td>
+                          <td className='flex items-center'>
+                            {/* <CustomDatePicker /> */}
+                            <span className='mx-2'>Start Date</span>
+                            <FormField
+                              control={form.control}
+                              name={`forms.${index}.start_date`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <CustomDatePicker
+                                      initialDate={
+                                        field.value instanceof Date
+                                          ? field.value
+                                          : new Date(field.value)
+                                      }
+                                      onDateChange={(date) => field.onChange(date)}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <span className='mx-2'>End Date</span>
+                            <FormField
+                              control={form.control}
+                              name={`forms.${index}.end_date`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <CustomDatePicker
+                                      initialDate={
+                                        field.value instanceof Date
+                                          ? field.value
+                                          : new Date(field.value)
+                                      }
+                                      onDateChange={(date) => field.onChange(date)}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td width={200}>Reimburse Cost</td>
+                          <td className='w-full grid grid-cols-7 gap-x-4'>
+                            <div className='col-span-3'>
+                              <FormField
+                                control={form.control}
+                                name={`forms.${index}.currency`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Select
+                                        onValueChange={(value) => {
+                                          updateForm(index, {
+                                            ...formValue,
+                                            currency: value,
+                                          });
+                                        }}
+                                        defaultValue={formValue.currency}
+                                      >
+                                        <SelectTrigger className='w-[200px]'>
+                                          <SelectValue placeholder='-' />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {currencies.map((currency) => (
+                                            <SelectItem key={currency.code} value={currency.code}>
+                                              {currency.name} ({currency.code})
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </FormControl>
+                                    <FormDescription className='h-6'></FormDescription>
+
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            <div className='col-span-4'>
+                              <FormField
+                                control={form.control}
+                                name={`forms.${index}.balance`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Input
+                                        type='number'
+                                        placeholder='0.0'
+                                        onChange={(e) => {
+                                          updateForm(index, {
+                                            ...formValue,
+                                            balance: e.target.value,
+                                          });
+                                        }}
+                                        defaultValue={formValue.balance}
+                                      />
+                                    </FormControl>
+
+                                    <FormDescription className='h-6'>
+                                      {parseInt(detailLimit?.balance ?? 0) <
+                                      parseInt(formValue.balance) ? (
+                                        <span className='text-red-500'>
+                                          Reimbuse cost must be not greather than balance
+                                        </span>
+                                      ) : null}
+                                    </FormDescription>
+
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td width={200}>Attachments</td>
+                          <td>
+                            <FormField
+                              control={form.control}
+                              name={`forms.${index}.attachment`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <input
+                                      type='file'
+                                      multiple
+                                      accept='image/*,.pdf,.doc,.docx'
+                                      onChange={(e) => {
+                                        const files = e.target.files;
+                                        if (files) {
+                                          const fileArray = Array.from(files);
+                                          field.onChange(fileArray);
+                                        }
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </TabsContent>
+              );
+            })}
           </Tabs>
 
           <Separator className='my-4' />

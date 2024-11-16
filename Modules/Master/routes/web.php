@@ -72,8 +72,12 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
             Route::delete('/delete/{id}', [MasterMaterialController::class, 'destroy'])->name('master.master-material.destroy');
             route::get("/get-list-material-by-material-group/{material_group}", [MasterMaterialController::class, 'getListMaterialByMaterialGroupAPI'])->name('master.get-master-material-by-material-group');
-
             Route::get('/get-dropdown-master-material-number', [MasterMaterialController::class, 'getListMasterMaterialNumberAPI'])->name('dropdown-master-material-number');
+
+            Route::get('/get-dropdown-master-material-number/by-material-group/{material_group}', [MasterMaterialController::class, 'getListMasterMaterialNumberByMaterialGroupAPI'])->name('dropdown-master-material-number-by-material-group');
+
+
+            Route::get('/get-dropdown-master-material-group', [MasterMaterialController::class, 'getListMasterMaterialGroupAPI'])->name('dropdown-master-material-group');
         });
         Route::group(['prefix' => 'asset'], function () {
             Route::get('/list', [AssetController::class, 'index'])->name('master.asset.index');
