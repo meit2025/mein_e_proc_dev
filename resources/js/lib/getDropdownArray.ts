@@ -24,6 +24,7 @@ const useDropdownOptionsArray = () => {
   const [dropdownOptions, setDropdownOptions] = useState<FormFieldModel<any>[]>();
 
   const getDropdown = async (data: DropdownProps[], object?: FormFieldModel<any>[]) => {
+    console.log('ini data', data);
     try {
       let dataObject = object;
       for (const item of data) {

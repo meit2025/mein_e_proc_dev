@@ -40,7 +40,7 @@ class ReimbuseController extends Controller
 
         // dd(Auth::user()->id);
 
-        // get latest period for new period 
+        // get latest period for new period
         $latestPeriode = MasterPeriodReimburse::orderBy('id', 'desc')->first();
 
 
@@ -156,7 +156,7 @@ class ReimbuseController extends Controller
     public function index()
     {
         try {
-            $is_Admin = Auth::user()->role === 'admin';
+            $is_Admin = Auth::user()->is_admin;
 
             $listFamily = [];
             if (!$is_Admin) {

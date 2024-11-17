@@ -1,0 +1,22 @@
+export const modelDropdowns = [
+  {
+    dropdown: 'master_business_partner_id',
+    struct: {
+      name: 'name_one',
+      id: 'id',
+      tabel: 'master_business_partners',
+      where: {
+        key: 'type',
+        parameter: 'employee',
+      },
+    },
+  },
+  {
+    dropdown: 'role_id',
+    struct: {
+      name: 'name',
+      id: 'id',
+      tabel: 'roles',
+    },
+  },
+];

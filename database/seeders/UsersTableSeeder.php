@@ -20,7 +20,7 @@ class UsersTableSeeder extends Seeder
             [
                 'nip'               =>  '00001',
                 'division'          =>  'IT',
-                'role'              =>  'user',
+                'role_id'              =>  null,
                 'job_level'         =>  'direktur',
                 'immediate_spv'     =>  null,
                 'name'              =>  'John Doe',
@@ -34,7 +34,7 @@ class UsersTableSeeder extends Seeder
             [
                 'nip'               =>  '23456',
                 'division'          =>  'IT',
-                'role'              =>  'admin',
+                'role_id'              =>  null,
                 'job_level'         =>  'manager',
                 'immediate_spv'     =>  '00001',
                 'name'              =>  'John',
@@ -48,7 +48,7 @@ class UsersTableSeeder extends Seeder
             [
                 'nip'               =>  '12345',
                 'division'          =>  'IT',
-                'role'              =>  'user',
+                'role_id'              =>  null,
                 'job_level'         =>  'staff',
                 'immediate_spv'     =>  '23456',
                 'name'              =>  'Doe',
@@ -66,7 +66,7 @@ class UsersTableSeeder extends Seeder
                 [
                     'nip'               =>  $faker->uuid(),
                     'division'          =>  'IT',
-                    'role'              =>  'user',
+                    'role_id'              =>  null,
                     'job_level'         =>  'staff',
                     'immediate_spv'     =>  '23456',
                     'name'              =>  $faker->safeEmail(),

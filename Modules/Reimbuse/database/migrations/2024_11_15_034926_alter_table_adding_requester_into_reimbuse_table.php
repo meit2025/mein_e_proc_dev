@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //  
+        //
         Schema::table("reimburses", function (Blueprint $table) {
-            $table->unsignedBigInteger('requester');
+            $table->unsignedBigInteger('requester')->nullable();
         });
     }
 

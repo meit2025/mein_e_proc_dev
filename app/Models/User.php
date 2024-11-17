@@ -23,7 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'nip',
-        'role',
+        'role_id',
         'job_level',
         'division',
         'immediate_spv',

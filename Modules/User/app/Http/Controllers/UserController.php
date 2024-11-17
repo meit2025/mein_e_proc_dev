@@ -24,7 +24,7 @@ class UserController extends Controller
             'nip',
             'name',
             'email',
-            'role',
+            'role_id',
             'job_level',
             'division',
             'immediate_spv',
@@ -42,7 +42,7 @@ class UserController extends Controller
                 $q->where('nip', 'like', '%' . $request->search . '%')
                     ->orWhere('name', 'like', '%' . $request->search . '%')
                     ->orWhere('email', 'like', '%' . $request->search . '%')
-                    ->orWhere('role', 'like', '%' . $request->search . '%')
+                    ->orWhere('role_id', 'like', '%' . $request->search . '%')
                     ->orWhere('job_level', 'like', '%' . $request->search . '%')
                     ->orWhere('division', 'like', '%' . $request->search . '%')
                     ->orWhere('immediate_spv', 'like', '%' . $request->search . '%');
@@ -69,7 +69,6 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $dataInsert = $request->all();
-        $dataInsert['role'] = 'user';
         $dataInsert['password'] = Hash::make($request->password);
         $secret = User::create($dataInsert);
         return $this->successResponse($secret);
@@ -98,9 +97,6 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $dataInsert = $request->all();
-        if ($request->password) {
-            $dataInsert['password'] = Hash::make($request->password);
-        }
         $data = User::find($id)->update($dataInsert);
         return $this->successResponse($data);
     }
