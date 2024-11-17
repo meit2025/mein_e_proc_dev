@@ -3,17 +3,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/ta
 import '../css/index.scss';
 import axios, { AxiosError } from 'axios';
 import axiosInstance from '@/axiosInstance';
-import { GET_DETAIL_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
+import { GET_DETAIL_BUSINESS_TRIP_DECLARATION_PRINT } from '@/endpoint/business-trip-declaration/api';
 
 interface PurposeType {
   id: number;
   name: string;
   code: string;
-}
-
-interface RequestFor {
-  id: number;
-  name: string;
 }
 
 interface RequestedBy {
@@ -76,10 +71,13 @@ interface BusinessTrip {
   purpose_type: PurposeType | null;
   total_destination: number;
   attachment: string;
-  cost_center: CostCenter | null;
-  request_for: RequestFor | null;
-  requested_by: RequestedBy | null;
+  cost_center: string;
+  request_for: string;
+  requested_by: string;
   business_trip_destination: BusinessTripDestination[];
+  parent_business_trip: BusinessTrip | null;
+  parent_business_trip_request_no: string;
+  purpose_type_name: string;
 }
 
 const BusinessTripDeclarationDetail = () => {
@@ -94,7 +92,7 @@ const BusinessTripDeclarationDetail = () => {
         setIsLoading(true);
         // Pastikan endpoint API mengembalikan data relasi `posts`
         const response = await axiosInstance.get(GET_DETAIL_BUSINESS_TRIP_DECLARATION_PRINT(id));
-        console.log(response.data.data.business_trip_destination);
+        console.log(response.data.data, ' inii');
         setData(response.data.data);
       } catch (err) {
         console.error('Error fetching detail:', err);
@@ -115,10 +113,10 @@ const BusinessTripDeclarationDetail = () => {
         <strong>Company:</strong> PT. Mitsubishi Electric Indonesia
       </p>
       <p className='text-sm'>
-        <strong>Request for:</strong> {data?.request_for?.name ?? '-'}
+        <strong>Request for:</strong> {data?.request_for}
       </p>
       <p className='text-sm'>
-        <strong>Requested By:</strong> {data?.requested_by?.name ?? '-'}
+        <strong>Requested By:</strong> {data?.requested_by}
       </p>
       <p className='text-sm'>
         <strong>Status:</strong> <span className='status-approved'>Fully Approved</span>
@@ -127,25 +125,31 @@ const BusinessTripDeclarationDetail = () => {
       <table className='info-table text-sm mt-4'>
         <tr>
           <td>
+            <strong>Request For</strong>
+          </td>
+          <td>{data?.request_for}</td>
+        </tr>
+        <tr>
+          <td>
+            <strong>Business Trip Request Number</strong>
+          </td>
+          <td>{data?.parent_business_trip_request_no}</td>
+        </tr>
+        <tr>
+          <td>
             <strong>Purpose Type</strong>
           </td>
-          <td>{data?.purpose_type?.name ?? '-'}</td>
+          <td>{data?.purpose_type_name}</td>
         </tr>
         <tr>
           <td>
             <strong>Pusat Biaya</strong>
           </td>
-          <td>{data?.cost_center?.cost_center ?? '-'}</td>
+          <td>{data?.cost_center}</td>
         </tr>
         <tr>
           <td>
-            <strong>Start Date</strong>
-          </td>
-          <td>17 Aug 2023</td>
-        </tr>
-        <tr>
-          <td>
-            <strong>End Date</strong>
+            <strong>Request Date</strong>
           </td>
           <td>17 Aug 2023</td>
         </tr>
@@ -182,7 +186,7 @@ const BusinessTripDeclarationDetail = () => {
                   <th>Actual Start</th>
                   <th>Actual End</th>
                 </tr>
-                {destination.detail_attendance.map((attendance: any, index: number) => (
+                {destination.business_trip_detail_attendance.map((attendance: any, index: number) => (
                   <tr key={index}>
                     <td>{attendance.date}</td>
                     <td>{attendance.shift_code}</td>
@@ -203,26 +207,15 @@ const BusinessTripDeclarationDetail = () => {
                     <th>Total Days</th>
                     <th>Total</th>
                   </tr>
-                  {destination.detail_destination_day.map((item: any, index: number) => (
+                  {destination.standar_detail_allowance.map((item: any, index: number) => (
                     <tr key={index}>
                       <td>
-                        {item.allowance.name} ({item.allowance.type})
+                        {item.item_name} ({item.type})
                       </td>
-                      <td>{item.allowance.currency_id}</td>
-                      <td>{item.allowance.grade_price}</td>
-                      <td className='text-center'>{item.total}</td>
-                      <td>{item.allowance.grade_price * item.total}</td>
-                    </tr>
-                  ))}
-                  {destination.detail_destination_total.map((item: any, index: number) => (
-                    <tr key={index}>
-                      <td>
-                        {item.allowance.name} ({item.allowance.type})
-                      </td>
-                      <td>{item.allowance.currency_id}</td>
-                      <td>{item.allowance.grade_price}</td>
-                      <td className='text-center'>-</td>
-                      <td>{item.allowance.grade_price}</td>
+                      <td>{item.currency_code}</td>
+                      <td>{item.value}</td>
+                      <td className='text-center'>{item.total_day}</td>
+                      <td>{item.total}</td>
                     </tr>
                   ))}
 
@@ -232,24 +225,8 @@ const BusinessTripDeclarationDetail = () => {
                     </td>
                     <td>IDR</td>
                     <td></td>
-                    <td className='text-center'>
-                      {destination.detail_destination_day.reduce(
-                        (accumulator: number, item: any) => accumulator + Number(item.total),
-                        0,
-                      )}
-                    </td>
-                    <td>
-                      {destination.detail_destination_day.reduce(
-                        (accumulator: number, item: any) =>
-                          accumulator + Number(item.total) * Number(item.allowance.grade_price),
-                        0,
-                      ) +
-                        destination.detail_destination_total.reduce(
-                          (accumulator: number, item: any) =>
-                            accumulator + Number(item.allowance.grade_price),
-                          0,
-                        )}
-                    </td>
+                    <td className='text-center'></td>
+                    <td></td>
                   </tr>
                 </table>
 
@@ -262,26 +239,15 @@ const BusinessTripDeclarationDetail = () => {
                     <th>Total Days</th>
                     <th>Total</th>
                   </tr>
-                  {destination.detail_destination_day.map((item: any, index: number) => (
+                  {destination.request_detail_allowance.map((item: any, index: number) => (
                     <tr key={index}>
                       <td>
-                        {item.allowance.name} ({item.allowance.type})
+                        {item.item_name} ({item.type})
                       </td>
-                      <td>{item.allowance.currency_id}</td>
-                      <td>{item.price / item.total}</td>
-                      <td className='text-center'>{item.total}</td>
-                      <td>{item.price * item.total}</td>
-                    </tr>
-                  ))}
-                  {destination.detail_destination_total.map((item: any, index: number) => (
-                    <tr key={index}>
-                      <td>
-                        {item.allowance.name} ({item.allowance.type})
-                      </td>
-                      <td>{item.allowance.currency_id}</td>
-                      <td>{item.price}</td>
-                      <td className='text-center'>-</td>
-                      <td>{item.price}</td>
+                      <td>{item.currency_code}</td>
+                      <td>{item.value}</td>
+                      <td className='text-center'>{item.total_day}</td>
+                      <td>{item.total}</td>
                     </tr>
                   ))}
                   <tr>
@@ -290,23 +256,39 @@ const BusinessTripDeclarationDetail = () => {
                     </td>
                     <td>IDR</td>
                     <td></td>
-                    <td className='text-center'>
-                      {destination.detail_destination_day.reduce(
-                        (accumulator: number, item: any) => accumulator + Number(item.total),
-                        0,
-                      )}
-                    </td>
+                    <td className='text-center'></td>
+                    <td></td>
+                  </tr>
+                </table>
+
+                <table className='value-table'>
+                  <caption>Declared Value</caption>
+                  <tr>
+                    <th>Item Name</th>
+                    <th>Currency Code</th>
+                    <th>Value</th>
+                    <th>Total Days</th>
+                    <th>Total</th>
+                  </tr>
+                  {destination.declaration_detail_allowance.map((item: any, index: number) => (
+                    <tr key={index}>
+                      <td>
+                        {item.item_name} ({item.type})
+                      </td>
+                      <td>{item.currency_code}</td>
+                      <td>{item.value}</td>
+                      <td className='text-center'>{item.total_day}</td>
+                      <td>{item.total}</td>
+                    </tr>
+                  ))}
+                  <tr>
                     <td>
-                      {destination.detail_destination_day.reduce(
-                        (accumulator: number, item: any) =>
-                          accumulator + Number(item.total) * Number(item.price),
-                        0,
-                      ) +
-                        destination.detail_destination_total.reduce(
-                          (accumulator: number, item: any) => accumulator + Number(item.price),
-                          0,
-                        )}
+                      <strong>Total Request Value</strong>
                     </td>
+                    <td>IDR</td>
+                    <td></td>
+                    <td className='text-center'></td>
+                    <td></td>
                   </tr>
                 </table>
               </div>

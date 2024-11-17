@@ -114,8 +114,21 @@ class BusinessTripController extends Controller
     {
         try {
             DB::beginTransaction();
+
+            $yearMonth = now()->format('Y-m');
+            $prefix = "ODR-{$yearMonth}-";
+            // Ambil urutan terakhir berdasarkan bulan dan tahun
+            $latestOrder = BusinessTrip::where('request_no', 'like', "$prefix%")
+                ->latest('id')
+                ->where('type', 'request')
+                ->first();
+            // Ambil nomor urut terakhir, atau mulai dari 1 jika belum ada
+            $sequence = $latestOrder ? (int)substr($latestOrder->code, -8) + 1 : 1;
+            // Format menjadi 8 digit
+            $sequence = str_pad($sequence, 8, '0', STR_PAD_LEFT);
+
             $businessTrip = BusinessTrip::create([
-                'request_no' => time(),
+                'request_no' => $prefix . $sequence,
                 'purpose_type_id' => $request->purpose_type_id,
                 'request_for' => $request->request_for,
                 'cost_center_id' => $request->cost_center_id,
@@ -198,12 +211,11 @@ class BusinessTripController extends Controller
         $query =  BusinessTrip::query()->with(['purposeType']);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
-        $sortDirection = $request->get('sort_direction', 'asc');
+        $sortDirection = $request->get('sort_direction', 'desc');
 
+        // $query->orderBy($sortBy, $sortDirection);
 
-        $query->orderBy($sortBy, $sortDirection);
-
-        $data = $query->where('type', 'request')->paginate($perPage);
+        $data = $query->where('type', 'request')->latest()->paginate($perPage);
 
         $data->getCollection()->transform(function ($map) {
 

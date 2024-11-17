@@ -217,7 +217,7 @@ class BtService
     {
         $tax = Pajak::where('id', $BusinessTrip->pajak_id ?? '1')->first();
         $findCostCenter = MasterCostCenter::find($BusinessTrip->cost_center_id)->first();
-        $taxAmount = $BusinessTrip->total_cash_advance - ($BusinessTrip->total_cash_advance * (($tax->desimal ?? 0) / 100));
+        $taxAmount = $BusinessTrip->total_cash_advance * (($tax->desimal ?? 0) / 100);
 
         $findBusinessTripDestination = $this->findBusinessTripDestination($item->business_trip_destination_id);
 
@@ -239,7 +239,7 @@ class BtService
             'vendor_code' => $BusinessTrip->requestFor->employee->partner_number ?? '',
             'saknr' => '', //saknr
             'hkont' => '', //hkont
-            'amount_local_currency' => $BusinessTrip->total_cash_advance,
+            'amount_local_currency' => (int)$BusinessTrip->total_cash_advance + (int)$taxAmount,
             'tax_code' => $tax->mwszkz ?? 'V0',
             'dzfbdt' => $formattedDate, //dzfbdt
             'purchasing_document' => '', //ebeln
