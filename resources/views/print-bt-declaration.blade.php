@@ -143,7 +143,7 @@
         </tr>
         <tr>
             <td><strong>Request Date</strong></td>
-            <td></td>
+            <td>{{$data['created_at']}}</td>
         </tr>
         <tr>
             <td><strong>Remark</strong></td>
@@ -277,11 +277,18 @@
                         @endphp
                     @endforeach
                     <tr>
+                        <td>Other Allowance</td>
+                        <td>IDR</td>
+                        <td></td>
+                        <td></td>
+                        <td>{{number_format($row['other_allowance'],0,'','')}}</td>
+                    </tr>
+                    <tr>
                         <td><strong>Total Declaration Value</strong></td>
                         <td>IDR</td>
                         <td></td>
                         <td></td>
-                        <td>{{$total_declaration_value}}</td>
+                        <td>{{$total_declaration_value + $row['other_allowance']}}</td>
                     </tr>
                 </table>
             </div>

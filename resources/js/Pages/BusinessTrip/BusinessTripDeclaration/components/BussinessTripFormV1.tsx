@@ -43,6 +43,7 @@ import { Button } from '@/components/shacdn/button';
 import { ChevronsUpDown, Plus, UndoIcon, X } from 'lucide-react';
 import axios, { AxiosError } from 'axios';
 import { Inertia } from '@inertiajs/inertia';
+import { useAlert } from '@/contexts/AlertContext';
 
 interface Props {
   listBusinessTrip: BusinessTripModel[];
@@ -109,11 +110,15 @@ export const BussinessTripFormV1 = ({
           business_trip_end_date: new Date(),
           detail_attedances: [],
           allowances: [],
-          other: [],
+          other: [
+            {value: 0}
+          ]
         },
       ],
     },
   });
+
+  const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log(values, ' data');
     try {
@@ -137,11 +142,11 @@ export const BussinessTripFormV1 = ({
 
       // console.log(response);
       showToast('succesfully created data', 'success');
-      onSuccess?.(true);
+    //   onSuccess?.(true);
     } catch (e) {
       const error = e as AxiosError;
 
-      onSuccess?.(false);
+    //   onSuccess?.(false);
       console.log(error);
     }
   };
@@ -171,9 +176,6 @@ export const BussinessTripFormV1 = ({
       setListDestination(businessTripData.destinations);
       setTotalDestination(businessTripData.total_destination);
       setAllowancesProperty(businessTripData.destinations);
-      //   console.log(businessTripData.destinations, ' businessTripData.destinations');
-      // console.log(businessTripDetail, ' businessTripDetail');
-      //   setListAllowances(businessTripData.allowances as AllowanceItemModel[]);
     } catch (e) {
       console.log(e);
     }
@@ -343,7 +345,7 @@ export const BussinessTripFormV1 = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Select value={totalDestination} onValueChange={totalDestinationHandler}>
+                        <Select value={totalDestination} onValueChange={totalDestinationHandler} disabled={true}>
                           <SelectTrigger className='w-[200px] py-2'>
                             <SelectValue placeholder='-- Select Bussiness Trip --' />
                           </SelectTrigger>
@@ -863,34 +865,26 @@ export function DetailAllowance({
 
   React.useEffect(() => {}, [detailAllowanceceWatch]);
 
-  const [otherAllowances, setOtherAllowances] = React.useState<number[]>([]); // Daftar untuk menyimpan allowance tambahan
-
-  const addOtherAllowance = () => {
-    if (otherAllowances.length === 0) {
-      setOtherAllowances([...otherAllowances, otherAllowances.length]);
-    }
-  };
+  // Field array untuk menyimpan other allowances
+  const { fields: otherAllowances, append, remove } = useFieldArray({
+    control: form.control,
+    name: `destinations.${destinationIndex}.other`, // Path field array
+  });
 
   const watchedAllowances = useWatch({
     control: form.control,
-    name: otherAllowances.map((_, index) => `destinations.${destinationIndex}.other[${index}]`),
+    name: `destinations.${destinationIndex}.other`, // Mengawasi perubahan nilai
   });
 
-  const removeAllowanceOther = (indexToRemove: number) => {
-    // Unregister input untuk menghapusnya dari data form
-    form.control.unregister(`destinations.${destinationIndex}.other[${indexToRemove}]`);
-
-    // Menghapus baris dari state
-    setOtherAllowances((prevAllowances) =>
-      prevAllowances.filter((_, index) => index !== indexToRemove),
-    );
-  };
-
   const calculateTotalOther = () => {
-    return watchedAllowances.reduce((total, allowance) => {
-      const allowanceValue = Number(allowance) || 0;
+    return (watchedAllowances || []).reduce((total:number, allowance:any) => {
+      const allowanceValue = Number(allowance?.value || 0);
       return total + allowanceValue;
     }, 0);
+  };
+
+  const addOtherAllowance = () => {
+    append({value:0}); // Tambahkan field baru ke array
   };
 
   return (
@@ -926,7 +920,7 @@ export function DetailAllowance({
             <div className='flex items-center'>
               <FormField
                 control={form.control}
-                name={`destinations.${destinationIndex}.other[${index}]`}
+                name={`destinations.${destinationIndex}.other[${index}].value`}
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -954,52 +948,12 @@ export function DetailAllowance({
             </div>
           </td>
           <td>
-            <Button type='button' className='text-xs' onClick={() => removeAllowanceOther(index)}>
+            <Button type='button' className='text-xs' onClick={() => remove(index)}>
               X
             </Button>
           </td>
         </tr>
       ))}
-      {/* <tr>
-        <td width={220} style={{ verticalAlign: 'middle' }} className='text-sm'>
-          Other Allowance
-        </td>
-        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>:</td>
-        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-          <span className='text-sm'>IDR</span>
-        </td>
-        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-          <div className='flex items-center'>
-            <FormField
-              control={form.control}
-              name={`destinations.${destinationIndex}.other`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      value={field.value}
-                      onChange={(e) => {
-                        // Memperbarui nilai field
-                        field.onChange(e); // Menggunakan onChange dari React Hook Form
-                        // Anda dapat melakukan aksi lain di sini, seperti mengupdate elemen lain
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <span className='text-sm'>* 100%</span>
-          </div>
-        </td>
-        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-          <div className='flex items-center'>
-            <span className='text-sm' style={{ padding: '2px 5px' }}>
-              = IDR {calculateTotalOther()}
-            </span>
-          </div>
-        </td>
-      </tr> */}
     </table>
   );
 }
