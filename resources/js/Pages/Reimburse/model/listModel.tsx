@@ -65,6 +65,7 @@ export interface User {
   nip: string;
   id: string;
   name: string;
+  is_admin: number;
 }
 
 export interface Group {

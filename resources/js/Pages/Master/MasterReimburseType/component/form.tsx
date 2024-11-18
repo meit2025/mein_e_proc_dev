@@ -273,11 +273,11 @@ export default function ReimburseTypeForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Select 
-                          onValueChange={(value) => field.onChange(value)} 
-                          value={field.value} 
-                          disabled={form.getValues('is_employee') === true}>
-
+                        <Select
+                          onValueChange={(value) => field.onChange(value)}
+                          value={field.value}
+                          disabled={form.getValues('is_employee') === true}
+                        >
                           <SelectTrigger className='w-[200px]'>
                             <SelectValue placeholder='Child / Wife' />
                           </SelectTrigger>

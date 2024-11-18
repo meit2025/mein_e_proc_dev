@@ -46,6 +46,7 @@ export interface AsyncDropdownType {
   placeholder?: string;
   label: string;
   value: string;
+  defaultLabel?: string;
   onSelectChange: (value: any) => void;
 }
 export function AsyncDropdownComponent({
@@ -55,6 +56,7 @@ export function AsyncDropdownComponent({
   label,
   value,
   onSelectChange,
+  defaultLabel,
   placeholder = 'Search items ...',
 }: AsyncDropdownType) {
   const [open, setOpen] = React.useState(false);
@@ -101,6 +103,7 @@ export function AsyncDropdownComponent({
     }
   }
 
+  console.log(defaultLabel);
   React.useEffect(() => {
     delay = setTimeout(() => {
       if (searchText) callAPI();
@@ -132,9 +135,11 @@ export function AsyncDropdownComponent({
           aria-expanded={open}
           className='w-[200px] text-xs justify-between'
         >
-          {value
+          {defaultLabel && dropdownList.length === 0 ? defaultLabel : null}
+          {value && dropdownList.length > 0
             ? dropdownList.find((framework) => String(framework[id]) === String(value))?.[label]
-            : placeholder}
+            : ''}
+          {value === '' && (defaultLabel === '' || defaultLabel === null) ? placeholder : ''}
           <ChevronsUpDown className='opacity-50' />
         </Button>
       </PopoverTrigger>
@@ -147,12 +152,12 @@ export function AsyncDropdownComponent({
           />
           <CommandList className='z-30'>
             {isLoading ? (
-              <div className='py-10'>
+              <div className='py-10 flex items-center justify-center h-64 w-full'>
                 <LoadingSpin />
               </div>
             ) : (
               <>
-                <CommandEmpty>No framework found. {dropdownList.length}</CommandEmpty>
+                <CommandEmpty>No Item found. {dropdownList.length}</CommandEmpty>
 
                 {dropdownList.length > 0 ? (
                   <CommandGroup className='z-30'>
