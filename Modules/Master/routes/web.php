@@ -121,6 +121,7 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::group(['prefix' => 'reimburse-type'], function () {
             Route::get('/', [MasterTypeReimburseController::class, 'list'])->name('master.reimburse-type.list');
+            Route::get('/listUserGrade/{id}', [MasterTypeReimburseController::class, 'listGradeUsers'])->name('master.listUserGrade');
             Route::post('/create', [MasterTypeReimburseController::class, 'store'])->name('master.reimburse-type.store');
             Route::put('/update/{id}', [MasterTypeReimburseController::class, 'update'])->name('master.reimburse-type.update');
             Route::get('/edit/{id}', [MasterTypeReimburseController::class, 'edit'])->name('master.reimburse-type.edit');
@@ -138,6 +139,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['prefix' => 'reimburse-quota'], function () {
             Route::get('/', [MasterQuotaReimburseController::class, 'list'])->name('master.reimburse-quota.list');
             Route::post('/create', [MasterQuotaReimburseController::class, 'store'])->name('master.reimburse-quota.store');
+            Route::get('/detail/{id}', [MasterQuotaReimburseController::class, 'detail'])->name('master.reimburse-quota.detail');
             Route::put('/update/{id}', [MasterQuotaReimburseController::class, 'update'])->name('master.reimburse-quota.update');
             Route::get('/edit/{id}', [MasterQuotaReimburseController::class, 'edit'])->name('master.reimburse-quota.edit');
             Route::delete('/delete/{id}', [MasterQuotaReimburseController::class, 'destroy'])->name('master.reimburse-quota.destroy');

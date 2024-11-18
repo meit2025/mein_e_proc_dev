@@ -12,6 +12,8 @@ use Modules\Master\Models\MasterTypeReimburse;
 use Modules\Master\Models\MasterTypeReimburseGrades;
 use Modules\Master\Models\MasterMaterial;
 use Modules\Master\Models\MaterialGroup;
+use Modules\BusinessTrip\Models\BusinessTripGradeUser;
+use App\Models\User;
 
 
 class MasterTypeReimburseController extends Controller
@@ -38,11 +40,33 @@ class MasterTypeReimburseController extends Controller
                     'code' => $map->code,
                     'is_employee' => $map->is_employee ? 'Employee' : 'Family',
                     'material_group' => $map->materialGroup->material_group,
+                    'family_status' => $map->family_status,
                     'material_number' => $map->masterMaterial->material_number,
                     'grade_option' => $map->grade_option,
                     'plafon' => ($map->grade_option == 'all') ? $map->grade_all_price : join(" , ", $gradeRelations),
                 ];
             });
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    public function listGradeUsers($reimburseTypeId) {
+        try {
+            $reimburseType          = MasterTypeReimburse::find($reimburseTypeId);
+            $gradeReimburseType     = MasterTypeReimburseGrades::select('grade_id')->where('reimburse_type_id', $reimburseTypeId)->pluck('grade_id')->toArray();
+            $listUserInGrade        = BusinessTripGradeUser::with('grade')
+            ->select("user_id")
+            ->when($gradeReimburseType, function($q) use ($gradeReimburseType) {
+                return $q->whereHas('grade', function($query) use ($gradeReimburseType) {
+                    $query->whereIn('id', $gradeReimburseType);
+                });
+            })
+            ->pluck('user_id')
+            ->toArray();
+            
+            $data = $reimburseType->grade_option == 'all' ? User::get() : User::whereIn('id', $listUserInGrade)->get() ;
             return $this->successResponse($data);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -86,6 +110,7 @@ class MasterTypeReimburseController extends Controller
             'name' => 'required',
             'limit' => 'required|min:1|numeric',
             'is_employee' => 'required|boolean',
+            'family_status' => '',
             'material_group' => 'required',
             'material_number' => 'required',
             'grade_option' => 'required'
@@ -160,6 +185,7 @@ class MasterTypeReimburseController extends Controller
             'name' => 'required',
             'limit' => 'required|min:1|numeric',
             'is_employee' => 'required|boolean',
+            'family_status' => '',
             'material_group' => 'required',
             'material_number' => 'required',
             'grade_option' => 'required'

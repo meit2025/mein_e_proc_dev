@@ -60,6 +60,7 @@ export default function ReimburseTypeForm({
     code: z.string(),
     name: z.string().min(1, 'Name is required'),
     is_employee: z.boolean(),
+    family_status: z.string().optional(),
     limit: z.number(),
     material_group: z.number('Material Group must choose'),
     material_number: z.number('Material Number must choose'),
@@ -83,6 +84,7 @@ export default function ReimburseTypeForm({
     name: '',
     material_group: null,
     material_number: null,
+    family_status: '',
     is_employee: true,
     grade_option: 'all',
     grade_all_price: '0',
@@ -104,6 +106,7 @@ export default function ReimburseTypeForm({
         name: data.name,
         limit: data.limit,
         is_employee: data.is_employee,
+        family_status: data.family_status,
         material_group: parseInt(data.material_group),
         material_number: parseInt(data.material_number),
         grade_option: data.grade_option,
@@ -271,6 +274,36 @@ export default function ReimburseTypeForm({
             </tr>
 
             <tr>
+              <td width={200}>Family Status</td>
+              <td>
+                <FormField
+                  control={form.control}
+                  name='family_status'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select 
+                          onValueChange={(value) => field.onChange(value)} 
+                          value={field.value} 
+                          disabled={form.getValues('is_employee') === true}>
+
+                          <SelectTrigger className='w-[200px]'>
+                            <SelectValue placeholder='Child / Wife' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='wife'>Wife</SelectItem>
+                            <SelectItem value='child'>Child</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </td>
+            </tr>
+
+            <tr>
               <td width={200}>
                 Limit <span className='text-red-500'>*</span>
               </td>
@@ -366,7 +399,7 @@ export default function ReimburseTypeForm({
                     <table>
                       {gradeFields.map((grade, gradeIndex) => (
                         <tr key={grade}>
-                          <td>Balance {grade.grade}</td>
+                          <td>Balance Grade {grade.grade}</td>
                           <td>:</td>
                           <td>
                             <div>
