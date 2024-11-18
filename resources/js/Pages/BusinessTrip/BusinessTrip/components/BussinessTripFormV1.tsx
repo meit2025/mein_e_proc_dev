@@ -197,29 +197,58 @@ export const BussinessTripFormV1 = ({
     },
   });
 
+  interface Destination {
+    destination: string;
+    detail_attedances: any[];
+    allowances: any[];
+    business_trip_start_date: Date;
+    business_trip_end_date: Date;
+  }
+
   async function getDetailData() {
     const url = GET_DETAIL_BUSINESS_TRIP(id);
 
     try {
-      const response = await axios.get(url);
-      //   console.log(response, ' Response Detail');
+        const response = await axios.get(url);
+        const data = response.data.data;
+        console.log(data, ' Response Detailxxxx');
+        console.log(data.destinations, ' Data Response Detailxxxx');
+        form.setValue('purpose_type_id', data.purpose_type_id);
+        form.setValue('request_for', data.request_for.id);
+        form.setValue('cost_center_id', data.cost_center_id);
+        form.setValue('pajak_id', data.pajak_id);
+        form.setValue('purchasing_group_id', data.purchasing_group_id);
+        form.setValue('remark', data.remarks);
+        form.setValue('total_destination', data.total_destination);
+        console.log(form.getValues('destinations'),'Form Destinations');
+        form.setValue('destinations',[]);
+        form.setValue('destinations',
+            data.destinations.map((destination: any) => ({
+                destination: destination.destination,
+                business_trip_start_date: new Date(destination.business_trip_start_date),
+                business_trip_end_date: new Date(destination.business_trip_end_date),
+                detail_attedances: destination.detail_attedances,
+                allowances: destination.allowances
+            }))
+        );
 
-      form.reset({
-        purpose_type_id: response.data.data.purpose_type_id,
-        request_for: response.data.data.request_for,
-        remark: response.data.data.remarks,
-        attachment: null,
-        total_destination: response.data.data.total_destination,
-        destinations: [
-          {
-            detail_attedances: response.data.data.destination.detail_attedances,
-            allowances: [],
-            destination: response.data.data.destination.destination,
-            business_trip_start_date: new Date(),
-            business_trip_end_date: new Date(),
-          },
-        ],
-      });
+        // form.trigger('destinations');
+        // console.log(form.getValues('destinations'),'Form Destinations');
+
+        // const formDestination: Destination[] = [];
+        // data.business_trip_destination.forEach((destination: any,index:number) => {
+        //     formDestination.push({
+        //         destination: destination.destination,
+        //         detail_attedances: [],
+        //         allowances: [],
+        //         business_trip_start_date: new Date(),
+        //         business_trip_end_date: new Date(),
+        //     })
+        // })
+        // console.log(formDestination,'Form Destination');
+        // form.setValue('destinations', formDestination);
+        // form.setValue(`destinations.0.destination`, 'JAKARTA');
+
     } catch (e) {
       const error = e as AxiosError;
     }
@@ -346,9 +375,14 @@ export const BussinessTripFormV1 = ({
   });
 
   React.useEffect(() => {
-    setAllowancesProperty();
     if (id && type == BusinessTripType.edit) {
       getDetailData();
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if(type == BusinessTripType.create){
+        setAllowancesProperty();
     }
   }, [totalDestination, listAllowances, id, type, role, idUser]);
 
