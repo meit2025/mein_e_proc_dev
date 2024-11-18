@@ -64,7 +64,11 @@ class ReimbursementService
             $validatedDataGroup['code'] = $this->generateUniqueGroupCode();
             $group = ReimburseGroup::create($validatedDataGroup);
 
+
+
+
             foreach ($forms as $form) {
+
                 if (!isset($form->for)) {
                     $form['for'] = $groupData['requester'];
                 }
@@ -79,6 +83,8 @@ class ReimbursementService
                 $validatedData['item_delivery_data'] = Carbon::parse($form['item_delivery_data'])->format('Y-m-d');
                 $validatedData['start_date'] = Carbon::parse($form['start_date'])->format('Y-m-d');
                 $validatedData['end_date'] = Carbon::parse($form['end_date'])->format('Y-m-d');
+                $validatedData['requester'] = $group['requester'];
+
 
                 $reimburse = Reimburse::create($validatedData);
 

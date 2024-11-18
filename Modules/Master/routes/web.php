@@ -5,6 +5,7 @@ use Modules\Master\Http\Controllers\AccountAssignmentCategoryController;
 use Modules\Master\Http\Controllers\AssetController;
 use Modules\Master\Http\Controllers\BankKeyController;
 use Modules\Master\Http\Controllers\CostCenterController;
+use Modules\Master\Http\Controllers\DataDropdownController;
 use Modules\Master\Http\Controllers\DokumentTypeController;
 use Modules\Master\Http\Controllers\DropdownMasterController;
 use Modules\Master\Http\Controllers\FamilyController;
@@ -72,8 +73,12 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/detail/{id}', [MasterMaterialController::class, 'show'])->name('master.master-material.show');
             Route::delete('/delete/{id}', [MasterMaterialController::class, 'destroy'])->name('master.master-material.destroy');
             route::get("/get-list-material-by-material-group/{material_group}", [MasterMaterialController::class, 'getListMaterialByMaterialGroupAPI'])->name('master.get-master-material-by-material-group');
-
             Route::get('/get-dropdown-master-material-number', [MasterMaterialController::class, 'getListMasterMaterialNumberAPI'])->name('dropdown-master-material-number');
+
+            Route::get('/get-dropdown-master-material-number/by-material-group/{material_group}', [MasterMaterialController::class, 'getListMasterMaterialNumberByMaterialGroupAPI'])->name('dropdown-master-material-number-by-material-group');
+
+
+            Route::get('/get-dropdown-master-material-group', [MasterMaterialController::class, 'getListMasterMaterialGroupAPI'])->name('dropdown-master-material-group');
         });
         Route::group(['prefix' => 'asset'], function () {
             Route::get('/list', [AssetController::class, 'index'])->name('master.asset.index');
@@ -163,6 +168,9 @@ Route::group(['middleware' => 'auth'], function () {
             Route::inertia('/',  'MasterPr/DokumentType/Index');
             Route::inertia('/create',  'MasterPr/DokumentType/Create');
             Route::inertia('/update/{id}',  'MasterPr/DokumentType/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+            Route::inertia('/detail/{id}',  'MasterPr/DokumentType/Detail', [
                 'id' => fn() => request()->route('id'),
             ]);
         });
@@ -297,6 +305,14 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/update/{id}', [PajakController::class, 'update'])->name('master.pajak.update');
             Route::get('/detail/{id}', [PajakController::class, 'show'])->name('master.pajak.show');
             Route::delete('/delete/{id}', [PajakController::class, 'destroy'])->name('master.pajak.destroy');
+        });
+
+        Route::group(['prefix' => 'data-dropdown'], function () {
+            Route::get('/list', [DataDropdownController::class, 'index'])->name('master.data-dropdown.index');
+            Route::post('/create', [DataDropdownController::class, 'store'])->name('master.data-dropdown.store');
+            Route::post('/update/{id}', [DataDropdownController::class, 'update'])->name('master.data-dropdown.update');
+            Route::get('/detail/{id}/{type}', [DataDropdownController::class, 'show'])->name('master.data-dropdown.show');
+            Route::delete('/delete/{id}', [DataDropdownController::class, 'destroy'])->name('master.data-dropdown.destroy');
         });
     });
 });

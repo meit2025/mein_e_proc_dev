@@ -124,6 +124,8 @@ class MasterTypeReimburseController extends Controller
         DB::beginTransaction();
         try {
             $validatedData  = $validator->validated();
+
+            // dd($validatedData);
             $createData     = MasterTypeReimburse::create($validatedData);
 
             if ($createData) {

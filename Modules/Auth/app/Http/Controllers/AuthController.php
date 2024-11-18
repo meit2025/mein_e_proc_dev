@@ -148,7 +148,7 @@ class AuthController extends Controller
                             'name' => 'Doe',
                             'nip' => "{$request->username}12345",
                             'division' => 'IT',
-                            'role' => 'user',
+                            'role_id' => null,
                             'job_level' => 'staff',
                             'immediate_spv' => '23456',
                         ]

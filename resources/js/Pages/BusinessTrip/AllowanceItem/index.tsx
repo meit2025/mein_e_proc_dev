@@ -24,16 +24,8 @@ interface propsType {
   listAllowanceCategory: AllowanceCategoryModel[];
   listCurrency: any[];
   listGrade: BusinessTripGrade[];
-  listMaterial: MaterialModel[];
-  listMaterialGroup: string[];
 }
-export const Index = ({
-  listAllowanceCategory,
-  listCurrency,
-  listGrade,
-  listMaterial,
-  listMaterialGroup,
-}: propsType) => {
+export const Index = ({ listAllowanceCategory, listCurrency, listGrade }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
   const [formType, setFormType] = React.useState({
@@ -65,8 +57,6 @@ export const Index = ({
             editUrl={UPDATE_ALLOWANCE_ITEM(formType.id)}
             detailUrl={GET_DETAIL_ALLOWANCE_ITEM(formType.id)}
             createUrl={CREATE_API_ALLOWANCE_ITEM}
-            listMaterialGroup={listMaterialGroup}
-            listMaterial={listMaterial}
             listGrade={listGrade}
             listCurrency={listCurrency}
             listAllowanceCategory={listAllowanceCategory}

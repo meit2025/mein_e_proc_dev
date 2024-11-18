@@ -216,7 +216,7 @@ const ArrayItem = ({
         }}
         placeholder={'Main Asset'}
         classNames='mt-2'
-        onChangeOutside={(x: any) => FetchDataValue(x, ItemIndex, dataIndex)}
+        onChangeOutside={(x: any, data: any) => FetchDataValue(x, ItemIndex, dataIndex)}
       />
 
       <FormAutocomplete<any>

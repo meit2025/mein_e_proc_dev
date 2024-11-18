@@ -54,6 +54,7 @@ class Reimburse extends Model
         "purchase_requisition_closed",
         'purchasing_group',
         'purchasing_organization',
+        'requester',
         'account_assignment',
         'storage_location',
         'desired_vendor',

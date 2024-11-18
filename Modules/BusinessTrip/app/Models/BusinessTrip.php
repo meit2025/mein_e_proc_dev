@@ -87,4 +87,8 @@ class BusinessTrip extends Model
     {
         return $this->belongsTo(PurchasingGroup::class, 'purchasing_group_id', 'id');
     }
+
+    function parentBusinessTrip(){
+        return $this->belongsTo(BusinessTrip::class, 'parent_id', 'id');
+    }
 }
