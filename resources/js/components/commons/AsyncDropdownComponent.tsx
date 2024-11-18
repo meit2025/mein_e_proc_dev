@@ -45,6 +45,7 @@ export interface AsyncDropdownType {
   id: string;
   placeholder?: string;
   label: string;
+  disabled?: boolean;
   value: string;
   defaultLabel?: string;
   onSelectChange: (value: any) => void;
@@ -57,6 +58,7 @@ export function AsyncDropdownComponent({
   value,
   onSelectChange,
   defaultLabel,
+  disabled,
   placeholder = 'Search items ...',
 }: AsyncDropdownType) {
   const [open, setOpen] = React.useState(false);
@@ -131,6 +133,7 @@ export function AsyncDropdownComponent({
       <PopoverTrigger asChild>
         <Button
           variant='outline'
+          disabled={disabled}
           role='combobox'
           aria-expanded={open}
           className='w-[200px] text-xs justify-between'

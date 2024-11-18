@@ -256,6 +256,7 @@ export const ReimburseForm: React.FC<Props> = ({
         item_delivery_data: new Date(),
         start_date: new Date(),
         end_date: new Date(),
+        url: '',
       };
 
       forms.push(object);
@@ -627,6 +628,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   //   </SelectContent>
                                   // </Select>
                                   <AsyncDropdownComponent
+                                    disabled={formValue.type === ''}
                                     onSelectChange={(value) => {
                                       updateForm(index, {
                                         ...formValue,
@@ -769,6 +771,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                       </Select> */}
 
                                         <AsyncDropdownComponent
+                                          disabled={formValue.type === ''}
                                           onSelectChange={(value) => {
                                             updateForm(index, {
                                               ...formValue,
