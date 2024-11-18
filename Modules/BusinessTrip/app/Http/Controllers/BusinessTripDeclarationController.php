@@ -28,8 +28,8 @@ class BusinessTripDeclarationController extends Controller
     {
         $users = User::select('nip', 'name', 'id')->get();
         $listBusinessTrip = BusinessTrip::where('type', 'request')->get();
-
-        $listPurposeType = PurposeType::select('name', 'code', 'id')->get();
+        $inBusinessTripRequest = BusinessTrip::where('type', 'request')->pluck('id')->toArray();
+        $listPurposeType = PurposeType::select('name', 'code', 'id')->where('id', '!=', $inBusinessTripRequest)->get();
         return Inertia::render('BusinessTrip/BusinessTripDeclaration/index', compact('users', 'listPurposeType', 'listBusinessTrip'));
     }
 
@@ -199,6 +199,7 @@ class BusinessTripDeclarationController extends Controller
         $data['parent_business_trip_request_no'] = $findData->parentBusinessTrip->request_no;
         $data['purpose_type_name'] = $findData->purposeType->name;
         $data['cost_center'] = $findData->costCenter?->cost_center;
+        $data['created_at'] = date('d-m-Y', strtotime($findData->created_at));
 
         $parentDestination = [];
         $request_detail_allowance_from_parent = [];
@@ -231,6 +232,7 @@ class BusinessTripDeclarationController extends Controller
             $parentRequestAllowanceByDestination[$parent->destination] = $request_detail_allowance;
         }
 
+
         foreach ($findData->businessTripDestination as $destination) {
             $detail_attendance = [];
             foreach ($destination->detailAttendance as $detail) {
@@ -247,6 +249,7 @@ class BusinessTripDeclarationController extends Controller
 
             // STANDARD
             $standar_detail_allowance = [];
+            $total_standard = 0;
             foreach ($destination->detailDestinationDay as $detailDay) {
                 $standar_detail_allowance[] = [
                     'item_name' => $detailDay->allowance->name,
@@ -256,6 +259,7 @@ class BusinessTripDeclarationController extends Controller
                     'total_day' => $detailDay->total,
                     'total' => $detailDay->standard_value * $detailDay->total,
                 ];
+                $total_standard += $detailDay->standard_value * $detailDay->total;
             }
 
 
@@ -268,10 +272,12 @@ class BusinessTripDeclarationController extends Controller
                     'total_day' => '-',
                     'total' => (int)$detailTotal->standard_value,
                 ];
+                $total_standard += $detailTotal->standard_value;
             }
 
             // DECLARATION
             $declaration_detail_allowance = [];
+            $total_declaration = 0;
             foreach ($destination->detailDestinationDay as $detailDay) {
                 $declaration_detail_allowance[] = [
                     'item_name' => $detailDay->allowance->name,
@@ -281,6 +287,7 @@ class BusinessTripDeclarationController extends Controller
                     'total_day' => $detailDay->total,
                     'total' => $detailDay->price * $detailDay->total,
                 ];
+                $total_declaration += $detailDay->price * $detailDay->total;
             }
 
 
@@ -293,9 +300,14 @@ class BusinessTripDeclarationController extends Controller
                     'total_day' => '-',
                     'total' => (int)$detailTotal->price,
                 ];
+                $total_declaration += $detailTotal->price;
             }
 
             $request_detail_allowance = $parentRequestAllowanceByDestination[$destination->destination] ?? [];
+            $total_request = 0;
+            foreach ($request_detail_allowance as $detail) {
+                $total_request += $detail['total'];
+            }
 
             $data['business_trip_destination'][] = [
                 'destination' => $destination->destination,
@@ -306,6 +318,10 @@ class BusinessTripDeclarationController extends Controller
                 'standar_detail_allowance' => $standar_detail_allowance,
                 'request_detail_allowance' => $request_detail_allowance,
                 'declaration_detail_allowance' => $declaration_detail_allowance,
+                'other_allowance' => number_format($destination->other_allowance,0,'',''),
+                'total_standard' => $total_standard,
+                'total_request' => $total_request,
+                'total_declaration' => $total_declaration + $destination->other_allowance,
             ];
         }
         return $this->successResponse($data);
@@ -381,20 +397,28 @@ class BusinessTripDeclarationController extends Controller
             DB::beginTransaction();
             $dataBusiness = BusinessTrip::find($request->request_no);
 
-            $yearMonth = now()->format('Y-m');
-            $prefix = "DCLR-{$yearMonth}-";
-            // Ambil urutan terakhir berdasarkan bulan dan tahun
+            $yearMonth = now()->format('Y-m'); // Format tahun dan bulan
+            $prefix = "DCLR-{$yearMonth}-"; // Prefix untuk request number
+
+            // Cari nomor urut terakhir berdasarkan prefix dan type
             $latestOrder = BusinessTrip::where('request_no', 'like', "$prefix%")
-                ->latest('id')
-                ->where('type', 'declaration')
+                ->where('type', 'declaration') // Filter berdasarkan tipe
+                ->latest('id') // Urutkan berdasarkan ID terbaru
                 ->first();
-            // Ambil nomor urut terakhir, atau mulai dari 1 jika belum ada
-            $sequence = $latestOrder ? (int)substr($latestOrder->code, -8) + 1 : 1;
-            // Format menjadi 8 digit
+
+            // Ambil nomor urut terakhir dari kode, atau mulai dari 1 jika belum ada
+            $sequence = $latestOrder
+                ? (int)substr($latestOrder->request_no, strlen($prefix)) + 1
+                : 1;
+
+            // Format menjadi angka 8 digit (misalnya 00000001, 00000002, dst.)
             $sequence = str_pad($sequence, 8, '0', STR_PAD_LEFT);
 
+            // Gabungkan prefix dan nomor urut
+            $requestNo = $prefix . $sequence;
+
             $businessTrip = BusinessTrip::create([
-                'request_no' => $prefix . $sequence,
+                'request_no' => $requestNo,
                 'parent_id' => $request->request_no,
                 'purpose_type_id' => $dataBusiness->purpose_type_id,
                 'request_for' => $dataBusiness->request_for,
@@ -425,7 +449,7 @@ class BusinessTripDeclarationController extends Controller
                     'destination' => $data_destination['destination'],
                     'business_trip_start_date' => date('Y-m-d', strtotime($data_destination['business_trip_start_date'])),
                     'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
-                    'other_allowance' => isset($data_destination['other']) ? $data_destination['other'][0] : 0,
+                    'other_allowance' => isset($data_destination['other']) ? $data_destination['other'][0]['value'] : 0,
                 ]);
                 foreach ($data_destination['detail_attedances'] as $key => $destination) {
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
@@ -485,6 +509,7 @@ class BusinessTripDeclarationController extends Controller
         $data['parent_business_trip_request_no'] = $findData->parentBusinessTrip->request_no;
         $data['purpose_type_name'] = $findData->purposeType->name;
         $data['cost_center'] = $findData->costCenter?->cost_center;
+        $data['created_at'] = date('d-m-Y', strtotime($findData->created_at));
 
         $parentDestination = [];
         $request_detail_allowance_from_parent = [];
@@ -592,6 +617,7 @@ class BusinessTripDeclarationController extends Controller
                 'standar_detail_allowance' => $standar_detail_allowance,
                 'request_detail_allowance' => $request_detail_allowance,
                 'declaration_detail_allowance' => $declaration_detail_allowance,
+                'other_allowance' => $destination->other_allowance
             ];
         }
         return view('print-bt-declaration', compact('data'));
