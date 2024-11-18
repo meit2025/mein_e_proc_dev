@@ -6,7 +6,12 @@ import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import { ReimburseForm } from './components/ReimburseForm';
-import { LIST_REIMBURSE, UPDATE_REIMBURSE, STORE_REIMBURSE } from '@/endpoint/reimburse/api';
+import {
+  LIST_REIMBURSE,
+  UPDATE_REIMBURSE,
+  STORE_REIMBURSE,
+  DETAIL_REIMBURSE,
+} from '@/endpoint/reimburse/api';
 import { FormType } from '@/lib/utils';
 import { Currency, Period, PurchasingGroup, User, Tax, CostCenter } from './model/listModel';
 import { PAGE_EDIT_REIMBURSE } from '@/endpoint/reimburse/page';
@@ -69,7 +74,7 @@ export const Index = ({
             latestPeriod={latestPeriod}
             taxes={taxes}
             cost_center={cost_center}
-            edit_url={PAGE_EDIT_REIMBURSE(formType.id)}
+            edit_url={DETAIL_REIMBURSE(formType.id)}
             update_url={UPDATE_REIMBURSE(formType.id)}
             store_url={STORE_REIMBURSE}
             type={formType.type}
