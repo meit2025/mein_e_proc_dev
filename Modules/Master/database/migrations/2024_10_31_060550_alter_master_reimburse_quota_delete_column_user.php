@@ -11,9 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('master_quota_reimburses', function (Blueprint $table) {
-            $table->dropColumn('user');
-        });
+
+        if (Schema::hasColumn('master_quota_reimburses', 'user')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('user');
+            });
+        }
+        // Schema::table('master_quota_reimburses', function (Blueprint $table) {
+        //     $table->dropColumn('user');
+        // });
     }
 
     /**
@@ -22,7 +28,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('master_quota_reimburses', function (Blueprint $table) {
-            $table->dropColumn('user');
+            $table->string('user');
         });
     }
 };
