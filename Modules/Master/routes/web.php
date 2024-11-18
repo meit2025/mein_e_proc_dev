@@ -5,6 +5,7 @@ use Modules\Master\Http\Controllers\AccountAssignmentCategoryController;
 use Modules\Master\Http\Controllers\AssetController;
 use Modules\Master\Http\Controllers\BankKeyController;
 use Modules\Master\Http\Controllers\CostCenterController;
+use Modules\Master\Http\Controllers\DataDropdownController;
 use Modules\Master\Http\Controllers\DokumentTypeController;
 use Modules\Master\Http\Controllers\DropdownMasterController;
 use Modules\Master\Http\Controllers\FamilyController;
@@ -125,6 +126,7 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::group(['prefix' => 'reimburse-type'], function () {
             Route::get('/', [MasterTypeReimburseController::class, 'list'])->name('master.reimburse-type.list');
+            Route::get('/listUserGrade/{id}', [MasterTypeReimburseController::class, 'listGradeUsers'])->name('master.listUserGrade');
             Route::post('/create', [MasterTypeReimburseController::class, 'store'])->name('master.reimburse-type.store');
             Route::put('/update/{id}', [MasterTypeReimburseController::class, 'update'])->name('master.reimburse-type.update');
             Route::get('/edit/{id}', [MasterTypeReimburseController::class, 'edit'])->name('master.reimburse-type.edit');
@@ -142,6 +144,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['prefix' => 'reimburse-quota'], function () {
             Route::get('/', [MasterQuotaReimburseController::class, 'list'])->name('master.reimburse-quota.list');
             Route::post('/create', [MasterQuotaReimburseController::class, 'store'])->name('master.reimburse-quota.store');
+            Route::get('/detail/{id}', [MasterQuotaReimburseController::class, 'detail'])->name('master.reimburse-quota.detail');
             Route::put('/update/{id}', [MasterQuotaReimburseController::class, 'update'])->name('master.reimburse-quota.update');
             Route::get('/edit/{id}', [MasterQuotaReimburseController::class, 'edit'])->name('master.reimburse-quota.edit');
             Route::delete('/delete/{id}', [MasterQuotaReimburseController::class, 'destroy'])->name('master.reimburse-quota.destroy');
@@ -165,6 +168,9 @@ Route::group(['middleware' => 'auth'], function () {
             Route::inertia('/',  'MasterPr/DokumentType/Index');
             Route::inertia('/create',  'MasterPr/DokumentType/Create');
             Route::inertia('/update/{id}',  'MasterPr/DokumentType/Update', [
+                'id' => fn() => request()->route('id'),
+            ]);
+            Route::inertia('/detail/{id}',  'MasterPr/DokumentType/Detail', [
                 'id' => fn() => request()->route('id'),
             ]);
         });
@@ -299,6 +305,14 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/update/{id}', [PajakController::class, 'update'])->name('master.pajak.update');
             Route::get('/detail/{id}', [PajakController::class, 'show'])->name('master.pajak.show');
             Route::delete('/delete/{id}', [PajakController::class, 'destroy'])->name('master.pajak.destroy');
+        });
+
+        Route::group(['prefix' => 'data-dropdown'], function () {
+            Route::get('/list', [DataDropdownController::class, 'index'])->name('master.data-dropdown.index');
+            Route::post('/create', [DataDropdownController::class, 'store'])->name('master.data-dropdown.store');
+            Route::post('/update/{id}', [DataDropdownController::class, 'update'])->name('master.data-dropdown.update');
+            Route::get('/detail/{id}/{type}', [DataDropdownController::class, 'show'])->name('master.data-dropdown.show');
+            Route::delete('/delete/{id}', [DataDropdownController::class, 'destroy'])->name('master.data-dropdown.destroy');
         });
     });
 });

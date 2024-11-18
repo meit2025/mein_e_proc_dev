@@ -60,9 +60,14 @@ export default function ReimburseTypeForm({
     code: z.string(),
     name: z.string().min(1, 'Name is required'),
     is_employee: z.boolean(),
+    family_status: z.string().optional(),
     limit: z.number(),
-    material_group: z.number('Material Group must choose'),
-    material_number: z.number('Material Number must choose'),
+    material_group: z.number().refine((val) => val > 0, {
+      message: 'Material Group must be chosen',
+    }),
+    material_number: z.number().refine((val) => val > 0, {
+      message: 'Material Number must be chosen',
+    }),
     grade_option: z.string().min(1, 'Grade must be selected'),
     grade_all_price: z.string().optional(),
     grades: z.array(
@@ -75,6 +80,7 @@ export default function ReimburseTypeForm({
   });
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [keySearchMaterialGroup, setKeySearchMaterialGroup] = React.useState('');
   const { dataDropdown: dataMaterialGroup, getDropdown: getMaterialGroup } = useDropdownOptions();
   const { dataDropdown: dataMaterialNumber, getDropdown: getMaterialNumber } = useDropdownOptions();
 
@@ -83,10 +89,12 @@ export default function ReimburseTypeForm({
     name: '',
     material_group: null,
     material_number: null,
+    family_status: '',
     is_employee: true,
     grade_option: 'all',
     grade_all_price: '0',
     grades: [],
+    limit: 0, // Pastikan semua properti ada jika diperlukan
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -96,7 +104,7 @@ export default function ReimburseTypeForm({
 
   async function getDetailData() {
     try {
-      const response = await axiosInstance.get(editURL);
+      const response = await axiosInstance.get(editURL || '');
       const data = response.data.data;
 
       form.reset({
@@ -104,6 +112,7 @@ export default function ReimburseTypeForm({
         name: data.name,
         limit: data.limit,
         is_employee: data.is_employee,
+        family_status: data.family_status,
         material_group: parseInt(data.material_group),
         material_number: parseInt(data.material_number),
         grade_option: data.grade_option,
@@ -133,22 +142,11 @@ export default function ReimburseTypeForm({
 
       onSuccess && onSuccess(true);
       showToast(response?.data?.message, 'success');
-    } catch (e) {
+    } catch (e: any) {
       onSuccess && onSuccess(false);
-      showToast(e.message, 'error');
+      showToast(e?.message, 'error');
     }
     setIsLoading(false);
-  };
-
-  const handleSearchMaterialGroup = async (query: string) => {
-    if (query.length > 0) {
-      getMaterialGroup('', {
-        name: 'material_group',
-        id: 'id',
-        tabel: 'material_groups',
-        search: query,
-      });
-    }
   };
 
   const handleSearchMaterialNumber = async (query: string) => {
@@ -157,6 +155,10 @@ export default function ReimburseTypeForm({
         name: 'material_number',
         id: 'id',
         tabel: 'master_materials',
+        where: {
+          key: 'material_group',
+          parameter: query,
+        },
       });
     }
   };
@@ -168,17 +170,9 @@ export default function ReimburseTypeForm({
       tabel: 'material_groups',
     });
 
-    getMaterialNumber('', {
-      name: 'material_number',
-      id: 'id',
-      tabel: 'master_materials',
-    });
-
     if (type === FormType.edit) {
       getDetailData();
     }
-
-    document.body.style.removeProperty('pointer-events');
   }, []);
 
   return (
@@ -271,6 +265,36 @@ export default function ReimburseTypeForm({
             </tr>
 
             <tr>
+              <td width={200}>Family Status</td>
+              <td>
+                <FormField
+                  control={form.control}
+                  name='family_status'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select 
+                          onValueChange={(value) => field.onChange(value)} 
+                          value={field.value} 
+                          disabled={form.getValues('is_employee') === true}>
+
+                          <SelectTrigger className='w-[200px]'>
+                            <SelectValue placeholder='Child / Wife' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='wife'>Wife</SelectItem>
+                            <SelectItem value='child'>Child</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </td>
+            </tr>
+
+            <tr>
               <td width={200}>
                 Limit <span className='text-red-500'>*</span>
               </td>
@@ -343,12 +367,12 @@ export default function ReimburseTypeForm({
                     <MultiSelect
                       label='grade'
                       id='id'
-                      options={listGrades}
+                      options={listGrades || []}
                       value={form.getValues('grades').map((item) => item.id)}
                       onSelect={(value) => {
                         form.setValue(
                           'grades',
-                          value.map((item) => {
+                          value.map((item: any) => {
                             return {
                               id: item.id,
                               grade: item.grade,
@@ -366,7 +390,7 @@ export default function ReimburseTypeForm({
                     <table>
                       {gradeFields.map((grade, gradeIndex) => (
                         <tr key={grade}>
-                          <td>Balance {grade.grade}</td>
+                          <td>Balance Grade {grade.grade}</td>
                           <td>:</td>
                           <td>
                             <div>
@@ -400,8 +424,11 @@ export default function ReimburseTypeForm({
                   isRequired={true}
                   disabled={false}
                   placeholder={'Material Group'}
-                  onSearch={handleSearchMaterialGroup}
                   classNames='mt-2 w-full'
+                  onChangeOutside={async (x: any, data: any) => {
+                    await handleSearchMaterialNumber(data?.label);
+                  }}
+                  fieldLabel={''}
                 />
               </td>
             </tr>
@@ -410,12 +437,12 @@ export default function ReimburseTypeForm({
               <td width={200}>Material Number</td>
               <td>
                 <FormAutocomplete<any>
+                  fieldLabel={''}
                   options={dataMaterialNumber}
                   fieldName='material_number'
                   isRequired={true}
                   disabled={false}
                   placeholder={'Material Number'}
-                  onSearch={handleSearchMaterialNumber}
                   classNames='mt-2 w-full'
                 />
               </td>
