@@ -332,7 +332,9 @@ class BusinessTripDeclarationController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $data = BusinessTrip::find($id);
+        $data->delete();
+        return $this->successResponse($data);
     }
 
     public function listAPI(Request $request)
