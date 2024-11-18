@@ -138,7 +138,7 @@ class MasterQuotaReimburseController extends Controller
             }
             
             $query = MasterQuotaReimburse::query()
-                ->join('master_quota_reimburse_userss', 'master_quota_reimburse_users.quota_reimburses_id', '=', 'master_quota_reimburses.id')
+                ->join('master_quota_reimburse_users', 'master_quota_reimburse_users.quota_reimburses_id', '=', 'master_quota_reimburses.id')
                 ->join('master_type_reimburses', 'master_type_reimburses.id', '=', 'master_quota_reimburses.type')
                 ->join('users', 'users.id', '=', 'master_quota_reimburse_users.user_id');
 
