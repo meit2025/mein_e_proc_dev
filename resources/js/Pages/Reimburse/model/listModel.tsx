@@ -35,7 +35,7 @@ export interface TypeReimburse {
   is_employee: boolean;
   material_group: string;
   material_number: string;
-} 
+}
 
 export interface Family {
   id: string;
@@ -63,9 +63,11 @@ export interface Reimburse {
 
 export interface User {
   nip: string;
+  id: string;
   name: string;
+  is_admin: number;
 }
-  
+
 export interface Group {
   id: string;
   code: string;

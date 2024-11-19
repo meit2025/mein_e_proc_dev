@@ -121,8 +121,10 @@ export function MultiSelect({ options, label, id, onSelect, value = [] }: multiS
 
     if (options.length === value.length) {
       setAll(true);
+    } else {
+      setAll(false);
     }
-  }, [value]);
+}, [options, value]);
 
   React.useEffect(() => {
     if (rightValues.length === options.length) {

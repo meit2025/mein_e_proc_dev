@@ -28,12 +28,9 @@ class AllowanceItemController extends Controller
         $listAllowanceCategory = AllowanceCategory::get();
         $listCurrency =  Currency::get();
         $listGrade =  BusinessTripGrade::get();
-        $listMaterial =  MasterMaterial::get();
-        $listMaterialGroup = MasterMaterial::select('material_group')->get()->pluck('material_group');
 
 
-
-        return inertia('BusinessTrip/AllowanceItem/index', compact('listAllowanceCategory', 'listCurrency', 'listGrade', 'listMaterial', 'listMaterialGroup'));
+        return inertia('BusinessTrip/AllowanceItem/index', compact('listAllowanceCategory', 'listCurrency', 'listGrade',));
     }
 
     /**

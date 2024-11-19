@@ -13,18 +13,16 @@ import {
 
 export const Index = () => {
   return (
-    <>
-      <DataGridComponent
-        columns={columns}
-        url={{
-          url: GET_MASTER_ACCOUNT_ASSIGNMENT_CATEGORY,
-          addUrl: CREATE_PAGE_MASTER_ACCOUNT_ASSIGNMENT_CATEGORY,
-          editUrl: EDIT_PAGE_MASTER_ACCOUNT_ASSIGNMENT_CATEGORY,
-          deleteUrl: DELET_MASTER_ACCOUNT_ASSIGNMENT_CATEGORY,
-        }}
-        labelFilter='search'
-      />
-    </>
+    <DataGridComponent
+      columns={columns}
+      url={{
+        url: GET_MASTER_ACCOUNT_ASSIGNMENT_CATEGORY,
+        addUrl: CREATE_PAGE_MASTER_ACCOUNT_ASSIGNMENT_CATEGORY,
+        editUrl: EDIT_PAGE_MASTER_ACCOUNT_ASSIGNMENT_CATEGORY,
+        deleteUrl: DELET_MASTER_ACCOUNT_ASSIGNMENT_CATEGORY,
+      }}
+      labelFilter='search'
+    />
   );
 };
 

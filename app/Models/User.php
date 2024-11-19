@@ -23,14 +23,15 @@ class User extends Authenticatable
         'email',
         'password',
         'nip',
-        'role',
+        'role_id',
         'job_level',
         'division',
         'immediate_spv',
         'email_verified_at',
         'username',
         'is_admin',
-        'master_business_partner_id'
+        'master_business_partner_id',
+        'role'
     ];
 
     /**

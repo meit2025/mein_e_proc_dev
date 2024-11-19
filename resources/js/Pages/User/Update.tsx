@@ -9,6 +9,8 @@ import axiosInstance from '@/axiosInstance';
 import { usePage } from '@inertiajs/react';
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
 import useDropdownOptions from '@/lib/getDropdown';
+import { modelDropdowns } from './model/modelDropdown';
+import useDropdownOptionsArray from '@/lib/getDropdownArray';
 
 const Update = ({ id }: { id: number }) => {
   const { props } = usePage();
@@ -36,22 +38,9 @@ const Update = ({ id }: { id: number }) => {
   );
 
   const [dataModel, setDataModel] = useState(formModel);
-  const { dropdownOptions, getDropdown } = useDropdownOptions();
-
+  const { dropdownOptions, getDropdown } = useDropdownOptionsArray();
   useEffect(() => {
-    getDropdown(
-      'master_business_partner_id',
-      {
-        name: 'name_one',
-        id: 'id',
-        tabel: 'master_business_partners',
-        where: {
-          key: 'type',
-          parameter: 'employee',
-        },
-      },
-      formModel,
-    );
+    getDropdown(modelDropdowns, formModel);
   }, []);
 
   useEffect(() => {
@@ -66,7 +55,7 @@ const Update = ({ id }: { id: number }) => {
           <FormMapping
             isLoading={isLoading}
             methods={methods}
-            formModel={dataModel}
+            formModel={(dataModel ?? []).filter((field: any) => field.name !== 'password')}
             url={`${EDIT_USER}/${props.id}`}
             redirectUrl={LIST_PAGE_USER}
           />

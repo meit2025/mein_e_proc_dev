@@ -24,7 +24,7 @@ interface propsType {
 }
 export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
-  console.log(listBusinessTrip, ' bt ');
+
   const [businessTripForm, setBusinessTripForm] = React.useState({
     type: BusinessTripType.create,
     id: undefined,

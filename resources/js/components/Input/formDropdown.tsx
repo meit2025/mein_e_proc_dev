@@ -1,6 +1,6 @@
-import { Autocomplete, TextField, FormHelperText, CircularProgress } from '@mui/material';
+import { Autocomplete, CircularProgress, FormHelperText, TextField } from '@mui/material';
+import { CSSProperties } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { CSSProperties, useEffect } from 'react';
 
 // Define the option type as a generic T for flexibility
 interface Option<T> {
@@ -19,8 +19,7 @@ interface FormAutocompleteProps<T> {
   placeholder?: string;
   classNames?: string;
   lengthLabel?: string;
-  // eslint-disable-next-line no-unused-vars
-  onChangeOutside?: (value: T | null) => void;
+  onChangeOutside?: (value: T | null, data?: any) => void;
   onSearch?: (query: string) => Promise<Option<T>[]>;
   loading?: boolean;
 }
@@ -45,10 +44,6 @@ const FormAutocomplete = <T,>({
     formState: { errors },
   } = useFormContext();
 
-  useEffect(() => {
-    document.body.style.pointerEvents = 'auto';
-  }, []);
-
   return (
     <div className='w-full' style={{ pointerEvents: 'auto' }}>
       <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
@@ -67,22 +62,19 @@ const FormAutocomplete = <T,>({
             <div className={`${classNames}`}>
               <Autocomplete
                 {...field}
-                value={options.find((option) => option.value === field.value) || null} // Make sure the value is controlled
+                value={(options ?? []).find((option) => option.value === field.value) || null} // Make sure the value is controlled
                 options={options}
                 getOptionLabel={(option) => option.label}
                 isOptionEqualToValue={(option, value) => option.value === value}
                 onChange={(_, data) => {
                   field.onChange(data ? data.value : null);
                   if (onChangeOutside) {
-                    onChangeOutside(data ? data.value : null);
+                    onChangeOutside(data ? data.value : null, data);
                   }
                 }}
                 sx={{ ...style, pointerEvents: 'auto !important', cursor: 'auto !important' }}
                 disabled={disabled}
                 loading={loading}
-                onClick={(x) => {
-                  console.log(x);
-                }}
                 onInputChange={(_, newInputValue) => {
                   if (onSearch) {
                     onSearch(newInputValue);

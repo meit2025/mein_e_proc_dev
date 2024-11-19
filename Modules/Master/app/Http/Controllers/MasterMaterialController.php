@@ -3,6 +3,7 @@
 namespace Modules\Master\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Modules\Master\Models\MasterMaterial;
@@ -114,5 +115,56 @@ class MasterMaterialController extends Controller
 
 
         return $this->successResponse($data);
+    }
+
+
+    public function getListMasterMaterialNumberByMaterialGroupAPI($material_group, Request $request)
+    {
+
+        $data = MasterMaterial::query()
+            ->where('material_group', 'ilike', '%' . $material_group . '%');
+
+
+
+
+        // $data = $data->where('material_number', 'like', '%' . 'm' . '%');
+        if ($request->filter && ($request->search && $request->search != '')) {
+            foreach ($request->filter as $f) {
+                $data = $data->where($f, 'ilike', '%' . $request->search . '%');
+            }
+
+            return $this->successResponse($data->get());
+        }
+
+
+
+
+
+        $data =  $data->limit(100)->get();
+
+
+        return $this->successResponse($data);
+    }
+
+    public function getListMasterMaterialGroupAPI(Request $request)
+    {
+
+        $data = MasterMaterial::query();
+
+        $data = $data->limit(100)->select('material_group')->groupBy('material_group');
+
+
+
+        // $data = $data->where('material_number', 'like', '%' . 'm' . '%');
+        if ($request->filter && ($request->search && $request->search != '')) {
+            foreach ($request->filter as $f) {
+                $data = $data->where($f, 'ilike', '%' . $request->search . '%');
+            }
+
+            return $this->successResponse($data->get());
+        }
+
+
+        return $this->successResponse($data->get());
     }
 }

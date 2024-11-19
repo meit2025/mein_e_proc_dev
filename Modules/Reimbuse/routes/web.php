@@ -24,10 +24,22 @@ Route::group(['prefix' => 'reimburse'], function () {
     Route::get('/type/{type}', [ReimbuseController::class, 'getTypeData'])->name('reimburse.type');
     Route::post('/is_required', [ReimbuseController::class, 'is_required'])->name('reimburse.is_required');
 
+    Route::get('/get-data-family/{user_id}', [ReimbuseController::class, 'getFamilyDataAPI'])->name('reimbuse.get-data-family');
+
     Route::inertia('/detail/{id}',  'Reimburse/Detail', [
         'id' => fn() => request()->route('id'),
     ]);
+
+
+    Route::get('/data-limit-and-balance', [ReimbuseController::class, 'getDataLimitAndBalance'])->name('reimburse.data-limit-balance');
 });
+
+
+Route::group(['prefix' => 'api/reimburse'], function () {
+    Route::get('/detail/{id}', [ReimbuseController::class, 'detailAPI'])->name('reimburse.detail');
+    Route::get('/get-list-master-reimburse-type/{type}', [ReimbuseController::class, 'getListMasterReimburseTypeAPI'])->name('reimburse.get-list-master-reimburse-type');
+});
+
 // });
 
 Route::get('/family/show/{employee}', [FamilyController::class, 'show']);

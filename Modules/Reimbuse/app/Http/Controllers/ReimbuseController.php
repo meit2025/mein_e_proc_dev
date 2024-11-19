@@ -11,11 +11,15 @@ use Modules\Reimbuse\Models\Reimburse;
 use Modules\Reimbuse\Models\ReimburseGroup;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Modules\BusinessTrip\Models\BusinessTripGrade;
+use Modules\BusinessTrip\Models\BusinessTripGradeUser;
 use Modules\Master\Models\Family;
 use Modules\Master\Models\MasterCostCenter;
 use Modules\Master\Models\MasterPeriodReimburse;
 use Modules\Master\Models\MasterQuotaReimburse;
+use Modules\Master\Models\MasterQuotaReimburseUser;
 use Modules\Master\Models\MasterTypeReimburse;
+use Modules\Master\Models\MasterTypeReimburseGrades;
 use Modules\Master\Models\Pajak;
 use Modules\Master\Models\PurchasingGroup;
 use Modules\Reimbuse\Services\ReimbursementService;
@@ -29,15 +33,81 @@ class ReimbuseController extends Controller
         $this->reimbursementService = $reimbursementService;
     }
 
+
+    public function getTypeCode()
+    {
+        $reimbuseQuotaUser =  MasterQuotaReimburseUser::where('user_id', Auth::user()->id)->pluck('quota_reimburses_id')->toArray();
+
+        // dd(Auth::user()->id);
+
+        // get latest period for new period
+        $latestPeriode = MasterPeriodReimburse::orderBy('id', 'desc')->first();
+
+
+        // get data when reimburse quota user and latest periode showing
+        $reimburseQuotaTypeCode =  MasterQuotaReimburse::query()->whereIn('id', $reimbuseQuotaUser)
+            ->where('period', $latestPeriode->id)
+            ->pluck('type');
+
+        return $reimburseQuotaTypeCode;
+    }
+
     public function getTypeData($type)
     {
         try {
             $res = ($type == 'Employee') ? 1 : 0;
-            $typeData = MasterTypeReimburse::where('is_employee', $res)->get();
+            $typeData = MasterTypeReimburse::where('is_employee', $res)
+                ->whereIn('id', $this->getTypeCode())
+                ->get();
             return $this->successResponse($typeData);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 400);
         }
+    }
+
+    public function getListMasterReimburseTypeAPI($type, Request $request)
+    {
+
+        $res = ($type == 'Employee') ? 1 : 0;
+        $data = MasterTypeReimburse::query()
+            ->where('is_employee', $res)
+            ->whereIn('id', $this->getTypeCode());
+
+
+
+        // $data = $data->where('material_number', 'like', '%' . 'm' . '%');
+        if ($request->filter && ($request->search && $request->search != '')) {
+            foreach ($request->filter as $f) {
+                $data = $data->where($f, 'ilike', '%' . $request->search . '%');
+            }
+
+            return $this->successResponse($data->get());
+        }
+
+
+
+
+
+        $data =  $data->limit(100)->get();
+
+
+        return $this->successResponse($data);
+
+
+
+
+        // try {
+        //     $res = ($type == 'Employee') ? 1 : 0;
+        //     $typeData = MasterTypeReimburse::query()
+
+        //     where('is_employee', $res)
+        //         ->whereIn('id', $this->getTypeCode())
+
+        //         ->get();
+        //     return $this->successResponse($typeData);
+        // } catch (\Exception $e) {
+        //     return $this->errorResponse($e->getMessage(), 400);
+        // }
     }
 
 
@@ -131,17 +201,19 @@ class ReimbuseController extends Controller
     public function index()
     {
         try {
-            $is_Admin = Auth::user()->role === 'admin';
+            $is_Admin = Auth::user()->is_admin;
 
             $listFamily = [];
             if (!$is_Admin) {
                 $users = User::where('id', Auth::id())->select('nip', 'name')->get();
 
-                $listFamily = Family::where('userId', Auth::user()->id)->get();
+                // $listFamily = Family::where('userId', Auth::user()->id)->get();
             } else {
                 $users = User::select('nip', 'name')->get();
-                $listFamily = Family::where('userId', User::select('nip')->pluck('nip')->toArray())->get();
+                // $listFamily = Family::where('userId', User::select('nip')->pluck('nip')->toArray())->get();
             }
+
+            $currentUser = Auth::user();
 
             $categories = ['Employee', 'Family'];
             $purchasing_groups = PurchasingGroup::select('id', 'purchasing_group', 'purchasing_group_desc')->get();
@@ -149,9 +221,13 @@ class ReimbuseController extends Controller
             $periods = MasterPeriodReimburse::select('id', 'code', 'start', 'end')->get();
             $cost_center = MasterCostCenter::select('id', 'cost_center')->get();
             $taxes = Pajak::select('id', 'mwszkz')->get();
+
+            $latestPeriod = MasterPeriodReimburse::orderBy('id', 'desc')->first();
+
+
             return Inertia::render(
                 'Reimburse/Index',
-                compact('purchasing_groups', 'listFamily', 'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes')
+                compact('purchasing_groups', 'currentUser', 'latestPeriod',  'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -162,6 +238,7 @@ class ReimbuseController extends Controller
     {
         return Inertia::render('Reimburse/ReimbursementForm');
     }
+
 
     public function store(Request $request)
     {
@@ -205,5 +282,74 @@ class ReimbuseController extends Controller
             return back()->withErrors(['status' => $response['error']]);
         }
         return redirect()->back()->with('status', 'Reimbursements updated successfully.');
+    }
+
+
+    public function getFamilyDataAPI($user_id, Request $request)
+    {
+        $listFamily =  Family::where('userId', $user_id)->get();
+
+        return $this->successResponse($listFamily);
+    }
+
+    public function getDataLimitAndBalance(Request $request)
+    {
+
+        $user = $request->user;
+        $period = $request->periode;
+        $reimbuseTypeID = $request->reimbuse_type_id;
+
+
+        $getCurrentBalance = Reimburse::where('requester', $request->user)
+            ->where('period', $period)
+            ->where('reimburse_type', $reimbuseTypeID)
+            ->sum('balance');
+
+        $getCurrentLimit = Reimburse::where('requester', $request->user)
+            ->where('period', $period)
+            ->where('reimburse_type', $reimbuseTypeID)
+            ->count();
+
+
+        $reimbuseType = MasterTypeReimburse::where('code', $reimbuseTypeID)->first();
+
+
+
+        $user =  User::where('nip', $user)->first();
+
+        $balance =  (float) $reimbuseType->grade_all_price - (float) $getCurrentBalance;
+
+        if ($reimbuseType->grade_option == 'grade') {
+            $userGrade = BusinessTripGradeUser::where('user_id', $user->id)->first();
+            $reimbuseGrade = MasterTypeReimburseGrades::where('grade_id', $userGrade->grade_id)->where('reimburse_type_id', $reimbuseType->id)->first();
+
+            $balance =  (float)($reimbuseGrade->plafon) - (float) $getCurrentBalance;
+        }
+        $limit = (float) $reimbuseType->limit - (float) $getCurrentLimit;
+        $context = [
+            'current_balance' => (float) $getCurrentBalance,
+            'balance' => (float) $balance,
+            'limit' => $limit,
+            'current_limit' => $getCurrentLimit,
+            'type_limit' => $reimbuseType->limit,
+            'type_balance' => $reimbuseType->grade_all_price
+        ];
+
+
+
+        return $this->successResponse($context);
+    }
+
+    public function detailAPI($id, Request $request)
+    {
+
+        $reimburseGroup = ReimburseGroup::where('id', $id)->first();
+
+        $reimburseForms = Reimburse::where('group', $reimburseGroup->code)->get();
+
+        return $this->successResponse([
+            'group' => $reimburseGroup,
+            'forms' => $reimburseForms
+        ]);
     }
 }

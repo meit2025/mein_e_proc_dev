@@ -1,12 +1,13 @@
-import { ReactNode, useEffect, useState } from 'react';
-import { FormFieldModel } from '@/interfaces/form/formWrapper';
-import MainLayout from '@/Pages/Layouts/MainLayout';
 import FormMapping from '@/components/form/FormMapping';
 import { CREATE_USER } from '@/endpoint/user/api';
 import { LIST_PAGE_USER } from '@/endpoint/user/page';
-import { formModel } from './model/formModel';
+import { FormFieldModel } from '@/interfaces/form/formWrapper';
+import useDropdownOptionsArray from '@/lib/getDropdownArray';
+import MainLayout from '@/Pages/Layouts/MainLayout';
+import { ReactNode, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import useDropdownOptions from '@/lib/getDropdown';
+import { formModel } from './model/formModel';
+import { modelDropdowns } from './model/modelDropdown';
 
 function Create() {
   const methods = useForm({
@@ -14,22 +15,9 @@ function Create() {
     reValidateMode: 'onChange',
   });
   const [dataModel, setDataModel] = useState(formModel);
-  const { dropdownOptions, getDropdown } = useDropdownOptions();
-
+  const { dropdownOptions, getDropdown } = useDropdownOptionsArray();
   useEffect(() => {
-    getDropdown(
-      'master_business_partner_id',
-      {
-        name: 'name_one',
-        id: 'id',
-        tabel: 'master_business_partners',
-        where: {
-          key: 'type',
-          parameter: 'employee',
-        },
-      },
-      formModel,
-    );
+    getDropdown(modelDropdowns, formModel);
   }, []);
 
   useEffect(() => {

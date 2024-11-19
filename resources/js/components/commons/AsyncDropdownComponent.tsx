@@ -45,7 +45,9 @@ export interface AsyncDropdownType {
   id: string;
   placeholder?: string;
   label: string;
+  disabled?: boolean;
   value: string;
+  defaultLabel?: string;
   onSelectChange: (value: any) => void;
 }
 export function AsyncDropdownComponent({
@@ -55,7 +57,9 @@ export function AsyncDropdownComponent({
   label,
   value,
   onSelectChange,
-  placeholder,
+  defaultLabel,
+  disabled,
+  placeholder = 'Search items ...',
 }: AsyncDropdownType) {
   const [open, setOpen] = React.useState(false);
   //   const [value, setValue] = React.useState('');
@@ -101,6 +105,7 @@ export function AsyncDropdownComponent({
     }
   }
 
+  console.log(defaultLabel);
   React.useEffect(() => {
     delay = setTimeout(() => {
       if (searchText) callAPI();
@@ -114,18 +119,30 @@ export function AsyncDropdownComponent({
     setOpen(false);
   }
 
+  console.log(url);
+
+  React.useEffect(() => {
+    if (open) {
+      callAPI();
+    } else {
+      setSearchText('');
+    }
+  }, [open]);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant='outline'
+          disabled={disabled}
           role='combobox'
           aria-expanded={open}
-          className='w-[200px] justify-between'
+          className='w-[200px] text-xs justify-between'
         >
-          {value
-            ? dropdownList.find((framework) => framework[id] === value)?.[label]
-            : 'Search items ..'}
+          {defaultLabel && dropdownList.length === 0 ? defaultLabel : null}
+          {value && dropdownList.length > 0
+            ? dropdownList.find((framework) => String(framework[id]) === String(value))?.[label]
+            : ''}
+          {value === '' && (defaultLabel === '' || defaultLabel === null) ? placeholder : ''}
           <ChevronsUpDown className='opacity-50' />
         </Button>
       </PopoverTrigger>
@@ -134,27 +151,26 @@ export function AsyncDropdownComponent({
           <CommandInput
             onKeyDown={onKeyDownHandler}
             onValueChange={(value) => setSearchText(value)}
-            placeholder='Search framework...'
+            placeholder={placeholder}
           />
-          <CommandList>
+          <CommandList className='z-30'>
             {isLoading ? (
-              <div className='py-10'>
+              <div className='py-10 flex items-center justify-center h-64 w-full'>
                 <LoadingSpin />
               </div>
             ) : (
               <>
-                <CommandEmpty>No framework found. {dropdownList.length}</CommandEmpty>
+                <CommandEmpty>No Item found. {dropdownList.length}</CommandEmpty>
 
                 {dropdownList.length > 0 ? (
-                  <CommandGroup>
+                  <CommandGroup className='z-30'>
                     {dropdownList.map((framework) => (
                       <CommandItem
+                        className='z-30'
                         key={framework[id]}
                         value={framework[id]}
                         onSelect={(currentValue) => {
-                          // setValue(currentValue === value ? '' : currentValue);
-                          // setOpen(false);
-                          onSelectHandler(currentValue);
+                          onSelectHandler(framework[id]);
                         }}
                       >
                         {framework[label]}

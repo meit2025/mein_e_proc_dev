@@ -23,6 +23,7 @@ import { AxiosError } from 'axios';
 import { FormType } from '@/lib/utils';
 import { MultiSelect } from '@/components/commons/MultiSelect';
 import { User } from '../models/models';
+import { LIST_API_USER_GRADE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
 
 export interface props {
   onSuccess?: (value: boolean) => void;
@@ -31,19 +32,17 @@ export interface props {
   storeURL?: string;
   editURL?: string;
   updateURL?: string;
-  listUser: User[];
 }
 
 export default function ReimburseQuotaForm({
   onSuccess,
   type = FormType.create,
-  listUser,
   storeURL,
   editURL,
   updateURL
 }: props) {
-
-  const [users, setUsers] = React.useState<User>([]);
+  const [users, setUsers] = React.useState<User[]>([]);
+  const [selectedType, setSelectedType] = React.useState<string | null>(null);
   const { dataDropdown: dataReimburseType, getDropdown: getReimburseType } = useDropdownOptions();
   const { dataDropdown: dataReimbursePeriod, getDropdown: getReimbursePeriod } = useDropdownOptions();
   
@@ -68,11 +67,10 @@ export default function ReimburseQuotaForm({
     try {
       const response = await axiosInstance.get(editURL);
       const data = response.data.data;
-      // await getSelectionType(data.users);
-      
+      fetchUsers(data.type)
       form.reset({
-        period: data.period.toString(),
-        type: data.type.toString(),
+        period: data.period,
+        type: data.type,
         users: data.users,
       });
     } catch (e) {
@@ -112,11 +110,32 @@ export default function ReimburseQuotaForm({
   const handleSearchReimbursePeriod = async (query: string) => {
     if (query.length > 0) {
       getReimbursePeriod(query, {
-        name: "CONCAT(`start`, ' - ', `end`)",
+        name: 'code',
         id: 'id',
         tabel: 'master_period_reimburses',
       });
     }
+  };
+
+  const fetchUsers = async (typeId: string) => {
+    try {
+      const response = await axiosInstance.get(LIST_API_USER_GRADE_REIMBURSE_TYPE(typeId));
+    
+      const formattedUsers: User[] = response.data.data.map((user: any) => ({
+        id: user.id,
+        name: user.name,
+        nip: user.nip,
+      }));
+      setUsers(formattedUsers);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setUsers([]);
+    }
+  };
+
+  const handleTypeChange = (typeId: string) => {
+    form.setValue('type', typeId);
+    fetchUsers(typeId);
   };
 
   React.useEffect(() => {
@@ -127,23 +146,41 @@ export default function ReimburseQuotaForm({
     });
     
     getReimbursePeriod('', {
-      name: "CONCAT(`start`, ' - ', `end`)",
+      name: 'code',
       id: 'id',
       tabel: 'master_period_reimburses',
     });
 
     if (type === FormType.edit) {
-      getDetailData()
-    };
-    setUsers(listUser);
+      getDetailData();
+
+    } else{
+      if (form.getValues('type')) fetchUsers(form.getValues('type'));
+    }
+
   }, [type]);
-  
   
   return (
     <ScrollArea className='h-[600px] w-full'>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <table className='text-xs mt-4 table font-thin'>
+            <tr>
+              <td width={200}>Type</td>
+              <td>
+                <FormAutocomplete<any>
+                  options={dataReimburseType}
+                  fieldName='type'
+                  isRequired={true}
+                  disabled={false}
+                  placeholder={'Reimburse Type'}
+                  onSearch={handleSearchReimburseType}
+                  onChangeOutside={(option) => handleTypeChange(option)}
+                  classNames='mt-2 w-full'
+                />
+              </td>
+            </tr>
+
             <tr>
               <td width={200}>Period</td>
               <td>
@@ -175,21 +212,6 @@ export default function ReimburseQuotaForm({
                   id='id'
                   label='name'
                   options={users}
-                />
-              </td>
-            </tr>
-
-            <tr>
-              <td width={200}>Type</td>
-              <td>
-                <FormAutocomplete<any>
-                  options={dataReimburseType}
-                  fieldName='type'
-                  isRequired={true}
-                  disabled={false}
-                  placeholder={'Reimburse Type'}
-                  onSearch={handleSearchReimburseType}
-                  classNames='mt-2 w-full'
                 />
               </td>
             </tr>

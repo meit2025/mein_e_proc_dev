@@ -58,7 +58,18 @@ export const formModel: Array<FormFieldModel<any>> = [
     options: [],
     required: true,
     style: {
-      width: '65.5rem',
+      width: '63.5rem',
+    },
+  },
+  {
+    type: 'select',
+    name: 'role_id',
+    label: 'Role',
+    placeholder: 'Select Employee',
+    options: [],
+    required: true,
+    style: {
+      width: '63.5rem',
     },
   },
   {

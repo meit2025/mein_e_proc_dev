@@ -48,6 +48,8 @@ class CashAdvance extends Model
         'message',
         'code',
         'belnr',
+        'dp',
+        'unit_id'
     ];
 
 

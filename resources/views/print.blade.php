@@ -114,32 +114,32 @@
 
 <div class="container">
     <h2>Attendance Onduty Request</h2>
-    <p><strong>Request No.:</strong> {{$data->request_no}}</p>
+    <p><strong>Request No.:</strong> {{$data['request_no']}}</p>
     <p><strong>Company:</strong> PT. Mitsubishi Electric Indonesia</p>
-    <p><strong>Request for:</strong> {{$data->requestFor->name}}</p>
-    <p><strong>Requested By:</strong> {{$data->requestedBy->name}}</p>
+    <p><strong>Request for:</strong> {{$data['request_for']}}</p>
+    <p><strong>Requested By:</strong> {{$data['requested_by']}}</p>
     <p><strong>Status:</strong> <span class="status-approved">Fully Approved</span></p>
 
     <table class="info-table">
         <tr>
             <td><strong>Purpose Type</strong></td>
-            <td>{{$data->purposeType->name ?? ''}}</td>
+            <td>{{$data['purpose_type_name']}}</td>
         </tr>
         <tr>
             <td><strong>Pusat Biaya</strong></td>
-            <td>{{$data->costCenter->cost_center ?? ''}}</td>
+            <td>{{$data['cost_center']}}</td>
         </tr>
         <tr>
             <td><strong>Start Date</strong></td>
-            <td>17 Aug 2023</td>
+            <td>{{$data['start_date']}}</td>
         </tr>
         <tr>
             <td><strong>End Date</strong></td>
-            <td>17 Aug 2023</td>
+            <td>{{$data['end_date']}}</td>
         </tr>
         <tr>
             <td><strong>Remark</strong></td>
-            <td>{{$data->remarks}}</td>
+            <td>{{$data['remarks']}}</td>
         </tr>
         <tr>
             <td><strong>Attachment File</strong></td>
@@ -149,14 +149,14 @@
 
     <div class="tabs">
         {{-- LOOPING DESTINASI --}}
-        @foreach ($data->businessTripDestination as $key => $item)
-            <button class="tab-button {{$key == 0 ? 'active' : ''}}" onclick="openTab(event, '{{$item->destination}}')">{{$item->destination}}</button>
+        @foreach ($data['business_trip_destination'] as $key => $item)
+            <button class="tab-button {{$key == 0 ? 'active' : ''}}" onclick="openTab(event, '{{$item['destination']}}')">{{$item['destination']}}</button>
         @endforeach
     </div>
 
-    @foreach ($data->businessTripDestination as $idx => $row)
-        <div id="{{$row->destination}}" class="tab-content {{$key == 0 ? 'active' : ''}}">
-            <h3>Detail {{$row->destination}}</h3>
+    @foreach ($data['business_trip_destination'] as $idx => $row)
+        <div id="{{$row['destination']}}" class="tab-content {{$key == 0 ? 'active' : ''}}">
+            <h3>Detail {{$row['destination']}}</h3>
             <table class="detail-table">
                 <tr>
                     <th>Date</th>
@@ -166,14 +166,14 @@
                     <th>Actual Start</th>
                     <th>Actual End</th>
                 </tr>
-                @foreach ($row->detailAttendance as $detail)
+                @foreach ($row['business_trip_detail_attendance'] as $detail)
                     <tr>
-                        <td>{{date('d/m/Y',strtotime($detail->date))}}</td>
-                        <td>{{$detail->shift_code}}</td>
-                        <td>{{$detail->shift_start}}</td>
-                        <td>{{$detail->shift_end}}</td>
-                        <td>{{$detail->start_time}}</td>
-                        <td>{{$detail->end_time}}</td>
+                        <td>{{date('d/m/Y',strtotime($detail['date']))}}</td>
+                        <td>{{$detail['shift_code']}}</td>
+                        <td>{{$detail['shift_start']}}</td>
+                        <td>{{$detail['shift_end']}}</td>
+                        <td>{{$detail['start_time']}}</td>
+                        <td>{{$detail['end_time']}}</td>
                     </tr>
                 @endforeach
             </table>
@@ -188,51 +188,18 @@
                         <th>Total</th>
                     </tr>
                     @php
-                        // Group items by allowance_item_id
-                        $groupedItems = $row->detailDestinationDay->groupBy('allowance_item_id');
-                        $total_standar = 0;
+                        $total_standar_value = 0;
                     @endphp
-
-                    @foreach ($groupedItems as $allowanceItemId => $items)
-                        @php
-                            // Get the first item in the group for displaying allowance details
-                            $firstItem = $items->first();
-                            $totalCount = $items->count(); // Count of items in this group
-                            $totalPrice = $items->sum('price'); // Sum of prices in this group
-                        @endphp
+                    @foreach ($row['standar_detail_allowance'] as $standar)
                         <tr>
-                            <td>{{ $firstItem->allowance->name  ?? ''}} ({{ $firstItem->allowance->type ?? '' }})</td>
-                            <td>{{ $firstItem->allowance->currency_id ?? '' }}</td>
-                            <td>{{ $firstItem->allowance->grade_price ?? '' }}</td>
-                            <td>{{ $totalCount }}</td>
-                            <td>{{ ($firstItem->allowance->grade_price ?? 0) * $totalCount }}</td>
+                            <td>{{ $standar['item_name']  ?? ''}} ({{ $standar['type'] ?? '' }})</td>
+                            <td>{{ $standar['currency_code'] ?? '' }}</td>
+                            <td>{{ $standar['value'] ?? '' }}</td>
+                            <td>{{ $standar['total_day'] }}</td>
+                            <td>{{ $standar['total'] }}</td>
                         </tr>
                         @php
-                            $total_standar += ($firstItem->allowance->grade_price ?? 0 )* $totalCount;
-                        @endphp
-                    @endforeach
-
-                    @php
-                        // Group items by allowance_item_id
-                        $groupedItemsTotal = $row->detailDestinationTotal->groupBy('allowance_item_id');
-                    @endphp
-
-                    @foreach ($groupedItemsTotal as $allowanceItemId => $items)
-                        @php
-                            // Get the first item in the group for displaying allowance details
-                            $firstItem = $items->first();
-                            $totalCount = $items->count(); // Count of items in this group
-                            $totalPrice = $items->sum('price'); // Sum of prices in this group
-                        @endphp
-                        <tr>
-                            <td>{{ $firstItem->allowance->name }} ({{ $firstItem->allowance->type }})</td>
-                            <td>{{ $firstItem->allowance->currency_id }}</td>
-                            <td>{{ $firstItem->allowance->grade_price }}</td>
-                            <td>{{ $totalCount }}</td>
-                            <td>{{ $firstItem->allowance->grade_price * $totalCount }}</td>
-                        </tr>
-                        @php
-                            $total_standar += $firstItem->allowance->grade_price * $totalCount;
+                            $total_standar_value += $standar['total'];
                         @endphp
                     @endforeach
                     <tr>
@@ -240,7 +207,7 @@
                         <td>IDR</td>
                         <td></td>
                         <td></td>
-                        <td>{{$total_standar}}</td>
+                        <td>{{$total_standar_value}}</td>
                     </tr>
                 </table>
 
@@ -254,51 +221,18 @@
                         <th>Total</th>
                     </tr>
                     @php
-                        // Group items by allowance_item_id
-                        $groupedItems = $row->detailDestinationDay->groupBy('allowance_item_id');
-                        $total_request = 0;
+                        $total_request_value = 0;
                     @endphp
-
-                    @foreach ($groupedItems as $allowanceItemId => $items)
-                        @php
-                            // Get the first item in the group for displaying allowance details
-                            $firstItem = $items->first();
-                            $totalCount = $items->count(); // Count of items in this group
-                            $totalPrice = $items->sum('price'); // Sum of prices in this group
-                        @endphp
+                    @foreach ($row['request_detail_allowance'] as $request)
                         <tr>
-                            <td>{{ $firstItem->allowance->name }} ({{ $firstItem->allowance->type }})</td>
-                            <td>{{ $firstItem->allowance->currency_id }}</td>
-                            <td>{{ $firstItem->price }}</td>
-                            <td>{{ $totalCount }}</td>
-                            <td>{{ $totalPrice }}</td>
+                            <td>{{ $request['item_name']  ?? ''}} ({{ $request['type'] ?? '' }})</td>
+                            <td>{{ $request['currency_code'] ?? '' }}</td>
+                            <td>{{ $request['value'] ?? '' }}</td>
+                            <td>{{ $request['total_day'] }}</td>
+                            <td>{{ $request['total'] }}</td>
                         </tr>
                         @php
-                            $total_request += $totalPrice;
-                        @endphp
-                    @endforeach
-
-                    @php
-                        // Group items by allowance_item_id
-                        $groupedItemsTotal = $row->detailDestinationTotal->groupBy('allowance_item_id');
-                    @endphp
-
-                    @foreach ($groupedItemsTotal as $allowanceItemId => $items)
-                        @php
-                            // Get the first item in the group for displaying allowance details
-                            $firstItem = $items->first();
-                            $totalCount = $items->count(); // Count of items in this group
-                            $totalPrice = $items->sum('price'); // Sum of prices in this group
-                        @endphp
-                        <tr>
-                            <td>{{ $firstItem->allowance->name }} ({{ $firstItem->allowance->type }})</td>
-                            <td>{{ $firstItem->allowance->currency_id }}</td>
-                            <td>{{ $firstItem->allowance->grade_price }}</td>
-                            <td>{{ $totalCount }}</td>
-                            <td>{{ $firstItem->allowance->grade_price * $totalCount }}</td>
-                        </tr>
-                        @php
-                            $total_request += $firstItem->allowance->grade_price * $totalCount;
+                            $total_request_value += $request['total'];
                         @endphp
                     @endforeach
                     <tr>
@@ -306,7 +240,7 @@
                         <td>IDR</td>
                         <td></td>
                         <td></td>
-                        <td>{{$total_request}}</td>
+                        <td>{{$total_request_value}}</td>
                     </tr>
                 </table>
             </div>
