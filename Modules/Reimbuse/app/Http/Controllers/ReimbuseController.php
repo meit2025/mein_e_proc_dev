@@ -65,6 +65,51 @@ class ReimbuseController extends Controller
         }
     }
 
+    public function getListMasterReimburseTypeAPI($type, Request $request)
+    {
+
+        $res = ($type == 'Employee') ? 1 : 0;
+        $data = MasterTypeReimburse::query()
+            ->where('is_employee', $res)
+            ->whereIn('id', $this->getTypeCode());
+
+
+
+        // $data = $data->where('material_number', 'like', '%' . 'm' . '%');
+        if ($request->filter && ($request->search && $request->search != '')) {
+            foreach ($request->filter as $f) {
+                $data = $data->where($f, 'ilike', '%' . $request->search . '%');
+            }
+
+            return $this->successResponse($data->get());
+        }
+
+
+
+
+
+        $data =  $data->limit(100)->get();
+
+
+        return $this->successResponse($data);
+
+
+
+
+        // try {
+        //     $res = ($type == 'Employee') ? 1 : 0;
+        //     $typeData = MasterTypeReimburse::query()
+
+        //     where('is_employee', $res)
+        //         ->whereIn('id', $this->getTypeCode())
+
+        //         ->get();
+        //     return $this->successResponse($typeData);
+        // } catch (\Exception $e) {
+        //     return $this->errorResponse($e->getMessage(), 400);
+        // }
+    }
+
 
     public function checkBalance(Request $request)
     {
@@ -293,5 +338,18 @@ class ReimbuseController extends Controller
 
 
         return $this->successResponse($context);
+    }
+
+    public function detailAPI($id, Request $request)
+    {
+
+        $reimburseGroup = ReimburseGroup::where('id', $id)->first();
+
+        $reimburseForms = Reimburse::where('group', $reimburseGroup->code)->get();
+
+        return $this->successResponse([
+            'group' => $reimburseGroup,
+            'forms' => $reimburseForms
+        ]);
     }
 }

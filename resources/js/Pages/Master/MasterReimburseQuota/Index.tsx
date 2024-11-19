@@ -6,17 +6,17 @@ import { columns } from './models/models';
 import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import { User } from './models/models';
 import ReimburseQuotaForm from './component/form'
-import { LIST_API_REIMBURSE_QUOTA, DESTROY_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
+import { 
+  LIST_API_REIMBURSE_QUOTA, 
+  STORE_REIMBURSE_QUOTA, 
+  EDIT_REIMBURSE_QUOTA, 
+  UPDATE_REIMBURSE_QUOTA, 
+  DESTROY_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
+import { DETAIL_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/page';
 import { FormType } from '@/lib/utils';
-import { STORE_REIMBURSE_QUOTA, EDIT_REIMBURSE_QUOTA, UPDATE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
 
-interface propsType {
-  listUser: User[];
-}
-
-export const Index = ({ listUser }: propsType) => {
+export const Index = () => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
   const [formType, setFormType] = React.useState({
@@ -31,6 +31,7 @@ export const Index = ({ listUser }: propsType) => {
       id: undefined,
     });
   }
+
   return (
     <>
       <div className='flex md:mb-4 mb-2 w-full justify-end'>
@@ -48,7 +49,6 @@ export const Index = ({ listUser }: propsType) => {
               setOpenForm(false);
             }}
             type={formType.type}
-            listUser={listUser}
             storeURL={STORE_REIMBURSE_QUOTA}
             editURL={EDIT_REIMBURSE_QUOTA(formType.id ?? '')}
             updateURL={UPDATE_REIMBURSE_QUOTA(formType.id ?? '')}
@@ -67,6 +67,7 @@ export const Index = ({ listUser }: propsType) => {
         }}
         url={{
           url: LIST_API_REIMBURSE_QUOTA,
+          detailUrl: DETAIL_REIMBURSE_QUOTA,
           deleteUrl: DESTROY_REIMBURSE_QUOTA,
         }}
         labelFilter='search'

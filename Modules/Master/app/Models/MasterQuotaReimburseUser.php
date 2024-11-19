@@ -23,6 +23,10 @@ class MasterQuotaReimburseUser extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
+    public function families() {
+        return $this->hasMany(Family::class, 'userId', 'user_id');
+    }
+
     public function quotaReimburses()
     {
         return $this->belongsTo(MasterQuotaReimburse::class, 'quota_reimburses_id', 'id');
