@@ -27,9 +27,9 @@ class BusinessTripDeclarationController extends Controller
     public function index()
     {
         $users = User::select('nip', 'name', 'id')->get();
-        $listBusinessTrip = BusinessTrip::where('type', 'request')->get();
-        $inBusinessTripRequest = BusinessTrip::where('type', 'request')->pluck('id')->toArray();
-        $listPurposeType = PurposeType::select('name', 'code', 'id')->where('id', '!=', $inBusinessTripRequest)->get();
+        $inBusinessTripRequest = BusinessTrip::where('type', 'declaration')->pluck('parent_id')->toArray();
+        $listBusinessTrip = BusinessTrip::where('type', 'request')->whereNotIn('id',$inBusinessTripRequest)->get();
+        $listPurposeType = PurposeType::select('name', 'code', 'id')->get();
         return Inertia::render('BusinessTrip/BusinessTripDeclaration/index', compact('users', 'listPurposeType', 'listBusinessTrip'));
     }
 
