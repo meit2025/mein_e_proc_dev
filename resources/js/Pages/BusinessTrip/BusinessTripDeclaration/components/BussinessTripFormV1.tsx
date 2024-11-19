@@ -92,7 +92,11 @@ export const BussinessTripFormV1 = ({
             ),
           }),
         ),
-        other: z.any().optional(),
+        other: z.array(
+            z.object({
+              value: z.number().min(0, 'Value must be 0 or greater'),
+            })
+          ),
       }),
     ),
   });

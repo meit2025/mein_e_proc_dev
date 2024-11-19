@@ -598,6 +598,7 @@ class BusinessTripController extends Controller
 
             // STANDARD
             $standar_detail_allowance = [];
+            $total_standard = 0;
             foreach ($destination->detailDestinationDay as $detailDay) {
                 $standar_detail_allowance[] = [
                     'item_name' => $detailDay->allowance->name,
@@ -607,6 +608,7 @@ class BusinessTripController extends Controller
                     'total_day' => $detailDay->total,
                     'total' => $detailDay->standard_value * $detailDay->total,
                 ];
+                $total_standard += $detailDay->standard_value * $detailDay->total;
             }
 
 
@@ -619,10 +621,12 @@ class BusinessTripController extends Controller
                     'total_day' => '-',
                     'total' => (int)$detailTotal->standard_value,
                 ];
+                $total_standard += $detailTotal->standard_value;
             }
 
             // REQUEST
             $request_detail_allowance = [];
+            $total_request = 0;
             foreach ($destination->detailDestinationDay as $detailDay) {
                 $request_detail_allowance[] = [
                     'item_name' => $detailDay->allowance->name,
@@ -632,6 +636,7 @@ class BusinessTripController extends Controller
                     'total_day' => $detailDay->total,
                     'total' => $detailDay->price,
                 ];
+                $total_request += $detailDay->price;
             }
 
 
@@ -644,6 +649,7 @@ class BusinessTripController extends Controller
                     'total_day' => '-',
                     'total' => (int)$detailTotal->price,
                 ];
+                $total_request += $detailTotal->price;
             }
 
             $data['business_trip_destination'][] = [
@@ -654,6 +660,8 @@ class BusinessTripController extends Controller
                 'business_trip_detail_attendance' => $detail_attendance,
                 'standar_detail_allowance' => $standar_detail_allowance,
                 'request_detail_allowance' => $request_detail_allowance,
+                'total_standard' => $total_standard,
+                'total_request' => $total_request,
             ];
         }
         return $this->successResponse($data);
