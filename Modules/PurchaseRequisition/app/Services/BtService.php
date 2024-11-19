@@ -176,7 +176,7 @@ class BtService
 
     private function findBusinessTripDestination($id)
     {
-        $items = BusinessTripDestination::find($id);
+        $items = BusinessTripDestination::where('business_trip_id',$id)->first();
         return $items;
     }
     private function findBusinessTripDetailAttedance($id)
@@ -213,13 +213,14 @@ class BtService
         return $mergedQuery;
     }
 
+
     private function prepareCashAdvanceData($BusinessTrip, $reqno, $settings)
     {
         $tax = Pajak::where('id', $BusinessTrip->pajak_id ?? '1')->first();
         $findCostCenter = MasterCostCenter::find($BusinessTrip->cost_center_id)->first();
         $taxAmount = $BusinessTrip->total_cash_advance * (($tax->desimal ?? 0) / 100);
 
-        $findBusinessTripDestination = $this->findBusinessTripDestination($BusinessTrip->business_trip_destination_id);
+        $findBusinessTripDestination = $this->findBusinessTripDestination($BusinessTrip->id);
 
         $formattedDate = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('Y-m-d');
         $year = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('Y');
