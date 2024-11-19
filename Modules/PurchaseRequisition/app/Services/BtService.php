@@ -103,7 +103,7 @@ class BtService
         $purchasingGroup = PurchasingGroup::find($BusinessTrip->purchasing_group_id);
         $uom = Uom::find($BusinessTrip->uom_id);
         $pajak = Pajak::find($BusinessTrip->pajak_id);
-        $costCenter = MasterCostCenter::find($BusinessTrip->pajak_id);
+        $costCenter = MasterCostCenter::find($BusinessTrip->cost_center_id);
 
         return [
             'code_transaction' => 'BTRE', // code_transaction
@@ -131,7 +131,7 @@ class BtService
             'item_category' => '', // pstyp
             'short_text' => $BusinessTrip->remarks, // txz01
             'plant' => $settings['plant'], // werks
-            'cost_center' => $costCenter->cost_center, // kostl
+            'cost_center' => $costCenter?->cost_center, // kostl
             'order_number' => '', // AUFNR
             'asset_subnumber' => '', // anln2
             'main_asset_number' => '', // anln1
