@@ -10,3 +10,7 @@ export const DELET_PR = `${ROUTE_PR}/delete`;
 export const GET_PR_SAP = `${ROUTE_PR_sap}/list`;
 export const GET_DP_SAP = `${ROUTE_PR_sap}/list-dp`;
 export const GET_PO_SAP = `${ROUTE_PR_sap}/list-po`;
+
+export const SEND_PR_SAP = (id: any, type: string) => `${ROUTE_PR_sap}/downolad-text/${id}/${type}`;
+export const SEND_PO_SAP = (id: any, type: string) =>
+  `${ROUTE_PR_sap}/downolad-text-po/${id}/${type}`;

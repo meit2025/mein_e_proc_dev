@@ -1,0 +1,1 @@
+const t="/api/pr/purchase-requisition",a="/api/pr/purchase-requisition-sap",_=`${t}/list`,P=`${t}/create`,c=`${t}/update`,n=s=>`${t}/detail/${s}`,e=`${t}/delete`,E=`${a}/list`,$=`${a}/list-dp`,i=`${a}/list-po`,p=(s,o)=>`${a}/downolad-text/${s}/${o}`,R=(s,o)=>`${a}/downolad-text-po/${s}/${o}`;export{P as C,n as D,c as E,_ as G,p as S,e as a,E as b,$ as c,i as d,R as e};

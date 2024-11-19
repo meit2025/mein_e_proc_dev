@@ -62,7 +62,7 @@ const FormAutocomplete = <T,>({
             <div className={`${classNames}`}>
               <Autocomplete
                 {...field}
-                value={options.find((option) => option.value === field.value) || null} // Make sure the value is controlled
+                value={(options ?? []).find((option) => option.value === field.value) || null} // Make sure the value is controlled
                 options={options}
                 getOptionLabel={(option) => option.label}
                 isOptionEqualToValue={(option, value) => option.value === value}
