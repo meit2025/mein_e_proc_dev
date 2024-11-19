@@ -89,7 +89,7 @@ const FormMapping: React.FC<FormMappingProps> = ({
                   ) : (
                     <>
                       {!field.conditional ||
-                      watch(field.parameterConditional ?? '') === field.conditional ? (
+                      watch(field.parameterConditional ?? '') === field.valueConditional ? (
                         <FormWrapper model={field} />
                       ) : null}
                     </>

@@ -37,6 +37,9 @@ Route::group(['middleware' => 'auth'], function () {
             Route::inertia('/update/{id}',  'UserManagement/Role/Update', [
                 'id' => fn() => request()->route('id'),
             ]);
+            Route::inertia('/detail/{id}',  'UserManagement/Role/Detail', [
+                'id' => fn() => request()->route('id'),
+            ]);
         });
     });
 

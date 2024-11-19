@@ -5,6 +5,7 @@ namespace Modules\Master\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Modules\Master\Models\DataDropdown;
 
 class DropdownMasterController extends Controller
 {
@@ -87,8 +88,33 @@ class DropdownMasterController extends Controller
             $data = $data->groupBy($groupByColumns);
         }
 
+        // cek where data dari data dropdown document type
+        if ($request->tabelname && $request->attribut) {
+            $dokumnTypeData = DataDropdown::where('dropdown_type', 'dokumeType')->where('field_name', $request->attribut)->first();
+            if ($dokumnTypeData) {
+                $array = explode(",", $dokumnTypeData->data_dropdown);
+                $data = $data->whereIn('account', $array);
+            }
+        }
 
-        $data = $data->limit(75)->get();
+        if ($request->tabelname && $request->attribut) {
+            $dokumnTypeData = DataDropdown::where('dropdown_type', 'dokumeType_material_group')->where('field_name', $request->attribut)->first();
+            if ($dokumnTypeData) {
+                $array = explode(",", $dokumnTypeData->data_dropdown);
+                $data = $data->whereIn('id', $array);
+            }
+        }
+
+
+        $data = $data->limit(175)->get();
+        return $this->successResponse($data);
+    }
+    function show_tabel(Request $request)
+    {
+        $data = DB::table('information_schema.tables')
+            ->select('table_name as label', 'table_name as value')
+            ->where('table_schema', 'public') // Hanya tabel di schema 'public'
+            ->get();
         return $this->successResponse($data);
     }
 }

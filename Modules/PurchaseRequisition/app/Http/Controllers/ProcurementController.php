@@ -51,21 +51,29 @@ class ProcurementController extends Controller
         DB::beginTransaction();
         try {
             //code...
-            $purchase = Purchase::create($request->all());
+            $dataInsert = $request->all();
+            $dataInsert['total_item'] = count($request['vendors'][0]['units']);
+            $purchase = Purchase::create($dataInsert);
 
-            $entertain = $purchase->entertainment()->create($request['entertainment']);
-
-            if ($request->is_cashAdvance) {
-                $purchase->cashAdvancePurchases()->create($request['cash_advance_purchases']);
+            if ($request['entertainment']) {
+                $entertain = $purchase->entertainment()->create($request['entertainment']);
             }
 
-
             foreach ($request['vendors'] as $vendorData) {
-
-                $vendor = $purchase->vendors()->create(['vendor' => $vendorData['vendor'],  'winner' => $vendorData['winner']]);
-
+                $vendor = $purchase->vendors()->create(['vendor' => $vendorData['vendor'],  'winner' => $vendorData['winner'] ?? false]);
                 foreach ($vendorData['units'] as $unitData) {
-                    $vendor->units()->create($unitData);
+                    $unitCrate =  $vendor->units()->create($unitData);
+                    if ($unitData['is_cashAdvance']) {
+                        $purchase->cashAdvancePurchases()->create([
+                            'unit_id' => $unitCrate->id,
+                            'reference' => $unitData['reference'],
+                            'document_header_text' => $unitData['document_header_text'],
+                            'document_date' => $unitData['document_date'],
+                            'due_on' => $unitData['due_on'],
+                            'text' => $unitData['text'],
+                            'dp' => $unitData['dp'],
+                        ]);
+                    }
                 }
             }
             DB::commit();
@@ -86,6 +94,11 @@ class ProcurementController extends Controller
     {
         $procurement = Purchase::with('vendors.units', 'entertainment', 'cashAdvancePurchases')->findOrFail($id);
         return response()->json($procurement);
+    }
+    public function retryPr($id, $type)
+    {
+        SapJobs::dispatch($id, $type);
+        return $this->successResponse();
     }
 
     /**

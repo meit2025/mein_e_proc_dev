@@ -50,6 +50,6 @@ class Purchase extends Model
     }
     public function cashAdvancePurchases()
     {
-        return $this->hasOne(CashAdvancePurchases::class);
+        return $this->hasMany(CashAdvancePurchases::class);
     }
 }
