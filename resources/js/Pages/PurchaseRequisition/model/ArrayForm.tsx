@@ -260,7 +260,6 @@ const ArrayForm = ({
 
   return (
     <div>
-      <h1> {`ini di sable${disable}`} </h1>
       <FormAutocomplete<any[]>
         options={dataVendor}
         fieldLabel={'Select Vendor'}
