@@ -20,10 +20,16 @@ class CashAdvancePurchases extends Model
         'document_date',
         'due_on',
         'text',
-        'purchase_id'
+        'purchase_id',
+        'dp',
+        'unit_id'
     ];
     public function purchase()
     {
         return $this->belongsTo(Purchase::class);
+    }
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
     }
 }

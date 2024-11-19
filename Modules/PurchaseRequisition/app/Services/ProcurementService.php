@@ -46,7 +46,6 @@ class ProcurementService
             $reqno = (int) SettingApproval::where('key', 'dokumenType_' . $procurement->document_type)->lockForUpdate()->value('value') + 1;
 
             $entertainment = Entertainment::where('purchase_id', $id)->first();
-            $cashData = CashAdvancePurchases::where('purchase_id', $id)->first();
 
 
             foreach ($items as $key => $value) {
@@ -62,8 +61,8 @@ class ProcurementService
                 );
                 $array[] = $datainsert;
                 PurchaseRequisition::create($datainsert);
-
-                if ($procurement->is_cashAdvance) {
+                $cashData = CashAdvancePurchases::where('purchase_id', $id)->where('unit_id', $value->id)->first();
+                if ($cashData) {
                     $datainsertCash = $this->prepareCashAdvanceData($procurement, $vendor, $value, $cashData, $reqno, $settings);
                     CashAdvance::create($datainsertCash);
                     $arrayCash[] = $datainsertCash;
@@ -177,7 +176,11 @@ class ProcurementService
     private function prepareCashAdvanceData($procurement, $vendor, $item, $cashData, $reqno, $settings)
     {
         $tax = Pajak::where('mwszkz', $item->tax)->first();
-        $taxAmount = $item->total_amount - ($item->total_amount * ($tax->desimal / 100));
+        $totalAmount = ($cashData->dp / 100) * $item->total_amount;
+        // $taxAmount = ($tax->desimal + 100 ) $item->total_amount - ($item->total_amount * ($tax->desimal / 100));
+
+        $desimalPlus = 100 + $tax->desimal;
+        $taxAmount = ($tax->desimal / $desimalPlus) * $totalAmount;
 
         $formattedDate = Carbon::parse($cashData->document_date)->format('Y-m-d');
         $year = Carbon::parse($cashData->document_date)->format('Y');
@@ -199,14 +202,15 @@ class ProcurementService
             'vendor_code' => $vendor->masterBusinesPartnerss->partner_number,  // lifnr
             'saknr' => '', //saknr
             'hkont' => '', //hkont
-            'amount_local_currency' => $item->total_amount, //dmbtr
+            'amount_local_currency' => $totalAmount, //dmbtr
             'tax_code' => $item->tax,
             'dzfbdt' => '', //dzfbdt
             'assigment' => $reqno,
             'text' => 'DP ' . $item->tax . ' ' . $cashData->text,
             'profit_center' => $item->cost_center,
             'tax_amount' => $taxAmount,
-            'amount' => $item->total_amount,
+            'amount' => $totalAmount,
+            'dp' => $cashData->dp,
         ];
     }
 }

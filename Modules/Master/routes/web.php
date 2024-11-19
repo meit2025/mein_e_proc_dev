@@ -158,6 +158,7 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::group(['prefix' => 'dropdown'], function () {
             Route::get('/', [DropdownMasterController::class, 'dropdown'])->name('master.dropdown');
+            Route::get('/tabel', [DropdownMasterController::class, 'show_tabel'])->name('master.show_tabel');
         });
     });
 

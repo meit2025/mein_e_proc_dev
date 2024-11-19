@@ -44,4 +44,5 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/downolad-text/{id}/{type}', [PurchaseRequisitionController::class, 'downloadtext'])->name('pr.generate-text-sap.download.text');
         Route::get('/downolad-text-po/{id}/{type}', [PurchaseRequisitionController::class, 'downloadPo'])->name('pr.generate-text-sap.download.po');
     });
+    Route::get('/retry-pr/{id}/{type}', [ProcurementController::class, 'retryPr'])->name('pr.generate-text-sap.download.po');
 });

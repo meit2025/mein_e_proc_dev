@@ -27,18 +27,16 @@ function Create() {
   }, [dropdownOptions]);
 
   return (
-    <>
-      <div className='card card-grid h-full min-w-full p-4'>
-        <div className='card-body'>
-          <FormMapping
-            formModel={dataModel}
-            methods={methods}
-            url={CREATE_PR}
-            redirectUrl={LIST_PAGE_PR}
-          />
-        </div>
+    <div className='card card-grid h-full min-w-full p-4'>
+      <div className='card-body'>
+        <FormMapping
+          formModel={dataModel}
+          methods={methods}
+          url={CREATE_PR}
+          redirectUrl={LIST_PAGE_PR}
+        />
       </div>
-    </>
+    </div>
   );
 }
 

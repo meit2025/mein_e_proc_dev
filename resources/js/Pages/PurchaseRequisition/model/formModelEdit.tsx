@@ -1,82 +1,16 @@
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
 import ItemForm from './itemForm';
 
-export const formModel: Array<FormFieldModel<any>> = [
-  //   {
-  //     type: 'switch',
-  //     name: 'is_cashAdvance',
-  //     label: 'cash Advance',
-  //     placeholder: 'cash Advance',
-  //     style: {
-  //       width: '65.5rem',
-  //     },
-  //   },
-  //   {
-  //     conditional: true,
-  //     valueConditional: true,
-  //     parameterConditional: 'is_cashAdvance',
-  //     type: 'input',
-  //     name: 'cash_advance_purchases.reference',
-  //     label: 'referance',
-  //     placeholder: 'referance',
-  //     style: {
-  //       width: '63.5rem',
-  //     },
-  //   },
-  //   {
-  //     conditional: true,
-  //     valueConditional: true,
-  //     parameterConditional: 'is_cashAdvance',
-  //     type: 'input',
-  //     name: 'cash_advance_purchases.document_header_text',
-  //     label: 'Document Header Text',
-  //     placeholder: 'Document Header Text',
-  //     style: {
-  //       width: '63.5rem',
-  //     },
-  //   },
-  //   {
-  //     conditional: true,
-  //     valueConditional: true,
-  //     parameterConditional: 'is_cashAdvance',
-  //     type: 'input',
-  //     name: 'cash_advance_purchases.document_date',
-  //     label: 'Delivery Date',
-  //     required: true,
-  //     texttype: 'date',
-  //     placeholder: 'enter your Document Date',
-  //   },
-  //   {
-  //     conditional: true,
-  //     valueConditional: true,
-  //     parameterConditional: 'is_cashAdvance',
-  //     type: 'input',
-  //     name: 'cash_advance_purchases.due_on',
-  //     label: 'due on',
-  //     required: true,
-  //     texttype: 'date',
-  //     placeholder: 'enter your Due On',
-  //   },
-  //   {
-  //     conditional: true,
-  //     valueConditional: true,
-  //     parameterConditional: 'is_cashAdvance',
-  //     type: 'input',
-  //     name: 'cash_advance_purchases.text',
-  //     label: 'text',
-  //     placeholder: 'text',
-  //     style: {
-  //       width: '63.5rem',
-  //     },
-  //   },
+export const formModelEdit: Array<FormFieldModel<any>> = [
   {
     type: 'select',
     name: 'user_id',
     label: 'Requisition',
     required: true,
+    disabled: true,
     options: [],
     style: {
-      width: '63.3rem',
+      width: '58.3rem',
     },
   },
   {
@@ -84,9 +18,10 @@ export const formModel: Array<FormFieldModel<any>> = [
     name: 'document_type',
     label: 'Document Type',
     required: true,
+    disabled: true,
     options: [],
     style: {
-      width: '63.3rem',
+      width: '58.3rem',
     },
   },
   {
@@ -94,9 +29,11 @@ export const formModel: Array<FormFieldModel<any>> = [
     name: 'purchasing_groups',
     label: 'Purchasing Group',
     required: true,
+    disabled: true,
+
     options: [],
     style: {
-      width: '63.3rem',
+      width: '58.3rem',
     },
   },
   {
@@ -104,6 +41,8 @@ export const formModel: Array<FormFieldModel<any>> = [
     name: 'delivery_date',
     label: 'Delivery Date',
     required: true,
+    disabled: true,
+
     texttype: 'date',
     placeholder: 'enter your date item delivery',
   },
@@ -112,14 +51,16 @@ export const formModel: Array<FormFieldModel<any>> = [
     name: 'storage_locations',
     label: 'Storage Location',
     required: false,
+    disabled: true,
     options: [],
     style: {
-      width: '63.3rem',
+      width: '58.3rem',
     },
   },
 
   {
     conditional: true,
+    disabled: true,
     valueConditional: 'ZENT',
     parameterConditional: 'document_type',
     type: 'textarea',
@@ -132,6 +73,7 @@ export const formModel: Array<FormFieldModel<any>> = [
   },
   {
     conditional: true,
+    disabled: true,
     valueConditional: 'ZENT',
     parameterConditional: 'document_type',
     type: 'input',
@@ -145,6 +87,7 @@ export const formModel: Array<FormFieldModel<any>> = [
   },
   {
     conditional: true,
+    disabled: true,
     valueConditional: 'ZENT',
     parameterConditional: 'document_type',
     type: 'input',
@@ -157,6 +100,7 @@ export const formModel: Array<FormFieldModel<any>> = [
   },
   {
     conditional: true,
+    disabled: true,
     valueConditional: 'ZENT',
     parameterConditional: 'document_type',
     type: 'input',
@@ -169,6 +113,7 @@ export const formModel: Array<FormFieldModel<any>> = [
   },
   {
     conditional: true,
+    disabled: true,
     valueConditional: 'ZENT',
     parameterConditional: 'document_type',
     type: 'input',
@@ -181,6 +126,8 @@ export const formModel: Array<FormFieldModel<any>> = [
   },
   {
     conditional: true,
+    disabled: true,
+
     valueConditional: 'ZENT',
     parameterConditional: 'nama_perusahaan',
     type: 'input',
@@ -193,6 +140,7 @@ export const formModel: Array<FormFieldModel<any>> = [
   },
   {
     conditional: true,
+    disabled: true,
     valueConditional: 'ZENT',
     parameterConditional: 'document_type',
     type: 'input',
@@ -205,6 +153,7 @@ export const formModel: Array<FormFieldModel<any>> = [
   },
   {
     conditional: true,
+    disabled: true,
     valueConditional: 'ZENT',
     parameterConditional: 'document_type',
     type: 'input',
@@ -217,6 +166,7 @@ export const formModel: Array<FormFieldModel<any>> = [
   },
   {
     conditional: true,
+    disabled: true,
     valueConditional: 'ZENT',
     parameterConditional: 'document_type',
     type: 'input',
@@ -229,6 +179,7 @@ export const formModel: Array<FormFieldModel<any>> = [
   },
   {
     conditional: true,
+    disabled: true,
     valueConditional: 'ZENT',
     parameterConditional: 'document_type',
     type: 'input',
@@ -241,6 +192,7 @@ export const formModel: Array<FormFieldModel<any>> = [
   },
   {
     type: 'input',
+    disabled: true,
     name: 'total_vendor',
     label: 'Total Vendor',
     required: true,
@@ -249,6 +201,6 @@ export const formModel: Array<FormFieldModel<any>> = [
   },
   {
     fieldCustome: true,
-    fieldCustomeValue: <ItemForm disable={false} />,
+    fieldCustomeValue: <ItemForm disable={true} />,
   },
 ];

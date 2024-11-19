@@ -61,16 +61,16 @@ class BtService
                 $dataMapping['purchase_id'] = $BusinessTrip->id;
                 PurchaseRequisition::create($dataMapping);
                 $array[] = $datainsert;
-                if ($BusinessTrip->cash_advance) {
-                    $datainsertCash = $this->prepareCashAdvanceData($BusinessTrip, $value, $reqno, $settings);
+            }
 
-                    $newDataInser = $datainsertCash;
-                    $newDataInser['amount'] = $BusinessTrip->total_cash_advance;
-                    $newDataInser['purchase_id'] = $BusinessTrip->id;
-                    CashAdvance::create($newDataInser);
-                    $arrayCash[] = $datainsertCash;
-                }
-                # code...
+            if ($BusinessTrip->cash_advance) {
+                $datainsertCash = $this->prepareCashAdvanceData($BusinessTrip, $reqno, $settings);
+
+                $newDataInser = $datainsertCash;
+                $newDataInser['amount'] = $BusinessTrip->total_cash_advance;
+                $newDataInser['purchase_id'] = $BusinessTrip->id;
+                CashAdvance::create($newDataInser);
+                $arrayCash[] = $datainsertCash;
             }
 
             // $this->generateFiles($array, $arrayCash, $reqno);
@@ -213,13 +213,13 @@ class BtService
         return $mergedQuery;
     }
 
-    private function prepareCashAdvanceData($BusinessTrip, $item, $reqno, $settings)
+    private function prepareCashAdvanceData($BusinessTrip, $reqno, $settings)
     {
         $tax = Pajak::where('id', $BusinessTrip->pajak_id ?? '1')->first();
         $findCostCenter = MasterCostCenter::find($BusinessTrip->cost_center_id)->first();
         $taxAmount = $BusinessTrip->total_cash_advance * (($tax->desimal ?? 0) / 100);
 
-        $findBusinessTripDestination = $this->findBusinessTripDestination($item->business_trip_destination_id);
+        $findBusinessTripDestination = $this->findBusinessTripDestination($BusinessTrip->business_trip_destination_id);
 
         $formattedDate = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('Y-m-d');
         $year = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('Y');

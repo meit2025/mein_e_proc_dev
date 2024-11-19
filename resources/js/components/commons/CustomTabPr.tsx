@@ -72,7 +72,28 @@ const CustomTabPr = ({ detailLayout, id, type }: CustomTabProps) => {
     },
   ]);
 
-  useEffect(() => {}, [type, detailLayout, id]);
+  useEffect(() => {
+    if (type === 'VEN' || type === 'REIM') {
+      setTabData([
+        {
+          title: 'Detail',
+          content: detailLayout,
+        },
+        {
+          title: 'Pr',
+          content: <Pr id={id} type={type} />,
+        },
+        {
+          title: 'Dp',
+          content: <Dp id={id} type={type} />,
+        },
+        {
+          title: 'Log',
+          content: <Logs />,
+        },
+      ]);
+    }
+  }, [type, detailLayout, id]);
 
   // eslint-disable-next-line react/jsx-key
 
