@@ -1,1 +1,0 @@
-const s="/api/pr/purchase-requisition",t="/api/pr/purchase-requisition-sap",c=`${s}/list`,o=`${s}/create`,_=`${s}/update`,i=a=>`${s}/detail/${a}`,E=`${s}/delete`,P=`${t}/list`,e=`${t}/list-dp`,n=`${t}/list-po`;export{o as C,i as D,_ as E,c as G,E as a,P as b,e as c,n as d};
