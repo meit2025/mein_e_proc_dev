@@ -103,7 +103,7 @@ class BtService
         $purchasingGroup = PurchasingGroup::find($BusinessTrip->purchasing_group_id);
         $uom = Uom::find($BusinessTrip->uom_id);
         $pajak = Pajak::find($BusinessTrip->pajak_id);
-        $costCenter = MasterCostCenter::find($BusinessTrip->pajak_id);
+        $costCenter = MasterCostCenter::find($BusinessTrip->cost_center_id);
 
         return [
             'code_transaction' => 'BTRE', // code_transaction
