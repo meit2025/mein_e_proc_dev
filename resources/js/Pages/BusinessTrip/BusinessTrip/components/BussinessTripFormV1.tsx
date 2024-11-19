@@ -67,6 +67,7 @@ import { CREATE_API_BUSINESS_TRIP, GET_DETAIL_BUSINESS_TRIP } from '@/endpoint/b
 import FormSwitch from '@/components/Input/formSwitchCustom';
 import FormAutocomplete from '@/components/Input/formDropdown';
 import { DestinationModel } from '../../Destination/models/models';
+import { useAlert } from '@/contexts/AlertContext';
 
 interface User {
   id: string;
@@ -197,29 +198,42 @@ export const BussinessTripFormV1 = ({
     },
   });
 
+  interface Destination {
+    destination: string;
+    detail_attedances: any[];
+    allowances: any[];
+    business_trip_start_date: Date;
+    business_trip_end_date: Date;
+  }
+
   async function getDetailData() {
     const url = GET_DETAIL_BUSINESS_TRIP(id);
 
     try {
-      const response = await axios.get(url);
-      //   console.log(response, ' Response Detail');
+        const response = await axios.get(url);
+        const data = response.data.data;
+        console.log(data, ' Response Detailxxxx');
+        form.setValue('purpose_type_id', data.purpose_type_id);
+        form.setValue('request_for', data.request_for.id);
+        form.setValue('cost_center_id', data.cost_center_id);
+        form.setValue('pajak_id', data.pajak_id);
+        form.setValue('purchasing_group_id', data.purchasing_group_id);
+        form.setValue('remark', data.remarks);
+        form.setValue('total_destination', data.total_destination);
+        form.setValue('destinations',[]);
+        form.setValue('destinations',
+            data.destinations.map((destination: any) => ({
+                destination: destination.destination,
+                business_trip_start_date: new Date(destination.business_trip_start_date),
+                business_trip_end_date: new Date(destination.business_trip_end_date),
+                detail_attedances: destination.detail_attedances,
+                allowances: destination.allowances
+            }))
+        );
 
-      form.reset({
-        purpose_type_id: response.data.data.purpose_type_id,
-        request_for: response.data.data.request_for,
-        remark: response.data.data.remarks,
-        attachment: null,
-        total_destination: response.data.data.total_destination,
-        destinations: [
-          {
-            detail_attedances: response.data.data.destination.detail_attedances,
-            allowances: [],
-            destination: response.data.data.destination.destination,
-            business_trip_start_date: new Date(),
-            business_trip_end_date: new Date(),
-          },
-        ],
-      });
+        // form.trigger('destinations');
+        // console.log(form.getValues('destinations'),'Form Destinations');
+
     } catch (e) {
       const error = e as AxiosError;
     }
@@ -250,6 +264,8 @@ export const BussinessTripFormV1 = ({
     setAllowancesProperty();
     // let valueToInt = parseInt(value);
   };
+
+  const { showToast } = useAlert();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -307,7 +323,7 @@ export const BussinessTripFormV1 = ({
       const error = e as AxiosError;
 
       //   onSuccess?.(false);
-      //   console.log(error);
+        console.log(error);
     }
 
     // console.log('values bg', values);
@@ -346,9 +362,14 @@ export const BussinessTripFormV1 = ({
   });
 
   React.useEffect(() => {
-    setAllowancesProperty();
     if (id && type == BusinessTripType.edit) {
       getDetailData();
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if(type == BusinessTripType.create){
+        setAllowancesProperty();
     }
   }, [totalDestination, listAllowances, id, type, role, idUser]);
 
@@ -1528,10 +1549,10 @@ export function AllowanceInputForm({
     </>
   );
 }
-function showToast(arg0: string, arg1: string) {
-  throw new Error('Function not implemented.');
-}
+// function showToast(arg0: string, arg1: string) {
+//   throw new Error('Function not implemented.');
+// }
 
-function onSuccess(arg0: boolean) {
-  throw new Error('Function not implemented.');
-}
+// function onSuccess(arg0: boolean) {
+//   throw new Error('Function not implemented.');
+// }

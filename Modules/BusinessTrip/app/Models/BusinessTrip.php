@@ -5,6 +5,7 @@ namespace Modules\BusinessTrip\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Master\Models\MasterCostCenter;
 use Modules\Master\Models\Pajak;
 use Modules\Master\Models\PurchasingGroup;
@@ -13,7 +14,7 @@ use Modules\Master\Models\PurchasingGroup;
 
 class BusinessTrip extends Model
 {
-    use HasFactory;
+    use HasFactory,SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
