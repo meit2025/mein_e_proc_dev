@@ -67,6 +67,7 @@ import { CREATE_API_BUSINESS_TRIP, GET_DETAIL_BUSINESS_TRIP } from '@/endpoint/b
 import FormSwitch from '@/components/Input/formSwitchCustom';
 import FormAutocomplete from '@/components/Input/formDropdown';
 import { DestinationModel } from '../../Destination/models/models';
+import { useAlert } from '@/contexts/AlertContext';
 
 interface User {
   id: string;
@@ -212,7 +213,6 @@ export const BussinessTripFormV1 = ({
         const response = await axios.get(url);
         const data = response.data.data;
         console.log(data, ' Response Detailxxxx');
-        console.log(data.destinations, ' Data Response Detailxxxx');
         form.setValue('purpose_type_id', data.purpose_type_id);
         form.setValue('request_for', data.request_for.id);
         form.setValue('cost_center_id', data.cost_center_id);
@@ -220,7 +220,6 @@ export const BussinessTripFormV1 = ({
         form.setValue('purchasing_group_id', data.purchasing_group_id);
         form.setValue('remark', data.remarks);
         form.setValue('total_destination', data.total_destination);
-        console.log(form.getValues('destinations'),'Form Destinations');
         form.setValue('destinations',[]);
         form.setValue('destinations',
             data.destinations.map((destination: any) => ({
@@ -234,20 +233,6 @@ export const BussinessTripFormV1 = ({
 
         // form.trigger('destinations');
         // console.log(form.getValues('destinations'),'Form Destinations');
-
-        // const formDestination: Destination[] = [];
-        // data.business_trip_destination.forEach((destination: any,index:number) => {
-        //     formDestination.push({
-        //         destination: destination.destination,
-        //         detail_attedances: [],
-        //         allowances: [],
-        //         business_trip_start_date: new Date(),
-        //         business_trip_end_date: new Date(),
-        //     })
-        // })
-        // console.log(formDestination,'Form Destination');
-        // form.setValue('destinations', formDestination);
-        // form.setValue(`destinations.0.destination`, 'JAKARTA');
 
     } catch (e) {
       const error = e as AxiosError;
@@ -279,6 +264,8 @@ export const BussinessTripFormV1 = ({
     setAllowancesProperty();
     // let valueToInt = parseInt(value);
   };
+
+  const { showToast } = useAlert();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -336,7 +323,7 @@ export const BussinessTripFormV1 = ({
       const error = e as AxiosError;
 
       //   onSuccess?.(false);
-      //   console.log(error);
+        console.log(error);
     }
 
     // console.log('values bg', values);
@@ -1562,10 +1549,10 @@ export function AllowanceInputForm({
     </>
   );
 }
-function showToast(arg0: string, arg1: string) {
-  throw new Error('Function not implemented.');
-}
+// function showToast(arg0: string, arg1: string) {
+//   throw new Error('Function not implemented.');
+// }
 
-function onSuccess(arg0: boolean) {
-  throw new Error('Function not implemented.');
-}
+// function onSuccess(arg0: boolean) {
+//   throw new Error('Function not implemented.');
+// }

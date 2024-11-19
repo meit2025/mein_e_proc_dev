@@ -38,6 +38,7 @@ interface UserAuth {
   name: string;
   email: string;
   role: string;
+  role_id: string;
 }
 
 interface SharedProps {

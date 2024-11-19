@@ -30,7 +30,8 @@ class User extends Authenticatable
         'email_verified_at',
         'username',
         'is_admin',
-        'master_business_partner_id'
+        'master_business_partner_id',
+        'role'
     ];
 
     /**

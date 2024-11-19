@@ -78,6 +78,7 @@ interface BusinessTrip {
   parent_business_trip: BusinessTrip | null;
   parent_business_trip_request_no: string;
   purpose_type_name: string;
+  created_at: string;
 }
 
 const BusinessTripDeclarationDetail = () => {
@@ -151,7 +152,7 @@ const BusinessTripDeclarationDetail = () => {
           <td>
             <strong>Request Date</strong>
           </td>
-          <td>17 Aug 2023</td>
+          <td>{data?.created_at}</td>
         </tr>
         <tr>
           <td>
@@ -219,6 +220,7 @@ const BusinessTripDeclarationDetail = () => {
                     </tr>
                   ))}
 
+
                   <tr>
                     <td>
                       <strong>Total Standar Value</strong>
@@ -226,7 +228,7 @@ const BusinessTripDeclarationDetail = () => {
                     <td>IDR</td>
                     <td></td>
                     <td className='text-center'></td>
-                    <td></td>
+                    <td>{destination.total_standard}</td>
                   </tr>
                 </table>
 
@@ -257,7 +259,7 @@ const BusinessTripDeclarationDetail = () => {
                     <td>IDR</td>
                     <td></td>
                     <td className='text-center'></td>
-                    <td></td>
+                    <td>{destination.total_request}</td>
                   </tr>
                 </table>
 
@@ -281,6 +283,15 @@ const BusinessTripDeclarationDetail = () => {
                       <td>{item.total}</td>
                     </tr>
                   ))}
+                    <tr>
+                      <td>
+                        Other Allowance
+                      </td>
+                      <td>IDR</td>
+                      <td></td>
+                      <td className='text-center'>-</td>
+                      <td>{destination.other_allowance}</td>
+                    </tr>
                   <tr>
                     <td>
                       <strong>Total Request Value</strong>
@@ -288,7 +299,7 @@ const BusinessTripDeclarationDetail = () => {
                     <td>IDR</td>
                     <td></td>
                     <td className='text-center'></td>
-                    <td></td>
+                    <td>{destination.total_declaration}</td>
                   </tr>
                 </table>
               </div>

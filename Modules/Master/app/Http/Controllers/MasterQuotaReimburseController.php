@@ -115,85 +115,6 @@ class MasterQuotaReimburseController extends Controller
         return view('master::show');
     }
 
-    public function detail(Request $request, $id)
-    {
-        try {
-            $familyStatus = null;
-            $masterReimburseQuota = MasterQuotaReimburse::with('type', 'period')->find($id)->toArray();
-            
-            if($masterReimburseQuota['type']['is_employee'] == false) $familyStatus = $masterReimburseQuota['type']['family_status'];
-            
-            $balanceGrade = MasterTypeReimburse::with(['reimburseTypeGrades', 'reimburseTypeGrades.grade', 'reimburseTypeGrades.grade.gradeUsers'])->find($masterReimburseQuota['type']['id'])->toArray();
-            
-            if (isset($balanceGrade['reimburse_type_grades']) && is_array($balanceGrade['reimburse_type_grades'])) {
-                $balanceGrade['reimburse_type_grades'] = array_map(function ($reimburseTypeGrade) {
-                    $grade = $reimburseTypeGrade['grade'];
-                    $reimburseTypeGrade['grade_name'] = $grade['grade'];
-                    $reimburseTypeGrade['user_ids'] = array_column($grade['grade_users'], 'user_id');
-                    
-                    unset($reimburseTypeGrade['grade']);
-            
-                    return $reimburseTypeGrade;
-                }, $balanceGrade['reimburse_type_grades']);
-            }
-            
-            $query = MasterQuotaReimburse::query()
-                ->join('master_quota_reimburse_users', 'master_quota_reimburse_users.quota_reimburses_id', '=', 'master_quota_reimburses.id')
-                ->join('master_type_reimburses', 'master_type_reimburses.id', '=', 'master_quota_reimburses.type')
-                ->join('users', 'users.id', '=', 'master_quota_reimburse_users.user_id');
-
-            $query->when($familyStatus, function($q) {
-                return $q->join('families', 'families.userId', '=', 'users.id');
-            });
-
-            $selectColumns = [
-                "master_quota_reimburses.id",
-                "users.name AS employerName",
-                "users.name AS familyName",
-                "users.id AS userId",
-            ];
-
-            if (!empty($familyStatus)) {
-                $selectColumns[] = "families.name AS familyName";
-            } else {
-                $selectColumns[] = DB::raw("CAST('' AS TEXT) AS familyName");
-            }
-
-            $query->select($selectColumns)
-                ->where('master_quota_reimburses.id', $id)
-                ->when($familyStatus, function($q) use ($familyStatus) {
-                    return $q->where('master_type_reimburses.family_status', $familyStatus);
-                })
-            ;
-            
-            $sortDirection = $request->get('sort_direction', 'asc');
-            $data = $query->orderBy('master_quota_reimburses.id', $sortDirection)->get()->toArray();
-            
-            $data['dataBalance'] = array_map(function ($map) use ($balanceGrade) {
-                $filteredGrade = array_filter($balanceGrade['reimburse_type_grades'], function ($grade) use ($map) {
-                    return in_array($map['userId'], $grade['user_ids']);
-                });
-                $firstGrade = reset($filteredGrade);
-                
-                return [
-                    'employerName'  => $map['employerName'],
-                    'familyName'    => $map['familyName'],
-                    'plafon'        => ($balanceGrade['grade_option'] == 'all') ? $balanceGrade['grade_all_price'] : ($firstGrade ? $firstGrade['plafon'] : 0),
-                    'grade'         => $firstGrade ? $firstGrade['grade_name'] : ''
-                ];
-            }, $data);
-
-            $data['type']          = $masterReimburseQuota['type']['name'];
-            $data['period']        = $masterReimburseQuota['period']['code'] . ' ( ' . $masterReimburseQuota['period']['start'] . ' - ' . $masterReimburseQuota['period']['end'] . ' )';
-            $data['employerStatus'] = $masterReimburseQuota['type']['is_employee'] ? 'Employee' : 'Family';
-            $data['familyStatus']   = $masterReimburseQuota['type']['family_status'];
-
-            return $this->successResponse($data);
-        } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage());
-        }
-    }
-
     /**
      * Show the form for editing the specified resource.
      */
@@ -267,6 +188,100 @@ class MasterQuotaReimburseController extends Controller
         } catch (\Exception  $e) {
             DB::rollBack();
             return $this->errorResponse($e);
+        }
+    }
+
+    public function detail($id)
+    {
+        $masterReimburseQuotaData = MasterQuotaReimburse::with('type', 'period')->find($id)->toArray();
+        
+        try {
+            return Inertia::render(
+                'Master/MasterReimburseQuota/Detail',
+                compact('masterReimburseQuotaData')
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    public function detailData(Request $request, $id)
+    {
+        try {
+            $familyStatus = null;
+            $masterReimburseQuota = MasterQuotaReimburse::with('type', 'period')->find($id)->toArray();
+            
+            if($masterReimburseQuota['type']['is_employee'] == false) $familyStatus = $masterReimburseQuota['type']['family_status'];
+            
+            $balanceGrade = MasterTypeReimburse::with(['reimburseTypeGrades', 'reimburseTypeGrades.grade', 'reimburseTypeGrades.grade.gradeUsers'])->find($masterReimburseQuota['type']['id'])->toArray();
+            
+            if (isset($balanceGrade['reimburse_type_grades']) && is_array($balanceGrade['reimburse_type_grades'])) {
+                $balanceGrade['reimburse_type_grades'] = array_map(function ($reimburseTypeGrade) {
+                    $grade = $reimburseTypeGrade['grade'];
+                    $reimburseTypeGrade['grade_name'] = $grade['grade'];
+                    $reimburseTypeGrade['user_ids'] = array_column($grade['grade_users'], 'user_id');
+                    
+                    unset($reimburseTypeGrade['grade']);
+            
+                    return $reimburseTypeGrade;
+                }, $balanceGrade['reimburse_type_grades']);
+            }
+            
+            $query = MasterQuotaReimburse::query()
+                ->join('master_quota_reimburse_users', 'master_quota_reimburse_users.quota_reimburses_id', '=', 'master_quota_reimburses.id')
+                ->join('master_type_reimburses', 'master_type_reimburses.id', '=', 'master_quota_reimburses.type')
+                ->join('users', 'users.id', '=', 'master_quota_reimburse_users.user_id');
+
+            $query->when($familyStatus, function($q) {
+                return $q->join('families', 'families.userId', '=', 'users.id');
+            });
+
+            $selectColumns = [
+                "users.name AS employerName",
+                "users.id AS userId"
+            ];
+
+            if (!empty($familyStatus)) {
+                $selectColumns[] = "families.name AS familyName";
+                $selectColumns[] = "families.id AS id";
+            } else {
+                $selectColumns[] = DB::raw("CAST('' AS TEXT) AS familyName, users.id AS id");
+            }
+
+            $query->select($selectColumns)
+                ->where('master_quota_reimburses.id', $id)
+                ->when($familyStatus, function($q) use ($familyStatus) {
+                    return $q->where('families.status', $familyStatus);
+                })
+            ;
+            
+            $perPage = $request->get('per_page', 10);
+            $sortDirection = $request->get('sort_direction', 'asc');
+            $data = $query->orderBy('master_quota_reimburses.id', $sortDirection)->paginate($perPage);
+            
+            $data->getCollection()->transform(function ($map) use ($balanceGrade) {
+                $filteredGrade = array_filter($balanceGrade['reimburse_type_grades'], function ($grade) use ($map) {
+                    return in_array($map->userId, $grade['user_ids']);
+                });
+                $firstGrade = reset($filteredGrade);
+
+                return [
+                    'id'            => $map->id,
+                    'employerName'  => $map->employerName,
+                    'familyName'    => $map->familyName,
+                    'plafon'        => ($balanceGrade['grade_option'] == 'all') ? $balanceGrade['grade_all_price'] : ($firstGrade ? $firstGrade['plafon'] : 0),
+                    'grade'         => $firstGrade ? $firstGrade['grade_name'] : ''
+                ];
+            });
+
+            // $data['type']          = $masterReimburseQuota['type']['name'];
+            // $data['period']        = $masterReimburseQuota['period']['code'] . ' ( ' . $masterReimburseQuota['period']['start'] . ' - ' . $masterReimburseQuota['period']['end'] . ' )';
+            // $data['employerStatus'] = $masterReimburseQuota['type']['is_employee'] ? 'Employee' : 'Family';
+            // $data['familyStatus']   = $masterReimburseQuota['type']['family_status'];
+
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
         }
     }
 }
