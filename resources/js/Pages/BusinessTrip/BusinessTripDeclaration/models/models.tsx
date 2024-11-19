@@ -2,8 +2,8 @@ import { GridColDef } from '@mui/x-data-grid';
 
 export const columns: GridColDef[] = [
   {
-    field: 'request_no',
-    headerName: 'Request No.',
+    field: 'declaration_no',
+    headerName: 'Declaration Number',
     width: 200,
     filterable: true,
     renderCell: (params) => (
@@ -15,8 +15,10 @@ export const columns: GridColDef[] = [
       </span>
     ),
   },
-  { field: 'purpose_type', headerName: 'Purpose Type', width: 200, filterable: true },
-  { field: 'total_destination', headerName: 'Total Destinations', width: 200, filterable: true },
+  { field: 'request_no', headerName: 'Request Number', width: 200, filterable: true },
+  { field: 'request_for', headerName: 'Request For', width: 200, filterable: true },
+  { field: 'created_at', headerName: 'Request Date', width: 200, filterable: true },
+  { field: 'remarks', headerName: 'Remark', width: 200, filterable: true },
 ];
 
 // Fungsi untuk menangani aksi cetak detail

@@ -248,6 +248,7 @@ export const BussinessTripFormV1 = ({
   async function handlePurposeType(value: string) {
     form.setValue('purpose_type_id', value || '');
     const userid = role == 'user' ? idUser || '' : selectedUserId || '';
+    console.log(userid, ' ---- ')
     const url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
 
     try {
