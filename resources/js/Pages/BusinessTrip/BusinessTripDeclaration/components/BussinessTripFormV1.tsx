@@ -163,6 +163,7 @@ export const BussinessTripFormV1 = ({
     try {
       const response = await axiosInstance.get(url);
       const businessTripData = response.data.data;
+      console.log(businessTripData, ' Response Detailxxxx');
       form.setValue('remark', businessTripData.remarks || '');
       //   form.setValue('attachment', businessTripData.attachment || null);
       form.setValue('total_destination', businessTripData.total_destination || 1);
@@ -196,7 +197,8 @@ export const BussinessTripFormV1 = ({
       business_trip_end_date: new Date(destination.business_trip_end_date),
       allowances: destination.allowances || [],
       detail_attedances: destination.detail_attedances || [],
-      allowances_result_item: destination.allowancesResultItem || [],
+      total_allowance: destination.total_allowance || 0,
+    //   allowances_result_item: destination.allowancesResultItem || [],
     }));
     form.setValue('destinations', destinationForm);
   }
@@ -632,7 +634,7 @@ export function ResultTotalItem({
   setTotalAllowance: any;
 }) {
   const resultItem = form.watch(`destinations[${destinationIndex}].allowances`);
-  console.log(resultItem);
+  const totalItem = form.watch(`destinations[${destinationIndex}].total_allowance`);
   return (
     <>
       <table className='w-full text-sm mt-10'>
@@ -643,12 +645,12 @@ export function ResultTotalItem({
           </tr>
         </thead>
         <tbody>
-          {allowanceField.map((allowance: any, index: number) => (
+          {resultItem.map((allowance: any, index: number) => (
             <tr key={allowance.id}>
               <td>{allowance.name}</td>
               <td className='flex justify-between pr-4'>
                 <span>IDR</span>
-                <span></span>
+                <span>{allowance.subtotal}</span>
               </td>
             </tr>
           ))}
@@ -660,7 +662,7 @@ export function ResultTotalItem({
             </td>
             <td className='flex justify-between pr-4'>
               <span>IDR</span>
-              <span></span>
+              <span>{totalItem}</span>
             </td>
           </tr>
         </tfoot>

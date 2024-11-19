@@ -24,6 +24,7 @@ class Entertainment extends Model
         'posisi',
         'jenis_usaha',
         'jenis_kegiatan',
+        'nama_perusahaan'
     ];
 
     // protected static function newFactory(): EntertainmentFactory

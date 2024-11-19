@@ -14,6 +14,7 @@ interface StructDropdown {
   tabel: string;
   where?: WhereProps;
   search?: string;
+  attribut?: string;
 }
 
 const useDropdownOptions = () => {
@@ -38,6 +39,7 @@ const useDropdownOptions = () => {
           key: struct.where?.key ?? '',
           parameter: struct.where?.parameter ?? '',
           groupBy: struct.where?.groupBy ?? '',
+          attribut: struct.attribut ?? '',
         },
         headers: {
           'Content-Type': 'application/json',

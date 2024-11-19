@@ -27,9 +27,9 @@ class BusinessTripDeclarationController extends Controller
     public function index()
     {
         $users = User::select('nip', 'name', 'id')->get();
-        $listBusinessTrip = BusinessTrip::where('type', 'request')->get();
-        $inBusinessTripRequest = BusinessTrip::where('type', 'request')->pluck('id')->toArray();
-        $listPurposeType = PurposeType::select('name', 'code', 'id')->where('id', '!=', $inBusinessTripRequest)->get();
+        $inBusinessTripRequest = BusinessTrip::where('type', 'declaration')->pluck('parent_id')->toArray();
+        $listBusinessTrip = BusinessTrip::where('type', 'request')->whereNotIn('id',$inBusinessTripRequest)->get();
+        $listPurposeType = PurposeType::select('name', 'code', 'id')->get();
         return Inertia::render('BusinessTrip/BusinessTripDeclaration/index', compact('users', 'listPurposeType', 'listBusinessTrip'));
     }
 
@@ -61,6 +61,7 @@ class BusinessTripDeclarationController extends Controller
         foreach ($data->businessTripDestination as $key => $value) {
             // Inisialisasi array allowances dengan kunci allowance_id
             $allowances = [];
+            $total_allowance = 0;
             // Mengisi data allowance dari detailDestinationDay
             foreach ($value->getDetailDestinationDay as $row) {
                 $allowanceId = $row->allowance->id;
@@ -70,7 +71,7 @@ class BusinessTripDeclarationController extends Controller
                         'code' => $row->allowance->code,
                         'default_price' => number_format($row->standard_value, 0, '.', ''),
                         'type' => $row->allowance->type,
-                        'subtotal' => number_format($row->standard_value, 0, '.', ''),
+                        'subtotal' => 0,
                         'currency' => $row->allowance->currency,
                         'request_value' => $row->allowance->request_value,
                         'detail' => [] // Array untuk menampung detail
@@ -82,6 +83,9 @@ class BusinessTripDeclarationController extends Controller
                     'date' => $row->date, // Sesuaikan dengan nama kolom tanggal di detailDestinationDay
                     'request_price' => $row->price // Sesuaikan dengan kolom request_price di detailDestinationDay
                 ];
+
+                $allowances[$allowanceId]['subtotal'] += $row->price;
+                $total_allowance += $row->price;
             }
 
             // Mengisi data allowance dari detailDestinationTotal
@@ -93,7 +97,7 @@ class BusinessTripDeclarationController extends Controller
                         'code' => $row->allowance->code,
                         'default_price' => number_format($row->standard_value, 0, '.', ''),
                         'type' => $row->allowance->type,
-                        'subtotal' => number_format($row->standard_value, 0, '.', ''),
+                        'subtotal' => 0,
                         'currency' => $row->allowance->currency,
                         'request_value' => $row->allowance->request_value,
                         'detail' => []
@@ -105,60 +109,12 @@ class BusinessTripDeclarationController extends Controller
                     'date' => '', // Sesuaikan dengan nama kolom tanggal di detailDestinationTotal
                     'request_price' => $row->price // Sesuaikan dengan kolom request_price di detailDestinationTotal
                 ];
+
+                $allowances[$allowanceId]['subtotal'] += $row->price;
+                $total_allowance += $row->price;
             }
 
             $allowances = array_values($allowances);
-
-            // RESULT ITEM
-            // Inisialisasi array allowances dengan kunci allowance_id
-            $allowancesResultItem = [];
-            // Mengisi data allowance dari detailDestinationDay
-            foreach ($value->detailDestinationDay as $rowDay) {
-                $allowanceId = $rowDay->allowance->id;
-                if (!isset($allowancesResultItem[$allowanceId])) {
-                    $allowancesResultItem[$allowanceId] = [
-                        'name' => $rowDay->allowance->name,
-                        'code' => $rowDay->allowance->code,
-                        'default_price' => number_format($rowDay->standard_value, 0, '.', ''),
-                        'type' => $rowDay->allowance->type,
-                        'subtotal' => number_format($rowDay->standard_value, 0, '.', ''),
-                        'currency' => $rowDay->allowance->currency,
-                        'request_value' => $rowDay->allowance->request_value,
-                        'detail' => [] // Array untuk menampung detail
-                    ];
-                }
-
-                // Tambahkan detail allowance
-                $allowancesResultItem[$allowanceId]['detail'][] = [
-                    'date' => $rowDay->date, // Sesuaikan dengan nama kolom tanggal di detailDestinationDay
-                    'request_price' => $rowDay->price // Sesuaikan dengan kolom request_price di detailDestinationDay
-                ];
-            }
-
-            // Mengisi data allowance dari detailDestinationTotal
-            foreach ($value->detailDestinationTotal as $rowTotal) {
-                $allowanceId = $rowTotal->allowance->id;
-                if (!isset($allowancesResultItem[$allowanceId])) {
-                    $allowancesResultItem[$allowanceId] = [
-                        'name' => $rowTotal->allowance->name,
-                        'code' => $rowTotal->allowance->code,
-                        'default_price' => number_format($rowTotal->standard_value, 0, '.', ''),
-                        'type' => $rowTotal->allowance->type,
-                        'subtotal' => number_format($rowTotal->standard_value, 0, '.', ''),
-                        'currency' => $rowTotal->allowance->currency,
-                        'request_value' => $rowTotal->allowance->request_value,
-                        'detail' => []
-                    ];
-                }
-
-                // Tambahkan detail allowance
-                $allowancesResultItem[$allowanceId]['detail'][] = [
-                    'date' => '', // Sesuaikan dengan nama kolom tanggal di detailDestinationTotal
-                    'request_price' => $rowTotal->price // Sesuaikan dengan kolom request_price di detailDestinationTotal
-                ];
-            }
-
-            $allowancesResultItem = array_values($allowancesResultItem);
 
             $detailAttendance = [];
             foreach ($value->detailAttendance as $row) {
@@ -180,7 +136,8 @@ class BusinessTripDeclarationController extends Controller
                 'business_trip_end_date' => $value->business_trip_end_date,
                 'detail_attedances' => $detailAttendance,
                 'allowances' => $allowances,
-                'allowancesResultItem' => $allowancesResultItem,
+                'total_allowance' => $total_allowance,
+                // 'allowancesResultItem' => $allowancesResultItem,
             ];
         }
         $data->destinations = $destinations;
@@ -367,13 +324,19 @@ class BusinessTripDeclarationController extends Controller
 
         $data->getCollection()->transform(function ($map) {
 
-            $purposeRelations = $map->purposeType ? $map->purposeType->name : ''; // Assuming 'name' is the field
+            // $purposeRelations = $map->purposeType ? $map->purposeType->name : '';
+            $requestFor = $map->requestFor ? $map->requestFor->name : '';
+            $requestNo = $map->parentBusinessTrip ? $map->parentBusinessTrip->request_no : '';
 
             return [
                 'id' => $map->id,
-                'request_no' => $map->request_no,
-                'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array
-                'total_destination' => $map->total_destination, // You can join multiple relations here if it's an array
+                'declaration_no' => $map->request_no,
+                'request_no' => $requestNo,
+                'request_for' => $requestFor,
+                'remarks' => $map->remarks,
+                'created_at' => date('d/m/Y', strtotime($map->created_at)),
+                // 'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array
+                // 'total_destination' => $map->total_destination, // You can join multiple relations here if it's an array
             ];
         });
 
