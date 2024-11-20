@@ -38,6 +38,9 @@ Route::group(['prefix' => 'reimburse'], function () {
 Route::group(['prefix' => 'api/reimburse'], function () {
     Route::get('/detail/{id}', [ReimbuseController::class, 'detailAPI'])->name('reimburse.detail');
     Route::get('/get-list-master-reimburse-type/{type}', [ReimbuseController::class, 'getListMasterReimburseTypeAPI'])->name('reimburse.get-list-master-reimburse-type');
+    Route::get('/get-period-reimburse/', [ReimbuseController::class, 'getPeriodAPI'])->name('reimburse.get-reimburse-period');
+
+    // getPeriodAPI
 });
 
 // });

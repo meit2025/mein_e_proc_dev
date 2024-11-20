@@ -352,4 +352,21 @@ class ReimbuseController extends Controller
             'forms' => $reimburseForms
         ]);
     }
+
+
+    public function getPeriodAPI(Request $request)
+    {
+
+        $user =  User::where('nip', $request->user)->first();
+
+        $reimbuseMaster = MasterTypeReimburse::where('code', $request->type)->select('id')->first();
+        $reimburseQuotaPeriod = MasterQuotaReimburse::where('type', $reimbuseMaster->id)
+            ->get()->pluck('period');
+
+
+        $reimbursePeriod = MasterPeriodReimburse::whereIn('id', $reimburseQuotaPeriod)->get();
+
+
+        return $this->successResponse($reimbursePeriod);
+    }
 }

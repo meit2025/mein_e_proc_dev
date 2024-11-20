@@ -17,6 +17,8 @@ export const columns: GridColDef[] = [
   },
   { field: 'purpose_type', headerName: 'Purpose Type', width: 200, filterable: true },
   { field: 'total_destination', headerName: 'Total Destinations', width: 200, filterable: true },
+
+  { field: 'created_at', headerName: 'Total Destinations', width: 200, filterable: true },
 ];
 
 // Fungsi untuk menangani aksi cetak detail

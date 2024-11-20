@@ -34,7 +34,10 @@ import { Currency, Period, PurchasingGroup, User, Tax, CostCenter } from '../mod
 import { FormType } from '@/lib/utils';
 import useDropdownOptions from '@/lib/getDropdown';
 import { AsyncDropdownComponent } from '@/components/commons/AsyncDropdownComponent';
-import { GET_LIST_MASTER_REIMBUSE_TYPE } from '@/endpoint/reimburse/api';
+import {
+  GET_LIST_MASTER_REIMBUSE_TYPE,
+  GET_LIST_PERIOD_MASTER_REIMBURSE,
+} from '@/endpoint/reimburse/api';
 import { CustomFormWrapper } from '@/components/commons/CustomFormWrapper';
 import { set } from 'date-fns';
 
@@ -81,6 +84,7 @@ export const ReimburseForm: React.FC<Props> = ({
   const [families, setFamilies] = useState([]);
   const [isFamily, setIsFamily] = useState([[]]);
   const { dataDropdown: dataUom, getDropdown: getUom } = useDropdownOptions();
+  const [listPeriode, setListPeriode] = useState([]);
   const [familyUrl, setFamilyUrl] = useState('');
 
   const [isLoading, setLoading] = useState<boolean>(false);
@@ -133,7 +137,7 @@ export const ReimburseForm: React.FC<Props> = ({
           tax_on_sales: '',
           uom: '',
           purchasing_group: '',
-          period: latestPeriod,
+          period: '',
           type: '',
           item_delivery_data: new Date(),
           start_date: new Date(),
@@ -164,7 +168,7 @@ export const ReimburseForm: React.FC<Props> = ({
           currency: 'IDR',
           tax_on_sales: '',
           purchasing_group: '',
-          period: latestPeriod['code'],
+          period: '',
           type: '',
           item_delivery_data: new Date(),
           start_date: new Date(),
@@ -239,28 +243,30 @@ export const ReimburseForm: React.FC<Props> = ({
   }, []);
 
   function generateForms(count: string) {
-    const forms = [];
+    const forms = [...form.getValues('forms')];
     for (let i = 0; i < parseInt(count); i++) {
-      const object = {
-        id: '',
-        for: '',
-        group: '',
-        reimburse_type: '',
-        short_text: '',
-        balance: '',
-        currency: '',
-        tax_on_sales: '',
-        uom: '',
-        purchasing_group: '',
-        period: latestPeriod['code'],
-        type: '',
-        item_delivery_data: new Date(),
-        start_date: new Date(),
-        end_date: new Date(),
-        url: '',
-      };
+      if (i + 1 > forms.length) {
+        const object = {
+          id: '',
+          for: '',
+          group: '',
+          reimburse_type: '',
+          short_text: '',
+          balance: '',
+          currency: '',
+          tax_on_sales: '',
+          uom: '',
+          purchasing_group: '',
+          period: '',
+          type: '',
+          item_delivery_data: new Date(),
+          start_date: new Date(),
+          end_date: new Date(),
+          url: '',
+        };
 
-      forms.push(object);
+        forms.push(object);
+      }
     }
 
     // console.log(forms);
@@ -292,7 +298,29 @@ export const ReimburseForm: React.FC<Props> = ({
       type: value,
       url: GET_LIST_MASTER_REIMBUSE_TYPE(value),
       reimburse_type: '',
+      period: '',
     });
+
+    setDetailLimit(null);
+    setListPeriode([]);
+  }
+
+  async function getListPeriodHandler(index, value: string) {
+    try {
+      const response = await axiosInstance.get(GET_LIST_PERIOD_MASTER_REIMBURSE, {
+        params: {
+          type: value,
+          user: form.getValues('requester'),
+        },
+      });
+
+      setListPeriode(response.data.data);
+
+      getDataByLimit(index);
+      console.log(response);
+    } catch (e) {
+      const error = e as AxiosError;
+    }
   }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -597,6 +625,8 @@ export const ReimburseForm: React.FC<Props> = ({
                                         ...formValue,
                                         reimburse_type: value,
                                       });
+
+                                      getListPeriodHandler(index, value);
                                     }}
                                     value={formValue.reimburse_type}
                                     placeholder='Select Reimbuse Type'
@@ -624,7 +654,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                         onValueChange={(value) => {
                                           updateForm(index, {
                                             ...formValue,
-                                            purchasing_group: value,
+                                            purchasing_group: String(value),
                                           });
                                         }}
                                         defaultValue={formValue.purchasing_group}
@@ -659,6 +689,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   <FormItem>
                                     <FormControl>
                                       <Select
+                                        disabled={formValue.reimburse_type === ''}
                                         onValueChange={(value) => {
                                           updateForm(index, {
                                             ...formValue,
@@ -672,19 +703,11 @@ export const ReimburseForm: React.FC<Props> = ({
                                           <SelectValue placeholder='-' />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          {/* {periods.map((period) => (
-                                          <SelectItem key={period.code} value={period.code}>
-                                            {period.start} - {period.end} ({period.code})
-                                          </SelectItem>
-                                        ))} */}
-
-                                          <SelectItem
-                                            key={latestPeriod?.code}
-                                            value={latestPeriod?.code}
-                                          >
-                                            {latestPeriod?.start} - {latestPeriod?.end} (
-                                            {latestPeriod?.code})
-                                          </SelectItem>
+                                          {listPeriode.map((period) => (
+                                            <SelectItem key={period.code} value={period.code}>
+                                              {period.start} - {period.end} ({period.code})
+                                            </SelectItem>
+                                          ))}
                                         </SelectContent>
                                       </Select>
                                     </FormControl>
@@ -806,7 +829,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                         onValueChange={(value) => {
                                           updateForm(index, {
                                             ...formValue,
-                                            uom: value,
+                                            uom: String(value),
                                           });
                                         }}
                                         defaultValue={formValue.uom}
