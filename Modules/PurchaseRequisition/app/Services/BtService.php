@@ -105,7 +105,6 @@ class BtService
         // get material number
         $getMaterial = MasterMaterial::where('material_number', $getAllowanceItem->material_number)->first();
         $internalUom = Uom::where('internal_uom', $getMaterial->base_unit_of_measure)->first();
-        Log::alert($internalUom);
 
 
         $purchasingGroup = PurchasingGroup::find($BusinessTrip->purchasing_group_id);

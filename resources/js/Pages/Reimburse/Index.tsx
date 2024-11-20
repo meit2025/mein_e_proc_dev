@@ -101,6 +101,7 @@ export const Index = ({
         }}
         url={{
           url: LIST_REIMBURSE,
+          detailUrl: '/reimburse/detail',
         }}
         labelFilter='search'
       />
