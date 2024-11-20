@@ -63,7 +63,7 @@ class ProcurementController extends Controller
                 $vendor = $purchase->vendors()->create(['vendor' => $vendorData['vendor'],  'winner' => $vendorData['winner'] ?? false]);
                 foreach ($vendorData['units'] as $unitData) {
                     $unitCrate =  $vendor->units()->create($unitData);
-                    if ($unitData['is_cashAdvance']) {
+                    if ($unitData['is_cashAdvance'] ?? false) {
                         $purchase->cashAdvancePurchases()->create([
                             'unit_id' => $unitCrate->id,
                             'reference' => $unitData['reference'],

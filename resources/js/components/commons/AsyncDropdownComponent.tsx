@@ -138,12 +138,12 @@ export function AsyncDropdownComponent({
           aria-expanded={open}
           className='w-[200px] text-xs justify-between'
         >
+          <ChevronsUpDown className='opacity-50' />
           {defaultLabel && dropdownList.length === 0 ? defaultLabel : null}
           {value && dropdownList.length > 0
             ? dropdownList.find((framework) => String(framework[id]) === String(value))?.[label]
             : ''}
           {value === '' && (defaultLabel === '' || defaultLabel === null) ? placeholder : ''}
-          <ChevronsUpDown className='opacity-50' />
         </Button>
       </PopoverTrigger>
       <PopoverContent className='w-[200px] p-0'>

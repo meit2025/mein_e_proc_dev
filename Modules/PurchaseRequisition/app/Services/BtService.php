@@ -5,6 +5,7 @@ namespace Modules\PurchaseRequisition\Services;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Modules\Approval\Models\SettingApproval;
 use Modules\BusinessTrip\Models\AllowanceItem;
@@ -13,6 +14,7 @@ use Modules\BusinessTrip\Models\BusinessTripAttachment;
 use Modules\BusinessTrip\Models\BusinessTripDestination;
 use Modules\BusinessTrip\Models\BusinessTripDetailAttedance;
 use Modules\Master\Models\MasterCostCenter;
+use Modules\Master\Models\MasterMaterial;
 use Modules\Master\Models\Pajak;
 use Modules\Master\Models\PurchasingGroup;
 use Modules\Master\Models\Uom;
@@ -79,8 +81,8 @@ class BtService
             DB::commit();
             return $array;
         } catch (Exception $e) {
-            dd($e);
             DB::rollBack();
+            Log::channel('bt_txt')->error($e->getMessage(), ['id' => $id]);
             throw new Exception($e->getMessage());
         }
     }
@@ -100,10 +102,14 @@ class BtService
             throw new Exception('alloean Item Not set materila number');
         }
 
+        // get material number
+        $getMaterial = MasterMaterial::where('material_number', $getAllowanceItem->material_number)->first();
+        $internalUom = Uom::where('internal_uom', $getMaterial->base_unit_of_measure)->first();
+
+
         $purchasingGroup = PurchasingGroup::find($BusinessTrip->purchasing_group_id);
-        $uom = Uom::find($BusinessTrip->uom_id);
         $pajak = Pajak::find($BusinessTrip->pajak_id);
-        $costCenter = MasterCostCenter::find($BusinessTrip->pajak_id);
+        $costCenter = MasterCostCenter::find($BusinessTrip->cost_center_id);
 
         return [
             'code_transaction' => 'BTRE', // code_transaction
@@ -123,7 +129,7 @@ class BtService
             'desired_vendor' => $BusinessTrip->requestFor->employee->partner_number ?? '', // lifnr
             'material_group' => $getAllowanceItem->material_group, // matkl
             'material_number' => $getAllowanceItem->material_number, // matnr
-            'unit_of_measure' => $uom->commercial ?? '', // meins
+            'unit_of_measure' => $internalUom->commercial ?? '', // meins
             'quantity' => '1', // menge
             'balance' => $item->price, // NILAI NYA
             'waers' => 'IDR', // MATA UANG
@@ -131,7 +137,7 @@ class BtService
             'item_category' => '', // pstyp
             'short_text' => $BusinessTrip->remarks, // txz01
             'plant' => $settings['plant'], // werks
-            'cost_center' => $costCenter->cost_center, // kostl
+            'cost_center' => $costCenter?->cost_center, // kostl
             'order_number' => '', // AUFNR
             'asset_subnumber' => '', // anln2
             'main_asset_number' => '', // anln1
@@ -176,7 +182,7 @@ class BtService
 
     private function findBusinessTripDestination($id)
     {
-        $items = BusinessTripDestination::find($id);
+        $items = BusinessTripDestination::where('business_trip_id', $id)->first();
         return $items;
     }
     private function findBusinessTripDetailAttedance($id)
@@ -213,13 +219,18 @@ class BtService
         return $mergedQuery;
     }
 
+
     private function prepareCashAdvanceData($BusinessTrip, $reqno, $settings)
     {
         $tax = Pajak::where('id', $BusinessTrip->pajak_id ?? '1')->first();
         $findCostCenter = MasterCostCenter::find($BusinessTrip->cost_center_id)->first();
-        $taxAmount = $BusinessTrip->total_cash_advance * (($tax->desimal ?? 0) / 100);
+        // $taxAmount = $BusinessTrip->total_cash_advance * (($tax->desimal ?? 0) / 100);
+        $totalAmount = (int)$BusinessTrip->total_cash_advance;
 
-        $findBusinessTripDestination = $this->findBusinessTripDestination($BusinessTrip->business_trip_destination_id);
+        $desimalPlus = 100 + $tax->desimal;
+        $taxAmount = ($tax->desimal / $desimalPlus) * $totalAmount;
+
+        $findBusinessTripDestination = $this->findBusinessTripDestination($BusinessTrip->id);
 
         $formattedDate = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('Y-m-d');
         $year = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('Y');
@@ -239,7 +250,7 @@ class BtService
             'vendor_code' => $BusinessTrip->requestFor->employee->partner_number ?? '',
             'saknr' => '', //saknr
             'hkont' => '', //hkont
-            'amount_local_currency' => (int)$BusinessTrip->total_cash_advance + (int)$taxAmount,
+            'amount_local_currency' => (int)$BusinessTrip->total_cash_advance,
             'tax_code' => $tax->mwszkz ?? 'V0',
             'dzfbdt' => $formattedDate, //dzfbdt
             'purchasing_document' => '', //ebeln

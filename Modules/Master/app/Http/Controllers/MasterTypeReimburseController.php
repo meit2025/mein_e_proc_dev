@@ -161,7 +161,7 @@ class MasterTypeReimburseController extends Controller
     public function edit($id)
     {
         try {
-            $groups             = MasterTypeReimburse::find($id);
+            $groups             = MasterTypeReimburse::with('materialGroup')->find($id);
             $groups->grades     = MasterTypeReimburseGrades::with('grade')
                 ->where('reimburse_type_id', $id)->get()
                 ->transform(function ($map) {

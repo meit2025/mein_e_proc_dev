@@ -47,6 +47,10 @@ export const Index = ({
   });
 
   function openFormHandler() {
+    setFormType({
+      type: FormType.create,
+      id: null,
+    });
     setOpenForm(!openForm);
   }
 
@@ -97,6 +101,7 @@ export const Index = ({
         }}
         url={{
           url: LIST_REIMBURSE,
+          detailUrl: '/reimburse/detail',
         }}
         labelFilter='search'
       />

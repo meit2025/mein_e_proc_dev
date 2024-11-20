@@ -106,19 +106,21 @@ export default function ReimburseTypeForm({
     try {
       const response = await axiosInstance.get(editURL || '');
       const data = response.data.data;
-
+      
       form.reset({
         code: data.code,
         name: data.name,
         limit: data.limit,
         is_employee: data.is_employee,
         family_status: data.family_status,
-        material_group: parseInt(data.material_group),
+        material_group: parseInt(data.material_group.id),
         material_number: parseInt(data.material_number),
         grade_option: data.grade_option,
         grade_all_price: data.grade_all_price,
         grades: data.grades,
       });
+
+      handleSearchMaterialNumber(data.material_group.material_group || '')
     } catch (e) {
       const error = e as AxiosError;
     }
@@ -174,7 +176,7 @@ export default function ReimburseTypeForm({
       getDetailData();
     }
   }, []);
-
+  console.log(getMaterialNumber)
   return (
     <ScrollArea className='h-[600px] w-full'>
       <Loading isLoading={isLoading} />
