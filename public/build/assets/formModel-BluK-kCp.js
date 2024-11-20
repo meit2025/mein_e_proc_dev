@@ -1,1 +1,0 @@
-const e=[{type:"input",name:"purchasing_doc",label:"Dokument",placeholder:"Enter your Dokument",required:!0},{type:"input",name:"purchasing_dsc",label:"Description",placeholder:"Enter your Description",required:!0}];export{e as formModel};

@@ -1,1 +1,0 @@
-const e=[{type:"input",name:"item_category",label:"Item Category",placeholder:"Enter your Item Category",required:!0},{type:"input",name:"text_category",label:"Text Category",placeholder:"Enter your Text Category",required:!0}];export{e as formModel};
