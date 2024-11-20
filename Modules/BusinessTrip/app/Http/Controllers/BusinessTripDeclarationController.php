@@ -72,7 +72,7 @@ class BusinessTripDeclarationController extends Controller
                         'default_price' => number_format($row->standard_value, 0, '.', ''),
                         'type' => $row->allowance->type,
                         'subtotal' => 0,
-                        'currency' => $row->allowance->currency,
+                        'currency' => $row->allowance->currency_id,
                         'request_value' => $row->allowance->request_value,
                         'detail' => [] // Array untuk menampung detail
                     ];
@@ -98,7 +98,7 @@ class BusinessTripDeclarationController extends Controller
                         'default_price' => number_format($row->standard_value, 0, '.', ''),
                         'type' => $row->allowance->type,
                         'subtotal' => 0,
-                        'currency' => $row->allowance->currency,
+                        'currency' => $row->allowance->currency_id,
                         'request_value' => $row->allowance->request_value,
                         'detail' => []
                     ];
@@ -140,6 +140,7 @@ class BusinessTripDeclarationController extends Controller
                 // 'allowancesResultItem' => $allowancesResultItem,
             ];
         }
+
         $data->destinations = $destinations;
         return $this->successResponse($data->makeHidden(['created_at', 'updated_at']));
     }
@@ -270,7 +271,7 @@ class BusinessTripDeclarationController extends Controller
                 'destination' => $destination->destination,
                 'business_trip_start_date' => $destination->business_trip_start_date,
                 'business_trip_end_date' => $destination->business_trip_end_date,
-                'other_allowance' => $destination->other_allowance,
+                // 'other_allowance' => $destination->other_allowance,
                 'business_trip_detail_attendance' => $detail_attendance,
                 'standar_detail_allowance' => $standar_detail_allowance,
                 'request_detail_allowance' => $request_detail_allowance,
@@ -575,7 +576,7 @@ class BusinessTripDeclarationController extends Controller
                 'destination' => $destination->destination,
                 'business_trip_start_date' => $destination->business_trip_start_date,
                 'business_trip_end_date' => $destination->business_trip_end_date,
-                'other_allowance' => $destination->other_allowance,
+                // 'other_allowance' => $destination->other_allowance,
                 'business_trip_detail_attendance' => $detail_attendance,
                 'standar_detail_allowance' => $standar_detail_allowance,
                 'request_detail_allowance' => $request_detail_allowance,

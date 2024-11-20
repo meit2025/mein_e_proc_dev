@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Modules\Approval\Models\SettingApproval;
 use Modules\Master\Models\MasterBusinessPartner;
 use Modules\Master\Models\Pajak;
@@ -74,6 +75,7 @@ class ProcurementService
             DB::commit();
             return $array;
         } catch (Exception $e) {
+            Log::channel('pr_txt')->error($e->getMessage(), ['id' => $id]);
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
