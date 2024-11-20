@@ -1,0 +1,1 @@
+const e=[{field:"desimal",headerName:"desimal",width:200,filterable:!0},{field:"mwszkz",headerName:"Code Tax",width:200,filterable:!0},{field:"description",headerName:"Description",width:200,filterable:!0}];export{e as columns};
