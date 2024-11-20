@@ -72,7 +72,7 @@ class BusinessTripDeclarationController extends Controller
                         'default_price' => number_format($row->standard_value, 0, '.', ''),
                         'type' => $row->allowance->type,
                         'subtotal' => 0,
-                        'currency' => $row->allowance->currency,
+                        'currency' => $row->allowance->currency_id,
                         'request_value' => $row->allowance->request_value,
                         'detail' => [] // Array untuk menampung detail
                     ];
@@ -80,7 +80,7 @@ class BusinessTripDeclarationController extends Controller
 
                 // Tambahkan detail allowance
                 $allowances[$allowanceId]['detail'][] = [
-                    'date' => $row->date, // Sesuaikan dengan nama kolom tanggal di detailDestinationDay
+                    // 'date' => $row->date, // Sesuaikan dengan nama kolom tanggal di detailDestinationDay
                     'request_price' => $row->price // Sesuaikan dengan kolom request_price di detailDestinationDay
                 ];
 
@@ -98,7 +98,7 @@ class BusinessTripDeclarationController extends Controller
                         'default_price' => number_format($row->standard_value, 0, '.', ''),
                         'type' => $row->allowance->type,
                         'subtotal' => 0,
-                        'currency' => $row->allowance->currency,
+                        'currency' => $row->allowance->currency_id,
                         'request_value' => $row->allowance->request_value,
                         'detail' => []
                     ];
@@ -106,7 +106,7 @@ class BusinessTripDeclarationController extends Controller
 
                 // Tambahkan detail allowance
                 $allowances[$allowanceId]['detail'][] = [
-                    'date' => '', // Sesuaikan dengan nama kolom tanggal di detailDestinationTotal
+                    // 'date' => '', // Sesuaikan dengan nama kolom tanggal di detailDestinationTotal
                     'request_price' => $row->price // Sesuaikan dengan kolom request_price di detailDestinationTotal
                 ];
 
@@ -270,7 +270,7 @@ class BusinessTripDeclarationController extends Controller
                 'destination' => $destination->destination,
                 'business_trip_start_date' => $destination->business_trip_start_date,
                 'business_trip_end_date' => $destination->business_trip_end_date,
-                'other_allowance' => $destination->other_allowance,
+                // 'other_allowance' => $destination->other_allowance,
                 'business_trip_detail_attendance' => $detail_attendance,
                 'standar_detail_allowance' => $standar_detail_allowance,
                 'request_detail_allowance' => $request_detail_allowance,
@@ -412,7 +412,7 @@ class BusinessTripDeclarationController extends Controller
                     'destination' => $data_destination['destination'],
                     'business_trip_start_date' => date('Y-m-d', strtotime($data_destination['business_trip_start_date'])),
                     'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
-                    'other_allowance' => isset($data_destination['other']) ? $data_destination['other'][0]['value'] : 0,
+                    // 'other_allowance' => isset($data_destination['other']) ? $data_destination['other'][0]['value'] : 0,
                 ]);
                 foreach ($data_destination['detail_attedances'] as $key => $destination) {
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
@@ -575,7 +575,7 @@ class BusinessTripDeclarationController extends Controller
                 'destination' => $destination->destination,
                 'business_trip_start_date' => $destination->business_trip_start_date,
                 'business_trip_end_date' => $destination->business_trip_end_date,
-                'other_allowance' => $destination->other_allowance,
+                // 'other_allowance' => $destination->other_allowance,
                 'business_trip_detail_attendance' => $detail_attendance,
                 'standar_detail_allowance' => $standar_detail_allowance,
                 'request_detail_allowance' => $request_detail_allowance,
