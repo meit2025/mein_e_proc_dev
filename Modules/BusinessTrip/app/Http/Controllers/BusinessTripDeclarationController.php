@@ -80,7 +80,7 @@ class BusinessTripDeclarationController extends Controller
 
                 // Tambahkan detail allowance
                 $allowances[$allowanceId]['detail'][] = [
-                    // 'date' => $row->date, // Sesuaikan dengan nama kolom tanggal di detailDestinationDay
+                    'date' => $row->date, // Sesuaikan dengan nama kolom tanggal di detailDestinationDay
                     'request_price' => $row->price // Sesuaikan dengan kolom request_price di detailDestinationDay
                 ];
 
@@ -106,7 +106,7 @@ class BusinessTripDeclarationController extends Controller
 
                 // Tambahkan detail allowance
                 $allowances[$allowanceId]['detail'][] = [
-                    // 'date' => '', // Sesuaikan dengan nama kolom tanggal di detailDestinationTotal
+                    'date' => '', // Sesuaikan dengan nama kolom tanggal di detailDestinationTotal
                     'request_price' => $row->price // Sesuaikan dengan kolom request_price di detailDestinationTotal
                 ];
 
@@ -140,6 +140,7 @@ class BusinessTripDeclarationController extends Controller
                 // 'allowancesResultItem' => $allowancesResultItem,
             ];
         }
+
         $data->destinations = $destinations;
         return $this->successResponse($data->makeHidden(['created_at', 'updated_at']));
     }
@@ -412,7 +413,7 @@ class BusinessTripDeclarationController extends Controller
                     'destination' => $data_destination['destination'],
                     'business_trip_start_date' => date('Y-m-d', strtotime($data_destination['business_trip_start_date'])),
                     'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
-                    // 'other_allowance' => isset($data_destination['other']) ? $data_destination['other'][0]['value'] : 0,
+                    'other_allowance' => isset($data_destination['other']) ? $data_destination['other'][0]['value'] : 0,
                 ]);
                 foreach ($data_destination['detail_attedances'] as $key => $destination) {
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
