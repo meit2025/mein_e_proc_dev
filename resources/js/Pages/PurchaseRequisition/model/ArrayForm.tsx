@@ -222,38 +222,36 @@ const ArrayForm = ({
       headerName: 'Actions',
       width: 150,
       renderCell: (params: any) => (
-        <>
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'flex-start',
-              alignItems: 'center',
-              gap: '10px', // Add consistent spacing between elements
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+            gap: '10px', // Add consistent spacing between elements
+          }}
+        >
+          <Link
+            type='button'
+            onClick={(event) => {
+              event.preventDefault();
+              handelEdit(params.row, params);
             }}
+            href='#'
           >
-            <Link
-              type='button'
-              onClick={(event) => {
-                event.preventDefault();
-                handelEdit(params.row, params);
-              }}
-              href='#'
-            >
-              <i className=' ki-duotone ki-notepad-edit text-success text-2xl'></i>
-            </Link>
-            <Link
-              type='button'
-              onClick={(event) => {
-                event.preventDefault();
-                handleDelete(params.row, params);
-              }}
-              href='#'
-            >
-              <i className=' ki-duotone ki-trash-square text-danger text-2xl'></i>
-            </Link>
-          </div>
-        </>
+            <i className=' ki-duotone ki-notepad-edit text-success text-2xl'></i>
+          </Link>
+          <Link
+            type='button'
+            onClick={(event) => {
+              event.preventDefault();
+              handleDelete(params.row, params);
+            }}
+            href='#'
+          >
+            <i className=' ki-duotone ki-trash-square text-danger text-2xl'></i>
+          </Link>
+        </div>
       ),
     },
   ];
@@ -467,7 +465,7 @@ const ArrayForm = ({
                       value: '50',
                     },
                     {
-                      label: '400%',
+                      label: '40%',
                       value: '40',
                     },
                     {
@@ -510,7 +508,7 @@ const ArrayForm = ({
                   placeholder={'Document Header Text'}
                 />
                 <FormInput
-                  fieldLabel={'Delivery Date'}
+                  fieldLabel={'Document Date'}
                   fieldName={'item_document_date'}
                   isRequired={false}
                   disabled={disable}
