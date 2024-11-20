@@ -78,15 +78,15 @@ export const BussinessTripFormV1 = ({
         ),
         allowances: z.array(
           z.object({
-            // name: z.string().optional(),
-            // code: z.string().optional(),
-            // default_price: z.string().optional(),
-            // type: z.string().optional(),
-            // currency: z.string().optional(),
-            // subtotal: z.string().optional(),
+            name: z.string().optional(),
+            code: z.string().optional(),
+            default_price: z.string().optional(),
+            type: z.string().optional(),
+            currency: z.string().optional(),
+            subtotal: z.number().optional(),
             detail: z.array(
               z.object({
-                // date: z.string().nullish(),
+                date: z.string().nullish(),
                 request_price: z.string().optional(),
               }),
             ),
@@ -138,19 +138,16 @@ export const BussinessTripFormV1 = ({
 
       // const response = axios.post(CREATE_API_BUSINESS_TRIP, formData);
 
-    //   await Inertia.post(CREATE_API_BUSINESS_TRIP_DECLARATION, formData, {
-    //     headers: {
-    //       'Content-Type': 'multipart/form-data',
-    //     },
-    //   });
+      await Inertia.post(CREATE_API_BUSINESS_TRIP_DECLARATION, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-      // console.log(response);
       showToast('succesfully created data', 'success');
-    //   onSuccess?.(true);
     } catch (e) {
       const error = e as AxiosError;
 
-    //   onSuccess?.(false);
       console.log(error);
     }
   };
