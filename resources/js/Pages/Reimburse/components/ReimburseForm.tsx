@@ -108,7 +108,7 @@ export const ReimburseForm: React.FC<Props> = ({
         item_delivery_data: z.date(),
         start_date: z.date(),
         end_date: z.date(),
-        url: z.string().isOptional(),
+        url: z.string().optional(),
       }),
     ),
   });
@@ -138,6 +138,7 @@ export const ReimburseForm: React.FC<Props> = ({
           item_delivery_data: new Date(),
           start_date: new Date(),
           end_date: new Date(),
+          url: '',
         },
       ],
     },
@@ -262,7 +263,7 @@ export const ReimburseForm: React.FC<Props> = ({
       forms.push(object);
     }
 
-    console.log(forms);
+    // console.log(forms);
 
     form.setValue('forms', forms);
   }
@@ -286,25 +287,6 @@ export const ReimburseForm: React.FC<Props> = ({
   };
 
   async function selectedTypeCode(index, value) {
-    // try {
-    //   const response = await axiosInstance.get(`reimburse/type/${value}` ?? '');
-    //   const typeData = response.data.data;
-    //   setReimburseTypes((prevTypes) => {
-    //     const updatedTypes = [...prevTypes];
-    //     updatedTypes[index] = typeData;
-    //     return updatedTypes;
-    //   });
-
-    //   updateForm(index, {
-    //     ...formFields[index],
-    //     type: value,
-    //   });
-    // } catch (error) {
-    //   const resultError = error as AxiosError;
-    //   const err = resultError.response.data;
-    //   showToast(err.message, 'error');
-    // }
-
     updateForm(index, {
       ...formFields[index],
       type: value,
@@ -312,25 +294,6 @@ export const ReimburseForm: React.FC<Props> = ({
       reimburse_type: '',
     });
   }
-
-  const checkBalance = async (index, user, is_employee, type, period) => {
-    const response = await axiosInstance.post('/reimburse/is_required', {
-      user,
-      is_employee,
-      type,
-      period,
-    });
-    const selectedType = response.data.data;
-    setLimits((prevLimits) => {
-      const updatedLimits = [...prevLimits];
-      updatedLimits[index] = {
-        plafon: selectedType?.plafon,
-        limit: selectedType?.limit,
-      };
-      return updatedLimits;
-    });
-    form.setValue(`forms.${index}.for`, user);
-  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (detailLimit) {
