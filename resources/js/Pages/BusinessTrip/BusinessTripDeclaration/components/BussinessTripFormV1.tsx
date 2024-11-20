@@ -55,13 +55,13 @@ export const BussinessTripFormV1 = ({
   listBusinessTrip: BusinessTripModel[];
 }) => {
   const formSchema = z.object({
-    request_no: z.string().min(1, 'Request for required'),
-    remark: z.string().min(1, 'Remark is required'),
+    request_no: z.string().nonempty('Request for required'),
+    remark: z.string().nonempty('Remark is required'),
     attachment: z.instanceof(File).nullable().optional(),
-    total_destination: z.number().min(1, 'Total Destinantion Required'),
+    total_destination: z.number().int('Total Destinantion Required'),
     destinations: z.array(
       z.object({
-        destination: z.string().min(1, 'Destinantion Required'),
+        destination: z.string().nonempty('Destinantion Required'),
         business_trip_start_date: z.date().optional(),
         business_trip_end_date: z.date().optional(),
         detail_attedances: z.array(
@@ -78,23 +78,23 @@ export const BussinessTripFormV1 = ({
         ),
         allowances: z.array(
           z.object({
-            name: z.string().optional(),
-            code: z.string().optional(),
+            // name: z.string().optional(),
+            // code: z.string().optional(),
             // default_price: z.string().optional(),
-            type: z.string().optional(),
-            subtotal: z.string().optional(),
+            // type: z.string().optional(),
             // currency: z.string().optional(),
+            // subtotal: z.string().optional(),
             detail: z.array(
               z.object({
-                date: z.string().nullish(),
-                request_price: z.any().optional(),
+                // date: z.string().nullish(),
+                request_price: z.string().optional(),
               }),
             ),
           }),
         ),
         other: z.array(
             z.object({
-              value: z.number().min(0, 'Value must be 0 or greater'),
+              value: z.number().optional(),
             })
           ),
       }),
@@ -124,7 +124,7 @@ export const BussinessTripFormV1 = ({
 
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values, ' data');
+    console.log(values, ' valuesnya');
     try {
       const formData = new FormData();
       // Append group data
@@ -138,11 +138,11 @@ export const BussinessTripFormV1 = ({
 
       // const response = axios.post(CREATE_API_BUSINESS_TRIP, formData);
 
-      await Inertia.post(CREATE_API_BUSINESS_TRIP_DECLARATION, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+    //   await Inertia.post(CREATE_API_BUSINESS_TRIP_DECLARATION, formData, {
+    //     headers: {
+    //       'Content-Type': 'multipart/form-data',
+    //     },
+    //   });
 
       // console.log(response);
       showToast('succesfully created data', 'success');
@@ -155,7 +155,7 @@ export const BussinessTripFormV1 = ({
     }
   };
 
-  const [businessTripDetail, setBusinessTripDetail] = React.useState<BusinessTripModel[]>([]);
+  const [businessTripDetail, setBusinessTripDetail] = React.useState<BusinessTripModel>([]);
 
   const [listAllowances, setListAllowances] = React.useState<AllowanceItemModel[]>([]);
   const [listDestination, setListDestination] = React.useState<[]>([]);
@@ -167,17 +167,17 @@ export const BussinessTripFormV1 = ({
     try {
       const response = await axiosInstance.get(url);
       const businessTripData = response.data.data;
-      console.log(businessTripData, ' Response Detailxxxx');
+      console.log(businessTripData, ' Response Detail Business Trip');
       form.setValue('remark', businessTripData.remarks || '');
-      //   form.setValue('attachment', businessTripData.attachment || null);
       form.setValue('total_destination', businessTripData.total_destination || 1);
+
+      //   form.setValue('attachment', businessTripData.attachment || null);
       //   form.setValue('cash_advance', businessTripData.cash_advance || false);
       //   form.setValue('total_percent', businessTripData.total_percent || '0');
       //   form.setValue('total_cash_advance', businessTripData.total_cash_advance || '0');
-
       //   form.setValue('destinations', businessTripData.total_cash_advance || '0');
 
-      setBusinessTripDetail(response.data.data as BusinessTripModel[]);
+      setBusinessTripDetail(response.data.data as BusinessTripModel);
       setListDestination(businessTripData.destinations);
       setTotalDestination(businessTripData.total_destination);
       setAllowancesProperty(businessTripData.destinations);
@@ -202,7 +202,7 @@ export const BussinessTripFormV1 = ({
       allowances: destination.allowances || [],
       detail_attedances: destination.detail_attedances || [],
       total_allowance: destination.total_allowance || 0,
-    //   allowances_result_item: destination.allowancesResultItem || [],
+      other: destination.other || [],
     }));
     form.setValue('destinations', destinationForm);
   }
@@ -246,7 +246,7 @@ export const BussinessTripFormV1 = ({
                             <SelectValue placeholder='-- Select One --' />
                           </SelectTrigger>
                           <SelectContent>
-                            {listBusinessTrip.map((item) => (
+                            {listBusinessTrip.map((item:any) => (
                               <SelectItem value={item.id.toString()}>{item.request_no}</SelectItem>
                             ))}
                           </SelectContent>
@@ -609,12 +609,12 @@ export function BussinessDestinationForm({
         <DetailAllowance allowanceField={allowancesField} destinationIndex={index} form={form} />
       </div>
       {/* disini */}
-      <ResultTotalItem
+      {/* <ResultTotalItem
         allowanceField={allowancesField}
         destinationIndex={index}
         form={form}
         setTotalAllowance={setTotalAllowance}
-      />
+      /> */}
 
       <table className='w-full text-sm mt-10'>
         <tr>
@@ -868,7 +868,7 @@ export function DetailAllowance({
   allowanceField: any;
 }) {
   const detailAllowanceceWatch = form.watch(`destinations[${destinationIndex}].allowances`);
-
+console.log('detailAllowanceceWatch', detailAllowanceceWatch)
   React.useEffect(() => {}, [detailAllowanceceWatch]);
 
   // Field array untuk menyimpan other allowances
@@ -931,12 +931,12 @@ export function DetailAllowance({
                   <FormItem>
                     <FormControl>
                       <Input
-                        value={field.value}
-                        onChange={(e) => {
-                          // Memperbarui nilai field
-                          field.onChange(e); // Menggunakan onChange dari React Hook Form
-                          // Anda dapat melakukan aksi lain di sini, seperti mengupdate elemen lain
-                        }}
+                      type="number"
+                      value={field.value ?? ''} // Gunakan string kosong jika nilai null/undefined
+                      onChange={(e) => {
+                        const parsedValue = e.target.value === '' ? undefined : Number(e.target.value); // Konversi ke angka atau undefined
+                        field.onChange(parsedValue); // Serahkan nilai yang sudah dikonversi
+                      }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -1194,11 +1194,4 @@ export function AllowanceInputForm({
       })}
     </>
   );
-}
-function showToast(arg0: string, arg1: string) {
-  throw new Error('Function not implemented.');
-}
-
-function onSuccess(arg0: boolean) {
-  throw new Error('Function not implemented.');
 }
