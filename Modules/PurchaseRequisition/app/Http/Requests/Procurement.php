@@ -64,12 +64,14 @@ class Procurement extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         $errors = $validator->errors();
+        $errorMessage = $errors->all(); // Mendapatkan semua pesan error sebagai array
+        $errorString = implode(', ', $errorMessage); // Menggabungkan array menjadi string
 
         // Menampilkan pesan error dalam bentuk JSON
         throw new HttpResponseException(response()->json([
             'status' => 'error',
-            'message' => 'Validation failed',
-            'errors' => $errors
+            'message' => $errorString,
+            'errors' => null
         ], 422));
     }
 }

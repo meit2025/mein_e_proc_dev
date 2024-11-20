@@ -5,6 +5,7 @@ namespace Modules\PurchaseRequisition\Services;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\Approval\Models\SettingApproval;
 use Modules\BusinessTrip\Models\BusinessTripAttachment;
 use Modules\PurchaseRequisition\Models\PurchaseOrder;
@@ -59,7 +60,7 @@ class BtPOService
             DB::commit();
             return $array;
         } catch (Exception $e) {
-            dd($e);
+            Log::channel('po_txt')->error($e->getMessage(), ['id' => $id]);
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
