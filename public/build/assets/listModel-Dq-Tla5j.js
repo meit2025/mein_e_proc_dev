@@ -1,0 +1,1 @@
+const e=[{field:"plant",headerName:"plant",width:200,filterable:!0},{field:"storage_location",headerName:"storage location",width:200,filterable:!0},{field:"storage_location_desc",headerName:"storage location desc",width:200,filterable:!0}];export{e as columns};

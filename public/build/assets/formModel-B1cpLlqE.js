@@ -1,0 +1,1 @@
+const e=[{type:"input",name:"titel",label:"Title Setting",placeholder:"Enter your Title Setting",required:!0},{type:"input",name:"key",label:"Key  Setting",placeholder:"Enter your Key  Setting",required:!0},{type:"input",name:"value",label:"value  Setting",placeholder:"Enter your value  Setting",required:!0},{type:"switch",name:"is_active",label:"Active"}];export{e as formModel};
