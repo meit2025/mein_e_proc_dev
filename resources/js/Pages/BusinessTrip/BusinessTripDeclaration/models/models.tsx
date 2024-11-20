@@ -38,6 +38,11 @@ export interface UserModel {
   nip: string;
 }
 
+export interface PajakModel {
+  id: string;
+  mwszkz: string;
+}
+
 export interface BusinessTripModel {
   id: string;
   request_no: string;
@@ -48,6 +53,13 @@ export interface BusinessTripModel {
   total_destination: number;
   remark: string;
   attachment: string;
+  pajak_id: string;
+  cost_center_id: string;
+  purchasing_group_id: string;
+  pajak?: PajakModel[];
+  cost_center: [];
+  purchasing_group: [];
+  business_trip_destination: [];
 }
 
 export interface AllowanceItemModel {
