@@ -176,7 +176,7 @@ class BtService
 
     private function findBusinessTripDestination($id)
     {
-        $items = BusinessTripDestination::where('business_trip_id',$id)->first();
+        $items = BusinessTripDestination::where('business_trip_id', $id)->first();
         return $items;
     }
     private function findBusinessTripDetailAttedance($id)
