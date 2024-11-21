@@ -343,13 +343,39 @@ class ReimbuseController extends Controller
     public function detailAPI($id, Request $request)
     {
 
-        $reimburseGroup = ReimburseGroup::where('id', $id)->first();
+        $reimburseGroup = ReimburseGroup::where('id', $id)
+            ->with(['user', 'costCenter'])
+            ->first();
 
-        $reimburseForms = Reimburse::where('group', $reimburseGroup->code)->get();
+        $reimburseForms = Reimburse::where('group', $reimburseGroup->code)->with([
+            'uomModel',
+            'purchasingGroupModel',
+            'taxOnSalesModel',
+            'reimburseType',
+            'periodeDate'
+        ])
+            ->get();
 
         return $this->successResponse([
             'group' => $reimburseGroup,
             'forms' => $reimburseForms
         ]);
+    }
+
+
+    public function getPeriodAPI(Request $request)
+    {
+
+        $user =  User::where('nip', $request->user)->first();
+
+        $reimbuseMaster = MasterTypeReimburse::where('code', $request->type)->select('id')->first();
+        $reimburseQuotaPeriod = MasterQuotaReimburse::where('type', $reimbuseMaster->id)
+            ->get()->pluck('period');
+
+
+        $reimbursePeriod = MasterPeriodReimburse::whereIn('id', $reimburseQuotaPeriod)->get();
+
+
+        return $this->successResponse($reimbursePeriod);
     }
 }
