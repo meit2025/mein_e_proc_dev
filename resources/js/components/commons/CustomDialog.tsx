@@ -49,28 +49,6 @@ const CustomDialog = ({
       )} */}
       <DialogTitle></DialogTitle>
       <DialogContent className={className ? className : 'md:max-w-[768px]'}>
-        <DialogHeader>
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href='/'>Home</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator>
-                <SlashIcon />
-              </BreadcrumbSeparator>
-              <BreadcrumbItem>
-                <BreadcrumbLink href='/components'>Components</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator>
-                <SlashIcon />
-              </BreadcrumbSeparator>
-              <BreadcrumbItem>
-                <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </DialogHeader>
-
         <div> {children ? children : null}</div>
         <DialogFooter>
           {onClose ? (
