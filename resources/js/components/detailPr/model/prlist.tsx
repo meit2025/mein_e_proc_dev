@@ -1,6 +1,7 @@
 import { GridColDef } from '@mui/x-data-grid';
 
 export const columns: GridColDef[] = [
+  { field: 'no_po', headerName: 'Number Po', width: 200, filterable: true },
   { field: 'requisitioner_name', headerName: 'Requisitioner Name', width: 200, filterable: true },
   { field: 'requisition_date', headerName: 'Requisition Date', width: 200, filterable: true },
   {
