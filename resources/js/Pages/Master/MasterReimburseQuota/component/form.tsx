@@ -128,7 +128,6 @@ export default function ReimburseQuotaForm({
       }));
       setUsers(formattedUsers);
     } catch (error) {
-      console.error('Error fetching users:', error);
       setUsers([]);
     }
   };
