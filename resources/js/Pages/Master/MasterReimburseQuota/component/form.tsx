@@ -67,7 +67,7 @@ export default function ReimburseQuotaForm({
     try {
       const response = await axiosInstance.get(editURL);
       const data = response.data.data;
-      fetchUsers(data.type)
+      await fetchUsers(data.type)
       form.reset({
         period: data.period,
         type: data.type,
