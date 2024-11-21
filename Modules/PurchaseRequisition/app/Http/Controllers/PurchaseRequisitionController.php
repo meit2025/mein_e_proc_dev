@@ -104,6 +104,7 @@ class PurchaseRequisitionController extends Controller
     public function index(Request $request)
     {
         $filterableColumns = [
+            'no_po',
             'requisitioner_name',
             'requisition_date',
             'purchase_requisition_number',
