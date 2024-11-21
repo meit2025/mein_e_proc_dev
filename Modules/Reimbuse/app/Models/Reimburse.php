@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Modules\Master\Models\MasterPeriodReimburse;
+use Modules\Master\Models\MasterTypeReimburse;
+use Modules\Master\Models\Pajak;
+use Modules\Master\Models\PurchasingGroup;
+use Modules\Master\Models\Uom;
 
 // use Modules\Reimbuse\Database\Factories\ReimburseFactory;
 
@@ -65,4 +70,32 @@ class Reimburse extends Model
         'plant',
         'uom',
     ];
+
+
+    public function uomModel()
+    {
+        return $this->belongsTo(Uom::class, 'uom', 'id');
+    }
+
+    /*************  ✨ Codeium Command ⭐  *************/
+    /******  ed3796dc-0f38-43e8-9594-0a544290ec32  *******/    public function purchasingGroupModel()
+    {
+        return $this->belongsTo(PurchasingGroup::class, 'purchasing_group', 'id');
+    }
+
+    public function taxOnSalesModel()
+    {
+        return $this->belongsTo(Pajak::class, 'tax_on_sales', 'id');
+    }
+
+
+    public function reimburseType()
+    {
+        return $this->belongsTo(MasterTypeReimburse::class, 'reimburse_type', 'code');
+    }
+
+    public function periodeDate()
+    {
+        return $this->belongsTo(MasterPeriodReimburse::class, 'period', 'code');
+    }
 }

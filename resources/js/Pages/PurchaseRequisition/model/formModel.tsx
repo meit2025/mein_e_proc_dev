@@ -182,7 +182,7 @@ export const formModel: Array<FormFieldModel<any>> = [
   {
     conditional: true,
     valueConditional: 'ZENT',
-    parameterConditional: 'nama_perusahaan',
+    parameterConditional: 'document_type',
     type: 'input',
     name: 'entertainment.nama_perusahaan',
     label: 'nama perusahaan',
@@ -191,6 +191,7 @@ export const formModel: Array<FormFieldModel<any>> = [
       width: '63.5rem',
     },
   },
+
   {
     conditional: true,
     valueConditional: 'ZENT',

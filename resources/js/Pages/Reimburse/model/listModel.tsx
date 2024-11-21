@@ -74,7 +74,8 @@ export interface Group {
   remark: string;
   status: string;
   cost_center: string;
-  users: User[];
+  user: User;
+  requester: string;
   reimburses: Reimburse[];
 }
 

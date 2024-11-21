@@ -225,7 +225,7 @@ const BusinessTripDetail = () => {
                         <td>IDR</td>
                         <td></td>
                         <td className='text-center'></td>
-                        <td></td>
+                        <td>{destination.total_standard}</td>
                     </tr>
                 </table>
 
@@ -256,7 +256,7 @@ const BusinessTripDetail = () => {
                     <td>IDR</td>
                     <td></td>
                     <td className='text-center'></td>
-                    <td></td>
+                    <td>{destination.total_request}</td>
                   </tr>
                 </table>
               </div>

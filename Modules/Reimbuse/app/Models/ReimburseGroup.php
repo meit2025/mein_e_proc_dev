@@ -5,6 +5,8 @@ namespace Modules\Reimbuse\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\Master\Models\MasterCostCenter;
+
 // use Modules\Reimbuse\Database\Factories\ReimburseGroupFactory;
 
 class ReimburseGroup extends Model
@@ -20,13 +22,18 @@ class ReimburseGroup extends Model
         "requester",
         "cost_center",
     ];
-    
+
     public function reimburses()
     {
         return $this->hasMany(Reimburse::class, 'group', 'code');
     }
 
-    public function users()
+    public function costCenter()
+    {
+        return $this->belongsTo(MasterCostCenter::class, 'cost_center', 'id');
+    }
+
+    public function user()
     {
         return $this->hasOne(User::class, 'nip', 'requester');
     }
