@@ -34,11 +34,11 @@ class Procurement extends FormRequest
             'vendors.*.vendor' => 'required|integer', // Assuming vendors table has an 'id' field
             'vendors.*.units' => 'required|array',
             'vendors.*.units.*.material_group' => 'required|string|max:255',
-            'vendors.*.units.*.uom' => 'required|string|max:10',
+            'vendors.*.units.*.uom' => 'required|string',
             'vendors.*.units.*.qty' => 'required|numeric|min:1',
             'vendors.*.units.*.unit_price' => 'required|numeric|min:0',
             'vendors.*.units.*.total_amount' => 'required|numeric|min:0',
-            'vendors.*.units.*.tax' => 'required|string|max:10',
+            'vendors.*.units.*.tax' => 'required|string',
             'vendors.*.units.*.short_text' => 'nullable|string|max:255',
         ];
     }

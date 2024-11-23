@@ -210,32 +210,33 @@ export const BussinessTripFormV1 = ({
 
   async function getDetailData() {
     const url = GET_DETAIL_BUSINESS_TRIP(id);
-
+    //fixing data not showing in index 0
+    form.setValue('destinations', []);
     try {
-        const response = await axios.get(url);
-        const data = response.data.data;
-        console.log(data, ' Response Detailxxxx');
-        form.setValue('purpose_type_id', data.purpose_type_id);
-        form.setValue('request_for', data.request_for.id);
-        form.setValue('cost_center_id', data.cost_center_id);
-        // form.setValue('pajak_id', data.pajak_id);
-        // form.setValue('purchasing_group_id', data.purchasing_group_id);
-        form.setValue('remark', data.remarks);
-        form.setValue('total_destination', data.total_destination);
-        form.setValue('destinations',[]);
-        form.setValue('destinations',
-            data.destinations.map((destination: any) => ({
-                destination: destination.destination,
-                business_trip_start_date: new Date(destination.business_trip_start_date),
-                business_trip_end_date: new Date(destination.business_trip_end_date),
-                detail_attedances: destination.detail_attedances,
-                allowances: destination.allowances
-            }))
-        );
+      const response = await axios.get(url);
+      const data = response.data.data;
+      console.log(data, ' Response Detailxxxx');
+      form.setValue('purpose_type_id', data.purpose_type_id);
+      form.setValue('request_for', data.request_for.id);
+      form.setValue('cost_center_id', data.cost_center_id);
+      form.setValue('pajak_id', data.pajak_id);
+      form.setValue('purchasing_group_id', data.purchasing_group_id);
+      form.setValue('remark', data.remarks);
+      form.setValue('total_destination', data.total_destination);
 
-        // form.trigger('destinations');
-        // console.log(form.getValues('destinations'),'Form Destinations');
+      form.setValue(
+        'destinations',
+        data.destinations.map((destination: any) => ({
+          destination: destination.destination,
+          business_trip_start_date: new Date(destination.business_trip_start_date),
+          business_trip_end_date: new Date(destination.business_trip_end_date),
+          detail_attedances: destination.detail_attedances,
+          allowances: destination.allowances,
+        })),
+      );
 
+      // form.trigger('destinations');
+      // console.log(form.getValues('destinations'),'Form Destinations');
     } catch (e) {
       const error = e as AxiosError;
     }
@@ -250,6 +251,7 @@ export const BussinessTripFormV1 = ({
   async function handlePurposeType(value: string) {
     form.setValue('purpose_type_id', value || '');
     const userid = role == 'user' ? idUser || '' : selectedUserId || '';
+    console.log(userid, ' ---- ');
     const url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
 
     try {
@@ -325,7 +327,7 @@ export const BussinessTripFormV1 = ({
       const error = e as AxiosError;
 
       //   onSuccess?.(false);
-        console.log(error);
+      console.log(error);
     }
 
     // console.log('values bg', values);
@@ -375,8 +377,8 @@ export const BussinessTripFormV1 = ({
   }, []);
 
   React.useEffect(() => {
-    if(type == BusinessTripType.create){
-        setAllowancesProperty();
+    if (type == BusinessTripType.create) {
+      setAllowancesProperty();
     }
   }, [totalDestination, listAllowances, id, type, role, idUser]);
 
