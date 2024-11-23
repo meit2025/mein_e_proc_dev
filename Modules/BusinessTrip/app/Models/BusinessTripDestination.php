@@ -21,6 +21,12 @@ class BusinessTripDestination extends Model
         'business_trip_end_date',
         'business_trip_id',
         'other_allowance',
+        'pajak_id',
+        'purchasing_group_id',
+        'cash_advance',
+        'total_percent',
+        'total_cash_advance',
+        'reference_number',
     ];
 
     function detailAttendance()

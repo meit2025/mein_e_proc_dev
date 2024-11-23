@@ -28,14 +28,9 @@ class BusinessTrip extends Model
         'created_by',
         'remarks',
         'total_destination',
-        'cash_advance',
-        'total_cash_advance',
-        'total_percent',
         'type',
         'parent_id',
         'cost_center_id',
-        'pajak_id',
-        'purchasing_group_id',
         'uom_id'
     ];
 
