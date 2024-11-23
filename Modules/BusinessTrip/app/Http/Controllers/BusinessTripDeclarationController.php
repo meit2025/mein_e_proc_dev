@@ -408,12 +408,16 @@ class BusinessTripDeclarationController extends Controller
 
             foreach ($request->destinations as $key => $value) {
                 $data_destination = json_decode($value, true);
+                $other = 0;
+                if (count($data_destination['other']) > 0) {
+                    $other = $data_destination['other'][0]['value'];
+                }
                 $businessTripDestination = BusinessTripDestination::create([
                     'business_trip_id' => $businessTrip->id,
                     'destination' => $data_destination['destination'],
                     'business_trip_start_date' => date('Y-m-d', strtotime($data_destination['business_trip_start_date'])),
                     'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
-                    'other_allowance' => empty($data_destination['other']) ? $data_destination['other'][0]['value'] : 0,
+                    'other_allowance' => $other,
                 ]);
                 foreach ($data_destination['detail_attedances'] as $key => $destination) {
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
