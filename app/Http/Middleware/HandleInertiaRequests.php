@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Spatie\Permission\Models\Role as ModelsRole;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -35,10 +36,18 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+
         return array_merge(parent::share($request), [
             'csrf_token' => csrf_token(),
             'auth.user' => fn() => $request->user()
-                ? $request->user()->only('id', 'name', 'email', 'role_id')
+                ? $request->user()
+                : null,
+            'auth.permission' => fn() => $request->user()
+                ? ModelsRole::with('permissions')
+                ->find($request->user()->role_id)
+                ->permissions
+                ->pluck('name')
+                ->toArray()
                 : null,
         ]);
     }
