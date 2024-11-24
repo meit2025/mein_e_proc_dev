@@ -4,10 +4,18 @@ import DataGridComponent from '@/components/commons/DataGrid';
 import { columns } from './model/listModel';
 import { GET_MASTER_COST_CENTER } from '@/endpoint/masterCostCenter/api';
 
+const roleAkses = 'master sap cost center';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 export const Index = () => {
   return (
     <>
       <DataGridComponent
+        role={roleConfig}
         columns={columns}
         url={{
           url: GET_MASTER_COST_CENTER,

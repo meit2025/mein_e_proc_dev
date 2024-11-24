@@ -125,19 +125,20 @@ export const BussinessTripFormV1 = ({
 }) => {
   const formSchema = z.object({
     purpose_type_id: z.string().min(1, 'Purpose type required'),
-    request_for: z.string().min(1, 'Request for required'),
-    cost_center_id: z.string().min(1, 'Cost Center for required'),
-    pajak_id: z.string().min(1, 'Pajak for required'),
-    purchasing_group_id: z.string().min(1, 'Purchasing Group for required'),
+    request_for: z.string().min(1, 'Request is required'),
+    cost_center_id: z.string().min(1, 'Cost Center is required'),
     remark: z.string().min(1, 'Remark is required'),
     attachment: z.instanceof(File).nullable().optional(),
     total_destination: z.number().min(1, 'Total Destinantion Required'),
-    cash_advance: z.boolean().nullable().optional(),
-    total_percent: z.string().nullable().optional(),
-    total_cash_advance: z.string().nullable().optional(),
     destinations: z.array(
       z.object({
-        destination: z.string().min(1, 'Destinantion Required'),
+        destination: z.string().min(1, 'Destinantion is Required'),
+        pajak_id: z.string().min(1, 'Pajak is required'),
+        purchasing_group_id: z.string().min(1, 'Purchasing Group is required'),
+        cash_advance: z.boolean().nullable().optional(),
+        reference_number: z.string().nullable().optional(),
+        total_percent: z.string().nullable().optional(),
+        total_cash_advance: z.string().nullable().optional(),
         business_trip_start_date: z.date().optional(),
         business_trip_end_date: z.date().optional(),
         detail_attedances: z.array(
@@ -178,19 +179,20 @@ export const BussinessTripFormV1 = ({
       purpose_type_id: '',
       request_for: '',
       cost_center_id: '',
-      pajak_id: '',
-      purchasing_group_id: '',
       remark: '',
       attachment: null,
       total_destination: 1,
-      cash_advance: false,
-      total_percent: '0',
-      total_cash_advance: '0',
       destinations: [
         {
           detail_attedances: [],
           allowances: [],
           destination: '',
+          pajak_id: '',
+          purchasing_group_id: '',
+          cash_advance: false,
+          reference_number: '',
+          total_percent: '',
+          total_cash_advance: '0',
           business_trip_start_date: new Date(),
           business_trip_end_date: new Date(),
         },
@@ -276,14 +278,14 @@ export const BussinessTripFormV1 = ({
       formData.append('purpose_type_id', values.purpose_type_id ?? '');
       formData.append('request_for', values.request_for ?? '');
       formData.append('cost_center_id', values.cost_center_id ?? '');
-      formData.append('pajak_id', values.pajak_id ?? '');
-      formData.append('purchasing_group_id', values.purchasing_group_id ?? '');
       formData.append('remark', values.remark ?? '');
       formData.append('attachment', values.attachment ?? '');
       formData.append('total_destination', `${values.total_destination}`);
-      formData.append('cash_advance', `${values.cash_advance}`);
-      formData.append('total_percent', `${values.total_percent}`);
-      formData.append('total_cash_advance', `${values.total_cash_advance}`);
+      //   formData.append('pajak_id', values.pajak_id ?? '');
+      //   formData.append('purchasing_group_id', values.purchasing_group_id ?? '');
+      //   formData.append('cash_advance', `${values.cash_advance}`);
+      //   formData.append('total_percent', `${values.total_percent}`);
+      //   formData.append('total_cash_advance', `${values.total_cash_advance}`);
       values.destinations.forEach((item, index) => {
         const itemCopy = {
           ...item,
@@ -341,6 +343,11 @@ export const BussinessTripFormV1 = ({
         destination: '',
         business_trip_start_date: new Date(),
         business_trip_end_date: new Date(),
+        pajak_id: '',
+        purchasing_group_id: '',
+        cash_advance: false,
+        total_percent: '',
+        total_cash_advance: '0',
         allowances: [],
         detail_attedances: [],
       });
@@ -375,33 +382,33 @@ export const BussinessTripFormV1 = ({
     }
   }, [totalDestination, listAllowances, id, type, role, idUser]);
 
-  const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
+//   const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
 
-  const handleCashAdvanceChange = (value: boolean) => {
-    setIsCashAdvance(value);
-  };
+//   const handleCashAdvanceChange = (value: boolean) => {
+//     setIsCashAdvance(value);
+//   };
 
   // const { setValue } = useFormContext();
 
   // Monitor total_percent value from form
-  const totalPercent = useWatch({
-    control: form.control,
-    name: 'total_percent',
-  });
+//   const totalPercent = useWatch({
+//     control: form.control,
+//     name: 'total_percent',
+//   });
 
-  const [totalAllowance, setTotalAllowance] = React.useState(0);
+//   const [totalAllowance, setTotalAllowance] = React.useState(0);
 
-  // Assuming allowance is calculated elsewhere, let's mock it for now
-  const allowance = totalAllowance; // Example: allowance is 1,000,000
+//   // Assuming allowance is calculated elsewhere, let's mock it for now
+//   const allowance = totalAllowance; // Example: allowance is 1,000,000
 
-  // Calculate total based on totalPercent and allowance
-  React.useEffect(() => {
-    const percentValue = parseFloat((totalPercent || '0').toString());
-    // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
-    const total = (percentValue / 100) * allowance; // Multiply percent with allowance
-    // console.log(total, ' totalll');
-    form.setValue('total_cash_advance', total.toFixed(0)); // Save the total in total_cash_advance field
-  }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance changes
+//   // Calculate total based on totalPercent and allowance
+//   React.useEffect(() => {
+//     const percentValue = parseFloat((totalPercent || '0').toString());
+//     // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
+//     const total = (percentValue / 100) * allowance; // Multiply percent with allowance
+//     // console.log(total, ' totalll');
+//     form.setValue('total_cash_advance', total.toFixed(0)); // Save the total in total_cash_advance field
+//   }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance changes
 
   return (
     <ScrollArea className='h-[600px] w-full '>
@@ -523,69 +530,6 @@ export const BussinessTripFormV1 = ({
               </td>
             </tr>
             <tr>
-              <td width={200}>Pajak</td>
-              <td>
-                {' '}
-                <FormField
-                  control={form.control}
-                  name='pajak_id'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => field.onChange(value)}
-                          value={field.value}
-                        >
-                          <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='-- Select Pajak --' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {pajak.map((item) => (
-                              <SelectItem value={item.id.toString()}>{item.mwszkz}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td width={200}>Purchasing Group</td>
-              <td>
-                {' '}
-                <FormField
-                  control={form.control}
-                  name='purchasing_group_id'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => field.onChange(value)}
-                          value={field.value}
-                        >
-                          <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='-- Select Purchasing Group --' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {purchasingGroup.map((item) => (
-                              <SelectItem value={item.id.toString()}>
-                                {item.purchasing_group}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </td>
-            </tr>
-
-            <tr>
               <td width={200}>Remark</td>
               <td>
                 <FormField
@@ -607,7 +551,6 @@ export const BussinessTripFormV1 = ({
                 />
               </td>
             </tr>
-
             <tr>
               <td width={200}>File Attachment</td>
               <td>
@@ -639,12 +582,10 @@ export const BussinessTripFormV1 = ({
                 />
               </td>
             </tr>
-
             <tr>
               <td width={200}>File Extension</td>
               <td className='text-gray-500 text-xs font-extralight'>doc,jpg,ods,png,txt,pdf</td>
             </tr>
-
             <tr>
               <td width={200}>Total Destination</td>
               <td>
@@ -686,69 +627,10 @@ export const BussinessTripFormV1 = ({
             form={form}
             listAllowances={listAllowances}
             totalDestination={form.getValues('total_destination').toString()}
-            setTotalAllowance={setTotalAllowance}
+            pajak={pajak}
+            purchasingGroup={purchasingGroup}
+            // setTotalAllowance={setTotalAllowance}
           />
-
-          <table className='w-full text-sm mt-10'>
-            <tr>
-              <td className='w-[50%]'>Cash Advance</td>
-              <td className='w-[50%] pb-0'>
-                <FormSwitch
-                  fieldName={'cash_advance'}
-                  isRequired={false}
-                  disabled={false}
-                  onChanges={(e) => handleCashAdvanceChange(e.target.checked)}
-                />
-              </td>
-            </tr>
-            {isCashAdvance && (
-              <>
-                <tr>
-                  <td className='w-[50%]'>Total Percent</td>
-                  <td className='w-[50%]'>
-                    <FormField
-                      control={form.control}
-                      name='total_percent'
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Select
-                              // onValueChange={(value) => handlePurposeType(value)}
-                              value={field.value || undefined}
-                              onValueChange={(value) => field.onChange(value)}
-                            >
-                              <SelectTrigger className='w-[50%] mb-2'>
-                                <SelectValue placeholder='-- Select Option --' />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value='10'>10</SelectItem>
-                                <SelectItem value='25'>25</SelectItem>
-                                <SelectItem value='50'>50</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={'total_cash_advance'}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input value={field.value || ''} readOnly={true} className='w-[50%]' />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                </tr>
-              </>
-            )}
-          </table>
-
           <Button type='submit'>submit</Button>
         </form>
       </Form>
@@ -762,16 +644,20 @@ export function BussinesTripDestination({
   destinationField,
   form,
   updateDestination,
-  setTotalAllowance,
+//   setTotalAllowance,
   listDestination = [],
+  pajak,
+  purchasingGroup,
 }: {
   totalDestination: string;
   listAllowances: AllowanceItemModel[];
   form: any;
   destinationField: any;
   updateDestination: any;
-  setTotalAllowance: any;
+//   setTotalAllowance: any;
   listDestination: DestinationModel[];
+  pajak: Pajak[],
+  purchasingGroup: PurchasingGroup[];
 }) {
   const [startDate, setStartDate] = React.useState<Date>();
 
@@ -794,8 +680,10 @@ export function BussinesTripDestination({
           destination={destination}
           form={form}
           index={index}
-          setTotalAllowance={setTotalAllowance}
+        //   setTotalAllowance={setTotalAllowance}
           listDestination={listDestination}
+          pajak={pajak}
+          purchasingGroup={purchasingGroup}
         />
       ))}
     </Tabs>
@@ -808,16 +696,20 @@ export function BussinessDestinationForm({
   destination,
   updateDestination,
   listAllowances,
-  setTotalAllowance,
+//   setTotalAllowance,
   listDestination,
+  pajak,
+  purchasingGroup,
 }: {
   form: any;
   index: number;
   destination: any;
   updateDestination: any;
   listAllowances: any;
-  setTotalAllowance: any;
+//   setTotalAllowance: any;
   listDestination: DestinationModel[];
+  pajak: Pajak[],
+  purchasingGroup: PurchasingGroup[];
 }) {
   const {
     fields: detailAttedanceFields,
@@ -907,104 +799,191 @@ export function BussinessDestinationForm({
     });
   }
 
+    const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
+
+    const handleCashAdvanceChange = (value: boolean) => {
+        setIsCashAdvance(value);
+    };
+
+    const totalPercent = useWatch({
+        control: form.control,
+        name: `destinations.${index}.total_percent`,
+    });
+
+      const [totalAllowance, setTotalAllowance] = React.useState(0);
+
+    // Assuming allowance is calculated elsewhere, let's mock it for now
+    const allowance = totalAllowance;
+
+    //   // Calculate total based on totalPercent and allowance
+    React.useEffect(() => {
+        const percentValue = parseFloat((totalPercent || '0').toString());
+        // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
+        const total = (percentValue / 100) * allowance; // Multiply percent with allowance
+        // console.log(total, ' totalll');
+        form.setValue(`destinations.${index}.total_cash_advance`, total.toFixed(0)); // Save the total in total_cash_advance field
+    }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance changes
+
   return (
     <TabsContent value={`destination${index + 1}`}>
       <div key={index}>
         <table className='text-xs mt-4 reimburse-form-detail font-thin'>
-          <tr>
-            <td width={200}>Destination {destination.destination}</td>
-            <td>
-              <FormField
-                control={form.control}
-                name={`destinations.${index}.destination`}
-                render={({ field }) => (
-                  <FormItem>
-                    {/* <FormLabel>Username</FormLabel> */}
-                    <FormControl>
-                      <Select
-                        onValueChange={(value) => {
-                          updateDestination(index, { ...destination, destination: value });
-                        }}
-                        defaultValue={destination.destination}
-                        // onValueChange={(value) => field.onChange(value)}
-                        // value={field.value}
-                      >
-                        <SelectTrigger className='w-[200px]'>
-                          <SelectValue placeholder='Destination' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {listDestination.map((map) => (
-                            <SelectItem value={map.destination} className='uppercase'>
-                              {map.destination}
-                            </SelectItem>
-                          ))}
+            <tr>
+                <td width={200}>Destination {destination.destination}</td>
+                <td>
+                <FormField
+                    control={form.control}
+                    name={`destinations.${index}.destination`}
+                    render={({ field }) => (
+                    <FormItem>
+                        {/* <FormLabel>Username</FormLabel> */}
+                        <FormControl>
+                        <Select
+                            onValueChange={(value) => {
+                            updateDestination(index, { ...destination, destination: value });
+                            }}
+                            defaultValue={destination.destination}
+                            // onValueChange={(value) => field.onChange(value)}
+                            // value={field.value}
+                        >
+                            <SelectTrigger className='w-[200px]'>
+                            <SelectValue placeholder='Destination' />
+                            </SelectTrigger>
+                            <SelectContent>
+                            {listDestination.map((map) => (
+                                <SelectItem value={map.destination} className='uppercase'>
+                                {map.destination}
+                                </SelectItem>
+                            ))}
 
-                          {/* <SelectItem value='banyuwangi'>Banyuwangi</SelectItem> */}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    {/* <FormDescription>This is your public display name.</FormDescription> */}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td width={200}>Bussines Trip Date</td>
-            <td className='flex space-x-2 items-center'>
-              <FormField
-                control={form.control}
-                name={`destinations.${index}.business_trip_start_date`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <CustomDatePicker
-                        initialDate={destination.business_trip_start_date}
-                        onDateChange={(value) => {
-                          updateDestination(index, {
-                            ...destination,
-                            business_trip_start_date: value,
-                          });
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                            {/* <SelectItem value='banyuwangi'>Banyuwangi</SelectItem> */}
+                            </SelectContent>
+                        </Select>
+                        </FormControl>
+                        {/* <FormDescription>This is your public display name.</FormDescription> */}
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                </td>
+            </tr>
+            <tr>
+              <td width={200}>Pajak</td>
+              <td>
+                {' '}
+                <FormField
+                  control={form.control}
+                  name={`destinations.${index}.pajak_id`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => field.onChange(value)}
+                          value={field.value}
+                        >
+                          <SelectTrigger className='w-[200px]'>
+                            <SelectValue placeholder='-- Select Pajak --' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {pajak.map((item) => (
+                              <SelectItem value={item.id.toString()}>{item.mwszkz}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </td>
+            </tr>
+            <tr>
+                <td width={200}>Purchasing Group</td>
+                <td>
+                {' '}
+                <FormField
+                    control={form.control}
+                    name={`destinations.${index}.purchasing_group_id`}
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormControl>
+                        <Select
+                            onValueChange={(value) => field.onChange(value)}
+                            value={field.value}
+                        >
+                            <SelectTrigger className='w-[200px]'>
+                            <SelectValue placeholder='-- Select Purchasing Group --' />
+                            </SelectTrigger>
+                            <SelectContent>
+                            {purchasingGroup.map((item) => (
+                                <SelectItem value={item.id.toString()}>
+                                {item.purchasing_group}
+                                </SelectItem>
+                            ))}
+                            </SelectContent>
+                        </Select>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                </td>
+            </tr>
+            <tr>
+                <td width={200}>Bussines Trip Date</td>
+                <td className='flex space-x-2 items-center'>
+                <FormField
+                    control={form.control}
+                    name={`destinations.${index}.business_trip_start_date`}
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormControl>
+                        <CustomDatePicker
+                            initialDate={destination.business_trip_start_date}
+                            onDateChange={(value) => {
+                            updateDestination(index, {
+                                ...destination,
+                                business_trip_start_date: value,
+                            });
+                            }}
+                        />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
 
-              <span>To</span>
-              <FormField
-                control={form.control}
-                name={`destinations.${index}.business_trip_end_date`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <CustomDatePicker
-                        initialDate={destination.business_trip_end_date}
-                        onDateChange={(value) => {
-                          console.log('end date', value);
-                          updateDestination(index, {
-                            ...destination,
-                            business_trip_end_date: value,
-                          });
+                <span>To</span>
+                <FormField
+                    control={form.control}
+                    name={`destinations.${index}.business_trip_end_date`}
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormControl>
+                        <CustomDatePicker
+                            initialDate={destination.business_trip_end_date}
+                            onDateChange={(value) => {
+                            console.log('end date', value);
+                            updateDestination(index, {
+                                ...destination,
+                                business_trip_end_date: value,
+                            });
 
-                          //   endDateHandler(value);
-                        }}
-                      />
-                    </FormControl>
-                    {/* <FormDescription>This is your public display name.</FormDescription> */}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                            //   endDateHandler(value);
+                            }}
+                        />
+                        </FormControl>
+                        {/* <FormDescription>This is your public display name.</FormDescription> */}
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
 
-              <Button type='button' onClick={() => detailAttedancesGenerate()}>
-                Get Detail
-              </Button>
-            </td>
-          </tr>
+                <Button type='button' onClick={() => detailAttedancesGenerate()}>
+                    Get Detail
+                </Button>
+                </td>
+            </tr>
         </table>
 
         <DetailAttedances
@@ -1028,6 +1007,79 @@ export function BussinessDestinationForm({
         form={form}
         setTotalAllowance={setTotalAllowance}
       />
+
+        {/* CASH ADVANCE */}
+        <table className='w-full text-sm mt-10'>
+            <tr>
+                <td className='w-[50%]'>Cash Advance</td>
+                <td className='w-[50%] pb-0'>
+                <FormSwitch
+                    fieldName={`destinations.${index}.cash_advance`}
+                    isRequired={false}
+                    disabled={false}
+                    onChanges={(e) => handleCashAdvanceChange(e.target.checked)}
+                />
+                </td>
+            </tr>
+            {isCashAdvance && (
+              <>
+                <tr>
+                  <td className='w-[50%]'>Total Percent</td>
+                  <td className='w-[50%]'>
+                    <FormField
+                        control={form.control}
+                        name={`destinations.${index}.reference_number`}
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormControl>
+                                <Input value={field.value || ''} onChange={(e) => field.onChange(e.target.value)} className='w-[50%] mb-2' placeholder='Reference Number'/>
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`destinations.${index}.total_percent`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Select
+                              // onValueChange={(value) => handlePurposeType(value)}
+                              value={field.value || undefined}
+                              onValueChange={(value) => field.onChange(value)}
+                            >
+                              <SelectTrigger className='w-[50%] mb-2'>
+                                <SelectValue placeholder='-- Select Total Percent --' />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value='10'>10%</SelectItem>
+                                <SelectItem value='25'>25%</SelectItem>
+                                <SelectItem value='50'>50%</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`destinations.${index}.total_cash_advance`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input value={field.value || ''} readOnly={true} className='w-[50%]' />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </td>
+                </tr>
+              </>
+            )}
+        </table>
     </TabsContent>
   );
 }
@@ -1054,31 +1106,31 @@ export function ResultTotalItem({
       return totalSum + itemTotal;
     }, 0);
 
-    const alldestinations = form.getValues('destinations');
+    // const alldestinations = form.getValues('destinations');
 
-    const totalAll = alldestinations.reduce(
-      (destinationSum: number, destination: any, destinationIndex: number) => {
-        const allowances = destination.allowances || [];
+    // const totalAll = alldestinations.reduce(
+    //   (destinationSum: number, destination: any, destinationIndex: number) => {
+    //     const allowances = destination.allowances || [];
 
-        const allowanceTotal = allowances.reduce(
-          (allowanceSum: number, allowance: any, index: number) => {
-            const details = form.getValues(
-              `destinations.${destinationIndex}.allowances.${index}.detail`,
-            );
+    //     const allowanceTotal = allowances.reduce(
+    //       (allowanceSum: number, allowance: any, index: number) => {
+    //         const details = form.getValues(
+    //           `destinations.${destinationIndex}.allowances.${index}.detail`,
+    //         );
 
-            const itemTotal = calculateTotal(allowance, details);
-            return allowanceSum + itemTotal;
-          },
-          0,
-        );
+    //         const itemTotal = calculateTotal(allowance, details);
+    //         return allowanceSum + itemTotal;
+    //       },
+    //       0,
+    //     );
 
-        return destinationSum + allowanceTotal;
-      },
-      0,
-    );
+    //     return destinationSum + allowanceTotal;
+    //   },
+    //   0,
+    // );
 
     setGrandTotal(newTotal);
-    setTotalAllowance(totalAll);
+    setTotalAllowance(newTotal);
   }, [allowanceField, form.watch()]); // Menggunakan form.watch() agar memantau perubahan input
   // Fungsi untuk menghitung total per allowance
   const calculateTotal = (allowance: any, details: any) => {

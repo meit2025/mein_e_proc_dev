@@ -16,6 +16,7 @@ import {
 } from '@/endpoint/business-grade/api';
 import { FormType } from '@/lib/utils';
 import { UserModel } from '../BusinessTrip/models/models';
+const roleAkses = 'master business trip grade';
 
 export const Index = ({ listUser }: { listUser: UserModel[] }) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
@@ -31,9 +32,9 @@ export const Index = ({ listUser }: { listUser: UserModel[] }) => {
   return (
     <>
       <div className='flex md:mb-4 mb-2 w-full justify-end'>
-        <Button onClick={openFormHandler}>
+        {/* <Button onClick={openFormHandler}>
           <PlusIcon />
-        </Button>
+        </Button> */}
 
         <CustomDialog
           onClose={() => setOpenForm(false)}
@@ -54,6 +55,13 @@ export const Index = ({ listUser }: { listUser: UserModel[] }) => {
         </CustomDialog>
       </div>
       <DataGridComponent
+        role={{
+          detail: `${roleAkses} view`,
+          create: `${roleAkses} create`,
+          update: `${roleAkses} update`,
+          delete: `${roleAkses} delete`,
+        }}
+        onCreate={openFormHandler}
         columns={columns}
         actionType='dropdown'
         deleteConfirmationText='Are you sure delete this business grade?'

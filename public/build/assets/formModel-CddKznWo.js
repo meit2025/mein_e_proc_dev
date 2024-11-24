@@ -1,0 +1,1 @@
+const e=[{type:"input",name:"material_group",label:"material group",placeholder:"Enter your material group",required:!0},{type:"input",name:"material_group_desc",label:"description",placeholder:"Enter your description",required:!0}];export{e as formModel};

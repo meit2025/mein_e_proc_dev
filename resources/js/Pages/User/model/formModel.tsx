@@ -24,31 +24,45 @@ export const formModel: Array<FormFieldModel<any>> = [
   },
   {
     type: 'input',
+    texttype: 'password',
     name: 'password',
     label: 'Password',
     placeholder: 'Enter your password',
     required: true,
   },
+
   {
-    type: 'input',
-    name: 'job_level',
-    label: 'Job Level',
-    placeholder: 'Enter your job level',
-    required: true,
-  },
-  {
-    type: 'input',
-    name: 'division',
+    type: 'select',
+    name: 'division_id',
     label: 'Division',
-    placeholder: 'Enter your division',
+    placeholder: 'Select Division',
+    options: [],
     required: true,
+    style: {
+      width: '63.5rem',
+    },
   },
   {
-    type: 'input',
-    name: 'immediate_spv',
-    label: 'Immediate SPV',
-    placeholder: 'Enter your immediate spv',
+    type: 'select',
+    name: 'position_id',
+    label: 'Position',
+    placeholder: 'Select Position',
+    options: [],
     required: true,
+    style: {
+      width: '63.5rem',
+    },
+  },
+  {
+    type: 'select',
+    name: 'departement_id',
+    label: 'Departement',
+    placeholder: 'Select Departement',
+    options: [],
+    required: true,
+    style: {
+      width: '63.5rem',
+    },
   },
   {
     type: 'select',
@@ -76,5 +90,10 @@ export const formModel: Array<FormFieldModel<any>> = [
     type: 'switch',
     name: 'is_admin',
     label: 'User Admin',
+  },
+  {
+    type: 'switch',
+    name: 'is_approval',
+    label: 'User Approval',
   },
 ];

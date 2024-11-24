@@ -176,7 +176,7 @@ export default function ReimburseTypeForm({
       getDetailData();
     }
   }, []);
-  console.log(getMaterialNumber)
+  
   return (
     <ScrollArea className='h-[600px] w-full'>
       <Loading isLoading={isLoading} />
@@ -329,8 +329,8 @@ export default function ReimburseTypeForm({
                     <FormItem>
                       <FormControl>
                         <RadioGroup
+                          value={field.value}
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
                           className='flex flex space-x-1'
                         >
                           <FormItem className='flex text-xs items-center space-x-3 space-y-0'>

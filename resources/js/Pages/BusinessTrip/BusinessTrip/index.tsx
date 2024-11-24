@@ -47,6 +47,8 @@ interface SharedProps {
   };
 }
 
+const roleAkses = 'business trip request';
+
 export const Index = ({
   listPurposeType,
   users,
@@ -76,9 +78,9 @@ export const Index = ({
   return (
     <>
       <div className='flex md:mb-4 mb-2 w-full justify-end'>
-        <Button onClick={openFormHandler}>
+        {/* <Button onClick={openFormHandler}>
           <PlusIcon />
-        </Button>
+        </Button> */}
 
         <CustomDialog
           onClose={() => setOpenForm(false)}
@@ -100,6 +102,13 @@ export const Index = ({
         </CustomDialog>
       </div>
       <DataGridComponent
+        role={{
+          detail: `${roleAkses} view`,
+          create: `${roleAkses} create`,
+          update: `${roleAkses} update`,
+          delete: `${roleAkses} delete`,
+        }}
+        onCreate={openFormHandler}
         columns={columns}
         actionType='dropdown'
         onEdit={(value) => {

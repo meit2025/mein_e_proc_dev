@@ -8,6 +8,10 @@ use Illuminate\Notifications\Notifiable;
 use Modules\BusinessTrip\Models\BusinessTripGradeUser;
 use Modules\Master\Models\Family;
 use Modules\Master\Models\MasterBusinessPartner;
+use Modules\Master\Models\MasterDepartment;
+use Modules\Master\Models\MasterDivision;
+use Modules\Master\Models\MasterPosition;
+use Spatie\Permission\Models\Role;
 
 class User extends Authenticatable
 {
@@ -24,14 +28,20 @@ class User extends Authenticatable
         'password',
         'nip',
         'role_id',
-        'job_level',
-        'division',
-        'immediate_spv',
+        // 'job_level',
+        // 'division',
+        // 'immediate_spv',
+        // 'role'
+
         'email_verified_at',
         'username',
         'is_admin',
         'master_business_partner_id',
-        'role'
+
+        'division_id',
+        'position_id',
+        'departement_id',
+        'is_approval',
     ];
 
     /**
@@ -57,6 +67,23 @@ class User extends Authenticatable
         ];
     }
 
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function positions()
+    {
+        return $this->belongsTo(MasterPosition::class, 'position_id', 'id');
+    }
+    public function divisions()
+    {
+        return $this->belongsTo(MasterDivision::class, 'division_id', 'id');
+    }
+    public function departements()
+    {
+        return $this->belongsTo(MasterDepartment::class, 'departement_id', 'id');
+    }
     public function grade()
     {
         return $this->hasOne(BusinessTripGradeUser::class, 'user_id', 'id');

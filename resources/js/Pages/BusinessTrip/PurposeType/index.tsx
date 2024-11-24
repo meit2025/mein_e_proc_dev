@@ -27,6 +27,13 @@ interface propsType {
 
   // listCurrency: any[];
 }
+const roleAkses = 'master business trip purpose type';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 export const Index = ({ listAllowance }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
   const [formType, setFormType] = React.useState({
@@ -44,9 +51,9 @@ export const Index = ({ listAllowance }: propsType) => {
   return (
     <>
       <div className='flex md:mb-4 mb-2 w-full justify-end'>
-        <Button onClick={openFormHandler}>
+        {/* <Button onClick={openFormHandler}>
           <PlusIcon />
-        </Button>
+        </Button> */}
 
         <ConfirmationDeleteModal open={false} onDelete={() => {}} onCancel={() => {}} />
         <CustomDialog
@@ -83,6 +90,8 @@ export const Index = ({ listAllowance }: propsType) => {
           url: GET_LIST_PURPOSE_TYPE,
           deleteUrl: DELETE_API_PURPOSE_TYPE,
         }}
+        role={roleConfig}
+        onCreate={openFormHandler}
         labelFilter='search'
       />
     </>
