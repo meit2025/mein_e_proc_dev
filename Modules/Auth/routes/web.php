@@ -40,7 +40,7 @@ Route::group(['middleware' => 'auth'], function () {
             ])->middleware(PermissionMiddleware::class . ':role update');
             Route::inertia('/detail/{id}',  'UserManagement/Role/Detail', [
                 'id' => fn() => request()->route('id'),
-            ])->middleware(PermissionMiddleware::class . ':role detail');
+            ])->middleware(PermissionMiddleware::class . ':role view');
         });
     });
 
@@ -59,7 +59,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/list', [RoleController::class, 'index'])->name('user-management.role.index')->middleware(PermissionMiddleware::class . ':role view');
             Route::post('/create', [RoleController::class, 'store'])->name('user-management.role.store')->middleware(PermissionMiddleware::class . ':role create');
             Route::post('/update/{role}', [RoleController::class, 'update'])->name('user-management.role.update')->middleware(PermissionMiddleware::class . ':role update');
-            Route::get('/detail/{id}', [RoleController::class, 'show'])->name('user-management.role.show')->middleware(PermissionMiddleware::class . ':role detail');
+            Route::get('/detail/{id}', [RoleController::class, 'show'])->name('user-management.role.show')->middleware(PermissionMiddleware::class . ':role view');
             Route::delete('/delete/{id}', [RoleController::class, 'destroy'])->name('user-management.role.destroy')->middleware(PermissionMiddleware::class . ':role delete');
         });
     });
