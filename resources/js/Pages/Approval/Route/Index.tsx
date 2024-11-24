@@ -8,11 +8,18 @@ import {
   EDIT_PAGE_APPROVAL_ROUTE,
 } from '@/endpoint/approvalRoute/page';
 
+const roleAkses = 'approval';
 export const Index = () => {
   return (
     <>
       <DataGridComponent
         columns={columns}
+        role={{
+          detail: `${roleAkses} view`,
+          create: `${roleAkses} create`,
+          update: `${roleAkses} update`,
+          delete: `${roleAkses} delete`,
+        }}
         url={{
           url: GET_APPROVAL_ROUTE,
           addUrl: CREATE_PAGE_APPROVAL_ROUTE,

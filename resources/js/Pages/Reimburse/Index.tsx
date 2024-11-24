@@ -1,21 +1,24 @@
-import MainLayout from '@/Pages/Layouts/MainLayout';
-import React, { ReactNode } from 'react';
-import DataGridComponent from '@/components/commons/DataGrid';
-import { columns } from './model/listModel';
-import { Button } from '@/components/shacdn/button';
-import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import { ReimburseForm } from './components/ReimburseForm';
+import DataGridComponent from '@/components/commons/DataGrid';
 import {
-  LIST_REIMBURSE,
-  UPDATE_REIMBURSE,
-  STORE_REIMBURSE,
   DETAIL_REIMBURSE,
+  LIST_REIMBURSE,
+  STORE_REIMBURSE,
+  UPDATE_REIMBURSE,
 } from '@/endpoint/reimburse/api';
 import { FormType } from '@/lib/utils';
-import { Currency, Period, PurchasingGroup, User, Tax, CostCenter } from './model/listModel';
-import { PAGE_EDIT_REIMBURSE } from '@/endpoint/reimburse/page';
-import { AsyncDropdownComponent } from '@/components/commons/AsyncDropdownComponent';
+import MainLayout from '@/Pages/Layouts/MainLayout';
+import React, { ReactNode } from 'react';
+import { ReimburseForm } from './components/ReimburseForm';
+import {
+  columns,
+  CostCenter,
+  Currency,
+  Period,
+  PurchasingGroup,
+  Tax,
+  User,
+} from './model/listModel';
 
 interface Props {
   users: User[];
@@ -28,6 +31,14 @@ interface Props {
   currentUser: User;
   latestPeriod: any;
 }
+
+const roleAkses = 'reimburse';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 
 export const Index = ({
   purchasing_groups,
@@ -59,9 +70,9 @@ export const Index = ({
   return (
     <>
       <div className='flex md:mb-4 mb-2 w-full justify-end'>
-        <Button onClick={openFormHandler}>
+        {/* <Button onClick={openFormHandler}>
           <PlusIcon />
-        </Button>
+        </Button> */}
 
         <CustomDialog
           onClose={() => setOpenForm(false)}
@@ -90,6 +101,8 @@ export const Index = ({
       </div>
 
       <DataGridComponent
+        role={roleConfig}
+        onCreate={openFormHandler}
         columns={columns}
         actionType='dropdown'
         onEdit={(value) => {

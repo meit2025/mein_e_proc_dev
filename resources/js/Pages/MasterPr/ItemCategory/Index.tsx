@@ -11,10 +11,18 @@ import {
   EDIT_PAGE_MASTER_VALUATION_TYPE,
 } from '@/endpoint/valuationType/page';
 
+const roleAkses = 'master pr item category';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 export const Index = () => {
   return (
     <>
       <DataGridComponent
+        role={roleConfig}
         columns={columns}
         url={{
           url: GET_MASTER_VALUATION_TYPE,

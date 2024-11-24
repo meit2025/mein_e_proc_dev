@@ -5,21 +5,27 @@ import { columns } from './model/listModel';
 import { DELET_ROLE, GET_ROLE } from '@/endpoint/role/api';
 import { CREATE_PAGE_ROLE, DETAIL_PAGE_ROLE, EDIT_PAGE_ROLE } from '@/endpoint/role/page';
 
+const roleAkses = 'role';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 export const Index = () => {
   return (
-    <>
-      <DataGridComponent
-        columns={columns}
-        url={{
-          url: GET_ROLE,
-          addUrl: CREATE_PAGE_ROLE,
-          editUrl: EDIT_PAGE_ROLE,
-          deleteUrl: DELET_ROLE,
-          detailUrl: DETAIL_PAGE_ROLE,
-        }}
-        labelFilter='search'
-      />
-    </>
+    <DataGridComponent
+      role={roleConfig}
+      columns={columns}
+      url={{
+        url: GET_ROLE,
+        addUrl: CREATE_PAGE_ROLE,
+        editUrl: EDIT_PAGE_ROLE,
+        deleteUrl: DELET_ROLE,
+        detailUrl: DETAIL_PAGE_ROLE,
+      }}
+      labelFilter='search'
+    />
   );
 };
 

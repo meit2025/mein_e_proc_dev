@@ -44,11 +44,10 @@ class HandleInertiaRequests extends Middleware
                 : null,
             'auth.permission' => fn() => $request->user()
                 ? ModelsRole::with('permissions')
-                ->find($request->user()->role_id)
-                ->permissions
-                ->pluck('name')
-                ->toArray()
-                : null,
+                ->find($request->user()->role_id)?->permissions
+                ?->pluck('name')
+                ?->toArray() ?? []
+                : [],
         ]);
     }
 }

@@ -5,20 +5,26 @@ import MainLayout from '@/Pages/Layouts/MainLayout';
 import { ReactNode } from 'react';
 import { columns } from './model/listModel';
 
+const roleAkses = 'master pr tax';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 export const Index = () => {
   return (
-    <>
-      <DataGridComponent
-        columns={columns}
-        url={{
-          url: GET_MASTER_PAJAK,
-          addUrl: CREATE_PAGE_MASTER_PAJAK,
-          editUrl: EDIT_PAGE_MASTER_PAJAK,
-          deleteUrl: DELET_MASTER_PAJAK,
-        }}
-        labelFilter='search'
-      />
-    </>
+    <DataGridComponent
+      role={roleConfig}
+      columns={columns}
+      url={{
+        url: GET_MASTER_PAJAK,
+        addUrl: CREATE_PAGE_MASTER_PAJAK,
+        editUrl: EDIT_PAGE_MASTER_PAJAK,
+        deleteUrl: DELET_MASTER_PAJAK,
+      }}
+      labelFilter='search'
+    />
   );
 };
 

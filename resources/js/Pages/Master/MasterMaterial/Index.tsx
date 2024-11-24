@@ -4,17 +4,24 @@ import DataGridComponent from '@/components/commons/DataGrid';
 import { columns } from './model/listModel';
 import { GET_MASTER_MATERIAL } from '@/endpoint/masterMaterial/api';
 
+const roleAkses = 'master sap material';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
+
 export const Index = () => {
   return (
-    <>
-      <DataGridComponent
-        columns={columns}
-        url={{
-          url: GET_MASTER_MATERIAL,
-        }}
-        labelFilter='search'
-      />
-    </>
+    <DataGridComponent
+      role={roleConfig}
+      columns={columns}
+      url={{
+        url: GET_MASTER_MATERIAL,
+      }}
+      labelFilter='search'
+    />
   );
 };
 

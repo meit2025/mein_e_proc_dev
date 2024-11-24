@@ -1,21 +1,26 @@
+import DataGridComponent from '@/components/commons/DataGrid';
+import { GET_MASTER_BUSINESS_PARTNER } from '@/endpoint/masterBusinessPartner/api';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import { ReactNode } from 'react';
-import DataGridComponent from '@/components/commons/DataGrid';
 import { columns } from './model/listModel';
-import { GET_MASTER_BANK_KEY } from '@/endpoint/masterBankKey/api';
-import { GET_MASTER_BUSINESS_PARTNER } from '@/endpoint/masterBusinessPartner/api';
 
+const roleAkses = 'master sap business partner';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 export const Index = () => {
   return (
-    <>
-      <DataGridComponent
-        columns={columns}
-        url={{
-          url: GET_MASTER_BUSINESS_PARTNER,
-        }}
-        labelFilter='search'
-      />
-    </>
+    <DataGridComponent
+      role={roleConfig}
+      columns={columns}
+      url={{
+        url: GET_MASTER_BUSINESS_PARTNER,
+      }}
+      labelFilter='search'
+    />
   );
 };
 

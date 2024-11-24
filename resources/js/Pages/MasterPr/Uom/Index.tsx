@@ -1,22 +1,22 @@
-import MainLayout from '@/Pages/Layouts/MainLayout';
-import { ReactNode } from 'react';
 import DataGridComponent from '@/components/commons/DataGrid';
-import { columns } from './model/listModel';
-import {
-  DELET_MASTER_MATERIAL_GROUP,
-  GET_MASTER_MATERIAL_GROUP,
-} from '@/endpoint/materialGroup/api';
-import {
-  CREATE_PAGE_MASTER_MATERIAL_GROUP,
-  EDIT_PAGE_MASTER_MATERIAL_GROUP,
-} from '@/endpoint/materialGroup/page';
 import { DELET_MASTER_UOM, GET_MASTER_UOM } from '@/endpoint/uom/api';
 import { CREATE_PAGE_MASTER_UOM, EDIT_PAGE_MASTER_UOM } from '@/endpoint/uom/page';
+import MainLayout from '@/Pages/Layouts/MainLayout';
+import { ReactNode } from 'react';
+import { columns } from './model/listModel';
 
+const roleAkses = 'master pr uom';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 export const Index = () => {
   return (
     <>
       <DataGridComponent
+        role={roleConfig}
         columns={columns}
         url={{
           url: GET_MASTER_UOM,
