@@ -12,9 +12,12 @@ use Modules\Master\Http\Controllers\DropdownMasterController;
 use Modules\Master\Http\Controllers\FamilyController;
 use Modules\Master\Http\Controllers\ItemCategoryController;
 use Modules\Master\Http\Controllers\MasterBusinessPartnerController;
+use Modules\Master\Http\Controllers\MasterDepartmentController;
+use Modules\Master\Http\Controllers\MasterDivisionController;
 use Modules\Master\Http\Controllers\MasterMaterialController;
 use Modules\Master\Http\Controllers\MaterialGroupController;
 use Modules\Master\Http\Controllers\MasterPeriodReimburseController;
+use Modules\Master\Http\Controllers\MasterPositionController;
 use Modules\Master\Http\Controllers\MasterQuotaReimburseController;
 use Modules\Master\Http\Controllers\MasterTypeReimburseController;
 use Modules\Master\Http\Controllers\OrderController;
@@ -65,6 +68,46 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('reimburse-quota/', [MasterQuotaReimburseController::class, 'index'])->name('master.reimburse-quota.index')->middleware(PermissionMiddleware::class . ':master reimburse quota view,master reimburse quota create,master reimburse quota update,master reimburse quota delete');
         Route::get('reimburse-quota/detail/{id}', [MasterQuotaReimburseController::class, 'detail'])->name('master.reimburse-quota.detail')->middleware(PermissionMiddleware::class . ':master reimburse quota view');
         Route::get('family/', [FamilyController::class, 'index'])->name('master.family.index');
+
+        Route::group(['prefix' => 'position', 'middleware' => 'auth'], function () {
+            Route::get('/', function () {
+                return inertia('Master/MasterPosition/Index');
+            })->middleware(PermissionMiddleware::class . ':position view');
+
+            Route::get('/create', function () {
+                return inertia('Master/MasterPosition/Create');
+            })->middleware(PermissionMiddleware::class . ':position create');
+
+            Route::get('/update/{id}', function ($id) {
+                return inertia('Master/MasterPosition/Update', ['id' => $id]);
+            })->middleware(PermissionMiddleware::class . ':position update');
+        });
+        Route::group(['prefix' => 'division', 'middleware' => 'auth'], function () {
+            Route::get('/', function () {
+                return inertia('Master/MasterDivision/Index');
+            })->middleware(PermissionMiddleware::class . ':division view');
+
+            Route::get('/create', function () {
+                return inertia('Master/MasterDivision/Create');
+            })->middleware(PermissionMiddleware::class . ':division create');
+
+            Route::get('/update/{id}', function ($id) {
+                return inertia('Master/MasterDivision/Update', ['id' => $id]);
+            })->middleware(PermissionMiddleware::class . ':division update');
+        });
+        Route::group(['prefix' => 'department', 'middleware' => 'auth'], function () {
+            Route::get('/', function () {
+                return inertia('Master/MasterDepartment/Index');
+            })->middleware(PermissionMiddleware::class . ':department view');
+
+            Route::get('/create', function () {
+                return inertia('Master/MasterDepartment/Create');
+            })->middleware(PermissionMiddleware::class . ':department create');
+
+            Route::get('/update/{id}', function ($id) {
+                return inertia('Master/MasterDepartment/Update', ['id' => $id]);
+            })->middleware(PermissionMiddleware::class . ':department update');
+        });
     });
 
     Route::group(['prefix' => 'api/master', 'middleware' => 'auth'], function () {
@@ -162,6 +205,30 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['prefix' => 'dropdown'], function () {
             Route::get('/', [DropdownMasterController::class, 'dropdown'])->name('master.dropdown');
             Route::get('/tabel', [DropdownMasterController::class, 'show_tabel'])->name('master.show_tabel');
+        });
+
+        Route::group(['prefix' => 'position'], function () {
+            Route::get('/list', [MasterPositionController::class, 'index'])->name('master.asset.index')->middleware(PermissionMiddleware::class . ':position view');
+            Route::post('/create', [MasterPositionController::class, 'store'])->name('master.asset.store')->middleware(PermissionMiddleware::class . ':position create');
+            Route::post('/update/{id}', [MasterPositionController::class, 'update'])->name('master.asset.update')->middleware(PermissionMiddleware::class . ':position update');
+            Route::get('/detail/{id}', [MasterPositionController::class, 'show'])->name('master.asset.show')->middleware(PermissionMiddleware::class . ':position view');
+            Route::delete('/delete/{id}', [MasterPositionController::class, 'destroy'])->name('master.asset.destroy')->middleware(PermissionMiddleware::class . ':position delete');
+        });
+
+        Route::group(['prefix' => 'division'], function () {
+            Route::get('/list', [MasterDivisionController::class, 'index'])->name('master.asset.index')->middleware(PermissionMiddleware::class . ':division view');
+            Route::post('/create', [MasterDivisionController::class, 'store'])->name('master.asset.store')->middleware(PermissionMiddleware::class . ':division create');
+            Route::post('/update/{id}', [MasterDivisionController::class, 'update'])->name('master.asset.update')->middleware(PermissionMiddleware::class . ':division update');
+            Route::get('/detail/{id}', [MasterDivisionController::class, 'show'])->name('master.asset.show')->middleware(PermissionMiddleware::class . ':division view');
+            Route::delete('/delete/{id}', [MasterDivisionController::class, 'destroy'])->name('master.asset.destroy')->middleware(PermissionMiddleware::class . ':division delete');
+        });
+
+        Route::group(['prefix' => 'department'], function () {
+            Route::get('/list', [MasterDepartmentController::class, 'index'])->name('master.asset.index')->middleware(PermissionMiddleware::class . ':department view');
+            Route::post('/create', [MasterDepartmentController::class, 'store'])->name('master.asset.store')->middleware(PermissionMiddleware::class . ':department create');
+            Route::post('/update/{id}', [MasterDepartmentController::class, 'update'])->name('master.asset.update')->middleware(PermissionMiddleware::class . ':department update');
+            Route::get('/detail/{id}', [MasterDepartmentController::class, 'show'])->name('master.asset.show')->middleware(PermissionMiddleware::class . ':department view');
+            Route::delete('/delete/{id}', [MasterDepartmentController::class, 'destroy'])->name('master.asset.destroy')->middleware(PermissionMiddleware::class . ':department delete');
         });
     });
 

@@ -18,7 +18,7 @@ class UserController extends Controller
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'asc');
 
-        $query = User::query();
+        $query = User::with(['role', 'positions', 'divisions', 'departements']);
 
         $filterableColumns =  [
             'nip',

@@ -1,16 +1,15 @@
-import { ReactNode, useCallback, useEffect, useState } from 'react';
 import MainLayout from '@/Pages/Layouts/MainLayout';
-import FormMapping from '@/components/form/FormMapping';
-import { CREATE_USER, DETAIL_USER, EDIT_USER } from '@/endpoint/user/api';
-import { LIST_PAGE_USER } from '@/endpoint/user/page';
-import { formModel } from './model/formModel';
-import { useForm } from 'react-hook-form';
 import axiosInstance from '@/axiosInstance';
-import { usePage } from '@inertiajs/react';
+import FormMapping from '@/components/form/FormMapping';
+import { DETAIL_USER, EDIT_USER } from '@/endpoint/user/api';
+import { LIST_PAGE_USER } from '@/endpoint/user/page';
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
-import useDropdownOptions from '@/lib/getDropdown';
-import { modelDropdowns } from './model/modelDropdown';
 import useDropdownOptionsArray from '@/lib/getDropdownArray';
+import { usePage } from '@inertiajs/react';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { formModel } from './model/formModel';
+import { modelDropdowns } from './model/modelDropdown';
 
 const Update = ({ id }: { id: number }) => {
   const { props } = usePage();
@@ -28,6 +27,10 @@ const Update = ({ id }: { id: number }) => {
         const response = await axiosInstance.get(DETAIL_USER(props.id));
         const data = response.data;
         methods.reset(data.data);
+        methods.setValue(
+          'master_business_partner_id',
+          parseInt(data.data.master_business_partner_id),
+        );
       } catch (error) {
         console.error('Error fetching detail:', error);
       } finally {
@@ -44,8 +47,8 @@ const Update = ({ id }: { id: number }) => {
   }, []);
 
   useEffect(() => {
-    getdetail();
     setDataModel(dropdownOptions as FormFieldModel<any>[]);
+    getdetail();
   }, [dropdownOptions, getdetail]);
 
   return (

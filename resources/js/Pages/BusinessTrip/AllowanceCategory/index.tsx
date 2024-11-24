@@ -16,6 +16,8 @@ import {
 } from '@/endpoint/allowance-category/api';
 import { FormType } from '@/lib/utils';
 
+const roleAkses = 'master business trip allowance category';
+
 export const Index = () => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
@@ -36,15 +38,7 @@ export const Index = () => {
   return (
     <>
       <div className='flex md:mb-4 mb-2 w-full justify-end'>
-        <Button onClick={openFormHandler}>
-          <PlusIcon />
-        </Button>
-
-        <CustomDialog
-          onClose={() => setOpenForm(false)}
-          open={openForm}
-          // onOpenChange={openFormHandler}
-        >
+        <CustomDialog onClose={() => setOpenForm(false)} open={openForm}>
           <AllowanceForm
             type={allowanceForm.type}
             id={allowanceForm.id}
@@ -58,6 +52,12 @@ export const Index = () => {
         </CustomDialog>
       </div>
       <DataGridComponent
+        role={{
+          detail: `${roleAkses} view`,
+          create: `${roleAkses} create`,
+          update: `${roleAkses} update`,
+          delete: `${roleAkses} delete`,
+        }}
         columns={columns}
         actionType='dropdown'
         onEdit={(value) => {
@@ -67,6 +67,7 @@ export const Index = () => {
           });
           setOpenForm(true);
         }}
+        onCreate={openFormHandler}
         url={{
           url: GET_LIST_ALLOWANCE_CATEGORY,
           deleteUrl: DELETE_ALLOWANCE_CATEGORY,

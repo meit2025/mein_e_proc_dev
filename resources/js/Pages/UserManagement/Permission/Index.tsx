@@ -8,10 +8,18 @@ import {
   EDIT_PAGE_MASTER_PERMISSION,
 } from '@/endpoint/permission/page';
 
+const roleAkses = 'role permission';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 export const Index = () => {
   return (
     <>
       <DataGridComponent
+        role={roleConfig}
         columns={columns}
         url={{
           url: GET_MASTER_PERMISSION,
