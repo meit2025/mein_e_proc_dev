@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Modules\Master\Models\MasterPeriodReimburse;
+use Modules\Master\Models\MasterStatus;
 use Modules\Master\Models\MasterTypeReimburse;
 use Modules\Master\Models\Pajak;
 use Modules\Master\Models\PurchasingGroup;
@@ -97,5 +98,10 @@ class Reimburse extends Model
     public function periodeDate()
     {
         return $this->belongsTo(MasterPeriodReimburse::class, 'period', 'code');
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(MasterStatus::class, 'status_id', 'id');
     }
 }

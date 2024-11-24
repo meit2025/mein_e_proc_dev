@@ -170,7 +170,7 @@ class ReimbuseController extends Controller
     public function list(Request $request)
     {
         try {
-            $query =  ReimburseGroup::query()->with(['reimburses']);
+            $query =  ReimburseGroup::query()->with(['reimburses', 'status']);
             $perPage = $request->get('per_page', 10);
             $sortBy = $request->get('sort_by', 'id');
             $sortDirection = $request->get('sort_direction', 'asc');
@@ -189,6 +189,10 @@ class ReimbuseController extends Controller
                     'remark' => $map->remark,
                     'balance' => $balance,
                     'form' => count($map->reimburses),
+                    'status' => [
+                        'name' => $map->status->name,
+                        'classname' => $map->status->classname,
+                    ],
                     'status' => $this->reimbursementService->checkGroupStatus($map->code),
                 ];
             });
