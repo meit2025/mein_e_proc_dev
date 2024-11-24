@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\PermissionMiddleware;
 use Illuminate\Support\Facades\Route;
 use Modules\PurchaseRequisition\Http\Controllers\ProcurementController;
 use Modules\PurchaseRequisition\Http\Controllers\PurchaseRequisitionController;
@@ -17,22 +18,22 @@ use Modules\PurchaseRequisition\Http\Controllers\PurchaseRequisitionController;
 
 Route::group(['middleware' => 'auth'], function () {
     Route::group(['prefix' => 'purchase-requisition'], function () {
-        Route::inertia('/',  'PurchaseRequisition/Index');
-        Route::inertia('/create',  'PurchaseRequisition/Create');
+        Route::inertia('/',  'PurchaseRequisition/Index')->middleware(PermissionMiddleware::class . ':purchase requisition view');
+        Route::inertia('/create',  'PurchaseRequisition/Create')->middleware(PermissionMiddleware::class . ':purchase requisition create');
         Route::inertia('/update/{id}',  'PurchaseRequisition/Update', [
             'id' => fn() => request()->route('id'),
-        ]);
+        ])->middleware(PermissionMiddleware::class . ':purchase requisition update');
         Route::inertia('/detail/{id}',  'PurchaseRequisition/Detail', [
             'id' => fn() => request()->route('id'),
-        ]);
+        ])->middleware(PermissionMiddleware::class . ':purchase requisition view');
     });
 
     Route::group(['prefix' => 'api/pr/purchase-requisition', 'middleware' => 'auth'], function () {
-        Route::get('/list', [ProcurementController::class, 'index'])->name('pr.purchase-requisition.index');
-        Route::post('/create', [ProcurementController::class, 'store'])->name('pr.purchase-requisition.store');
-        Route::post('/update/{id}', [ProcurementController::class, 'update'])->name('pr.purchase-requisition.update');
-        Route::get('/detail/{id}', [ProcurementController::class, 'show'])->name('pr.purchase-requisition.show');
-        Route::delete('/delete/{id}', [ProcurementController::class, 'destroy'])->name('pr.purchase-requisition.destroy');
+        Route::get('/list', [ProcurementController::class, 'index'])->name('pr.purchase-requisition.index')->middleware(PermissionMiddleware::class . ':purchase requisition view');
+        Route::post('/create', [ProcurementController::class, 'store'])->name('pr.purchase-requisition.store')->middleware(PermissionMiddleware::class . ':purchase requisition create');
+        Route::post('/update/{id}', [ProcurementController::class, 'update'])->name('pr.purchase-requisition.update')->middleware(PermissionMiddleware::class . ':purchase requisition update');
+        Route::get('/detail/{id}', [ProcurementController::class, 'show'])->name('pr.purchase-requisition.show')->middleware(PermissionMiddleware::class . ':purchase requisition view');
+        Route::delete('/delete/{id}', [ProcurementController::class, 'destroy'])->name('pr.purchase-requisition.destroy')->middleware(PermissionMiddleware::class . ':purchase requisition delete');
     });
 
     Route::group(['prefix' => 'api/pr/purchase-requisition-sap', 'middleware' => 'auth'], function () {

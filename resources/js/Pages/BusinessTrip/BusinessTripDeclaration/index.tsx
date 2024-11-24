@@ -22,6 +22,7 @@ interface propsType {
   users: UserModel[];
   listBusinessTrip: any;
 }
+const roleAkses = 'business trip declaration';
 export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
@@ -36,9 +37,9 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
   return (
     <>
       <div className='flex md:mb-4 mb-2 w-full justify-end'>
-        <Button onClick={openFormHandler}>
+        {/* <Button onClick={openFormHandler}>
           <PlusIcon />
-        </Button>
+        </Button> */}
 
         <CustomDialog
           onClose={() => setOpenForm(false)}
@@ -53,6 +54,13 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         </CustomDialog>
       </div>
       <DataGridComponent
+        role={{
+          detail: `${roleAkses} view`,
+          create: `${roleAkses} create`,
+          update: `${roleAkses} update`,
+          delete: `${roleAkses} delete`,
+        }}
+        onCreate={openFormHandler}
         columns={columns}
         actionType='dropdown'
         onEdit={(value) => {

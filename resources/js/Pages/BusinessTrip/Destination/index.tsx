@@ -29,6 +29,8 @@ import {
 } from '@/endpoint/destination/api';
 import DestinationForm from './component/form';
 
+const roleAkses = 'master business trip destination';
+
 interface propsType {
   // listAllowanceCategory: AllowanceCategoryModel[];
   listDestination: DestinationModel[];
@@ -52,9 +54,9 @@ export const Index = ({ listDestination }: propsType) => {
   return (
     <>
       <div className='flex md:mb-4 mb-2 w-full justify-end'>
-        <Button onClick={openFormHandler}>
+        {/* <Button onClick={openFormHandler}>
           <PlusIcon />
-        </Button>
+        </Button> */}
 
         <CustomDialog
           onClose={() => setOpenForm(false)}
@@ -73,6 +75,13 @@ export const Index = ({ listDestination }: propsType) => {
         </CustomDialog>
       </div>
       <DataGridComponent
+        role={{
+          detail: `${roleAkses} view`,
+          create: `${roleAkses} create`,
+          update: `${roleAkses} update`,
+          delete: `${roleAkses} delete`,
+        }}
+        onCreate={openFormHandler}
         onEdit={(value) => {
           setFormType({
             type: FormType.edit,

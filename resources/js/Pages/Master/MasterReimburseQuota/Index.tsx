@@ -6,16 +6,24 @@ import { columns } from './models/models';
 import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import ReimburseQuotaForm from './component/form'
-import { 
-  LIST_API_REIMBURSE_QUOTA, 
-  STORE_REIMBURSE_QUOTA, 
-  EDIT_REIMBURSE_QUOTA, 
-  UPDATE_REIMBURSE_QUOTA, 
-  DESTROY_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
+import ReimburseQuotaForm from './component/form';
+import {
+  LIST_API_REIMBURSE_QUOTA,
+  STORE_REIMBURSE_QUOTA,
+  EDIT_REIMBURSE_QUOTA,
+  UPDATE_REIMBURSE_QUOTA,
+  DESTROY_REIMBURSE_QUOTA,
+} from '@/endpoint/reimburseQuota/api';
 import { DETAIL_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/page';
 import { FormType } from '@/lib/utils';
 
+const roleAkses = 'master reimburse quota';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 export const Index = () => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
@@ -35,9 +43,9 @@ export const Index = () => {
   return (
     <>
       <div className='flex md:mb-4 mb-2 w-full justify-end'>
-        <Button onClick={openFormHandler}>
+        {/* <Button onClick={openFormHandler}>
           <PlusIcon />
-        </Button>
+        </Button> */}
 
         <CustomDialog
           onClose={() => setOpenForm(false)}
@@ -56,6 +64,8 @@ export const Index = () => {
         </CustomDialog>
       </div>
       <DataGridComponent
+        role={roleConfig}
+        onCreate={openFormHandler}
         columns={columns}
         actionType='dropdown'
         onEdit={(value) => {

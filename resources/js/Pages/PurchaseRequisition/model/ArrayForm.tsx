@@ -352,20 +352,18 @@ const ArrayForm = ({
               }}
             />
 
-            {watchAccountAssigment !== 'K' && (
-              <FormAutocomplete<any>
-                options={dataMaterial}
-                fieldLabel={'Material number'}
-                fieldName={'item_material_number'}
-                isRequired={false}
-                disabled={disable}
-                style={{
-                  width: '56.5rem',
-                }}
-                placeholder={'Material number'}
-                classNames='mt-2'
-              />
-            )}
+            <FormAutocomplete<any>
+              options={dataMaterial}
+              fieldLabel={'Material number'}
+              fieldName={'item_material_number'}
+              isRequired={false}
+              disabled={disable}
+              style={{
+                width: '56.5rem',
+              }}
+              placeholder={'Material number'}
+              classNames='mt-2'
+            />
 
             <FormAutocomplete<any>
               options={dataUom}

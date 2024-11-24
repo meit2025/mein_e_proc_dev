@@ -4,17 +4,23 @@ import DataGridComponent from '@/components/commons/DataGrid';
 import { columns } from './model/listModel';
 import { GET_MASTER_ORDER } from '@/endpoint/masterOrder/api';
 
+const roleAkses = 'master sap internal order';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 export const Index = () => {
   return (
-    <>
-      <DataGridComponent
-        columns={columns}
-        url={{
-          url: GET_MASTER_ORDER,
-        }}
-        labelFilter='search'
-      />
-    </>
+    <DataGridComponent
+      role={roleConfig}
+      columns={columns}
+      url={{
+        url: GET_MASTER_ORDER,
+      }}
+      labelFilter='search'
+    />
   );
 };
 
