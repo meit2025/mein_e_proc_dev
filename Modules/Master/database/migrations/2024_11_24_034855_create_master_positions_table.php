@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('master_postions', function (Blueprint $table) {
+        Schema::create('master_positions', function (Blueprint $table) {
             $table->id();
-            
+            $table->string('name');
             $table->timestamps();
         });
     }

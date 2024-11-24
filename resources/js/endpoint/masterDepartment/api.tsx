@@ -1,0 +1,7 @@
+const ROUTE_MASTER_DEPARTMENT = '/api/master/department';
+
+export const GET_MASTER_DEPARTMENT = `${ROUTE_MASTER_DEPARTMENT}/list`;
+export const CREATE_MASTER_DEPARTMENT = `${ROUTE_MASTER_DEPARTMENT}/create`;
+export const EDIT_MASTER_DEPARTMENT = `${ROUTE_MASTER_DEPARTMENT}/update`;
+export const DETAIL_MASTER_DEPARTMENT = (id: any) => `${ROUTE_MASTER_DEPARTMENT}/detail/${id}`;
+export const DELET_MASTER_DEPARTMENT = `${ROUTE_MASTER_DEPARTMENT}/delete`;

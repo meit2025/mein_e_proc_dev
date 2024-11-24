@@ -37,6 +37,9 @@ import { PAGE_REIMBURSE } from '@/endpoint/reimburse/page';
 import { LIST_PAGE_MASTER_PERMISSION } from '@/endpoint/permission/page';
 import { LIST_PAGE_DESTINATION } from '@/endpoint/destination/page';
 import { ScrollArea } from '@/components/shacdn/scroll-area';
+import { LIST_PAGE_MASTER_POSITION } from '@/endpoint/masterPosition/page';
+import { LIST_PAGE_MASTER_DIVISION } from '@/endpoint/masterDivision/page';
+import { LIST_PAGE_MASTER_DEPARTMENT } from '@/endpoint/masterDepartment/page';
 
 export const RuteTitle = (title: string) => {
   return (
@@ -82,6 +85,9 @@ export const Singel = (menu: any, url: string) => {
 };
 export const MultiMenu = (menu: any, url: string) => {
   const isActive = menu.sub.some((sub: any) => url === sub.route);
+  const { props } = usePage<{ auth: { permission: string[] } }>();
+
+  const permissions = props.auth?.permission || [];
   return (
     <div
       className={`menu-item ${isActive ? 'active' : ''}`}
@@ -107,6 +113,9 @@ export const MultiMenu = (menu: any, url: string) => {
         {menu.sub.map((sub: any, subkey: number) => {
           const isSubActive = url === sub.route;
 
+          if (sub.role && !sub.role.some((perm: string) => permissions.includes(perm))) {
+            return null;
+          }
           return (
             <div key={subkey} className={`menu-item ${isSubActive ? 'active' : ''}`}>
               <Link
@@ -296,6 +305,10 @@ const sidebar = [
           'role view',
           'role update',
           'role delete',
+          'position create',
+          'position view',
+          'position update',
+          'position delete',
         ],
         sub: [
           {
@@ -317,6 +330,26 @@ const sidebar = [
             name: 'Roles',
             route: LIST_PAGE_ROLE,
             role: ['role create', 'role view', 'role update', 'role delete'],
+          },
+          {
+            name: 'Position',
+            route: LIST_PAGE_MASTER_POSITION,
+            role: ['position create', 'position view', 'position update', 'position delete'],
+          },
+          {
+            name: 'Division',
+            route: LIST_PAGE_MASTER_DIVISION,
+            role: ['division create', 'division view', 'division update', 'division delete'],
+          },
+          {
+            name: 'Department',
+            route: LIST_PAGE_MASTER_DEPARTMENT,
+            role: [
+              'department create',
+              'department view',
+              'department update',
+              'department delete',
+            ],
           },
         ],
       },
@@ -878,6 +911,7 @@ export default function Sidebar() {
                         const visibleSub = menu.sub.filter(
                           (sub) => !sub.role || hasPermission(sub.role),
                         );
+
                         if (visibleSub.length === 0) return null;
 
                         return MultiMenu(menu, url.toLowerCase());
