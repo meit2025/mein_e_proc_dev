@@ -3,7 +3,7 @@ export const DetailLayout = (detail: any) => {
   
   return (
     <>
-      <p className='text-sm font-semibold leading-6 text-yellow-500 uppercase'>This user is {data.is_admin != 0 && 'not'} admin </p>
+      <p className='text-sm font-semibold leading-6 text-yellow-500 uppercase'>This user is {!data.is_admin && 'not'} admin </p>
       <ul role='list' className='divide-y divide-gray-100 h-screen'>
         <li className='flex justify-between gap-x-6 py-5'>
           <div className='flex min-w-0 gap-x-4'>
