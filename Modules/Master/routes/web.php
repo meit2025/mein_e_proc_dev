@@ -19,6 +19,7 @@ use Modules\Master\Http\Controllers\MaterialGroupController;
 use Modules\Master\Http\Controllers\MasterPeriodReimburseController;
 use Modules\Master\Http\Controllers\MasterPositionController;
 use Modules\Master\Http\Controllers\MasterQuotaReimburseController;
+use Modules\Master\Http\Controllers\MasterTrackingNumberController;
 use Modules\Master\Http\Controllers\MasterTypeReimburseController;
 use Modules\Master\Http\Controllers\OrderController;
 use Modules\Master\Http\Controllers\PajakController;
@@ -107,6 +108,19 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/update/{id}', function ($id) {
                 return inertia('Master/MasterDepartment/Update', ['id' => $id]);
             })->middleware(PermissionMiddleware::class . ':department update');
+        });
+        Route::group(['prefix' => 'tracking-number', 'middleware' => 'auth'], function () {
+            Route::get('/', function () {
+                return inertia('Master/MasterTrackingNumber/Index');
+            })->middleware(PermissionMiddleware::class . ':tracking number view');
+
+            Route::get('/create', function () {
+                return inertia('Master/MasterTrackingNumber/Create');
+            })->middleware(PermissionMiddleware::class . ':tracking number create');
+
+            Route::get('/update/{id}', function ($id) {
+                return inertia('Master/MasterTrackingNumber/Update', ['id' => $id]);
+            })->middleware(PermissionMiddleware::class . ':tracking number update');
         });
     });
 
@@ -208,27 +222,34 @@ Route::group(['middleware' => 'auth'], function () {
         });
 
         Route::group(['prefix' => 'position'], function () {
-            Route::get('/list', [MasterPositionController::class, 'index'])->name('master.asset.index')->middleware(PermissionMiddleware::class . ':position view');
-            Route::post('/create', [MasterPositionController::class, 'store'])->name('master.asset.store')->middleware(PermissionMiddleware::class . ':position create');
-            Route::post('/update/{id}', [MasterPositionController::class, 'update'])->name('master.asset.update')->middleware(PermissionMiddleware::class . ':position update');
-            Route::get('/detail/{id}', [MasterPositionController::class, 'show'])->name('master.asset.show')->middleware(PermissionMiddleware::class . ':position view');
-            Route::delete('/delete/{id}', [MasterPositionController::class, 'destroy'])->name('master.asset.destroy')->middleware(PermissionMiddleware::class . ':position delete');
+            Route::get('/list', [MasterPositionController::class, 'index'])->name('master.position.index')->middleware(PermissionMiddleware::class . ':position view');
+            Route::post('/create', [MasterPositionController::class, 'store'])->name('master.position.store')->middleware(PermissionMiddleware::class . ':position create');
+            Route::post('/update/{id}', [MasterPositionController::class, 'update'])->name('master.position.update')->middleware(PermissionMiddleware::class . ':position update');
+            Route::get('/detail/{id}', [MasterPositionController::class, 'show'])->name('master.position.show')->middleware(PermissionMiddleware::class . ':position view');
+            Route::delete('/delete/{id}', [MasterPositionController::class, 'destroy'])->name('master.position.destroy')->middleware(PermissionMiddleware::class . ':position delete');
         });
 
         Route::group(['prefix' => 'division'], function () {
-            Route::get('/list', [MasterDivisionController::class, 'index'])->name('master.asset.index')->middleware(PermissionMiddleware::class . ':division view');
-            Route::post('/create', [MasterDivisionController::class, 'store'])->name('master.asset.store')->middleware(PermissionMiddleware::class . ':division create');
-            Route::post('/update/{id}', [MasterDivisionController::class, 'update'])->name('master.asset.update')->middleware(PermissionMiddleware::class . ':division update');
-            Route::get('/detail/{id}', [MasterDivisionController::class, 'show'])->name('master.asset.show')->middleware(PermissionMiddleware::class . ':division view');
-            Route::delete('/delete/{id}', [MasterDivisionController::class, 'destroy'])->name('master.asset.destroy')->middleware(PermissionMiddleware::class . ':division delete');
+            Route::get('/list', [MasterDivisionController::class, 'index'])->name('master.division.index')->middleware(PermissionMiddleware::class . ':division view');
+            Route::post('/create', [MasterDivisionController::class, 'store'])->name('master.division.store')->middleware(PermissionMiddleware::class . ':division create');
+            Route::post('/update/{id}', [MasterDivisionController::class, 'update'])->name('master.division.update')->middleware(PermissionMiddleware::class . ':division update');
+            Route::get('/detail/{id}', [MasterDivisionController::class, 'show'])->name('master.division.show')->middleware(PermissionMiddleware::class . ':division view');
+            Route::delete('/delete/{id}', [MasterDivisionController::class, 'destroy'])->name('master.division.destroy')->middleware(PermissionMiddleware::class . ':division delete');
         });
 
         Route::group(['prefix' => 'department'], function () {
-            Route::get('/list', [MasterDepartmentController::class, 'index'])->name('master.asset.index')->middleware(PermissionMiddleware::class . ':department view');
-            Route::post('/create', [MasterDepartmentController::class, 'store'])->name('master.asset.store')->middleware(PermissionMiddleware::class . ':department create');
-            Route::post('/update/{id}', [MasterDepartmentController::class, 'update'])->name('master.asset.update')->middleware(PermissionMiddleware::class . ':department update');
-            Route::get('/detail/{id}', [MasterDepartmentController::class, 'show'])->name('master.asset.show')->middleware(PermissionMiddleware::class . ':department view');
-            Route::delete('/delete/{id}', [MasterDepartmentController::class, 'destroy'])->name('master.asset.destroy')->middleware(PermissionMiddleware::class . ':department delete');
+            Route::get('/list', [MasterDepartmentController::class, 'index'])->name('master.department.index')->middleware(PermissionMiddleware::class . ':department view');
+            Route::post('/create', [MasterDepartmentController::class, 'store'])->name('master.department.store')->middleware(PermissionMiddleware::class . ':department create');
+            Route::post('/update/{id}', [MasterDepartmentController::class, 'update'])->name('master.department.update')->middleware(PermissionMiddleware::class . ':department update');
+            Route::get('/detail/{id}', [MasterDepartmentController::class, 'show'])->name('master.department.show')->middleware(PermissionMiddleware::class . ':department view');
+            Route::delete('/delete/{id}', [MasterDepartmentController::class, 'destroy'])->name('master.department.destroy')->middleware(PermissionMiddleware::class . ':department delete');
+        });
+        Route::group(['prefix' => 'tracking-number'], function () {
+            Route::get('/list', [MasterTrackingNumberController::class, 'index'])->name('master.tracking-number.index')->middleware(PermissionMiddleware::class . ':tracking number view');
+            Route::post('/create', [MasterTrackingNumberController::class, 'store'])->name('master.tracking-number.store')->middleware(PermissionMiddleware::class . ':tracking number create');
+            Route::post('/update/{id}', [MasterTrackingNumberController::class, 'update'])->name('master.tracking-number.update')->middleware(PermissionMiddleware::class . ':tracking number update');
+            Route::get('/detail/{id}', [MasterTrackingNumberController::class, 'show'])->name('master.tracking-number.show')->middleware(PermissionMiddleware::class . ':tracking number view');
+            Route::delete('/delete/{id}', [MasterTrackingNumberController::class, 'destroy'])->name('master.tracking-number.destroy')->middleware(PermissionMiddleware::class . ':tracking number delete');
         });
     });
 

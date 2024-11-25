@@ -1,0 +1,34 @@
+export const modelDropdowns = [
+  {
+    dropdown: 'document_type_id',
+    struct: {
+      name: 'purchasing_dsc',
+      id: 'id',
+      tabel: 'document_types',
+    },
+  },
+  {
+    dropdown: 'master_division_id',
+    struct: {
+      name: 'name',
+      id: 'id',
+      tabel: 'master_divisions',
+    },
+  },
+  {
+    dropdown: 'purchasing_group_id',
+    struct: {
+      name: 'purchasing_group_desc',
+      id: 'id',
+      tabel: 'purchasing_groups',
+    },
+  },
+  {
+    dropdown: 'master_tracking_number_id',
+    struct: {
+      name: 'name',
+      id: 'id',
+      tabel: 'master_tracking_numbers',
+    },
+  },
+];

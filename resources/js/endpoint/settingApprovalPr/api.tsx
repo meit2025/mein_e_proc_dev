@@ -1,0 +1,7 @@
+const ROUTE_SETTING_APPROVAL_PR = '/api/approval/pr';
+
+export const GET_SETTING_APPROVAL_PR = `${ROUTE_SETTING_APPROVAL_PR}/list`;
+export const CREATE_SETTING_APPROVAL_PR = `${ROUTE_SETTING_APPROVAL_PR}/create`;
+export const EDIT_SETTING_APPROVAL_PR = `${ROUTE_SETTING_APPROVAL_PR}/update`;
+export const DETAIL_SETTING_APPROVAL_PR = (id: any) => `${ROUTE_SETTING_APPROVAL_PR}/detail/${id}`;
+export const DELET_SETTING_APPROVAL_PR = `${ROUTE_SETTING_APPROVAL_PR}/delete`;

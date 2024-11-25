@@ -5,6 +5,8 @@ namespace Modules\Master\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\Approval\Models\ApprovalPr;
+
 // use Modules\Master\Database\Factories\MasterDivisionFactory;
 
 class MasterDivision extends Model
@@ -27,4 +29,9 @@ class MasterDivision extends Model
     // {
     //     // return MasterDivisionFactory::new();
     // }
+
+    public function approvalPr()
+    {
+        return $this->belongsTo(ApprovalPr::class);
+    }
 }
