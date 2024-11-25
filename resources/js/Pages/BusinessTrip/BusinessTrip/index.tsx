@@ -73,7 +73,8 @@ export const Index = ({
 
   // Get the logged-in user's ID
   const userId = auth.user?.id;
-  const userRole = auth.user?.role;
+  const isAdmin = auth.user?.is_admin;
+  console.log(auth, ' ini auth');
 
   return (
     <>
@@ -91,7 +92,7 @@ export const Index = ({
             listDestination={listDestination}
             users={users}
             idUser={userId}
-            role={userRole}
+            isAdmin={isAdmin}
             listPurposeType={listPurposeType}
             pajak={pajak}
             costcenter={costcenter}
