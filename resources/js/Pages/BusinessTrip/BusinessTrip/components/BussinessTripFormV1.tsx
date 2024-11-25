@@ -63,7 +63,7 @@ import { Item } from '@radix-ui/react-dropdown-menu';
 import Detail from '@/Pages/User/Api/Detail';
 import { AllowanceForm } from '../../AllowanceCategory/components/AllowaceForm';
 import axios, { AxiosError } from 'axios';
-import { CREATE_API_BUSINESS_TRIP, GET_DETAIL_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
+import { CREATE_API_BUSINESS_TRIP, GET_DETAIL_BUSINESS_TRIP, EDIT_API_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
 import FormSwitch from '@/components/Input/formSwitchCustom';
 import FormAutocomplete from '@/components/Input/formDropdown';
 import { DestinationModel } from '../../Destination/models/models';
@@ -108,7 +108,7 @@ export const BussinessTripFormV1 = ({
   purchasingGroup,
   type,
   id,
-  role,
+  isAdmin,
   idUser,
   listDestination = [],
 }: {
@@ -119,7 +119,7 @@ export const BussinessTripFormV1 = ({
   purchasingGroup: PurchasingGroup[];
   type: BusinessTripType;
   id: string | undefined;
-  role: string | undefined;
+  isAdmin: string | undefined;
   idUser: number | undefined;
   listDestination: DestinationModel[];
 }) => {
@@ -219,24 +219,25 @@ export const BussinessTripFormV1 = ({
       form.setValue('purpose_type_id', data.purpose_type_id);
       form.setValue('request_for', data.request_for.id);
       form.setValue('cost_center_id', data.cost_center_id);
-      form.setValue('pajak_id', data.pajak_id);
-      form.setValue('purchasing_group_id', data.purchasing_group_id);
       form.setValue('remark', data.remarks);
       form.setValue('total_destination', data.total_destination);
-
+        console.log(data.destinations,' data.destinations')
       form.setValue(
         'destinations',
         data.destinations.map((destination: any) => ({
           destination: destination.destination,
+          pajak_id: destination.pajak_id,
+          purchasing_group_id: destination.purchasing_group_id,
+          cash_advance: destination.cash_advance,
+          reference_number: destination.reference_number,
+          total_percent: destination.total_percent,
+          total_cash_advance: destination.total_cash_advance,
           business_trip_start_date: new Date(destination.business_trip_start_date),
           business_trip_end_date: new Date(destination.business_trip_end_date),
           detail_attedances: destination.detail_attedances,
           allowances: destination.allowances,
         })),
       );
-
-      // form.trigger('destinations');
-      // console.log(form.getValues('destinations'),'Form Destinations');
     } catch (e) {
       const error = e as AxiosError;
     }
@@ -245,12 +246,12 @@ export const BussinessTripFormV1 = ({
   const [listAllowances, setListAllowances] = React.useState<AllowanceItemModel[]>([]);
 
   const [selectedUserId, setSelectedUserId] = React.useState(
-    role === 'user' ? idUser.toString() : '',
+    isAdmin === '0' ? idUser.toString() : '',
   );
 
   async function handlePurposeType(value: string) {
     form.setValue('purpose_type_id', value || '');
-    const userid = role == 'user' ? idUser || '' : selectedUserId || '';
+    const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
     console.log(userid, ' ---- ');
     const url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
 
@@ -258,7 +259,7 @@ export const BussinessTripFormV1 = ({
       const response = await axiosInstance.get(url);
       setListAllowances(response.data.data as AllowanceItemModel[]);
     } catch (e) {
-      //   console.log(e);
+        console.log(e);
     }
   }
 
@@ -314,14 +315,24 @@ export const BussinessTripFormV1 = ({
 
       console.log(formData, ' test');
 
-      await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+    if (type == BusinessTripType.create) {
+        await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+        });
+        showToast('succesfully created data', 'success');
+    }else{
+        await Inertia.put(`${EDIT_API_BUSINESS_TRIP}/${id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        showToast('succesfully updated data', 'success');
+    }
+
 
       // console.log(response);
-      showToast('succesfully created data', 'success');
       //   onSuccess?.(true);
     } catch (e) {
       const error = e as AxiosError;
@@ -380,7 +391,7 @@ export const BussinessTripFormV1 = ({
     if (type == BusinessTripType.create) {
       setAllowancesProperty();
     }
-  }, [totalDestination, listAllowances, id, type, role, idUser]);
+  }, [totalDestination, listAllowances, id, type, isAdmin, idUser]);
 
 //   const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
 
@@ -427,7 +438,7 @@ export const BussinessTripFormV1 = ({
                   name='request_for'
                   render={({ field }) => {
                     // Jika role adalah 'user', set value default sebagai currentUserId
-                    if (role === 'user' && !field.value) {
+                    if (isAdmin === '0' && !field.value) {
                       field.onChange(idUser.toString());
                     }
                     return (
@@ -439,13 +450,13 @@ export const BussinessTripFormV1 = ({
                               field.onChange(value);
                             }}
                             value={field.value}
-                            disabled={role === 'user'} // Disable select for user role
+                            disabled={isAdmin === '0'} // Disable select for user role
                           >
                             <SelectTrigger className='w-[200px] py-2'>
                               <SelectValue placeholder='-- Select Business Purpose Type --' />
                             </SelectTrigger>
                             <SelectContent>
-                              {role === 'admin'
+                              {isAdmin === '1'
                                 ? users.map((item) => (
                                     <SelectItem key={item.id} value={item.id.toString()}>
                                       {item.name}
@@ -629,6 +640,7 @@ export const BussinessTripFormV1 = ({
             totalDestination={form.getValues('total_destination').toString()}
             pajak={pajak}
             purchasingGroup={purchasingGroup}
+            typeEdit={type}
             // setTotalAllowance={setTotalAllowance}
           />
           <Button type='submit'>submit</Button>
@@ -648,6 +660,7 @@ export function BussinesTripDestination({
   listDestination = [],
   pajak,
   purchasingGroup,
+  typeEdit,
 }: {
   totalDestination: string;
   listAllowances: AllowanceItemModel[];
@@ -658,6 +671,7 @@ export function BussinesTripDestination({
   listDestination: DestinationModel[];
   pajak: Pajak[],
   purchasingGroup: PurchasingGroup[];
+  typeEdit:any,
 }) {
   const [startDate, setStartDate] = React.useState<Date>();
 
@@ -684,6 +698,7 @@ export function BussinesTripDestination({
           listDestination={listDestination}
           pajak={pajak}
           purchasingGroup={purchasingGroup}
+          typeEdit={typeEdit}
         />
       ))}
     </Tabs>
@@ -700,6 +715,7 @@ export function BussinessDestinationForm({
   listDestination,
   pajak,
   purchasingGroup,
+  typeEdit,
 }: {
   form: any;
   index: number;
@@ -710,6 +726,7 @@ export function BussinessDestinationForm({
   listDestination: DestinationModel[];
   pajak: Pajak[],
   purchasingGroup: PurchasingGroup[];
+  typeEdit: any;
 }) {
   const {
     fields: detailAttedanceFields,
@@ -810,13 +827,15 @@ export function BussinessDestinationForm({
         name: `destinations.${index}.total_percent`,
     });
 
-      const [totalAllowance, setTotalAllowance] = React.useState(0);
-
+    const [totalAllowance, setTotalAllowance] = React.useState(0);
     // Assuming allowance is calculated elsewhere, let's mock it for now
     const allowance = totalAllowance;
 
     //   // Calculate total based on totalPercent and allowance
     React.useEffect(() => {
+        if (typeEdit == BusinessTripType.edit) {
+            setIsCashAdvance(form.getValues(`destinations.${index}.cash_advance`))
+        }
         const percentValue = parseFloat((totalPercent || '0').toString());
         // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
         const total = (percentValue / 100) * allowance; // Multiply percent with allowance
@@ -886,7 +905,7 @@ export function BussinessDestinationForm({
                           </SelectTrigger>
                           <SelectContent>
                             {pajak.map((item) => (
-                              <SelectItem value={item.id.toString()}>{item.mwszkz}</SelectItem>
+                              <SelectItem value={item.id}>{item.mwszkz}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -916,7 +935,7 @@ export function BussinessDestinationForm({
                             </SelectTrigger>
                             <SelectContent>
                             {purchasingGroup.map((item) => (
-                                <SelectItem value={item.id.toString()}>
+                                <SelectItem value={item.id}>
                                 {item.purchasing_group}
                                 </SelectItem>
                             ))}

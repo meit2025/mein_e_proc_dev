@@ -5,6 +5,8 @@ namespace Modules\BusinessTrip\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Modules\Master\Models\Pajak;
+use Modules\Master\Models\PurchasingGroup;
 
 // use Modules\BusinessTrip\Database\Factories\BusinessTripDestinationFactory;
 
@@ -63,6 +65,14 @@ class BusinessTripDestination extends Model
         $totalDetails = $this->detailDestinationTotal ?? collect();
 
         return $dayDetails->merge($totalDetails);
+    }
+
+    function pajak() {
+        return $this->belongsTo(Pajak::class, 'pajak_id', 'id');
+    }
+
+    function purchasingGroup() {
+        return $this->belongsTo(PurchasingGroup::class, 'purchasing_group_id', 'id');
     }
 
     //   $table->string('destination');
