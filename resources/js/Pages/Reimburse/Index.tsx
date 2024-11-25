@@ -19,6 +19,7 @@ import {
   Tax,
   User,
 } from './model/listModel';
+import { WorkflowApproval, WorkflowComponent } from '@/components/commons/WorkflowComponent';
 
 interface Props {
   users: User[];
@@ -118,6 +119,8 @@ export const Index = ({
         }}
         labelFilter='search'
       />
+
+      <WorkflowComponent />
     </>
   );
 };

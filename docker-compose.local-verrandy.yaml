@@ -23,7 +23,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin          # pgAdmin default password
     ports:
       - "5054:80"  # Expose pgAdmin on port 5050
-    networks:w
+    networks:
       - pgnetwork
     depends_on:
       - postgress_mein  # Ensure PostgreSQL starts first
