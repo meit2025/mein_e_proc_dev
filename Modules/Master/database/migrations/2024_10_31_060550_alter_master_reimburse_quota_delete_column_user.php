@@ -13,7 +13,7 @@ return new class extends Migration
     {
 
         if (Schema::hasColumn('master_quota_reimburses', 'user')) {
-            Schema::table('users', function (Blueprint $table) {
+            Schema::table('master_quota_reimburses', function (Blueprint $table) {
                 $table->dropColumn('user');
             });
         }
