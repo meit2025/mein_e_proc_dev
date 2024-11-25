@@ -464,7 +464,7 @@ class BusinessTripController extends Controller
     public function listAPI(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType']);
+        $query =  BusinessTrip::query()->with(['purposeType', 'status']);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
@@ -480,6 +480,12 @@ class BusinessTripController extends Controller
             return [
                 'id' => $map->id,
                 'request_no' => $map->request_no,
+                'status' => [
+                    'name' => $map->status->name,
+                    'classname' => $map->status->classname,
+                    'code' =>
+                    $map->status->code
+                ],
                 'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array
                 'total_destination' => $map->total_destination, // You can join multiple relations here if it's an array
             ];
@@ -499,8 +505,8 @@ class BusinessTripController extends Controller
         $data['requested_by'] = $findData->requestedBy->name;
         $data['purpose_type_name'] = $findData->purposeType->name;
         $data['cost_center'] = $findData->costCenter?->cost_center;
-        $data['start_date'] = date('d-m-Y',strtotime($findData->detailAttendance()->orderBy('date','asc')->first()->date));
-        $data['end_date'] = date('d-m-Y',strtotime($findData->detailAttendance()->orderBy('date','desc')->first()->date));
+        $data['start_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'asc')->first()->date));
+        $data['end_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'desc')->first()->date));
 
         foreach ($findData->businessTripDestination as $destination) {
             $detail_attendance = [];
@@ -578,7 +584,8 @@ class BusinessTripController extends Controller
         return view('print', compact('data'));
     }
 
-    function detailBtRequestAPI($id) {
+    function detailBtRequestAPI($id)
+    {
         $findData  = BusinessTrip::find($id);
         $data = [];
         $data['request_no'] = $findData->request_no;
@@ -587,8 +594,8 @@ class BusinessTripController extends Controller
         $data['requested_by'] = $findData->requestedBy->name;
         $data['purpose_type_name'] = $findData->purposeType->name;
         $data['cost_center'] = $findData->costCenter?->cost_center;
-        $data['start_date'] = date('d-m-Y',strtotime($findData->detailAttendance()->orderBy('date','asc')->first()->date));
-        $data['end_date'] = date('d-m-Y',strtotime($findData->detailAttendance()->orderBy('date','desc')->first()->date));
+        $data['start_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'asc')->first()->date));
+        $data['end_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'desc')->first()->date));
 
         foreach ($findData->businessTripDestination as $destination) {
             $detail_attendance = [];

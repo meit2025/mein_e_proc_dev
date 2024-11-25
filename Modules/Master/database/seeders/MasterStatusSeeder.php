@@ -3,6 +3,7 @@
 namespace Modules\Master\Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Modules\Master\Models\MasterStatus;
 
 class MasterStatusSeeder extends Seeder
@@ -14,29 +15,43 @@ class MasterStatusSeeder extends Seeder
     {
         // $this->call([]);
 
+        DB::table('master_statuses')->truncate();
+
         $data = [
             [
-                "name" => 'Approve',
-                'code' => 'approve',
-                'classname' => 'bg-green-100 text-green-600 border-green-600'
-            ],
-            [
-                "name" => 'Waiting Approve',
+                "name" => 'Waiting Approve ',
                 'code' => 'waiting_approve',
                 'classname' => 'bg-orange-100 text-orange-600 border-orange-600'
             ],
 
-            [
-                "name" => 'Rejected',
-                'code' => 'rejected',
-                'classname' => 'bg-red-100 text-red-600 border-red-600'
-            ],
 
             [
                 "name" => 'Cancel',
                 'code' => 'cancel',
                 'classname' => 'bg-red-100 text-red-600 border-red-600'
             ],
+
+            [
+                "name" => 'Approve To :name',
+                'code' => 'approve_to',
+                'classname' => 'bg-green-100 text-green-600 border-green-600'
+            ],
+
+
+            [
+                "name" => 'Reject To :name',
+                'code' => 'reject_to',
+                'classname' => 'bg-red-100 text-red-600 border-red-600'
+            ],
+
+
+
+            [
+                "name" => 'Fully Approve',
+                'code' => 'fully_approve',
+                'classname' => 'bg-green-100 text-green-600 border-green-600'
+            ],
+
         ];
 
 

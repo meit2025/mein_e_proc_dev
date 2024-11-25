@@ -14,11 +14,11 @@ return new class extends Migration
         //
 
         Schema::table('business_trip', function (Blueprint $table) {
-            $table->unsignedBigInteger('status_id')->default(2);
+            $table->unsignedBigInteger('status_id')->default(1);
             $table->foreign('status_id')->on('master_statuses')->references('id')->onUpdate('cascade');
         });
         Schema::table('reimburses', function (Blueprint $table) {
-            $table->unsignedBigInteger('status_id')->default(2);
+            $table->unsignedBigInteger('status_id')->default(1);
             $table->foreign('status_id')->on('master_statuses')->references('id')->onUpdate('cascade');
         });
     }

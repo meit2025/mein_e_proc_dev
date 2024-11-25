@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
-        Schema::table('reimburse_groups', function (Blueprint $table) {
+        Schema::table('purchase_requisitions', function (Blueprint $table) {
+            //
+
             $table->unsignedBigInteger('status_id')->default(1);
-            $table->foreign('status_id')->on('master_statuses')->references('id')->onUpdate('cascade');
         });
     }
 
@@ -23,10 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
-
-        Schema::table('reimburse_groups', function (Blueprint $table) {
-            $table->dropForeign(['status_id']);
+        Schema::table('purchase_requisitions', function (Blueprint $table) {
+            //
             $table->dropColumn('status_id');
         });
     }

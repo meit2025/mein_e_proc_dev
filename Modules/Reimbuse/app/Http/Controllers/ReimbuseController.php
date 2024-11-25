@@ -192,8 +192,10 @@ class ReimbuseController extends Controller
                     'status' => [
                         'name' => $map->status->name,
                         'classname' => $map->status->classname,
+                        'code' =>
+                        $map->status->code
                     ],
-                    'status' => $this->reimbursementService->checkGroupStatus($map->code),
+                    // 'status' => $this->reimbursementService->checkGroupStatus($map->code),
                 ];
             });
             return $this->successResponse($data);
