@@ -147,10 +147,7 @@ class AuthController extends Controller
                             'password' => Hash::make($request->password),
                             'name' => 'Doe',
                             'nip' => "{$request->username}12345",
-                            'division' => 'IT',
                             'role_id' => null,
-                            'job_level' => 'staff',
-                            'immediate_spv' => '23456',
                         ]
                     );
 

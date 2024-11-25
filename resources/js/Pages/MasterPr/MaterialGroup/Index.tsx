@@ -11,10 +11,18 @@ import {
   EDIT_PAGE_MASTER_MATERIAL_GROUP,
 } from '@/endpoint/materialGroup/page';
 
+const roleAkses = 'master pr material group';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 export const Index = () => {
   return (
     <>
       <DataGridComponent
+        role={roleConfig}
         columns={columns}
         url={{
           url: GET_MASTER_MATERIAL_GROUP,

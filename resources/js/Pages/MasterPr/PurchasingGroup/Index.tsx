@@ -1,7 +1,4 @@
-import MainLayout from '@/Pages/Layouts/MainLayout';
-import { ReactNode } from 'react';
 import DataGridComponent from '@/components/commons/DataGrid';
-import { columns } from './model/listModel';
 import {
   DELET_MASTER_PURCHASING_GROUP,
   GET_MASTER_PURCHASING_GROUP,
@@ -10,21 +7,30 @@ import {
   CREATE_PAGE_MASTER_PURCHASING_GROUP,
   EDIT_PAGE_MASTER_PURCHASING_GROUP,
 } from '@/endpoint/purchasingGroup/page';
+import MainLayout from '@/Pages/Layouts/MainLayout';
+import { ReactNode } from 'react';
+import { columns } from './model/listModel';
 
+const roleAkses = 'master pr purchasing group';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 export const Index = () => {
   return (
-    <>
-      <DataGridComponent
-        columns={columns}
-        url={{
-          url: GET_MASTER_PURCHASING_GROUP,
-          addUrl: CREATE_PAGE_MASTER_PURCHASING_GROUP,
-          editUrl: EDIT_PAGE_MASTER_PURCHASING_GROUP,
-          deleteUrl: DELET_MASTER_PURCHASING_GROUP,
-        }}
-        labelFilter='search'
-      />
-    </>
+    <DataGridComponent
+      role={roleConfig}
+      columns={columns}
+      url={{
+        url: GET_MASTER_PURCHASING_GROUP,
+        addUrl: CREATE_PAGE_MASTER_PURCHASING_GROUP,
+        editUrl: EDIT_PAGE_MASTER_PURCHASING_GROUP,
+        deleteUrl: DELET_MASTER_PURCHASING_GROUP,
+      }}
+      labelFilter='search'
+    />
   );
 };
 

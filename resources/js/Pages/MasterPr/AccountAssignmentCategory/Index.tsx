@@ -11,9 +11,17 @@ import {
   EDIT_PAGE_MASTER_ACCOUNT_ASSIGNMENT_CATEGORY,
 } from '@/endpoint/accountAssignmentCategory/page';
 
+const roleAkses = 'master pr account assignment category';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 export const Index = () => {
   return (
     <DataGridComponent
+      role={roleConfig}
       columns={columns}
       url={{
         url: GET_MASTER_ACCOUNT_ASSIGNMENT_CATEGORY,

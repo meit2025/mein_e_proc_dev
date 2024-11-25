@@ -73,6 +73,29 @@ const FormMapping: React.FC<FormMappingProps> = ({
     setIsLoading(false);
   };
 
+  function isConditionMet(
+    parameterValue: any, // Value being watched
+    conditionalValue: any, // Value to compare against
+    conditionType: string = '=', // Type of comparison, default to '='
+  ): boolean {
+    switch (conditionType) {
+      case '=': // Equal
+        return parameterValue === conditionalValue;
+      case '>': // Greater than
+        return parameterValue > conditionalValue;
+      case '<': // Less than
+        return parameterValue < conditionalValue;
+      case '>=': // Greater than or equal
+        return parameterValue >= conditionalValue;
+      case '<=': // Less than or equal
+        return parameterValue <= conditionalValue;
+      case '!==': // Less than or equal
+        return parameterValue !== conditionalValue;
+      default: // Unknown condition type
+        return parameterValue === conditionalValue;
+    }
+  }
+
   return (
     <FormProvider {...methods}>
       <Loading isLoading={isLoading || isLoadings} />
@@ -89,7 +112,11 @@ const FormMapping: React.FC<FormMappingProps> = ({
                   ) : (
                     <>
                       {!field.conditional ||
-                      watch(field.parameterConditional ?? '') === field.valueConditional ? (
+                      isConditionMet(
+                        watch(field.parameterConditional ?? ''),
+                        field.valueConditional,
+                        field.conditionalType,
+                      ) ? (
                         <FormWrapper model={field} />
                       ) : null}
                     </>

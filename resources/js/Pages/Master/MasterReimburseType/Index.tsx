@@ -20,6 +20,14 @@ interface propsType {
   listGrades?: Grade[];
 }
 
+const roleAkses = 'master reimburse type';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
+
 export const Index = ({ listGrades }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
@@ -39,9 +47,9 @@ export const Index = ({ listGrades }: propsType) => {
   return (
     <>
       <div className='flex md:mb-4 mb-2 w-full justify-end'>
-        <Button onClick={openFormHandler}>
+        {/* <Button onClick={openFormHandler}>
           <PlusIcon />
-        </Button>
+        </Button> */}
 
         <CustomDialog
           onClose={() => setOpenForm(false)}
@@ -58,6 +66,8 @@ export const Index = ({ listGrades }: propsType) => {
         </CustomDialog>
       </div>
       <DataGridComponent
+        role={roleConfig}
+        onCreate={openFormHandler}
         columns={columns}
         actionType='dropdown'
         onEdit={(value) => {

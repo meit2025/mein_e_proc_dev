@@ -19,4 +19,28 @@ export const modelDropdowns = [
       tabel: 'roles',
     },
   },
+  {
+    dropdown: 'division_id',
+    struct: {
+      name: 'name',
+      id: 'id',
+      tabel: 'master_divisions',
+    },
+  },
+  {
+    dropdown: 'position_id',
+    struct: {
+      name: 'name',
+      id: 'id',
+      tabel: 'master_positions',
+    },
+  },
+  {
+    dropdown: 'departement_id',
+    struct: {
+      name: 'name',
+      id: 'id',
+      tabel: 'master_departments',
+    },
+  },
 ];

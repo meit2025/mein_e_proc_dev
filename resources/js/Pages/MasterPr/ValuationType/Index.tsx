@@ -1,7 +1,4 @@
-import MainLayout from '@/Pages/Layouts/MainLayout';
-import { ReactNode } from 'react';
 import DataGridComponent from '@/components/commons/DataGrid';
-import { columns } from './model/listModel';
 import {
   DELET_MASTER_VALUATION_TYPE,
   GET_MASTER_VALUATION_TYPE,
@@ -10,11 +7,23 @@ import {
   CREATE_PAGE_MASTER_VALUATION_TYPE,
   EDIT_PAGE_MASTER_VALUATION_TYPE,
 } from '@/endpoint/valuationType/page';
+import MainLayout from '@/Pages/Layouts/MainLayout';
+import { ReactNode } from 'react';
+import { columns } from './model/listModel';
+
+const roleAkses = 'master pr valuation type';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 
 export const Index = () => {
   return (
     <>
       <DataGridComponent
+        role={roleConfig}
         columns={columns}
         url={{
           url: GET_MASTER_VALUATION_TYPE,

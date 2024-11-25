@@ -4,6 +4,9 @@ namespace Modules\Master\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\Approval\Models\ApprovalPr;
+use Modules\Approval\Models\ApprovalTrackingNumberAuto;
+
 // use Modules\Master\Database\Factories\PurchasingGroupFactory;
 
 class PurchasingGroup extends Model
@@ -23,4 +26,13 @@ class PurchasingGroup extends Model
     // {
     //     // return PurchasingGroupFactory::new();
     // }
+    public function approvalPr()
+    {
+        return $this->belongsTo(ApprovalPr::class);
+    }
+
+    public function approvalTrackingNumber()
+    {
+        return $this->belongsTo(ApprovalTrackingNumberAuto::class);
+    }
 }

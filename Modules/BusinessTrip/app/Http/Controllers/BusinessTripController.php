@@ -381,15 +381,15 @@ class BusinessTripController extends Controller
                 'purpose_type_id' => $request->purpose_type_id,
                 'request_for' => $request->request_for,
                 'cost_center_id' => $request->cost_center_id,
-                'pajak_id' => $request->pajak_id,
-                'purchasing_group_id' => $request->purchasing_group_id,
                 'remarks' => $request->remark,
                 'total_destination' => $request->total_destination,
                 'created_by' => auth()->user()->id,
                 'type' => 'request',
-                'cash_advance' => $request->cash_advance == "true" ? 1 : 0,
-                'total_percent' => $request->total_percent,
-                'total_cash_advance' => $request->total_cash_advance,
+                // 'pajak_id' => $request->pajak_id,
+                // 'purchasing_group_id' => $request->purchasing_group_id,
+                // 'cash_advance' => $request->cash_advance == "true" ? 1 : 0,
+                // 'total_percent' => $request->total_percent,
+                // 'total_cash_advance' => $request->total_cash_advance,
             ]);
 
             if ($request->attachment != null) {
@@ -407,6 +407,12 @@ class BusinessTripController extends Controller
                     'destination' => $data_destination['destination'],
                     'business_trip_start_date' => date('Y-m-d', strtotime($data_destination['business_trip_start_date'])),
                     'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
+                    'pajak_id' => $data_destination['pajak_id'],
+                    'purchasing_group_id' => $data_destination['purchasing_group_id'],
+                    'cash_advance' => $data_destination['cash_advance'] == "true" ? 1 : 0,
+                    'reference_number' => $data_destination['cash_advance'] == "true" ? $data_destination['reference_number'] : null,
+                    'total_percent' => $data_destination['cash_advance'] == "true" ? $data_destination['total_percent'] : null,
+                    'total_cash_advance' => $data_destination['cash_advance'] == "true" ? $data_destination['total_cash_advance'] : null,
                 ]);
                 foreach ($data_destination['detail_attedances'] as $key => $destination) {
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
@@ -448,9 +454,10 @@ class BusinessTripController extends Controller
 
             DB::commit();
             SapJobs::dispatch($businessTrip->id, 'BT');
+            // return $this->successResponse("All data has been processed successfully");
         } catch (\Exception $e) {
-            dd($e);
             DB::rollBack();
+            // return $this->errorResponse($e->getMessage());
         }
     }
 

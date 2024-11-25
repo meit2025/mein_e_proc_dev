@@ -6,11 +6,25 @@ import { columns } from './models/models';
 import { Button } from '@/components/shacdn/button';
 import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import { GET_LIST_REIMBURSE_PERIOD, DESTROY_REIMBURSE_PERIOD } from '@/endpoint/reimbursePeriod/api';
+import {
+  GET_LIST_REIMBURSE_PERIOD,
+  DESTROY_REIMBURSE_PERIOD,
+} from '@/endpoint/reimbursePeriod/api';
 import { FormType } from '@/lib/utils';
 import ReimbursePeriodForm from './component/form';
-import { STORE_REIMBURSE_PERIOD, EDIT_REIMBURSE_PERIOD, UPDATE_REIMBURSE_PERIOD } from '@/endpoint/reimbursePeriod/api';
+import {
+  STORE_REIMBURSE_PERIOD,
+  EDIT_REIMBURSE_PERIOD,
+  UPDATE_REIMBURSE_PERIOD,
+} from '@/endpoint/reimbursePeriod/api';
 
+const roleAkses = 'master reimburse period';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 export const Index = () => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
@@ -23,15 +37,15 @@ export const Index = () => {
     setFormType({
       type: FormType.create,
       id: null,
-    })
+    });
     setOpenForm(!openForm);
   }
   return (
     <>
       <div className='flex md:mb-4 mb-2 w-full justify-end'>
-        <Button onClick={openFormHandler}>
+        {/* <Button onClick={openFormHandler}>
           <PlusIcon />
-        </Button>
+        </Button> */}
 
         <CustomDialog
           onClose={() => setOpenForm(false)}
@@ -48,6 +62,8 @@ export const Index = () => {
         </CustomDialog>
       </div>
       <DataGridComponent
+        onCreate={openFormHandler}
+        role={roleConfig}
         columns={columns}
         actionType='dropdown'
         onEdit={(value) => {
@@ -59,7 +75,7 @@ export const Index = () => {
         }}
         url={{
           url: GET_LIST_REIMBURSE_PERIOD,
-          deleteUrl: DESTROY_REIMBURSE_PERIOD
+          deleteUrl: DESTROY_REIMBURSE_PERIOD,
         }}
         labelFilter='search'
       />
