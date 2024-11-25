@@ -194,6 +194,8 @@ export const BussinessTripFormV1 = ({
   function setAllowancesProperty(destinations: any[]) {
     const destinationForm = destinations.map((destination) => ({
       destination: destination.destination || '', // Adjust field names as needed
+      pajak: destination.pajak || '', // Adjust field names as needed
+      purchasing_group: destination.purchasing_group || '', // Adjust field names as needed
       business_trip_start_date: new Date(destination.business_trip_start_date),
       business_trip_end_date: new Date(destination.business_trip_end_date),
       allowances: destination.allowances || [],
@@ -266,18 +268,8 @@ export const BussinessTripFormV1 = ({
                   <td className='text-sm'>{businessTripDetail.name_request}</td>
                 </tr>
                 <tr>
-                  <td width={200}>Pajak</td>
-                  <td className='text-sm'>{businessTripDetail?.pajak?.mwszkz}</td>
-                </tr>
-                <tr>
                   <td width={200}>Cost Center</td>
                   <td className='text-sm'>{businessTripDetail?.cost_center?.company_code}</td>
-                </tr>
-                <tr>
-                  <td width={200}>Purchasing Group</td>
-                  <td className='text-sm'>
-                    {businessTripDetail?.purchasing_group?.purchasing_group}
-                  </td>
                 </tr>
               </>
             )}
@@ -581,6 +573,16 @@ export function BussinessDestinationForm({
             <td width={200}>Destination</td>
             <td>{destination.destination}</td>
           </tr>
+          <tr>
+            <td width={200}>Pajak</td>
+            <td className='text-sm'>{destination?.pajak}</td>
+            </tr>
+            <tr>
+                <td width={200}>Purchasing Group</td>
+                <td className='text-sm'>
+                {destination?.purchasing_group}
+                </td>
+            </tr>
           <tr>
             <td width={200}>Bussines Trip Date</td>
             <td className='flex space-x-2 items-center gap-3'>

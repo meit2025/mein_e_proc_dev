@@ -188,6 +188,12 @@ class BusinessTripController extends Controller
                 'destination' => $value->destination,
                 'business_trip_start_date' => $value->business_trip_start_date,
                 'business_trip_end_date' => $value->business_trip_end_date,
+                'pajak_id' => $value->pajak_id,
+                'purchasing_group_id' => $value->purchasing_group_id,
+                'reference_number' => $value->reference_number,
+                'cash_advance' => $value->cash_advance,
+                'total_cash_advance' => $value->total_cash_advance,
+                'total_percent' => $value->total_percent,
                 'detail_attedances' => $detailAttendance,
                 'allowances' => $allowances,
                 'allowancesResultItem' => $allowancesResultItem,
@@ -338,7 +344,7 @@ class BusinessTripController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        dd($request->all(),$id);
     }
 
     /**
