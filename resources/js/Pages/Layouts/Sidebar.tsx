@@ -40,6 +40,10 @@ import { ScrollArea } from '@/components/shacdn/scroll-area';
 import { LIST_PAGE_MASTER_POSITION } from '@/endpoint/masterPosition/page';
 import { LIST_PAGE_MASTER_DIVISION } from '@/endpoint/masterDivision/page';
 import { LIST_PAGE_MASTER_DEPARTMENT } from '@/endpoint/masterDepartment/page';
+import { LIST_PAGE_MASTER_TRACKING_NUMBER } from '@/endpoint/masterTrackingNumber/page';
+import { LIST_PAGE_SETTING_APPROVAL_PR } from '@/endpoint/settingApprovalPr/page';
+import { LIST_PAGE_TRACKING_NUMBER_AUTO } from '@/endpoint/approvalTrackingNumberAuto/page';
+import { LIST_PAGE_TRACKING_NUMBER_CHOOSE } from '@/endpoint/approvalTrackingNumberChoose/page';
 
 export const RuteTitle = (title: string) => {
   return (
@@ -280,11 +284,73 @@ const sidebar = [
         title: 'Approval',
         icon: 'ki-copy-success',
         route: '/',
+        role: [
+          'approval create',
+          'approval view',
+          'approval update',
+          'approval delete',
+          'tracking number create',
+          'tracking number view',
+          'tracking number update',
+          'tracking number delete',
+          'approval pr create',
+          'approval pr view',
+          'approval pr update',
+          'approval pr delete',
+          'tracking number auto create',
+          'tracking number auto view',
+          'tracking number auto update',
+          'tracking number auto delete',
+          'tracking number choose create',
+          'tracking number choose view',
+          'tracking number choose update',
+          'tracking number choose delete',
+        ],
         sub: [
           {
             name: 'Approval',
             route: LIST_PAGE_APPROVAL_ROUTE,
             role: ['approval create', 'approval view', 'approval update', 'approval delete'],
+          },
+          {
+            name: 'Approval Pr',
+            route: LIST_PAGE_SETTING_APPROVAL_PR,
+            role: [
+              'approval pr create',
+              'approval pr view',
+              'approval pr update',
+              'approval pr delete',
+            ],
+          },
+          {
+            name: 'Tracking Number Auto',
+            route: LIST_PAGE_TRACKING_NUMBER_AUTO,
+            role: [
+              'tracking number auto create',
+              'tracking number auto view',
+              'tracking number auto update',
+              'tracking number auto delete',
+            ],
+          },
+          {
+            name: 'Tracking Number Choose',
+            route: LIST_PAGE_TRACKING_NUMBER_CHOOSE,
+            role: [
+              'tracking number choose create',
+              'tracking number choose view',
+              'tracking number choose update',
+              'tracking number choose delete',
+            ],
+          },
+          {
+            name: 'Master Tracking Number',
+            route: LIST_PAGE_MASTER_TRACKING_NUMBER,
+            role: [
+              'tracking number create',
+              'tracking number view',
+              'tracking number update',
+              'tracking number delete',
+            ],
           },
         ],
       },

@@ -4,6 +4,8 @@ namespace Modules\Master\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\Approval\Models\ApprovalPr;
+
 // use Modules\Master\Database\Factories\DocumentTypeFactory;
 
 class DocumentType extends Model
@@ -22,4 +24,9 @@ class DocumentType extends Model
     // {
     //     // return DocumentTypeFactory::new();
     // }
+
+    public function approvalPr()
+    {
+        return $this->belongsTo(ApprovalPr::class);
+    }
 }
