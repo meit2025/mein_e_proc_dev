@@ -101,6 +101,7 @@ export const Index = ({
       </div>
 
       <DataGridComponent
+        isHistory={true}
         role={roleConfig}
         onCreate={openFormHandler}
         columns={columns}

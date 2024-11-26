@@ -22,7 +22,13 @@ export const Index = () => {
   };
 
   return (
-    <DataGridComponent role={roleConfig} columns={columns} url={urlConfig} labelFilter='search' />
+    <DataGridComponent
+      isHistory={true}
+      role={roleConfig}
+      columns={columns}
+      url={urlConfig}
+      labelFilter='search'
+    />
   );
 };
 
