@@ -1,7 +1,13 @@
-import MainLayout from '@/Pages/Layouts/MainLayout';
-import React, { ReactNode } from 'react';
+import { CustomDialog } from '@/components/commons/CustomDialog';
 import DataGridComponent from '@/components/commons/DataGrid';
+import { DELET_API_BUSINESS_TRIP, GET_LIST_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
+import { DETAIL_PAGE_BUSINESS_TRIP } from '@/endpoint/business-trip/page';
+import MainLayout from '@/Pages/Layouts/MainLayout';
 import { usePage } from '@inertiajs/react';
+import React, { ReactNode } from 'react';
+import { DestinationModel } from '../Destination/models/models';
+import { PurposeTypeModel } from '../PurposeType/models/models';
+import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
 import {
   BusinessTripType,
   columns,
@@ -10,20 +16,6 @@ import {
   PurchasingGroup,
   UserModel,
 } from './models/models';
-import { GET_MASTER_ASSET } from '@/endpoint/masterAsset/api';
-import { Button } from '@/components/shacdn/button';
-import { PlusIcon } from 'lucide-react';
-import { CustomDialog } from '@/components/commons/CustomDialog';
-import {
-  DELET_API_BUSINESS_TRIP,
-  PRINT_API_BUSINESS_TRIP,
-  GET_LIST_BUSINESS_TRIP,
-} from '@/endpoint/business-trip/api';
-import { AllowanceCategoryModel } from '../AllowanceCategory/model/AllowanceModel';
-import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
-import { PurposeTypeModel } from '../PurposeType/models/models';
-import { DETAIL_PAGE_BUSINESS_TRIP } from '@/endpoint/business-trip/page';
-import { DestinationModel } from '../Destination/models/models';
 interface propsType {
   listPurposeType: PurposeTypeModel[];
   users: UserModel[];
@@ -103,6 +95,7 @@ export const Index = ({
         </CustomDialog>
       </div>
       <DataGridComponent
+        isHistory={true}
         role={{
           detail: `${roleAkses} view`,
           create: `${roleAkses} create`,

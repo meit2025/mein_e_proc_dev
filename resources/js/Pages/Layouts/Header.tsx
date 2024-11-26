@@ -6,14 +6,15 @@ import { useAlert } from '@/contexts/AlertContext';
 import axiosInstance from '@/axiosInstance';
 import { Notification } from '@/interfaces/notifikasi/notifikasi';
 import { Loading } from '@/components/commons/Loading';
-interface User {
+export interface User {
   id: number;
   name: string;
   email: string;
   role_id: string;
+  is_approval: boolean;
 }
 
-interface Auth {
+export interface Auth {
   user?: User;
 }
 

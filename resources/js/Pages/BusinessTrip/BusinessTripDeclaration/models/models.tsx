@@ -1,3 +1,4 @@
+import { CustomStatus } from '@/components/commons/CustomStatus';
 import { GridColDef } from '@mui/x-data-grid';
 
 export const columns: GridColDef[] = [
@@ -19,6 +20,22 @@ export const columns: GridColDef[] = [
   { field: 'request_for', headerName: 'Request For', width: 200, filterable: true },
   { field: 'created_at', headerName: 'Request Date', width: 200, filterable: true },
   { field: 'remarks', headerName: 'Remark', width: 200, filterable: true },
+
+  {
+    field: 'status',
+    headerName: 'Status',
+    width: 200,
+    filterable: true,
+    renderCell: (params: any) => {
+      return (
+        <CustomStatus
+          name={params.row.status?.name}
+          className={params.row.status?.classname}
+          code={params.row.status?.code}
+        />
+      );
+    },
+  },
 ];
 
 // Fungsi untuk menangani aksi cetak detail
