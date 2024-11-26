@@ -133,7 +133,7 @@ class BusinessTripDeclarationController extends Controller
             $destinations[] = [
                 'destination' => $value->destination,
                 'pajak' => $value->pajak->mwszkz ?? '',
-                'purchasing_group' => $value->purchasingGroup->purchasing_group,
+                'purchasing_group' => $value->purchasingGroup->purchasing_group ?? '',
                 'business_trip_start_date' => $value->business_trip_start_date,
                 'business_trip_end_date' => $value->business_trip_end_date,
                 'detail_attedances' => $detailAttendance,
