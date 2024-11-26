@@ -1,3 +1,4 @@
+import { CustomStatus } from '@/components/commons/CustomStatus';
 import { FamilyModel } from '@/Pages/Master/Family/models/models';
 
 export const columns: GridColDef[] = [
@@ -7,7 +8,21 @@ export const columns: GridColDef[] = [
   { field: 'remark', headerName: 'Remark', width: 200, filterable: true },
   { field: 'balance', headerName: 'Total Balance', width: 200, filterable: true },
   { field: 'form', headerName: 'Reimburse Form', width: 200, filterable: true },
-  { field: 'status', headerName: 'Status', width: 200, filterable: true },
+  {
+    field: 'status',
+    headerName: 'Status',
+    width: 200,
+    filterable: true,
+    renderCell: (params: any) => {
+      return (
+        <CustomStatus
+          name={params.row.status?.name}
+          className={params.row.status?.classname}
+          code={params.row.status?.code}
+        />
+      );
+    },
+  },
 ];
 
 export interface Quota {

@@ -28,7 +28,7 @@ class BusinessTripDeclarationController extends Controller
     {
         $users = User::select('nip', 'name', 'id')->get();
         $inBusinessTripRequest = BusinessTrip::where('type', 'declaration')->pluck('parent_id')->toArray();
-        $listBusinessTrip = BusinessTrip::where('type', 'request')->whereNotIn('id',$inBusinessTripRequest)->get();
+        $listBusinessTrip = BusinessTrip::where('type', 'request')->whereNotIn('id', $inBusinessTripRequest)->get();
         $listPurposeType = PurposeType::select('name', 'code', 'id')->get();
         return Inertia::render('BusinessTrip/BusinessTripDeclaration/index', compact('users', 'listPurposeType', 'listBusinessTrip'));
     }
@@ -278,7 +278,7 @@ class BusinessTripDeclarationController extends Controller
                 'standar_detail_allowance' => $standar_detail_allowance,
                 'request_detail_allowance' => $request_detail_allowance,
                 'declaration_detail_allowance' => $declaration_detail_allowance,
-                'other_allowance' => number_format($destination->other_allowance,0,'',''),
+                'other_allowance' => number_format($destination->other_allowance, 0, '', ''),
                 'total_standard' => $total_standard,
                 'total_request' => $total_request,
                 'total_declaration' => $total_declaration + $destination->other_allowance,
@@ -316,7 +316,7 @@ class BusinessTripDeclarationController extends Controller
     public function listAPI(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType']);
+        $query =  BusinessTrip::query()->with(['purposeType', 'status']);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'asc');
@@ -337,6 +337,12 @@ class BusinessTripDeclarationController extends Controller
                 'request_no' => $requestNo,
                 'request_for' => $requestFor,
                 'remarks' => $map->remarks,
+                'status' => [
+                    'name' => $map->status->name,
+                    'classname' => $map->status->classname,
+                    'code' =>
+                    $map->status->code
+                ],
                 'created_at' => date('d/m/Y', strtotime($map->created_at)),
                 // 'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array
                 // 'total_destination' => $map->total_destination, // You can join multiple relations here if it's an array
