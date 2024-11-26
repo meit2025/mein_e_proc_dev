@@ -216,9 +216,9 @@ export const BussinessTripFormV1 = ({
       const response = await axios.get(url);
       const data = response.data.data;
       console.log(data, ' Response Detailxxxx');
-      form.setValue('purpose_type_id', data.purpose_type_id);
-      form.setValue('request_for', data.request_for.id);
-      form.setValue('cost_center_id', data.cost_center_id);
+      form.setValue('purpose_type_id', data.purpose_type_id.toString());
+      form.setValue('request_for', data.request_for.id.toString());
+      form.setValue('cost_center_id', data.cost_center_id.toString());
       form.setValue('remark', data.remarks);
       form.setValue('total_destination', data.total_destination);
         console.log(data.destinations,' data.destinations')
@@ -228,14 +228,31 @@ export const BussinessTripFormV1 = ({
           destination: destination.destination,
           pajak_id: destination.pajak_id,
           purchasing_group_id: destination.purchasing_group_id,
-          cash_advance: destination.cash_advance,
+          cash_advance: destination.cash_advance == 1 ? true : false,
           reference_number: destination.reference_number,
           total_percent: destination.total_percent,
           total_cash_advance: destination.total_cash_advance,
           business_trip_start_date: new Date(destination.business_trip_start_date),
           business_trip_end_date: new Date(destination.business_trip_end_date),
-          detail_attedances: destination.detail_attedances,
-          allowances: destination.allowances,
+          detail_attedances: destination.detail_attedances.map((detail:any) => {
+            return {
+                ...detail,
+                date: new Date(detail.date),
+            }
+          }),
+          allowances: destination.allowances.map((allowance:any) => {
+            return {
+              ...allowance,
+              default_price: parseInt(allowance.default_price),
+              subtotal: parseInt(allowance.subtotal),
+              detail: allowance.detail.map((detail:any) => {
+                return {
+                  ...detail,
+                  date: detail?.date != null ? new Date(detail.date) : null,
+                };
+              }),
+            };
+          }),
         })),
       );
     } catch (e) {
@@ -273,6 +290,7 @@ export const BussinessTripFormV1 = ({
   const { showToast } = useAlert();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log(values, ' valuesss')
     try {
       const formData = new FormData();
       // Append group data
@@ -323,7 +341,7 @@ export const BussinessTripFormV1 = ({
         });
         showToast('succesfully created data', 'success');
     }else{
-        await Inertia.put(`${EDIT_API_BUSINESS_TRIP}/${id}`, formData, {
+        await Inertia.post(`${EDIT_API_BUSINESS_TRIP}/${id}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -833,6 +851,7 @@ export function BussinessDestinationForm({
 
     //   // Calculate total based on totalPercent and allowance
     React.useEffect(() => {
+        console.log(form.getValues(`destinations`), ' edit destination')
         if (typeEdit == BusinessTripType.edit) {
             setIsCashAdvance(form.getValues(`destinations.${index}.cash_advance`))
         }
@@ -905,7 +924,7 @@ export function BussinessDestinationForm({
                           </SelectTrigger>
                           <SelectContent>
                             {pajak.map((item) => (
-                              <SelectItem value={item.id}>{item.mwszkz}</SelectItem>
+                              <SelectItem value={item.id.toString()}>{item.mwszkz}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -935,7 +954,7 @@ export function BussinessDestinationForm({
                             </SelectTrigger>
                             <SelectContent>
                             {purchasingGroup.map((item) => (
-                                <SelectItem value={item.id}>
+                                <SelectItem value={item.id.toString()}>
                                 {item.purchasing_group}
                                 </SelectItem>
                             ))}

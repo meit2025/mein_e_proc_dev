@@ -83,7 +83,7 @@ class BusinessTripController extends Controller
                         'default_price' => number_format($row->standard_value, 0, '.', ''),
                         'type' => $row->allowance->type,
                         'subtotal' => number_format($row->standard_value, 0, '.', ''),
-                        'currency' => $row->allowance->currency,
+                        'currency' => $row->allowance->currency_id,
                         'request_value' => $row->allowance->request_value,
                         'detail' => [] // Array untuk menampung detail
                     ];
@@ -106,7 +106,7 @@ class BusinessTripController extends Controller
                         'default_price' => number_format($row->standard_value, 0, '.', ''),
                         'type' => $row->allowance->type,
                         'subtotal' => number_format($row->standard_value, 0, '.', ''),
-                        'currency' => $row->allowance->currency,
+                        'currency' => $row->allowance->currency_id,
                         'request_value' => $row->allowance->request_value,
                         'detail' => []
                     ];
@@ -114,7 +114,7 @@ class BusinessTripController extends Controller
 
                 // Tambahkan detail allowance
                 $allowances[$allowanceId]['detail'][] = [
-                    'date' => '', // Sesuaikan dengan nama kolom tanggal di detailDestinationTotal
+                    'date' => null, // Sesuaikan dengan nama kolom tanggal di detailDestinationTotal
                     'request_price' => $row->price // Sesuaikan dengan kolom request_price di detailDestinationTotal
                 ];
             }
@@ -134,7 +134,7 @@ class BusinessTripController extends Controller
                         'default_price' => number_format($rowDay->standard_value, 0, '.', ''),
                         'type' => $rowDay->allowance->type,
                         'subtotal' => number_format($rowDay->standard_value, 0, '.', ''),
-                        'currency' => $rowDay->allowance->currency,
+                        'currency' => $rowDay->allowance->currency_id,
                         'request_value' => $rowDay->allowance->request_value,
                         'detail' => [] // Array untuk menampung detail
                     ];
@@ -157,7 +157,7 @@ class BusinessTripController extends Controller
                         'default_price' => number_format($rowTotal->standard_value, 0, '.', ''),
                         'type' => $rowTotal->allowance->type,
                         'subtotal' => number_format($rowTotal->standard_value, 0, '.', ''),
-                        'currency' => $rowTotal->allowance->currency,
+                        'currency' => $rowTotal->allowance->currency_id,
                         'request_value' => $rowTotal->allowance->request_value,
                         'detail' => []
                     ];
@@ -165,7 +165,7 @@ class BusinessTripController extends Controller
 
                 // Tambahkan detail allowance
                 $allowancesResultItem[$allowanceId]['detail'][] = [
-                    'date' => '', // Sesuaikan dengan nama kolom tanggal di detailDestinationTotal
+                    'date' => null, // Sesuaikan dengan nama kolom tanggal di detailDestinationTotal
                     'request_price' => $rowTotal->price // Sesuaikan dengan kolom request_price di detailDestinationTotal
                 ];
             }
@@ -188,8 +188,8 @@ class BusinessTripController extends Controller
                 'destination' => $value->destination,
                 'business_trip_start_date' => $value->business_trip_start_date,
                 'business_trip_end_date' => $value->business_trip_end_date,
-                'pajak_id' => $value->pajak_id,
-                'purchasing_group_id' => $value->purchasing_group_id,
+                'pajak_id' => "$value->pajak_id",
+                'purchasing_group_id' => "$value->purchasing_group_id",
                 'reference_number' => $value->reference_number,
                 'cash_advance' => $value->cash_advance,
                 'total_cash_advance' => $value->total_cash_advance,
@@ -225,7 +225,7 @@ class BusinessTripController extends Controller
                         'default_price' => number_format($row->standard_value, 0, '.', ''),
                         'type' => $row->allowance->type,
                         'subtotal' => number_format($row->standard_value, 0, '.', ''),
-                        'currency' => $row->allowance->currency,
+                        'currency' => $row->allowance->currency_id,
                         'request_value' => $row->allowance->request_value,
                         'detail' => [] // Array untuk menampung detail
                     ];
@@ -248,7 +248,7 @@ class BusinessTripController extends Controller
                         'default_price' => number_format($row->standard_value, 0, '.', ''),
                         'type' => $row->allowance->type,
                         'subtotal' => number_format($row->standard_value, 0, '.', ''),
-                        'currency' => $row->allowance->currency,
+                        'currency' => $row->allowance->currency_id,
                         'request_value' => $row->allowance->request_value,
                         'detail' => []
                     ];
@@ -276,7 +276,7 @@ class BusinessTripController extends Controller
                         'default_price' => number_format($rowDay->standard_value, 0, '.', ''),
                         'type' => $rowDay->allowance->type,
                         'subtotal' => number_format($rowDay->standard_value, 0, '.', ''),
-                        'currency' => $rowDay->allowance->currency,
+                        'currency' => $rowDay->allowance->currency_id,
                         'request_value' => $rowDay->allowance->request_value,
                         'detail' => [] // Array untuk menampung detail
                     ];
@@ -299,7 +299,7 @@ class BusinessTripController extends Controller
                         'default_price' => number_format($rowTotal->standard_value, 0, '.', ''),
                         'type' => $rowTotal->allowance->type,
                         'subtotal' => number_format($rowTotal->standard_value, 0, '.', ''),
-                        'currency' => $rowTotal->allowance->currency,
+                        'currency' => $rowTotal->allowance->currency_id,
                         'request_value' => $rowTotal->allowance->request_value,
                         'detail' => []
                     ];
