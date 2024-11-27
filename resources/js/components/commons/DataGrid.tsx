@@ -22,6 +22,9 @@ import {
 import { CaretSortIcon, ChevronDownIcon, DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { Button as ShacdnButton } from '@/components/shacdn/button';
 import { Edit, Trash, Trash2Icon } from 'lucide-react';
+import CustomTab from './CustomTab';
+import { Tab, Tabs } from '@mui/material';
+import { Auth, User } from '@/Pages/Layouts/Header';
 
 interface UrlDataGrid {
   url: string;
@@ -54,7 +57,15 @@ interface DataGridProps {
   buttonActionCustome?: ReactNode;
   deleteConfirmationText?: string;
   titleConfirmationText?: string;
+  isHistory?: boolean;
 }
+
+const a11yProps = (index: number) => {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+};
 
 const DataGridComponent: React.FC<DataGridProps> = ({
   columns,
@@ -71,6 +82,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   buttonActionCustome,
   deleteConfirmationText,
   titleConfirmationText,
+  isHistory = false,
   role,
 }) => {
   const [rows, setRows] = useState([]);
@@ -83,11 +95,12 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
   const [modalDelete, setModalDelete] = useState<number | null>(null);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+  const [value, setValue] = useState(0);
   const [rowCount, setRowCount] = useState(0);
   const [search, setSearch] = useState('');
   const { showToast } = useAlert();
 
-  const { props } = usePage<{ auth: { permission: string[] } }>();
+  const { props } = usePage<{ auth: { permission: string[]; user: User } }>();
 
   const permissions = props.auth?.permission || [];
 
@@ -296,112 +309,126 @@ const DataGridComponent: React.FC<DataGridProps> = ({
         ]
       : [];
 
+  const handleChange = (event: any, newValue: number) => {
+    setValue(newValue);
+  };
   return (
     <Box>
       <Box sx={{ height: '45rem', width: '100%', overflowX: 'auto' }}>
-        <div className='lg:col-span-2'>
-          <div className='grid'>
-            <div className='card card-grid h-full min-w-full'>
-              <div className='card-header'>
-                <h3 className='card-title'>
-                  <div className='input input-sm max-w-48'>
-                    <i className='ki-filled ki-magnifier'></i>
+        <Box sx={{ width: '100%' }}>
+          {isHistory && props.auth?.user?.is_approval && (
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs value={value} onChange={handleChange} aria-label='dynamic tabs example'>
+                <Tab key={0} label={'List'} {...a11yProps(0)} />
+                <Tab key={1} label={'Approval'} {...a11yProps(0)} />
+              </Tabs>
+            </Box>
+          )}
 
-                    <input
-                      placeholder={labelFilter}
-                      type='text'
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      style={{
-                        width: '100%',
-                        maxWidth: '200px',
-                        marginBottom: '10p',
-                      }}
-                    />
+          <div className='lg:col-span-2 mt-2'>
+            <div className='grid'>
+              <div className='card card-grid h-full min-w-full'>
+                <div className='card-header'>
+                  <h3 className='card-title'>
+                    <div className='input input-sm max-w-48'>
+                      <i className='ki-filled ki-magnifier'></i>
+
+                      <input
+                        placeholder={labelFilter}
+                        type='text'
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        style={{
+                          width: '100%',
+                          maxWidth: '200px',
+                          marginBottom: '10p',
+                        }}
+                      />
+                    </div>
+                  </h3>
+
+                  {/* Flex container for the buttons */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
+                      gap: '10px', // Add consistent spacing between elements
+                    }}
+                  >
+                    {(onCreate || url.addUrl) && (
+                      <>
+                        {(!role || permissions.includes(role?.create ?? '')) && (
+                          <Link
+                            href={url.addUrl ?? '#'}
+                            className='btn btn-success'
+                            onClick={(e) => {
+                              if (onCreate) {
+                                e.preventDefault();
+                                onCreate();
+                              }
+                            }}
+                            style={{ marginRight: '10px', marginBottom: '10px' }} // Add margin for spacing
+                          >
+                            <i className='ki-filled ki-additem'></i>
+                            Add New
+                          </Link>
+                        )}
+                      </>
+                    )}
+
+                    {onExport && (
+                      <Button
+                        className='btn'
+                        variant='contained'
+                        onClick={() => onExport()}
+                        color='primary'
+                        startIcon={<i className='ki-filled ki-folder-down' />}
+                        style={{ marginBottom: '10px' }} // Add margin for spacing
+                      >
+                        Export TXT
+                      </Button>
+                    )}
+
+                    {buttonCustome}
                   </div>
-                </h3>
-
-                {/* Flex container for the buttons */}
-                <div
-                  style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    justifyContent: 'flex-start',
-                    alignItems: 'center',
-                    gap: '10px', // Add consistent spacing between elements
-                  }}
-                >
-                  {(onCreate || url.addUrl) && (
-                    <>
-                      {(!role || permissions.includes(role?.create ?? '')) && (
-                        <Link
-                          href={url.addUrl ?? '#'}
-                          className='btn btn-success'
-                          onClick={(e) => {
-                            if (onCreate) {
-                              e.preventDefault();
-                              onCreate();
-                            }
-                          }}
-                          style={{ marginRight: '10px', marginBottom: '10px' }} // Add margin for spacing
-                        >
-                          <i className='ki-filled ki-additem'></i>
-                          Add New
-                        </Link>
-                      )}
-                    </>
-                  )}
-
-                  {onExport && (
-                    <Button
-                      className='btn'
-                      variant='contained'
-                      onClick={() => onExport()}
-                      color='primary'
-                      startIcon={<i className='ki-filled ki-folder-down' />}
-                      style={{ marginBottom: '10px' }} // Add margin for spacing
-                    >
-                      Export TXT
-                    </Button>
-                  )}
-
-                  {buttonCustome}
                 </div>
-              </div>
-              <div className='card-body'>
-                <ConfirmationDeleteModal
-                  isLoading={deleteLoading}
-                  description={deleteConfirmationText}
-                  open={modalDelete !== null}
-                  onClose={() => {
-                    setModalDelete(null);
-                  }}
-                  onDelete={() => handleDelete(modalDelete ?? 0)}
-                />
-                <div data-datatable='true' data-datatable-page-size={paginationModel.pageSize}>
-                  <div className='scrollable-x-auto'>
-                    <DataGrid
-                      rows={rows}
-                      columns={[...columns, ...actionColumn]}
-                      loading={loading}
-                      paginationMode='server'
-                      rowCount={rowCount}
-                      paginationModel={paginationModel}
-                      onPaginationModelChange={setPaginationModel}
-                      pageSizeOptions={[10, 20]}
-                      sortingMode='server'
-                      sortModel={sortModel}
-                      onSortModelChange={(model) => setSortModel(model)}
-                      filterMode='server'
-                      filterModel={filterModel}
-                      onFilterModelChange={(model) => setFilterModel(model)}
-                    />
+                <div className='card-body'>
+                  <ConfirmationDeleteModal
+                    isLoading={deleteLoading}
+                    description={deleteConfirmationText}
+                    open={modalDelete !== null}
+                    onClose={() => {
+                      setModalDelete(null);
+                    }}
+                    onDelete={() => handleDelete(modalDelete ?? 0)}
+                  />
+                  <div data-datatable='true' data-datatable-page-size={paginationModel.pageSize}>
+                    <div className='scrollable-x-auto'>
+                      <DataGrid
+                        rows={rows}
+                        columns={[...columns, ...actionColumn]}
+                        loading={loading}
+                        paginationMode='server'
+                        rowCount={rowCount}
+                        paginationModel={paginationModel}
+                        onPaginationModelChange={setPaginationModel}
+                        pageSizeOptions={[10, 20]}
+                        sortingMode='server'
+                        sortModel={sortModel}
+                        onSortModelChange={(model) => setSortModel(model)}
+                        filterMode='server'
+                        filterModel={filterModel}
+                        onFilterModelChange={(model) => setFilterModel(model)}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </Box>
       </Box>
     </Box>
   );

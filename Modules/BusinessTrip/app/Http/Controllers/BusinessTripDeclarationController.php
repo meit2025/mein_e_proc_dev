@@ -54,7 +54,7 @@ class BusinessTripDeclarationController extends Controller
      */
     public function showAPI($id)
     {
-        $data = BusinessTrip::with(['costCenter', 'pajak', 'purchasingGroup'])->where('id', $id)->first();
+        $data = BusinessTrip::with(['costCenter'])->where('id', $id)->first();
         $data->name_request = $data->requestFor->name;
         $data->name_purpose = $data->purposeType->name;
         $destinations = [];
@@ -132,6 +132,8 @@ class BusinessTripDeclarationController extends Controller
 
             $destinations[] = [
                 'destination' => $value->destination,
+                'pajak' => $value->pajak->mwszkz ?? '',
+                'purchasing_group' => $value->purchasingGroup->purchasing_group ?? '',
                 'business_trip_start_date' => $value->business_trip_start_date,
                 'business_trip_end_date' => $value->business_trip_end_date,
                 'detail_attedances' => $detailAttendance,

@@ -99,7 +99,7 @@ Route::group(['prefix' => 'api/'], function () {
             Route::get('/detail/{id}', [BusinessTripController::class, 'showAPI'])->name('business-trip.detail');
             Route::delete('/delete/{id}', [BusinessTripController::class, 'destroy'])->name('business-trip.destroy');
             Route::get('/detail-bt/{id}', [BusinessTripController::class, 'detailBtRequestAPI'])->name('business-trip.detail');
-            // Route::post('/update/{id}', [MasterMaterialController::class, 'update'])->name('master.master-material.update');
+            Route::post('/update/{id}', [BusinessTripController::class, 'update'])->name('business-trip.update');
         });
 
         Route::group(['prefix' => 'business-trip-declaration'], function () {
@@ -108,6 +108,7 @@ Route::group(['prefix' => 'api/'], function () {
             Route::get('/detail/{id}', [BusinessTripDeclarationController::class, 'showAPI'])->name('business-trip-declaration.detail');
             Route::get('/detail-bt/{id}', [BusinessTripDeclarationController::class, 'detailBtDeclareAPI'])->name('business-trip-declaration.detail');
             Route::delete('/delete/{id}', [BusinessTripDeclarationController::class, 'destroy'])->name('business-trip-declaration.destroy');
+            Route::post('/update/{id}', [BusinessTripDeclarationController::class, 'update'])->name('business-trip-declaration.update');
         });
     });
 

@@ -1,15 +1,20 @@
 import { GridColDef } from '@mui/x-data-grid';
 
 export const columns: GridColDef[] = [
-  { field: 'no_po', headerName: 'Number Po', width: 200, filterable: true },
-  { field: 'requisitioner_name', headerName: 'Requisitioner Name', width: 200, filterable: true },
-  { field: 'requisition_date', headerName: 'Requisition Date', width: 200, filterable: true },
   {
     field: 'purchase_requisition_number',
     headerName: 'Purchase Requisition Number',
     width: 200,
     filterable: true,
   },
+  { field: 'status', headerName: 'PR Status', width: 150, filterable: true },
+
+  { field: 'no_po', headerName: 'Number PO', width: 200, filterable: true },
+  { field: 'is_closed', headerName: 'PO Status', width: 150, filterable: true },
+
+  { field: 'requisitioner_name', headerName: 'Requisitioner Name', width: 200, filterable: true },
+  { field: 'requisition_date', headerName: 'Requisition Date', width: 200, filterable: true },
+
   {
     field: 'requirement_tracking_number',
     headerName: 'Requirement Tracking Number',
@@ -19,7 +24,6 @@ export const columns: GridColDef[] = [
   { field: 'item_number', headerName: 'Item Number', width: 150, filterable: true },
   { field: 'document_type', headerName: 'Document Type', width: 200, filterable: true },
   { field: 'valuation_type', headerName: 'Valuation Type', width: 200, filterable: true },
-  { field: 'is_closed', headerName: 'Is Closed', width: 150, filterable: true },
   { field: 'purchasing_group', headerName: 'Purchasing Group', width: 200, filterable: true },
   {
     field: 'purchasing_organization',
@@ -91,7 +95,6 @@ export const columns: GridColDef[] = [
     width: 250,
     filterable: true,
   },
-  { field: 'status', headerName: 'Status', width: 150, filterable: true },
   { field: 'code', headerName: 'Code', width: 150, filterable: true },
   { field: 'message', headerName: 'Message', width: 200, filterable: true },
   { field: 'attachment', headerName: 'Attachment', width: 200, filterable: true },
