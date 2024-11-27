@@ -120,7 +120,7 @@ export function WorkflowComponent({
   workflowApprovalDiagram: WorkflowApprovalDiagramInterface;
 }) {
   return (
-    <div className='flex flex-col space-y-6 border border-gray-200 p-4'>
+    <div className='flex flex-col rounded-xl space-y-6 border border-gray-200 p-4'>
       <WorkflowApproval workflowApproval={workflowApproval} />
 
       <WorkflowApprovalStep workflowApprovalStep={workflowApprovalStep} />
