@@ -97,8 +97,11 @@ const formSchema = z.object({
 });
 
 const dummyPrice = 25000;
-const MAX_FILE_SIZE = 5000000;
-const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+// const MAX_FILE_SIZE = 5000000;
+// const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
+const ACCEPTED_FILE_TYPES = ["image/jpeg", "image/png", "application/pdf"];
 
 export const BussinessTripFormV1 = ({
   users,
@@ -128,7 +131,19 @@ export const BussinessTripFormV1 = ({
     request_for: z.string().min(1, 'Request is required'),
     cost_center_id: z.string().min(1, 'Cost Center is required'),
     remark: z.string().min(1, 'Remark is required'),
-    attachment: z.instanceof(File).nullable().optional(),
+    attachment: z.array(
+        z.instanceof(File).refine(
+            (file) => ACCEPTED_FILE_TYPES.includes(file.type),
+            {
+              message: "File type must be JPG, JPEG, PNG, or PDF",
+            }
+          ).refine(
+            (file) => file.size <= MAX_FILE_SIZE,
+            {
+              message: "File size must be less than 1MB",
+            }
+        )
+    ),
     total_destination: z.number().min(1, 'Total Destinantion Required'),
     destinations: z.array(
       z.object({
@@ -180,7 +195,7 @@ export const BussinessTripFormV1 = ({
       request_for: '',
       cost_center_id: '',
       remark: '',
-      attachment: null,
+      attachment: [],
       total_destination: 1,
       destinations: [
         {
@@ -207,6 +222,10 @@ export const BussinessTripFormV1 = ({
     business_trip_start_date: Date;
     business_trip_end_date: Date;
   }
+
+  React.useEffect(() => {
+    console.log("Form Errors:", form.formState.errors);
+  }, [form.formState.errors]);
 
   async function getDetailData() {
     const url = GET_DETAIL_BUSINESS_TRIP(id);
@@ -298,13 +317,12 @@ export const BussinessTripFormV1 = ({
       formData.append('request_for', values.request_for ?? '');
       formData.append('cost_center_id', values.cost_center_id ?? '');
       formData.append('remark', values.remark ?? '');
-      formData.append('attachment', values.attachment ?? '');
+      values.attachment.forEach((file:any, index:number) => {
+        if (file) {
+          formData.append(`attachment[${index}]`, file);
+        }
+      });
       formData.append('total_destination', `${values.total_destination}`);
-      //   formData.append('pajak_id', values.pajak_id ?? '');
-      //   formData.append('purchasing_group_id', values.purchasing_group_id ?? '');
-      //   formData.append('cash_advance', `${values.cash_advance}`);
-      //   formData.append('total_percent', `${values.total_percent}`);
-      //   formData.append('total_cash_advance', `${values.total_cash_advance}`);
       values.destinations.forEach((item, index) => {
         const itemCopy = {
           ...item,
@@ -410,34 +428,6 @@ export const BussinessTripFormV1 = ({
       setAllowancesProperty();
     }
   }, [totalDestination, listAllowances, id, type, isAdmin, idUser]);
-
-//   const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
-
-//   const handleCashAdvanceChange = (value: boolean) => {
-//     setIsCashAdvance(value);
-//   };
-
-  // const { setValue } = useFormContext();
-
-  // Monitor total_percent value from form
-//   const totalPercent = useWatch({
-//     control: form.control,
-//     name: 'total_percent',
-//   });
-
-//   const [totalAllowance, setTotalAllowance] = React.useState(0);
-
-//   // Assuming allowance is calculated elsewhere, let's mock it for now
-//   const allowance = totalAllowance; // Example: allowance is 1,000,000
-
-//   // Calculate total based on totalPercent and allowance
-//   React.useEffect(() => {
-//     const percentValue = parseFloat((totalPercent || '0').toString());
-//     // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
-//     const total = (percentValue / 100) * allowance; // Multiply percent with allowance
-//     // console.log(total, ' totalll');
-//     form.setValue('total_cash_advance', total.toFixed(0)); // Save the total in total_cash_advance field
-//   }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance changes
 
   return (
     <ScrollArea className='h-[600px] w-full '>
@@ -593,19 +583,25 @@ export const BussinessTripFormV1 = ({
                       </FormLabel>
                       <FormControl>
                         <input
-                          className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
-                          type='file'
-                          onChange={(e) => {
-                            const file = e.target.files?.[0]; // Ambil file pertama
-                            if (file) {
-                              field.onChange(file); // Panggil onChange dengan event untuk react-hook-form
-                            } else {
-                              field.onChange(null); // Jika tidak ada file, set null
-                            }
+                           className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                           type="file"
+                           multiple // Menambahkan atribut multiple
+                           onChange={(e) => {
+                             const files = e.target.files; // Ambil file yang dipilih
+                             if (files) {
+                               const fileArray = Array.from(files); // Konversi FileList ke Array
+                               field.onChange(fileArray); // Panggil onChange dengan array file
+                             } else {
+                               field.onChange([]); // Jika tidak ada file, set array kosong
+                             }
                           }}
                         />
                       </FormControl>
-                      <FormMessage />
+                        {form.formState.errors.attachment?.map((error, index) => (
+                            <p key={index} className="text-[0.8rem] font-medium text-destructive">
+                                {error.message}
+                            </p>
+                        )) ?? <></>}
                     </FormItem>
                   )}
                 />

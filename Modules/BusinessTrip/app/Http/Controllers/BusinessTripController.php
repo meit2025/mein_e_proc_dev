@@ -359,6 +359,7 @@ class BusinessTripController extends Controller
 
     public function storeAPI(Request $request)
     {
+        dd($request->all());
         try {
             DB::beginTransaction();
 
@@ -391,19 +392,16 @@ class BusinessTripController extends Controller
                 'total_destination' => $request->total_destination,
                 'created_by' => auth()->user()->id,
                 'type' => 'request',
-                // 'pajak_id' => $request->pajak_id,
-                // 'purchasing_group_id' => $request->purchasing_group_id,
-                // 'cash_advance' => $request->cash_advance == "true" ? 1 : 0,
-                // 'total_percent' => $request->total_percent,
-                // 'total_cash_advance' => $request->total_cash_advance,
             ]);
 
             if ($request->attachment != null) {
-                BusinessTripAttachment::create([
-                    'business_trip_id' => $businessTrip->id,
-                    'file_path' => explode('/', $request->attachment->store('business_trip', 'public'))[0],
-                    'file_name' => explode('/', $request->attachment->store('business_trip', 'public'))[1],
-                ]);
+                foreach ($request->attachment as $row) {
+                    BusinessTripAttachment::create([
+                        'business_trip_id' => $businessTrip->id,
+                        'file_path' => explode('/', $row->store('business_trip', 'public'))[0],
+                        'file_name' => explode('/', $row->store('business_trip', 'public'))[1],
+                    ]);
+                }
             }
 
             foreach ($request->destinations as $key => $value) {
