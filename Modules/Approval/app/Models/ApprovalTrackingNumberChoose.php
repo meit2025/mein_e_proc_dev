@@ -25,4 +25,8 @@ class ApprovalTrackingNumberChoose extends Model
     {
         return $this->hasMany(ApprovalTrackingNumberChooseRoute::class);
     }
+    public function approvalRoute()
+    {
+        return $this->hasMany(ApprovalTrackingNumberChooseRoute::class);
+    }
 }

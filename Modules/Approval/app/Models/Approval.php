@@ -5,9 +5,9 @@ namespace Modules\Approval\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\Approval\Database\Factories\ApprovalPrRouteFactory;
+// use Modules\Approval\Database\Factories\ApprovalFactory;
 
-class ApprovalPrRoute extends Model
+class Approval extends Model
 {
     use HasFactory;
 
@@ -16,20 +16,19 @@ class ApprovalPrRoute extends Model
      */
     protected $fillable = [
         'user_id',
-        'approval_pr_id',
+        'is_status',
+        'message',
+        'document_id',
+        'document_name',
+        'status'
     ];
-
-    public function approvalPr()
-    {
-        return $this->hasMany(ApprovalPr::class);
-    }
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // protected static function newFactory(): ApprovalPrRouteFactory
+    // protected static function newFactory(): ApprovalFactory
     // {
-    //     // return ApprovalPrRouteFactory::new();
+    //     // return ApprovalFactory::new();
     // }
 }

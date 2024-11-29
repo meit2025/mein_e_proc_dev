@@ -2,8 +2,11 @@
 
 namespace Modules\PurchaseRequisition\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\Master\Models\MasterStatus;
+
 // use Modules\PurchaseRequisition\Database\Factories\PurchaseFactory;
 
 class Purchase extends Model
@@ -23,7 +26,13 @@ class Purchase extends Model
         'storage_locations',
         'total_vendor',
         'total_item',
-        'is_cashAdvance'
+        // 'is_cashAdvance',
+        'status_id',
+        'createdBy',
+        'updatedBy',
+        'metode_approval',
+        'chooses_approval_id',
+        'total_all_amount'
     ];
 
     public function getCreatedAtFormattedAttribute()
@@ -51,5 +60,23 @@ class Purchase extends Model
     public function cashAdvancePurchases()
     {
         return $this->hasMany(CashAdvancePurchases::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'createdBy', 'id');
+    }
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updatedBy', 'id');
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(MasterStatus::class, 'status_id', 'id');
     }
 }
