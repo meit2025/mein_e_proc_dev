@@ -16,6 +16,7 @@ interface CustomTabProps {
   detailLayout: ReactNode;
   id: number;
   type: string;
+  logName?: string;
 }
 
 const TabPanel = ({ children, value, index, ...other }: TabPanelProps) => {
@@ -43,7 +44,7 @@ const a11yProps = (index: number) => {
   };
 };
 
-const CustomTabPr = ({ detailLayout, id, type }: CustomTabProps) => {
+const CustomTabPr = ({ detailLayout, id, type, logName }: CustomTabProps) => {
   const [value, setValue] = useState(0);
 
   const handleChange = (event: any, newValue: number) => {
@@ -68,7 +69,7 @@ const CustomTabPr = ({ detailLayout, id, type }: CustomTabProps) => {
     },
     {
       title: 'Log',
-      content: <Logs />,
+      content: <Logs id={id} functionName={logName as ''} />,
     },
   ]);
 
@@ -89,7 +90,7 @@ const CustomTabPr = ({ detailLayout, id, type }: CustomTabProps) => {
         },
         {
           title: 'Log',
-          content: <Logs />,
+          content: <Logs id={id} functionName={logName as ''} />,
         },
       ]);
     }

@@ -34,8 +34,8 @@ class Unit extends Model
     {
         return $this->belongsTo(Vendor::class);
     }
-    public function cashAdvanve()
+    public function cashAdvancePurchases()
     {
-        return $this->hasMany(CashAdvance::class);
+        return $this->hasOne(CashAdvancePurchases::class);
     }
 }

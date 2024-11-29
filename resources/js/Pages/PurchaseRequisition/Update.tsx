@@ -72,7 +72,7 @@ const Update = ({ id }: { id: number }) => {
 
 // Assign layout to the page
 Update.layout = (page: ReactNode) => (
-  <MainLayout title='Gateway' description='Gateway Secret Update'>
+  <MainLayout title='Purchasing Request' description='Purchasing Request Update'>
     {page}
   </MainLayout>
 );

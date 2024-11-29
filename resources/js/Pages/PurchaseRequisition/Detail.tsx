@@ -17,7 +17,8 @@ const Detail = ({ id }: { id: number }) => {
       try {
         const response = await axiosInstance.get(DETAIL_PR(id));
         const data = response.data;
-        setData(data.data);
+        console.log(data.data.data);
+        setData(data.data.data);
       } catch (error) {
         console.error('Error fetching detail:', error);
       } finally {
@@ -34,7 +35,7 @@ const Detail = ({ id }: { id: number }) => {
   return (
     <>
       <Loading isLoading={isLoading} />
-      <CustomTabPr detailLayout={<PrDetail id={id} />} id={id} type='VEN' />
+      <CustomTabPr detailLayout={<PrDetail id={id} />} id={id} type='VEN' logName='procurement' />
     </>
   );
 };

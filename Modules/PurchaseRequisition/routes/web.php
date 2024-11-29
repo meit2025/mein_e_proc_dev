@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\PermissionMiddleware;
 use Illuminate\Support\Facades\Route;
+use Modules\Approval\Http\Controllers\ApprovalController;
 use Modules\PurchaseRequisition\Http\Controllers\ProcurementController;
 use Modules\PurchaseRequisition\Http\Controllers\PurchaseRequisitionController;
 
@@ -46,4 +47,6 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/downolad-text-po/{id}/{type}', [PurchaseRequisitionController::class, 'downloadPo'])->name('pr.generate-text-sap.download.po');
     });
     Route::get('/retry-pr/{id}/{type}', [ProcurementController::class, 'retryPr'])->name('pr.generate-text-sap.download.po');
+
+    Route::get('/check-approval', [ApprovalController::class, 'CekApproval'])->name('pr.approval');
 });

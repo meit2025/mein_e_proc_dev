@@ -5,6 +5,7 @@ import { Group, Reimburse } from '../model/listModel';
 import '../css/reimburse_detail.scss';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
+import { WorkflowComponent } from '@/components/commons/WorkflowComponent';
 
 const ReimburseDetail = () => {
   const pathname = window.location.pathname;
@@ -173,6 +174,10 @@ const ReimburseDetail = () => {
           </TabsContent>
         ))}
       </Tabs>
+
+      <div className='my-2'>
+        <WorkflowComponent />
+      </div>
     </>
   );
 };

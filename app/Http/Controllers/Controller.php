@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use Clue\Redis\Protocol\Model\Request;
+use DateTime;
+use DateTimeZone;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Modules\Approval\Models\Approval;
 use Modules\Gateway\Models\Log;
 
 abstract class Controller
@@ -57,7 +61,7 @@ abstract class Controller
         return $this->errorResponse($message, 404);
     }
 
-    public function filterAndPaginate($request, $model, array $filterableColumns)
+    public function filterAndPaginate($request, $model, array $filterableColumns, $userData = false)
     {
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
@@ -78,6 +82,17 @@ abstract class Controller
                     $q->orWhere($column, 'ILIKE', '%' . $request->search . '%');
                 }
             });
+        }
+
+        if ($userData) {
+            if ($request->approval == 1) {
+                $data = Approval::where('user_id', Auth::user()->id)
+                    ->where('document_name', 'PR')->pluck('document_id')->toArray();
+
+                $query = $query->whereIn('id', $data);
+            } else {
+                $query = $query->where('user_id', Auth::user()->id)->orWhere('createdBy', Auth::user()->id);
+            }
         }
 
         $query->orderBy($sortBy, $sortDirection);
@@ -130,5 +145,10 @@ abstract class Controller
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+    }
+    protected function DateTimeNow()
+    {
+        $date = new DateTime('now', new DateTimeZone('Asia/Jakarta'));
+        return $date->format('Y-m-d H:i:s');
     }
 }

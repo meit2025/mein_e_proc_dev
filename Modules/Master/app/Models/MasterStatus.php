@@ -13,7 +13,8 @@ class MasterStatus extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = ['name','code', 'className'];
+    protected $fillable = ['name', 'code', 'className'];
+
 
 
 

@@ -4,6 +4,7 @@ use App\Http\Middleware\PermissionMiddleware;
 use Illuminate\Support\Facades\Route;
 use Modules\Approval\Http\Controllers\ApprovalController;
 use Modules\Approval\Http\Controllers\ApprovalPrController;
+use Modules\Approval\Http\Controllers\ApprovalToUserController;
 use Modules\Approval\Http\Controllers\ApprovalTrackingNumberAutoController;
 use Modules\Approval\Http\Controllers\ApprovalTrackingNumberChooseController;
 use Modules\Approval\Http\Controllers\SettingApprovalController;
@@ -85,6 +86,9 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/detail/{id}', [ApprovalController::class, 'show'])->name('approval.route.show')->middleware(PermissionMiddleware::class . ':approval view');
             Route::delete('/delete/{id}', [ApprovalController::class, 'destroy'])->name('approval.route.destroy')->middleware(PermissionMiddleware::class . ':approval delete');
         });
+
+        Route::post('/approval_or_rejceted', [ApprovalController::class, 'ApprovalOrRejceted'])->name('approval.route.ApprovalOrRejceted');
+
         Route::group(['prefix' => 'setting'], function () {
             Route::get('/list', [SettingApprovalController::class, 'index'])->name('approval.setting.index')->middleware(PermissionMiddleware::class . ':setting view');
             Route::post('/create', [SettingApprovalController::class, 'store'])->name('approval.setting.store')->middleware(PermissionMiddleware::class . ':setting create');
@@ -115,6 +119,12 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/update/{id}', [ApprovalTrackingNumberChooseController::class, 'update'])->name('approval.tr-choose.update')->middleware(PermissionMiddleware::class . ':tracking number choose update');
             Route::get('/detail/{id}', [ApprovalTrackingNumberChooseController::class, 'show'])->name('approval.tr-choose.show')->middleware(PermissionMiddleware::class . ':tracking number choose view');
             Route::delete('/delete/{id}', [ApprovalTrackingNumberChooseController::class, 'destroy'])->name('approval.tr-choose.destroy')->middleware(PermissionMiddleware::class . ':tracking number choose delete');
+        });
+        Route::group(['prefix' => 'approval-to-user'], function () {
+            Route::get('/list', [ApprovalToUserController::class, 'index'])->name('approval.to-users.index')->middleware(PermissionMiddleware::class . ':approval view');
+            Route::post('/create', [ApprovalToUserController::class, 'store'])->name('approval.to-users.store')->middleware(PermissionMiddleware::class . ':approval update');
+            Route::post('/update/{id}', [ApprovalToUserController::class, 'update'])->name('approval.to-users.update')->middleware(PermissionMiddleware::class . ':approval update');
+            Route::get('/detail/{id}', [ApprovalToUserController::class, 'show'])->name('approval.to-users.show')->middleware(PermissionMiddleware::class . ':approval view');
         });
     });
 });
