@@ -18,6 +18,7 @@ import {
 } from '@/components/shacdn/select';
 import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import { Input } from '@/components/shacdn/input';
+import { WorkflowComponent } from '@/components/commons/WorkflowComponent';
 
 interface User {
   id: string;
@@ -344,6 +345,8 @@ export const BusinessTripForm: React.FC<Props> = ({ users, types, currencies, cs
                   </tr>
                 </table>
               </div>
+
+              <WorkflowComponent />
             </TabsContent>
           </Tabs>
           <Button type='submit'>Save</Button>

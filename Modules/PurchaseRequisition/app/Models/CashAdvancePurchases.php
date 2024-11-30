@@ -28,8 +28,9 @@ class CashAdvancePurchases extends Model
     {
         return $this->belongsTo(Purchase::class);
     }
+
     public function unit()
     {
-        return $this->belongsTo(Unit::class);
+        return $this->belongsTo(Unit::class, 'unit_id', 'id');
     }
 }

@@ -63,11 +63,16 @@ import { Item } from '@radix-ui/react-dropdown-menu';
 import Detail from '@/Pages/User/Api/Detail';
 import { AllowanceForm } from '../../AllowanceCategory/components/AllowaceForm';
 import axios, { AxiosError } from 'axios';
-import { CREATE_API_BUSINESS_TRIP, GET_DETAIL_BUSINESS_TRIP, EDIT_API_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
+import {
+  CREATE_API_BUSINESS_TRIP,
+  GET_DETAIL_BUSINESS_TRIP,
+  EDIT_API_BUSINESS_TRIP,
+} from '@/endpoint/business-trip/api';
 import FormSwitch from '@/components/Input/formSwitchCustom';
 import FormAutocomplete from '@/components/Input/formDropdown';
 import { DestinationModel } from '../../Destination/models/models';
 import { useAlert } from '@/contexts/AlertContext';
+import { WorkflowComponent } from '@/components/commons/WorkflowComponent';
 
 interface User {
   id: string;
@@ -240,7 +245,7 @@ export const BussinessTripFormV1 = ({
       form.setValue('cost_center_id', data.cost_center_id.toString());
       form.setValue('remark', data.remarks);
       form.setValue('total_destination', data.total_destination);
-        console.log(data.destinations,' data.destinations')
+      console.log(data.destinations, ' data.destinations');
       form.setValue(
         'destinations',
         data.destinations.map((destination: any) => ({
@@ -295,7 +300,7 @@ export const BussinessTripFormV1 = ({
       const response = await axiosInstance.get(url);
       setListAllowances(response.data.data as AllowanceItemModel[]);
     } catch (e) {
-        console.log(e);
+      console.log(e);
     }
   }
 
@@ -351,11 +356,11 @@ export const BussinessTripFormV1 = ({
 
       console.log(formData, ' test');
 
-    if (type == BusinessTripType.create) {
+      if (type == BusinessTripType.create) {
         await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         });
         showToast('succesfully created data', 'success');
     }else{
@@ -365,8 +370,7 @@ export const BussinessTripFormV1 = ({
             },
         });
         showToast('succesfully updated data', 'success');
-    }
-
+      }
 
       // console.log(response);
       //   onSuccess?.(true);
@@ -597,11 +601,14 @@ export const BussinessTripFormV1 = ({
                           }}
                         />
                       </FormControl>
-                        {form.formState.errors.attachment?.map((error, index) => (
-                            <p key={index} className="text-[0.8rem] font-medium text-destructive">
-                                {error.message}
-                            </p>
-                        )) ?? <></>}
+                      {form.formState.errors.attachment && Array.isArray(form.formState.errors.attachment) ? (
+                            form.formState.errors.attachment.map((error, index) => (
+                                <p key={index} className="text-[0.8rem] font-medium text-destructive">
+                                    {error.message}
+                                </p>
+                            ))
+                        ) : null}
+
                     </FormItem>
                   )}
                 />
@@ -670,7 +677,7 @@ export function BussinesTripDestination({
   destinationField,
   form,
   updateDestination,
-//   setTotalAllowance,
+  //   setTotalAllowance,
   listDestination = [],
   pajak,
   purchasingGroup,
@@ -681,11 +688,11 @@ export function BussinesTripDestination({
   form: any;
   destinationField: any;
   updateDestination: any;
-//   setTotalAllowance: any;
+  //   setTotalAllowance: any;
   listDestination: DestinationModel[];
-  pajak: Pajak[],
+  pajak: Pajak[];
   purchasingGroup: PurchasingGroup[];
-  typeEdit:any,
+  typeEdit: any;
 }) {
   const [startDate, setStartDate] = React.useState<Date>();
 
@@ -708,7 +715,7 @@ export function BussinesTripDestination({
           destination={destination}
           form={form}
           index={index}
-        //   setTotalAllowance={setTotalAllowance}
+          //   setTotalAllowance={setTotalAllowance}
           listDestination={listDestination}
           pajak={pajak}
           purchasingGroup={purchasingGroup}
@@ -725,7 +732,7 @@ export function BussinessDestinationForm({
   destination,
   updateDestination,
   listAllowances,
-//   setTotalAllowance,
+  //   setTotalAllowance,
   listDestination,
   pajak,
   purchasingGroup,
@@ -736,9 +743,9 @@ export function BussinessDestinationForm({
   destination: any;
   updateDestination: any;
   listAllowances: any;
-//   setTotalAllowance: any;
+  //   setTotalAllowance: any;
   listDestination: DestinationModel[];
-  pajak: Pajak[],
+  pajak: Pajak[];
   purchasingGroup: PurchasingGroup[];
   typeEdit: any;
 }) {
@@ -830,20 +837,20 @@ export function BussinessDestinationForm({
     });
   }
 
-    const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
+  const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
 
-    const handleCashAdvanceChange = (value: boolean) => {
-        setIsCashAdvance(value);
-    };
+  const handleCashAdvanceChange = (value: boolean) => {
+    setIsCashAdvance(value);
+  };
 
-    const totalPercent = useWatch({
-        control: form.control,
-        name: `destinations.${index}.total_percent`,
-    });
+  const totalPercent = useWatch({
+    control: form.control,
+    name: `destinations.${index}.total_percent`,
+  });
 
-    const [totalAllowance, setTotalAllowance] = React.useState(0);
-    // Assuming allowance is calculated elsewhere, let's mock it for now
-    const allowance = totalAllowance;
+  const [totalAllowance, setTotalAllowance] = React.useState(0);
+  // Assuming allowance is calculated elsewhere, let's mock it for now
+  const allowance = totalAllowance;
 
     //   // Calculate total based on totalPercent and allowance
     React.useEffect(() => {
@@ -862,33 +869,33 @@ export function BussinessDestinationForm({
     <TabsContent value={`destination${index + 1}`}>
       <div key={index}>
         <table className='text-xs mt-4 reimburse-form-detail font-thin'>
-            <tr>
-                <td width={200}>Destination {destination.destination}</td>
-                <td>
-                <FormField
-                    control={form.control}
-                    name={`destinations.${index}.destination`}
-                    render={({ field }) => (
-                    <FormItem>
-                        {/* <FormLabel>Username</FormLabel> */}
-                        <FormControl>
-                        <Select
-                            onValueChange={(value) => {
-                            updateDestination(index, { ...destination, destination: value });
-                            }}
-                            defaultValue={destination.destination}
-                            // onValueChange={(value) => field.onChange(value)}
-                            // value={field.value}
-                        >
-                            <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='Destination' />
-                            </SelectTrigger>
-                            <SelectContent>
-                            {listDestination.map((map) => (
-                                <SelectItem value={map.destination} className='uppercase'>
-                                {map.destination}
-                                </SelectItem>
-                            ))}
+          <tr>
+            <td width={200}>Destination {destination.destination}</td>
+            <td>
+              <FormField
+                control={form.control}
+                name={`destinations.${index}.destination`}
+                render={({ field }) => (
+                  <FormItem>
+                    {/* <FormLabel>Username</FormLabel> */}
+                    <FormControl>
+                      <Select
+                        onValueChange={(value) => {
+                          updateDestination(index, { ...destination, destination: value });
+                        }}
+                        defaultValue={destination.destination}
+                        // onValueChange={(value) => field.onChange(value)}
+                        // value={field.value}
+                      >
+                        <SelectTrigger className='w-[200px]'>
+                          <SelectValue placeholder='Destination' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {listDestination.map((map) => (
+                            <SelectItem value={map.destination} className='uppercase'>
+                              {map.destination}
+                            </SelectItem>
+                          ))}
 
                             {/* <SelectItem value='banyuwangi'>Banyuwangi</SelectItem> */}
                             </SelectContent>
@@ -987,37 +994,37 @@ export function BussinessDestinationForm({
                     )}
                 />
 
-                <span>To</span>
-                <FormField
-                    control={form.control}
-                    name={`destinations.${index}.business_trip_end_date`}
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormControl>
-                        <CustomDatePicker
-                            initialDate={destination.business_trip_end_date}
-                            onDateChange={(value) => {
-                            console.log('end date', value);
-                            updateDestination(index, {
-                                ...destination,
-                                business_trip_end_date: value,
-                            });
+              <span>To</span>
+              <FormField
+                control={form.control}
+                name={`destinations.${index}.business_trip_end_date`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <CustomDatePicker
+                        initialDate={destination.business_trip_end_date}
+                        onDateChange={(value) => {
+                          console.log('end date', value);
+                          updateDestination(index, {
+                            ...destination,
+                            business_trip_end_date: value,
+                          });
 
-                            //   endDateHandler(value);
-                            }}
-                        />
-                        </FormControl>
-                        {/* <FormDescription>This is your public display name.</FormDescription> */}
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
+                          //   endDateHandler(value);
+                        }}
+                      />
+                    </FormControl>
+                    {/* <FormDescription>This is your public display name.</FormDescription> */}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <Button type='button' onClick={() => detailAttedancesGenerate()}>
-                    Get Detail
-                </Button>
-                </td>
-            </tr>
+              <Button type='button' onClick={() => detailAttedancesGenerate()}>
+                Get Detail
+              </Button>
+            </td>
+          </tr>
         </table>
 
         <DetailAttedances
@@ -1042,78 +1049,87 @@ export function BussinessDestinationForm({
         setTotalAllowance={setTotalAllowance}
       />
 
-        {/* CASH ADVANCE */}
-        <table className='w-full text-sm mt-10'>
+      {/* CASH ADVANCE */}
+      <table className='w-full text-sm mt-10'>
+        <tr>
+          <td className='w-[50%]'>Cash Advance</td>
+          <td className='w-[50%] pb-0'>
+            <FormSwitch
+              fieldName={`destinations.${index}.cash_advance`}
+              isRequired={false}
+              disabled={false}
+              onChanges={(e) => handleCashAdvanceChange(e.target.checked)}
+            />
+          </td>
+        </tr>
+        {isCashAdvance && (
+          <>
             <tr>
-                <td className='w-[50%]'>Cash Advance</td>
-                <td className='w-[50%] pb-0'>
-                <FormSwitch
-                    fieldName={`destinations.${index}.cash_advance`}
-                    isRequired={false}
-                    disabled={false}
-                    onChanges={(e) => handleCashAdvanceChange(e.target.checked)}
+              <td className='w-[50%]'>Total Percent</td>
+              <td className='w-[50%]'>
+                <FormField
+                  control={form.control}
+                  name={`destinations.${index}.reference_number`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          className='w-[50%] mb-2'
+                          placeholder='Reference Number'
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                </td>
+                <FormField
+                  control={form.control}
+                  name={`destinations.${index}.total_percent`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          // onValueChange={(value) => handlePurposeType(value)}
+                          value={field.value || undefined}
+                          onValueChange={(value) => field.onChange(value)}
+                        >
+                          <SelectTrigger className='w-[50%] mb-2'>
+                            <SelectValue placeholder='-- Select Total Percent --' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='10'>10%</SelectItem>
+                            <SelectItem value='25'>25%</SelectItem>
+                            <SelectItem value='50'>50%</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`destinations.${index}.total_cash_advance`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input value={field.value || ''} readOnly={true} className='w-[50%]' />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </td>
             </tr>
-            {isCashAdvance && (
-              <>
-                <tr>
-                  <td className='w-[50%]'>Total Percent</td>
-                  <td className='w-[50%]'>
-                    <FormField
-                        control={form.control}
-                        name={`destinations.${index}.reference_number`}
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormControl>
-                                <Input value={field.value || ''} onChange={(e) => field.onChange(e.target.value)} className='w-[50%] mb-2' placeholder='Reference Number'/>
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`destinations.${index}.total_percent`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Select
-                              // onValueChange={(value) => handlePurposeType(value)}
-                              value={field.value || undefined}
-                              onValueChange={(value) => field.onChange(value)}
-                            >
-                              <SelectTrigger className='w-[50%] mb-2'>
-                                <SelectValue placeholder='-- Select Total Percent --' />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value='10'>10%</SelectItem>
-                                <SelectItem value='25'>25%</SelectItem>
-                                <SelectItem value='50'>50%</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`destinations.${index}.total_cash_advance`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input value={field.value || ''} readOnly={true} className='w-[50%]' />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                </tr>
-              </>
-            )}
-        </table>
+          </>
+        )}
+      </table>
+
+      <div className='my-2'>
+        <WorkflowComponent />
+      </div>
     </TabsContent>
   );
 }

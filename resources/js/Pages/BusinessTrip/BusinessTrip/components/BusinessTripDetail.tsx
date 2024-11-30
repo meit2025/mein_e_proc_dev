@@ -4,6 +4,7 @@ import '../css/index.scss';
 import axios, { AxiosError } from 'axios';
 import axiosInstance from '@/axiosInstance';
 import { GET_DETAIL_BUSINESS_TRIP_REQUEST } from '@/endpoint/business-trip/api';
+import { WorkflowComponent } from '@/components/commons/WorkflowComponent';
 
 interface PurposeType {
   id: number;
@@ -185,16 +186,18 @@ const BusinessTripDetail = () => {
                   <th>Actual Start</th>
                   <th>Actual End</th>
                 </tr>
-                {destination.business_trip_detail_attendance.map((attendance: any, index: number) => (
-                  <tr key={index}>
-                    <td>{attendance.date}</td>
-                    <td>{attendance.shift_code}</td>
-                    <td>{attendance.shift_start}</td>
-                    <td>{attendance.shift_end}</td>
-                    <td>{attendance.start_time}</td>
-                    <td>{attendance.end_time}</td>
-                  </tr>
-                ))}
+                {destination.business_trip_detail_attendance.map(
+                  (attendance: any, index: number) => (
+                    <tr key={index}>
+                      <td>{attendance.date}</td>
+                      <td>{attendance.shift_code}</td>
+                      <td>{attendance.shift_start}</td>
+                      <td>{attendance.shift_end}</td>
+                      <td>{attendance.start_time}</td>
+                      <td>{attendance.end_time}</td>
+                    </tr>
+                  ),
+                )}
               </table>
               <div className='tables-wrapper'>
                 <table className='value-table'>
@@ -218,15 +221,15 @@ const BusinessTripDetail = () => {
                     </tr>
                   ))}
 
-                    <tr>
-                        <td>
-                        <strong>Total Standar Value</strong>
-                        </td>
-                        <td>IDR</td>
-                        <td></td>
-                        <td className='text-center'></td>
-                        <td>{destination.total_standard}</td>
-                    </tr>
+                  <tr>
+                    <td>
+                      <strong>Total Standar Value</strong>
+                    </td>
+                    <td>IDR</td>
+                    <td></td>
+                    <td className='text-center'></td>
+                    <td>{destination.total_standard}</td>
+                  </tr>
                 </table>
 
                 <table className='value-table'>
@@ -264,6 +267,10 @@ const BusinessTripDetail = () => {
           </TabsContent>
         ))}
       </Tabs>
+
+      <div className='my-2'>
+        <WorkflowComponent />
+      </div>
     </>
   );
 };

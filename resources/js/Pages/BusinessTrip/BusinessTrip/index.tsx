@@ -66,7 +66,6 @@ export const Index = ({
   // Get the logged-in user's ID
   const userId = auth.user?.id;
   const isAdmin = auth.user?.is_admin;
-  console.log(auth, ' ini auth');
 
   return (
     <>
