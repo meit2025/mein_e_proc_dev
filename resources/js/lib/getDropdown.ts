@@ -9,6 +9,7 @@ interface WhereProps {
   groupBy?: string;
 }
 interface StructDropdown {
+  isMapping?: boolean;
   name: string;
   id: string | number;
   tabel: string;
@@ -46,14 +47,17 @@ const useDropdownOptions = () => {
         },
       });
 
-      const fetchedData = response.data.data;
+      const fetchedData = response.data.data.map((item: any) => ({
+        label: !struct.isMapping ? item.label : `${item.label} - ${item.value}`,
+        value: item.value,
+      }));
       if (object && dropdown !== '') {
         const updatedObject = object.map((field) =>
           field.name === dropdown ? { ...field, options: fetchedData } : field,
         );
         setDropdownOptions(updatedObject);
       }
-      setdataDropdown(response.data.data);
+      setdataDropdown(fetchedData);
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching dropdown options:', error);

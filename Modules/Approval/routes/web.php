@@ -85,6 +85,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/update/{id}', [ApprovalController::class, 'update'])->name('approval.route.update')->middleware(PermissionMiddleware::class . ':approval update');
             Route::get('/detail/{id}', [ApprovalController::class, 'show'])->name('approval.route.show')->middleware(PermissionMiddleware::class . ':approval view');
             Route::delete('/delete/{id}', [ApprovalController::class, 'destroy'])->name('approval.route.destroy')->middleware(PermissionMiddleware::class . ':approval delete');
+            Route::get('/getApproval', [ApprovalController::class, 'getApproval'])->name('approval.route.destroy');
         });
 
         Route::post('/approval_or_rejceted', [ApprovalController::class, 'ApprovalOrRejceted'])->name('approval.route.ApprovalOrRejceted');
@@ -125,6 +126,8 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/create', [ApprovalToUserController::class, 'store'])->name('approval.to-users.store')->middleware(PermissionMiddleware::class . ':approval update');
             Route::post('/update/{id}', [ApprovalToUserController::class, 'update'])->name('approval.to-users.update')->middleware(PermissionMiddleware::class . ':approval update');
             Route::get('/detail/{id}', [ApprovalToUserController::class, 'show'])->name('approval.to-users.show')->middleware(PermissionMiddleware::class . ':approval view');
+
+            Route::get('/get-user-dropdown/{id}', [ApprovalToUserController::class, 'getUsersDropdown'])->name('approval.to-users.getUsersDropdown')->middleware(PermissionMiddleware::class . ':approval update');
         });
     });
 });

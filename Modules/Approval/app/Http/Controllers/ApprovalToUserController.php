@@ -3,6 +3,7 @@
 namespace Modules\Approval\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Modules\Approval\Models\ApprovalToUser;
 
@@ -47,6 +48,38 @@ class ApprovalToUserController extends Controller
             return $this->successResponse($request->all());
         } catch (\Throwable $th) {
             //throw $th;
+        }
+    }
+
+    /**
+     * Retrieve the dropdown list of user IDs for a specific approval route.
+     *
+     * This function fetches the user IDs associated with a given approval route ID and returns
+     * a list of user IDs that are not already part of any approval route. It returns a success
+     * response containing both the list of available user IDs and the current user IDs for the
+     * specified approval route.
+     *
+     * @param int $id The ID of the approval route.
+     * @return \Illuminate\Http\JsonResponse A JSON response with the list of available user IDs and current user IDs.
+     */
+    public function getUsersDropdown($id)
+    {
+        try {
+            //code...
+            $dataUserExsit =  ApprovalToUser::pluck('user_id')->toArray();
+            $data =  ApprovalToUser::select('users.id as value', 'users.name as label')->leftJoin('users', 'users.id', '=', 'approval_to_users.user_id')
+                ->where('approval_to_users.approval_route_id', $id)
+                ->get();
+
+            $users = User::select('id as value', 'name as label')->whereNotIn('id', $dataUserExsit)->get();
+
+            return $this->successResponse([
+                'users' => $users,
+                'data' => $data
+            ]); // return response
+        } catch (\Throwable $th) {
+            //throw $th;
+            return $this->errorResponse($th->getMessage());
         }
     }
 

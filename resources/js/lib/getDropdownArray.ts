@@ -37,7 +37,11 @@ const useDropdownOptionsArray = () => {
           },
         );
 
-        const fetchedData = response.data.data;
+        const fetchedData = response.data.data.map((item: any) => ({
+          label: `${item.label} - ${item.value}`,
+          value: item.value,
+        }));
+
         if (dataObject && item.dropdown !== '') {
           const updatedObject = dataObject.map((field) =>
             field.name === item.dropdown ? { ...field, options: fetchedData } : field,

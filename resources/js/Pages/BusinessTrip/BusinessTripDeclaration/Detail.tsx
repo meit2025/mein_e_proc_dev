@@ -46,6 +46,7 @@ const Detail = ({ id }: { id: number }) => {
           detailLayout={<BusinessTripDeclarationDetail />}
           id={data.parent_id ? data.parent_id : id} // Check if parent_id exists
           type='BTRE'
+          logName='trip_declaration'
         />
       ) : (
         <p>No details available for this business trip declaration.</p> // Handle null data case

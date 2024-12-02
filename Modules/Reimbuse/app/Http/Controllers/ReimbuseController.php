@@ -11,6 +11,7 @@ use Modules\Reimbuse\Models\Reimburse;
 use Modules\Reimbuse\Models\ReimburseGroup;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Modules\Approval\Models\Approval;
 use Modules\BusinessTrip\Models\BusinessTripGrade;
 use Modules\BusinessTrip\Models\BusinessTripGradeUser;
 use Modules\Master\Models\Family;
@@ -256,9 +257,9 @@ class ReimbuseController extends Controller
                 'cost_center'    => $data['cost_center'],
             ];
             $forms = $data['forms'];
+            $data['user_id'] =  $request->requester;
 
-
-            $response = $this->reimbursementService->storeReimbursements($groupData, $forms);
+            $response = $this->reimbursementService->storeReimbursements($groupData, $forms, $data);
             if (isset($response['error'])) {
                 return $this->errorResponse($response['error']);
             }
@@ -362,9 +363,12 @@ class ReimbuseController extends Controller
         ])
             ->get();
 
+        $approval = Approval::with('user.divisions')->where('document_id', $id)->where('document_name', 'REIM')->orderBy('id', 'ASC')->get();
+
         return $this->successResponse([
             'group' => $reimburseGroup,
-            'forms' => $reimburseForms
+            'forms' => $reimburseForms,
+            'approval' => $approval,
         ]);
     }
 
