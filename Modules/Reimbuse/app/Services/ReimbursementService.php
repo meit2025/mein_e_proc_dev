@@ -104,7 +104,7 @@ class ReimbursementService
             $this->generateProgress($group, $requester);
 
             $const = new CheckApproval();
-            $const->Payment($dataRequest, true, $group->id, 'REIM');
+            $const->Payment(json_decode(json_encode($dataRequest)), true, $group->id, 'REIM');
             DB::commit();
 
             SapJobs::dispatch($group->id, 'REIM');
