@@ -86,12 +86,16 @@ abstract class Controller
 
         if ($userData) {
             if ($request->approval == 1) {
+
                 $data = Approval::where('user_id', Auth::user()->id)
                     ->where('document_name', 'PR')->pluck('document_id')->toArray();
 
                 $query = $query->whereIn('id', $data);
             } else {
-                $query = $query->where('user_id', Auth::user()->id)->orWhere('createdBy', Auth::user()->id);
+                $query->where(function ($q) use ($request, $filterableColumns) {
+                    $q->orWhere('user_id', Auth::user()->id)
+                        ->orWhere('createdBy', Auth::user()->id);
+                });
             }
         }
 
