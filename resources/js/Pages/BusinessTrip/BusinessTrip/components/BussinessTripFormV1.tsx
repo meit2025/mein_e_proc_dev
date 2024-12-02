@@ -73,6 +73,7 @@ import FormAutocomplete from '@/components/Input/formDropdown';
 import { DestinationModel } from '../../Destination/models/models';
 import { useAlert } from '@/contexts/AlertContext';
 import { WorkflowComponent } from '@/components/commons/WorkflowComponent';
+import { GET_LIST_DESTINATION_BY_TYPE } from '@/endpoint/destination/api';
 
 interface User {
   id: string;
@@ -118,7 +119,6 @@ export const BussinessTripFormV1 = ({
   id,
   isAdmin,
   idUser,
-  listDestination = [],
 }: {
   users: User[];
   listPurposeType: PurposeTypeModel[];
@@ -129,7 +129,6 @@ export const BussinessTripFormV1 = ({
   id: string | undefined;
   isAdmin: string | undefined;
   idUser: number | undefined;
-  listDestination: DestinationModel[];
 }) => {
   const formSchema = z.object({
     purpose_type_id: z.string().min(1, 'Purpose type required'),
@@ -192,7 +191,6 @@ export const BussinessTripFormV1 = ({
   });
   const [totalDestination, setTotalDestination] = React.useState<string>('1');
 
-  console.log('list destiantion', listDestination);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -285,6 +283,7 @@ export const BussinessTripFormV1 = ({
   }
 
   const [listAllowances, setListAllowances] = React.useState<AllowanceItemModel[]>([]);
+  const [listDestination, setListDestination] = React.useState<DestinationModel[]>([]);
 
   const [selectedUserId, setSelectedUserId] = React.useState(
     isAdmin === '0' ? idUser.toString() : '',
@@ -293,12 +292,15 @@ export const BussinessTripFormV1 = ({
   async function handlePurposeType(value: string) {
     form.setValue('purpose_type_id', value || '');
     const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
-    console.log(userid, ' ---- ');
     const url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
+    const getDestination = GET_LIST_DESTINATION_BY_TYPE(value);
 
     try {
       const response = await axiosInstance.get(url);
+      const responseDestination = await axiosInstance.get(getDestination);
+      console.log(responseDestination.data.data, ' responseDestination')
       setListAllowances(response.data.data as AllowanceItemModel[]);
+      setListDestination(responseDestination.data.data as DestinationModel[]);
     } catch (e) {
       console.log(e);
     }
@@ -864,7 +866,7 @@ export function BussinessDestinationForm({
         // console.log(total, ' totalll');
         form.setValue(`destinations.${index}.total_cash_advance`, total.toFixed(0)); // Save the total in total_cash_advance field
     }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance changes
-
+console.log(listDestination, 'listDestination 123')
   return (
     <TabsContent value={`destination${index + 1}`}>
       <div key={index}>

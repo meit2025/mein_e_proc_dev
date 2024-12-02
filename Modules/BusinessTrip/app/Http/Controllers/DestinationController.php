@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Modules\BusinessTrip\Models\Destination;
+use Modules\BusinessTrip\Models\PurposeType;
 
 class DestinationController extends Controller
 {
@@ -159,13 +160,8 @@ class DestinationController extends Controller
             $purpose->code =  $request->code;
             $purpose->destination = $request->destination;
             $purpose->type = $request->type;
-
             $purpose->save();
-
-
-
             DB::commit();
-
             return $this->successResponse($purpose, 'Successfully creeted purpose type');
         } catch (\Exception $e) {
             dd($e);
@@ -200,5 +196,12 @@ class DestinationController extends Controller
             'destination' => $find
         ];
         return $this->successResponse($context);
+    }
+
+    function getDestinationByType($id) {
+        $purpose = PurposeType::find($id);
+        $destination = Destination::where('type', $purpose->type)->get();
+
+        return $this->successResponse($destination);
     }
 }

@@ -108,7 +108,7 @@ const BusinessTripDeclarationDetail = () => {
   return (
     <>
       <p className='text-sm'>
-        <strong>Request No.:</strong> {data?.request_no}
+        <strong>Declaration No.:</strong> {data?.request_no}
       </p>
       <p className='text-sm'>
         <strong>Company:</strong> PT. Mitsubishi Electric Indonesia

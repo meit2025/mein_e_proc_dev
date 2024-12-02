@@ -49,7 +49,6 @@ export const Index = ({
   purchasingGroup,
   listDestination,
 }: propsType) => {
-  console.log(costcenter);
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
   const [businessTripForm, setBusinessTripForm] = React.useState({

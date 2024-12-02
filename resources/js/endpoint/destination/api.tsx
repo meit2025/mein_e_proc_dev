@@ -6,3 +6,5 @@ export const EDIT_API = `${ROUTE_API}/update`;
 export const GET_DETAIL_DESTINATION = (id: any) => `${ROUTE_API}/detail/${id}`;
 export const UPDATE_DESTINATION = (id: any) => `${ROUTE_API}/update/${id}`;
 export const DELETE_API_DESTINATION = `${ROUTE_API}/delete`;
+export const GET_LIST_DESTINATION_BY_TYPE = (id: any) =>
+    `${ROUTE_API}/list-destination-by-type/${id}`;
