@@ -195,6 +195,7 @@ class CheckApproval
 
             // chcek condition approval
             $ApprovalCondition = ApprovalRoute::where('nominal', '<=', $request->value)
+                ->where('nominal', '!=', 0)
                 ->orderBy('nominal', 'desc')
                 ->first();
 
