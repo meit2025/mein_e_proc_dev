@@ -91,6 +91,7 @@ abstract class Controller
 
                 $query = $query->whereIn('id', $data);
             } else {
+                dd('test', Auth::user()->id);
                 $query = $query->where('user_id', Auth::user()->id)->orWhere('createdBy', Auth::user()->id);
             }
         }
