@@ -1,6 +1,6 @@
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
 import ItemForm from './itemForm';
-import DetailApproval from './detailApproval';
+import DetailApproval from '../../../components/approval/detailApproval';
 
 export const formModelEdit: Array<FormFieldModel<any>> = [
   {

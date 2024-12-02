@@ -32,7 +32,8 @@ class BusinessTrip extends Model
         'type',
         'parent_id',
         'cost_center_id',
-        'uom_id'
+        'uom_id',
+        'status_id'
     ];
 
 

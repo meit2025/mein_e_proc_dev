@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/shacdn/button';
+import { Button as ButtonMui } from '@mui/material';
 import { Inertia } from '@inertiajs/inertia';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -40,7 +41,11 @@ import {
 } from '@/endpoint/reimburse/api';
 import { CustomFormWrapper } from '@/components/commons/CustomFormWrapper';
 import { set } from 'date-fns';
-import { WorkflowComponent } from '@/components/commons/WorkflowComponent';
+import {
+  WorkflowApprovalDiagramInterface,
+  WorkflowApprovalStepInterface,
+  WorkflowComponent,
+} from '@/components/commons/WorkflowComponent';
 
 interface Props {
   onSuccess?: (value?: boolean) => void;
@@ -87,15 +92,22 @@ export const ReimburseForm: React.FC<Props> = ({
   const { dataDropdown: dataUom, getDropdown: getUom } = useDropdownOptions();
   const [listPeriode, setListPeriode] = useState([]);
   const [familyUrl, setFamilyUrl] = useState('');
+  const [isShow, setIsShow] = useState(false);
 
   const [isLoading, setLoading] = useState<boolean>(false);
   const [detailLimit, setDetailLimit] = useState<any>(null);
+  const [approvalRoute, setApprovalRoute] = useState({
+    approvalRequest: [],
+    approvalFrom: [],
+    acknowledgeFrom: [],
+  });
 
   const formSchema = z.object({
     formCount: z.string().min(1, 'total form must be have value'),
     remark_group: z.string().optional(),
     cost_center: z.string().min(1, 'cost center required'),
     requester: z.string().min(1, 'requester required'),
+    value: z.number().optional(),
     forms: z.array(
       z.object({
         id: z.string().optional(),
@@ -344,6 +356,9 @@ export const ReimburseForm: React.FC<Props> = ({
         return;
       }
     }
+    const totalNominal = values.forms.reduce((acc, item) => acc + parseInt(item.balance) || 0, 0);
+
+    values.value = totalNominal;
     try {
       const response = await axiosInstance.post(store_url ?? '', values);
 
@@ -379,6 +394,48 @@ export const ReimburseForm: React.FC<Props> = ({
   }
 
   // /data-limit-and-balance
+
+  const fetchDataValue = async () => {
+    try {
+      const values = form.getValues('forms');
+      const totalNominal = values.reduce((acc, item) => acc + parseInt(item.balance) || 0, 0);
+
+      if (totalNominal === 0) {
+        showToast('Please fill the balance', 'error');
+        return;
+      }
+
+      const response = await axiosInstance.get('/check-approval', {
+        params: {
+          value: totalNominal,
+          user_id: form.getValues('requester'),
+          type: 'REIM',
+        },
+      });
+      if (response.data.status_code === 200) {
+        const approvalRequest = response.data?.data?.approval.map(
+          (route: any) => route?.division_name || null,
+        );
+
+        const approvalFrom = response.data?.data?.approval.map((route: any) => route?.name || null);
+
+        const acknowledgeFrom: never[] = [];
+        if (response.data?.data?.hr) {
+          acknowledgeFrom.push(response.data?.data?.hr?.name as unknown as never);
+        }
+
+        const dataApproval = {
+          approvalRequest,
+          approvalFrom,
+          acknowledgeFrom: acknowledgeFrom,
+        };
+        setApprovalRoute(dataApproval);
+        setIsShow(true);
+      }
+    } catch (error) {
+      showToast(error?.response?.data?.message, 'error');
+    }
+  };
 
   return (
     <ScrollArea className='h-[600px] w-full'>
@@ -770,7 +827,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                           filter={['name']}
                                           id='id'
                                           label='name'
-                                          url={`reimburse/get-data-family/` + currentUser.id}
+                                          url={'reimburse/get-data-family/' + currentUser.id}
                                         />
                                       </FormControl>
                                       <FormMessage />
@@ -1080,8 +1137,30 @@ export const ReimburseForm: React.FC<Props> = ({
                 );
               })}
             </Tabs>
+            <ButtonMui
+              onClick={async () => await fetchDataValue()}
+              variant='contained'
+              color='primary'
+              type='button'
+            >
+              Check Approval
+            </ButtonMui>
             <div className='my-2'>
-              <WorkflowComponent />
+              {isShow && (
+                <WorkflowComponent
+                  workflowApproval={{
+                    approvalRequest: approvalRoute.approvalRequest,
+                    approvalFrom: approvalRoute.approvalFrom,
+                    acknowledgeFrom: approvalRoute.acknowledgeFrom,
+                  }}
+                  workflowApprovalStep={
+                    approvalRoute.approvalFrom as unknown as WorkflowApprovalStepInterface
+                  }
+                  workflowApprovalDiagram={
+                    approvalRoute.approvalFrom as unknown as WorkflowApprovalDiagramInterface
+                  }
+                />
+              )}
             </div>
             <Separator className='my-4' />
             <div className='mt-4 flex justify-end'>

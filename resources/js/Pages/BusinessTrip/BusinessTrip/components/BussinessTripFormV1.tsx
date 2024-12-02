@@ -3,8 +3,8 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormMessage,
   FormLabel,
+  FormMessage,
 } from '@/components/shacdn/form';
 
 import { z } from 'zod';
@@ -12,33 +12,27 @@ import { z } from 'zod';
 import { Inertia } from '@inertiajs/inertia';
 
 import { Button } from '@/components/shacdn/button';
-import { ChevronsUpDown, Plus, UndoIcon, X } from 'lucide-react';
+import { ChevronsUpDown } from 'lucide-react';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  FieldArray,
-  FieldArrayWithId,
-  useFieldArray,
-  useForm,
-  useFormContext,
-  useWatch,
-} from 'react-hook-form';
 import { Textarea } from '@/components/shacdn/textarea';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 
-import '../css/index.scss';
 import { ScrollArea } from '@/components/shacdn/scroll-area';
 import { Separator } from '@/components/shacdn/separator';
+import '../css/index.scss';
 
-import { format } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
 
+import axiosInstance from '@/axiosInstance';
+import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/shacdn/collapsible';
-
-import moment from 'moment';
+  WorkflowApprovalDiagramInterface,
+  WorkflowApprovalStepInterface,
+  WorkflowComponent,
+} from '@/components/commons/WorkflowComponent';
+import FormSwitch from '@/components/Input/formSwitchCustom';
+import { Input } from '@/components/shacdn/input';
 import {
   Select,
   SelectContent,
@@ -46,12 +40,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/shacdn/select';
-import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
-import { Input } from '@/components/shacdn/input';
-import * as React from 'react';
-import { PurposeTypeModel } from '../../PurposeType/models/models';
+import { useAlert } from '@/contexts/AlertContext';
+import {
+  CREATE_API_BUSINESS_TRIP,
+  EDIT_API_BUSINESS_TRIP,
+  GET_DETAIL_BUSINESS_TRIP,
+} from '@/endpoint/business-trip/api';
 import { GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE } from '@/endpoint/purpose-type/api';
-import axiosInstance from '@/axiosInstance';
+import { Button as ButtonMui } from '@mui/material';
+import axios, { AxiosError } from 'axios';
+import moment from 'moment';
+import * as React from 'react';
+import { DestinationModel } from '../../Destination/models/models';
+import { PurposeTypeModel } from '../../PurposeType/models/models';
 import {
   AllowanceItemModel,
   BusinessTripType,
@@ -59,20 +60,6 @@ import {
   Pajak,
   PurchasingGroup,
 } from '../models/models';
-import { Item } from '@radix-ui/react-dropdown-menu';
-import Detail from '@/Pages/User/Api/Detail';
-import { AllowanceForm } from '../../AllowanceCategory/components/AllowaceForm';
-import axios, { AxiosError } from 'axios';
-import {
-  CREATE_API_BUSINESS_TRIP,
-  GET_DETAIL_BUSINESS_TRIP,
-  EDIT_API_BUSINESS_TRIP,
-} from '@/endpoint/business-trip/api';
-import FormSwitch from '@/components/Input/formSwitchCustom';
-import FormAutocomplete from '@/components/Input/formDropdown';
-import { DestinationModel } from '../../Destination/models/models';
-import { useAlert } from '@/contexts/AlertContext';
-import { WorkflowComponent } from '@/components/commons/WorkflowComponent';
 import { GET_LIST_DESTINATION_BY_TYPE } from '@/endpoint/destination/api';
 
 interface User {
@@ -319,7 +306,12 @@ export const BussinessTripFormV1 = ({
     console.log(values, ' valuesss')
     try {
       const formData = new FormData();
+      const totalAll = getTotalDes();
       // Append group data
+      formData.append('user_id', values.purpose_type_id ?? '');
+      formData.append('value', totalAll.toString());
+      formData.append('purpose_type_id', values.purpose_type_id ?? '');
+
       formData.append('purpose_type_id', values.purpose_type_id ?? '');
       formData.append('request_for', values.request_for ?? '');
       formData.append('cost_center_id', values.cost_center_id ?? '');
@@ -435,6 +427,119 @@ export const BussinessTripFormV1 = ({
     }
   }, [totalDestination, listAllowances, id, type, isAdmin, idUser]);
 
+  //   const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
+
+  //   const handleCashAdvanceChange = (value: boolean) => {
+  //     setIsCashAdvance(value);
+  //   };
+
+  // const { setValue } = useFormContext();
+
+  // Monitor total_percent value from form
+  //   const totalPercent = useWatch({
+  //     control: form.control,
+  //     name: 'total_percent',
+  //   });
+
+  //   const [totalAllowance, setTotalAllowance] = React.useState(0);
+
+  //   // Assuming allowance is calculated elsewhere, let's mock it for now
+  //   const allowance = totalAllowance; // Example: allowance is 1,000,000
+
+  //   // Calculate total based on totalPercent and allowance
+  //   React.useEffect(() => {
+  //     const percentValue = parseFloat((totalPercent || '0').toString());
+  //     // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
+  //     const total = (percentValue / 100) * allowance; // Multiply percent with allowance
+  //     // console.log(total, ' totalll');
+  //     form.setValue('total_cash_advance', total.toFixed(0)); // Save the total in total_cash_advance field
+  //   }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance changes
+
+  const [isShow, setIsShow] = React.useState(false);
+  const [approvalRoute, setApprovalRoute] = React.useState({
+    approvalRequest: [],
+    approvalFrom: [],
+    acknowledgeFrom: [],
+  });
+
+  const calculateTotal = (allowance: any, details: any) => {
+    if (allowance.type === 'total') {
+      const basePrice = parseFloat(details?.[0]?.request_price || 0);
+      return basePrice;
+    } else {
+      return details?.reduce(
+        (sum: number, item: any) => sum + parseFloat(item.request_price || 0),
+        0,
+      );
+    }
+  };
+
+  const getTotalDes = () => {
+    const alldestinations = form.getValues('destinations');
+    const totalAll = alldestinations.reduce(
+      (destinationSum: number, destination: any, destinationIndex: number) => {
+        const allowances = destination.allowances || [];
+
+        const allowanceTotal = allowances.reduce(
+          (allowanceSum: number, allowance: any, index: number) => {
+            const details = form.getValues(
+              `destinations.${destinationIndex}.allowances.${index}.detail`,
+            );
+
+            const itemTotal = calculateTotal(allowance, details);
+            return allowanceSum + itemTotal;
+          },
+          0,
+        );
+
+        return destinationSum + allowanceTotal;
+      },
+      0,
+    );
+
+    return totalAll;
+  };
+
+  const fetchDataValue = async () => {
+    try {
+      const totalAll = getTotalDes();
+      if (totalAll === 0) {
+        showToast('Please fill the balance', 'error');
+        return;
+      }
+
+      const response = await axiosInstance.get('/check-approval', {
+        params: {
+          value: totalAll,
+          user_id: form.getValues('purpose_type_id'),
+          type: 'TRIP',
+        },
+      });
+      if (response.data.status_code === 200) {
+        const approvalRequest = response.data?.data?.approval.map(
+          (route: any) => route?.division_name || null,
+        );
+
+        const approvalFrom = response.data?.data?.approval.map((route: any) => route?.name || null);
+
+        const acknowledgeFrom: never[] = [];
+        if (response.data?.data?.hr) {
+          acknowledgeFrom.push(response.data?.data?.hr?.name as unknown as never);
+        }
+
+        const dataApproval = {
+          approvalRequest,
+          approvalFrom,
+          acknowledgeFrom: acknowledgeFrom,
+        };
+        setApprovalRoute(dataApproval);
+        setIsShow(true);
+      }
+    } catch (error) {
+      showToast(error?.response?.data?.message, 'error');
+    }
+  };
+
   return (
     <ScrollArea className='h-[600px] w-full '>
       <Form {...form}>
@@ -513,7 +618,9 @@ export const BussinessTripFormV1 = ({
                           </SelectTrigger>
                           <SelectContent>
                             {listPurposeType.map((item) => (
-                              <SelectItem value={item.id.toString()}>{item.name}</SelectItem>
+                              <SelectItem key={item.id} value={item.id.toString()}>
+                                {item.name}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -543,7 +650,9 @@ export const BussinessTripFormV1 = ({
                           </SelectTrigger>
                           <SelectContent>
                             {costcenter.map((item) => (
-                              <SelectItem value={item.id.toString()}>{item.cost_center}</SelectItem>
+                              <SelectItem key={item.id} value={item.id.toString()}>
+                                {item.cost_center}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -639,7 +748,10 @@ export const BussinessTripFormV1 = ({
                           </SelectTrigger>
                           <SelectContent>
                             {Array.from({ length: 5 }, (_, index) => (
-                              <SelectItem value={(index + 1).toString()}> {index + 1} </SelectItem>
+                              <SelectItem key={index} value={(index + 1).toString()}>
+                                {' '}
+                                {index + 1}{' '}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -666,6 +778,33 @@ export const BussinessTripFormV1 = ({
             typeEdit={type}
             // setTotalAllowance={setTotalAllowance}
           />
+          <Separator className='my-4' />
+          <ButtonMui
+            onClick={async () => await fetchDataValue()}
+            variant='contained'
+            color='primary'
+            type='button'
+          >
+            Check Approval
+          </ButtonMui>
+
+          <div className='my-2'>
+            {isShow && (
+              <WorkflowComponent
+                workflowApproval={{
+                  approvalRequest: approvalRoute.approvalRequest,
+                  approvalFrom: approvalRoute.approvalFrom,
+                  acknowledgeFrom: approvalRoute.acknowledgeFrom,
+                }}
+                workflowApprovalStep={
+                  approvalRoute.approvalFrom as unknown as WorkflowApprovalStepInterface
+                }
+                workflowApprovalDiagram={
+                  approvalRoute.approvalFrom as unknown as WorkflowApprovalDiagramInterface
+                }
+              />
+            )}
+          </div>
           <Button type='submit'>submit</Button>
         </form>
       </Form>
@@ -701,6 +840,8 @@ export function BussinesTripDestination({
   const [endDate, setEndDate] = React.useState<Date>();
 
   const [selectedDestinationIdex, setDestinationIndex] = React.useState<number>(0);
+
+  const { showToast } = useAlert();
 
   return (
     <Tabs defaultValue='destination1' className='w-full'>
@@ -1128,10 +1269,6 @@ console.log(listDestination, 'listDestination 123')
           </>
         )}
       </table>
-
-      <div className='my-2'>
-        <WorkflowComponent />
-      </div>
     </TabsContent>
   );
 }
