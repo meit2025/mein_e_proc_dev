@@ -108,6 +108,7 @@ export const ReimburseForm: React.FC<Props> = ({
     cost_center: z.string().min(1, 'cost center required'),
     requester: z.string().min(1, 'requester required'),
     value: z.number().optional(),
+    user_id: z.string().optional(),
     forms: z.array(
       z.object({
         id: z.string().optional(),
@@ -223,7 +224,7 @@ export const ReimburseForm: React.FC<Props> = ({
           url: GET_LIST_MASTER_REIMBUSE_TYPE(map.type),
         };
       });
-      form.setValue('formCount', reimburseForms.length);
+      form.setValue('formCount', reimburseForms.length.toString());
       form.setValue('remark_group', reimburseGroup.remark_group);
       form.setValue('cost_center', String(reimburseGroup.cost_center));
       form.setValue('requester', reimburseGroup.requester);
@@ -359,6 +360,7 @@ export const ReimburseForm: React.FC<Props> = ({
     const totalNominal = values.forms.reduce((acc, item) => acc + parseInt(item.balance) || 0, 0);
 
     values.value = totalNominal;
+    values.user_id = values?.requester || '0';
     try {
       const response = await axiosInstance.post(store_url ?? '', values);
 
