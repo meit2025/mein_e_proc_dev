@@ -9,7 +9,7 @@ interface ApprovalProps {
 }
 
 export const CustomeForm = ({ data }: { data: any[] }) => {
-  const { getValues } = useFormContext();
+  const { getValues, setValue } = useFormContext();
   const [inputs, setInputs] = useState<ApprovalProps[]>(data);
 
   const handleAddInput = () => {
@@ -24,6 +24,7 @@ export const CustomeForm = ({ data }: { data: any[] }) => {
   const handleRemoveInput = (index: any) => {
     const newInputs = inputs.filter((_, i) => i !== index);
     setInputs(newInputs);
+    setValue('user_approvals', newInputs);
   };
 
   const { dataDropdown, getDropdown } = useDropdownOptions();
