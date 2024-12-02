@@ -3,6 +3,13 @@ import { FormFieldModel } from '@/interfaces/form/formWrapper';
 export const formModel: Array<FormFieldModel<any>> = [
   {
     type: 'input',
+    name: 'username',
+    label: 'Username',
+    placeholder: 'Enter your username',
+    required: true,
+  },
+  {
+    type: 'input',
     name: 'nip',
     label: 'NIP',
     placeholder: 'Enter your nip',

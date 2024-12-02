@@ -19,6 +19,7 @@ import {
   Tax,
   User,
 } from './model/listModel';
+import { WorkflowApproval, WorkflowComponent } from '@/components/commons/WorkflowComponent';
 
 interface Props {
   users: User[];
@@ -101,6 +102,7 @@ export const Index = ({
       </div>
 
       <DataGridComponent
+        isHistory={true}
         role={roleConfig}
         onCreate={openFormHandler}
         columns={columns}
@@ -118,6 +120,8 @@ export const Index = ({
         }}
         labelFilter='search'
       />
+
+      <WorkflowComponent />
     </>
   );
 };

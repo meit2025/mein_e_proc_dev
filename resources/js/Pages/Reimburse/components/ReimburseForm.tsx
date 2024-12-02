@@ -40,6 +40,7 @@ import {
 } from '@/endpoint/reimburse/api';
 import { CustomFormWrapper } from '@/components/commons/CustomFormWrapper';
 import { set } from 'date-fns';
+import { WorkflowComponent } from '@/components/commons/WorkflowComponent';
 
 interface Props {
   onSuccess?: (value?: boolean) => void;
@@ -1079,7 +1080,9 @@ export const ReimburseForm: React.FC<Props> = ({
                 );
               })}
             </Tabs>
-
+            <div className='my-2'>
+              <WorkflowComponent />
+            </div>
             <Separator className='my-4' />
             <div className='mt-4 flex justify-end'>
               <Button type='submit' className='w-32'>

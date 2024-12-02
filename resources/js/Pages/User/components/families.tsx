@@ -1,7 +1,13 @@
 import React, { ReactNode, useState } from 'react';
 import DataGridComponent from '@/components/commons/DataGrid';
 import { columnsValue } from '../model/listModel';
-import { LIST_API_FAMILY, CREATE_API_FAMILY ,EDIT_FAMILY, UPDATE_FAMILY ,DESTROY_FAMILY } from '@/endpoint/family/api';
+import {
+  LIST_API_FAMILY,
+  CREATE_API_FAMILY,
+  EDIT_FAMILY,
+  UPDATE_FAMILY,
+  DESTROY_FAMILY,
+} from '@/endpoint/family/api';
 import { Button } from '@/components/shacdn/button';
 import FamilyHeaderForm from '@/Pages/Master/Family/components/form';
 import { CustomDialog } from '@/components/commons/CustomDialog';
@@ -19,7 +25,7 @@ export const FamiliyLayout = ({ id }: { id: number }) => {
     setFormType({
       type: FormType.create,
       id: null,
-    })
+    });
     setOpenForm(!openForm);
   }
   return (

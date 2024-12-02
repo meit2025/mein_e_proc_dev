@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Master\Models\MasterCostCenter;
+use Modules\Master\Models\MasterStatus;
 
 // use Modules\Reimbuse\Database\Factories\ReimburseGroupFactory;
 
@@ -42,4 +43,9 @@ class ReimburseGroup extends Model
     // {
     //     // return ReimburseGroupFactory::new();
     // }
+
+    public function status()
+    {
+        return $this->belongsTo(MasterStatus::class, 'status_id', 'id');
+    }
 }

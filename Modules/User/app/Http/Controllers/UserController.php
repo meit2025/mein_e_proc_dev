@@ -4,8 +4,10 @@ namespace Modules\User\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -108,5 +110,29 @@ class UserController extends Controller
     {
         $data = User::find($id)->delete();
         return $this->successResponse($data);
+    }
+
+    public function changePassword(Request $request, $id)
+    {
+        // Validasi input menggunakan Validator
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|string|confirmed|min:8',
+        ]);
+
+        // Jika validasi gagal, kembalikan respons error
+        if ($validator->fails()) {
+            $errorString = implode(', ', $validator->errors()->all());
+            return $this->errorResponse($errorString, 400, $validator->errors());
+        }
+
+
+        // Ambil pengguna yang sedang login
+        $user = User::find($id);
+        // Update password dengan password baru
+        $user->forceFill([
+            'password' => Hash::make($request->password),
+        ])->save();
+
+        return $this->successResponse($user);
     }
 }

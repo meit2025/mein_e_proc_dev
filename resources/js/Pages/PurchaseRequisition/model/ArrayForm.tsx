@@ -109,8 +109,10 @@ const ArrayForm = ({
   };
   const handleClick = async () => {
     const dataobj = getValues();
+    const id = dataobj.item_id ?? `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
 
     const newItem = {
+      id: id,
       qty: dataobj.item_qty,
       unit_price: dataobj.item_unit_price,
       total_amount: dataobj.item_qty * dataobj.item_unit_price,
@@ -125,34 +127,33 @@ const ArrayForm = ({
       asset_number: dataobj.item_asset_number,
       sub_asset_number: dataobj.item_sub_asset_number,
       is_cashAdvance: dataobj.item_is_cashAdvance,
-      dp: dataobj.item_dp,
-      reference: dataobj.item_reference,
-      document_header_text: dataobj.item_document_header_text,
-      document_date: dataobj.item_document_date,
-      due_on: dataobj.item_due_on,
-      text: dataobj.item_text_cash_advance,
+      cash_advance_purchases: {
+        dp: dataobj.item_dp,
+        reference: dataobj.item_reference,
+        document_header_text: dataobj.item_document_header_text,
+        document_date: dataobj.item_document_date,
+        due_on: dataobj.item_due_on,
+        text: dataobj.item_text_cash_advance,
+      },
     };
 
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
     let updatedItems = [];
     if (dataobj.action === 'edit') {
       updatedItems = currentItems.map((item: any, index: any) =>
-        index === dataobj.indexEdit ? newItem : item,
+        item.id === dataobj.indexEdit ? newItem : item,
       );
     } else {
       updatedItems = [...currentItems, newItem];
     }
 
-    updatedItems = updatedItems.map((item: any, index: any) => {
-      return {
-        id: index,
-        ...item,
-      };
-    });
+    const totalSum = updatedItems.reduce((sum: number, item: any) => sum + item.total_amount, 0);
 
     // Simpan array baru ke React Hook Form state
     setValue(`vendors[${dataIndex}].units`, updatedItems);
+    setValue('total_all_amount', totalSum);
     setValue('indexEdit', 0);
+    setValue('item_id', null);
     resetindex();
   };
 
@@ -179,35 +180,39 @@ const ArrayForm = ({
     setValue('item_text_cash_advance', '');
     setValue('item_unit_price', '');
     setValue('item_uom', '');
+    setValue('cash_advance_purchases', null);
   };
 
   const handelEdit = (data: any, rowIndex: any) => {
-    setValue('indexEdit', data.id);
+    console.log(rowIndex, data.id);
+
+    const id = data.id ?? `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
+
+    setValue('indexEdit', id);
     setValue('action', 'edit');
 
     setValue('item_account_assignment_categories', data.account_assignment_categories ?? '');
     setValue('item_asset_number', data.asset_number ?? '');
     setValue('item_cost_center', data.cost_center ?? '');
-    setValue('item_document_date', data.document_date ?? '');
-    setValue('item_document_header_text', data.document_header_text ?? '');
-    setValue('item_dp', data.dp ?? '');
-    setValue('item_due_on', data.due_on ?? '');
-    setValue(
-      'item_id',
-      data.id ?? `random-generated-id-${Math.random().toString(36).substr(2, 9)}`,
-    );
-    setValue('item_is_cashAdvance', data.is_cashAdvance ?? false);
+
+    setValue('item_id', id);
+    setValue('item_is_cashAdvance', data.cash_advance_purchases?.reference !== null ? true : false);
     setValue('item_material_group', data.material_group ?? '');
     setValue('item_material_number', data.material_number ?? '');
     setValue('item_order_number', data.order_number ?? '');
     setValue('item_qty', data.qty ?? '0');
-    setValue('item_reference', data.reference ?? '');
     setValue('item_short_text', data.short_text ?? '');
     setValue('item_sub_asset_number', data.sub_asset_number ?? '');
     setValue('item_tax', data.tax ?? '');
-    setValue('item_text_cash_advance', data.text ?? '');
     setValue('item_unit_price', data.unit_price ?? '0');
     setValue('item_uom', data.uom ?? '');
+
+    setValue('item_reference', data.cash_advance_purchases?.reference ?? '');
+    setValue('item_dp', data.cash_advance_purchases?.dp ?? '');
+    setValue('item_due_on', data.cash_advance_purchases?.due_on ?? '');
+    setValue('item_text_cash_advance', data.cash_advance_purchases?.text ?? '');
+    setValue('item_document_date', data.cash_advance_purchases?.document_date ?? '');
+    setValue('item_document_header_text', data.cash_advance_purchases?.document_header_text ?? '');
   };
 
   const handleDelete = (data: any, rowIndex: any) => {
@@ -553,7 +558,10 @@ const ArrayForm = ({
                 <div data-datatable='true'>
                   <div className='scrollable-x-auto'>
                     <DataGrid
-                      columns={[...action, ...columnsItem]}
+                      columns={[
+                        ...(disable ? [] : action), // Spread an empty array if disabled, or the action array if not
+                        ...columnsItem,
+                      ]}
                       rows={dataArrayItem}
                       hideFooterPagination={true}
                     />

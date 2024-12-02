@@ -1,21 +1,17 @@
+import DataGridComponent from '@/components/commons/DataGrid';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import React, { ReactNode } from 'react';
-import DataGridComponent from '@/components/commons/DataGrid';
 
-import { BusinessTripType, columns, UserModel } from './models/models';
-import { Button } from '@/components/shacdn/button';
-import { PlusIcon } from 'lucide-react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import { GET_LIST_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/api';
-import { AllowanceCategoryModel } from '../AllowanceCategory/model/AllowanceModel';
+import { BusinessTripType, columns, UserModel } from './models/models';
 
-import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
-import { PurposeTypeModel } from '../PurposeType/models/models';
 import {
   DELET_API,
   GET_LIST_BUSINESS_TRIP_DECLARATION,
 } from '@/endpoint/business-trip-declaration/api';
 import { DETAIL_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
+import { PurposeTypeModel } from '../PurposeType/models/models';
+import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
 
 interface propsType {
   listPurposeType: PurposeTypeModel[];
@@ -54,6 +50,7 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         </CustomDialog>
       </div>
       <DataGridComponent
+        isHistory={true}
         role={{
           detail: `${roleAkses} view`,
           create: `${roleAkses} create`,

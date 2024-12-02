@@ -5,32 +5,44 @@ namespace Modules\PurchaseRequisition\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Jobs\SapJobs;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Modules\Approval\Models\Approval;
 use Modules\PurchaseRequisition\Http\Requests\Procurement as RequestsProcurement;
+use Modules\PurchaseRequisition\Models\CashAdvancePurchases;
 use Modules\PurchaseRequisition\Models\Item;
 use Modules\PurchaseRequisition\Models\Procurement;
 use Modules\PurchaseRequisition\Models\Purchase;
 use Modules\PurchaseRequisition\Models\Vendor;
 use Modules\PurchaseRequisition\Models\VendorUnit;
+use Modules\Approval\Services\CheckApproval;
 
 class ProcurementController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    protected $approvalServices;
+
+    public function __construct(CheckApproval $approvalServices)
+    {
+        $this->approvalServices = $approvalServices;
+    }
     public function index(Request $request)
     {
         $filterableColumns = [
             'user_id',
             'document_type',
             'purchasing_groups',
-            'account_assignment_categories',
             'delivery_date',
             'storage_locations',
             'total_vendor',
             'total_item',
         ];
-        $data = $this->filterAndPaginate($request, Purchase::class, $filterableColumns);
+
+        $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user');
+
+        $data = $this->filterAndPaginate($request, $data, $filterableColumns, true);
         return $this->successResponse($data);
     }
 
@@ -53,6 +65,7 @@ class ProcurementController extends Controller
             //code...
             $dataInsert = $request->all();
             $dataInsert['total_item'] = count($request['vendors'][0]['units']);
+            $dataInsert['createdBy'] = Auth::user()->id;
             $purchase = Purchase::create($dataInsert);
 
             if ($request['entertainment']) {
@@ -66,18 +79,27 @@ class ProcurementController extends Controller
                     if ($unitData['is_cashAdvance'] ?? false) {
                         $purchase->cashAdvancePurchases()->create([
                             'unit_id' => $unitCrate->id,
-                            'reference' => $unitData['reference'],
-                            'document_header_text' => $unitData['document_header_text'],
-                            'document_date' => $unitData['document_date'],
-                            'due_on' => $unitData['due_on'],
-                            'text' => $unitData['text'],
-                            'dp' => $unitData['dp'],
+                            'reference' => $unitData['cash_advance_purchases']['reference'] ?? '',
+                            'document_header_text' => $unitData['cash_advance_purchases']['document_header_text'] ?? '',
+                            'document_date' => $unitData['cash_advance_purchases']['document_date'] ?? '',
+                            'due_on' => $unitData['cash_advance_purchases']['due_on'] ?? '',
+                            'text' => $unitData['cash_advance_purchases']['text'] ?? '',
+                            'dp' => $unitData['cash_advance_purchases']['dp'] ?? '',
                         ]);
                     }
                 }
             }
+
+            $this->approvalServices->PR($request, true, $purchase->id);
             DB::commit();
-            SapJobs::dispatch($purchase->id, 'PR');
+            $this->logToDatabase(
+                $purchase->id,
+                'procurement',
+                'INFO',
+                'Create Procurement Di Create Oleh User ' . Auth::user()->name . ' Pada Tanggal ' . $this->DateTimeNow(),
+                $request->all()
+            );
+
 
             return $this->successResponse($request->all());
         } catch (\Throwable $th) {
@@ -92,8 +114,12 @@ class ProcurementController extends Controller
      */
     public function show($id)
     {
-        $procurement = Purchase::with('vendors.units', 'entertainment', 'cashAdvancePurchases')->findOrFail($id);
-        return response()->json($procurement);
+        $procurement = Purchase::with('vendors.units.cashAdvancePurchases', 'entertainment', 'cashAdvancePurchases')->findOrFail($id);
+        $approval = Approval::with('user.divisions')->where('document_id', $id)->where('document_name', 'PR')->orderBy('id', 'ASC')->get();
+        return $this->successResponse([
+            'data' => $procurement,
+            'approval' => $approval
+        ]);
     }
     public function retryPr($id, $type)
     {
@@ -121,8 +147,7 @@ class ProcurementController extends Controller
             // Find the purchase by ID
             $purchase = Purchase::with('vendors.units')->findOrFail($id);
 
-            // Update the purchase fields
-            $purchase->update($request->only([
+            $insert = $request->only([
                 'user_id',
                 'document_type',
                 'purchasing_groups',
@@ -132,7 +157,11 @@ class ProcurementController extends Controller
                 'total_vendor',
                 'total_item',
                 'is_cashAdvance'
-            ]));
+            ]);
+            $insert['updatedBy'] = Auth::user()->id;
+
+            // Update the purchase fields
+            $purchase->update($insert);
 
             $entertain = $purchase->entertainment()->updateOrCreate([
                 'purchase_id' => $id
@@ -155,11 +184,37 @@ class ProcurementController extends Controller
                 // Update or create units for the vendor
                 foreach ($vendorData['units'] as $unitData) {
                     $vendor->units()->updateOrCreate(
-                        ['material_number' => $unitData['material_number']],  // Check for existing unit by material number
+                        ['id' => $unitData['id']],  // Check for existing unit by material number
                         $unitData  // Update or create with the new data
+                    );
+
+                    CashAdvancePurchases::updateOrCreate(
+                        [
+                            'unit_id' => $unitData['id'],
+                            'purchase_id' => $id,
+                        ],
+                        [
+                            'purchase_id' => $id,
+                            'unit_id' => $unitData['id'],
+                            'reference' => $unitData['cash_advance_purchases']['reference'] ?? '',
+                            'document_header_text' => $unitData['cash_advance_purchases']['document_header_text'] ?? '',
+                            'document_date' => $unitData['cash_advance_purchases']['document_date'] ?? '',
+                            'due_on' => $unitData['cash_advance_purchases']['due_on'] ?? '',
+                            'text' => $unitData['cash_advance_purchases']['text'] ?? '',
+                            'dp' => $unitData['cash_advance_purchases']['dp'] ?? '',
+                        ]
                     );
                 }
             }
+            $this->logToDatabase(
+                $purchase->id,
+                'procurement',
+                'INFO',
+                'Procurement Di Update Oleh User ' . Auth::user()->name . ' Pada Tanggal ' . $this->DateTimeNow(),
+                $request->all()
+            );
+
+
 
             DB::commit();
             return $this->successResponse($request->all());
