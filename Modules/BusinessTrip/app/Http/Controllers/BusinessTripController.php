@@ -26,9 +26,17 @@ use Modules\Master\Models\Pajak;
 use Modules\Master\Models\PurchasingGroup;
 use Modules\Reimbuse\Models\Reimburse;
 use Modules\Reimbuse\Models\ReimburseType;
+use Modules\Approval\Services\CheckApproval;
 
 class BusinessTripController extends Controller
 {
+    protected $approvalServices;
+
+    public function __construct(CheckApproval $approvalServices)
+    {
+        $this->approvalServices = $approvalServices;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -344,7 +352,7 @@ class BusinessTripController extends Controller
      */
     public function update(Request $request, $id)
     {
-        dd($request->all(),$id);
+        dd($request->all(), $id);
     }
 
     /**
@@ -457,13 +465,15 @@ class BusinessTripController extends Controller
                     }
                 }
             }
-
+            $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP');
             DB::commit();
-            SapJobs::dispatch($businessTrip->id, 'BT');
+
+
             // return $this->successResponse("All data has been processed successfully");
         } catch (\Exception $e) {
+            dd($e);
             DB::rollBack();
-            // return $this->errorResponse($e->getMessage());
+            return $this->errorResponse($e->getMessage());
         }
     }
 
@@ -485,6 +495,7 @@ class BusinessTripController extends Controller
 
             return [
                 'id' => $map->id,
+                'status_id' => $map->status_id,
                 'request_no' => $map->request_no,
                 'status' => [
                     'name' => $map->status->name,
@@ -594,6 +605,7 @@ class BusinessTripController extends Controller
     {
         $findData  = BusinessTrip::find($id);
         $data = [];
+        $data['status_id'] = $findData->status_id;
         $data['request_no'] = $findData->request_no;
         $data['remarks'] = $findData->remarks;
         $data['request_for'] = $findData->requestFor->name;

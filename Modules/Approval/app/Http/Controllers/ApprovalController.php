@@ -135,8 +135,10 @@ class ApprovalController extends Controller
     {
         try {
             switch ($request->type) {
-                case 'REIM' | 'TRIP' | 'TRIP_DECLARATION':
-                    $result = $this->approvalServices->Reim($request);
+                case 'REIM':
+                case 'TRIP':
+                case 'TRIP_DECLARATION':
+                    $result = $this->approvalServices->Payment($request);
                     break;
                 case 'PR':
                     $result = $this->approvalServices->PR($request);
@@ -204,6 +206,19 @@ class ApprovalController extends Controller
             }
 
             return $this->successResponse($request->all());
+            //code...
+        } catch (\Throwable $th) {
+            //throw $th;
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+    public  function getApproval(Request $request)
+    {
+        try {
+            $approval = Approval::with('user.divisions')->where('document_id', $request->id)->where('document_name', $request->type)->orderBy('id', 'ASC')->get();
+
+
+            return $this->successResponse($approval);
             //code...
         } catch (\Throwable $th) {
             //throw $th;

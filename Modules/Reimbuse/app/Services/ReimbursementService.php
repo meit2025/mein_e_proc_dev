@@ -11,6 +11,7 @@ use Modules\Reimbuse\Models\ReimburseGroup;
 use Modules\Reimbuse\Models\ReimburseProgress;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Modules\Approval\Services\CheckApproval;
 use Modules\Reimbuse\Models\ReimburseAttachment;
 
 class ReimbursementService
@@ -49,7 +50,7 @@ class ReimbursementService
         return 'Finished';
     }
 
-    public function storeReimbursements($groupData, $forms)
+    public function storeReimbursements($groupData, $forms, $dataRequest)
     {
         try {
             DB::beginTransaction();
@@ -102,9 +103,12 @@ class ReimbursementService
             $requester = User::where('nip', $groupData['requester'])->first();
             $this->generateProgress($group, $requester);
 
+            $const = new CheckApproval();
+            $const->Payment($dataRequest, true, $group->id, 'REIM');
+            DB::commit();
+
             SapJobs::dispatch($group->id, 'REIM');
 
-            DB::commit();
             return "Reimbursements and progress stored successfully.";
         } catch (\Exception $e) {
             DB::rollBack();
