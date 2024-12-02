@@ -153,6 +153,7 @@ class FamilyController extends Controller
             return $this->successResponse([], 'Delete Reimburse Period Successfully');
         } catch (\Exception  $e) {
             DB::rollBack();
+            if ($e instanceof \PDOException && $e->getCode() == '23503') return $this->errorResponse('Gagal, Tidak dapat menghapus data ini karena ada data terkait yang masih ada.');
             return $this->errorResponse($e);
         }
     }

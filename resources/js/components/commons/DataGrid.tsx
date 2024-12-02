@@ -157,6 +157,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
       } else {
         showToast('An unexpected error occurred', 'error');
       }
+      setDeleteLoading(false);
     }
   };
 
