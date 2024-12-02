@@ -89,7 +89,6 @@ abstract class Controller
 
                 $data = Approval::where('user_id', Auth::user()->id)
                     ->where('document_name', 'PR')->pluck('document_id')->toArray();
-                dd($data,  Auth::user()->id);
                 $query = $query->whereIn('id', $data);
             } else {
                 $query->where(function ($q) use ($request, $filterableColumns) {
