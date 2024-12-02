@@ -204,8 +204,4 @@ export const formModelEdit: Array<FormFieldModel<any>> = [
     fieldCustome: true,
     fieldCustomeValue: <ItemForm disable={true} />,
   },
-  {
-    fieldCustome: true,
-    fieldCustomeValue: <DetailApproval />,
-  },
 ];
