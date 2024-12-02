@@ -124,6 +124,7 @@ class CheckApproval
         // Implement Reim logic if necessary
         try {
             //code...
+            dd($request);
 
             $getUserId = User::where('id', $request->user_id ?? $request->requester)->orWhere('nip', $request->user_id ??  $request->requester)->first();
             if (!$getUserId) {
