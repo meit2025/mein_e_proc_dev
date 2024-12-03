@@ -48,7 +48,7 @@ import { all, AxiosError } from 'axios';
 import { AllowanceItemModel } from '../../AllowanceItem/models/models';
 import { FormType } from '@/lib/utils';
 import { MultiSelect } from '@/components/commons/MultiSelect';
-import { DestinationModel, PurposeTypeModel } from '../models/models';
+import { DestinationModel } from '../models/models';
 //
 
 interface FormInterface {
@@ -182,6 +182,9 @@ export default function DestinationForm({
                             </SelectItem>
                             <SelectItem key={'domestic'} value={'domestic'}>
                               DOMESTIC
+                            </SelectItem>
+                            <SelectItem key={'local'} value={'local'}>
+                              LOCAL
                             </SelectItem>
                           </SelectContent>
                         </Select>

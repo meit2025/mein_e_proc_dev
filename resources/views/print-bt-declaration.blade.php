@@ -114,7 +114,7 @@
 
 <div class="container">
     <h2>Attendance Onduty Request</h2>
-    <p><strong>Request No.:</strong> {{$data['request_no']}}</p>
+    <p><strong>Declaration No.:</strong> {{$data['request_no']}}</p>
     <p><strong>Company:</strong> PT. Mitsubishi Electric Indonesia</p>
     <p><strong>Request for:</strong> {{$data['request_for']}}</p>
     <p><strong>Requested By:</strong> {{$data['requested_by']}}</p>
