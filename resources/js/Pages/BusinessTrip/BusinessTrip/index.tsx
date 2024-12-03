@@ -49,7 +49,6 @@ export const Index = ({
   purchasingGroup,
   listDestination,
 }: propsType) => {
-  console.log(costcenter);
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
   const [businessTripForm, setBusinessTripForm] = React.useState({
@@ -66,7 +65,6 @@ export const Index = ({
   // Get the logged-in user's ID
   const userId = auth.user?.id;
   const isAdmin = auth.user?.is_admin;
-  console.log(auth, ' ini auth');
 
   return (
     <>
