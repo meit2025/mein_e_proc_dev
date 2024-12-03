@@ -33,7 +33,6 @@ export const columns: GridColDef[] = [
       );
     },
   },
-  { field: 'created_at', headerName: 'Total Destinations', width: 200, filterable: true },
 ];
 
 // Fungsi untuk menangani aksi cetak detail

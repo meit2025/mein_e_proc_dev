@@ -68,7 +68,7 @@ class AllowanceItemController extends Controller
             })->toArray();
 
             $purposeTypeRelations = collect($map->allowancePurposeType)->map(function ($relation) {
-                return  $relation->purposeType->name;
+                return  $relation?->purposeType?->name;
             })->toArray();
             return [
                 'id' => $map->id,

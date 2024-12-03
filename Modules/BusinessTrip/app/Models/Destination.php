@@ -17,13 +17,7 @@ class Destination extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [
-
-        'code',
-        'destination',
-        'type',
-        'region'
-    ];
+    protected $guarded = [];
 
     // protected static function newFactory(): DestinationFactory
     // {
