@@ -308,9 +308,8 @@ export const BussinessTripFormV1 = ({
       const formData = new FormData();
       const totalAll = getTotalDes();
       // Append group data
-      formData.append('user_id', values.purpose_type_id ?? '');
+      formData.append('user_id', values.request_for ?? '');
       formData.append('value', totalAll.toString());
-      formData.append('purpose_type_id', values.purpose_type_id ?? '');
 
       formData.append('purpose_type_id', values.purpose_type_id ?? '');
       formData.append('request_for', values.request_for ?? '');
@@ -511,7 +510,7 @@ export const BussinessTripFormV1 = ({
       const response = await axiosInstance.get('/check-approval', {
         params: {
           value: totalAll,
-          user_id: form.getValues('purpose_type_id'),
+          user_id: form.getValues('request_for'),
           type: 'TRIP',
         },
       });
