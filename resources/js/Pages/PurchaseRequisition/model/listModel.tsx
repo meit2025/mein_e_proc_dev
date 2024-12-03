@@ -9,7 +9,7 @@ export const columns: GridColDef[] = [
     width: 200,
     filterable: false,
     renderCell: (params: any) => {
-      return <Link href={`${DETAIL_PAGE_PR}/${params.row.id}`}>{params.row.user.name}</Link>;
+      return <Link href={`${DETAIL_PAGE_PR}/${params?.row?.id}`}>{params?.row?.user?.name}</Link>;
     },
   },
   { field: 'document_type', headerName: 'document type', width: 200, filterable: true },
@@ -63,7 +63,7 @@ export const columns: GridColDef[] = [
     headerName: 'Created By',
     width: 200,
     filterable: false,
-    renderCell: ({ row: { created_by } }) => created_by.name,
+    renderCell: ({ row: { created_by: e } }) => e?.name ?? 'Unknown',
   },
 ];
 
