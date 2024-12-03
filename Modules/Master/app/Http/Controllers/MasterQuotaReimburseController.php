@@ -29,14 +29,14 @@ class MasterQuotaReimburseController extends Controller
             $data = $query->paginate($perPage);
             $data->getCollection()->transform(function ($map) {
                 $map = json_decode($map);
-                
+
                 $userRelations = collect($map->quota_reimburse_users)->map(function ($relation) {
-                    return $relation->user->name;
+                    return $relation->user->name ?? '-';
                 })->toArray();
                 return [
                     'id' => $map->id,
-                    'period' => $map->period->code. ' ( ' . $map->period->start . ' - ' . $map->period->end . ' )',
-                    'type' => $map->type->name,
+                    'period' => $map->period->code . ' ( ' . $map->period->start . ' - ' . $map->period->end . ' )',
+                    'type' => $map->type->name ?? '-',
                     'users' => join(',', $userRelations),
                 ];
             });
@@ -90,7 +90,7 @@ class MasterQuotaReimburseController extends Controller
             $createData     = MasterQuotaReimburse::create($inputData->toArray());
 
             if ($createData && !empty($validatedData['users'])) {
-                $validatedData['users'] = array_map(function($user) use($createData) {
+                $validatedData['users'] = array_map(function ($user) use ($createData) {
                     return [
                         'user_id' => $user,
                         'quota_reimburses_id' => $createData->id
@@ -149,19 +149,19 @@ class MasterQuotaReimburseController extends Controller
             $getData        = MasterQuotaReimburse::find($id);
             $validatedData  = $validator->validated();
             $editData      = collect($validatedData)->except('users');
-            
+
             $getData->fill($editData->toArray());
             $getData->save();
 
             MasterQuotaReimburseUser::where('quota_reimburses_id', $id)->delete();
             if (!empty($validatedData['users'])) {
-                $validatedData['users'] = array_map(function($user) use($id) {
+                $validatedData['users'] = array_map(function ($user) use ($id) {
                     return [
                         'user_id' => $user,
                         'quota_reimburses_id' => $id
                     ];
                 }, $validatedData['users']);
-    
+
                 MasterQuotaReimburseUser::insert($validatedData['users']);
             }
             DB::commit();
@@ -194,7 +194,7 @@ class MasterQuotaReimburseController extends Controller
     public function detail($id)
     {
         $masterReimburseQuotaData = MasterQuotaReimburse::with('type', 'period')->find($id)->toArray();
-        
+
         try {
             return Inertia::render(
                 'Master/MasterReimburseQuota/Detail',
@@ -210,29 +210,29 @@ class MasterQuotaReimburseController extends Controller
         try {
             $familyStatus = null;
             $masterReimburseQuota = MasterQuotaReimburse::with('type', 'period')->find($id)->toArray();
-            
-            if($masterReimburseQuota['type']['is_employee'] == false) $familyStatus = $masterReimburseQuota['type']['family_status'];
-            
+
+            if ($masterReimburseQuota['type']['is_employee'] == false) $familyStatus = $masterReimburseQuota['type']['family_status'];
+
             $balanceGrade = MasterTypeReimburse::with(['reimburseTypeGrades', 'reimburseTypeGrades.grade', 'reimburseTypeGrades.grade.gradeUsers'])->find($masterReimburseQuota['type']['id'])->toArray();
-            
+
             if (isset($balanceGrade['reimburse_type_grades']) && is_array($balanceGrade['reimburse_type_grades'])) {
                 $balanceGrade['reimburse_type_grades'] = array_map(function ($reimburseTypeGrade) {
                     $grade = $reimburseTypeGrade['grade'];
                     $reimburseTypeGrade['grade_name'] = $grade['grade'];
                     $reimburseTypeGrade['user_ids'] = array_column($grade['grade_users'], 'user_id');
-                    
+
                     unset($reimburseTypeGrade['grade']);
-            
+
                     return $reimburseTypeGrade;
                 }, $balanceGrade['reimburse_type_grades']);
             }
-            
+
             $query = MasterQuotaReimburse::query()
                 ->join('master_quota_reimburse_users', 'master_quota_reimburse_users.quota_reimburses_id', '=', 'master_quota_reimburses.id')
                 ->join('master_type_reimburses', 'master_type_reimburses.id', '=', 'master_quota_reimburses.type')
                 ->join('users', 'users.id', '=', 'master_quota_reimburse_users.user_id');
 
-            $query->when($familyStatus, function($q) {
+            $query->when($familyStatus, function ($q) {
                 return $q->join('families', 'families.userId', '=', 'users.id');
             });
 
@@ -250,15 +250,15 @@ class MasterQuotaReimburseController extends Controller
 
             $query->select($selectColumns)
                 ->where('master_quota_reimburses.id', $id)
-                ->when($familyStatus, function($q) use ($familyStatus) {
+                ->when($familyStatus, function ($q) use ($familyStatus) {
                     return $q->where('families.status', $familyStatus);
                 })
             ;
-            
+
             $perPage = $request->get('per_page', 10);
             $sortDirection = $request->get('sort_direction', 'asc');
             $data = $query->orderBy('master_quota_reimburses.id', $sortDirection)->paginate($perPage);
-            
+
             $data->getCollection()->transform(function ($map) use ($balanceGrade) {
                 $filteredGrade = array_filter($balanceGrade['reimburse_type_grades'], function ($grade) use ($map) {
                     return in_array($map->userId, $grade['user_ids']);
