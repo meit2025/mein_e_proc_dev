@@ -301,49 +301,55 @@ class ReimbuseController extends Controller
     public function getDataLimitAndBalance(Request $request)
     {
 
-        $user = $request->user;
-        $period = $request->periode;
-        $reimbuseTypeID = $request->reimbuse_type_id;
+        try {
+            //code...
+            $user = $request->user;
+            $period = $request->periode;
+            $reimbuseTypeID = $request->reimbuse_type_id;
 
 
-        $getCurrentBalance = Reimburse::where('requester', $request->user)
-            ->where('period', $period)
-            ->where('reimburse_type', $reimbuseTypeID)
-            ->sum('balance');
+            $getCurrentBalance = Reimburse::where('requester', $request->user)
+                ->where('period', $period)
+                ->where('reimburse_type', $reimbuseTypeID)
+                ->sum('balance');
 
-        $getCurrentLimit = Reimburse::where('requester', $request->user)
-            ->where('period', $period)
-            ->where('reimburse_type', $reimbuseTypeID)
-            ->count();
-
-
-        $reimbuseType = MasterTypeReimburse::where('code', $reimbuseTypeID)->first();
+            $getCurrentLimit = Reimburse::where('requester', $request->user)
+                ->where('period', $period)
+                ->where('reimburse_type', $reimbuseTypeID)
+                ->count();
 
 
+            $reimbuseType = MasterTypeReimburse::where('code', $reimbuseTypeID)->first();
 
-        $user =  User::where('nip', $user)->first();
 
-        $balance =  (float) $reimbuseType->grade_all_price - (float) $getCurrentBalance;
 
-        if ($reimbuseType->grade_option == 'grade') {
-            $userGrade = BusinessTripGradeUser::where('user_id', $user->id)->first();
-            $reimbuseGrade = MasterTypeReimburseGrades::where('grade_id', $userGrade->grade_id)->where('reimburse_type_id', $reimbuseType->id)->first();
+            $user =  User::where('nip', $user)->first();
 
-            $balance =  (float)($reimbuseGrade->plafon) - (float) $getCurrentBalance;
+            $balance =  (float) $reimbuseType->grade_all_price - (float) $getCurrentBalance;
+
+            if ($reimbuseType->grade_option == 'grade') {
+                $userGrade = BusinessTripGradeUser::where('user_id', $user->id)->first();
+                $reimbuseGrade = MasterTypeReimburseGrades::where('grade_id', $userGrade->grade_id)->where('reimburse_type_id', $reimbuseType->id)->first();
+
+                $balance =  (float)($reimbuseGrade->plafon) - (float) $getCurrentBalance;
+            }
+            $limit = (float) $reimbuseType->limit - (float) $getCurrentLimit;
+            $context = [
+                'current_balance' => (float) $getCurrentBalance,
+                'balance' => (float) $balance,
+                'limit' => $limit,
+                'current_limit' => $getCurrentLimit,
+                'type_limit' => $reimbuseType->limit,
+                'type_balance' => $reimbuseType->grade_all_price
+            ];
+
+
+
+            return $this->successResponse($context);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return $this->errorResponse($th->getMessage());
         }
-        $limit = (float) $reimbuseType->limit - (float) $getCurrentLimit;
-        $context = [
-            'current_balance' => (float) $getCurrentBalance,
-            'balance' => (float) $balance,
-            'limit' => $limit,
-            'current_limit' => $getCurrentLimit,
-            'type_limit' => $reimbuseType->limit,
-            'type_balance' => $reimbuseType->grade_all_price
-        ];
-
-
-
-        return $this->successResponse($context);
     }
 
     public function detailAPI($id, Request $request)
