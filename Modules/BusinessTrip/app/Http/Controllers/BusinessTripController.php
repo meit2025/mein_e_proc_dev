@@ -367,7 +367,6 @@ class BusinessTripController extends Controller
 
     public function storeAPI(Request $request)
     {
-        dd($request->all());
         try {
             DB::beginTransaction();
 
@@ -469,7 +468,6 @@ class BusinessTripController extends Controller
 
             // return $this->successResponse("All data has been processed successfully");
         } catch (\Exception $e) {
-            dd($e);
             DB::rollBack();
             return $this->errorResponse($e->getMessage());
         }
