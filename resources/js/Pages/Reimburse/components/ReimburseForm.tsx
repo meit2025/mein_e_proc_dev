@@ -209,13 +209,13 @@ export const ReimburseForm: React.FC<Props> = ({
       const response = await axiosInstance.get(edit_url ?? '');
       const reimburseGroup = response.data.data.group;
       const reimburseForms = response.data.data.forms as [];
-
+      
       const reimburseFormMapping = reimburseForms.map((map: any) => {
         return {
           id: String(map.id),
           for: String(map.for),
           group: String(map.group),
-          reimburse_type: map.reimburse_type,
+          reimburse_type: map.reimburse_type.code,
           short_text: map.short_text,
           balance: map.balance,
           currency: map.currency,
@@ -230,10 +230,19 @@ export const ReimburseForm: React.FC<Props> = ({
           // url: GET_LIST_MASTER_REIMBUSE_TYPE,
         };
       });
+
       form.setValue('formCount', reimburseForms.length.toString());
       form.setValue('remark_group', reimburseGroup.remark_group);
-      form.setValue('cost_center', String(reimburseGroup.cost_center));
+      form.setValue('cost_center', String(reimburseGroup.cost_center.id));
       form.setValue('requester', reimburseGroup.requester);
+
+      let formCounter = 0;
+      for (const map of reimburseForms) {
+        formCounter++;
+        await fetchReimburseType(formCounter, {type: map.type});
+        await handleChangeReimburseType(formCounter, {type: map.type, reimburse_type: map.reimburse_type.code});
+        await handleChangeReimbursePeriod(formCounter, {type: map.type, reimburse_type: map.reimburse_type.code, period: map.period});
+      }
 
       form.setValue('forms', reimburseFormMapping);
       setLoading(false);
@@ -277,11 +286,11 @@ export const ReimburseForm: React.FC<Props> = ({
     });
   }, []);
 
-  const fetchReimburseType = async (index: number) => {
+  const fetchReimburseType = async (index: number, otherParams: any) => {
     const response = await axiosInstance.get(GET_LIST_MASTER_REIMBUSE_TYPE, {
       params: {
         user                : form.getValues('requester'),
-        familyRelationship  : form.getValues(`forms.${index}.type`)
+        familyRelationship  : otherParams.type
       },
       headers: {
         'Content-Type': 'application/json',
@@ -315,13 +324,13 @@ export const ReimburseForm: React.FC<Props> = ({
     }
   };
 
-  const handleChangeReimburseType = async (reimburseType: string, index: number) => {
+  const handleChangeReimburseType = async (index: number, otherParams: any) => {
       // get data reimburse period
       const response = await axiosInstance.get(GET_LIST_PERIOD_MASTER_REIMBURSE, {
         params: {
           user                : form.getValues('requester'),
-          familyRelationship  : form.getValues(`forms.${index}.type`),
-          reimburseType       : reimburseType
+          familyRelationship  : otherParams.type,
+          reimburseType       : otherParams.reimburse_type
         },
         headers: {
           'Content-Type': 'application/json',
@@ -334,14 +343,14 @@ export const ReimburseForm: React.FC<Props> = ({
       });
   };
 
-  const handleChangeReimbursePeriod = async (reimbursePeriod: string, index: number) => {
+  const handleChangeReimbursePeriod = async (index: number, otherParams: any) => {
     // get data family
     const response = await axiosInstance.get(GET_LIST_FAMILY_REIMBURSE, {
       params: {
         user                : form.getValues('requester'),
-        familyRelationship  : form.getValues(`forms.${index}.type`),
-        reimburseType       : form.getValues(`forms.${index}.reimburse_type`),
-        reimbursePeriod     : reimbursePeriod,
+        familyRelationship  : otherParams.type,
+        reimburseType       : otherParams.reimburse_type,
+        reimbursePeriod     : otherParams.period
       },
       headers: {
         'Content-Type': 'application/json',
@@ -359,7 +368,7 @@ export const ReimburseForm: React.FC<Props> = ({
       let requester           = form.getValues('requester');
       let familyRelationship  = form.getValues(`forms.${index}.type`);
       
-      if (requester || familyRelationship) fetchReimburseType(index);
+      if (requester || familyRelationship) fetchReimburseType(index, {type: familyRelationship});
     }
   }, [formFields.length, form.watch('forms')]);
 
@@ -714,10 +723,10 @@ export const ReimburseForm: React.FC<Props> = ({
                                       for             : '',
                                     });
                                     
-                                    handleChangeReimburseType(data.value, index);
+                                    handleChangeReimburseType(index, {type: form.getValues(`forms.${index}.type`), reimburse_type: data.value});
                                   } 
                                 }}
-                                onFocus={() => fetchReimburseType(index)}
+                                onFocus={() => fetchReimburseType(index, {type: form.getValues(`forms.${index}.type`)})}
                                 classNames='mt-2 w-full'
                               />
                             </td>
@@ -779,7 +788,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                             for     : ''
                                           });
                                           if (form.getValues(`forms.${index}.type`) == 'Employee') getDataByLimit(index);
-                                          handleChangeReimbursePeriod(value, index)
+                                          handleChangeReimbursePeriod(index, {type: form.getValues(`forms.${index}.type`), reimburse_type: form.getValues(`forms.${index}.reimburse_type`), period: value})
                                         }}
                                         defaultValue={formValue.period}
                                       >
