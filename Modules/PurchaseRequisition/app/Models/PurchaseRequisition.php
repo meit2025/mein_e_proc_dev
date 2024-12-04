@@ -2,8 +2,11 @@
 
 namespace Modules\PurchaseRequisition\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\Master\Models\MasterStatus;
+
 // use Modules\PurchaseRequisition\Database\Factories\PurchaseRequisitionFactory;
 
 class PurchaseRequisition extends Model
@@ -61,7 +64,8 @@ class PurchaseRequisition extends Model
         'attachment',
         'balance',
         'attachment_link',
-        'no_po'
+        'no_po',
+
     ];
 
     // Define the relationship with Purchase
@@ -70,8 +74,3 @@ class PurchaseRequisition extends Model
         return $this->belongsTo(Purchase::class);
     }
 }
-
- public function status()
-    {
-        return $this->belongsTo(MasterStatus::class, 'status_id', 'id');
-    }

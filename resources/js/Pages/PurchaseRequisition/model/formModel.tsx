@@ -1,5 +1,6 @@
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
 import ItemForm from './itemForm';
+import CheckApproval from './checkApproval';
 
 export const formModel: Array<FormFieldModel<any>> = [
   //   {
@@ -251,5 +252,9 @@ export const formModel: Array<FormFieldModel<any>> = [
   {
     fieldCustome: true,
     fieldCustomeValue: <ItemForm disable={false} />,
+  },
+  {
+    fieldCustome: true,
+    fieldCustomeValue: <CheckApproval isDisabled={false} />,
   },
 ];

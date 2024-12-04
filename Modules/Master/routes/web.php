@@ -206,6 +206,8 @@ Route::group(['middleware' => 'auth'], function () {
             Route::put('/update/{id}', [MasterQuotaReimburseController::class, 'update'])->name('master.reimburse-quota.update')->middleware(PermissionMiddleware::class . ':master reimburse quota update');
             Route::get('/edit/{id}', [MasterQuotaReimburseController::class, 'edit'])->name('master.reimburse-quota.edit')->middleware(PermissionMiddleware::class . ':master reimburse quota update');
             Route::delete('/delete/{id}', [MasterQuotaReimburseController::class, 'destroy'])->name('master.reimburse-quota.destroy')->middleware(PermissionMiddleware::class . ':master reimburse quota delete');
+            Route::delete('/delete/{id}', [MasterQuotaReimburseController::class, 'destroy'])->name('master.reimburse-quota.destroy')->middleware(PermissionMiddleware::class . ':master reimburse quota delete');
+            Route::get('/getPeriodDropdown', [MasterQuotaReimburseController::class, 'dropdownPeriod'])->name('master.reimburse.quota.dropdown.period')->middleware(PermissionMiddleware::class . ':master reimburse quota view');
         });
 
         Route::group(['prefix' => 'family'], function () {
@@ -270,6 +272,10 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/update/{id}', function ($id) {
                 return inertia('MasterPr/DokumentType/Update', ['id' => $id]);
             })->middleware(PermissionMiddleware::class . ':master pr document type update');
+
+            Route::get('/detail/{id}', function ($id) {
+                return inertia('MasterPr/DokumentType/Detail', ['id' => $id]);
+            })->middleware(PermissionMiddleware::class . ':master pr document type view');
         });
 
         // Valuation Type Routes
@@ -519,6 +525,13 @@ Route::group(['middleware' => 'auth'], function () {
                 ->middleware(PermissionMiddleware::class . ':master pr tax view');
             Route::delete('/delete/{id}', [PajakController::class, 'destroy'])->name('master.pajak.destroy')
                 ->middleware(PermissionMiddleware::class . ':master pr tax delete');
+        });
+        Route::group(['prefix' => 'data-dropdown'], function () {
+            Route::get('/list', [DataDropdownController::class, 'index'])->name('master.data-dropdown.index');
+            Route::post('/create', [DataDropdownController::class, 'store'])->name('master.data-dropdown.store');
+            Route::post('/update/{id}', [DataDropdownController::class, 'update'])->name('master.data-dropdown.update');
+            Route::get('/detail/{id}/{type}', [DataDropdownController::class, 'show'])->name('master.data-dropdown.show');
+            Route::delete('/delete/{id}', [DataDropdownController::class, 'destroy'])->name('master.data-dropdown.destroy');
         });
     });
 

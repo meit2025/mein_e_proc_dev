@@ -77,6 +77,25 @@ export interface BusinessTripModel {
   cost_center: [];
   purchasing_group: [];
   business_trip_destination: [];
+  request_for?: RequestFor;
+}
+
+export interface RequestFor {
+  id: number;
+  nip: string;
+  name: string;
+  email: string;
+  email_verified_at: string;
+  created_at: string;
+  updated_at: string;
+  username: string;
+  is_admin: string;
+  master_business_partner_id: any;
+  role_id: any;
+  division_id: any;
+  position_id: any;
+  departement_id: any;
+  is_approval: boolean;
 }
 
 export interface AllowanceItemModel {

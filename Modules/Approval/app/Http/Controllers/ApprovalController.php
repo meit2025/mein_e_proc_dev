@@ -3,13 +3,24 @@
 namespace Modules\Approval\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SapJobs;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Modules\Approval\Models\Approval;
 use Modules\Approval\Models\ApprovalRoute;
 use Modules\Approval\Models\ApprovalRouteUsers;
+use Modules\Approval\Services\CheckApproval;
+use Modules\PurchaseRequisition\Models\Purchase;
 
 class ApprovalController extends Controller
 {
+    protected $approvalServices;
+
+    public function __construct(CheckApproval $approvalServices)
+    {
+        $this->approvalServices = $approvalServices;
+    }
     public function index(Request $request)
     {
         $filterableColumns = [
@@ -118,5 +129,100 @@ class ApprovalController extends Controller
         //
         $data = ApprovalRoute::find($id)->delete();
         return $this->successResponse($data);
+    }
+
+    public  function CekApproval(Request $request)
+    {
+        try {
+            switch ($request->type) {
+                case 'REIM':
+                case 'TRIP':
+                case 'TRIP_DECLARATION':
+                    $result = $this->approvalServices->Payment($request);
+                    break;
+                case 'PR':
+                    $result = $this->approvalServices->PR($request);
+                    break;
+                default:
+                    return $this->errorResponse('Type not found');
+            }
+            return $this->successResponse($result);
+
+            //code...
+        } catch (\Throwable $th) {
+            //throw $th;
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+
+    public  function ApprovalOrRejceted(Request $request)
+    {
+        try {
+            Approval::where('id', $request->approvalId)->where('document_id',  $request->id)
+                ->update([
+                    'status' => $request->status,
+                    'message' => $request->note,
+                    'is_status' => true
+                ]);
+
+            $this->logToDatabase(
+                $request->id,
+                $request->function_name,
+                'INFO',
+                $request->status . ' Procurement ' . Auth::user()->name . ' Pada Tanggal ' . $this->DateTimeNow(),
+                $request->note
+            );
+
+            $ceksedSap = Approval::where('is_status', false)->where('document_id', $request->id)->get();
+            if ($request->status == 'Rejected') {
+                Purchase::where('id', $request->id)->update(['status_id' => 4]);
+            }
+            if ($ceksedSap->count() == 0 && $request->status == 'Approved') {
+                Purchase::where('id', $request->id)->update(['status_id' => 5]);
+                $this->logToDatabase(
+                    $request->id,
+                    $request->function_name,
+                    'INFO',
+                    'Generate PR TO SAP',
+                    'SEND SAP SUCCESS'
+                );
+                $dokumnetType = 'PR';
+                switch ($request->function_name) {
+                    case 'procurement':
+                        $dokumnetType = 'PR';
+                        break;
+                    case 'reim':
+                        $dokumnetType = 'reim';
+                        break;
+                    case 'trip':
+                        $dokumnetType = 'BT';
+                        break;
+                    case 'trip_declaration':
+                        $dokumnetType = 'BTPO';
+                        break;
+                }
+
+                SapJobs::dispatch($request->id, $dokumnetType);
+            }
+
+            return $this->successResponse($request->all());
+            //code...
+        } catch (\Throwable $th) {
+            //throw $th;
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+    public  function getApproval(Request $request)
+    {
+        try {
+            $approval = Approval::with('user.divisions')->where('document_id', $request->id)->where('document_name', $request->type)->orderBy('id', 'ASC')->get();
+
+
+            return $this->successResponse($approval);
+            //code...
+        } catch (\Throwable $th) {
+            //throw $th;
+            return $this->errorResponse($th->getMessage());
+        }
     }
 }

@@ -9,6 +9,7 @@ interface WhereProps {
   groupBy?: string;
 }
 interface StructDropdown {
+  isMapping?: boolean;
   name: string;
   id: string | number;
   tabel: string;
@@ -17,7 +18,7 @@ interface StructDropdown {
   attribut?: string;
 }
 
-const useDropdownOptions = () => {
+const useDropdownOptions = (urls: string = 'api/master/dropdown') => {
   const [dropdownOptions, setDropdownOptions] = useState<FormFieldModel<any>[]>();
   const [dataDropdown, setdataDropdown] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -29,7 +30,7 @@ const useDropdownOptions = () => {
   ) => {
     setIsLoading(true);
     try {
-      const response = await axiosInstance.get('api/master/dropdown', {
+      const response = await axiosInstance.get(urls, {
         params: {
           name: struct.name,
           id: struct.id,
@@ -46,14 +47,17 @@ const useDropdownOptions = () => {
         },
       });
 
-      const fetchedData = response.data.data;
+      const fetchedData = response.data.data.map((item: any) => ({
+        label: !struct.isMapping ? item.label : `${item.label} - ${item.value}`,
+        value: item.value,
+      }));
       if (object && dropdown !== '') {
         const updatedObject = object.map((field) =>
           field.name === dropdown ? { ...field, options: fetchedData } : field,
         );
         setDropdownOptions(updatedObject);
       }
-      setdataDropdown(response.data.data);
+      setdataDropdown(fetchedData);
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching dropdown options:', error);

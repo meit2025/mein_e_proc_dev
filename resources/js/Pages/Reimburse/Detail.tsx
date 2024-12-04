@@ -34,7 +34,7 @@ const Detail = ({ id }: { id: number }) => {
   return (
     <>
       <Loading isLoading={isLoading} />
-      <CustomTabPr detailLayout={<ReimburseDetail />} id={id} type={'REIM'} />
+      <CustomTabPr detailLayout={<ReimburseDetail />} id={id} type={'REIM'} logName='reim' />
     </>
   );
 };

@@ -31,6 +31,7 @@ const Update = ({ id }: { id: number }) => {
           'master_business_partner_id',
           parseInt(data.data.master_business_partner_id),
         );
+        methods.setValue('is_admin', data.data.is_admin === '0' ? false : true);
       } catch (error) {
         console.error('Error fetching detail:', error);
       } finally {

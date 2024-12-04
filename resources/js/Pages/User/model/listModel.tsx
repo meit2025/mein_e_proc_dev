@@ -1,6 +1,12 @@
 import { GridColDef } from '@mui/x-data-grid';
 
 export const columns: GridColDef[] = [
+  {
+    field: 'username',
+    headerName: 'Username',
+    width: 200,
+    filterable: true,
+  },
   { field: 'nip', headerName: 'NIP', width: 200, filterable: true },
   { field: 'name', headerName: 'Name', width: 200, filterable: true },
   { field: 'email', headerName: 'Email', width: 200, filterable: true },
@@ -25,6 +31,7 @@ export const columns: GridColDef[] = [
     filterable: true,
     renderCell: (params) => <span className='capitalize'>{params.row.positions?.name}</span>,
   },
+
   {
     field: 'role.name',
     headerName: 'Role',

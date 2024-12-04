@@ -33,6 +33,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::group(['prefix' => 'api/user', 'middleware' => 'auth'], function () {
         Route::get('/list', [UserController::class, 'index'])->name('user.index');
         Route::post('/create', [UserController::class, 'store'])->name('user.store');
+        Route::post('/change-password/{id}', [UserController::class, 'changePassword'])->name('user.changePassword');
         Route::post('/update/{id}', [UserController::class, 'update'])->name('user.update');
         Route::get('/detail/{id}', [UserController::class, 'show'])->name('user.show');
         Route::delete('/delete/{id}', [UserController::class, 'destroy'])->name('user.destroy');

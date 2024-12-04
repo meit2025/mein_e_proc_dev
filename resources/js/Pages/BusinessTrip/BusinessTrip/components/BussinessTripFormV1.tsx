@@ -3,8 +3,8 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormMessage,
   FormLabel,
+  FormMessage,
 } from '@/components/shacdn/form';
 
 import { z } from 'zod';
@@ -12,33 +12,27 @@ import { z } from 'zod';
 import { Inertia } from '@inertiajs/inertia';
 
 import { Button } from '@/components/shacdn/button';
-import { ChevronsUpDown, Plus, UndoIcon, X } from 'lucide-react';
+import { ChevronsUpDown } from 'lucide-react';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  FieldArray,
-  FieldArrayWithId,
-  useFieldArray,
-  useForm,
-  useFormContext,
-  useWatch,
-} from 'react-hook-form';
 import { Textarea } from '@/components/shacdn/textarea';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 
-import '../css/index.scss';
 import { ScrollArea } from '@/components/shacdn/scroll-area';
 import { Separator } from '@/components/shacdn/separator';
+import '../css/index.scss';
 
-import { format } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
 
+import axiosInstance from '@/axiosInstance';
+import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/shacdn/collapsible';
-
-import moment from 'moment';
+  WorkflowApprovalDiagramInterface,
+  WorkflowApprovalStepInterface,
+  WorkflowComponent,
+} from '@/components/commons/WorkflowComponent';
+import FormSwitch from '@/components/Input/formSwitchCustom';
+import { Input } from '@/components/shacdn/input';
 import {
   Select,
   SelectContent,
@@ -46,12 +40,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/shacdn/select';
-import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
-import { Input } from '@/components/shacdn/input';
-import * as React from 'react';
-import { PurposeTypeModel } from '../../PurposeType/models/models';
+import { useAlert } from '@/contexts/AlertContext';
+import {
+  CREATE_API_BUSINESS_TRIP,
+  EDIT_API_BUSINESS_TRIP,
+  GET_DETAIL_BUSINESS_TRIP,
+} from '@/endpoint/business-trip/api';
 import { GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE } from '@/endpoint/purpose-type/api';
-import axiosInstance from '@/axiosInstance';
+import { Button as ButtonMui } from '@mui/material';
+import axios, { AxiosError } from 'axios';
+import moment from 'moment';
+import * as React from 'react';
+import { DestinationModel } from '../../Destination/models/models';
+import { PurposeTypeModel } from '../../PurposeType/models/models';
 import {
   AllowanceItemModel,
   BusinessTripType,
@@ -59,20 +60,7 @@ import {
   Pajak,
   PurchasingGroup,
 } from '../models/models';
-import { Item } from '@radix-ui/react-dropdown-menu';
-import Detail from '@/Pages/User/Api/Detail';
-import { AllowanceForm } from '../../AllowanceCategory/components/AllowaceForm';
-import axios, { AxiosError } from 'axios';
-import {
-  CREATE_API_BUSINESS_TRIP,
-  GET_DETAIL_BUSINESS_TRIP,
-  EDIT_API_BUSINESS_TRIP,
-} from '@/endpoint/business-trip/api';
-import FormSwitch from '@/components/Input/formSwitchCustom';
-import FormAutocomplete from '@/components/Input/formDropdown';
-import { DestinationModel } from '../../Destination/models/models';
-import { useAlert } from '@/contexts/AlertContext';
-import { WorkflowComponent } from '@/components/commons/WorkflowComponent';
+import { GET_LIST_DESTINATION_BY_TYPE } from '@/endpoint/destination/api';
 
 interface User {
   id: string;
@@ -102,8 +90,11 @@ const formSchema = z.object({
 });
 
 const dummyPrice = 25000;
-const MAX_FILE_SIZE = 5000000;
-const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+// const MAX_FILE_SIZE = 5000000;
+// const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
+const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
 
 export const BussinessTripFormV1 = ({
   users,
@@ -115,7 +106,6 @@ export const BussinessTripFormV1 = ({
   id,
   isAdmin,
   idUser,
-  listDestination = [],
 }: {
   users: User[];
   listPurposeType: PurposeTypeModel[];
@@ -126,14 +116,22 @@ export const BussinessTripFormV1 = ({
   id: string | undefined;
   isAdmin: string | undefined;
   idUser: number | undefined;
-  listDestination: DestinationModel[];
 }) => {
   const formSchema = z.object({
     purpose_type_id: z.string().min(1, 'Purpose type required'),
     request_for: z.string().min(1, 'Request is required'),
     cost_center_id: z.string().min(1, 'Cost Center is required'),
     remark: z.string().min(1, 'Remark is required'),
-    attachment: z.instanceof(File).nullable().optional(),
+    attachment: z.array(
+      z
+        .instanceof(File)
+        .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
+          message: 'File type must be JPG, JPEG, PNG, or PDF',
+        })
+        .refine((file) => file.size <= MAX_FILE_SIZE, {
+          message: 'File size must be less than 1MB',
+        }),
+    ),
     total_destination: z.number().min(1, 'Total Destinantion Required'),
     destinations: z.array(
       z.object({
@@ -177,7 +175,6 @@ export const BussinessTripFormV1 = ({
   });
   const [totalDestination, setTotalDestination] = React.useState<string>('1');
 
-  console.log('list destiantion', listDestination);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -185,7 +182,7 @@ export const BussinessTripFormV1 = ({
       request_for: '',
       cost_center_id: '',
       remark: '',
-      attachment: null,
+      attachment: [],
       total_destination: 1,
       destinations: [
         {
@@ -213,6 +210,10 @@ export const BussinessTripFormV1 = ({
     business_trip_end_date: Date;
   }
 
+  React.useEffect(() => {
+    console.log('Form Errors:', form.formState.errors);
+  }, [form.formState.errors]);
+
   async function getDetailData() {
     const url = GET_DETAIL_BUSINESS_TRIP(id);
     //fixing data not showing in index 0
@@ -221,9 +222,9 @@ export const BussinessTripFormV1 = ({
       const response = await axios.get(url);
       const data = response.data.data;
       console.log(data, ' Response Detailxxxx');
-      form.setValue('purpose_type_id', data.purpose_type_id);
-      form.setValue('request_for', data.request_for.id);
-      form.setValue('cost_center_id', data.cost_center_id);
+      form.setValue('purpose_type_id', data.purpose_type_id.toString());
+      form.setValue('request_for', data.request_for.id.toString());
+      form.setValue('cost_center_id', data.cost_center_id.toString());
       form.setValue('remark', data.remarks);
       form.setValue('total_destination', data.total_destination);
       console.log(data.destinations, ' data.destinations');
@@ -233,14 +234,31 @@ export const BussinessTripFormV1 = ({
           destination: destination.destination,
           pajak_id: destination.pajak_id,
           purchasing_group_id: destination.purchasing_group_id,
-          cash_advance: destination.cash_advance,
+          cash_advance: destination.cash_advance == 1 ? true : false,
           reference_number: destination.reference_number,
           total_percent: destination.total_percent,
           total_cash_advance: destination.total_cash_advance,
           business_trip_start_date: new Date(destination.business_trip_start_date),
           business_trip_end_date: new Date(destination.business_trip_end_date),
-          detail_attedances: destination.detail_attedances,
-          allowances: destination.allowances,
+          detail_attedances: destination.detail_attedances.map((detail: any) => {
+            return {
+              ...detail,
+              date: new Date(detail.date),
+            };
+          }),
+          allowances: destination.allowances.map((allowance: any) => {
+            return {
+              ...allowance,
+              default_price: parseInt(allowance.default_price),
+              subtotal: parseInt(allowance.subtotal),
+              detail: allowance.detail.map((detail: any) => {
+                return {
+                  ...detail,
+                  date: detail?.date != null ? new Date(detail.date) : null,
+                };
+              }),
+            };
+          }),
         })),
       );
     } catch (e) {
@@ -249,6 +267,7 @@ export const BussinessTripFormV1 = ({
   }
 
   const [listAllowances, setListAllowances] = React.useState<AllowanceItemModel[]>([]);
+  const [listDestination, setListDestination] = React.useState<DestinationModel[]>([]);
 
   const [selectedUserId, setSelectedUserId] = React.useState(
     isAdmin === '0' ? idUser.toString() : '',
@@ -257,12 +276,15 @@ export const BussinessTripFormV1 = ({
   async function handlePurposeType(value: string) {
     form.setValue('purpose_type_id', value || '');
     const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
-    console.log(userid, ' ---- ');
     const url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
+    const getDestination = GET_LIST_DESTINATION_BY_TYPE(value);
 
     try {
       const response = await axiosInstance.get(url);
+      const responseDestination = await axiosInstance.get(getDestination);
+      console.log(responseDestination.data.data, ' responseDestination');
       setListAllowances(response.data.data as AllowanceItemModel[]);
+      setListDestination(responseDestination.data.data as DestinationModel[]);
     } catch (e) {
       console.log(e);
     }
@@ -278,20 +300,24 @@ export const BussinessTripFormV1 = ({
   const { showToast } = useAlert();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log(values, ' valuesss');
     try {
       const formData = new FormData();
+      const totalAll = getTotalDes();
       // Append group data
+      formData.append('user_id', values.request_for ?? '');
+      formData.append('value', totalAll.toString());
+
       formData.append('purpose_type_id', values.purpose_type_id ?? '');
       formData.append('request_for', values.request_for ?? '');
       formData.append('cost_center_id', values.cost_center_id ?? '');
       formData.append('remark', values.remark ?? '');
-      formData.append('attachment', values.attachment ?? '');
+      values.attachment.forEach((file: any, index: number) => {
+        if (file) {
+          formData.append(`attachment[${index}]`, file);
+        }
+      });
       formData.append('total_destination', `${values.total_destination}`);
-      //   formData.append('pajak_id', values.pajak_id ?? '');
-      //   formData.append('purchasing_group_id', values.purchasing_group_id ?? '');
-      //   formData.append('cash_advance', `${values.cash_advance}`);
-      //   formData.append('total_percent', `${values.total_percent}`);
-      //   formData.append('total_cash_advance', `${values.total_cash_advance}`);
       values.destinations.forEach((item, index) => {
         const itemCopy = {
           ...item,
@@ -318,8 +344,6 @@ export const BussinessTripFormV1 = ({
         formData.append(`destinations[${index}]`, JSON.stringify(itemCopy));
       });
 
-      console.log(formData, ' test');
-
       if (type == BusinessTripType.create) {
         await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
           headers: {
@@ -328,7 +352,7 @@ export const BussinessTripFormV1 = ({
         });
         showToast('succesfully created data', 'success');
       } else {
-        await Inertia.put(`${EDIT_API_BUSINESS_TRIP}/${id}`, formData, {
+        await Inertia.post(`${EDIT_API_BUSINESS_TRIP}/${id}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -425,6 +449,98 @@ export const BussinessTripFormV1 = ({
   //     form.setValue('total_cash_advance', total.toFixed(0)); // Save the total in total_cash_advance field
   //   }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance changes
 
+  const [isShow, setIsShow] = React.useState(false);
+  const [approvalRoute, setApprovalRoute] = React.useState({
+    approvalRequest: [],
+    approvalFrom: [],
+    acknowledgeFrom: [],
+  });
+
+  const calculateTotal = (allowance: any, details: any) => {
+    if (allowance.type === 'total') {
+      const basePrice = parseFloat(details?.[0]?.request_price || 0);
+      return basePrice;
+    } else {
+      return details?.reduce(
+        (sum: number, item: any) => sum + parseFloat(item.request_price || 0),
+        0,
+      );
+    }
+  };
+
+  const getTotalDes = () => {
+    const alldestinations = form.getValues('destinations');
+    const totalAll = alldestinations.reduce(
+      (destinationSum: number, destination: any, destinationIndex: number) => {
+        const allowances = destination.allowances || [];
+
+        const allowanceTotal = allowances.reduce(
+          (allowanceSum: number, allowance: any, index: number) => {
+            const details = form.getValues(
+              `destinations.${destinationIndex}.allowances.${index}.detail`,
+            );
+
+            const itemTotal = calculateTotal(allowance, details);
+            return allowanceSum + itemTotal;
+          },
+          0,
+        );
+
+        return destinationSum + allowanceTotal;
+      },
+      0,
+    );
+
+    return totalAll;
+  };
+
+  const fetchDataValue = async () => {
+    try {
+      const totalAll = getTotalDes();
+      if (totalAll === 0) {
+        showToast('Please fill the balance', 'error');
+        return;
+      }
+
+      const response = await axiosInstance.get('/check-approval', {
+        params: {
+          value: totalAll,
+          user_id: form.getValues('request_for'),
+          type: 'TRIP',
+        },
+      });
+      if (response.data.status_code === 200) {
+        const approvalRequest = response.data?.data?.approval.map(
+          (route: any) => route?.division_name || null,
+        );
+
+        const approvalFrom = response.data?.data?.approval.map((route: any) => route?.name || null);
+
+        const acknowledgeFrom: never[] = [];
+        if (response.data?.data?.hr) {
+          acknowledgeFrom.push(response.data?.data?.hr?.name as unknown as never);
+        }
+
+        const dataApproval = {
+          approvalRequest,
+          approvalFrom,
+          acknowledgeFrom: acknowledgeFrom,
+        };
+        setApprovalRoute(dataApproval);
+        setIsShow(true);
+      }
+    } catch (error) {
+      showToast(error?.response?.data?.message, 'error');
+    }
+  };
+
+  React.useEffect(() => {
+    const totalAll = getTotalDes();
+    if (totalAll > 0) {
+      fetchDataValue();
+    }
+  }, [form.watch('destinations')]);
+
   return (
     <ScrollArea className='h-[600px] w-full '>
       <Form {...form}>
@@ -503,7 +619,9 @@ export const BussinessTripFormV1 = ({
                           </SelectTrigger>
                           <SelectContent>
                             {listPurposeType.map((item) => (
-                              <SelectItem value={item.id.toString()}>{item.name}</SelectItem>
+                              <SelectItem key={item.id} value={item.id.toString()}>
+                                {item.name}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -533,7 +651,9 @@ export const BussinessTripFormV1 = ({
                           </SelectTrigger>
                           <SelectContent>
                             {costcenter.map((item) => (
-                              <SelectItem value={item.id.toString()}>{item.cost_center}</SelectItem>
+                              <SelectItem key={item.id} value={item.id.toString()}>
+                                {item.cost_center}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -581,17 +701,26 @@ export const BussinessTripFormV1 = ({
                         <input
                           className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
                           type='file'
+                          multiple // Menambahkan atribut multiple
                           onChange={(e) => {
-                            const file = e.target.files?.[0]; // Ambil file pertama
-                            if (file) {
-                              field.onChange(file); // Panggil onChange dengan event untuk react-hook-form
+                            const files = e.target.files; // Ambil file yang dipilih
+                            if (files) {
+                              const fileArray = Array.from(files); // Konversi FileList ke Array
+                              field.onChange(fileArray); // Panggil onChange dengan array file
                             } else {
-                              field.onChange(null); // Jika tidak ada file, set null
+                              field.onChange([]); // Jika tidak ada file, set array kosong
                             }
                           }}
                         />
                       </FormControl>
-                      <FormMessage />
+                      {form.formState.errors.attachment &&
+                      Array.isArray(form.formState.errors.attachment)
+                        ? form.formState.errors.attachment.map((error, index) => (
+                            <p key={index} className='text-[0.8rem] font-medium text-destructive'>
+                              {error.message}
+                            </p>
+                          ))
+                        : null}
                     </FormItem>
                   )}
                 />
@@ -620,7 +749,10 @@ export const BussinessTripFormV1 = ({
                           </SelectTrigger>
                           <SelectContent>
                             {Array.from({ length: 5 }, (_, index) => (
-                              <SelectItem value={(index + 1).toString()}> {index + 1} </SelectItem>
+                              <SelectItem key={index} value={(index + 1).toString()}>
+                                {' '}
+                                {index + 1}{' '}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -647,6 +779,33 @@ export const BussinessTripFormV1 = ({
             typeEdit={type}
             // setTotalAllowance={setTotalAllowance}
           />
+          <Separator className='my-4' />
+          <ButtonMui
+            onClick={async () => await fetchDataValue()}
+            variant='contained'
+            color='primary'
+            type='button'
+          >
+            Check Approval
+          </ButtonMui>
+
+          <div className='my-2'>
+            {isShow && (
+              <WorkflowComponent
+                workflowApproval={{
+                  approvalRequest: approvalRoute.approvalRequest,
+                  approvalFrom: approvalRoute.approvalFrom,
+                  acknowledgeFrom: approvalRoute.acknowledgeFrom,
+                }}
+                workflowApprovalStep={
+                  approvalRoute.approvalFrom as unknown as WorkflowApprovalStepInterface
+                }
+                workflowApprovalDiagram={
+                  approvalRoute.approvalFrom as unknown as WorkflowApprovalDiagramInterface
+                }
+              />
+            )}
+          </div>
           <Button type='submit'>submit</Button>
         </form>
       </Form>
@@ -682,6 +841,8 @@ export function BussinesTripDestination({
   const [endDate, setEndDate] = React.useState<Date>();
 
   const [selectedDestinationIdex, setDestinationIndex] = React.useState<number>(0);
+
+  const { showToast } = useAlert();
 
   return (
     <Tabs defaultValue='destination1' className='w-full'>
@@ -837,6 +998,7 @@ export function BussinessDestinationForm({
 
   //   // Calculate total based on totalPercent and allowance
   React.useEffect(() => {
+    console.log(form.getValues('destinations'), ' edit destination');
     if (typeEdit == BusinessTripType.edit) {
       setIsCashAdvance(form.getValues(`destinations.${index}.cash_advance`));
     }
@@ -846,7 +1008,7 @@ export function BussinessDestinationForm({
     // console.log(total, ' totalll');
     form.setValue(`destinations.${index}.total_cash_advance`, total.toFixed(0)); // Save the total in total_cash_advance field
   }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance changes
-
+  console.log(listDestination, 'listDestination 123');
   return (
     <TabsContent value={`destination${index + 1}`}>
       <div key={index}>
@@ -906,7 +1068,7 @@ export function BussinessDestinationForm({
                         </SelectTrigger>
                         <SelectContent>
                           {pajak.map((item) => (
-                            <SelectItem value={item.id}>{item.mwszkz}</SelectItem>
+                            <SelectItem value={item.id.toString()}>{item.mwszkz}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -933,7 +1095,9 @@ export function BussinessDestinationForm({
                         </SelectTrigger>
                         <SelectContent>
                           {purchasingGroup.map((item) => (
-                            <SelectItem value={item.id}>{item.purchasing_group}</SelectItem>
+                            <SelectItem value={item.id.toString()}>
+                              {item.purchasing_group}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -1100,10 +1264,6 @@ export function BussinessDestinationForm({
           </>
         )}
       </table>
-
-      <div className='my-2'>
-        <WorkflowComponent />
-      </div>
     </TabsContent>
   );
 }

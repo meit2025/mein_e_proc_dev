@@ -68,11 +68,10 @@ class DropdownMasterController extends Controller
 
     function dropdown(Request $request)
     {
-        $selectLabel = str_contains($request->name, 'CONCAT(') ? str_replace('`', '"', $request->name) :  $request->name;
-        $data = DB::table($request->tabelname)->select($selectLabel . ' as label', $request->id . ' as value');
+        $data = DB::table($request->tabelname)->select($request->name . ' as label', $request->id . ' as value');
 
         if ($request->search) {
-            $data = $data->where($selectLabel, 'ilike', '%' . $request->search . '%');
+            $data = $data->where($request->name, 'ilike', '%' . $request->search . '%');
         }
 
         if ($request->key && $request->parameter) {

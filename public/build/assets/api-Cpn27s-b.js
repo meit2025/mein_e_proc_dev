@@ -1,0 +1,1 @@
+const T="/api/destination",E=`${T}/list`,I=`${T}/create`,s=t=>`${T}/detail/${t}`,_=t=>`${T}/update/${t}`,a=`${T}/delete`,A=t=>`${T}/list-destination-by-type/${t}`;export{I as C,a as D,s as G,_ as U,E as a,A as b};

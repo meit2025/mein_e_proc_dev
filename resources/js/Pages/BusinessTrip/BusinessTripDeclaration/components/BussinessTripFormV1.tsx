@@ -44,6 +44,12 @@ import { ChevronsUpDown, Plus, UndoIcon, X } from 'lucide-react';
 import axios, { AxiosError } from 'axios';
 import { Inertia } from '@inertiajs/inertia';
 import { useAlert } from '@/contexts/AlertContext';
+import { Button as ButtonMui } from '@mui/material';
+import {
+  WorkflowApprovalDiagramInterface,
+  WorkflowApprovalStepInterface,
+  WorkflowComponent,
+} from '@/components/commons/WorkflowComponent';
 
 interface Props {
   listBusinessTrip: BusinessTripModel[];
@@ -93,10 +99,10 @@ export const BussinessTripFormV1 = ({
           }),
         ),
         other: z.array(
-            z.object({
-              value: z.number().optional(),
-            })
-          ),
+          z.object({
+            value: z.number().optional(),
+          }),
+        ),
       }),
     ),
   });
@@ -114,20 +120,61 @@ export const BussinessTripFormV1 = ({
           business_trip_end_date: new Date(),
           detail_attedances: [],
           allowances: [],
-          other: [
-            {value: 0}
-          ]
+          other: [{ value: 0 }],
         },
       ],
     },
   });
 
+  const calculateTotal = (allowance: any, details: any) => {
+    if (allowance.type === 'total') {
+      const basePrice = parseFloat(details?.[0]?.request_price || 0);
+      return basePrice;
+    } else {
+      return details?.reduce(
+        (sum: number, item: any) => sum + parseFloat(item.request_price || 0),
+        0,
+      );
+    }
+  };
+
+  const getTotalDes = () => {
+    const alldestinations = form.getValues('destinations');
+    const totalAll = alldestinations.reduce(
+      (destinationSum: number, destination: any, destinationIndex: number) => {
+        const allowances = destination.allowances || [];
+
+        const allowanceTotal = allowances.reduce(
+          (allowanceSum: number, allowance: any, index: number) => {
+            const details = form.getValues(
+              `destinations.${destinationIndex}.allowances.${index}.detail`,
+            );
+
+            const itemTotal = calculateTotal(allowance, details);
+            return allowanceSum + itemTotal;
+          },
+          0,
+        );
+
+        return destinationSum + allowanceTotal;
+      },
+      0,
+    );
+
+    return totalAll;
+  };
+
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log(values, ' valuesnya');
     try {
+      const totalAll = getTotalDes();
       const formData = new FormData();
       // Append group data
+
+      formData.append('user_id', businessTripDetail.purpose_type_id ?? '');
+      formData.append('value', totalAll.toString());
+
       formData.append('request_no', values.request_no ?? '');
       formData.append('remark', values.remark ?? '');
       formData.append('attachment', values.attachment ?? '');
@@ -219,6 +266,60 @@ export const BussinessTripFormV1 = ({
   React.useEffect(() => {}, [businessTripDetail, totalDestination]);
 
   const [totalAllowance, setTotalAllowance] = React.useState(0);
+  const [isShow, setIsShow] = React.useState(false);
+  const [approvalRoute, setApprovalRoute] = React.useState({
+    approvalRequest: [],
+    approvalFrom: [],
+    acknowledgeFrom: [],
+  });
+
+  const fetchDataValue = async () => {
+    try {
+      const totalAll = getTotalDes();
+      if (totalAll === 0) {
+        showToast('Please fill the balance', 'error');
+        return;
+      }
+
+      const response = await axiosInstance.get('/check-approval', {
+        params: {
+          value: totalAll,
+          user_id: businessTripDetail.request_for?.id ?? '',
+          type: 'TRIP_DECLARATION',
+        },
+      });
+      if (response.data.status_code === 200) {
+        const approvalRequest = response.data?.data?.approval.map(
+          (route: any) => route?.division_name || null,
+        );
+
+        const approvalFrom = response.data?.data?.approval.map((route: any) => route?.name || null);
+
+        const acknowledgeFrom: never[] = [];
+        if (response.data?.data?.hr) {
+          acknowledgeFrom.push(response.data?.data?.hr?.name as unknown as never);
+        }
+
+        const dataApproval = {
+          approvalRequest,
+          approvalFrom,
+          acknowledgeFrom: acknowledgeFrom,
+        };
+        setApprovalRoute(dataApproval);
+        setIsShow(true);
+      }
+    } catch (error) {
+      showToast(error?.response?.data?.message, 'error');
+    }
+  };
+
+  React.useEffect(() => {
+    const totalAll = getTotalDes();
+    if (totalAll > 0) {
+      fetchDataValue();
+    }
+  }, [form.watch('destinations')]);
+
   return (
     <ScrollArea className='h-[600px] w-full '>
       <Form {...form}>
@@ -245,7 +346,7 @@ export const BussinessTripFormV1 = ({
                             <SelectValue placeholder='-- Select One --' />
                           </SelectTrigger>
                           <SelectContent>
-                            {listBusinessTrip.map((item:any) => (
+                            {listBusinessTrip.map((item: any) => (
                               <SelectItem value={item.id.toString()}>{item.request_no}</SelectItem>
                             ))}
                           </SelectContent>
@@ -340,13 +441,20 @@ export const BussinessTripFormV1 = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Select value={totalDestination} onValueChange={totalDestinationHandler} disabled={true}>
+                        <Select
+                          value={totalDestination}
+                          onValueChange={totalDestinationHandler}
+                          disabled={true}
+                        >
                           <SelectTrigger className='w-[200px] py-2'>
                             <SelectValue placeholder='-- Select Bussiness Trip --' />
                           </SelectTrigger>
                           <SelectContent>
                             {Array.from({ length: 5 }, (_, index) => (
-                              <SelectItem value={(index + 1).toString()}> {index + 1} </SelectItem>
+                              <SelectItem key={index} value={(index + 1).toString()}>
+                                {' '}
+                                {index + 1}{' '}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -369,6 +477,33 @@ export const BussinessTripFormV1 = ({
             setTotalAllowance={setTotalAllowance}
             businessTripDetail={businessTripDetail}
           />
+          <Separator className='my-4' />
+          <ButtonMui
+            onClick={async () => await fetchDataValue()}
+            variant='contained'
+            color='primary'
+            type='button'
+          >
+            Check Approval
+          </ButtonMui>
+
+          <div className='my-2'>
+            {isShow && (
+              <WorkflowComponent
+                workflowApproval={{
+                  approvalRequest: approvalRoute.approvalRequest,
+                  approvalFrom: approvalRoute.approvalFrom,
+                  acknowledgeFrom: approvalRoute.acknowledgeFrom,
+                }}
+                workflowApprovalStep={
+                  approvalRoute.approvalFrom as unknown as WorkflowApprovalStepInterface
+                }
+                workflowApprovalDiagram={
+                  approvalRoute.approvalFrom as unknown as WorkflowApprovalDiagramInterface
+                }
+              />
+            )}
+          </div>
 
           <Button type='submit'>submit</Button>
         </form>
@@ -576,13 +711,11 @@ export function BussinessDestinationForm({
           <tr>
             <td width={200}>Pajak</td>
             <td className='text-sm'>{destination?.pajak}</td>
-            </tr>
-            <tr>
-                <td width={200}>Purchasing Group</td>
-                <td className='text-sm'>
-                {destination?.purchasing_group}
-                </td>
-            </tr>
+          </tr>
+          <tr>
+            <td width={200}>Purchasing Group</td>
+            <td className='text-sm'>{destination?.purchasing_group}</td>
+          </tr>
           <tr>
             <td width={200}>Bussines Trip Date</td>
             <td className='flex space-x-2 items-center gap-3'>
@@ -867,11 +1000,15 @@ export function DetailAllowance({
   allowanceField: any;
 }) {
   const detailAllowanceceWatch = form.watch(`destinations[${destinationIndex}].allowances`);
-console.log('detailAllowanceceWatch', detailAllowanceceWatch)
+  console.log('detailAllowanceceWatch', detailAllowanceceWatch);
   React.useEffect(() => {}, [detailAllowanceceWatch]);
 
   // Field array untuk menyimpan other allowances
-  const { fields: otherAllowances, append, remove } = useFieldArray({
+  const {
+    fields: otherAllowances,
+    append,
+    remove,
+  } = useFieldArray({
     control: form.control,
     name: `destinations.${destinationIndex}.other`, // Path field array
   });
@@ -882,14 +1019,14 @@ console.log('detailAllowanceceWatch', detailAllowanceceWatch)
   });
 
   const calculateTotalOther = () => {
-    return (watchedAllowances || []).reduce((total:number, allowance:any) => {
+    return (watchedAllowances || []).reduce((total: number, allowance: any) => {
       const allowanceValue = Number(allowance?.value || 0);
       return total + allowanceValue;
     }, 0);
   };
 
   const addOtherAllowance = () => {
-    append({value:0}); // Tambahkan field baru ke array
+    append({ value: 0 }); // Tambahkan field baru ke array
   };
 
   return (
@@ -930,12 +1067,13 @@ console.log('detailAllowanceceWatch', detailAllowanceceWatch)
                   <FormItem>
                     <FormControl>
                       <Input
-                      type="number"
-                      value={field.value ?? ''} // Gunakan string kosong jika nilai null/undefined
-                      onChange={(e) => {
-                        const parsedValue = e.target.value === '' ? undefined : Number(e.target.value); // Konversi ke angka atau undefined
-                        field.onChange(parsedValue); // Serahkan nilai yang sudah dikonversi
-                      }}
+                        type='number'
+                        value={field.value ?? ''} // Gunakan string kosong jika nilai null/undefined
+                        onChange={(e) => {
+                          const parsedValue =
+                            e.target.value === '' ? undefined : Number(e.target.value); // Konversi ke angka atau undefined
+                          field.onChange(parsedValue); // Serahkan nilai yang sudah dikonversi
+                        }}
                       />
                     </FormControl>
                     <FormMessage />

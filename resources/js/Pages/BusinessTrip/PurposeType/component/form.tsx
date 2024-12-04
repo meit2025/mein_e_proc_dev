@@ -76,6 +76,7 @@ export default function PurposeTypeForm({
     all: z.boolean().optional(),
     allowances: z.array(z.number()).optional(),
     attedance_status: z.string().min(1, 'Attedance Status is required'),
+    type: z.string().min(1, 'Type is required'),
   });
 
   const defaultValues = {
@@ -84,6 +85,7 @@ export default function PurposeTypeForm({
     all: false,
     allowances: [],
     attedance_status: '',
+    type: '',
   };
 
   //   console.log('currency_id', listCurrency);
@@ -99,6 +101,7 @@ export default function PurposeTypeForm({
         code: purpose.code,
         name: purpose.name,
         attedance_status: purpose.attedance_status,
+        type: purpose.type,
         allowances: allowances.map((map) => parseInt(map)),
       });
     } catch (e) {
@@ -251,6 +254,43 @@ export default function PurposeTypeForm({
                           <SelectContent>
                             <SelectItem key={'BST'} value={'Business Trip'}>
                               Business Trip (BST)
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td width={200}>
+                Type <span className='text-red-500'>*</span>
+              </td>
+              <td>
+                <FormField
+                  control={form.control}
+                  name='type'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
+                          value={field.value} // Set the current value from React Hook Form
+                        >
+                          <SelectTrigger className='w-[200px]'>
+                            <SelectValue placeholder='Select Type' />
+                          </SelectTrigger>
+                          <SelectContent>
+                          <SelectItem key={'international'} value={'international'}>
+                              INTERNATIONAL
+                            </SelectItem>
+                            <SelectItem key={'domestic'} value={'domestic'}>
+                              DOMESTIC
+                            </SelectItem>
+                            <SelectItem key={'local'} value={'local'}>
+                              LOCAL
                             </SelectItem>
                           </SelectContent>
                         </Select>
