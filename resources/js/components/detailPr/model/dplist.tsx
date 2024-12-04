@@ -1,6 +1,10 @@
 import { GridColDef } from '@mui/x-data-grid';
 
 export const columns: GridColDef[] = [
+  { field: 'belnr', headerName: 'Number Document SAP', width: 200, filterable: true },
+  { field: 'status', headerName: 'Status', width: 200, filterable: true },
+  { field: 'purchasing_document', headerName: 'Purchasing Document', width: 200, filterable: true },
+
   { field: 'code_transaction', headerName: 'Code Transaction', width: 200, filterable: true },
   { field: 'company_code', headerName: 'Company Code', width: 200, filterable: true },
   { field: 'document_type', headerName: 'Document Type', width: 200, filterable: true },
@@ -29,7 +33,6 @@ export const columns: GridColDef[] = [
   { field: 'tax_code', headerName: 'Tax Code', width: 200, filterable: true },
   { field: 'due_on', headerName: 'Due On', width: 200, filterable: true },
   { field: 'payment_method', headerName: 'Payment Method', width: 200, filterable: true },
-  { field: 'purchasing_document', headerName: 'Purchasing Document', width: 200, filterable: true },
   {
     field: 'purchasing_document_item',
     headerName: 'Purchasing Document Item',
@@ -39,7 +42,12 @@ export const columns: GridColDef[] = [
   { field: 'assigment', headerName: 'Assignment', width: 200, filterable: true },
   { field: 'text', headerName: 'Text', width: 200, filterable: true },
   { field: 'profit_center', headerName: 'Profit Center', width: 200, filterable: true },
-  { field: 'gjahr', headerName: 'GJahr', width: 200, filterable: true },
+  { field: 'gjahr', headerName: 'fiscal year', width: 200, filterable: true },
+  { field: 'extdoc', headerName: 'Number Document Web', width: 200, filterable: true },
+  { field: 'stblg', headerName: 'Number Document Cancel', width: 200, filterable: true },
+  { field: 'stjah', headerName: 'Year Document Cancel', width: 200, filterable: true },
+  { field: 'message', headerName: 'Message', width: 200, filterable: true },
+  { field: 'code', headerName: 'Code', width: 200, filterable: true },
   { field: 'budat', headerName: 'Budat', width: 200, filterable: true },
   { field: 'monat', headerName: 'Monat', width: 200, filterable: true },
 ];

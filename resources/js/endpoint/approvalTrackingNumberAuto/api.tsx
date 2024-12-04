@@ -1,0 +1,8 @@
+const ROUTE_TRACKING_NUMBER_AUTO = '/api/approval/tracking-number-auto';
+
+export const GET_TRACKING_NUMBER_AUTO = `${ROUTE_TRACKING_NUMBER_AUTO}/list`;
+export const CREATE_TRACKING_NUMBER_AUTO = `${ROUTE_TRACKING_NUMBER_AUTO}/create`;
+export const EDIT_TRACKING_NUMBER_AUTO = `${ROUTE_TRACKING_NUMBER_AUTO}/update`;
+export const DETAIL_TRACKING_NUMBER_AUTO = (id: any) =>
+  `${ROUTE_TRACKING_NUMBER_AUTO}/detail/${id}`;
+export const DELET_TRACKING_NUMBER_AUTO = `${ROUTE_TRACKING_NUMBER_AUTO}/delete`;

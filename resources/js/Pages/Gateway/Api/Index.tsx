@@ -5,10 +5,18 @@ import { columns } from './model/listModel';
 import { DELET_API, GET_API } from '@/endpoint/getway/api';
 import { CREATE_PAGE_API, DETAIL_PAGE_API, EDIT_PAGE_API } from '@/endpoint/getway/page';
 
+const roleAkses = 'api';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
 export const Index = () => {
   return (
     <>
       <DataGridComponent
+        role={roleConfig}
         columns={columns}
         url={{
           url: GET_API,

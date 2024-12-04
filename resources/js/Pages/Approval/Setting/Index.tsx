@@ -8,11 +8,18 @@ import {
   EDIT_PAGE_SETTING_APPROVAL,
 } from '@/endpoint/settingApproval/page';
 
+const roleAkses = 'setting';
 export const Index = () => {
   return (
     <>
       <DataGridComponent
         columns={columns}
+        role={{
+          detail: `${roleAkses} view`,
+          create: `${roleAkses} create`,
+          update: `${roleAkses} update`,
+          delete: `${roleAkses} delete`,
+        }}
         url={{
           url: GET_SETTING_APPROVAL,
           addUrl: CREATE_PAGE_SETTING_APPROVAL,

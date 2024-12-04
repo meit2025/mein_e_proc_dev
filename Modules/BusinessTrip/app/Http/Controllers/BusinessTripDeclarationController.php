@@ -28,7 +28,7 @@ class BusinessTripDeclarationController extends Controller
     {
         $users = User::select('nip', 'name', 'id')->get();
         $inBusinessTripRequest = BusinessTrip::where('type', 'declaration')->pluck('parent_id')->toArray();
-        $listBusinessTrip = BusinessTrip::where('type', 'request')->whereNotIn('id',$inBusinessTripRequest)->get();
+        $listBusinessTrip = BusinessTrip::where('type', 'request')->whereNotIn('id', $inBusinessTripRequest)->get();
         $listPurposeType = PurposeType::select('name', 'code', 'id')->get();
         return Inertia::render('BusinessTrip/BusinessTripDeclaration/index', compact('users', 'listPurposeType', 'listBusinessTrip'));
     }
@@ -54,7 +54,7 @@ class BusinessTripDeclarationController extends Controller
      */
     public function showAPI($id)
     {
-        $data = BusinessTrip::with(['costCenter', 'pajak', 'purchasingGroup'])->where('id', $id)->first();
+        $data = BusinessTrip::with(['costCenter'])->where('id', $id)->first();
         $data->name_request = $data->requestFor->name;
         $data->name_purpose = $data->purposeType->name;
         $destinations = [];
@@ -132,6 +132,8 @@ class BusinessTripDeclarationController extends Controller
 
             $destinations[] = [
                 'destination' => $value->destination,
+                'pajak' => $value->pajak->mwszkz ?? '',
+                'purchasing_group' => $value->purchasingGroup->purchasing_group ?? '',
                 'business_trip_start_date' => $value->business_trip_start_date,
                 'business_trip_end_date' => $value->business_trip_end_date,
                 'detail_attedances' => $detailAttendance,
@@ -276,7 +278,7 @@ class BusinessTripDeclarationController extends Controller
                 'standar_detail_allowance' => $standar_detail_allowance,
                 'request_detail_allowance' => $request_detail_allowance,
                 'declaration_detail_allowance' => $declaration_detail_allowance,
-                'other_allowance' => number_format($destination->other_allowance,0,'',''),
+                'other_allowance' => number_format($destination->other_allowance, 0, '', ''),
                 'total_standard' => $total_standard,
                 'total_request' => $total_request,
                 'total_declaration' => $total_declaration + $destination->other_allowance,
@@ -314,7 +316,7 @@ class BusinessTripDeclarationController extends Controller
     public function listAPI(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType']);
+        $query =  BusinessTrip::query()->with(['purposeType', 'status']);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'asc');
@@ -335,6 +337,12 @@ class BusinessTripDeclarationController extends Controller
                 'request_no' => $requestNo,
                 'request_for' => $requestFor,
                 'remarks' => $map->remarks,
+                'status' => [
+                    'name' => $map->status->name,
+                    'classname' => $map->status->classname,
+                    'code' =>
+                    $map->status->code
+                ],
                 'created_at' => date('d/m/Y', strtotime($map->created_at)),
                 // 'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array
                 // 'total_destination' => $map->total_destination, // You can join multiple relations here if it's an array
@@ -408,12 +416,16 @@ class BusinessTripDeclarationController extends Controller
 
             foreach ($request->destinations as $key => $value) {
                 $data_destination = json_decode($value, true);
+                $other = 0;
+                if (count($data_destination['other']) > 0) {
+                    $other = $data_destination['other'][0]['value'];
+                }
                 $businessTripDestination = BusinessTripDestination::create([
                     'business_trip_id' => $businessTrip->id,
                     'destination' => $data_destination['destination'],
                     'business_trip_start_date' => date('Y-m-d', strtotime($data_destination['business_trip_start_date'])),
                     'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
-                    'other_allowance' => isset($data_destination['other']) ? $data_destination['other'][0]['value'] : 0,
+                    'other_allowance' => $other,
                 ]);
                 foreach ($data_destination['detail_attedances'] as $key => $destination) {
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([

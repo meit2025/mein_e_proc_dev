@@ -5,19 +5,33 @@ export const columns: GridColDef[] = [
   { field: 'name', headerName: 'Name', width: 200, filterable: true },
   { field: 'email', headerName: 'Email', width: 200, filterable: true },
   {
-    field: 'job_level',
-    headerName: 'Job Level',
+    field: 'departements.name',
+    headerName: 'Department',
     width: 200,
     filterable: true,
+    renderCell: (params) => <span className='capitalize'>{params.row.departements?.name}</span>,
   },
   {
-    field: 'division',
+    field: 'divisions.name',
     headerName: 'Division',
     width: 200,
     filterable: true,
+    renderCell: (params) => <span className='capitalize'>{params.row.divisions?.name}</span>,
   },
-  { field: 'immediate_spv', headerName: 'Immediate SPV', width: 200, filterable: true },
-  { field: 'role', headerName: 'Role', width: 200, filterable: true },
+  {
+    field: 'positions.name',
+    headerName: 'Positions',
+    width: 200,
+    filterable: true,
+    renderCell: (params) => <span className='capitalize'>{params.row.positions?.name}</span>,
+  },
+  {
+    field: 'role.name',
+    headerName: 'Role',
+    width: 200,
+    filterable: true,
+    renderCell: (params) => <span className='capitalize'>{params.row.role?.name}</span>,
+  },
 ];
 
 export const columnsValue: GridColDef[] = [

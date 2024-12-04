@@ -188,6 +188,12 @@ class BusinessTripController extends Controller
                 'destination' => $value->destination,
                 'business_trip_start_date' => $value->business_trip_start_date,
                 'business_trip_end_date' => $value->business_trip_end_date,
+                'pajak_id' => $value->pajak_id,
+                'purchasing_group_id' => $value->purchasing_group_id,
+                'reference_number' => $value->reference_number,
+                'cash_advance' => $value->cash_advance,
+                'total_cash_advance' => $value->total_cash_advance,
+                'total_percent' => $value->total_percent,
                 'detail_attedances' => $detailAttendance,
                 'allowances' => $allowances,
                 'allowancesResultItem' => $allowancesResultItem,
@@ -338,7 +344,7 @@ class BusinessTripController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        dd($request->all(),$id);
     }
 
     /**
@@ -381,15 +387,15 @@ class BusinessTripController extends Controller
                 'purpose_type_id' => $request->purpose_type_id,
                 'request_for' => $request->request_for,
                 'cost_center_id' => $request->cost_center_id,
-                'pajak_id' => $request->pajak_id,
-                'purchasing_group_id' => $request->purchasing_group_id,
                 'remarks' => $request->remark,
                 'total_destination' => $request->total_destination,
                 'created_by' => auth()->user()->id,
                 'type' => 'request',
-                'cash_advance' => $request->cash_advance == "true" ? 1 : 0,
-                'total_percent' => $request->total_percent,
-                'total_cash_advance' => $request->total_cash_advance,
+                // 'pajak_id' => $request->pajak_id,
+                // 'purchasing_group_id' => $request->purchasing_group_id,
+                // 'cash_advance' => $request->cash_advance == "true" ? 1 : 0,
+                // 'total_percent' => $request->total_percent,
+                // 'total_cash_advance' => $request->total_cash_advance,
             ]);
 
             if ($request->attachment != null) {
@@ -407,6 +413,12 @@ class BusinessTripController extends Controller
                     'destination' => $data_destination['destination'],
                     'business_trip_start_date' => date('Y-m-d', strtotime($data_destination['business_trip_start_date'])),
                     'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
+                    'pajak_id' => $data_destination['pajak_id'],
+                    'purchasing_group_id' => $data_destination['purchasing_group_id'],
+                    'cash_advance' => $data_destination['cash_advance'] == "true" ? 1 : 0,
+                    'reference_number' => $data_destination['cash_advance'] == "true" ? $data_destination['reference_number'] : null,
+                    'total_percent' => $data_destination['cash_advance'] == "true" ? $data_destination['total_percent'] : null,
+                    'total_cash_advance' => $data_destination['cash_advance'] == "true" ? $data_destination['total_cash_advance'] : null,
                 ]);
                 foreach ($data_destination['detail_attedances'] as $key => $destination) {
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
@@ -448,16 +460,17 @@ class BusinessTripController extends Controller
 
             DB::commit();
             SapJobs::dispatch($businessTrip->id, 'BT');
+            // return $this->successResponse("All data has been processed successfully");
         } catch (\Exception $e) {
-            dd($e);
             DB::rollBack();
+            // return $this->errorResponse($e->getMessage());
         }
     }
 
     public function listAPI(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType']);
+        $query =  BusinessTrip::query()->with(['purposeType', 'status']);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
@@ -473,6 +486,12 @@ class BusinessTripController extends Controller
             return [
                 'id' => $map->id,
                 'request_no' => $map->request_no,
+                'status' => [
+                    'name' => $map->status->name,
+                    'classname' => $map->status->classname,
+                    'code' =>
+                    $map->status->code
+                ],
                 'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array
                 'total_destination' => $map->total_destination, // You can join multiple relations here if it's an array
             ];
@@ -492,8 +511,8 @@ class BusinessTripController extends Controller
         $data['requested_by'] = $findData->requestedBy->name;
         $data['purpose_type_name'] = $findData->purposeType->name;
         $data['cost_center'] = $findData->costCenter?->cost_center;
-        $data['start_date'] = date('d-m-Y',strtotime($findData->detailAttendance()->orderBy('date','asc')->first()->date));
-        $data['end_date'] = date('d-m-Y',strtotime($findData->detailAttendance()->orderBy('date','desc')->first()->date));
+        $data['start_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'asc')->first()->date));
+        $data['end_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'desc')->first()->date));
 
         foreach ($findData->businessTripDestination as $destination) {
             $detail_attendance = [];
@@ -571,7 +590,8 @@ class BusinessTripController extends Controller
         return view('print', compact('data'));
     }
 
-    function detailBtRequestAPI($id) {
+    function detailBtRequestAPI($id)
+    {
         $findData  = BusinessTrip::find($id);
         $data = [];
         $data['request_no'] = $findData->request_no;
@@ -580,8 +600,8 @@ class BusinessTripController extends Controller
         $data['requested_by'] = $findData->requestedBy->name;
         $data['purpose_type_name'] = $findData->purposeType->name;
         $data['cost_center'] = $findData->costCenter?->cost_center;
-        $data['start_date'] = date('d-m-Y',strtotime($findData->detailAttendance()->orderBy('date','asc')->first()->date));
-        $data['end_date'] = date('d-m-Y',strtotime($findData->detailAttendance()->orderBy('date','desc')->first()->date));
+        $data['start_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'asc')->first()->date));
+        $data['end_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'desc')->first()->date));
 
         foreach ($findData->businessTripDestination as $destination) {
             $detail_attendance = [];

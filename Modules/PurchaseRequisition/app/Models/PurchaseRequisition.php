@@ -70,3 +70,8 @@ class PurchaseRequisition extends Model
         return $this->belongsTo(Purchase::class);
     }
 }
+
+ public function status()
+    {
+        return $this->belongsTo(MasterStatus::class, 'status_id', 'id');
+    }

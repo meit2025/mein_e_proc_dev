@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Master\Models\MasterCostCenter;
+use Modules\Master\Models\MasterStatus;
 use Modules\Master\Models\Pajak;
 use Modules\Master\Models\PurchasingGroup;
 
@@ -14,7 +15,7 @@ use Modules\Master\Models\PurchasingGroup;
 
 class BusinessTrip extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -28,14 +29,9 @@ class BusinessTrip extends Model
         'created_by',
         'remarks',
         'total_destination',
-        'cash_advance',
-        'total_cash_advance',
-        'total_percent',
         'type',
         'parent_id',
         'cost_center_id',
-        'pajak_id',
-        'purchasing_group_id',
         'uom_id'
     ];
 
@@ -89,7 +85,13 @@ class BusinessTrip extends Model
         return $this->belongsTo(PurchasingGroup::class, 'purchasing_group_id', 'id');
     }
 
-    function parentBusinessTrip(){
+    function parentBusinessTrip()
+    {
         return $this->belongsTo(BusinessTrip::class, 'parent_id', 'id');
+    }
+
+    function status()
+    {
+        return $this->belongsTo(MasterStatus::class, 'status_id', 'id');
     }
 }
