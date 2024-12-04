@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Modules\Master\Models\MasterPeriodReimburse;
+use Modules\Master\Models\MasterQuotaReimburse;
 
 class MasterPeriodReimburseController extends Controller
 {
@@ -121,6 +122,14 @@ class MasterPeriodReimburseController extends Controller
     {
         DB::beginTransaction();
         try {
+            // master_quota_reimburses
+            $referenced = MasterQuotaReimburse::where('period', $id)->exists();
+
+            if ($referenced) {
+                DB::rollBack();
+                return $this->errorResponse('Unable to delete this period as it is still linked to existing quota reimbursements.');
+            }
+
             MasterPeriodReimburse::find($id)->delete();
             DB::commit();
 

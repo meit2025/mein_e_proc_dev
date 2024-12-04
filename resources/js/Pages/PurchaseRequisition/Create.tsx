@@ -8,6 +8,8 @@ import { formModel } from './model/formModel';
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
 import useDropdownOptionsArray from '@/lib/getDropdownArray';
 import { modelDropdowns } from './model/modelDropdown';
+import { usePage, Link } from '@inertiajs/react';
+import { Auth } from '../Layouts/Header';
 
 function Create() {
   const methods = useForm({
@@ -17,13 +19,23 @@ function Create() {
 
   const [dataModel, setDataModel] = useState(formModel);
   const { dropdownOptions, getDropdown } = useDropdownOptionsArray();
+  const { auth } = usePage().props as unknown as { auth?: Auth };
 
   useEffect(() => {
     getDropdown(modelDropdowns, formModel);
   }, []);
 
   useEffect(() => {
-    setDataModel(dropdownOptions as FormFieldModel<any>[]);
+    console.log(auth);
+    if (auth?.user?.is_admin !== '1') {
+      const updatedObject = (dropdownOptions ?? []).map((field) =>
+        field.name === 'user_id' ? { ...field, disabled: true } : field,
+      );
+      methods.setValue('user_id', auth?.user?.id);
+      setDataModel(updatedObject);
+    } else {
+      setDataModel(dropdownOptions as FormFieldModel<any>[]);
+    }
   }, [dropdownOptions]);
 
   return (

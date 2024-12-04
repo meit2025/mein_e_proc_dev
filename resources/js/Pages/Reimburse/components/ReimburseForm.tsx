@@ -439,6 +439,13 @@ export const ReimburseForm: React.FC<Props> = ({
     }
   };
 
+  useEffect(() => {
+    const values = form.getValues('forms');
+    const totalNominal = values.reduce((acc, item) => acc + parseInt(item.balance) || 0, 0);
+    if (totalNominal > 0 && isShow === true) {
+      fetchDataValue();
+    }
+  }, [form.watch('forms'), form.watch('requester')]);
   return (
     <ScrollArea className='h-[600px] w-full'>
       <CustomFormWrapper isLoading={isLoading}>

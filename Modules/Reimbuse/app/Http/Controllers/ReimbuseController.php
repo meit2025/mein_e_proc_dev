@@ -231,7 +231,6 @@ class ReimbuseController extends Controller
 
             $latestPeriod = MasterPeriodReimburse::orderBy('id', 'desc')->first();
 
-
             return Inertia::render(
                 'Reimburse/Index',
                 compact('purchasing_groups', 'currentUser', 'latestPeriod',  'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes')
