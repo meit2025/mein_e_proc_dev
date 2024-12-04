@@ -206,6 +206,8 @@ Route::group(['middleware' => 'auth'], function () {
             Route::put('/update/{id}', [MasterQuotaReimburseController::class, 'update'])->name('master.reimburse-quota.update')->middleware(PermissionMiddleware::class . ':master reimburse quota update');
             Route::get('/edit/{id}', [MasterQuotaReimburseController::class, 'edit'])->name('master.reimburse-quota.edit')->middleware(PermissionMiddleware::class . ':master reimburse quota update');
             Route::delete('/delete/{id}', [MasterQuotaReimburseController::class, 'destroy'])->name('master.reimburse-quota.destroy')->middleware(PermissionMiddleware::class . ':master reimburse quota delete');
+            Route::delete('/delete/{id}', [MasterQuotaReimburseController::class, 'destroy'])->name('master.reimburse-quota.destroy')->middleware(PermissionMiddleware::class . ':master reimburse quota delete');
+            Route::get('/getPeriodDropdown', [MasterQuotaReimburseController::class, 'dropdownPeriod'])->name('master.reimburse.quota.dropdown.period')->middleware(PermissionMiddleware::class . ':master reimburse quota view');
         });
 
         Route::group(['prefix' => 'family'], function () {

@@ -24,6 +24,7 @@ import { FormType } from '@/lib/utils';
 import { MultiSelect } from '@/components/commons/MultiSelect';
 import { User } from '../models/models';
 import { LIST_API_USER_GRADE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
+import { LIST_DROPDOWN_PERIOD_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/api';
 
 export interface props {
   onSuccess?: (value: boolean) => void;
@@ -44,7 +45,7 @@ export default function ReimburseQuotaForm({
   const [users, setUsers] = React.useState<User[]>([]);
   const [selectedType, setSelectedType] = React.useState<string | null>(null);
   const { dataDropdown: dataReimburseType, getDropdown: getReimburseType } = useDropdownOptions();
-  const { dataDropdown: dataReimbursePeriod, getDropdown: getReimbursePeriod } = useDropdownOptions();
+  const { dataDropdown: dataReimbursePeriod, getDropdown: getReimbursePeriod } = useDropdownOptions(LIST_DROPDOWN_PERIOD_REIMBURSE_QUOTA);
   
   const formSchema = z.object({
     period: z.number('Period must choose'),
