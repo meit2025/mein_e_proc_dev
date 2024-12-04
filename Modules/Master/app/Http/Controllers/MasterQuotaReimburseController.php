@@ -8,12 +8,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
-use Modules\BusinessTrip\Models\BusinessTripGradeUser;
 use Modules\Master\Models\MasterPeriodReimburse;
 use Modules\Master\Models\MasterQuotaReimburse;
 use Modules\Master\Models\MasterQuotaReimburseUser;
 use Modules\Master\Models\MasterTypeReimburse;
-use Modules\Master\Models\MasterTypeReimburseGrades;
 
 class MasterQuotaReimburseController extends Controller
 {
@@ -187,7 +185,7 @@ class MasterQuotaReimburseController extends Controller
             return $this->successResponse([], 'Delete Reimburse Quota Successfully');
         } catch (\Exception  $e) {
             DB::rollBack();
-            if ($e instanceof \PDOException && $e->getCode() == '23503') return $this->errorResponse('Gagal, Tidak dapat menghapus data ini karena ada data terkait yang masih ada.');
+            if ($e instanceof \PDOException && $e->getCode() == '23503') return $this->errorResponse('Failed, Cannot delete this data because it is related to other data.');
             return $this->errorResponse($e);
         }
     }
@@ -284,5 +282,22 @@ class MasterQuotaReimburseController extends Controller
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }
+    }
+
+    function dropdownPeriod(Request $request)
+    {
+        $data = MasterPeriodReimburse::selectRaw(
+            'code || \' (\' || "start" || \' - \' || "end" || \')\' as label, id as value'
+        );
+        
+        if ($request->search) {
+            $data = $data
+                    ->where('code', 'ilike', '%' . $request->search . '%')
+                    ->orWhere('start', 'ilike', '%' . $request->search . '%')
+                    ->orWhere('end', 'ilike', '%' . $request->search . '%');
+        }
+
+        $data = $data->limit(175)->get();
+        return $this->successResponse($data);
     }
 }
