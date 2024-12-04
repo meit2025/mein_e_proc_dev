@@ -238,6 +238,7 @@ class MasterTypeReimburseController extends Controller
             return $this->successResponse([], 'Delete Reimburse Type Successfully');
         } catch (\Exception  $e) {
             DB::rollBack();
+            if ($e instanceof \PDOException && $e->getCode() == '23503') return $this->errorResponse('Failed, Cannot delete this data because it is related to other data.');
             return $this->errorResponse($e);
         }
     }
