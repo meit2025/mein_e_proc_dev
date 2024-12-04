@@ -17,7 +17,7 @@ interface StructDropdown {
   attribut?: string;
 }
 
-const useDropdownOptions = () => {
+const useDropdownOptions = (urls: string = 'api/master/dropdown') => {
   const [dropdownOptions, setDropdownOptions] = useState<FormFieldModel<any>[]>();
   const [dataDropdown, setdataDropdown] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -29,7 +29,7 @@ const useDropdownOptions = () => {
   ) => {
     setIsLoading(true);
     try {
-      const response = await axiosInstance.get('api/master/dropdown', {
+      const response = await axiosInstance.get(urls, {
         params: {
           name: struct.name,
           id: struct.id,

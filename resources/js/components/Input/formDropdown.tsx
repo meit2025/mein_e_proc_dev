@@ -22,6 +22,7 @@ interface FormAutocompleteProps<T> {
   onChangeOutside?: (value: T | null, data?: any) => void;
   onSearch?: (query: string) => Promise<Option<T>[]>;
   loading?: boolean;
+  onFocus?: () => void;
 }
 
 const FormAutocomplete = <T,>({
@@ -38,6 +39,7 @@ const FormAutocomplete = <T,>({
   lengthLabel = '40',
   onSearch,
   loading = false,
+  onFocus,
 }: FormAutocompleteProps<T>) => {
   const {
     control,
@@ -80,6 +82,7 @@ const FormAutocomplete = <T,>({
                     onSearch(newInputValue);
                   }
                 }}
+                onFocus={onFocus}
                 renderInput={(params) => (
                   <TextField
                     {...params}
