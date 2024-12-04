@@ -151,6 +151,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
       onDelete && (await onDelete(id));
       fetchRows(paginationModel.page, paginationModel.pageSize, search, sortModel, filterModel, 0);
     } catch (error) {
+      setDeleteLoading(false);
       if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message || 'Failed to delete record';
         showToast(errorMessage, 'error');

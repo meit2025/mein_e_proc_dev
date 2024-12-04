@@ -217,7 +217,7 @@ const ArrayForm = ({
 
   const handleDelete = (data: any, rowIndex: any) => {
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
-    const updatedItems = currentItems.filter((item: any, index: number) => index !== data.id);
+    const updatedItems = currentItems.filter((item: any, index: number) => item.id !== data.id);
     setValue(`vendors[${dataIndex}].units`, updatedItems);
   };
 

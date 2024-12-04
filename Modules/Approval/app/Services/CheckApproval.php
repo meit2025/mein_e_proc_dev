@@ -231,7 +231,6 @@ class CheckApproval
             ];
         } catch (\Throwable $th) {
             //throw $th;
-            dd($th);
             throw new Exception($th->getMessage());
         }
     }

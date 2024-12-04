@@ -12,6 +12,7 @@ export interface User {
   email: string;
   role_id: string;
   is_approval: boolean;
+  is_admin: string;
 }
 
 export interface Auth {

@@ -56,6 +56,8 @@ class ApprovalPrController extends Controller
                 'purchasing_group_id',
                 'master_tracking_number_id',
             ]);
+
+            $approvalRouteData['value'] = $request->value ?? 0;
             $approvalRoute = ApprovalPr::create($approvalRouteData);
 
             // Ambil array user_id dari request
