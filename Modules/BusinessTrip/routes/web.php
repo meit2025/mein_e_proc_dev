@@ -142,5 +142,6 @@ Route::group(['prefix' => 'api/'], function () {
         Route::get('/detail/{id}', [DestinationController::class, 'detailAPI'])->name('destination-api.detail');
 
         Route::delete('/delete/{id}', [DestinationController::class, 'deleteAPI'])->name('destination-api.destroy');
+        Route::get('/list-destination-by-type/{id}', [DestinationController::class, 'getDestinationByType'])->name('destination-api.get-by-type');
     });
 });

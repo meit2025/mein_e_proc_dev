@@ -24,7 +24,6 @@ const useDropdownOptionsArray = () => {
   const [dropdownOptions, setDropdownOptions] = useState<FormFieldModel<any>[]>();
 
   const getDropdown = async (data: DropdownProps[], object?: FormFieldModel<any>[]) => {
-    console.log('ini data', data);
     try {
       let dataObject = object;
       for (const item of data) {
@@ -37,7 +36,11 @@ const useDropdownOptionsArray = () => {
           },
         );
 
-        const fetchedData = response.data.data;
+        const fetchedData = response.data.data.map((item: any) => ({
+          label: `${item.label} - ${item.value}`,
+          value: item.value,
+        }));
+
         if (dataObject && item.dropdown !== '') {
           const updatedObject = dataObject.map((field) =>
             field.name === item.dropdown ? { ...field, options: fetchedData } : field,

@@ -5,6 +5,7 @@ import { columns } from './model/listModel';
 import { DELET_APPROVAL_ROUTE, GET_APPROVAL_ROUTE } from '@/endpoint/approvalRoute/api';
 import {
   CREATE_PAGE_APPROVAL_ROUTE,
+  DETAIL_PAGE_APPROVAL_ROUTE,
   EDIT_PAGE_APPROVAL_ROUTE,
 } from '@/endpoint/approvalRoute/page';
 
@@ -25,6 +26,7 @@ export const Index = () => {
           addUrl: CREATE_PAGE_APPROVAL_ROUTE,
           editUrl: EDIT_PAGE_APPROVAL_ROUTE,
           deleteUrl: DELET_APPROVAL_ROUTE,
+          detailUrl: DETAIL_PAGE_APPROVAL_ROUTE,
         }}
         labelFilter='search'
       />

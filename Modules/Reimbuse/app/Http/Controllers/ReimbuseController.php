@@ -11,6 +11,7 @@ use Modules\Reimbuse\Models\Reimburse;
 use Modules\Reimbuse\Models\ReimburseGroup;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Modules\Approval\Models\Approval;
 use Modules\BusinessTrip\Models\BusinessTripGrade;
 use Modules\BusinessTrip\Models\BusinessTripGradeUser;
 use Modules\Master\Models\Family;
@@ -198,7 +199,6 @@ class ReimbuseController extends Controller
 
             $latestPeriod = MasterPeriodReimburse::orderBy('id', 'desc')->first();
 
-
             return Inertia::render(
                 'Reimburse/Index',
                 compact('purchasing_groups', 'currentUser', 'latestPeriod',  'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes')
@@ -224,9 +224,9 @@ class ReimbuseController extends Controller
                 'cost_center'    => $data['cost_center'],
             ];
             $forms = $data['forms'];
+            $data['user_id'] =  $request->requester;
 
-
-            $response = $this->reimbursementService->storeReimbursements($groupData, $forms);
+            $response = $this->reimbursementService->storeReimbursements($groupData, $forms, $data);
             if (isset($response['error'])) {
                 return $this->errorResponse($response['error']);
             }
@@ -269,49 +269,55 @@ class ReimbuseController extends Controller
     public function getDataLimitAndBalance(Request $request)
     {
 
-        $user = $request->user;
-        $period = $request->periode;
-        $reimbuseTypeID = $request->reimbuse_type_id;
+        try {
+            //code...
+            $user = $request->user;
+            $period = $request->periode;
+            $reimbuseTypeID = $request->reimbuse_type_id;
 
 
-        $getCurrentBalance = Reimburse::where('requester', $request->user)
-            ->where('period', $period)
-            ->where('reimburse_type', $reimbuseTypeID)
-            ->sum('balance');
+            $getCurrentBalance = Reimburse::where('requester', $request->user)
+                ->where('period', $period)
+                ->where('reimburse_type', $reimbuseTypeID)
+                ->sum('balance');
 
-        $getCurrentLimit = Reimburse::where('requester', $request->user)
-            ->where('period', $period)
-            ->where('reimburse_type', $reimbuseTypeID)
-            ->count();
-
-
-        $reimbuseType = MasterTypeReimburse::where('code', $reimbuseTypeID)->first();
+            $getCurrentLimit = Reimburse::where('requester', $request->user)
+                ->where('period', $period)
+                ->where('reimburse_type', $reimbuseTypeID)
+                ->count();
 
 
+            $reimbuseType = MasterTypeReimburse::where('code', $reimbuseTypeID)->first();
 
-        $user =  User::where('nip', $user)->first();
 
-        $balance =  (float) $reimbuseType->grade_all_price - (float) $getCurrentBalance;
 
-        if ($reimbuseType->grade_option == 'grade') {
-            $userGrade = BusinessTripGradeUser::where('user_id', $user->id)->first();
-            $reimbuseGrade = MasterTypeReimburseGrades::where('grade_id', $userGrade->grade_id)->where('reimburse_type_id', $reimbuseType->id)->first();
+            $user =  User::where('nip', $user)->first();
 
-            $balance =  (float)($reimbuseGrade->plafon) - (float) $getCurrentBalance;
+            $balance =  (float) $reimbuseType->grade_all_price - (float) $getCurrentBalance;
+
+            if ($reimbuseType->grade_option == 'grade') {
+                $userGrade = BusinessTripGradeUser::where('user_id', $user->id)->first();
+                $reimbuseGrade = MasterTypeReimburseGrades::where('grade_id', $userGrade->grade_id)->where('reimburse_type_id', $reimbuseType->id)->first();
+
+                $balance =  (float)($reimbuseGrade->plafon) - (float) $getCurrentBalance;
+            }
+            $limit = (float) $reimbuseType->limit - (float) $getCurrentLimit;
+            $context = [
+                'current_balance' => (float) $getCurrentBalance,
+                'balance' => (float) $balance,
+                'limit' => $limit,
+                'current_limit' => $getCurrentLimit,
+                'type_limit' => $reimbuseType->limit,
+                'type_balance' => $reimbuseType->grade_all_price
+            ];
+
+
+
+            return $this->successResponse($context);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return $this->errorResponse($th->getMessage());
         }
-        $limit = (float) $reimbuseType->limit - (float) $getCurrentLimit;
-        $context = [
-            'current_balance' => (float) $getCurrentBalance,
-            'balance' => (float) $balance,
-            'limit' => $limit,
-            'current_limit' => $getCurrentLimit,
-            'type_limit' => $reimbuseType->limit,
-            'type_balance' => $reimbuseType->grade_all_price
-        ];
-
-
-
-        return $this->successResponse($context);
     }
 
     public function detailAPI($id, Request $request)
@@ -330,9 +336,12 @@ class ReimbuseController extends Controller
         ])
             ->get();
 
+        $approval = Approval::with('user.divisions')->where('document_id', $id)->where('document_name', 'REIM')->orderBy('id', 'ASC')->get();
+
         return $this->successResponse([
             'group' => $reimburseGroup,
-            'forms' => $reimburseForms
+            'forms' => $reimburseForms,
+            'approval' => $approval,
         ]);
     }
 

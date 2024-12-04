@@ -18,9 +18,16 @@ use Modules\BusinessTrip\Models\BusinessTripDetailDestinationDayTotal;
 use Modules\BusinessTrip\Models\BusinessTripDetailDestinationTotal;
 use Modules\BusinessTrip\Models\PurposeType;
 use Modules\BusinessTrip\Models\PurposeTypeAllowance;
+use Modules\Approval\Services\CheckApproval;
 
 class BusinessTripDeclarationController extends Controller
 {
+    protected $approvalServices;
+
+    public function __construct(CheckApproval $approvalServices)
+    {
+        $this->approvalServices = $approvalServices;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -466,7 +473,7 @@ class BusinessTripDeclarationController extends Controller
                 }
             }
 
-            SapJobs::dispatch($dataBusiness->id, 'BTPO');
+            $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP_DECLARATION');
             DB::commit();
         } catch (\Exception $e) {
             dd($e);

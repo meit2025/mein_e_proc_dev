@@ -149,6 +149,7 @@ class PurposeTypeController extends Controller
             $purpose->code =  $request->code;
             $purpose->name = $request->name;
             $purpose->attedance_status = $request->attedance_status;
+            $purpose->type = $request->type;
 
             $purpose->save();
 
@@ -199,6 +200,7 @@ class PurposeTypeController extends Controller
             // $purpose->code =  $request->code;
             $purpose->name = $request->name;
             $purpose->attedance_status = $request->attedance_status;
+            $purpose->type = $request->type;
             $purpose->save();
             $allowances = [];
             foreach ($request->allowances as $allowance_id) {

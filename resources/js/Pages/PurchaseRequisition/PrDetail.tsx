@@ -14,6 +14,7 @@ import Button from '@mui/material/Button';
 import { Auth } from '../Layouts/Header';
 import { Box, Modal } from '@mui/material';
 import FormTextArea from '@/components/Input/formTextArea';
+import DetailApproval from '@/components/approval/detailApproval';
 
 const style = {
   position: 'absolute',
@@ -137,6 +138,7 @@ const PrDetail = ({ id }: { id: number }) => {
             disableButtonSubmit={true}
           />
         </div>
+        <DetailApproval methods={methods} />
         <Modal
           open={open}
           onClose={handleClose}
