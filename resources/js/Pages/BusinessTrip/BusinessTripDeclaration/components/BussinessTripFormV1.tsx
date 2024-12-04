@@ -284,7 +284,7 @@ export const BussinessTripFormV1 = ({
       const response = await axiosInstance.get('/check-approval', {
         params: {
           value: totalAll,
-          user_id: businessTripDetail.purpose_type_id,
+          user_id: businessTripDetail.request_for?.id ?? '',
           type: 'TRIP_DECLARATION',
         },
       });
@@ -312,6 +312,14 @@ export const BussinessTripFormV1 = ({
       showToast(error?.response?.data?.message, 'error');
     }
   };
+
+  React.useEffect(() => {
+    const totalAll = getTotalDes();
+    if (totalAll > 0) {
+      fetchDataValue();
+    }
+  }, [form.watch('destinations')]);
+
   return (
     <ScrollArea className='h-[600px] w-full '>
       <Form {...form}>

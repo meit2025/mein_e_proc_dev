@@ -101,11 +101,9 @@ export function AsyncDropdownComponent({
     if (e.key === 'Enter') {
       clearTimeout(delay);
       callAPI();
-      console.log('keyDown press and ready for api call');
     }
   }
 
-  console.log(defaultLabel);
   React.useEffect(() => {
     delay = setTimeout(() => {
       if (searchText) callAPI();
@@ -118,8 +116,6 @@ export function AsyncDropdownComponent({
     onSelectChange(currentValue);
     setOpen(false);
   }
-
-  console.log(url);
 
   React.useEffect(() => {
     if (open) {
