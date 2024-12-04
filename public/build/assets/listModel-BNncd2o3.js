@@ -1,0 +1,5 @@
+<<<<<<<< HEAD:public/build/assets/listModel-CsumUR_M.js
+import{j as t}from"./app-CQ2aiylx.js";import{S as r}from"./StatusBolean-C8IGxwo-.js";import"./app-HlhieNAw.js";const s=[{field:"key",headerName:"Key",width:200,filterable:!0},{field:"secret_key",headerName:"Secret Key",width:200,filterable:!0},{field:"employee",headerName:"Employee",width:200,filterable:!0},{field:"desc",headerName:"Description",width:200,filterable:!0},{filterable:!1,field:"is_status",headerName:"Status",width:150,renderCell:e=>t.jsx(r,{status:e.value})}];export{s as columns};
+========
+import{j as t}from"./app-DGVQjNt2.js";import{S as r}from"./StatusBolean-sBh-dQVR.js";import"./app-HlhieNAw.js";const s=[{field:"key",headerName:"Key",width:200,filterable:!0},{field:"secret_key",headerName:"Secret Key",width:200,filterable:!0},{field:"employee",headerName:"Employee",width:200,filterable:!0},{field:"desc",headerName:"Description",width:200,filterable:!0},{filterable:!1,field:"is_status",headerName:"Status",width:150,renderCell:e=>t.jsx(r,{status:e.value})}];export{s as columns};
+>>>>>>>> 9900746a12d11fdc55bd744042bbc47b213f4a67:public/build/assets/listModel-BNncd2o3.js
