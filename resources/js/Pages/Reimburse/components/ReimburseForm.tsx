@@ -392,6 +392,7 @@ export const ReimburseForm: React.FC<Props> = ({
       setDetailLimit(response.data.data);
     } catch (e) {
       console.log(e);
+      showToast(e?.response?.data?.message, 'error');
     }
   }
 
