@@ -140,6 +140,7 @@ class ReimbuseController extends Controller
     {
         try {
             $query =  ReimburseGroup::query()->with(['reimburses', 'status']);
+            // if (Auth::user()->is_admin == '0') $data = $query->where('id', Auth::user()->nip);
             $perPage = $request->get('per_page', 10);
             $sortBy = $request->get('sort_by', 'id');
             $sortDirection = $request->get('sort_direction', 'asc');
@@ -164,7 +165,6 @@ class ReimbuseController extends Controller
                         'code' =>
                         $map->status->code
                     ],
-                    // 'status' => $this->reimbursementService->checkGroupStatus($map->code),
                 ];
             });
             return $this->successResponse($data);
@@ -376,15 +376,15 @@ class ReimbuseController extends Controller
         $familyRelationship = $request->familyRelationship == 'Employee' ? 1 : 0;
         $reimburseType      = $request->reimburseType;
         $reimbursePeriod    = $request->reimbursePeriod;
-
+        $getFamilyStatus = MasterTypeReimburse::where('code', $reimburseType)->first()->family_status ?? '';
+        
         $data = MasterQuotaReimburseUser::select('f.name as label', 'f.id as value')
         ->join('users as u', 'u.id', '=', 'master_quota_reimburse_users.user_id')
         ->join('families as f', 'f.userId', '=', 'u.id')
         ->join('master_quota_reimburses as mqr', 'mqr.id', '=', 'master_quota_reimburse_users.quota_reimburses_id')
         ->join('master_type_reimburses as mtr', 'mtr.id', '=', 'mqr.type')
         ->join('master_period_reimburses as mpr', 'mpr.id', '=', 'mqr.period')
-        ->join('master_type_reimburses as mtrf', 'mtrf.family_status', '=', 'f.status')
-        ->where(['u.nip' => $userId, 'mtr.is_employee' => $familyRelationship, 'mtr.code' => $reimburseType, 'mpr.code' => $reimbursePeriod]);
+        ->where(['u.nip' => $userId, 'mtr.is_employee' => $familyRelationship, 'mtr.code' => $reimburseType, 'f.status' => $getFamilyStatus, 'mpr.code' => $reimbursePeriod]);
 
         if ($request->search) {
             $data = $data->Where('f.name', 'ilike', '%' . $request->search . '%');

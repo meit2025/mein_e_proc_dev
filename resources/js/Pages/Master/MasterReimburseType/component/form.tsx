@@ -461,7 +461,7 @@ export default function ReimburseTypeForm({
                   disabled={false}
                   placeholder={'Material Number'}
                   classNames='mt-2 w-full'
-                  onSearch={(search) => handleSearchMaterialNumber(search, String(form.getValues('material_group')))}
+                  onChangeOutside={async (search) => await handleSearchMaterialNumber(search, String(form.getValues('material_group')))}
                 />
               </td>
             </tr>

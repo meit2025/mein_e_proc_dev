@@ -11,11 +11,17 @@ use Modules\Reimbuse\Models\ReimburseGroup;
 use Modules\Reimbuse\Models\ReimburseProgress;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
-use Modules\Approval\Services\CheckApproval;
 use Modules\Reimbuse\Models\ReimburseAttachment;
+use Modules\Approval\Services\CheckApproval;
 
 class ReimbursementService
 {
+    protected $approvalServices;
+
+    public function __construct(CheckApproval $approvalServices)
+    {
+        $this->approvalServices = $approvalServices;
+    }
     protected $validator_rule_group = [
         'remark'        =>  'nullable',
         'requester'     =>  'required|exists:users,nip',
@@ -50,7 +56,7 @@ class ReimbursementService
         return 'Finished';
     }
 
-    public function storeReimbursements($groupData, $forms, $dataRequest)
+    public function storeReimbursements($groupData, $forms)
     {
         try {
             DB::beginTransaction();
@@ -69,10 +75,7 @@ class ReimbursementService
 
 
             foreach ($forms as $form) {
-
-                if (!isset($form->for)) {
-                    $form['for'] = $groupData['requester'];
-                }
+                if (!isset($form['for'])) $form['for'] = $groupData['requester'];
                 $form['desired_vendor'] = $groupData['requester'];
                 $validator = Validator::make($form, $this->validator_rule_reimburse);
                 if ($validator->fails()) {
@@ -81,11 +84,11 @@ class ReimbursementService
                 }
                 $validatedData = $validator->validated();
                 $validatedData['group'] = $group->code;
+                $validatedData['uom']   = $form['uom'];
                 $validatedData['item_delivery_data'] = Carbon::parse($form['item_delivery_data'])->format('Y-m-d');
                 $validatedData['start_date'] = Carbon::parse($form['start_date'])->format('Y-m-d');
                 $validatedData['end_date'] = Carbon::parse($form['end_date'])->format('Y-m-d');
                 $validatedData['requester'] = $group['requester'];
-
 
                 $reimburse = Reimburse::create($validatedData);
 
@@ -98,17 +101,17 @@ class ReimbursementService
                         ]);
                     }
                 }
+                
+                $parseForApproval = [
+                    'requester' => $group->requester, 
+                    'value'     => $form['balance']
+                ];
+                $this->approvalServices->Payment((Object)$parseForApproval, true, $reimburse->id, 'REIM');
             }
-
-            $requester = User::where('nip', $groupData['requester'])->first();
-            $this->generateProgress($group, $requester);
-
-            $const = new CheckApproval();
-            $const->Payment(json_decode(json_encode($dataRequest)), true, $group->id, 'REIM');
-            DB::commit();
 
             SapJobs::dispatch($group->id, 'REIM');
 
+            DB::commit();
             return "Reimbursements and progress stored successfully.";
         } catch (\Exception $e) {
             DB::rollBack();
