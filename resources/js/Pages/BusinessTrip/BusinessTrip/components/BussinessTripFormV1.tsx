@@ -46,7 +46,7 @@ import {
   EDIT_API_BUSINESS_TRIP,
   GET_DETAIL_BUSINESS_TRIP,
 } from '@/endpoint/business-trip/api';
-import { GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE } from '@/endpoint/purpose-type/api';
+import { GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE, GET_DETAIL_PURPOSE_TYPE } from '@/endpoint/purpose-type/api';
 import { Button as ButtonMui } from '@mui/material';
 import axios, { AxiosError } from 'axios';
 import moment from 'moment';
@@ -77,6 +77,12 @@ interface Type {
 interface CurrencyModel {
   id: string;
   code: string;
+}
+
+interface BusinessTripAttachement {
+  id: number;
+  url: string;
+  file_name: string;
 }
 
 interface Props {
@@ -210,9 +216,11 @@ export const BussinessTripFormV1 = ({
     business_trip_end_date: Date;
   }
 
-  React.useEffect(() => {
-    console.log('Form Errors:', form.formState.errors);
-  }, [form.formState.errors]);
+//   React.useEffect(() => {
+//     console.log('Form Errors:', form.formState.errors);
+//   }, [form.formState.errors]);
+
+  const [fileAttachment, setfileAttachment] = React.useState<BusinessTripAttachement[]>([]);
 
   async function getDetailData() {
     const url = GET_DETAIL_BUSINESS_TRIP(id);
@@ -221,13 +229,17 @@ export const BussinessTripFormV1 = ({
     try {
       const response = await axios.get(url);
       const data = response.data.data;
-      console.log(data, ' Response Detailxxxx');
+    //   console.log(data,' data nya');
+      const getDestination = GET_LIST_DESTINATION_BY_TYPE(data.purpose_type_id);
+      const responseDestination = await axiosInstance.get(getDestination);
+      setListDestination(responseDestination.data.data as DestinationModel[]);
+      setfileAttachment(data.attachments as BusinessTripAttachement[]);
+
       form.setValue('purpose_type_id', data.purpose_type_id.toString());
       form.setValue('request_for', data.request_for.id.toString());
       form.setValue('cost_center_id', data.cost_center_id.toString());
       form.setValue('remark', data.remarks);
       form.setValue('total_destination', data.total_destination);
-      console.log(data.destinations, ' data.destinations');
       form.setValue(
         'destinations',
         data.destinations.map((destination: any) => ({
@@ -268,6 +280,7 @@ export const BussinessTripFormV1 = ({
 
   const [listAllowances, setListAllowances] = React.useState<AllowanceItemModel[]>([]);
   const [listDestination, setListDestination] = React.useState<DestinationModel[]>([]);
+  const [typePurpose, setTypePurpose] = React.useState<string>('');
 
   const [selectedUserId, setSelectedUserId] = React.useState(
     isAdmin === '0' ? idUser.toString() : '',
@@ -278,17 +291,25 @@ export const BussinessTripFormV1 = ({
     const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
     const url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
     const getDestination = GET_LIST_DESTINATION_BY_TYPE(value);
-
+    const getPurposeType = GET_DETAIL_PURPOSE_TYPE(value);
     try {
       const response = await axiosInstance.get(url);
       const responseDestination = await axiosInstance.get(getDestination);
-      console.log(responseDestination.data.data, ' responseDestination');
+      const responsePurposeType = await axiosInstance.get(getPurposeType);
+    //   console.log(responseDestination.data.data, ' responseDestination');
+    //   console.log(response.data.data, ' responseresponseresponse');
+      const typePurpose = responsePurposeType.data.data.purpose.type;
+      if(typePurpose == 'international') {
+        totalDestinationHandler('1')
+      }
+      setTypePurpose(typePurpose);
       setListAllowances(response.data.data as AllowanceItemModel[]);
       setListDestination(responseDestination.data.data as DestinationModel[]);
     } catch (e) {
       console.log(e);
     }
   }
+
 
   const totalDestinationHandler = (value: string) => {
     form.setValue('total_destination', parseInt(value, 10));
@@ -300,7 +321,7 @@ export const BussinessTripFormV1 = ({
   const { showToast } = useAlert();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values, ' valuesss');
+    // console.log(values, ' valuesss');
     try {
       const formData = new FormData();
       const totalAll = getTotalDes();
@@ -410,6 +431,8 @@ export const BussinessTripFormV1 = ({
   });
 
   React.useEffect(() => {
+    console.log(BusinessTripType.edit, ' business edit')
+    console.log(type, ' id type')
     if (id && type == BusinessTripType.edit) {
       getDetailData();
     }
@@ -420,34 +443,6 @@ export const BussinessTripFormV1 = ({
       setAllowancesProperty();
     }
   }, [totalDestination, listAllowances, id, type, isAdmin, idUser]);
-
-  //   const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
-
-  //   const handleCashAdvanceChange = (value: boolean) => {
-  //     setIsCashAdvance(value);
-  //   };
-
-  // const { setValue } = useFormContext();
-
-  // Monitor total_percent value from form
-  //   const totalPercent = useWatch({
-  //     control: form.control,
-  //     name: 'total_percent',
-  //   });
-
-  //   const [totalAllowance, setTotalAllowance] = React.useState(0);
-
-  //   // Assuming allowance is calculated elsewhere, let's mock it for now
-  //   const allowance = totalAllowance; // Example: allowance is 1,000,000
-
-  //   // Calculate total based on totalPercent and allowance
-  //   React.useEffect(() => {
-  //     const percentValue = parseFloat((totalPercent || '0').toString());
-  //     // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
-  //     const total = (percentValue / 100) * allowance; // Multiply percent with allowance
-  //     // console.log(total, ' totalll');
-  //     form.setValue('total_cash_advance', total.toFixed(0)); // Save the total in total_cash_advance field
-  //   }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance changes
 
   const [isShow, setIsShow] = React.useState(false);
   const [approvalRoute, setApprovalRoute] = React.useState({
@@ -539,7 +534,15 @@ export const BussinessTripFormV1 = ({
     if (totalAll > 0) {
       fetchDataValue();
     }
+    // console.log(listDestination, ' get value'); 
   }, [form.watch('destinations')]);
+
+  const [deletedFiles, setDeletedFiles] = React.useState<number[]>([]); // Simpan index file yang dihapus
+
+  // Menandai file untuk dihapus
+  const handleDelete = (id: number) => {
+    setfileAttachment((prev) => prev.filter((file) => file.id !== id));
+  };
 
   return (
     <ScrollArea className='h-[600px] w-full '>
@@ -726,6 +729,30 @@ export const BussinessTripFormV1 = ({
                 />
               </td>
             </tr>
+            {fileAttachment.length > 0 && (
+                <tr>
+                    <td width={200}></td>
+                    {fileAttachment.map((attachment: any, index: number) => (
+                        <td className='flex flex-col pb-3'>
+                            <a
+                                href={attachment.url}
+                                target='_blank'
+                                className="text-blue-500 inline-block"
+                                key={index}
+                            >
+                                {attachment.file_name}
+                            </a>
+                            <button
+                            type="button"
+                            onClick={() => handleDelete(attachment.id)}
+                            className="text-red-500 mt-2"
+                            >
+                            Delete
+                            </button>
+                        </td> 
+                    ))}
+                </tr>
+            )}
             <tr>
               <td width={200}>File Extension</td>
               <td className='text-gray-500 text-xs font-extralight'>doc,jpg,ods,png,txt,pdf</td>
@@ -743,6 +770,7 @@ export const BussinessTripFormV1 = ({
                         <Select
                           value={field.value.toString()}
                           onValueChange={totalDestinationHandler}
+                          disabled={typePurpose === 'international'}
                         >
                           <SelectTrigger className='w-[200px] py-2'>
                             <SelectValue placeholder='-- Select Bussiness Trip --' />
@@ -998,7 +1026,7 @@ export function BussinessDestinationForm({
 
   //   // Calculate total based on totalPercent and allowance
   React.useEffect(() => {
-    console.log(form.getValues('destinations'), ' edit destination');
+    // console.log(form.getValues('destinations'), ' edit destination');
     if (typeEdit == BusinessTripType.edit) {
       setIsCashAdvance(form.getValues(`destinations.${index}.cash_advance`));
     }
@@ -1008,7 +1036,7 @@ export function BussinessDestinationForm({
     // console.log(total, ' totalll');
     form.setValue(`destinations.${index}.total_cash_advance`, total.toFixed(0)); // Save the total in total_cash_advance field
   }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance changes
-  console.log(listDestination, 'listDestination 123');
+//   console.log(listDestination, 'listDestination 123');
   return (
     <TabsContent value={`destination${index + 1}`}>
       <div key={index}>
@@ -1028,8 +1056,6 @@ export function BussinessDestinationForm({
                           updateDestination(index, { ...destination, destination: value });
                         }}
                         defaultValue={destination.destination}
-                        // onValueChange={(value) => field.onChange(value)}
-                        // value={field.value}
                       >
                         <SelectTrigger className='w-[200px]'>
                           <SelectValue placeholder='Destination' />
@@ -1040,8 +1066,6 @@ export function BussinessDestinationForm({
                               {map.destination}
                             </SelectItem>
                           ))}
-
-                          {/* <SelectItem value='banyuwangi'>Banyuwangi</SelectItem> */}
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -1062,7 +1086,12 @@ export function BussinessDestinationForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Select onValueChange={(value) => field.onChange(value)} value={field.value}>
+                      <Select
+                      onValueChange={(value) => {
+                        updateDestination(index, { ...destination, pajak_id: value });
+                      }}
+                      defaultValue={destination.pajak_id}
+                      >
                         <SelectTrigger className='w-[200px]'>
                           <SelectValue placeholder='-- Select Pajak --' />
                         </SelectTrigger>
@@ -1089,7 +1118,12 @@ export function BussinessDestinationForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Select onValueChange={(value) => field.onChange(value)} value={field.value}>
+                      <Select
+                        onValueChange={(value) => {
+                            updateDestination(index, { ...destination, purchasing_group_id: value });
+                          }}
+                          defaultValue={destination.purchasing_group_id}
+                      >
                         <SelectTrigger className='w-[200px]'>
                           <SelectValue placeholder='-- Select Purchasing Group --' />
                         </SelectTrigger>
@@ -1142,7 +1176,6 @@ export function BussinessDestinationForm({
                       <CustomDatePicker
                         initialDate={destination.business_trip_end_date}
                         onDateChange={(value) => {
-                          console.log('end date', value);
                           updateDestination(index, {
                             ...destination,
                             business_trip_end_date: value,

@@ -77,6 +77,14 @@ class BusinessTripController extends Controller
         $data = BusinessTrip::with(['costCenter', 'pajak', 'purchasingGroup'])->where('id', $id)->first();
         $data->name_request = $data->requestFor->name;
         $data->name_purpose = $data->purposeType->name;
+        $attachments = $data->attachment->map(function ($attachment) {
+            return [
+                'id' => $attachment->id,
+                'url' => asset('storage/' . $attachment->file_path . '/' . $attachment->file_name),
+                'file_name' => $attachment->file_name,
+            ];
+        });
+        $data->attachments = $attachments;
         $destinations = [];
         foreach ($data->businessTripDestination as $key => $value) {
             // Inisialisasi array allowances dengan kunci allowance_id
@@ -403,10 +411,21 @@ class BusinessTripController extends Controller
 
             if ($request->attachment != null) {
                 foreach ($request->attachment as $row) {
+                    // Ambil nama asli file
+                    $originalName = pathinfo($row->getClientOriginalName(), PATHINFO_FILENAME);
+                    $extension = $row->getClientOriginalExtension();
+
+                    // Tambahkan timestamp di akhir nama file
+                    $timestampedName = $originalName . '_' . time() . '.' . $extension;
+
+                    // Simpan file dengan nama yang telah dimodifikasi
+                    $filePath = $row->storeAs('business_trip', $timestampedName, 'public');
+
+                    // Simpan data ke database
                     BusinessTripAttachment::create([
                         'business_trip_id' => $businessTrip->id,
-                        'file_path' => explode('/', $row->store('business_trip', 'public'))[0],
-                        'file_name' => explode('/', $row->store('business_trip', 'public'))[1],
+                        'file_path' => 'business_trip', // Folder tempat file disimpan
+                        'file_name' => $timestampedName, // Nama file dengan timestamp
                     ]);
                 }
             }
@@ -496,8 +515,7 @@ class BusinessTripController extends Controller
                 'status' => [
                     'name' => $map->status->name,
                     'classname' => $map->status->classname,
-                    'code' =>
-                    $map->status->code
+                    'code' => $map->status->code
                 ],
                 'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array
                 'total_destination' => $map->total_destination, // You can join multiple relations here if it's an array
@@ -518,8 +536,15 @@ class BusinessTripController extends Controller
         $data['requested_by'] = $findData->requestedBy->name;
         $data['purpose_type_name'] = $findData->purposeType->name;
         $data['cost_center'] = $findData->costCenter?->cost_center;
-        $data['start_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'asc')->first()->date));
-        $data['end_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'desc')->first()->date));
+        $data['start_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'asc')->first()?->date));
+        $data['end_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'desc')->first()?->date));
+        $attachments = $findData->attachment->map(function ($attachment) {
+            return [
+                'url' => asset('storage/' . $attachment->file_path . '/' . $attachment->file_name),
+                'file_name' => $attachment->file_name,
+            ];
+        });
+        $data['file_attachement'] = $attachments;
 
         foreach ($findData->businessTripDestination as $destination) {
             $detail_attendance = [];
@@ -608,8 +633,15 @@ class BusinessTripController extends Controller
         $data['requested_by'] = $findData->requestedBy->name;
         $data['purpose_type_name'] = $findData->purposeType->name;
         $data['cost_center'] = $findData->costCenter?->cost_center;
-        $data['start_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'asc')->first()->date));
-        $data['end_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'desc')->first()->date));
+        $data['start_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'asc')->first()?->date));
+        $data['end_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'desc')->first()?->date));
+        $attachments = $findData->attachment->map(function ($attachment) {
+            return [
+                'url' => asset('storage/' . $attachment->file_path . '/' . $attachment->file_name),
+                'file_name' => $attachment->file_name,
+            ];
+        });
+        $data['file_attachement'] = $attachments;
 
         foreach ($findData->businessTripDestination as $destination) {
             $detail_attendance = [];
@@ -634,7 +666,7 @@ class BusinessTripController extends Controller
                     'currency_code' => $detailDay->allowance->currency_id,
                     'value' => (int)$detailDay->standard_value,
                     'total_day' => $detailDay->total,
-                    'total' => $detailDay->standard_value * $detailDay->total,
+                    'total' => number_format($detailDay->standard_value * $detailDay->total,0,',','.'),
                 ];
                 $total_standard += $detailDay->standard_value * $detailDay->total;
             }
@@ -645,9 +677,9 @@ class BusinessTripController extends Controller
                     'item_name' => $detailTotal->allowance->name,
                     'type' => $detailTotal->allowance->type,
                     'currency_code' => $detailTotal->allowance->currency_id,
-                    'value' => (int)$detailTotal->standard_value,
+                    'value' => number_format($detailTotal->standard_value,0,',','.'),
                     'total_day' => '-',
-                    'total' => (int)$detailTotal->standard_value,
+                    'total' => number_format($detailTotal->standard_value,0,',','.'),
                 ];
                 $total_standard += $detailTotal->standard_value;
             }
@@ -660,22 +692,21 @@ class BusinessTripController extends Controller
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)$detailDay->price / $detailDay->total,
+                    'value' => number_format($detailDay->price / $detailDay->total,0,',','.'),
                     'total_day' => $detailDay->total,
-                    'total' => $detailDay->price,
+                    'total' => number_format($detailDay->price,0,',','.'),
                 ];
                 $total_request += $detailDay->price;
             }
-
 
             foreach ($destination->detailDestinationTotal as $detailTotal) {
                 $request_detail_allowance[] = [
                     'item_name' => $detailTotal->allowance->name,
                     'type' => $detailTotal->allowance->type,
                     'currency_code' => $detailTotal->allowance->currency_id,
-                    'value' => (int)$detailTotal->price,
+                    'value' => number_format($detailTotal->price,0,',','.'),
                     'total_day' => '-',
-                    'total' => (int)$detailTotal->price,
+                    'total' => number_format($detailTotal->price,0,',','.'),
                 ];
                 $total_request += $detailTotal->price;
             }
@@ -688,8 +719,11 @@ class BusinessTripController extends Controller
                 'business_trip_detail_attendance' => $detail_attendance,
                 'standar_detail_allowance' => $standar_detail_allowance,
                 'request_detail_allowance' => $request_detail_allowance,
-                'total_standard' => $total_standard,
-                'total_request' => $total_request,
+                'total_standard' => number_format($total_standard,0,',','.'),
+                'total_request' => number_format($total_request,0,',','.'),
+                'cash_advance' => $destination->cash_advance,
+                'total_percent' => $destination->total_percent. '%',
+                'total_cash_advance' => number_format($destination->total_cash_advance,0,',','.'),
             ];
         }
         return $this->successResponse($data);
