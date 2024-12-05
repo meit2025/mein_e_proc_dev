@@ -172,7 +172,7 @@ export const BussinessTripFormV1 = ({
       const formData = new FormData();
       // Append group data
 
-      formData.append('user_id', businessTripDetail.purpose_type_id ?? '');
+      formData.append('user_id', businessTripDetail.request_for?.id.toString() ?? '');
       formData.append('value', totalAll.toString());
 
       formData.append('request_no', values.request_no ?? '');
