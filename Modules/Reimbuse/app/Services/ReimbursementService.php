@@ -74,6 +74,7 @@ class ReimbursementService
 
 
 
+            $balance = 0;
             foreach ($forms as $form) {
                 if (!isset($form['for'])) $form['for'] = $groupData['requester'];
                 $form['desired_vendor'] = $groupData['requester'];
@@ -84,7 +85,7 @@ class ReimbursementService
                 }
                 $validatedData = $validator->validated();
                 $validatedData['group'] = $group->code;
-                $validatedData['uom']   = $form['uom'];
+                $validatedData['purchase_requisition_unit_of_measure']   = $form['uom'];
                 $validatedData['item_delivery_data'] = Carbon::parse($form['item_delivery_data'])->format('Y-m-d');
                 $validatedData['start_date'] = Carbon::parse($form['start_date'])->format('Y-m-d');
                 $validatedData['end_date'] = Carbon::parse($form['end_date'])->format('Y-m-d');
@@ -101,13 +102,14 @@ class ReimbursementService
                         ]);
                     }
                 }
-                
-                $parseForApproval = [
-                    'requester' => $group->requester, 
-                    'value'     => $form['balance']
-                ];
-                $this->approvalServices->Payment((Object)$parseForApproval, true, $reimburse->id, 'REIM');
+                $balance += $form['balance'];
             }
+
+            $parseForApproval = [
+                'requester' => $group->requester,
+                'value'     => $balance
+            ];
+            $this->approvalServices->Payment((object)$parseForApproval, true, $group->id, 'REIM');
 
             SapJobs::dispatch($group->id, 'REIM');
 

@@ -26,7 +26,6 @@ function Create() {
   }, []);
 
   useEffect(() => {
-    console.log(auth);
     if (auth?.user?.is_admin !== '1') {
       const updatedObject = (dropdownOptions ?? []).map((field) =>
         field.name === 'user_id' ? { ...field, disabled: true } : field,

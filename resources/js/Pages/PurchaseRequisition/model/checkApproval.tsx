@@ -102,6 +102,7 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
       setLoading(false);
     } catch (error) {
       setLoading(false);
+      showToast(error?.response?.data?.message, 'error');
     }
   };
 
