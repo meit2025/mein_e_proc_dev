@@ -140,7 +140,7 @@ class ReimbuseController extends Controller
     {
         try {
             $query =  ReimburseGroup::query()->with(['reimburses', 'status']);
-            // if (Auth::user()->is_admin == '0') $data = $query->where('id', Auth::user()->nip);
+            if (Auth::user()->is_admin == '0') $data = $query->where('requester', Auth::user()->nip);
             $perPage = $request->get('per_page', 10);
             $sortBy = $request->get('sort_by', 'id');
             $sortDirection = $request->get('sort_direction', 'asc');
