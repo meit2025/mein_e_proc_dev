@@ -35,17 +35,12 @@ class ReimbuseController extends Controller
     }
 
 
-    public function getTypeCode()
+    public function getTypeCode($userId)
     {
-        $reimbuseQuotaUser =  MasterQuotaReimburseUser::where('user_id', Auth::user()->id)->pluck('quota_reimburses_id')->toArray();
+        $reimbuseQuotaUser =  MasterQuotaReimburseUser::where('user_id', $userId)->pluck('quota_reimburses_id')->toArray();
 
-        // dd(Auth::user()->id);
-
-        // get latest period for new period
         $latestPeriode = MasterPeriodReimburse::orderBy('id', 'desc')->first();
 
-
-        // get data when reimburse quota user and latest periode showing
         $reimburseQuotaTypeCode =  MasterQuotaReimburse::query()->whereIn('id', $reimbuseQuotaUser)
             ->where('period', $latestPeriode->id)
             ->pluck('type');
@@ -66,49 +61,22 @@ class ReimbuseController extends Controller
         }
     }
 
-    public function getListMasterReimburseTypeAPI($type, Request $request)
+    public function getListMasterReimburseTypeAPI(Request $request)
     {
+        $userId             = $request->user; 
+        $familyRelationship = $request->familyRelationship == 'Employee' ? 1 : 0;
+        $data = MasterQuotaReimburseUser::selectRaw("mtr.name || ' (' || code || ')' as label, mtr.code as value")
+        ->join('users as u', 'u.id', '=', 'master_quota_reimburse_users.user_id')
+        ->join('master_quota_reimburses as mqr', 'mqr.id', '=', 'master_quota_reimburse_users.quota_reimburses_id')
+        ->join('master_type_reimburses as mtr', 'mtr.id', '=', 'mqr.type')
+        ->where(['u.nip' => $userId, 'mtr.is_employee' => $familyRelationship]);
 
-        $res = ($type == 'Employee') ? 1 : 0;
-        $data = MasterTypeReimburse::query()
-            ->where('is_employee', $res)
-            ->whereIn('id', $this->getTypeCode());
-
-
-
-        // $data = $data->where('material_number', 'like', '%' . 'm' . '%');
-        if ($request->filter && ($request->search && $request->search != '')) {
-            foreach ($request->filter as $f) {
-                $data = $data->where($f, 'ilike', '%' . $request->search . '%');
-            }
-
-            return $this->successResponse($data->get());
+        if ($request->search) {
+            $data = $data->where('mtr.name', 'ilike', '%' . $request->search . '%');
         }
 
-
-
-
-
-        $data =  $data->limit(100)->get();
-
-
+        $data = $data->limit(50)->groupBy('mtr.name', 'mtr.code')->get();
         return $this->successResponse($data);
-
-
-
-
-        // try {
-        //     $res = ($type == 'Employee') ? 1 : 0;
-        //     $typeData = MasterTypeReimburse::query()
-
-        //     where('is_employee', $res)
-        //         ->whereIn('id', $this->getTypeCode())
-
-        //         ->get();
-        //     return $this->successResponse($typeData);
-        // } catch (\Exception $e) {
-        //     return $this->errorResponse($e->getMessage(), 400);
-        // }
     }
 
 
@@ -172,6 +140,7 @@ class ReimbuseController extends Controller
     {
         try {
             $query =  ReimburseGroup::query()->with(['reimburses', 'status']);
+            if (Auth::user()->is_admin == '0') $data = $query->where('requester', Auth::user()->nip);
             $perPage = $request->get('per_page', 10);
             $sortBy = $request->get('sort_by', 'id');
             $sortDirection = $request->get('sort_direction', 'asc');
@@ -196,7 +165,6 @@ class ReimbuseController extends Controller
                         'code' =>
                         $map->status->code
                     ],
-                    // 'status' => $this->reimbursementService->checkGroupStatus($map->code),
                 ];
             });
             return $this->successResponse($data);
@@ -380,17 +348,61 @@ class ReimbuseController extends Controller
 
     public function getPeriodAPI(Request $request)
     {
+        $userId             = $request->user;
+        $familyRelationship = $request->familyRelationship == 'Employee' ? 1 : 0;
+        $reimburseType      = $request->reimburseType;
 
-        $user =  User::where('nip', $request->user)->first();
+        $data = MasterQuotaReimburseUser::selectRaw('mpr.code || \' (\' || mpr.start || \' - \' || mpr.end || \')\' as label, mpr.code as value')
+        ->join('users as u', 'u.id', '=', 'master_quota_reimburse_users.user_id')
+        ->join('master_quota_reimburses as mqr', 'mqr.id', '=', 'master_quota_reimburse_users.quota_reimburses_id')
+        ->join('master_type_reimburses as mtr', 'mtr.id', '=', 'mqr.type')
+        ->join('master_period_reimburses as mpr', 'mpr.id', '=', 'mqr.period')
+        ->where(['u.nip' => $userId, 'mtr.is_employee' => $familyRelationship, 'mtr.code' => $reimburseType]);
 
-        $reimbuseMaster = MasterTypeReimburse::where('code', $request->type)->select('id')->first();
-        $reimburseQuotaPeriod = MasterQuotaReimburse::where('type', $reimbuseMaster->id)
-            ->get()->pluck('period');
+        if ($request->search) {
+            $data = $data
+                    ->where('code', 'ilike', '%' . $request->search . '%')
+                    ->orWhere('start', 'ilike', '%' . $request->search . '%')
+                    ->orWhere('end', 'ilike', '%' . $request->search . '%');
+        }
 
+        $data = $data->limit(50)->groupBy('mpr.code', 'mpr.start', 'mpr.end')->get();
+        return $this->successResponse($data);
+    }
 
-        $reimbursePeriod = MasterPeriodReimburse::whereIn('id', $reimburseQuotaPeriod)->get();
+    public function dropdownFamily(Request $request)
+    {
+        $userId             = $request->user;
+        $familyRelationship = $request->familyRelationship == 'Employee' ? 1 : 0;
+        $reimburseType      = $request->reimburseType;
+        $reimbursePeriod    = $request->reimbursePeriod;
+        $getFamilyStatus = MasterTypeReimburse::where('code', $reimburseType)->first()->family_status ?? '';
+        
+        $data = MasterQuotaReimburseUser::select('f.name as label', 'f.id as value')
+        ->join('users as u', 'u.id', '=', 'master_quota_reimburse_users.user_id')
+        ->join('families as f', 'f.userId', '=', 'u.id')
+        ->join('master_quota_reimburses as mqr', 'mqr.id', '=', 'master_quota_reimburse_users.quota_reimburses_id')
+        ->join('master_type_reimburses as mtr', 'mtr.id', '=', 'mqr.type')
+        ->join('master_period_reimburses as mpr', 'mpr.id', '=', 'mqr.period')
+        ->where(['u.nip' => $userId, 'mtr.is_employee' => $familyRelationship, 'mtr.code' => $reimburseType, 'f.status' => $getFamilyStatus, 'mpr.code' => $reimbursePeriod]);
 
+        if ($request->search) {
+            $data = $data->Where('f.name', 'ilike', '%' . $request->search . '%');
+        }
 
-        return $this->successResponse($reimbursePeriod);
+        $data = $data->limit(50)->groupBy('f.name', 'f.id')->get();
+        return $this->successResponse($data);
+    }
+
+    function dropdownEmployee(Request $request)
+    {
+        $data = User::selectRaw("name || ' [' || nip || ']' as label, nip as value");
+        if (Auth::user()->is_admin == 0) $data = $data->where('id', Auth::user()->id);
+        if ($request->search) {
+            $data = $data->where('name', 'ilike', '%' . $request->search . '%')->orWhere('nip', 'ilike', '%' . $request->search . '%');
+        }
+
+        $data = $data->limit(50)->get();
+        return $this->successResponse($data);
     }
 }

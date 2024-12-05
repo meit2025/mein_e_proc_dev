@@ -120,7 +120,7 @@ export default function ReimburseTypeForm({
         grades: data.grades,
       });
 
-      handleSearchMaterialNumber(data.material_group.material_group || '')
+      handleChangeMaterialGroup(data.material_group.material_group || '')
     } catch (e) {
       const error = e as AxiosError;
     }
@@ -151,7 +151,7 @@ export default function ReimburseTypeForm({
     setIsLoading(false);
   };
 
-  const handleSearchMaterialNumber = async (query: string) => {
+  const handleChangeMaterialGroup = async (query: string) => {
     if (query.length > 0) {
       getMaterialNumber(query, {
         name: 'material_number',
@@ -160,6 +160,21 @@ export default function ReimburseTypeForm({
         where: {
           key: 'material_group',
           parameter: query,
+        },
+      });
+    }
+  };
+
+  const handleSearchMaterialNumber = async (query: string, materialGroup: string) => {
+    if (query.length > 0) {
+      getMaterialNumber(query, {
+        name: 'material_number',
+        id: 'id',
+        tabel: 'master_materials',
+        search: query,
+        where: {
+          key: 'material_group',
+          parameter: materialGroup,
         },
       });
     }
@@ -428,7 +443,7 @@ export default function ReimburseTypeForm({
                   placeholder={'Material Group'}
                   classNames='mt-2 w-full'
                   onChangeOutside={async (x: any, data: any) => {
-                    await handleSearchMaterialNumber(data?.label);
+                    await handleChangeMaterialGroup(data?.label);
                   }}
                   fieldLabel={''}
                 />
@@ -446,6 +461,7 @@ export default function ReimburseTypeForm({
                   disabled={false}
                   placeholder={'Material Number'}
                   classNames='mt-2 w-full'
+                  onChangeOutside={async (search) => await handleSearchMaterialNumber(search, String(form.getValues('material_group')))}
                 />
               </td>
             </tr>

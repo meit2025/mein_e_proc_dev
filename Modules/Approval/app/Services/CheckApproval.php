@@ -126,7 +126,12 @@ class CheckApproval
             //code...
             // dd($request);
 
-            $getUserId = User::where('id', $request->user_id ?? $request->requester)->orWhere('nip', $request->user_id ??  $request->requester)->first();
+            if (isset($request->user_id)) {
+                $getUserId = User::where('id', $request->user_id)->first();
+            } else if (isset($request->requester)) {
+                $getUserId = User::where('nip', $request->requester)->first();
+            }
+            
             if (!$getUserId) {
                 throw new Exception('Username not found');
             }

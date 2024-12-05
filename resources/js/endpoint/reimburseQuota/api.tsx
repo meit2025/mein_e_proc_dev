@@ -6,3 +6,5 @@ export const STORE_REIMBURSE_QUOTA = `${ROUTE_API}/create`;
 export const EDIT_REIMBURSE_QUOTA = (id: any) => `${ROUTE_API}/edit/${id}`;
 export const UPDATE_REIMBURSE_QUOTA = (id: any) => `${ROUTE_API}/update/${id}`;
 export const DESTROY_REIMBURSE_QUOTA = `${ROUTE_API}/delete`;
+export const LIST_DROPDOWN_PERIOD_REIMBURSE_QUOTA    = `${ROUTE_API}/getPeriodDropdown`;
+

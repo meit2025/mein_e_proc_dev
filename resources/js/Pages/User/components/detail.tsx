@@ -45,14 +45,6 @@ export const DetailLayout = (detail: any) => {
             </div>
           </div>
         </li>
-        <li className='flex justify-between gap-x-6 py-5'>
-          <div className='flex min-w-0 gap-x-4'>
-            <div className='min-w-0 flex-auto'>
-              <p className='text-sm font-semibold leading-6 text-gray-900 uppercase'>{'immediate spv'}</p>
-              <p className='mt-1 truncate text-xs leading-5 text-gray-500'>{data?.immediate_spv}</p>
-            </div>
-          </div>
-        </li>
       </ul>
     </>
   );
