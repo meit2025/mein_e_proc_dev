@@ -90,7 +90,7 @@ export function WorkflowApprovalDiagram({
   return (
     <div>
       <WorkflowBorder title='Workflow Approval Diagram'>
-        <div className='flex items-center '>
+        <div className='flex items-center flex-wrap gap-3'>
           <div className='mr-2'>
             <CircleUserRound />
           </div>
