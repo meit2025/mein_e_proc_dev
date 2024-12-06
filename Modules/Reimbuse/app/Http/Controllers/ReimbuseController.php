@@ -144,7 +144,7 @@ class ReimbuseController extends Controller
             $perPage = $request->get('per_page', 10);
             $sortBy = $request->get('sort_by', 'id');
             $sortDirection = $request->get('sort_direction', 'asc');
-            $query->orderBy($sortBy, $sortDirection);
+            $query->orderBy($sortBy, 'desc');
             $data = $query->paginate($perPage);
             $data->getCollection()->transform(function ($map) {
                 $balance = 0;
