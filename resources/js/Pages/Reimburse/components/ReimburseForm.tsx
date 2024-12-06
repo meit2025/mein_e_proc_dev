@@ -99,7 +99,6 @@ export const ReimburseForm: React.FC<Props> = ({
   const [dataFamily, setDataFamily] = useState<any[]>([]);
   const [familyUrl, setFamilyUrl] = useState('');
   const [isShow, setIsShow] = useState(false);
-
   const [isLoading, setLoading] = useState<boolean>(false);
   const [detailLimit, setDetailLimit] = useState<any>(null);
   const [approvalRoute, setApprovalRoute] = useState({
@@ -391,7 +390,7 @@ export const ReimburseForm: React.FC<Props> = ({
           reimburse_type: '',
           short_text: '',
           balance: '',
-          currency: '',
+          currency: 'IDR',
           tax_on_sales: '',
           uom: '',
           purchasing_group: '',
