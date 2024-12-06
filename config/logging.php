@@ -87,6 +87,12 @@ return [
             'level' => 'debug',
             'days' => 14,
         ],
+        'bt_txt' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/bt_txt_' . date('Y-m-d') . '.log'),
+            'level' => 'debug',
+            'days' => 14,
+        ],
 
         'papertrail' => [
             'driver' => 'monolog',

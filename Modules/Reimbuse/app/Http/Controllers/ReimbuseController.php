@@ -63,13 +63,13 @@ class ReimbuseController extends Controller
 
     public function getListMasterReimburseTypeAPI(Request $request)
     {
-        $userId             = $request->user; 
+        $userId             = $request->user;
         $familyRelationship = $request->familyRelationship == 'Employee' ? 1 : 0;
         $data = MasterQuotaReimburseUser::selectRaw("mtr.name || ' (' || code || ')' as label, mtr.code as value")
-        ->join('users as u', 'u.id', '=', 'master_quota_reimburse_users.user_id')
-        ->join('master_quota_reimburses as mqr', 'mqr.id', '=', 'master_quota_reimburse_users.quota_reimburses_id')
-        ->join('master_type_reimburses as mtr', 'mtr.id', '=', 'mqr.type')
-        ->where(['u.nip' => $userId, 'mtr.is_employee' => $familyRelationship]);
+            ->join('users as u', 'u.id', '=', 'master_quota_reimburse_users.user_id')
+            ->join('master_quota_reimburses as mqr', 'mqr.id', '=', 'master_quota_reimburse_users.quota_reimburses_id')
+            ->join('master_type_reimburses as mtr', 'mtr.id', '=', 'mqr.type')
+            ->where(['u.nip' => $userId, 'mtr.is_employee' => $familyRelationship]);
 
         if ($request->search) {
             $data = $data->where('mtr.name', 'ilike', '%' . $request->search . '%');
@@ -224,7 +224,6 @@ class ReimbuseController extends Controller
                 'cost_center'    => $data['cost_center'],
             ];
             $forms = $data['forms'];
-            $data['user_id'] =  $request->requester;
 
             $response = $this->reimbursementService->storeReimbursements($groupData, $forms, $data);
             if (isset($response['error'])) {
@@ -353,17 +352,17 @@ class ReimbuseController extends Controller
         $reimburseType      = $request->reimburseType;
 
         $data = MasterQuotaReimburseUser::selectRaw('mpr.code || \' (\' || mpr.start || \' - \' || mpr.end || \')\' as label, mpr.code as value')
-        ->join('users as u', 'u.id', '=', 'master_quota_reimburse_users.user_id')
-        ->join('master_quota_reimburses as mqr', 'mqr.id', '=', 'master_quota_reimburse_users.quota_reimburses_id')
-        ->join('master_type_reimburses as mtr', 'mtr.id', '=', 'mqr.type')
-        ->join('master_period_reimburses as mpr', 'mpr.id', '=', 'mqr.period')
-        ->where(['u.nip' => $userId, 'mtr.is_employee' => $familyRelationship, 'mtr.code' => $reimburseType]);
+            ->join('users as u', 'u.id', '=', 'master_quota_reimburse_users.user_id')
+            ->join('master_quota_reimburses as mqr', 'mqr.id', '=', 'master_quota_reimburse_users.quota_reimburses_id')
+            ->join('master_type_reimburses as mtr', 'mtr.id', '=', 'mqr.type')
+            ->join('master_period_reimburses as mpr', 'mpr.id', '=', 'mqr.period')
+            ->where(['u.nip' => $userId, 'mtr.is_employee' => $familyRelationship, 'mtr.code' => $reimburseType]);
 
         if ($request->search) {
             $data = $data
-                    ->where('code', 'ilike', '%' . $request->search . '%')
-                    ->orWhere('start', 'ilike', '%' . $request->search . '%')
-                    ->orWhere('end', 'ilike', '%' . $request->search . '%');
+                ->where('code', 'ilike', '%' . $request->search . '%')
+                ->orWhere('start', 'ilike', '%' . $request->search . '%')
+                ->orWhere('end', 'ilike', '%' . $request->search . '%');
         }
 
         $data = $data->limit(50)->groupBy('mpr.code', 'mpr.start', 'mpr.end')->get();
@@ -377,14 +376,14 @@ class ReimbuseController extends Controller
         $reimburseType      = $request->reimburseType;
         $reimbursePeriod    = $request->reimbursePeriod;
         $getFamilyStatus = MasterTypeReimburse::where('code', $reimburseType)->first()->family_status ?? '';
-        
+
         $data = MasterQuotaReimburseUser::select('f.name as label', 'f.id as value')
-        ->join('users as u', 'u.id', '=', 'master_quota_reimburse_users.user_id')
-        ->join('families as f', 'f.userId', '=', 'u.id')
-        ->join('master_quota_reimburses as mqr', 'mqr.id', '=', 'master_quota_reimburse_users.quota_reimburses_id')
-        ->join('master_type_reimburses as mtr', 'mtr.id', '=', 'mqr.type')
-        ->join('master_period_reimburses as mpr', 'mpr.id', '=', 'mqr.period')
-        ->where(['u.nip' => $userId, 'mtr.is_employee' => $familyRelationship, 'mtr.code' => $reimburseType, 'f.status' => $getFamilyStatus, 'mpr.code' => $reimbursePeriod]);
+            ->join('users as u', 'u.id', '=', 'master_quota_reimburse_users.user_id')
+            ->join('families as f', 'f.userId', '=', 'u.id')
+            ->join('master_quota_reimburses as mqr', 'mqr.id', '=', 'master_quota_reimburse_users.quota_reimburses_id')
+            ->join('master_type_reimburses as mtr', 'mtr.id', '=', 'mqr.type')
+            ->join('master_period_reimburses as mpr', 'mpr.id', '=', 'mqr.period')
+            ->where(['u.nip' => $userId, 'mtr.is_employee' => $familyRelationship, 'mtr.code' => $reimburseType, 'f.status' => $getFamilyStatus, 'mpr.code' => $reimbursePeriod]);
 
         if ($request->search) {
             $data = $data->Where('f.name', 'ilike', '%' . $request->search . '%');

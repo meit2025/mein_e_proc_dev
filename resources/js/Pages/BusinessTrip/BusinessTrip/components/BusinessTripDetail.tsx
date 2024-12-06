@@ -69,6 +69,12 @@ interface BusinessTripDestination {
   detail_attendance: BusinessTripDetailAttendance[];
 }
 
+interface BusinessTripAttachment {
+  id: number;
+  url: string;
+  file_name: string;
+}
+
 interface BusinessTrip {
   status_id?: number;
   id: number;
@@ -85,6 +91,7 @@ interface BusinessTrip {
   purpose_type_name: string;
   start_date: string;
   end_date: string;
+  file_attachement: BusinessTripAttachment[];
   business_trip_destination: BusinessTripDestination[];
 }
 
@@ -100,7 +107,6 @@ const BusinessTripDetail = () => {
         setIsLoading(true);
         // Pastikan endpoint API mengembalikan data relasi `posts`
         const response = await axiosInstance.get(GET_DETAIL_BUSINESS_TRIP_REQUEST(id));
-        console.log(response.data.data);
         setData(response.data.data);
       } catch (err) {
         console.error('Error fetching detail:', err);
@@ -130,45 +136,58 @@ const BusinessTripDetail = () => {
         <p className='text-sm'>
           <strong>Status:</strong> <span className='status-approved'>Fully Approved</span>
         </p>
-
-        <table className='info-table text-sm mt-4'>
-          <tr>
-            <td>
-              <strong>Purpose Type</strong>
-            </td>
-            <td>{data?.purpose_type_name}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Pusat Biaya</strong>
-            </td>
-            <td>{data?.cost_center}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Start Date</strong>
-            </td>
-            <td>{data?.start_date}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>End Date</strong>
-            </td>
-            <td>{data?.end_date}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Remark</strong>
-            </td>
-            <td>{data?.remarks}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Attachment File</strong>
-            </td>
-            <td></td>
-          </tr>
-        </table>
+        <div>
+            <table className='info-table text-sm mt-4'>
+            <tr>
+                <td>
+                <strong>Purpose Type</strong>
+                </td>
+                <td>{data?.purpose_type_name}</td>
+            </tr>
+            <tr>
+                <td>
+                <strong>Pusat Biaya</strong>
+                </td>
+                <td>{data?.cost_center}</td>
+            </tr>
+            <tr>
+                <td>
+                <strong>Start Date</strong>
+                </td>
+                <td>{data?.start_date}</td>
+            </tr>
+            <tr>
+                <td>
+                <strong>End Date</strong>
+                </td>
+                <td>{data?.end_date}</td>
+            </tr>
+            <tr>
+                <td>
+                <strong>Remark</strong>
+                </td>
+                <td>{data?.remarks}</td>
+            </tr>
+            <tr>
+                <td>
+                <strong>Attachment File</strong>
+                </td>
+                <td className='flex flex-col'>
+                    {data?.file_attachement.map((attachment: any, index: number) => (
+                        <a
+                            href={attachment.url}
+                            target='_blank'
+                            className="text-blue-500"
+                            rel='noopener noreferrer'
+                            key={index}
+                        >
+                            {attachment.file_name}
+                        </a>
+                    ))}
+                </td>
+            </tr>
+            </table>
+        </div>
 
         <Tabs defaultValue='destination1' className='w-full text-sm'>
           <TabsList className={'flex items-center justify-start space-x-4'}>
@@ -268,6 +287,27 @@ const BusinessTripDetail = () => {
                     </tr>
                   </table>
                 </div>
+                {destination.cash_advance != 0 && (
+                <div>
+                    <table className='cash-advance-table'>
+                        <tr>
+                            <td><strong>Cash Advance</strong></td>
+                            {/* <td>:</td>
+                            <td>Dp Number (status)</td> */}
+                        </tr>
+                        <tr>
+                            <td>Dp Percentage</td>
+                            <td>:</td>
+                            <td>{destination.total_percent}</td>
+                        </tr>
+                        <tr>
+                            <td>Dp Amount</td>
+                            <td>:</td>
+                            <td>{destination.total_cash_advance}</td>
+                        </tr>
+                    </table>
+                </div>  
+                )}
               </div>
             </TabsContent>
           ))}

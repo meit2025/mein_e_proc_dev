@@ -10,8 +10,12 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Modules\Approval\Models\SettingApproval;
 use Modules\Master\Models\MasterBusinessPartner;
+use Modules\Master\Models\MasterMaterial;
 use Modules\Master\Models\MasterTypeReimburse;
+use Modules\Master\Models\MaterialGroup;
 use Modules\Master\Models\Pajak;
+use Modules\Master\Models\PurchasingGroup;
+use Modules\Master\Models\Uom;
 use Modules\PurchaseRequisition\Models\CashAdvance;
 use Modules\PurchaseRequisition\Models\CashAdvancePurchases;
 use Modules\PurchaseRequisition\Models\Entertainment;
@@ -170,8 +174,12 @@ class ReimburseServices
     {
         $formattedDate = Carbon::parse($reim->created_at)->format('Y-m-d');
         $attachment = $this->findReimburseAttachment($value->id);
-        $getMaterialNumber = $this->findReimburseType($value->reimburse_type);
+        $reimburseType = $this->findReimburseType($value->reimburse_type);
+        $materialNumber = MasterMaterial::find($reimburseType->material_number);
+        $materialGroup = MaterialGroup::find($reimburseType->material_group);
         $pajak = Pajak::find($value->tax_on_sales);
+        $purchasingGroup = PurchasingGroup::find($value->purchasing_group);
+        $uom = Uom::find($value->purchase_requisition_unit_of_measure);
 
         return [
             'purchase_id' => $reim->id,
@@ -184,15 +192,15 @@ class ReimburseServices
             'document_type' => $dokumenType, // bsart
             'valuation_type' => '', //bwtar
             'is_closed' => '', // ebakz
-            'purchasing_group' => $value->purchasing_group, //bsart
+            'purchasing_group' => $purchasingGroup->purchasing_group, //bsart
             'purchasing_organization' => $PurchasingOrganization, // ekorg
             'account_assignment_category' => $AccountAssignmentCategory,  // knttp
             'item_delivery_date' => $formattedDate, // lfdat
             'storage_location' => $StorageLocation,  // lgort
             'desired_vendor' => $businessPartner->partner_number ?? '',  // lifnr
-            'material_group' => $getMaterialNumber->material_group, // matkl
-            'material_number' => $getMaterialNumber->material_number, // matnr
-            'unit_of_measure' => $value->uom,
+            'material_group' => $materialGroup->material_group, // matkl
+            'material_number' => $materialNumber->material_number, // matnr
+            'unit_of_measure' => $uom->commercial ?? '', // meins
             'quantity' => $PurchaseRequisitionQuantity,
             'balance' => $value->balance, //netpr
             'waers' => 'IDR',
