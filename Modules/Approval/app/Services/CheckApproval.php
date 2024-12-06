@@ -61,12 +61,13 @@ class CheckApproval
             $purchasingGroup = PurchasingGroup::where('purchasing_group', $request->purchasing_group_id ?? $request->purchasing_groups)->first();
 
             // Define the conditions
+            $total = (string)$request->value ?? (string)$request->total_all_amount;
             $conditions = [
-                fn($query) => $query->where('condition_type', '=', '>')->where('value', '<', $request->value ?? $request->total_all_amount),
-                fn($query) => $query->where('condition_type', '=', '>=')->where('value', '<=', $request->value ?? $request->total_all_amount),
-                fn($query) => $query->where('condition_type', '=', '<')->where('value', '>', $request->value ?? $request->total_all_amount),
-                fn($query) => $query->where('condition_type', '=', '<=')->where('value', '>=', $request->value ?? $request->total_all_amount),
-                fn($query) => $query->where('condition_type', '=', 'range')->where('min_value', '<=', $request->value ?? $request->total_all_amount)->where('max_value', '>=', $request->value ?? $request->total_all_amount),
+                fn($query) => $query->where('condition_type', '=', '>')->where('value', '<',),
+                fn($query) => $query->where('condition_type', '=', '>=')->where('value', '<=', $total),
+                fn($query) => $query->where('condition_type', '=', '<')->where('value', '>', $total),
+                fn($query) => $query->where('condition_type', '=', '<=')->where('value', '>=', $total),
+                fn($query) => $query->where('condition_type', '=', 'range')->where('min_value', '<=', $total)->where('max_value', '>=', $request->value ?? $request->total_all_amount),
                 fn($query) => $query->whereNull('condition_type'),
             ];
 
@@ -76,7 +77,7 @@ class CheckApproval
                 case 'approval':
                 case '':
                     $query = $this->getApprovalQuery($documentType->id, $purchasingGroup->id, $user->division_id);
-                    $result = $this->applyConditions($query, $conditions, $request->value);
+                    $result = $query->first();
                     break;
 
                 case 'chooses_approval':
@@ -129,9 +130,9 @@ class CheckApproval
             if (isset($request->user_id)) {
                 $getUserId = User::where('id', $request->user_id)->first();
             } else if (isset($request->requester)) {
-                $getUserId = User::where('nip', $request->requester)->first();
+                $getUserId = User::where('nip', $request->requester)->orwhere('username', $request->requester)->first();
             }
-            
+
             if (!$getUserId) {
                 throw new Exception('Username not found');
             }

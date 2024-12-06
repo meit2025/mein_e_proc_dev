@@ -476,6 +476,7 @@ class BusinessTripDeclarationController extends Controller
             $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP_DECLARATION');
             DB::commit();
         } catch (\Exception $e) {
+            dd($e);
             DB::rollBack();
         }
     }

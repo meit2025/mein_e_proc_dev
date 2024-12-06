@@ -240,8 +240,8 @@ export const ReimburseForm: React.FC<Props> = ({
       for (const map of reimburseForms) {
         formCounter++;
         await fetchReimburseType(formCounter, {type: map.type});
-        await handleChangeReimburseType(formCounter, {type: map.type, reimburse_type: map.reimburse_type.code});
-        await handleChangeReimbursePeriod(formCounter, {type: map.type, reimburse_type: map.reimburse_type.code, period: map.period});
+        await fetchReimbursePeriod(formCounter, {type: map.type, reimburse_type: map.reimburse_type.code});
+        await fetchFamily(formCounter, {type: map.type, reimburse_type: map.reimburse_type.code, period: map.period});
       }
 
       form.setValue('forms', reimburseFormMapping);
@@ -324,7 +324,7 @@ export const ReimburseForm: React.FC<Props> = ({
     }
   };
 
-  const handleChangeReimburseType = async (index: number, otherParams: any) => {
+  const fetchReimbursePeriod = async (index: number, otherParams: any) => {
       // get data reimburse period
       const response = await axiosInstance.get(GET_LIST_PERIOD_MASTER_REIMBURSE, {
         params: {
@@ -343,7 +343,7 @@ export const ReimburseForm: React.FC<Props> = ({
       });
   };
 
-  const handleChangeReimbursePeriod = async (index: number, otherParams: any) => {
+  const fetchFamily = async (index: number, otherParams: any) => {
     // get data family
     const response = await axiosInstance.get(GET_LIST_FAMILY_REIMBURSE, {
       params: {
@@ -481,7 +481,7 @@ export const ReimburseForm: React.FC<Props> = ({
       const response = await axiosInstance.get('/check-approval', {
         params: {
           value: totalNominal,
-          user_id: form.getValues('requester'),
+          requester: form.getValues('requester'),
           type: 'REIM',
         },
       });
@@ -682,11 +682,12 @@ export const ReimburseForm: React.FC<Props> = ({
                                     onValueChange={(value) => {
                                       updateForm(index, {
                                         ...formValue,
-                                        type            : String(value),
-                                        reimburse_type  : '',
-                                        period          : '',
-                                        for             : '',
+                                        type            : String(value)
                                       });
+
+                                      form.setValue(`forms.${index}.reimburse_type`, '');
+                                      form.setValue(`forms.${index}.period`, '');
+                                      if (form.getValues(`forms.${index}.type`) == 'Family') form.setValue(`forms.${index}.for`, '');
                                     }}
                                     defaultValue={formValue.type}
                                   >
@@ -718,12 +719,13 @@ export const ReimburseForm: React.FC<Props> = ({
                                   if (data?.value) {
                                     updateForm(index, {
                                       ...formValue,
-                                      reimburse_type  : data?.value,
-                                      period          : '',
-                                      for             : '',
+                                      reimburse_type  : data?.value
                                     });
                                     
-                                    handleChangeReimburseType(index, {type: form.getValues(`forms.${index}.type`), reimburse_type: data.value});
+                                    fetchReimbursePeriod(index, {type: form.getValues(`forms.${index}.type`), reimburse_type: data.value});
+
+                                    form.setValue(`forms.${index}.period`, '');
+                                    if (form.getValues(`forms.${index}.type`) == 'Family') form.setValue(`forms.${index}.for`, '');
                                   } 
                                 }}
                                 onFocus={() => fetchReimburseType(index, {type: form.getValues(`forms.${index}.type`)})}
@@ -784,11 +786,11 @@ export const ReimburseForm: React.FC<Props> = ({
                                         onValueChange={(value) => {
                                           updateForm(index, {
                                             ...formValue,
-                                            period  : value,
-                                            for     : ''
+                                            period  : value
                                           });
                                           if (form.getValues(`forms.${index}.type`) == 'Employee') getDataByLimit(index);
-                                          handleChangeReimbursePeriod(index, {type: form.getValues(`forms.${index}.type`), reimburse_type: form.getValues(`forms.${index}.reimburse_type`), period: value})
+                                          fetchFamily(index, {type: form.getValues(`forms.${index}.type`), reimburse_type: form.getValues(`forms.${index}.reimburse_type`), period: value})
+                                          if (form.getValues(`forms.${index}.type`) == 'Family') form.setValue(`forms.${index}.for`, '');
                                         }}
                                         defaultValue={formValue.period}
                                       >
@@ -1176,6 +1178,7 @@ export const ReimburseForm: React.FC<Props> = ({
                 />
               )}
             </div>
+            {/* <WorkflowComponent /> */}
             <Separator className='my-4' />
             <div className='mt-4 flex justify-end'>
               <Button type='submit' className='w-32'>

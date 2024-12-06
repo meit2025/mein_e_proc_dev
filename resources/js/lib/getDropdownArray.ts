@@ -13,6 +13,7 @@ interface StructDropdown {
   tabel: string;
   search?: string;
   where?: WhereProps;
+  isMapping?: boolean;
 }
 
 interface DropdownProps {
@@ -36,9 +37,14 @@ const useDropdownOptionsArray = () => {
           },
         );
 
-        const fetchedData = response.data.data.map((item: any) => ({
-          label: `${item.label} - ${item.value}`,
-          value: item.value,
+        // const fetchedData = response.data.data.map((item: any) => ({
+        //   label: `${item.label} - ${item.value}`,
+        //   value: item.value,
+        // }));
+
+        const fetchedData = response.data.data.map((items: any) => ({
+          label: !item.struct.isMapping ? items.label : `${items.label} - ${items.value}`,
+          value: items.value,
         }));
 
         if (dataObject && item.dropdown !== '') {

@@ -120,8 +120,6 @@ export const Index = ({
         }}
         labelFilter='search'
       />
-
-      <WorkflowComponent />
     </>
   );
 };

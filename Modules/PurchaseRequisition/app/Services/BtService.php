@@ -27,7 +27,6 @@ class BtService
     {
         DB::beginTransaction();
         try {
-
             $BusinessTrip = $this->findBusinessTrip($id);
             $BusinessAttachment = $this->findBusinessAttachment($id);
             $BusinessTripDetailDestinationTotal = $this->findBusinessTripDetailDestinationTotal($id);
@@ -49,6 +48,8 @@ class BtService
             $reqno = (int) SettingApproval::where('key', 'dokumenType_' . $dokumenType)->lockForUpdate()->value('value') + 1;
 
             foreach ($BusinessTripDetailDestinationTotal as $key => $value) {
+                $getDestination = $this->findBusinessTripDestination($value->business_trip_destination_id);
+
                 $datainsert = $this->preparePurchaseRequisitionData(
                     $BusinessTrip,
                     $value,
@@ -56,24 +57,27 @@ class BtService
                     $BusinessAttachment,
                     $key + 1,
                     $dokumenType,
-                    $settings
+                    $settings,
+                    $getDestination
                 );
 
                 $dataMapping = $datainsert;
                 $dataMapping['purchase_id'] = $BusinessTrip->id;
                 PurchaseRequisition::create($dataMapping);
                 $array[] = $datainsert;
+
+
+                if ($getDestination->cash_advance) {
+                    $datainsertCash = $this->prepareCashAdvanceData($BusinessTrip, $reqno, $settings, $getDestination);
+
+                    $newDataInser = $datainsertCash;
+                    $newDataInser['amount'] = $getDestination->total_cash_advance;
+                    $newDataInser['purchase_id'] = $BusinessTrip->id;
+                    CashAdvance::create($newDataInser);
+                    $arrayCash[] = $datainsertCash;
+                }
             }
 
-            if ($BusinessTrip->cash_advance) {
-                $datainsertCash = $this->prepareCashAdvanceData($BusinessTrip, $reqno, $settings);
-
-                $newDataInser = $datainsertCash;
-                $newDataInser['amount'] = $BusinessTrip->total_cash_advance;
-                $newDataInser['purchase_id'] = $BusinessTrip->id;
-                CashAdvance::create($newDataInser);
-                $arrayCash[] = $datainsertCash;
-            }
 
             // $this->generateFiles($array, $arrayCash, $reqno);
             SettingApproval::where('key', 'dokumenType_' . $dokumenType)->update(['value' => $reqno]);
@@ -95,11 +99,13 @@ class BtService
         $indx,
         $dokumenType,
         $settings,
+        $getDestination
     ) {
+
         $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y-m-d');
         $getAllowanceItem = AllowanceItem::where('id', $item->allowance_item_id)->first();
         if ($getAllowanceItem && $getAllowanceItem->material_number == '') {
-            throw new Exception('alloean Item Not set materila number');
+            throw new Exception('allowance Item Not set materila number');
         }
 
         // get material number
@@ -107,8 +113,8 @@ class BtService
         $internalUom = Uom::where('internal_uom', $getMaterial->base_unit_of_measure)->first();
 
 
-        $purchasingGroup = PurchasingGroup::find($BusinessTrip->purchasing_group_id);
-        $pajak = Pajak::find($BusinessTrip->pajak_id);
+        $purchasingGroup = PurchasingGroup::find($getDestination->purchasing_group_id);
+        $pajak = Pajak::find($getDestination->pajak_id);
         $costCenter = MasterCostCenter::find($BusinessTrip->cost_center_id);
 
         return [
@@ -182,7 +188,7 @@ class BtService
 
     private function findBusinessTripDestination($id)
     {
-        $items = BusinessTripDestination::where('business_trip_id', $id)->first();
+        $items = BusinessTripDestination::where('id', $id)->first();
         return $items;
     }
     private function findBusinessTripDetailAttedance($id)
@@ -220,21 +226,20 @@ class BtService
     }
 
 
-    private function prepareCashAdvanceData($BusinessTrip, $reqno, $settings)
+    private function prepareCashAdvanceData($BusinessTrip, $reqno, $settings, $getDestination)
     {
-        $tax = Pajak::where('id', $BusinessTrip->pajak_id ?? '1')->first();
+
+        $tax = Pajak::where('id', $getDestination->pajak_id ?? '1')->first();
         $findCostCenter = MasterCostCenter::find($BusinessTrip->cost_center_id)->first();
-        // $taxAmount = $BusinessTrip->total_cash_advance * (($tax->desimal ?? 0) / 100);
-        $totalAmount = (int)$BusinessTrip->total_cash_advance;
+        $totalAmount = (int)$getDestination->total_cash_advance;
 
         $desimalPlus = 100 + $tax->desimal;
         $taxAmount = ($tax->desimal / $desimalPlus) * $totalAmount;
 
-        $findBusinessTripDestination = $this->findBusinessTripDestination($BusinessTrip->id);
 
-        $formattedDate = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('Y-m-d');
-        $year = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('Y');
-        $month = Carbon::parse($findBusinessTripDestination->business_trip_start_date)->format('m');
+        $formattedDate = Carbon::parse($getDestination->business_trip_start_date)->format('Y-m-d');
+        $year = Carbon::parse($getDestination->business_trip_start_date)->format('Y');
+        $month = Carbon::parse($getDestination->business_trip_start_date)->format('m');
         return [
             'extdoc' => $BusinessTrip->id,
             'code_transaction' => 'BTRE',
@@ -245,12 +250,12 @@ class BtService
             'document_date' => $formattedDate,
             'budat' => $formattedDate, // budat
             'monat' => $month, // monat
-            'reference' => $BusinessTrip->request_no,
+            'reference' => $getDestination->reference_number,
             'document_header_text' => $BusinessTrip->remarks,
             'vendor_code' => $BusinessTrip->requestFor->employee->partner_number ?? '',
             'saknr' => '', //saknr
             'hkont' => '', //hkont
-            'amount_local_currency' => (int)$BusinessTrip->total_cash_advance,
+            'amount_local_currency' => (int)$getDestination->total_cash_advance,
             'tax_code' => $tax->mwszkz ?? 'V0',
             'dzfbdt' => $formattedDate, //dzfbdt
             'purchasing_document' => '', //ebeln
