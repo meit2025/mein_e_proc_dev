@@ -246,15 +246,20 @@ class ReimbuseController extends Controller
         }
     }
 
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
         $data = $request->all();
+        $groupData = [
+            'groupId'       => $id,
+            'remark'        => $data['remark_group'],
+            'requester'     => $data['requester'],
+            'cost_center'   => $data['cost_center'],
+        ];
         $forms = $data['forms'];
-        $response = $this->reimbursementService->updateReimbursements($forms);
-        if (isset($response['error'])) {
-            return back()->withErrors(['status' => $response['error']]);
-        }
-        return redirect()->back()->with('status', 'Reimbursements updated successfully.');
+        $response = $this->reimbursementService->updateReimbursements($groupData, $forms);
+        
+        if (isset($response['error'])) return $this->errorResponse($response['error']);
+        return $this->successResponse("Reimbursements updated successfully.");
     }
 
 
