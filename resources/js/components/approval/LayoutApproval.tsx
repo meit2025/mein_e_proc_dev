@@ -1,15 +1,15 @@
-import { ReactNode, useCallback, useEffect, useState } from 'react';
-import FormMapping from '@/components/form/FormMapping';
-import { useForm } from 'react-hook-form';
 import axiosInstance from '@/axiosInstance';
-import { usePage } from '@inertiajs/react';
-import { LIST_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
 import { Loading } from '@/components/commons/Loading';
-import Button from '@mui/material/Button';
-import { Box, Modal } from '@mui/material';
+import FormMapping from '@/components/form/FormMapping';
 import FormTextArea from '@/components/Input/formTextArea';
-import DetailApproval from './detailApproval';
 import { Auth } from '@/Pages/Layouts/Header';
+import { usePage } from '@inertiajs/react';
+import { Box, Modal } from '@mui/material';
+import Button from '@mui/material/Button';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import DetailApproval from './detailApproval';
+import moment from 'moment';
 
 const style = {
   position: 'absolute',
@@ -61,13 +61,19 @@ const LayoutApproval = ({
         const approvalFrom = (data.data ?? []).map((route: any) => route.user.name);
         const firstFalseStatus = (data.data ?? []).find((item: any) => item.is_status === false);
 
-        console.log(status_id, 'status_id');
-        console.log(firstFalseStatus?.user_id, 'firstFalseStatus?.user_id');
-        console.log(auth?.user?.id, 'auth?.user?.id');
         if (status_id !== 4 && firstFalseStatus?.user_id === auth?.user?.id) {
           setIsApproval(true);
         }
 
+        const approvalFromStatusRoute = (data.data ?? []).map((route: any) => {
+          return {
+            status: route.status,
+            name: route.user.name,
+            dateApproved: moment(route.updated_at).format('YYYY-MM-DD'),
+          };
+        });
+
+        methods.setValue('approvalFromStatusRoute', approvalFromStatusRoute);
         methods.setValue('approvalRequest', approvalRequest);
         methods.setValue('approvalFrom', approvalFrom);
         methods.setValue('approvalId', firstFalseStatus?.id);
@@ -155,7 +161,6 @@ const LayoutApproval = ({
               }
               methods={methods}
               url={'api/approval/approval_or_rejceted'}
-              redirectUrl={LIST_PAGE_PR}
             />
           </Box>
         </Modal>

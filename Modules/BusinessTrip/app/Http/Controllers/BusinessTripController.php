@@ -8,9 +8,11 @@ use App\Models\Currency;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
+use Modules\Approval\Models\Approval;
 use Modules\BusinessTrip\Models\AllowanceItem;
 use Modules\BusinessTrip\Models\BusinessTrip;
 use Modules\BusinessTrip\Models\BusinessTripAttachment;
@@ -501,6 +503,11 @@ class BusinessTripController extends Controller
         $sortDirection = $request->get('sort_direction', 'desc');
 
         // $query->orderBy($sortBy, $sortDirection);
+        if ($request->approval == "1") {
+            $data = Approval::where('user_id', Auth::user()->id)
+                ->where('document_name', 'TRIP')->pluck('document_id')->toArray();
+            $query = $query->whereIn('id', $data);
+        }
 
         $data = $query->where('type', 'request')->latest()->paginate($perPage);
 
@@ -666,7 +673,7 @@ class BusinessTripController extends Controller
                     'currency_code' => $detailDay->allowance->currency_id,
                     'value' => (int)$detailDay->standard_value,
                     'total_day' => $detailDay->total,
-                    'total' => number_format($detailDay->standard_value * $detailDay->total,0,',','.'),
+                    'total' => number_format($detailDay->standard_value * $detailDay->total, 0, ',', '.'),
                 ];
                 $total_standard += $detailDay->standard_value * $detailDay->total;
             }
@@ -677,9 +684,9 @@ class BusinessTripController extends Controller
                     'item_name' => $detailTotal->allowance->name,
                     'type' => $detailTotal->allowance->type,
                     'currency_code' => $detailTotal->allowance->currency_id,
-                    'value' => number_format($detailTotal->standard_value,0,',','.'),
+                    'value' => number_format($detailTotal->standard_value, 0, ',', '.'),
                     'total_day' => '-',
-                    'total' => number_format($detailTotal->standard_value,0,',','.'),
+                    'total' => number_format($detailTotal->standard_value, 0, ',', '.'),
                 ];
                 $total_standard += $detailTotal->standard_value;
             }
@@ -692,9 +699,9 @@ class BusinessTripController extends Controller
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => number_format($detailDay->price / $detailDay->total,0,',','.'),
+                    'value' => number_format($detailDay->price / $detailDay->total, 0, ',', '.'),
                     'total_day' => $detailDay->total,
-                    'total' => number_format($detailDay->price,0,',','.'),
+                    'total' => number_format($detailDay->price, 0, ',', '.'),
                 ];
                 $total_request += $detailDay->price;
             }
@@ -704,9 +711,9 @@ class BusinessTripController extends Controller
                     'item_name' => $detailTotal->allowance->name,
                     'type' => $detailTotal->allowance->type,
                     'currency_code' => $detailTotal->allowance->currency_id,
-                    'value' => number_format($detailTotal->price,0,',','.'),
+                    'value' => number_format($detailTotal->price, 0, ',', '.'),
                     'total_day' => '-',
-                    'total' => number_format($detailTotal->price,0,',','.'),
+                    'total' => number_format($detailTotal->price, 0, ',', '.'),
                 ];
                 $total_request += $detailTotal->price;
             }
@@ -719,11 +726,11 @@ class BusinessTripController extends Controller
                 'business_trip_detail_attendance' => $detail_attendance,
                 'standar_detail_allowance' => $standar_detail_allowance,
                 'request_detail_allowance' => $request_detail_allowance,
-                'total_standard' => number_format($total_standard,0,',','.'),
-                'total_request' => number_format($total_request,0,',','.'),
+                'total_standard' => number_format($total_standard, 0, ',', '.'),
+                'total_request' => number_format($total_request, 0, ',', '.'),
                 'cash_advance' => $destination->cash_advance,
-                'total_percent' => $destination->total_percent. '%',
-                'total_cash_advance' => number_format($destination->total_cash_advance,0,',','.'),
+                'total_percent' => $destination->total_percent . '%',
+                'total_cash_advance' => number_format($destination->total_cash_advance, 0, ',', '.'),
             ];
         }
         return $this->successResponse($data);
