@@ -16,6 +16,11 @@ interface StructDropdown {
   where?: WhereProps;
   search?: string;
   attribut?: string;
+  hiddenZero?: boolean;
+}
+
+function removeLeadingZeros(input: string): string {
+  return Number(input).toString();
 }
 
 const useDropdownOptions = (urls: string = 'api/master/dropdown') => {
@@ -47,10 +52,13 @@ const useDropdownOptions = (urls: string = 'api/master/dropdown') => {
         },
       });
 
-      const fetchedData = response.data.data.map((item: any) => ({
-        label: !struct.isMapping ? item.label : `${item.label} - ${item.value}`,
-        value: item.value,
-      }));
+      const fetchedData = response.data.data.map((item: any) => {
+        const label = struct.hiddenZero ? removeLeadingZeros(item.label) : item.label;
+        return {
+          label: !struct.isMapping ? label : `${label} - ${item.value}`,
+          value: item.value,
+        };
+      });
       if (object && dropdown !== '') {
         const updatedObject = object.map((field) =>
           field.name === dropdown ? { ...field, options: fetchedData } : field,
