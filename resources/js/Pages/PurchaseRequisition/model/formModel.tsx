@@ -73,7 +73,7 @@ export const formModel: Array<FormFieldModel<any>> = [
   {
     type: 'select',
     name: 'user_id',
-    label: 'Requisition',
+    label: 'Requester',
     required: true,
     options: [],
     style: {
@@ -111,7 +111,7 @@ export const formModel: Array<FormFieldModel<any>> = [
   {
     type: 'select',
     name: 'storage_locations',
-    label: 'Storage Location',
+    label: 'Recieving Location',
     required: false,
     options: [],
     style: {
