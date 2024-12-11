@@ -74,11 +74,10 @@ class Reimburse extends Model
 
     public function uomModel()
     {
-        return $this->belongsTo(Uom::class, 'uom', 'id');
+        return $this->belongsTo(Uom::class, 'purchase_requisition_unit_of_measure', 'id');
     }
 
-    /*************  ✨ Codeium Command ⭐  *************/
-    /******  ed3796dc-0f38-43e8-9594-0a544290ec32  *******/    public function purchasingGroupModel()
+    public function purchasingGroupModel()
     {
         return $this->belongsTo(PurchasingGroup::class, 'purchasing_group', 'id');
     }

@@ -372,7 +372,11 @@ export const ReimburseForm: React.FC<Props> = ({
       form.setValue(`forms.${index}.reimburse_type`, '');
       form.setValue(`forms.${index}.period`, '');
       if (form.getValues(`forms.${index}.type`) == 'Family') form.setValue(`forms.${index}.for`, '');
-      setDetailLimit([]);
+      setDetailLimit((prev) => {
+        const newDetailLimit = [...prev];
+        newDetailLimit.splice(index, 1)
+        return newDetailLimit;
+      });
     }
   };
   
@@ -695,7 +699,11 @@ export const ReimburseForm: React.FC<Props> = ({
                                       form.setValue(`forms.${index}.reimburse_type`, '');
                                       form.setValue(`forms.${index}.period`, '');
                                       if (form.getValues(`forms.${index}.type`) == 'Family') form.setValue(`forms.${index}.for`, '');
-                                      setDetailLimit([]);
+                                      setDetailLimit((prev) => {
+                                        const newDetailLimit = [...prev];
+                                        newDetailLimit.splice(index, 1)
+                                        return newDetailLimit;
+                                      });
                                     }}
                                     defaultValue={formValue.type}
                                   >
@@ -731,11 +739,16 @@ export const ReimburseForm: React.FC<Props> = ({
                                     });
                                     
                                     fetchReimbursePeriod(index, {type: form.getValues(`forms.${index}.type`), reimburse_type: data.value});
+                                  }
 
-                                    form.setValue(`forms.${index}.period`, '');
-                                    if (form.getValues(`forms.${index}.type`) == 'Family') form.setValue(`forms.${index}.for`, '');
-                                    setDetailLimit([]);
-                                  } 
+                                  form.setValue(`forms.${index}.period`, '');
+                                  if (form.getValues(`forms.${index}.type`) == 'Family') form.setValue(`forms.${index}.for`, '');
+                                  setDetailLimit((prev) => {
+                                    const newDetailLimit = [...prev];
+                                    newDetailLimit.splice(index, 1)
+                                    return newDetailLimit;
+                                  });
+                                  
                                 }}
                                 onFocus={() => fetchReimburseType(index, {type: form.getValues(`forms.${index}.type`)})}
                                 classNames='mt-2 w-full'
@@ -800,7 +813,11 @@ export const ReimburseForm: React.FC<Props> = ({
                                           if (form.getValues(`forms.${index}.type`) == 'Employee') {
                                             getDataByLimit(index);
                                           } else {
-                                            setDetailLimit([]);
+                                            setDetailLimit((prev) => {
+                                              const newDetailLimit = [...prev];
+                                              newDetailLimit.splice(index, 1)
+                                              return newDetailLimit;
+                                            });
                                           }
                                           fetchFamily(index, {type: form.getValues(`forms.${index}.type`), reimburse_type: form.getValues(`forms.${index}.reimburse_type`), period: value})
                                           if (form.getValues(`forms.${index}.type`) == 'Family') form.setValue(`forms.${index}.for`, '');
