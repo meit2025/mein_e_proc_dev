@@ -29,8 +29,7 @@ Route::group(['prefix' => 'reimburse'], function () {
     Route::inertia('/detail/{id}',  'Reimburse/Detail', [
         'id' => fn() => request()->route('id'),
     ]);
-
-
+    Route::get('/print/{id}', [ReimbuseController::class, 'print'])->name('reimburse.print');
     Route::get('/data-limit-and-balance', [ReimbuseController::class, 'getDataLimitAndBalance'])->name('reimburse.data-limit-balance');
 });
 
