@@ -46,7 +46,10 @@ import {
   EDIT_API_BUSINESS_TRIP,
   GET_DETAIL_BUSINESS_TRIP,
 } from '@/endpoint/business-trip/api';
-import { GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE, GET_DETAIL_PURPOSE_TYPE } from '@/endpoint/purpose-type/api';
+import {
+  GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE,
+  GET_DETAIL_PURPOSE_TYPE,
+} from '@/endpoint/purpose-type/api';
 import { Button as ButtonMui } from '@mui/material';
 import axios, { AxiosError } from 'axios';
 import moment from 'moment';
@@ -139,15 +142,15 @@ export const BussinessTripFormV1 = ({
         }),
     ),
     total_destination: z.number().min(1, 'Total Destinantion Required'),
+    cash_advance: z.boolean().nullable().optional(),
+    reference_number: z.string().nullable().optional(),
+    total_percent: z.string().nullable().optional(),
+    total_cash_advance: z.string().nullable().optional(),
     destinations: z.array(
       z.object({
         destination: z.string().min(1, 'Destinantion is Required'),
         pajak_id: z.string().min(1, 'Pajak is required'),
         purchasing_group_id: z.string().min(1, 'Purchasing Group is required'),
-        cash_advance: z.boolean().nullable().optional(),
-        reference_number: z.string().nullable().optional(),
-        total_percent: z.string().nullable().optional(),
-        total_cash_advance: z.string().nullable().optional(),
         business_trip_start_date: z.date().optional(),
         business_trip_end_date: z.date().optional(),
         detail_attedances: z.array(
@@ -190,6 +193,10 @@ export const BussinessTripFormV1 = ({
       remark: '',
       attachment: [],
       total_destination: 1,
+      cash_advance: false,
+      reference_number: '',
+      total_percent: '',
+      total_cash_advance: '0',
       destinations: [
         {
           detail_attedances: [],
@@ -197,10 +204,6 @@ export const BussinessTripFormV1 = ({
           destination: '',
           pajak_id: '',
           purchasing_group_id: '',
-          cash_advance: false,
-          reference_number: '',
-          total_percent: '',
-          total_cash_advance: '0',
           business_trip_start_date: new Date(),
           business_trip_end_date: new Date(),
         },
@@ -216,9 +219,9 @@ export const BussinessTripFormV1 = ({
     business_trip_end_date: Date;
   }
 
-//   React.useEffect(() => {
-//     console.log('Form Errors:', form.formState.errors);
-//   }, [form.formState.errors]);
+  //   React.useEffect(() => {
+  //     console.log('Form Errors:', form.formState.errors);
+  //   }, [form.formState.errors]);
 
   const [fileAttachment, setfileAttachment] = React.useState<BusinessTripAttachement[]>([]);
 
@@ -229,7 +232,7 @@ export const BussinessTripFormV1 = ({
     try {
       const response = await axios.get(url);
       const data = response.data.data;
-    //   console.log(data,' data nya');
+      //   console.log(data,' data nya');
       const getDestination = GET_LIST_DESTINATION_BY_TYPE(data.purpose_type_id);
       const responseDestination = await axiosInstance.get(getDestination);
       setListDestination(responseDestination.data.data as DestinationModel[]);
@@ -240,16 +243,20 @@ export const BussinessTripFormV1 = ({
       form.setValue('cost_center_id', data.cost_center_id.toString());
       form.setValue('remark', data.remarks);
       form.setValue('total_destination', data.total_destination);
+      form.setValue('cash_advance', data.cash_advance == 1 ? true : false);
+      form.setValue('reference_number', data.reference_number);
+      form.setValue('total_percent', data.total_percent);
+      form.setValue('total_cash_advance', data.total_cash_advance);
       form.setValue(
         'destinations',
         data.destinations.map((destination: any) => ({
           destination: destination.destination,
           pajak_id: destination.pajak_id,
           purchasing_group_id: destination.purchasing_group_id,
-          cash_advance: destination.cash_advance == 1 ? true : false,
-          reference_number: destination.reference_number,
-          total_percent: destination.total_percent,
-          total_cash_advance: destination.total_cash_advance,
+          //   cash_advance: destination.cash_advance == 1 ? true : false,
+          //   reference_number: destination.reference_number,
+          //   total_percent: destination.total_percent,
+          //   total_cash_advance: destination.total_cash_advance,
           business_trip_start_date: new Date(destination.business_trip_start_date),
           business_trip_end_date: new Date(destination.business_trip_end_date),
           detail_attedances: destination.detail_attedances.map((detail: any) => {
@@ -296,11 +303,11 @@ export const BussinessTripFormV1 = ({
       const response = await axiosInstance.get(url);
       const responseDestination = await axiosInstance.get(getDestination);
       const responsePurposeType = await axiosInstance.get(getPurposeType);
-    //   console.log(responseDestination.data.data, ' responseDestination');
-    //   console.log(response.data.data, ' responseresponseresponse');
+      //   console.log(responseDestination.data.data, ' responseDestination');
+      //   console.log(response.data.data, ' responseresponseresponse');
       const typePurpose = responsePurposeType.data.data.purpose.type;
-      if(typePurpose == 'international') {
-        totalDestinationHandler('1')
+      if (typePurpose == 'international') {
+        totalDestinationHandler('1');
       }
       setTypePurpose(typePurpose);
       setListAllowances(response.data.data as AllowanceItemModel[]);
@@ -309,7 +316,6 @@ export const BussinessTripFormV1 = ({
       console.log(e);
     }
   }
-
 
   const totalDestinationHandler = (value: string) => {
     form.setValue('total_destination', parseInt(value, 10));
@@ -333,6 +339,11 @@ export const BussinessTripFormV1 = ({
       formData.append('request_for', values.request_for ?? '');
       formData.append('cost_center_id', values.cost_center_id ?? '');
       formData.append('remark', values.remark ?? '');
+      formData.append('reference_number', `${values.reference_number}`);
+      formData.append('cash_advance', `${values.cash_advance}`);
+      formData.append('total_percent', `${values.total_percent}`);
+      formData.append('total_cash_advance', `${values.total_cash_advance}`);
+
       values.attachment.forEach((file: any, index: number) => {
         if (file) {
           formData.append(`attachment[${index}]`, file);
@@ -431,8 +442,8 @@ export const BussinessTripFormV1 = ({
   });
 
   React.useEffect(() => {
-    console.log(BusinessTripType.edit, ' business edit')
-    console.log(type, ' id type')
+    console.log(BusinessTripType.edit, ' business edit');
+    console.log(type, ' id type');
     if (id && type == BusinessTripType.edit) {
       getDetailData();
     }
@@ -534,7 +545,7 @@ export const BussinessTripFormV1 = ({
     if (totalAll > 0) {
       fetchDataValue();
     }
-    // console.log(listDestination, ' get value'); 
+    // console.log(listDestination, ' get value');
   }, [form.watch('destinations')]);
 
   const [deletedFiles, setDeletedFiles] = React.useState<number[]>([]); // Simpan index file yang dihapus
@@ -543,6 +554,34 @@ export const BussinessTripFormV1 = ({
   const handleDelete = (id: number) => {
     setfileAttachment((prev) => prev.filter((file) => file.id !== id));
   };
+
+  const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
+
+  const handleCashAdvanceChange = (value: boolean) => {
+    setIsCashAdvance(value);
+  };
+
+  const totalPercent: any = useWatch({
+    control: form.control,
+    name: `total_percent`,
+  });
+
+  const [totalAllowance, setTotalAllowance] = React.useState(0);
+  // Assuming allowance is calculated elsewhere, let's mock it for now
+  const allowance = totalAllowance;
+
+  //   // Calculate total based on totalPercent and allowance
+  React.useEffect(() => {
+    // console.log(form.getValues('destinations'), ' edit destination');
+    if (type == BusinessTripType.edit) {
+      setIsCashAdvance(form.getValues(`cash_advance`) ?? false);
+    }
+    const percentValue = parseFloat((totalPercent || '0').toString());
+    // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
+    const total = (percentValue / 100) * allowance; // Multiply percent with allowance
+    // console.log(total, ' totalll');
+    form.setValue(`total_cash_advance`, total.toFixed(0)); // Save the total in total_cash_advance field
+  }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance changes
 
   return (
     <ScrollArea className='h-[600px] w-full '>
@@ -730,28 +769,28 @@ export const BussinessTripFormV1 = ({
               </td>
             </tr>
             {fileAttachment.length > 0 && (
-                <tr>
-                    <td width={200}></td>
-                    {fileAttachment.map((attachment: any, index: number) => (
-                        <td className='flex flex-col pb-3'>
-                            <a
-                                href={attachment.url}
-                                target='_blank'
-                                className="text-blue-500 inline-block"
-                                key={index}
-                            >
-                                {attachment.file_name}
-                            </a>
-                            <button
-                            type="button"
-                            onClick={() => handleDelete(attachment.id)}
-                            className="text-red-500 mt-2"
-                            >
-                            Delete
-                            </button>
-                        </td> 
-                    ))}
-                </tr>
+              <tr>
+                <td width={200}></td>
+                {fileAttachment.map((attachment: any, index: number) => (
+                  <td className='flex flex-col pb-3'>
+                    <a
+                      href={attachment.url}
+                      target='_blank'
+                      className='text-blue-500 inline-block'
+                      key={index}
+                    >
+                      {attachment.file_name}
+                    </a>
+                    <button
+                      type='button'
+                      onClick={() => handleDelete(attachment.id)}
+                      className='text-red-500 mt-2'
+                    >
+                      Delete
+                    </button>
+                  </td>
+                ))}
+              </tr>
             )}
             <tr>
               <td width={200}>File Extension</td>
@@ -804,10 +843,88 @@ export const BussinessTripFormV1 = ({
             totalDestination={form.getValues('total_destination').toString()}
             pajak={pajak}
             purchasingGroup={purchasingGroup}
-            typeEdit={type}
-            // setTotalAllowance={setTotalAllowance}
+            setTotalAllowance={setTotalAllowance}
           />
           <Separator className='my-4' />
+
+          {/* CASH ADVANCE */}
+          <table className='w-full text-sm mt-10'>
+            <tr>
+              <td className='w-[50%]'>Cash Advance</td>
+              <td className='w-[50%] pb-0'>
+                <FormSwitch
+                  fieldName={`cash_advance`}
+                  isRequired={false}
+                  disabled={false}
+                  onChanges={(e) => handleCashAdvanceChange(e.target.checked)}
+                />
+              </td>
+            </tr>
+            {isCashAdvance && (
+              <>
+                <tr>
+                  <td className='w-[50%]'>Total Percent</td>
+                  <td className='w-[50%]'>
+                    <FormField
+                      control={form.control}
+                      name={`reference_number`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value)}
+                              className='w-[50%] mb-2'
+                              placeholder='Reference Number'
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`total_percent`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Select
+                              // onValueChange={(value) => handlePurposeType(value)}
+                              value={field.value || undefined}
+                              onValueChange={(value) => field.onChange(value)}
+                            >
+                              <SelectTrigger className='w-[50%] mb-2'>
+                                <SelectValue placeholder='-- Select Total Percent --' />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value='10'>10%</SelectItem>
+                                <SelectItem value='25'>25%</SelectItem>
+                                <SelectItem value='50'>50%</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`total_cash_advance`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input value={field.value || ''} readOnly={true} className='w-[50%]' />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </td>
+                </tr>
+              </>
+            )}
+          </table>
+
           <ButtonMui
             onClick={async () => await fetchDataValue()}
             variant='contained'
@@ -847,7 +964,7 @@ export function BussinesTripDestination({
   destinationField,
   form,
   updateDestination,
-  //   setTotalAllowance,
+  setTotalAllowance,
   listDestination = [],
   pajak,
   purchasingGroup,
@@ -858,7 +975,7 @@ export function BussinesTripDestination({
   form: any;
   destinationField: any;
   updateDestination: any;
-  //   setTotalAllowance: any;
+  setTotalAllowance: any;
   listDestination: DestinationModel[];
   pajak: Pajak[];
   purchasingGroup: PurchasingGroup[];
@@ -887,7 +1004,7 @@ export function BussinesTripDestination({
           destination={destination}
           form={form}
           index={index}
-          //   setTotalAllowance={setTotalAllowance}
+          setTotalAllowance={setTotalAllowance}
           listDestination={listDestination}
           pajak={pajak}
           purchasingGroup={purchasingGroup}
@@ -904,7 +1021,7 @@ export function BussinessDestinationForm({
   destination,
   updateDestination,
   listAllowances,
-  //   setTotalAllowance,
+  setTotalAllowance,
   listDestination,
   pajak,
   purchasingGroup,
@@ -915,7 +1032,7 @@ export function BussinessDestinationForm({
   destination: any;
   updateDestination: any;
   listAllowances: any;
-  //   setTotalAllowance: any;
+  setTotalAllowance: any;
   listDestination: DestinationModel[];
   pajak: Pajak[];
   purchasingGroup: PurchasingGroup[];
@@ -1009,34 +1126,7 @@ export function BussinessDestinationForm({
     });
   }
 
-  const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
-
-  const handleCashAdvanceChange = (value: boolean) => {
-    setIsCashAdvance(value);
-  };
-
-  const totalPercent = useWatch({
-    control: form.control,
-    name: `destinations.${index}.total_percent`,
-  });
-
-  const [totalAllowance, setTotalAllowance] = React.useState(0);
-  // Assuming allowance is calculated elsewhere, let's mock it for now
-  const allowance = totalAllowance;
-
-  //   // Calculate total based on totalPercent and allowance
-  React.useEffect(() => {
-    // console.log(form.getValues('destinations'), ' edit destination');
-    if (typeEdit == BusinessTripType.edit) {
-      setIsCashAdvance(form.getValues(`destinations.${index}.cash_advance`));
-    }
-    const percentValue = parseFloat((totalPercent || '0').toString());
-    // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
-    const total = (percentValue / 100) * allowance; // Multiply percent with allowance
-    // console.log(total, ' totalll');
-    form.setValue(`destinations.${index}.total_cash_advance`, total.toFixed(0)); // Save the total in total_cash_advance field
-  }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance changes
-//   console.log(listDestination, 'listDestination 123');
+  //   console.log(listDestination, 'listDestination 123');
   return (
     <TabsContent value={`destination${index + 1}`}>
       <div key={index}>
@@ -1087,10 +1177,10 @@ export function BussinessDestinationForm({
                   <FormItem>
                     <FormControl>
                       <Select
-                      onValueChange={(value) => {
-                        updateDestination(index, { ...destination, pajak_id: value });
-                      }}
-                      defaultValue={destination.pajak_id}
+                        onValueChange={(value) => {
+                          updateDestination(index, { ...destination, pajak_id: value });
+                        }}
+                        defaultValue={destination.pajak_id}
                       >
                         <SelectTrigger className='w-[200px]'>
                           <SelectValue placeholder='-- Select Pajak --' />
@@ -1120,9 +1210,9 @@ export function BussinessDestinationForm({
                     <FormControl>
                       <Select
                         onValueChange={(value) => {
-                            updateDestination(index, { ...destination, purchasing_group_id: value });
-                          }}
-                          defaultValue={destination.purchasing_group_id}
+                          updateDestination(index, { ...destination, purchasing_group_id: value });
+                        }}
+                        defaultValue={destination.purchasing_group_id}
                       >
                         <SelectTrigger className='w-[200px]'>
                           <SelectValue placeholder='-- Select Purchasing Group --' />
@@ -1219,84 +1309,6 @@ export function BussinessDestinationForm({
         form={form}
         setTotalAllowance={setTotalAllowance}
       />
-
-      {/* CASH ADVANCE */}
-      <table className='w-full text-sm mt-10'>
-        <tr>
-          <td className='w-[50%]'>Cash Advance</td>
-          <td className='w-[50%] pb-0'>
-            <FormSwitch
-              fieldName={`destinations.${index}.cash_advance`}
-              isRequired={false}
-              disabled={false}
-              onChanges={(e) => handleCashAdvanceChange(e.target.checked)}
-            />
-          </td>
-        </tr>
-        {isCashAdvance && (
-          <>
-            <tr>
-              <td className='w-[50%]'>Total Percent</td>
-              <td className='w-[50%]'>
-                <FormField
-                  control={form.control}
-                  name={`destinations.${index}.reference_number`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          value={field.value || ''}
-                          onChange={(e) => field.onChange(e.target.value)}
-                          className='w-[50%] mb-2'
-                          placeholder='Reference Number'
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`destinations.${index}.total_percent`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          // onValueChange={(value) => handlePurposeType(value)}
-                          value={field.value || undefined}
-                          onValueChange={(value) => field.onChange(value)}
-                        >
-                          <SelectTrigger className='w-[50%] mb-2'>
-                            <SelectValue placeholder='-- Select Total Percent --' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value='10'>10%</SelectItem>
-                            <SelectItem value='25'>25%</SelectItem>
-                            <SelectItem value='50'>50%</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`destinations.${index}.total_cash_advance`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input value={field.value || ''} readOnly={true} className='w-[50%]' />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </td>
-            </tr>
-          </>
-        )}
-      </table>
     </TabsContent>
   );
 }
@@ -1323,31 +1335,31 @@ export function ResultTotalItem({
       return totalSum + itemTotal;
     }, 0);
 
-    // const alldestinations = form.getValues('destinations');
+    const alldestinations = form.getValues('destinations');
 
-    // const totalAll = alldestinations.reduce(
-    //   (destinationSum: number, destination: any, destinationIndex: number) => {
-    //     const allowances = destination.allowances || [];
+    const totalAll = alldestinations.reduce(
+      (destinationSum: number, destination: any, destinationIndex: number) => {
+        const allowances = destination.allowances || [];
 
-    //     const allowanceTotal = allowances.reduce(
-    //       (allowanceSum: number, allowance: any, index: number) => {
-    //         const details = form.getValues(
-    //           `destinations.${destinationIndex}.allowances.${index}.detail`,
-    //         );
+        const allowanceTotal = allowances.reduce(
+          (allowanceSum: number, allowance: any, index: number) => {
+            const details = form.getValues(
+              `destinations.${destinationIndex}.allowances.${index}.detail`,
+            );
 
-    //         const itemTotal = calculateTotal(allowance, details);
-    //         return allowanceSum + itemTotal;
-    //       },
-    //       0,
-    //     );
+            const itemTotal = calculateTotal(allowance, details);
+            return allowanceSum + itemTotal;
+          },
+          0,
+        );
 
-    //     return destinationSum + allowanceTotal;
-    //   },
-    //   0,
-    // );
+        return destinationSum + allowanceTotal;
+      },
+      0,
+    );
 
     setGrandTotal(newTotal);
-    setTotalAllowance(newTotal);
+    setTotalAllowance(totalAll);
   }, [allowanceField, form.watch()]); // Menggunakan form.watch() agar memantau perubahan input
   // Fungsi untuk menghitung total per allowance
   const calculateTotal = (allowance: any, details: any) => {

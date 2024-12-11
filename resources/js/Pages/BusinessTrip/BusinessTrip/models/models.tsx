@@ -7,14 +7,6 @@ export const columns: GridColDef[] = [
     headerName: 'Request No.',
     width: 200,
     filterable: true,
-    renderCell: (params) => (
-      <span
-        onClick={() => handlePrintDetail(params.row.id)}
-        style={{ color: '#1976d2', cursor: 'pointer', textDecoration: 'underline' }}
-      >
-        {params.value}
-      </span>
-    ),
   },
   { field: 'purpose_type', headerName: 'Purpose Type', width: 200, filterable: true },
   { field: 'total_destination', headerName: 'Total Destinations', width: 200, filterable: true },

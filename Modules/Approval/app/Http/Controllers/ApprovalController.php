@@ -196,19 +196,19 @@ class ApprovalController extends Controller
             if ($ceksedSap->count() == 0 && $request->status == 'Approved') {
 
                 if ($request->type == 'procurement') {
-                    Purchase::where('id', $request->id)->update(['status_id' => 4]);
+                    Purchase::where('id', $request->id)->update(['status_id' => 5]);
                 }
 
                 if ($request->type == 'reim') {
-                    ReimburseGroup::where('id', $request->id)->update(['status_id' => 4]);
+                    ReimburseGroup::where('id', $request->id)->update(['status_id' => 5]);
                 }
 
                 if ($request->type == 'trip') {
-                    BusinessTrip::where('id', $request->id)->update(['status_id' => 4]);
+                    BusinessTrip::where('id', $request->id)->update(['status_id' => 5]);
                 }
 
                 if ($request->type == 'trip_declaration') {
-                    BusinessTrip::where('id', $request->id)->update(['status_id' => 4]);
+                    BusinessTrip::where('id', $request->id)->update(['status_id' => 5]);
                 }
 
                 $this->logToDatabase(

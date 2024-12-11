@@ -635,6 +635,12 @@ class BusinessTripController extends Controller
         $data['cost_center'] = $findData->costCenter?->cost_center;
         $data['start_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'asc')->first()?->date));
         $data['end_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'desc')->first()?->date));
+        $data['status'] = [
+            'id' => $findData->status_id,
+            'name' => $findData->status->name,
+            'color' => $findData->status->color,
+            'code' => $findData->status->code
+        ];
         $attachments = $findData->attachment->map(function ($attachment) {
             return [
                 'url' => asset('storage/' . $attachment->file_path . '/' . $attachment->file_name),
