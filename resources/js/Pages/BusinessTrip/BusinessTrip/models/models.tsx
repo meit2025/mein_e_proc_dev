@@ -7,17 +7,11 @@ export const columns: GridColDef[] = [
     headerName: 'Request No.',
     width: 200,
     filterable: true,
-    renderCell: (params) => (
-      <span
-        onClick={() => handlePrintDetail(params.row.id)}
-        style={{ color: '#1976d2', cursor: 'pointer', textDecoration: 'underline' }}
-      >
-        {params.value}
-      </span>
-    ),
   },
+  { field: 'request_for', headerName: 'Request For', width: 200, filterable: true },
   { field: 'purpose_type', headerName: 'Purpose Type', width: 200, filterable: true },
-  { field: 'total_destination', headerName: 'Total Destinations', width: 200, filterable: true },
+  { field: 'remarks', headerName: 'Remarks', width: 200, filterable: true },
+  { field: 'created_at', headerName: 'Request Date', width: 200, filterable: true },
   {
     field: 'status',
     headerName: 'Status',
@@ -33,6 +27,7 @@ export const columns: GridColDef[] = [
       );
     },
   },
+  { field: 'total_destination', headerName: 'Total Destinations', width: 200, filterable: true },
 ];
 
 // Fungsi untuk menangani aksi cetak detail

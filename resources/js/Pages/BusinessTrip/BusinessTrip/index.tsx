@@ -102,7 +102,6 @@ export const Index = ({
         }}
         onCreate={openFormHandler}
         columns={columns}
-        actionType='dropdown'
         onEdit={(value) => {
           setBusinessTripForm({
             type: BusinessTripType.edit,
