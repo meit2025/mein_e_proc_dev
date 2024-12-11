@@ -409,6 +409,10 @@ class BusinessTripController extends Controller
                 'total_destination' => $request->total_destination,
                 'created_by' => auth()->user()->id,
                 'type' => 'request',
+                'cash_advance' => $request->cash_advance == "true" ? 1 : 0,
+                'reference_number' => $request->cash_advance == "true" ? $request->reference_number : null,
+                'total_percent' => $request->cash_advance == "true" ? $request->total_percent : null,
+                'total_cash_advance' => $request->cash_advance == "true" ? $request->total_cash_advance : null,
             ]);
 
             if ($request->attachment != null) {
@@ -441,10 +445,6 @@ class BusinessTripController extends Controller
                     'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
                     'pajak_id' => $data_destination['pajak_id'],
                     'purchasing_group_id' => $data_destination['purchasing_group_id'],
-                    'cash_advance' => $data_destination['cash_advance'] == "true" ? 1 : 0,
-                    'reference_number' => $data_destination['cash_advance'] == "true" ? $data_destination['reference_number'] : null,
-                    'total_percent' => $data_destination['cash_advance'] == "true" ? $data_destination['total_percent'] : null,
-                    'total_cash_advance' => $data_destination['cash_advance'] == "true" ? $data_destination['total_cash_advance'] : null,
                 ]);
                 foreach ($data_destination['detail_attedances'] as $key => $destination) {
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
