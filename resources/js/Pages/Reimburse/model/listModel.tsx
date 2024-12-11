@@ -1,12 +1,34 @@
 import { CustomStatus } from '@/components/commons/CustomStatus';
-import { FamilyModel } from '@/Pages/Master/Family/models/models';
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
+import { GridColDef } from '@mui/x-data-grid';
 
 export const columns: GridColDef[] = [
   { field: 'id', headerName: 'Request Number', width: 200, filterable: true },
-  { field: 'code', headerName: 'Request Number', width: 200, filterable: true },
+  {
+    field: 'code',
+    headerName: 'Request Number',
+    width: 200,
+    filterable: true,
+    renderCell: (params) => (
+      <span
+        onClick={() => handlePrintDetail(params.row.id)}
+        style={{ color: '#1976d2', cursor: 'pointer', textDecoration: 'underline' }}
+      >
+        {params.value}
+      </span>
+    ),
+  },
   { field: 'request_for', headerName: 'Reimburse for', width: 200, filterable: true },
   { field: 'remark', headerName: 'Remark', width: 200, filterable: true },
-  { field: 'balance', headerName: 'Total Balance', width: 200, filterable: true },
+  {
+    field: 'balance',
+    headerName: 'Total Balance',
+    width: 200,
+    filterable: true,
+    renderCell: (params: any) => {
+      return formatRupiah(params.row.balance);
+    },
+  },
   { field: 'form', headerName: 'Reimburse Form', width: 200, filterable: true },
   {
     field: 'status',
@@ -23,7 +45,23 @@ export const columns: GridColDef[] = [
       );
     },
   },
+  {
+    field: 'createdDate',
+    headerName: 'Created Date',
+    width: 200,
+    filterable: true,
+    renderCell: (params: any) => {
+      const date = new Date(params.row.createdDate);
+      const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+      return formattedDate;
+    },
+  }
 ];
+
+const handlePrintDetail = (id: string) => {
+  const printUrl = `/reimburse/print/${id}`;
+  window.open(printUrl, '_blank');
+};
 
 export interface Quota {
   id: string;
