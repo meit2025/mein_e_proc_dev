@@ -509,7 +509,7 @@ class BusinessTripController extends Controller
             $query = $query->whereIn('id', $data);
         }
 
-        $data = $query->where('type', 'request')->latest()->paginate($perPage);
+        $data = $query->where('type', 'request')->latest()->search(request(['search']))->paginate($perPage);
 
         $data->getCollection()->transform(function ($map) {
 
@@ -519,6 +519,8 @@ class BusinessTripController extends Controller
                 'id' => $map->id,
                 'status_id' => $map->status_id,
                 'request_no' => $map->request_no,
+                'remarks' => $map->remarks,
+                'request_for' => $map->requestFor->name,
                 'status' => [
                     'name' => $map->status->name,
                     'classname' => $map->status->classname,
@@ -526,6 +528,7 @@ class BusinessTripController extends Controller
                 ],
                 'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array
                 'total_destination' => $map->total_destination, // You can join multiple relations here if it's an array
+                'created_at' => date('d/m/Y', strtotime($map->created_at)),
             ];
         });
 
@@ -642,6 +645,12 @@ class BusinessTripController extends Controller
         $data['cost_center'] = $findData->costCenter?->cost_center;
         $data['start_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'asc')->first()?->date));
         $data['end_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'desc')->first()?->date));
+        $data['status'] = [
+            'id' => $findData->status_id,
+            'name' => $findData->status->name,
+            'color' => $findData->status->color,
+            'code' => $findData->status->code
+        ];
         $attachments = $findData->attachment->map(function ($attachment) {
             return [
                 'url' => asset('storage/' . $attachment->file_path . '/' . $attachment->file_name),
