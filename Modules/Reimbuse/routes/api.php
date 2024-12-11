@@ -15,10 +15,5 @@ use Modules\Reimbuse\Http\Controllers\ReimbuseController;
 */
 
 // Route::group(['middleware' => 'auth'], function () {
-Route::group(['prefix' => 'reimburse'], function () {
-    Route::get('/', [ReimbuseController::class, 'list'])->name('api.reimburse.list');
-    Route::PUT('/update/{id}', [ReimbuseController::class, 'update'])->name('api.reimburse.update');
-    Route::POST('/store', [ReimbuseController::class, 'store'])->name('api.reimburse.store');
-    Route::DELETE('/destory/{id}', [ReimbuseController::class, 'destroy'])->name('api.reimburse.destroy');
-});
+
 // });

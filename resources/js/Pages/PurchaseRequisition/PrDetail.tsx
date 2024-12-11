@@ -15,6 +15,7 @@ import { Auth } from '../Layouts/Header';
 import { Box, Modal } from '@mui/material';
 import FormTextArea from '@/components/Input/formTextArea';
 import DetailApproval from '@/components/approval/detailApproval';
+import moment from 'moment';
 
 const style = {
   position: 'absolute',
@@ -71,6 +72,15 @@ const PrDetail = ({ id }: { id: number }) => {
           setIsApproval(true);
         }
 
+        const approvalFromStatusRoute = (data.data?.approval ?? []).map((route: any) => {
+          return {
+            status: route.status,
+            name: route.user.name,
+            dateApproved: moment(route.updated_at).format('YYYY-MM-DD'),
+          };
+        });
+
+        methods.setValue('approvalFromStatusRoute', approvalFromStatusRoute);
         methods.setValue('approvalRequest', approvalRequest);
         methods.setValue('approvalFrom', approvalFrom);
         methods.setValue('approvalId', firstFalseStatus?.id);

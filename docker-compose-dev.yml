@@ -53,7 +53,7 @@ services:
     build:
       context: .
       dockerfile: dockerfile.dev
-    command: ['php', 'artisan', 'queue:work']
+    command: ['php', 'artisan', 'queue:work', '--sleep=3', '--tries=3']
     container_name: laravel-cron
     restart: unless-stopped
     working_dir: /var/www/html/mein

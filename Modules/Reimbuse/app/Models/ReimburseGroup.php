@@ -22,6 +22,7 @@ class ReimburseGroup extends Model
         "remark",
         "requester",
         "cost_center",
+        "status_id"
     ];
 
     public function reimburses()

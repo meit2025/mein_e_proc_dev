@@ -12,5 +12,4 @@ export const GET_LIST_PERIOD_MASTER_REIMBURSE = `${ROUTE_REIMBURSE}/get-period-r
 export const GET_LIST_EMPLOYEE_REIMBURSE = `${ROUTE_REIMBURSE}/get-employee-reimburse/`;
 export const GET_LIST_FAMILY_REIMBURSE = `${ROUTE_REIMBURSE}/get-family-reimburse/`;
 
-
 // get - list - master - reimburse - type;

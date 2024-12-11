@@ -61,12 +61,19 @@ class CheckApproval
             $purchasingGroup = PurchasingGroup::where('purchasing_group', $request->purchasing_group_id ?? $request->purchasing_groups)->first();
 
             // Define the conditions
+            $total = (int)$request->value ?? (int)$request->total_all_amount;
             $conditions = [
-                fn($query) => $query->where('condition_type', '=', '>')->where('value', '<', $request->value ?? $request->total_all_amount),
-                fn($query) => $query->where('condition_type', '=', '>=')->where('value', '<=', $request->value ?? $request->total_all_amount),
-                fn($query) => $query->where('condition_type', '=', '<')->where('value', '>', $request->value ?? $request->total_all_amount),
-                fn($query) => $query->where('condition_type', '=', '<=')->where('value', '>=', $request->value ?? $request->total_all_amount),
-                fn($query) => $query->where('condition_type', '=', 'range')->where('min_value', '<=', $request->value ?? $request->total_all_amount)->where('max_value', '>=', $request->value ?? $request->total_all_amount),
+                fn($query) => $query->where('condition_type', '=', '>')
+                    ->whereRaw("CAST(REGEXP_REPLACE(value, '[^\d]', '', 'g') AS INTEGER) < ?", [$total]),
+                fn($query) => $query->where('condition_type', '=', '>=')
+                    ->whereRaw("CAST(REGEXP_REPLACE(value, '[^\d]', '', 'g') AS INTEGER) <= ?", [$total]),
+                fn($query) => $query->where('condition_type', '=', '<')
+                    ->whereRaw("CAST(REGEXP_REPLACE(value, '[^\d]', '', 'g') AS INTEGER) <= ?", [$total]),
+                fn($query) => $query->where('condition_type', '=', '<=')
+                    ->whereRaw("CAST(REGEXP_REPLACE(value, '[^\d]', '', 'g') AS INTEGER) >= ?", [$total]),
+                fn($query) => $query->where('condition_type', '=', 'range')
+                    ->whereRaw("CAST(REGEXP_REPLACE(min_value, '[^\d]', '', 'g') AS INTEGER) <= ?", [$total])
+                    ->whereRaw("CAST(REGEXP_REPLACE(max_value, '[^\d]', '', 'g') AS INTEGER) >= ?", [$total]),
                 fn($query) => $query->whereNull('condition_type'),
             ];
 
@@ -75,8 +82,13 @@ class CheckApproval
             switch ($request->metode_approval) {
                 case 'approval':
                 case '':
+                    // dd($documentType->id, $purchasingGroup->id, $user->division_id);
                     $query = $this->getApprovalQuery($documentType->id, $purchasingGroup->id, $user->division_id);
+                    // $result = $query->where('condition_type', '=', '<=')
+                    //     ->whereRaw("CAST(REGEXP_REPLACE(value, '[^\d]', '', 'g') AS INTEGER) >= ?", [$total])->first();
                     $result = $this->applyConditions($query, $conditions, $request->value);
+
+
                     break;
 
                 case 'chooses_approval':
@@ -129,9 +141,9 @@ class CheckApproval
             if (isset($request->user_id)) {
                 $getUserId = User::where('id', $request->user_id)->first();
             } else if (isset($request->requester)) {
-                $getUserId = User::where('nip', $request->requester)->first();
+                $getUserId = User::where('nip', $request->requester)->orwhere('username', $request->requester)->first();
             }
-            
+
             if (!$getUserId) {
                 throw new Exception('Username not found');
             }

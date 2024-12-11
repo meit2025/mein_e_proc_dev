@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Jobs\SapJobs;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
+use Modules\Approval\Models\Approval;
 use Modules\BusinessTrip\Models\AllowanceItem;
 use Modules\BusinessTrip\Models\BusinessTrip;
 use Modules\BusinessTrip\Models\BusinessTripAttachment;
@@ -329,6 +331,11 @@ class BusinessTripDeclarationController extends Controller
         $sortDirection = $request->get('sort_direction', 'asc');
 
         // $query->orderBy($sortBy, $sortDirection);
+        if ($request->approval == "1") {
+            $data = Approval::where('user_id', Auth::user()->id)
+                ->where('document_name', 'TRIP_DECLARATION')->pluck('document_id')->toArray();
+            $query = $query->whereIn('id', $data);
+        }
 
         $data = $query->where('type', 'declaration')->latest()->paginate($perPage);
 
@@ -476,6 +483,7 @@ class BusinessTripDeclarationController extends Controller
             $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP_DECLARATION');
             DB::commit();
         } catch (\Exception $e) {
+            dd($e);
             DB::rollBack();
         }
     }

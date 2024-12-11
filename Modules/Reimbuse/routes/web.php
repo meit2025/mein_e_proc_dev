@@ -29,13 +29,17 @@ Route::group(['prefix' => 'reimburse'], function () {
     Route::inertia('/detail/{id}',  'Reimburse/Detail', [
         'id' => fn() => request()->route('id'),
     ]);
-
-
+    Route::get('/print/{id}', [ReimbuseController::class, 'print'])->name('reimburse.print');
     Route::get('/data-limit-and-balance', [ReimbuseController::class, 'getDataLimitAndBalance'])->name('reimburse.data-limit-balance');
 });
 
 
 Route::group(['prefix' => 'api/reimburse'], function () {
+    Route::get('/', [ReimbuseController::class, 'list'])->name('api.reimburse.list');
+    Route::PUT('/update/{id}', [ReimbuseController::class, 'update'])->name('api.reimburse.update');
+    Route::POST('/store', [ReimbuseController::class, 'store'])->name('api.reimburse.store');
+    Route::DELETE('/destory/{id}', [ReimbuseController::class, 'destroy'])->name('api.reimburse.destroy');
+
     Route::get('/detail/{id}', [ReimbuseController::class, 'detailAPI'])->name('reimburse.detail');
     Route::get('/get-list-master-reimburse-type', [ReimbuseController::class, 'getListMasterReimburseTypeAPI'])->name('reimburse.get-list-master-reimburse-type');
     Route::get('/get-period-reimburse', [ReimbuseController::class, 'getPeriodAPI'])->name('reimburse.get-reimburse-period');

@@ -15,7 +15,7 @@ const DetailApproval = ({ methods }: { methods: ReturnType<typeof useForm> }) =>
           acknowledgeFrom: methods.getValues('acknowledgeFrom') ?? [],
         }}
         workflowApprovalStep={
-          methods.getValues('approvalFrom') as unknown as WorkflowApprovalStepInterface
+          methods.getValues('approvalFromStatusRoute') as unknown as WorkflowApprovalStepInterface
         }
         workflowApprovalDiagram={
           methods.getValues('approvalFrom') as unknown as WorkflowApprovalDiagramInterface

@@ -11,7 +11,9 @@ use Modules\Approval\Models\Approval;
 use Modules\Approval\Models\ApprovalRoute;
 use Modules\Approval\Models\ApprovalRouteUsers;
 use Modules\Approval\Services\CheckApproval;
+use Modules\BusinessTrip\Models\BusinessTrip;
 use Modules\PurchaseRequisition\Models\Purchase;
+use Modules\Reimbuse\Models\ReimburseGroup;
 
 class ApprovalController extends Controller
 {
@@ -175,10 +177,40 @@ class ApprovalController extends Controller
 
             $ceksedSap = Approval::where('is_status', false)->where('document_id', $request->id)->get();
             if ($request->status == 'Rejected') {
-                Purchase::where('id', $request->id)->update(['status_id' => 4]);
+                if ($request->type == 'procurement') {
+                    Purchase::where('id', $request->id)->update(['status_id' => 2]);
+                }
+
+                if ($request->type == 'reim') {
+                    ReimburseGroup::where('id', $request->id)->update(['status_id' => 2]);
+                }
+
+                if ($request->type == 'trip') {
+                    BusinessTrip::where('id', $request->id)->update(['status_id' => 2]);
+                }
+
+                if ($request->type == 'trip_declaration') {
+                    BusinessTrip::where('id', $request->id)->update(['status_id' => 2]);
+                }
             }
             if ($ceksedSap->count() == 0 && $request->status == 'Approved') {
-                Purchase::where('id', $request->id)->update(['status_id' => 5]);
+                
+                if ($request->type == 'procurement') {
+                    Purchase::where('id', $request->id)->update(['status_id' => 5]);
+                }
+                
+                if ($request->type == 'reim') {
+                    ReimburseGroup::where('id', $request->id)->update(['status_id' => 5]);
+                }
+
+                if ($request->type == 'trip') {
+                    BusinessTrip::where('id', $request->id)->update(['status_id' => 5]);
+                }
+
+                if ($request->type == 'trip_declaration') {
+                    BusinessTrip::where('id', $request->id)->update(['status_id' => 5]);
+                }
+
                 $this->logToDatabase(
                     $request->id,
                     $request->function_name,
@@ -192,7 +224,7 @@ class ApprovalController extends Controller
                         $dokumnetType = 'PR';
                         break;
                     case 'reim':
-                        $dokumnetType = 'reim';
+                        $dokumnetType = 'REIM';
                         break;
                     case 'trip':
                         $dokumnetType = 'BT';
@@ -204,7 +236,7 @@ class ApprovalController extends Controller
 
                 SapJobs::dispatch($request->id, $dokumnetType);
             }
-
+            
             return $this->successResponse($request->all());
             //code...
         } catch (\Throwable $th) {

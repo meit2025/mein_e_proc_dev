@@ -38,7 +38,7 @@ const Update = ({ id }: { id: number }) => {
       try {
         const response = await axiosInstance.get(DETAIL_PR(props.id));
         const data = response.data;
-        methods.reset(data);
+        methods.reset(data.data.data);
       } catch (error) {
         setIsLoading(false);
         console.log(error);

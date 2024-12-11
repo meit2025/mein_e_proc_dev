@@ -1,6 +1,9 @@
 import React from 'react';
 
 import { CircleUserRound } from 'lucide-react';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 export function WorkflowBorder({
   children,
   title = 'title',
@@ -56,24 +59,64 @@ export function WorkflowApproval({
 }
 
 export interface WorkflowApprovalStepInterface {
-  workflowApprovalStep: string[];
+  workflowApprovalDiagram?: WorkflowApprovalStepInterfaceStatus[];
+}
+
+export interface WorkflowApprovalStepInterfaceStatus {
+  status: string;
+  name: string;
+  dateApproved: string;
 }
 
 export function WorkflowApprovalStep({
-  workflowApprovalStep = ['Debby', 'Bagus'],
+  workflowApprovalDiagram = [
+    {
+      status: 'Approved',
+      name: 'dono',
+      dateApproved: '2022-01-01',
+    },
+    {
+      status: 'Approved',
+      name: 'kasino',
+      dateApproved: '2022-01-01',
+    },
+    {
+      status: 'Approved',
+      name: 'indro',
+      dateApproved: '2022-01-01',
+    },
+  ],
 }: WorkflowApprovalStepInterface) {
   return (
     <div>
       <WorkflowBorder title='Workflow Approval Step'>
         <table className='w-full text-xs'>
-          {workflowApprovalStep.map((item: string, index: number) => {
-            return (
-              <tr key={index}>
-                <td width='300'>Step {index + 1}</td>
-                <td>{item}</td>
-              </tr>
-            );
-          })}
+          <tr>
+            <td width='300'>Step</td>
+            <td>Name</td>
+            <td>Status</td>
+            <td>Date Approved</td>
+          </tr>
+          {workflowApprovalDiagram.map(
+            (item: WorkflowApprovalStepInterfaceStatus, index: number) => {
+              return (
+                <tr key={index}>
+                  <td width='300'>Step {index + 1}</td>
+                  <td>{item.name}</td>
+                  <td>
+                    {item.status === 'Approved' && <CheckCircleIcon style={{ color: 'green' }} />}
+                    {item.status === 'Rejected' && <CancelIcon style={{ color: 'red' }} />}
+                    {item.status === 'Waiting' && <RemoveCircleIcon style={{ color: 'orange' }} />}
+                  </td>
+                  <td>
+                    {' '}
+                    {(item.status === 'Approved' || item.status === 'Rejected') &&
+                      item.dateApproved}
+                  </td>
+                </tr>
+              );
+            },
+          )}
         </table>
       </WorkflowBorder>
     </div>
@@ -90,7 +133,7 @@ export function WorkflowApprovalDiagram({
   return (
     <div>
       <WorkflowBorder title='Workflow Approval Diagram'>
-        <div className='flex items-center '>
+        <div className='flex items-center flex-wrap gap-3'>
           <div className='mr-2'>
             <CircleUserRound />
           </div>
@@ -112,8 +155,8 @@ export function WorkflowApprovalDiagram({
 
 export function WorkflowComponent({
   workflowApproval,
-  workflowApprovalStep = ['debi', 'hai'],
-  workflowApprovalDiagram = ['debi'],
+  workflowApprovalStep,
+  workflowApprovalDiagram,
 }: {
   workflowApproval: WorkflowApprovalInterface;
   workflowApprovalStep: WorkflowApprovalStepInterface;
@@ -122,9 +165,7 @@ export function WorkflowComponent({
   return (
     <div className='flex flex-col rounded-xl space-y-6 border border-gray-200 p-4'>
       <WorkflowApproval workflowApproval={workflowApproval} />
-
-      <WorkflowApprovalStep workflowApprovalStep={workflowApprovalStep} />
-
+      <WorkflowApprovalStep workflowApprovalDiagram={workflowApprovalStep} />
       <WorkflowApprovalDiagram workflowApprovalDiagram={workflowApprovalDiagram} />
     </div>
   );

@@ -106,7 +106,6 @@ export const Index = ({
         role={roleConfig}
         onCreate={openFormHandler}
         columns={columns}
-        actionType='dropdown'
         onEdit={(value) => {
           setFormType({
             type: FormType.edit,
@@ -120,8 +119,6 @@ export const Index = ({
         }}
         labelFilter='search'
       />
-
-      <WorkflowComponent />
     </>
   );
 };
