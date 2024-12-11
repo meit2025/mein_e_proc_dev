@@ -2,6 +2,7 @@ import axiosInstance from '@/axiosInstance';
 import { DETAIL_REIMBURSE } from '@/endpoint/reimburse/api';
 import * as React from 'react';
 import { Group, Reimburse } from '../model/listModel';
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 import '../css/reimburse_detail.scss';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
@@ -23,7 +24,7 @@ const ReimburseDetail = () => {
         setIsLoading(true);
         // Pastikan endpoint API mengembalikan data relasi `posts`
         const response = await axiosInstance.get(DETAIL_REIMBURSE(id));
-        console.log(response.data.data);
+        
         setData(response.data.data.group);
         setReimburse(response.data.data.forms);
       } catch (err) {
@@ -165,7 +166,7 @@ const ReimburseDetail = () => {
                     <td>
                       <strong>Reimburse Cost</strong>
                     </td>
-                    <td>{reimburse?.balance}</td>
+                    <td>{formatRupiah(reimburse?.balance || 0)}</td>
                   </tr>
                   <tr>
                     <td>

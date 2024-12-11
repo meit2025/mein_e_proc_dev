@@ -78,6 +78,7 @@ const LayoutApproval = ({
         methods.setValue('approvalFrom', approvalFrom);
         methods.setValue('approvalId', firstFalseStatus?.id);
         methods.setValue('function_name', type.toLowerCase());
+        methods.setValue('type', type.toLowerCase());
         methods.setValue('id', id);
       } catch (error) {
         setIsLoading(false);
