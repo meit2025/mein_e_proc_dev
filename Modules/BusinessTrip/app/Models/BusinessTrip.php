@@ -33,7 +33,11 @@ class BusinessTrip extends Model
         'parent_id',
         'cost_center_id',
         'uom_id',
-        'status_id'
+        'status_id',
+        'cash_advance',
+        'total_percent',
+        'total_cash_advance',
+        'reference_number',
     ];
 
 
@@ -94,5 +98,23 @@ class BusinessTrip extends Model
     function status()
     {
         return $this->belongsTo(MasterStatus::class, 'status_id', 'id');
+    }
+
+    function scopeSearch($query, array $filters) {
+        $query->when($filters['search'] ?? false, function ($query, $search) {
+            $query
+            ->where('request_no', 'ILIKE', '%' . $search . '%')
+            ->orWhere('remarks', 'ILIKE', '%' . $search . '%')
+            ->orWhere('created_at', 'ILIKE', '%' . $search . '%')
+            ->orWhereHas('status', function ($query) use ($search) {
+                $query->where('name', 'ILIKE', '%' . $search . '%');
+            })
+            ->orWhereHas('purposeType', function ($query) use ($search) {
+                $query->where('name', 'ILIKE', '%' . $search . '%');
+            })
+            ->orWhereHas('requestFor', function ($query) use ($search) {
+                $query->where('name', 'ILIKE', '%' . $search . '%');
+            });
+        });
     }
 }

@@ -409,6 +409,10 @@ class BusinessTripController extends Controller
                 'total_destination' => $request->total_destination,
                 'created_by' => auth()->user()->id,
                 'type' => 'request',
+                'cash_advance' => $request->cash_advance == "true" ? 1 : 0,
+                'reference_number' => $request->cash_advance == "true" ? $request->reference_number : null,
+                'total_percent' => $request->cash_advance == "true" ? $request->total_percent : null,
+                'total_cash_advance' => $request->cash_advance == "true" ? $request->total_cash_advance : null,
             ]);
 
             if ($request->attachment != null) {
@@ -441,10 +445,6 @@ class BusinessTripController extends Controller
                     'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
                     'pajak_id' => $data_destination['pajak_id'],
                     'purchasing_group_id' => $data_destination['purchasing_group_id'],
-                    'cash_advance' => $data_destination['cash_advance'] == "true" ? 1 : 0,
-                    'reference_number' => $data_destination['cash_advance'] == "true" ? $data_destination['reference_number'] : null,
-                    'total_percent' => $data_destination['cash_advance'] == "true" ? $data_destination['total_percent'] : null,
-                    'total_cash_advance' => $data_destination['cash_advance'] == "true" ? $data_destination['total_cash_advance'] : null,
                 ]);
                 foreach ($data_destination['detail_attedances'] as $key => $destination) {
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
@@ -509,7 +509,7 @@ class BusinessTripController extends Controller
             $query = $query->whereIn('id', $data);
         }
 
-        $data = $query->where('type', 'request')->latest()->paginate($perPage);
+        $data = $query->where('type', 'request')->latest()->search(request(['search']))->paginate($perPage);
 
         $data->getCollection()->transform(function ($map) {
 
@@ -519,6 +519,8 @@ class BusinessTripController extends Controller
                 'id' => $map->id,
                 'status_id' => $map->status_id,
                 'request_no' => $map->request_no,
+                'remarks' => $map->remarks,
+                'request_for' => $map->requestFor->name,
                 'status' => [
                     'name' => $map->status->name,
                     'classname' => $map->status->classname,
@@ -526,6 +528,7 @@ class BusinessTripController extends Controller
                 ],
                 'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array
                 'total_destination' => $map->total_destination, // You can join multiple relations here if it's an array
+                'created_at' => date('d/m/Y', strtotime($map->created_at)),
             ];
         });
 
@@ -642,6 +645,12 @@ class BusinessTripController extends Controller
         $data['cost_center'] = $findData->costCenter?->cost_center;
         $data['start_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'asc')->first()?->date));
         $data['end_date'] = date('d-m-Y', strtotime($findData->detailAttendance()->orderBy('date', 'desc')->first()?->date));
+        $data['status'] = [
+            'id' => $findData->status_id,
+            'name' => $findData->status->name,
+            'color' => $findData->status->color,
+            'code' => $findData->status->code
+        ];
         $attachments = $findData->attachment->map(function ($attachment) {
             return [
                 'url' => asset('storage/' . $attachment->file_path . '/' . $attachment->file_name),

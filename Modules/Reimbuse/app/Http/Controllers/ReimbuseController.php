@@ -140,7 +140,13 @@ class ReimbuseController extends Controller
     {
         try {
             $query =  ReimburseGroup::query()->with(['reimburses', 'status']);
-            if (Auth::user()->is_admin == '0') $data = $query->where('requester', Auth::user()->nip);
+            if ($request->approval == 1) {
+                $approval = Approval::where('user_id', Auth::user()->id)
+                    ->where(['document_name' => 'REIM', 'status' => 'Waiting'])->pluck('document_id')->toArray();
+                $query = $query->whereIn('id', $approval);
+            } else {
+                if (Auth::user()->is_admin == '0') $data = $query->where('requester', Auth::user()->nip);
+            }
             $perPage = $request->get('per_page', 10);
             $sortBy = $request->get('sort_by', 'id');
             $sortDirection = $request->get('sort_direction', 'asc');
@@ -165,6 +171,8 @@ class ReimbuseController extends Controller
                         'code' =>
                         $map->status->code
                     ],
+                    'createdDate' => $map->created_at,
+                    
                 ];
             });
             return $this->successResponse($data);
@@ -192,7 +200,7 @@ class ReimbuseController extends Controller
 
             $categories = ['Employee', 'Family'];
             $purchasing_groups = PurchasingGroup::select('id', 'purchasing_group', 'purchasing_group_desc')->get();
-            $currencies = Currency::select('code', 'name')->get();
+            $currencies = Currency::select('code', 'name')->where('code', 'IDR')->get();
             $periods = MasterPeriodReimburse::select('id', 'code', 'start', 'end')->get();
             $cost_center = MasterCostCenter::select('id', 'cost_center')->get();
             $taxes = Pajak::select('id', 'mwszkz')->get();
@@ -347,6 +355,31 @@ class ReimbuseController extends Controller
             'forms' => $reimburseForms,
             'approval' => $approval,
         ]);
+    }
+
+    function print($id)
+    {
+        $reimburseGroup = ReimburseGroup::where('id', $id)
+            ->with(['user', 'costCenter'])
+            ->first();
+
+        $reimburseForms = Reimburse::where('group', $reimburseGroup->code)->with([
+            'uomModel',
+            'purchasingGroupModel',
+            'taxOnSalesModel',
+            'reimburseType',
+            'periodeDate'
+        ])->get();
+
+        $approval = Approval::with('user.divisions')->where('document_id', $id)->where('document_name', 'REIM')->orderBy('id', 'ASC')->get();
+
+        $data = [
+            'group'     => $reimburseGroup,
+            'forms'     => $reimburseForms,
+            'approval'  => $approval
+        ];
+
+        return view('print-reimburse', compact('data'));
     }
 
 

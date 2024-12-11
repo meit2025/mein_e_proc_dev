@@ -194,21 +194,21 @@ class ApprovalController extends Controller
                 }
             }
             if ($ceksedSap->count() == 0 && $request->status == 'Approved') {
-
+                
                 if ($request->type == 'procurement') {
-                    Purchase::where('id', $request->id)->update(['status_id' => 4]);
+                    Purchase::where('id', $request->id)->update(['status_id' => 5]);
                 }
-
+                
                 if ($request->type == 'reim') {
-                    ReimburseGroup::where('id', $request->id)->update(['status_id' => 4]);
+                    ReimburseGroup::where('id', $request->id)->update(['status_id' => 5]);
                 }
 
                 if ($request->type == 'trip') {
-                    BusinessTrip::where('id', $request->id)->update(['status_id' => 4]);
+                    BusinessTrip::where('id', $request->id)->update(['status_id' => 5]);
                 }
 
                 if ($request->type == 'trip_declaration') {
-                    BusinessTrip::where('id', $request->id)->update(['status_id' => 4]);
+                    BusinessTrip::where('id', $request->id)->update(['status_id' => 5]);
                 }
 
                 $this->logToDatabase(
@@ -224,7 +224,7 @@ class ApprovalController extends Controller
                         $dokumnetType = 'PR';
                         break;
                     case 'reim':
-                        $dokumnetType = 'reim';
+                        $dokumnetType = 'REIM';
                         break;
                     case 'trip':
                         $dokumnetType = 'BT';
@@ -236,7 +236,7 @@ class ApprovalController extends Controller
 
                 SapJobs::dispatch($request->id, $dokumnetType);
             }
-
+            
             return $this->successResponse($request->all());
             //code...
         } catch (\Throwable $th) {
