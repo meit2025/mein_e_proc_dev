@@ -63,7 +63,7 @@ export function LoginForm() {
       // Menggunakan axios untuk mengirim permintaan POST
       const response = await axiosInstance.post('/login', values);
       showToast(response.data.message, 'success');
-      window.location.href = '/';
+      window.location.href = '/portal';
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.data?.message) {
         showToast(error.response.data.message, 'error');
