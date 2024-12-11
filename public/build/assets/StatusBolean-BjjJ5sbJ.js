@@ -1,1 +1,0 @@
-import{j as t}from"./app-B_GisuRo.js";const s=({status:e,name:a={active:"Active",InActive:"Inactive"}})=>t.jsx("span",{className:`badge badge-outline ${e?"badge-success":"badge-danger"}`,children:e?a.active:a.InActive});export{s as S};
