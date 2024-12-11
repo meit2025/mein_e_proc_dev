@@ -107,6 +107,9 @@ class BusinessTrip extends Model
             })
             ->orWhereHas('purposeType', function ($query) use ($search) {
                 $query->where('name', 'ILIKE', '%' . $search . '%');
+            })
+            ->orWhereHas('requestFor', function ($query) use ($search) {
+                $query->where('name', 'ILIKE', '%' . $search . '%');
             });
         });
     }
