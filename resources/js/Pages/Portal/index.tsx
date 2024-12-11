@@ -14,7 +14,7 @@ const App = () => {
                     <h2 className="text-xl font-bold text-center mb-5">Welcome to E-Portal</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 bg-white">
                         <div style={{ backgroundImage: "url('assets/media/images/2600x1200/bg-14.png')" }}
-                            className={` bg-cover bg-center bg-no-repeat bg-opacity-90  px-6 py-10 rounded-lg xl:min-h-96 xl:min-w-96 lg:min-h-48 lg:min-w-48 shadow-lg text-center bg-[#1B84FF] `}>
+                            className={` bg-cover bg-center bg-no-repeat bg-opacity-90  px-6 py-10 rounded-lg shadow-lg text-center bg-[#1B84FF] `}>
                             <div className="flex justify-center">
                                 <SVGLoader src="/assets/svg/polygon/polygon-1.svg" className='object-center' width="90" height="90" alt="Icon" />
                             </div>
@@ -22,10 +22,10 @@ const App = () => {
                             <p className="text-white mb-6">This is our central hub for accessing all your self service company resource and tools.</p>
                             <a href='/business-trip' className='btn bg-transparent border px-4 m-2 border-solid border-white text-white rounded-full'>Business Trip</a>
                             <a href='/reimburse' className='btn bg-transparent border px-4 m-2 border-solid border-white text-white rounded-full'>Reimbursement</a>
-                            <a href='#' className='btn bg-transparent border px-4 m-2 border-solid border-white text-white rounded-full'>Claim</a>
+                            <a href='/business-trip/business-trip-declaration' className='btn bg-transparent border px-4 m-2 border-solid border-white text-white rounded-full'>Claim</a>
                         </div>
                         <div style={{ backgroundImage: "url('assets/media/images/2600x1200/bg-14.png')" }}
-                            className={` bg-cover bg-center bg-no-repeat bg-opacity-90 px-6 py-10 rounded-lg xl:min-h-96 xl:min-w-96 lg:min-h-48 lg:min-w-48 shadow-lg text-center bg-green-500 `}>
+                            className={` bg-cover bg-center bg-no-repeat bg-opacity-90 px-6 py-10 rounded-lg shadow-lg text-center bg-green-500 `}>
                             <div className="flex justify-center">
                                 <SVGLoader src="/assets/svg/polygon/polygon-2.svg" className='object-center' width="90" height="90" alt="Icon" />
                             </div>
@@ -34,7 +34,7 @@ const App = () => {
                             <a href='/purchase-requisition' className='btn bg-transparent border px-4 m-2 border-solid border-white text-white rounded-full'>Purchase Request</a>
                         </div>
                         <div style={{ backgroundImage: "url('assets/media/images/2600x1200/bg-14.png')" }}
-                            className={` bg-cover bg-center bg-no-repeat bg-opacity-90 px-6 py-10 rounded-lg xl:min-h-96 xl:min-w-96 lg:min-h-48 lg:min-w-48 shadow-lg text-center bg-purple-500 `}>
+                            className={` bg-cover bg-center bg-no-repeat bg-opacity-90 px-6 py-10 rounded-lg shadow-lg text-center bg-purple-500 `}>
                             <div className="flex justify-center">
                                 <SVGLoader src="/assets/svg/polygon/polygon-3.svg" className='object-center' width="90" height="90" alt="Icon" />
                             </div>
@@ -45,7 +45,7 @@ const App = () => {
                             <a href='#' className='btn bg-transparent border px-4 m-2 border-solid border-white text-white rounded-full'>Project Management</a>
                         </div>
                         <div style={{ backgroundImage: "url('assets/media/images/2600x1200/bg-14.png')" }}
-                            className={` bg-cover bg-center bg-no-repeat bg-opacity-90 px-6 py-10 rounded-lg xl:min-h-96 xl:min-w-96 lg:min-h-48 lg:min-w-48 shadow-lg text-center bg-gray-900 `}>
+                            className={` bg-cover bg-center bg-no-repeat bg-opacity-90 px-6 py-10 rounded-lg shadow-lg text-center bg-gray-900 `}>
                             <div className="flex justify-center">
                                 <SVGLoader src="/assets/svg/polygon/polygon-4.svg" className='object-center' width="90" height="90" alt="Icon" />
                             </div>
@@ -54,7 +54,7 @@ const App = () => {
                             <a href='#' className='btn bg-transparent border px-4 m-2 border-solid border-white text-white rounded-full'>Contact Us</a>
                         </div>
                         <div style={{ backgroundImage: "url('assets/media/images/2600x1200/bg-14.png')" }}
-                            className={` bg-cover bg-center bg-no-repeat bg-opacity-90 px-6 py-10 rounded-lg xl:min-h-96 xl:min-w-96 lg:min-h-48 lg:min-w-48 shadow-lg text-center bg-gray-200 border-dashed border-2 border-gray-500 `}>
+                            className={` bg-cover bg-center bg-no-repeat bg-opacity-90 px-6 py-10 rounded-lg shadow-lg text-center bg-gray-200 border-dashed border-2 border-gray-500 `}>
                             <div className="flex justify-center">
                                 <SVGLoader src="/assets/svg/polygon/polygon-5.svg" className='object-center' width="90" height="90" alt="Icon" />
                             </div>
