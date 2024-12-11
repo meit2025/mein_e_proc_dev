@@ -192,7 +192,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end'>
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      {(onEdit || url.editUrl) && (
+                      {(onEdit || url.editUrl) && value === 0 && (
                         <>
                           {(!role || permissions.includes(role?.update ?? '')) && (
                             <DropdownMenuItem onClick={() => onEdit && onEdit(params.row.id)}>
@@ -208,7 +208,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                       <DropdownMenuSeparator />
                       {/* <DropdownMenuItem>View customer</DropdownMenuItem> */}
 
-                      {(url.deleteUrl || onDelete) && (
+                      {(url.deleteUrl || onDelete) && value === 0 && (
                         <>
                           {(!role || permissions.includes(role?.delete ?? '')) && (
                             <DropdownMenuItem
@@ -272,7 +272,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                       </>
                     )}
 
-                    {(onEdit || url.editUrl) && (
+                    {(onEdit || url.editUrl) && value === 0 && (
                       <>
                         {(!role || permissions.includes(role?.update ?? '')) && (
                           <Link

@@ -574,7 +574,7 @@ export const BussinessTripFormV1 = ({
   React.useEffect(() => {
     // console.log(form.getValues('destinations'), ' edit destination');
     if (type == BusinessTripType.edit) {
-      setIsCashAdvance(form.getValues(`cash_advance`) ?? false);
+      setIsCashAdvance(form.getValues(`cash_advance`) ?? false);    
     }
     const percentValue = parseFloat((totalPercent || '0').toString());
     // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number

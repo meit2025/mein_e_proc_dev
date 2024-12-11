@@ -8,8 +8,10 @@ export const columns: GridColDef[] = [
     width: 200,
     filterable: true,
   },
+  { field: 'request_for', headerName: 'Request For', width: 200, filterable: true },
   { field: 'purpose_type', headerName: 'Purpose Type', width: 200, filterable: true },
-  { field: 'total_destination', headerName: 'Total Destinations', width: 200, filterable: true },
+  { field: 'remarks', headerName: 'Remarks', width: 200, filterable: true },
+  { field: 'created_at', headerName: 'Request Date', width: 200, filterable: true },
   {
     field: 'status',
     headerName: 'Status',
@@ -25,6 +27,7 @@ export const columns: GridColDef[] = [
       );
     },
   },
+  { field: 'total_destination', headerName: 'Total Destinations', width: 200, filterable: true },
 ];
 
 // Fungsi untuk menangani aksi cetak detail

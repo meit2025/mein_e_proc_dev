@@ -294,29 +294,6 @@ const BusinessTripDetail = () => {
                     </tr>
                   </table>
                 </div>
-                {destination.cash_advance != 0 && (
-                  <div>
-                    <table className='cash-advance-table'>
-                      <tr>
-                        <td>
-                          <strong>Cash Advance</strong>
-                        </td>
-                        {/* <td>:</td>
-                            <td>Dp Number (status)</td> */}
-                      </tr>
-                      <tr>
-                        <td>Dp Percentage</td>
-                        <td>:</td>
-                        <td>{destination.total_percent}</td>
-                      </tr>
-                      <tr>
-                        <td>Dp Amount</td>
-                        <td>:</td>
-                        <td>{destination.total_cash_advance}</td>
-                      </tr>
-                    </table>
-                  </div>
-                )}
               </div>
             </TabsContent>
           ))}
