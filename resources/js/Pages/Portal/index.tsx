@@ -1,10 +1,16 @@
 import SVGLoader from '@/components/commons/SvgLoader';
 import React from 'react';
+import Header from '../Layouts/Header';
 
 const App = () => {
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
-            <div className="card rounded-3xl shadow-lg m-5">
+        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center relative">
+            <div className='antialiased flex h-full text-base text-gray-700 [--tw-page-bg:#fefefe] [--tw-page-bg-dark:var(--tw-coal-500)] demo1 header-fixed bg-[--tw-page-bg] dark:bg-[--tw-page-bg-dark]'>
+                <div className='flex grow'>
+                    <Header />
+                </div>
+            </div>
+            <div className="card rounded-3xl shadow-lg my-20">
                 <header style={{ backgroundImage: "url('assets/media/images/2600x1200/bg-14.png')" }} className="p-10 text-center mb-8 bg-cover bg-[right_top_-1rem] bg-no-repeat bg-opacity-60 bg-[#F1F1F4] w-full">
                     <img src="/images/main_logo.png" alt="Company Logo" className="mx-auto mb-4" />
                     <h1 className="text-2xl font-bold">Welcome to the Company <span className="text-blue-500">System Portal</span></h1>
