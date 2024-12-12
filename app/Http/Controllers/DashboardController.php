@@ -13,134 +13,146 @@ use Modules\PurchaseRequisition\Models\Vendor;
 
 class DashboardController extends Controller
 {
-    //
-    // public function index()
-    // {
-    //     $reimburseTotal                 = ReimburseGroup::with(['reimburses'])->count();
-    //     $businessTripRequestTotal       = BusinessTrip::with(['purposeType'])->where('type', 'request')->count();
-    //     $businessTripDeclarationTotal   = BusinessTrip::with(['purposeType'])->where('type', 'declaration')->count();
-    //     $purchaseRequisitionTotal       = Purchase::count();
-
-    //     $dataTotal = [
-    //         'reimburse'                 => $reimburseTotal,
-    //         'businessTripRequest'       => $businessTripRequestTotal,
-    //         'businessTripDeclaration'   => $businessTripDeclarationTotal,
-    //         'purchaseRequisition'       => $purchaseRequisitionTotal,
-    //     ];
-    //     return Inertia::render('Dashboard/index', [
-    //         'title'     => 'Dashboard',
-    //         'dataTotal' => $dataTotal
-    //     ]);
-    // }
-
-    // public function roles()
-    // {
-    //     return Inertia::render('Role/index', [
-    //         'title' => 'Dashboard',
-    //     ]);
-    // }
-
     public function index(Request $request)
     {
         $statusFilter = $request->input('status', 'reim');
         $monthFilter = $request->input('month', '12');
         $user = Auth::user();
 
-        // Definisikan status yang mungkin dengan ID yang sesuai
+        // Define status mapping
         $statusTypes = [
-            'waitingApprove' => 1,
-            'onProcess' => 3,
-            'reject' => 4,
-            'fullyApproved' => 5,
+            'waiting' => 1,
+            'process' => 3,
+            'rejected' => 4,
+            'approved' => 5,
         ];
 
-        // Inisialisasi array untuk menyimpan jumlah per kategori dan status
+        // Initialize categories array
         $categories = [];
 
-        if ($statusFilter == 'reim') {
-            // Query untuk Reimburse
-            $reimburseQuery = ReimburseGroup::query();
-            if ($user->is_admin == '0') {
-                $reimburseQuery->where('requester', $user->id);
-            }
-            if ($monthFilter) {
-                $reimburseQuery->whereMonth('created_at', $monthFilter);
-            }
-            foreach ($statusTypes as $key => $statusId) {
-                $categories[$key] = $reimburseQuery->where('status_id', $statusId)->count();
-            }
-        } elseif ($statusFilter == 'trip') {
-            // Query untuk Business Trip Request
-            $businessTripRequestQuery = BusinessTrip::query()->where('type', 'request');
-            if ($user->is_admin == '0') {
-                $businessTripRequestQuery->where('request_for', $user->id);
-            }
-            if ($monthFilter) {
-                $businessTripRequestQuery->whereMonth('created_at', $monthFilter);
-            }
-            foreach ($statusTypes as $key => $statusId) {
-                $categories[$key] = $businessTripRequestQuery->where('status_id', $statusId)->count();
-            }
-        } elseif ($statusFilter == 'dec') {
-            // Query untuk Business Trip Declaration
-            $businessTripDeclarationQuery = BusinessTrip::query()->where('type', 'declaration');
-            if ($user->is_admin == '0') {
-                $businessTripDeclarationQuery->where('request_for', $user->id);
-            }
-            if ($monthFilter) {
-                $businessTripDeclarationQuery->whereMonth('created_at', $monthFilter);
-            }
-            foreach ($statusTypes as $key => $statusId) {
-                $categories[$key] = $businessTripDeclarationQuery->where('status_id', $statusId)->count();
-            }
-        } elseif ($statusFilter == 'vendor') {
-            // Query untuk Vendor Selection
-            $vendorSelectionQuery = Purchase::query();
-            if ($user->is_admin == '0') {
-                $vendorSelectionQuery->where('user_id', $user->id);
-            }
-            if ($monthFilter) {
-                $vendorSelectionQuery->whereMonth('created_at', $monthFilter);
-            }
-            foreach ($statusTypes as $key => $statusId) {
-                $categories[$key] = $vendorSelectionQuery->where('status_id', $statusId)->count();
-            }
-        }
-        // Query Request
-        $reim = ReimburseGroup::query();
-        $trip = BusinessTrip::query()->where('type', 'request');
-        $dec = BusinessTrip::query()->where('type', 'declaration');
-        $vendor = Purchase::query();
-
-        if ($user->is_admin == '0') {
-            $reim = $reim->where('requester', $user->id);
-            $trip = $trip->where('request_for', $user->id);
-            $dec = $dec->where('request_for', $user->id);
-            $vendor = $vendor->where('user_id', $user->id);
+        // Base queries based on status filter
+        if ($statusFilter === 'reim') {
+            $query = ReimburseGroup::query();
+            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'requester');
+            $categories = $this->countStatuses($query, $statusTypes);
+        } elseif ($statusFilter === 'trip') {
+            $query = BusinessTrip::query()->where('type', 'request');
+            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'request_for');
+            $categories = $this->countStatuses($query, $statusTypes);
+        } elseif ($statusFilter === 'dec') {
+            $query = BusinessTrip::query()->where('type', 'declaration');
+            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'request_for');
+            $categories = $this->countStatuses($query, $statusTypes);
+        } elseif ($statusFilter === 'vendor') {
+            $query = Purchase::query();
+            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'user_id');
+            $categories = $this->countStatuses($query, $statusTypes);
         }
 
-        $reim = $reim->count();
-        $trip = $trip->count();
-        $dec = $dec->count();
-        $vendor = $vendor->count();
-
-
+        // Total counts for each category
         $dataTotal = [
             'request' => [
-                'reim' => $reim,
-                'businessTrip' => $trip,
-                'businessDec' => $dec,
-                'vendorSelection' => $vendor,
+                'reim' => $this->getTotalCount(ReimburseGroup::query(), $user, 'requester'),
+                'businessTrip' => $this->getTotalCount(BusinessTrip::query()->where('type', 'request'), $user, 'request_for'),
+                'businessDec' => $this->getTotalCount(BusinessTrip::query()->where('type', 'declaration'), $user, 'request_for'),
+                'vendorSelection' => $this->getTotalCount(Purchase::query(), $user, 'user_id'),
             ],
-            'categories' => $categories
+            'categories' => $categories,
         ];
 
         return Inertia::render('Dashboard/index', [
-            'title'     => 'Dashboard',
-            'dataTotal' => $dataTotal
+            'title' => 'Dashboard',
+            'dataTotal' => $dataTotal,
+            'statusFilter' => $statusFilter,
+            'monthFilter' => $monthFilter,
         ]);
     }
 
+    public function filter(Request $request)
+    {
+        // Retrieve filters from request
+        $statusFilter = $request->input('status', 'reim');
+        $monthFilter = $request->input('month', '12');
+        $user = Auth::user();
+
+        // Define status mapping
+        $statusTypes = [
+            'waiting' => 1,
+            'process' => 3,
+            'rejected' => 4,
+            'approved' => 5,
+        ];
+
+        // Initialize categories array
+        $categories = [];
+
+        // Base queries based on status filter
+        if ($statusFilter === 'reim') {
+            $query = ReimburseGroup::query();
+            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'requester');
+            $categories = $this->countStatuses($query, $statusTypes);
+        } elseif ($statusFilter === 'trip') {
+            $query = BusinessTrip::query()->where('type', 'request');
+            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'request_for');
+            $categories = $this->countStatuses($query, $statusTypes);
+        } elseif ($statusFilter === 'dec') {
+            $query = BusinessTrip::query()->where('type', 'declaration');
+            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'request_for');
+            $categories = $this->countStatuses($query, $statusTypes);
+        } elseif ($statusFilter === 'vendor') {
+            $query = Purchase::query();
+            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'user_id');
+            $categories = $this->countStatuses($query, $statusTypes);
+        }
+
+        // Total counts for each category
+        $dataTotal = [
+            'request' => [
+                'reim' => $this->getTotalCount(ReimburseGroup::query(), $user, 'requester'),
+                'businessTrip' => $this->getTotalCount(BusinessTrip::query()->where('type', 'request'), $user, 'request_for'),
+                'businessDec' => $this->getTotalCount(BusinessTrip::query()->where('type', 'declaration'), $user, 'request_for'),
+                'vendorSelection' => $this->getTotalCount(Purchase::query(), $user, 'user_id'),
+            ],
+            'categories' => $categories,
+        ];
+
+
+        return response()->json([
+            'dataTotal' => $dataTotal,
+            'statusFilter' => $statusFilter,
+            'monthFilter' => $monthFilter,
+        ]);
+    }
+
+    private function applyUserAndMonthFilters($query, $user, $monthFilter, $userColumn)
+    {
+        if ($user->is_admin === '0') {
+            $query->where($userColumn, $user->id);
+        }
+
+        if (!empty($monthFilter) && $monthFilter !== '12') {
+            $query->whereMonth('created_at', $monthFilter);
+        }
+    }
+
+    private function countStatuses($query, $statusTypes)
+    {
+        $counts = [];
+        foreach ($statusTypes as $key => $statusId) {
+            $counts[$key] = (clone $query)->where('status_id', $statusId)->count();
+        }
+
+        return $counts;
+    }
+
+    private function getTotalCount($query, $user, $userColumn)
+    {
+        if ($user->is_admin === '0') {
+            $query->where($userColumn, $user->id);
+        }
+
+        return $query->count();
+    }
 
     public function roles()
     {
