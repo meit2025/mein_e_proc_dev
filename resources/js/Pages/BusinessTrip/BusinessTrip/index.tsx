@@ -111,7 +111,6 @@ export const Index = ({
         }}
         url={{
           url: GET_LIST_BUSINESS_TRIP,
-          deleteUrl: DELET_API_BUSINESS_TRIP,
           detailUrl: DETAIL_PAGE_BUSINESS_TRIP,
         }}
         labelFilter='search'

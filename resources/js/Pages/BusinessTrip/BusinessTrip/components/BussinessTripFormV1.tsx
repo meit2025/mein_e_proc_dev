@@ -45,6 +45,12 @@ import {
   CREATE_API_BUSINESS_TRIP,
   EDIT_API_BUSINESS_TRIP,
   GET_DETAIL_BUSINESS_TRIP,
+  GET_LIST_COST_CENTER,
+  GET_LIST_DESTINATION,
+  GET_LIST_EMPLOYEE,
+  GET_LIST_PURCHASING_GROUP,
+  GET_LIST_PURPOSE_TYPE,
+  GET_LIST_TAX,
 } from '@/endpoint/business-trip/api';
 import {
   GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE,
@@ -64,6 +70,10 @@ import {
   PurchasingGroup,
 } from '../models/models';
 import { GET_LIST_DESTINATION_BY_TYPE } from '@/endpoint/destination/api';
+import useDropdownOptions from '@/lib/getDropdown';
+import FormAutocomplete from '@/components/Input/formDropdown';
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
+import { Combobox } from '@/components/shacdn/combobox';
 
 interface User {
   id: string;
@@ -302,9 +312,8 @@ export const BussinessTripFormV1 = ({
     try {
       const response = await axiosInstance.get(url);
       const responseDestination = await axiosInstance.get(getDestination);
+      console.log(responseDestination.data.data, 'responseDestination');
       const responsePurposeType = await axiosInstance.get(getPurposeType);
-      //   console.log(responseDestination.data.data, ' responseDestination');
-      //   console.log(response.data.data, ' responseresponseresponse');
       const typePurpose = responsePurposeType.data.data.purpose.type;
       if (typePurpose == 'international') {
         totalDestinationHandler('1');
@@ -327,7 +336,7 @@ export const BussinessTripFormV1 = ({
   const { showToast } = useAlert();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    // console.log(values, ' valuesss');
+    console.log(values, ' valuesss');
     try {
       const formData = new FormData();
       const totalAll = getTotalDes();
@@ -442,8 +451,8 @@ export const BussinessTripFormV1 = ({
   });
 
   React.useEffect(() => {
-    console.log(BusinessTripType.edit, ' business edit');
-    console.log(type, ' id type');
+    // console.log(BusinessTripType.edit, ' business edit');
+    // console.log(type, ' id type');
     if (id && type == BusinessTripType.edit) {
       getDetailData();
     }
@@ -532,6 +541,7 @@ export const BussinessTripFormV1 = ({
           approvalFrom,
           acknowledgeFrom: acknowledgeFrom,
         };
+        console.log(dataApproval)
         setApprovalRoute(dataApproval);
         setIsShow(true);
       }
@@ -569,19 +579,72 @@ export const BussinessTripFormV1 = ({
   const [totalAllowance, setTotalAllowance] = React.useState(0);
   // Assuming allowance is calculated elsewhere, let's mock it for now
   const allowance = totalAllowance;
-
   //   // Calculate total based on totalPercent and allowance
   React.useEffect(() => {
     // console.log(form.getValues('destinations'), ' edit destination');
     if (type == BusinessTripType.edit) {
-      setIsCashAdvance(form.getValues(`cash_advance`) ?? false);    
+      setIsCashAdvance(form.getValues(`cash_advance`) ?? false);
     }
     const percentValue = parseFloat((totalPercent || '0').toString());
     // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
     const total = (percentValue / 100) * allowance; // Multiply percent with allowance
     // console.log(total, ' totalll');
     form.setValue(`total_cash_advance`, total.toFixed(0)); // Save the total in total_cash_advance field
-  }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance changes
+  }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance cha
+
+  const { dataDropdown: dataEmployee, getDropdown: getEmployee } =
+    useDropdownOptions(GET_LIST_EMPLOYEE);
+  const { dataDropdown: dataPurposeType, getDropdown: getPurposeType } =
+    useDropdownOptions(GET_LIST_PURPOSE_TYPE);
+  const { dataDropdown: dataCostCenter, getDropdown: getCostCenter } =
+    useDropdownOptions(GET_LIST_COST_CENTER);
+  const { dataDropdown: dataDestination, getDropdown: getDestination } =
+    useDropdownOptions(GET_LIST_DESTINATION);
+  const { dataDropdown: dataTax, getDropdown: getTax } = useDropdownOptions(GET_LIST_TAX);
+  const { dataDropdown: dataPurchasingGroup, getDropdown: getPurchasingGroup } =
+    useDropdownOptions(GET_LIST_PURCHASING_GROUP);
+
+  React.useEffect(() => {
+    getEmployee('', {
+      name: 'name',
+      id: 'id',
+      tabel: 'users',
+    });
+    getPurposeType('', {
+      name: 'name',
+      id: 'id',
+      tabel: 'purpose_types',
+    });
+    getCostCenter('', {
+      name: 'cost_center',
+      id: 'id',
+      tabel: 'master_cost_centers',
+    });
+    getDestination('', {
+      name: 'destination',
+      id: 'destination',
+      tabel: 'destinations',
+    });
+    getTax('', {
+      name: 'mwszkz',
+      id: 'id',
+      tabel: 'pajaks',
+    });
+    getPurchasingGroup('', {
+      name: 'purchasing_group',
+      id: 'id',
+      tabel: 'purchasing_groups',
+    });
+  }, []);
+
+  React.useEffect(() => {
+    if (type != BusinessTripType.edit) {
+      if (isAdmin == '0') {
+        console.log(idUser, ' idUseridUseridUser');
+        form.setValue('request_for', idUser ?? '');
+      }
+    }
+  }, []);
 
   return (
     <ScrollArea className='h-[600px] w-full '>
@@ -595,49 +658,15 @@ export const BussinessTripFormV1 = ({
             <tr>
               <td width={200}>Request For</td>
               <td>
-                <FormField
-                  control={form.control}
-                  name='request_for'
-                  render={({ field }) => {
-                    // Jika role adalah 'user', set value default sebagai currentUserId
-                    if (isAdmin === '0' && !field.value) {
-                      field.onChange(idUser.toString());
-                    }
-                    return (
-                      <FormItem>
-                        <FormControl>
-                          <Select
-                            onValueChange={(value) => {
-                              setSelectedUserId(value);
-                              field.onChange(value);
-                            }}
-                            value={field.value}
-                            disabled={isAdmin === '0'} // Disable select for user role
-                          >
-                            <SelectTrigger className='w-[200px] py-2'>
-                              <SelectValue placeholder='-- Select Business Purpose Type --' />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {isAdmin === '1'
-                                ? users.map((item) => (
-                                    <SelectItem key={item.id} value={item.id.toString()}>
-                                      {item.name}
-                                    </SelectItem>
-                                  ))
-                                : // If role is user, show only the logged-in user's name
-                                  users
-                                    .filter((user) => user.id === idUser)
-                                    .map((item) => (
-                                      <SelectItem key={item.id} value={item.id.toString()}>
-                                        {item.name}
-                                      </SelectItem>
-                                    ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
+                <FormAutocomplete<any>
+                  options={dataEmployee}
+                  fieldName='request_for'
+                  isRequired={true}
+                  disabled={isAdmin == '0'}
+                  placeholder={'Select Employee'}
+                  classNames='mt-2 w-full'
+                  onChangeOutside={(value) => {
+                    setSelectedUserId(value);
                   }}
                 />
               </td>
@@ -645,7 +674,18 @@ export const BussinessTripFormV1 = ({
             <tr>
               <td width={200}>Bussiness Trip Purpose Type</td>
               <td>
-                {' '}
+                <FormAutocomplete<any>
+                  options={dataPurposeType}
+                  fieldName='purpose_type_id'
+                  isRequired={true}
+                  disabled={false}
+                  placeholder={'Select Purpose Type'}
+                  classNames='mt-2 w-full'
+                  onChangeOutside={(value) => {
+                    handlePurposeType(value);
+                  }}
+                />
+                {/* {' '}
                 <FormField
                   control={form.control}
                   name='purpose_type_id'
@@ -671,13 +711,21 @@ export const BussinessTripFormV1 = ({
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
               </td>
             </tr>
             <tr>
               <td width={200}>Cost Center</td>
               <td>
-                {' '}
+                <FormAutocomplete<any>
+                  options={dataCostCenter}
+                  fieldName='cost_center_id'
+                  isRequired={true}
+                  disabled={false}
+                  placeholder={'Select Cost Center'}
+                  classNames='mt-2 w-full'
+                />
+                {/* {' '}
                 <FormField
                   control={form.control}
                   name='cost_center_id'
@@ -703,7 +751,7 @@ export const BussinessTripFormV1 = ({
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
               </td>
             </tr>
             <tr>
@@ -844,6 +892,8 @@ export const BussinessTripFormV1 = ({
             pajak={pajak}
             purchasingGroup={purchasingGroup}
             setTotalAllowance={setTotalAllowance}
+            dataTax={dataTax}
+            dataPurchasingGroup={dataPurchasingGroup}
           />
           <Separator className='my-4' />
 
@@ -889,7 +939,6 @@ export const BussinessTripFormV1 = ({
                         <FormItem>
                           <FormControl>
                             <Select
-                              // onValueChange={(value) => handlePurposeType(value)}
                               value={field.value || undefined}
                               onValueChange={(value) => field.onChange(value)}
                             >
@@ -969,6 +1018,8 @@ export function BussinesTripDestination({
   pajak,
   purchasingGroup,
   typeEdit,
+  dataTax,
+  dataPurchasingGroup,
 }: {
   totalDestination: string;
   listAllowances: AllowanceItemModel[];
@@ -980,6 +1031,8 @@ export function BussinesTripDestination({
   pajak: Pajak[];
   purchasingGroup: PurchasingGroup[];
   typeEdit: any;
+  dataTax: any;
+  dataPurchasingGroup: any;
 }) {
   const [startDate, setStartDate] = React.useState<Date>();
 
@@ -1009,6 +1062,8 @@ export function BussinesTripDestination({
           pajak={pajak}
           purchasingGroup={purchasingGroup}
           typeEdit={typeEdit}
+          dataTax={dataTax}
+          dataPurchasingGroup={dataPurchasingGroup}
         />
       ))}
     </Tabs>
@@ -1026,6 +1081,8 @@ export function BussinessDestinationForm({
   pajak,
   purchasingGroup,
   typeEdit,
+  dataTax,
+  dataPurchasingGroup,
 }: {
   form: any;
   index: number;
@@ -1037,6 +1094,8 @@ export function BussinessDestinationForm({
   pajak: Pajak[];
   purchasingGroup: PurchasingGroup[];
   typeEdit: any;
+  dataTax: any;
+  dataPurchasingGroup: any;
 }) {
   const {
     fields: detailAttedanceFields,
@@ -1126,6 +1185,13 @@ export function BussinessDestinationForm({
     });
   }
 
+  const handleSelect = (value: string) => {
+    updateDestination(index, {
+        ...destination,
+        destination: value,
+      });
+  };
+
   //   console.log(listDestination, 'listDestination 123');
   return (
     <TabsContent value={`destination${index + 1}`}>
@@ -1141,23 +1207,12 @@ export function BussinessDestinationForm({
                   <FormItem>
                     {/* <FormLabel>Username</FormLabel> */}
                     <FormControl>
-                      <Select
-                        onValueChange={(value) => {
-                          updateDestination(index, { ...destination, destination: value });
-                        }}
-                        defaultValue={destination.destination}
-                      >
-                        <SelectTrigger className='w-[200px]'>
-                          <SelectValue placeholder='Destination' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {listDestination.map((map) => (
-                            <SelectItem value={map.destination} className='uppercase'>
-                              {map.destination}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <Combobox
+                        data={listDestination.map((destination) => ({
+                            value: destination.destination ?? '', // or whatever unique identifier you have
+                            label: destination.destination ?? '',
+                        }))} 
+                        onSelect={handleSelect} />
                     </FormControl>
                     {/* <FormDescription>This is your public display name.</FormDescription> */}
                     <FormMessage />
@@ -1169,66 +1224,26 @@ export function BussinessDestinationForm({
           <tr>
             <td width={200}>Pajak</td>
             <td>
-              {' '}
-              <FormField
-                control={form.control}
-                name={`destinations.${index}.pajak_id`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Select
-                        onValueChange={(value) => {
-                          updateDestination(index, { ...destination, pajak_id: value });
-                        }}
-                        defaultValue={destination.pajak_id}
-                      >
-                        <SelectTrigger className='w-[200px]'>
-                          <SelectValue placeholder='-- Select Pajak --' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {pajak.map((item) => (
-                            <SelectItem value={item.id.toString()}>{item.mwszkz}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <FormAutocomplete<any>
+                options={dataTax}
+                fieldName={`destinations.${index}.pajak_id`}
+                isRequired={true}
+                disabled={false}
+                placeholder={'Select Pajak'}
+                classNames='mt-2 w-full'
               />
             </td>
           </tr>
           <tr>
             <td width={200}>Purchasing Group</td>
             <td>
-              {' '}
-              <FormField
-                control={form.control}
-                name={`destinations.${index}.purchasing_group_id`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Select
-                        onValueChange={(value) => {
-                          updateDestination(index, { ...destination, purchasing_group_id: value });
-                        }}
-                        defaultValue={destination.purchasing_group_id}
-                      >
-                        <SelectTrigger className='w-[200px]'>
-                          <SelectValue placeholder='-- Select Purchasing Group --' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {purchasingGroup.map((item) => (
-                            <SelectItem value={item.id.toString()}>
-                              {item.purchasing_group}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <FormAutocomplete<any>
+                options={dataPurchasingGroup}
+                fieldName={`destinations.${index}.purchasing_group_id`}
+                isRequired={true}
+                disabled={false}
+                placeholder={'Select Purchasing Group'}
+                classNames='mt-2 w-full'
               />
             </td>
           </tr>
@@ -1403,7 +1418,7 @@ export function ResultTotalItem({
                 <i>IDR</i>
               </span>
               <span>
-                <i>{grandTotal}</i>
+                <i>{formatRupiah(grandTotal)}</i>
               </span>
             </td>
           </tr>
@@ -1454,7 +1469,7 @@ export function ResultPerItem({
       <td>{allowance.name}</td>
       <td className='flex justify-between pr-4'>
         <span>IDR</span>
-        <span>{calculateTotal()}</span>
+        <span>{formatRupiah(calculateTotal())}</span>
       </td>
     </tr>
   );
@@ -1727,14 +1742,14 @@ export function AllowanceRowInput({
           ) : (
             <span className='text-sm'>
               {' '}
-              {allowance.detail.length} Days * {allowance.subtotal} * 100%
+              {allowance.detail.length} Days * {formatRupiah(allowance.subtotal)} * 100%
             </span>
           )}
         </td>
         <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
           <div className='flex items-center'>
             <span className='text-sm' style={{ padding: '2px 5px' }}>
-              = IDR {calculateTotal()}
+              = IDR {formatRupiah(calculateTotal())}
             </span>
           </div>
         </td>
