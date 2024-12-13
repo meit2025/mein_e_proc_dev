@@ -541,7 +541,7 @@ export const BussinessTripFormV1 = ({
           approvalFrom,
           acknowledgeFrom: acknowledgeFrom,
         };
-        console.log(dataApproval)
+        console.log(dataApproval);
         setApprovalRoute(dataApproval);
         setIsShow(true);
       }
@@ -640,8 +640,7 @@ export const BussinessTripFormV1 = ({
   React.useEffect(() => {
     if (type != BusinessTripType.edit) {
       if (isAdmin == '0') {
-        console.log(idUser, ' idUseridUseridUser');
-        form.setValue('request_for', idUser ?? '');
+        form.setValue('request_for', idUser?.toString() ?? '');
       }
     }
   }, []);
@@ -1187,9 +1186,9 @@ export function BussinessDestinationForm({
 
   const handleSelect = (value: string) => {
     updateDestination(index, {
-        ...destination,
-        destination: value,
-      });
+      ...destination,
+      destination: value,
+    });
   };
 
   //   console.log(listDestination, 'listDestination 123');
@@ -1207,12 +1206,13 @@ export function BussinessDestinationForm({
                   <FormItem>
                     {/* <FormLabel>Username</FormLabel> */}
                     <FormControl>
-                    <Combobox
+                      <Combobox
                         data={listDestination.map((destination) => ({
-                            value: destination.destination ?? '', // or whatever unique identifier you have
-                            label: destination.destination ?? '',
-                        }))} 
-                        onSelect={handleSelect} />
+                          value: destination.destination ?? '', // or whatever unique identifier you have
+                          label: destination.destination ?? '',
+                        }))}
+                        onSelect={handleSelect}
+                      />
                     </FormControl>
                     {/* <FormDescription>This is your public display name.</FormDescription> */}
                     <FormMessage />
