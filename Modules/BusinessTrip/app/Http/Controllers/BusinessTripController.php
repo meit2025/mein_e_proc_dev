@@ -507,7 +507,7 @@ class BusinessTripController extends Controller
             $data = Approval::where('user_id', Auth::user()->id)->where('document_name', 'TRIP')->pluck('document_id')->toArray();
             $query = $query->whereIn('id', $data);
         }else{
-            $query = $query->where('created_by', Auth::user()->id);
+            $query = $query->where('created_by', Auth::user()->id)->orWhere('request_for', Auth::user()->id);
         }
 
         $data = $query->where('type', 'request')->latest()->search(request(['search']))->paginate($perPage);

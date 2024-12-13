@@ -5,6 +5,7 @@ use App\Events\NotifikasiUsers;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotifikasiController;
+use App\Http\Controllers\PortalController;
 use App\Jobs\SendNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +33,7 @@ Route::group(['middleware' => 'auth'], function () {
         ]);
     });
 
+    Route::get('/portal', [PortalController::class, 'index'])->name('portal');
 
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
