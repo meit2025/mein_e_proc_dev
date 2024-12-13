@@ -1,0 +1,1 @@
+const T="/api/business-trip",_=`${T}/list`,s=`${T}/create`,E=`${T}/update`,S=t=>`${T}/detail/${t}`,I=t=>`${T}/detail-bt/${t}`,e=`${T}/get-employee`,a=`${T}/get-purpose-type`,o=`${T}/get-cost-center`,c=`${T}/get-destination`,n=`${T}/get-tax`,P=`${T}/get-purchasing-group`;export{s as C,E,I as G,_ as a,e as b,a as c,o as d,c as e,n as f,P as g,S as h};

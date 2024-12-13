@@ -504,9 +504,10 @@ class BusinessTripController extends Controller
 
         // $query->orderBy($sortBy, $sortDirection);
         if ($request->approval == "1") {
-            $data = Approval::where('user_id', Auth::user()->id)
-                ->where('document_name', 'TRIP')->pluck('document_id')->toArray();
+            $data = Approval::where('user_id', Auth::user()->id)->where('document_name', 'TRIP')->pluck('document_id')->toArray();
             $query = $query->whereIn('id', $data);
+        }else{
+            $query = $query->where('created_by', Auth::user()->id)->orWhere('request_for', Auth::user()->id);
         }
 
         $data = $query->where('type', 'request')->latest()->search(request(['search']))->paginate($perPage);
@@ -742,6 +743,68 @@ class BusinessTripController extends Controller
                 'total_cash_advance' => number_format($destination->total_cash_advance, 0, ',', '.'),
             ];
         }
+        return $this->successResponse($data);
+    }
+
+    function dropdownEmployee(Request $request)
+    {
+        $data = User::selectRaw("name || ' [' || nip || ']' as label, CAST(id AS TEXT) as value");
+        if (Auth::user()->is_admin == 0) $data = $data->where('id', Auth::user()->id);
+        if ($request->search) {
+            $data = $data->where('name', 'ilike', '%' . $request->search . '%')->orWhere('nip', 'ilike', '%' . $request->search . '%');
+        }
+
+        $data = $data->limit(50)->get();
+        return $this->successResponse($data);
+    }
+
+    function dropdownPurposeType(Request $request)
+    {
+        $data = PurposeType::selectRaw("name as label, CAST(id AS TEXT) as value");
+        if ($request->search) {
+            $data = $data->where('name', 'ILIKE', '%' . $request->search . '%');
+        }
+        $data = $data->limit(30)->get();
+        return $this->successResponse($data);
+    }
+
+    function dropdownCostCenter(Request $request)
+    {
+        $data = MasterCostCenter::selectRaw("cost_center as label, CAST(id AS TEXT) as value");
+        if ($request->search) {
+            $data = $data->where('cost_center', 'ILIKE', '%' . $request->search . '%');
+        }
+        $data = $data->limit(30)->get();
+        return $this->successResponse($data);
+    }
+
+    function dropdownDestination(Request $request)
+    {
+        $data = Destination::selectRaw("destination as label, CAST(destination AS TEXT) as value");
+        if ($request->search) {
+            $data = $data->where('destination', 'ILIKE', '%' . $request->search . '%');
+        }
+        $data = $data->limit(30)->get();
+        return $this->successResponse($data);
+    }
+
+    function dropdownTax(Request $request)
+    {
+        $data = Pajak::selectRaw("mwszkz || ' [' || description || ']' as label, CAST(id AS TEXT) as value");
+        if ($request->search) {
+            $data = $data->where('mwszkz', 'ILIKE', '%' . $request->search . '%')->orWhere('description', 'ILIKE', '%' . $request->search . '%');
+        }
+        $data = $data->limit(30)->get();
+        return $this->successResponse($data);
+    }
+
+    function dropdownPurchasingGroup(Request $request)
+    {
+        $data = PurchasingGroup::selectRaw("purchasing_group as label, CAST(id AS TEXT) as value");
+        if ($request->search) {
+            $data = $data->where('purchasing_group', 'ILIKE', '%' . $request->search . '%');
+        }
+        $data = $data->limit(30)->get();
         return $this->successResponse($data);
     }
 }

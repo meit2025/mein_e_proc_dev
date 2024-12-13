@@ -1,0 +1,1 @@
+const i=(t,e=!0)=>{const r=new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",minimumFractionDigits:0,maximumFractionDigits:0}).format(t);return e?r:r.replace("Rp","").trim()};export{i as f};
