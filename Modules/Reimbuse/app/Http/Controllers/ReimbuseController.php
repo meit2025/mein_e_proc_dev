@@ -172,7 +172,7 @@ class ReimbuseController extends Controller
                         $map->status->code
                     ],
                     'createdDate' => $map->created_at,
-                    
+
                 ];
             });
             return $this->successResponse($data);
@@ -265,7 +265,7 @@ class ReimbuseController extends Controller
         ];
         $forms = $data['forms'];
         $response = $this->reimbursementService->updateReimbursements($groupData, $forms);
-        
+
         if (isset($response['error'])) return $this->errorResponse($response['error']);
         return $this->successResponse("Reimbursements updated successfully.");
     }
