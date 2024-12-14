@@ -74,6 +74,7 @@ import useDropdownOptions from '@/lib/getDropdown';
 import FormAutocomplete from '@/components/Input/formDropdown';
 import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 import { Combobox } from '@/components/shacdn/combobox';
+import { BussinesTripDestination } from './BussinesTripDestination';
 
 interface User {
   id: string;
@@ -298,21 +299,22 @@ export const BussinessTripFormV1 = ({
   const [listAllowances, setListAllowances] = React.useState<AllowanceItemModel[]>([]);
   const [listDestination, setListDestination] = React.useState<DestinationModel[]>([]);
   const [typePurpose, setTypePurpose] = React.useState<string>('');
+  const { dataDropdown: dataDestination, getDropdown: getDestination } = useDropdownOptions();
 
   const [selectedUserId, setSelectedUserId] = React.useState(
-    isAdmin === '0' ? idUser.toString() : '',
+    isAdmin === '0' ? idUser?.toString() : '',
   );
 
   async function handlePurposeType(value: string) {
     form.setValue('purpose_type_id', value || '');
     const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
     const url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
-    const getDestination = GET_LIST_DESTINATION_BY_TYPE(value);
+    // const getDestination = GET_LIST_DESTINATION_BY_TYPE(value);
     const getPurposeType = GET_DETAIL_PURPOSE_TYPE(value);
     try {
       const response = await axiosInstance.get(url);
-      const responseDestination = await axiosInstance.get(getDestination);
-      console.log(responseDestination.data.data, 'responseDestination');
+      //   const responseDestination = await axiosInstance.get(getDestination);
+      //   console.log(responseDestination.data.data, 'responseDestination');
       const responsePurposeType = await axiosInstance.get(getPurposeType);
       const typePurpose = responsePurposeType.data.data.purpose.type;
       if (typePurpose == 'international') {
@@ -320,7 +322,16 @@ export const BussinessTripFormV1 = ({
       }
       setTypePurpose(typePurpose);
       setListAllowances(response.data.data as AllowanceItemModel[]);
-      setListDestination(responseDestination.data.data as DestinationModel[]);
+      //   setListDestination(responseDestination.data.data as DestinationModel[]);
+      getDestination('', {
+        name: 'destination',
+        id: 'destination',
+        tabel: 'destinations',
+        where: {
+          key: 'type',
+          parameter: responsePurposeType.data.data.purpose.type,
+        },
+      });
     } catch (e) {
       console.log(e);
     }
@@ -592,38 +603,31 @@ export const BussinessTripFormV1 = ({
     form.setValue(`total_cash_advance`, total.toFixed(0)); // Save the total in total_cash_advance field
   }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance cha
 
-  const { dataDropdown: dataEmployee, getDropdown: getEmployee } =
-    useDropdownOptions(GET_LIST_EMPLOYEE);
-  const { dataDropdown: dataPurposeType, getDropdown: getPurposeType } =
-    useDropdownOptions(GET_LIST_PURPOSE_TYPE);
-  const { dataDropdown: dataCostCenter, getDropdown: getCostCenter } =
-    useDropdownOptions(GET_LIST_COST_CENTER);
-  const { dataDropdown: dataDestination, getDropdown: getDestination } =
-    useDropdownOptions(GET_LIST_DESTINATION);
-  const { dataDropdown: dataTax, getDropdown: getTax } = useDropdownOptions(GET_LIST_TAX);
+  const { dataDropdown: dataEmployee, getDropdown: getEmployee } = useDropdownOptions();
+  const { dataDropdown: dataPurposeType, getDropdown: getPurposeType } = useDropdownOptions();
+  const { dataDropdown: dataCostCenter, getDropdown: getCostCenter } = useDropdownOptions();
+  const { dataDropdown: dataTax, getDropdown: getTax } = useDropdownOptions();
   const { dataDropdown: dataPurchasingGroup, getDropdown: getPurchasingGroup } =
-    useDropdownOptions(GET_LIST_PURCHASING_GROUP);
+    useDropdownOptions();
 
   React.useEffect(() => {
     getEmployee('', {
       name: 'name',
       id: 'id',
       tabel: 'users',
+      idType: 'string',
     });
     getPurposeType('', {
       name: 'name',
       id: 'id',
       tabel: 'purpose_types',
+      idType: 'string',
     });
     getCostCenter('', {
       name: 'cost_center',
       id: 'id',
       tabel: 'master_cost_centers',
-    });
-    getDestination('', {
-      name: 'destination',
-      id: 'destination',
-      tabel: 'destinations',
+      idType: 'string',
     });
     getTax('', {
       name: 'mwszkz',
@@ -645,6 +649,7 @@ export const BussinessTripFormV1 = ({
     }
   }, []);
 
+  console.log(dataDestination, 'data destination');
   return (
     <ScrollArea className='h-[600px] w-full '>
       <Form {...form}>
@@ -658,6 +663,7 @@ export const BussinessTripFormV1 = ({
               <td width={200}>Request For</td>
               <td>
                 <FormAutocomplete<any>
+                  fieldLabel=''
                   options={dataEmployee}
                   fieldName='request_for'
                   isRequired={true}
@@ -674,49 +680,24 @@ export const BussinessTripFormV1 = ({
               <td width={200}>Bussiness Trip Purpose Type</td>
               <td>
                 <FormAutocomplete<any>
+                  fieldLabel=''
                   options={dataPurposeType}
                   fieldName='purpose_type_id'
                   isRequired={true}
                   disabled={false}
                   placeholder={'Select Purpose Type'}
                   classNames='mt-2 w-full'
-                  onChangeOutside={(value) => {
-                    handlePurposeType(value);
+                  onChangeOutside={async (value: string, data: any) => {
+                    await handlePurposeType(value);
                   }}
                 />
-                {/* {' '}
-                <FormField
-                  control={form.control}
-                  name='purpose_type_id'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => handlePurposeType(value)}
-                          value={field.value}
-                        >
-                          <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='-- Select Bussiness Purpose Type --' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {listPurposeType.map((item) => (
-                              <SelectItem key={item.id} value={item.id.toString()}>
-                                {item.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
               </td>
             </tr>
             <tr>
               <td width={200}>Cost Center</td>
               <td>
                 <FormAutocomplete<any>
+                  fieldLabel=''
                   options={dataCostCenter}
                   fieldName='cost_center_id'
                   isRequired={true}
@@ -724,33 +705,6 @@ export const BussinessTripFormV1 = ({
                   placeholder={'Select Cost Center'}
                   classNames='mt-2 w-full'
                 />
-                {/* {' '}
-                <FormField
-                  control={form.control}
-                  name='cost_center_id'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => field.onChange(value)}
-                          value={field.value}
-                        >
-                          <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='-- Select Cost Center --' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {costcenter.map((item) => (
-                              <SelectItem key={item.id} value={item.id.toString()}>
-                                {item.cost_center}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
               </td>
             </tr>
             <tr>
@@ -893,6 +847,7 @@ export const BussinessTripFormV1 = ({
             setTotalAllowance={setTotalAllowance}
             dataTax={dataTax}
             dataPurchasingGroup={dataPurchasingGroup}
+            dataDestination={dataDestination}
           />
           <Separator className='my-4' />
 
@@ -1005,809 +960,6 @@ export const BussinessTripFormV1 = ({
     </ScrollArea>
   );
 };
-
-export function BussinesTripDestination({
-  totalDestination,
-  listAllowances,
-  destinationField,
-  form,
-  updateDestination,
-  setTotalAllowance,
-  listDestination = [],
-  pajak,
-  purchasingGroup,
-  typeEdit,
-  dataTax,
-  dataPurchasingGroup,
-}: {
-  totalDestination: string;
-  listAllowances: AllowanceItemModel[];
-  form: any;
-  destinationField: any;
-  updateDestination: any;
-  setTotalAllowance: any;
-  listDestination: DestinationModel[];
-  pajak: Pajak[];
-  purchasingGroup: PurchasingGroup[];
-  typeEdit: any;
-  dataTax: any;
-  dataPurchasingGroup: any;
-}) {
-  const [startDate, setStartDate] = React.useState<Date>();
-
-  const [endDate, setEndDate] = React.useState<Date>();
-
-  const [selectedDestinationIdex, setDestinationIndex] = React.useState<number>(0);
-
-  const { showToast } = useAlert();
-
-  return (
-    <Tabs defaultValue='destination1' className='w-full'>
-      <TabsList className={'flex items-center justify-start space-x-4'}>
-        {destinationField.map((field: any, index: number) => (
-          <TabsTrigger value={`destination${index + 1}`}>Destination {index + 1}</TabsTrigger>
-        ))}
-      </TabsList>
-
-      {destinationField.map((destination: any, index: number) => (
-        <BussinessDestinationForm
-          listAllowances={listAllowances}
-          updateDestination={updateDestination}
-          destination={destination}
-          form={form}
-          index={index}
-          setTotalAllowance={setTotalAllowance}
-          listDestination={listDestination}
-          pajak={pajak}
-          purchasingGroup={purchasingGroup}
-          typeEdit={typeEdit}
-          dataTax={dataTax}
-          dataPurchasingGroup={dataPurchasingGroup}
-        />
-      ))}
-    </Tabs>
-  );
-}
-
-export function BussinessDestinationForm({
-  form,
-  index,
-  destination,
-  updateDestination,
-  listAllowances,
-  setTotalAllowance,
-  listDestination,
-  pajak,
-  purchasingGroup,
-  typeEdit,
-  dataTax,
-  dataPurchasingGroup,
-}: {
-  form: any;
-  index: number;
-  destination: any;
-  updateDestination: any;
-  listAllowances: any;
-  setTotalAllowance: any;
-  listDestination: DestinationModel[];
-  pajak: Pajak[];
-  purchasingGroup: PurchasingGroup[];
-  typeEdit: any;
-  dataTax: any;
-  dataPurchasingGroup: any;
-}) {
-  const {
-    fields: detailAttedanceFields,
-    update: updateDetailAttedances,
-    append: detailAttedanceAppend,
-    remove: removeAttendace,
-  } = useFieldArray({
-    control: form.control,
-    name: `destinations.${index}.detail_attedances`,
-  });
-
-  const {
-    fields: allowancesField,
-    update: updateAllowance,
-    append: appendAllowance,
-    remove: removeAllowance,
-    replace: replaceAllowance,
-  } = useFieldArray({
-    control: form.control,
-    name: `destinations.${index}.allowances`,
-  });
-
-  //generate detail
-
-  function detailAttedancesGenerate() {
-    let momentStart = moment(destination.business_trip_start_date).startOf('day');
-    const momentEnd = moment(destination.business_trip_end_date).startOf('day');
-    removeAttendace();
-    removeAllowance();
-
-    while (momentStart.isBefore(momentEnd) || momentStart.isSame(momentEnd)) {
-      const object = {
-        date: momentStart.toDate(),
-        shift_code: 'SHIFTREGULAR',
-        shift_start: '08:00',
-        shift_end: '17:00',
-        end_time: '17:00',
-        start_time: '08:00',
-      };
-
-      detailAttedanceAppend(object);
-      momentStart = momentStart.add(1, 'days');
-    }
-
-    function generateDetailAllowanceByDate(price: string): any[] {
-      let momentStart = moment(destination.business_trip_start_date).startOf('day');
-      const momentEnd = moment(destination.business_trip_end_date).startOf('day');
-      const detailAllowance = [];
-
-      while (momentStart.isBefore(momentEnd) || momentStart.isSame(momentEnd)) {
-        detailAllowance.push({
-          date: momentStart.toDate(),
-          request_price: price,
-        });
-        momentStart = momentStart.add(1, 'days');
-      }
-      return detailAllowance;
-    }
-
-    const allowancesForm = listAllowances.map((item: any) => {
-      return {
-        name: item.name,
-        code: item.code,
-        default_price: parseInt(item.grade_price),
-        type: item.type,
-        subtotal: parseInt(item.grade_price),
-        currency: item.currency_id,
-        request_value: item.request_value,
-        detail:
-          item.type.toLowerCase() == 'total'
-            ? [
-                {
-                  date: null,
-                  request_price: parseInt(item.grade_price),
-                },
-              ]
-            : generateDetailAllowanceByDate(item.grade_price),
-      };
-    });
-    replaceAllowance(allowancesForm);
-  }
-
-  function endDateHandler(value: Date | undefined) {
-    updateDestination(index, {
-      ...destination,
-      business_trip_end_date: value,
-    });
-  }
-
-  const handleSelect = (value: string) => {
-    updateDestination(index, {
-      ...destination,
-      destination: value,
-    });
-  };
-
-  //   console.log(listDestination, 'listDestination 123');
-  return (
-    <TabsContent value={`destination${index + 1}`}>
-      <div key={index}>
-        <table className='text-xs mt-4 reimburse-form-detail font-thin'>
-          <tr>
-            <td width={200}>Destination {destination.destination}</td>
-            <td>
-              <FormField
-                control={form.control}
-                name={`destinations.${index}.destination`}
-                render={({ field }) => (
-                  <FormItem>
-                    {/* <FormLabel>Username</FormLabel> */}
-                    <FormControl>
-                      <Combobox
-                        data={listDestination.map((destination) => ({
-                          value: destination.destination ?? '', // or whatever unique identifier you have
-                          label: destination.destination ?? '',
-                        }))}
-                        onSelect={handleSelect}
-                      />
-                    </FormControl>
-                    {/* <FormDescription>This is your public display name.</FormDescription> */}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td width={200}>Pajak</td>
-            <td>
-              <FormAutocomplete<any>
-                options={dataTax}
-                fieldName={`destinations.${index}.pajak_id`}
-                isRequired={true}
-                disabled={false}
-                placeholder={'Select Pajak'}
-                classNames='mt-2 w-full'
-              />
-            </td>
-          </tr>
-          <tr>
-            <td width={200}>Purchasing Group</td>
-            <td>
-              <FormAutocomplete<any>
-                options={dataPurchasingGroup}
-                fieldName={`destinations.${index}.purchasing_group_id`}
-                isRequired={true}
-                disabled={false}
-                placeholder={'Select Purchasing Group'}
-                classNames='mt-2 w-full'
-              />
-            </td>
-          </tr>
-          <tr>
-            <td width={200}>Bussines Trip Date</td>
-            <td className='flex space-x-2 items-center'>
-              <FormField
-                control={form.control}
-                name={`destinations.${index}.business_trip_start_date`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <CustomDatePicker
-                        initialDate={destination.business_trip_start_date}
-                        onDateChange={(value) => {
-                          updateDestination(index, {
-                            ...destination,
-                            business_trip_start_date: value,
-                          });
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <span>To</span>
-              <FormField
-                control={form.control}
-                name={`destinations.${index}.business_trip_end_date`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <CustomDatePicker
-                        initialDate={destination.business_trip_end_date}
-                        onDateChange={(value) => {
-                          updateDestination(index, {
-                            ...destination,
-                            business_trip_end_date: value,
-                          });
-
-                          //   endDateHandler(value);
-                        }}
-                      />
-                    </FormControl>
-                    {/* <FormDescription>This is your public display name.</FormDescription> */}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button type='button' onClick={() => detailAttedancesGenerate()}>
-                Get Detail
-              </Button>
-            </td>
-          </tr>
-        </table>
-
-        <DetailAttedances
-          detailAttedanceFields={detailAttedanceFields}
-          form={form}
-          updateAttedanceFields={updateDetailAttedances}
-          destinationIndex={index}
-        />
-        <table className='text-xs mt-4 reimburse-form-detail font-thin'>
-          <tr>
-            <td className='text-sm'>Detail Bussines Trip Allowance:</td>
-            <td></td>
-          </tr>
-        </table>
-        <DetailAllowance allowanceField={allowancesField} destinationIndex={index} form={form} />
-      </div>
-
-      <ResultTotalItem
-        allowanceField={allowancesField}
-        destinationIndex={index}
-        form={form}
-        setTotalAllowance={setTotalAllowance}
-      />
-    </TabsContent>
-  );
-}
-
-export function ResultTotalItem({
-  allowanceField,
-  destinationIndex,
-  form,
-  setTotalAllowance,
-}: {
-  allowanceField: any;
-  destinationIndex: number;
-  form: any;
-  setTotalAllowance: any;
-}) {
-  const [grandTotal, setGrandTotal] = React.useState(0);
-
-  React.useEffect(() => {
-    // Hitung ulang total allowance setiap kali allowanceField atau form berubah
-    const newTotal = allowanceField.reduce((totalSum: number, allowance: any, index: number) => {
-      const details = form.getValues(`destinations.${destinationIndex}.allowances.${index}.detail`);
-
-      const itemTotal = calculateTotal(allowance, details);
-      return totalSum + itemTotal;
-    }, 0);
-
-    const alldestinations = form.getValues('destinations');
-
-    const totalAll = alldestinations.reduce(
-      (destinationSum: number, destination: any, destinationIndex: number) => {
-        const allowances = destination.allowances || [];
-
-        const allowanceTotal = allowances.reduce(
-          (allowanceSum: number, allowance: any, index: number) => {
-            const details = form.getValues(
-              `destinations.${destinationIndex}.allowances.${index}.detail`,
-            );
-
-            const itemTotal = calculateTotal(allowance, details);
-            return allowanceSum + itemTotal;
-          },
-          0,
-        );
-
-        return destinationSum + allowanceTotal;
-      },
-      0,
-    );
-
-    setGrandTotal(newTotal);
-    setTotalAllowance(totalAll);
-  }, [allowanceField, form.watch()]); // Menggunakan form.watch() agar memantau perubahan input
-  // Fungsi untuk menghitung total per allowance
-  const calculateTotal = (allowance: any, details: any) => {
-    if (allowance.type === 'total') {
-      const basePrice = parseFloat(details?.[0]?.request_price || 0);
-      return basePrice;
-    } else {
-      return details?.reduce(
-        (sum: number, item: any) => sum + parseFloat(item.request_price || 0),
-        0,
-      );
-    }
-  };
-
-  return (
-    <>
-      <table className='w-full text-sm mt-10'>
-        <thead>
-          <tr>
-            <th className='w-[50%]'>Item</th>
-            <th className='w-[50%]'>Sub Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {allowanceField.map((allowance: any, index: number) => (
-            <ResultPerItem
-              allowance={allowance}
-              destinationIndex={destinationIndex}
-              form={form}
-              allowanceIndex={index}
-            />
-          ))}
-        </tbody>
-        <tfoot className='mt-4'>
-          <tr className='font-bold'>
-            <td>
-              <i>Total Allowance</i>
-            </td>
-            <td className='flex justify-between pr-4'>
-              <span>
-                <i>IDR</i>
-              </span>
-              <span>
-                <i>{formatRupiah(grandTotal)}</i>
-              </span>
-            </td>
-          </tr>
-        </tfoot>
-      </table>
-    </>
-  );
-}
-
-export function ResultPerItem({
-  allowance,
-  destinationIndex,
-  form,
-  allowanceIndex,
-}: {
-  allowance: any;
-  destinationIndex: number;
-  form: any;
-  allowanceIndex: number;
-}) {
-  const basePrice = useWatch({
-    control: form.control,
-    name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${0}.request_price`, // pastikan memantau field request_price
-  });
-  // Memantau semua detail harga jika allowance.type !== 'TOTAL'
-  const details = useWatch({
-    control: form.control,
-    name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail`,
-  });
-
-  const calculateTotal = () => {
-    if (allowance.type === 'total') {
-      // Pastikan basePrice tidak NaN atau undefined
-      const price = parseFloat(basePrice || 0);
-      return price * 1; // Menghitung total dengan basePrice
-    } else {
-      let total = 0;
-      details?.forEach((detail: any) => {
-        const price = parseFloat(detail.request_price || 0); // Pastikan parsing harga detail
-        total += price; // Menghitung total dari setiap detail
-      });
-      return total;
-    }
-  };
-
-  return (
-    <tr key={allowance.id}>
-      <td>{allowance.name}</td>
-      <td className='flex justify-between pr-4'>
-        <span>IDR</span>
-        <span>{formatRupiah(calculateTotal())}</span>
-      </td>
-    </tr>
-  );
-}
-
-export function DetailAttedances({
-  form,
-  destinationIndex,
-  detailAttedanceFields,
-  updateAttedanceFields,
-}: {
-  form: any;
-  destinationIndex: number;
-  detailAttedanceFields: any;
-  updateAttedanceFields: any;
-}) {
-  const detailAttedanceWatch = form.watch(`destinations.${destinationIndex}.detail_attedances`);
-
-  React.useEffect(() => {}, [detailAttedanceWatch]);
-
-  React.useEffect(() => {
-    // console.log(detailAttedanceFields, ' Detail Attedance fields');
-  }, [detailAttedanceFields]);
-  return (
-    <table className='text-xs mt-4 reimburse-form-detail font-thin'>
-      <tr>
-        <td colSpan={2}>
-          <div className='mb-4 text-sm'>Detail Attedance: </div>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <table className='detail-attedance text-xs'>
-            <thead>
-              <th>Date</th>
-              <th>Shift code</th>
-              <th>Shift Start</th>
-              <th>Shift End</th>
-              <th>Start Time</th>
-              <th>End Time</th>
-            </thead>
-            <tbody>
-              {detailAttedanceFields.map((attedance: any, index: any) => (
-                <tr key={attedance.index}>
-                  <td>
-                    {moment(attedance.date).format('DD/MM/YYYY')}
-
-                    <FormField
-                      control={form.control}
-                      name={`destinations.${destinationIndex}.detail_attedances.${index}.date`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              defaultValue={moment(field.value).format('YYYY-MM-DD')}
-                              onChange={field.onChange}
-                              type='hidden'
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-
-                  <td>
-                    {attedance.shift_code}
-                    <FormField
-                      control={form.control}
-                      name={`destinations.${destinationIndex}.detail_attedances.${index}.shift_code`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              defaultValue={moment(field.value).format('YYYY-MM-DD')}
-                              onChange={field.onChange}
-                              type='hidden'
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                  <td>
-                    {attedance.shift_start}
-                    <FormField
-                      control={form.control}
-                      name={`destinations.${destinationIndex}.detail_attedances.${index}.shift_start`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              defaultValue={moment(field.value).format('YYYY-MM-DD')}
-                              onChange={field.onChange}
-                              type='hidden'
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                  <td>
-                    {attedance.shift_end}
-                    <FormField
-                      control={form.control}
-                      name={`destinations.${destinationIndex}.detail_attedances.${index}.shift_end`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              defaultValue={moment(field.value).format('YYYY-MM-DD')}
-                              onChange={field.onChange}
-                              type='hidden'
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                  <td>
-                    <FormField
-                      control={form.control}
-                      name={`destinations.${destinationIndex}.detail_attedances.${index}.start_time`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input defaultValue={field.value} onChange={field.onChange} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                  <td>
-                    <FormField
-                      control={form.control}
-                      name={`destinations.${destinationIndex}.detail_attedances.${index}.end_time`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input defaultValue={field.value} onChange={field.onChange} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </td>
-      </tr>
-    </table>
-  );
-}
-
-export function DetailAllowance({
-  form,
-  destinationIndex,
-  allowanceField,
-}: {
-  form: any;
-  destinationIndex: number;
-  allowanceField: any;
-}) {
-  return (
-    <table className='w-full allowance-table'>
-      {allowanceField.map((allowance: any, index: any) => (
-        <AllowanceRowInput
-          form={form}
-          allowance={allowance}
-          destinationIndex={destinationIndex}
-          allowanceIndex={index}
-        />
-      ))}
-    </table>
-  );
-}
-
-export function AllowanceRowInput({
-  form,
-  allowance,
-  destinationIndex,
-  allowanceIndex,
-}: {
-  form: any;
-  allowance: any;
-  destinationIndex: any;
-  allowanceIndex: any;
-}) {
-  const [isExpanded, setIsExpanded] = React.useState<boolean>(false);
-  const handleClikRow = (index: number) => {
-    setIsExpanded((prev) => !prev);
-  };
-  // Memantau base price jika allowance.type === 'TOTAL'
-  const basePrice = useWatch({
-    control: form.control,
-    name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${0}.request_price`, // pastikan memantau field request_price
-  });
-
-  // Memantau semua detail harga jika allowance.type !== 'TOTAL'
-  const details = useWatch({
-    control: form.control,
-    name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail`,
-  });
-
-  const calculateTotal = () => {
-    if (allowance.type === 'total') {
-      // Pastikan basePrice tidak NaN atau undefined
-      const price = parseFloat(basePrice || 0);
-      return price * 1; // Menghitung total dengan basePrice
-    } else {
-      let total = 0;
-      details?.forEach((detail: any) => {
-        const price = parseFloat(detail.request_price || 0); // Pastikan parsing harga detail
-        total += price; // Menghitung total dari setiap detail
-      });
-      return total;
-    }
-  };
-
-  const handleInputChange = (field: any) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(event.target.value) || 0;
-
-    if (allowance.request_value === 'unlimited') {
-      // No restrictions on input value
-      field.onChange(event);
-    } else if (allowance.request_value === 'up to max value') {
-      if (value <= allowance.subtotal) {
-        field.onChange(event);
-      } else {
-        alert(`Value cannot exceed the subtotal of IDR ${allowance.subtotal}`);
-      }
-    } else if (allowance.request_value === 'fixed value') {
-      // Do not allow changes for fixed value
-      alert('This value is fixed and cannot be changed.');
-    }
-  };
-  return (
-    <>
-      <tr key={allowance.id}>
-        <td width={220} style={{ verticalAlign: 'middle' }} className='text-sm'>
-          {allowance.name}
-        </td>
-        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>:</td>
-        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-          {allowance.type == 'total' ? <span className='text-sm'>IDR</span> : <span></span>}
-        </td>
-        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-          {allowance.type == 'total' ? (
-            <div className='flex items-center'>
-              <FormField
-                control={form.control}
-                name={`destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${0}.request_price`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input value={field.value} onChange={handleInputChange(field)} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <span className='text-sm'>* 100%</span>
-            </div>
-          ) : (
-            <span className='text-sm'>
-              {' '}
-              {allowance.detail.length} Days * {formatRupiah(allowance.subtotal)} * 100%
-            </span>
-          )}
-        </td>
-        <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-          <div className='flex items-center'>
-            <span className='text-sm' style={{ padding: '2px 5px' }}>
-              = IDR {formatRupiah(calculateTotal())}
-            </span>
-          </div>
-        </td>
-        {allowance.type == 'total' ? (
-          <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
-        ) : (
-          <td
-            style={{ verticalAlign: 'middle', padding: '2px 5px' }}
-            onClick={() => handleClikRow(allowanceIndex)}
-          >
-            <Button variant='ghost' type='button' size='sm' className='w-9 p-0'>
-              <ChevronsUpDown className='h-4 w-4' />
-              <span className='sr-only'>Toggle</span>
-            </Button>
-          </td>
-        )}
-      </tr>
-
-      {isExpanded && (
-        <>
-          {allowance.detail.map((detail: any, detailIndex: number) => (
-            <tr key={detail.id}>
-              <td className='text-end' style={{ verticalAlign: 'middle' }}>
-                <span className='text-sm'>{moment(detail.date).format('DD/MM/YYYY')}</span>{' '}
-              </td>
-              <td style={{ padding: '8px 2px', verticalAlign: 'middle' }}>:</td>
-              <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-                <span className='text-sm'>IDR</span>
-              </td>
-              <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
-                <div className='flex mt-1 text-sm justify-between items-center'>
-                  <FormField
-                    control={form.control}
-                    name={`destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${detailIndex}.request_price`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            value={field.value} // Ensure proper value binding
-                            // onChange={field.onChange} // Bind change handler to form control
-                            onChange={handleInputChange(field)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </td>
-              <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
-              <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}></td>
-            </tr>
-          ))}
-        </>
-      )}
-    </>
-  );
-}
 
 export function AllowanceInputForm({
   form,

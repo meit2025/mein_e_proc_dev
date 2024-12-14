@@ -46,9 +46,10 @@ interface listData {
   interface ComboboxProps {
     data: listData[];
     onSelect?: (selectedValue: string) => void; // Callback saat dipilih
+    values?: string;
   }
 
-export function Combobox({ data, onSelect }: ComboboxProps) {
+export function Combobox({ data, onSelect, values: initialValue }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState('');
 
@@ -58,6 +59,13 @@ export function Combobox({ data, onSelect }: ComboboxProps) {
     onSelect?.(newValue); // Kirim nilai ke parent jika ada
     setOpen(false);
   };
+
+  // Update state value saat prop value berubah
+  React.useEffect(() => {
+    if (initialValue !== undefined) {
+      setValue(initialValue);
+    }
+  }, [initialValue]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
