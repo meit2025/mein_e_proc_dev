@@ -57,6 +57,10 @@ export const Index = ({
   });
 
   function openFormHandler() {
+    setBusinessTripForm({
+        type: BusinessTripType.create,
+        id: null,
+    });
     setOpenForm(!openForm);
   }
 
