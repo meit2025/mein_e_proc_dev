@@ -39,7 +39,7 @@ export const Index = () => {
 
 // Assign layout to the page
 Index.layout = (page: ReactNode) => (
-  <MainLayout title='Valuation Type' description='Valuation Type Create PR'>
+  <MainLayout title='Valuation Type' description='Valuation Type Create'>
     {page}
   </MainLayout>
 );

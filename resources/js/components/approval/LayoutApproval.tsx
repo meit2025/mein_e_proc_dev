@@ -118,7 +118,7 @@ const LayoutApproval = ({
                 color='primary'
                 type='button'
               >
-                Approval
+                APPROVE
               </Button>
               <Button
                 onClick={() => handleOpen('Rejected')}
@@ -129,7 +129,7 @@ const LayoutApproval = ({
                 color='error'
                 type='button'
               >
-                Rejectd
+                REJECT
               </Button>
             </div>
           </div>

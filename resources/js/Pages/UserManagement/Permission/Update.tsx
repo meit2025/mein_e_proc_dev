@@ -61,7 +61,7 @@ const Update = ({ id }: { id: number }) => {
 
 // Assign layout to the page
 Update.layout = (page: ReactNode) => (
-  <MainLayout title='Dokument Type' description='Dokument Type Update'>
+  <MainLayout title='Document Type' description='Document Type Update'>
     {page}
   </MainLayout>
 );

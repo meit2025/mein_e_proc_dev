@@ -60,7 +60,7 @@ export const columns: GridColDef[] = [
   },
   {
     field: 'created_by.name',
-    headerName: 'Requester By',
+    headerName: 'Requested By',
     width: 200,
     filterable: false,
     renderCell: ({ row: { created_by: e } }) => e?.name ?? 'Unknown',
