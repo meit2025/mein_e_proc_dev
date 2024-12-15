@@ -45,12 +45,6 @@ import {
   CREATE_API_BUSINESS_TRIP,
   EDIT_API_BUSINESS_TRIP,
   GET_DETAIL_BUSINESS_TRIP,
-  GET_LIST_COST_CENTER,
-  GET_LIST_DESTINATION,
-  GET_LIST_EMPLOYEE,
-  GET_LIST_PURCHASING_GROUP,
-  GET_LIST_PURPOSE_TYPE,
-  GET_LIST_TAX,
 } from '@/endpoint/business-trip/api';
 import {
   GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE,
@@ -107,7 +101,6 @@ interface Props {
 export function BussinesTripDestination({
   updateDestination,
   destinationField,
-  listDestination = [],
   form,
   listAllowances,
   totalDestination,
@@ -117,10 +110,11 @@ export function BussinesTripDestination({
   dataTax,
   dataPurchasingGroup,
   dataDestination,
+  type,
+  btEdit
 }: {
   updateDestination: any;
   destinationField: any;
-  listDestination: DestinationModel[];
   form: any;
   listAllowances: AllowanceItemModel[];
   totalDestination: string;
@@ -130,13 +124,12 @@ export function BussinesTripDestination({
   dataTax: any;
   dataPurchasingGroup: any;
   dataDestination: any;
+  type: any;
+  btEdit: any;
 }) {
   const [startDate, setStartDate] = React.useState<Date>();
-
   const [endDate, setEndDate] = React.useState<Date>();
-
   const [selectedDestinationIdex, setDestinationIndex] = React.useState<number>(0);
-
   const { showToast } = useAlert();
 
   return (
@@ -155,12 +148,13 @@ export function BussinesTripDestination({
           form={form}
           index={index}
           setTotalAllowance={setTotalAllowance}
-          listDestination={listDestination}
           pajak={pajak}
           purchasingGroup={purchasingGroup}
           dataTax={dataTax}
           dataPurchasingGroup={dataPurchasingGroup}
           dataDestination={dataDestination}
+          type={type}
+          btEdit={BusinessTripType.edit}
         />
       ))}
     </Tabs>

@@ -45,12 +45,6 @@ import {
   CREATE_API_BUSINESS_TRIP,
   EDIT_API_BUSINESS_TRIP,
   GET_DETAIL_BUSINESS_TRIP,
-  GET_LIST_COST_CENTER,
-  GET_LIST_DESTINATION,
-  GET_LIST_EMPLOYEE,
-  GET_LIST_PURCHASING_GROUP,
-  GET_LIST_PURPOSE_TYPE,
-  GET_LIST_TAX,
 } from '@/endpoint/business-trip/api';
 import {
   GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE,
@@ -113,12 +107,13 @@ export function BussinessDestinationForm({
   updateDestination,
   listAllowances,
   setTotalAllowance,
-  listDestination,
   pajak,
   purchasingGroup,
   dataTax,
   dataPurchasingGroup,
   dataDestination,
+  type,
+  btEdit
 }: {
   form: any;
   index: number;
@@ -126,12 +121,13 @@ export function BussinessDestinationForm({
   updateDestination: any;
   listAllowances: any;
   setTotalAllowance: any;
-  listDestination: DestinationModel[];
   pajak: Pajak[];
   purchasingGroup: PurchasingGroup[];
   dataTax: any;
   dataPurchasingGroup: any;
   dataDestination: any;
+  type: any;
+  btEdit: any;
 }) {
   const {
     fields: detailAttedanceFields,
@@ -214,20 +210,6 @@ export function BussinessDestinationForm({
     replaceAllowance(allowancesForm);
   }
 
-  function endDateHandler(value: Date | undefined) {
-    updateDestination(index, {
-      ...destination,
-      business_trip_end_date: value,
-    });
-  }
-
-  const handleSelect = (value: string) => {
-    updateDestination(index, {
-      ...destination,
-      destination: value,
-    });
-  };
-
   //   console.log(listDestination, 'listDestination 123');
   return (
     <TabsContent value={`destination${index + 1}`}>
@@ -241,7 +223,7 @@ export function BussinessDestinationForm({
                 options={dataDestination}
                 fieldName={`destinations.${index}.destination`}
                 isRequired={true}
-                disabled={false}
+                disabled={type == btEdit ? (form.watch(`destinations.${index}.destination`) ? true : false) : false}
                 placeholder={'Select Destination'}
                 classNames='mt-2 w-full'
                 onChangeOutside={(value) => {
@@ -261,7 +243,7 @@ export function BussinessDestinationForm({
                 options={dataTax}
                 fieldName={`destinations.${index}.pajak_id`}
                 isRequired={true}
-                disabled={false}
+                disabled={type == btEdit ? (form.watch(`destinations.${index}.pajak_id`) ? true : false) : false}
                 placeholder={'Select Pajak'}
                 classNames='mt-2 w-full'
                 onChangeOutside={(value) => {
@@ -281,15 +263,15 @@ export function BussinessDestinationForm({
                 options={dataPurchasingGroup}
                 fieldName={`destinations.${index}.purchasing_group_id`}
                 isRequired={true}
-                disabled={false}
+                disabled={type == btEdit ? (form.watch(`destinations.${index}.purchasing_group_id`) ? true : false) : false}
                 placeholder={'Select Purchasing Group'}
                 classNames='mt-2 w-full'
                 onChangeOutside={(value) => {
-                    updateDestination(index, {
-                      ...destination,
-                      purchasing_group_id: value,
-                    });
-                  }}
+                  updateDestination(index, {
+                    ...destination,
+                    purchasing_group_id: value,
+                  });
+                }}
               />
             </td>
           </tr>
@@ -310,6 +292,7 @@ export function BussinessDestinationForm({
                             business_trip_start_date: value,
                           });
                         }}
+                        disabled={type == btEdit ? (form.watch(`destinations.${index}.business_trip_start_date`) ? true : false) : false}
                       />
                     </FormControl>
                     <FormMessage />
@@ -331,9 +314,8 @@ export function BussinessDestinationForm({
                             ...destination,
                             business_trip_end_date: value,
                           });
-
-                          //   endDateHandler(value);
                         }}
+                        disabled={type == btEdit ? (form.watch(`destinations.${index}.business_trip_end_date`) ? true : false) : false}
                       />
                     </FormControl>
                     {/* <FormDescription>This is your public display name.</FormDescription> */}
@@ -342,7 +324,11 @@ export function BussinessDestinationForm({
                 )}
               />
 
-              <Button type='button' onClick={() => detailAttedancesGenerate()}>
+              <Button
+                type='button'
+                className={type == btEdit ? (form.watch(`destinations.${index}.destination`) ? 'hidden' : '') : ''}
+                onClick={() => detailAttedancesGenerate()}
+              >
                 Get Detail
               </Button>
             </td>
@@ -354,6 +340,8 @@ export function BussinessDestinationForm({
           form={form}
           updateAttedanceFields={updateDetailAttedances}
           destinationIndex={index}
+          type={type}
+          btEdit={btEdit}
         />
         <table className='text-xs mt-4 reimburse-form-detail font-thin'>
           <tr>
@@ -361,7 +349,7 @@ export function BussinessDestinationForm({
             <td></td>
           </tr>
         </table>
-        <DetailAllowance allowanceField={allowancesField} destinationIndex={index} form={form} />
+        <DetailAllowance allowanceField={allowancesField} destinationIndex={index} form={form} type={type} btEdit={btEdit} />
       </div>
 
       <ResultTotalItem

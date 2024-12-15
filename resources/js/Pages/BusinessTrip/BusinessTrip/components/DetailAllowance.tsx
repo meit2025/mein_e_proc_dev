@@ -6,113 +6,32 @@ import {
     FormLabel,
     FormMessage,
   } from '@/components/shacdn/form';
-  
-  import { z } from 'zod';
-  
-  import { Inertia } from '@inertiajs/inertia';
-  
+
   import { Button } from '@/components/shacdn/button';
   import { ChevronsUpDown } from 'lucide-react';
-  
-  import { Textarea } from '@/components/shacdn/textarea';
-  import { zodResolver } from '@hookform/resolvers/zod';
+
   import { useFieldArray, useForm, useWatch } from 'react-hook-form';
-  
-  import { ScrollArea } from '@/components/shacdn/scroll-area';
-  import { Separator } from '@/components/shacdn/separator';
+
   import '../css/index.scss';
-  
-  import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
-  
-  import axiosInstance from '@/axiosInstance';
-  import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
-  import {
-    WorkflowApprovalDiagramInterface,
-    WorkflowApprovalStepInterface,
-    WorkflowComponent,
-  } from '@/components/commons/WorkflowComponent';
-  import FormSwitch from '@/components/Input/formSwitchCustom';
+
   import { Input } from '@/components/shacdn/input';
-  import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-  } from '@/components/shacdn/select';
-  import { useAlert } from '@/contexts/AlertContext';
-  import {
-    CREATE_API_BUSINESS_TRIP,
-    EDIT_API_BUSINESS_TRIP,
-    GET_DETAIL_BUSINESS_TRIP,
-    GET_LIST_COST_CENTER,
-    GET_LIST_DESTINATION,
-    GET_LIST_EMPLOYEE,
-    GET_LIST_PURCHASING_GROUP,
-    GET_LIST_PURPOSE_TYPE,
-    GET_LIST_TAX,
-  } from '@/endpoint/business-trip/api';
-  import {
-    GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE,
-    GET_DETAIL_PURPOSE_TYPE,
-  } from '@/endpoint/purpose-type/api';
-  import { Button as ButtonMui } from '@mui/material';
-  import axios, { AxiosError } from 'axios';
   import moment from 'moment';
   import * as React from 'react';
-  import { DestinationModel } from '../../Destination/models/models';
   import { PurposeTypeModel } from '../../PurposeType/models/models';
-  import {
-    AllowanceItemModel,
-    BusinessTripType,
-    Costcenter,
-    Pajak,
-    PurchasingGroup,
-  } from '../models/models';
-  import { GET_LIST_DESTINATION_BY_TYPE } from '@/endpoint/destination/api';
-  import useDropdownOptions from '@/lib/getDropdown';
-  import FormAutocomplete from '@/components/Input/formDropdown';
   import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
-  import { Combobox } from '@/components/shacdn/combobox';
-  import { BussinessDestinationForm } from './BussinessDestinationForm';
-  
-  interface User {
-    id: string;
-    nip: string;
-    name: string;
-  }
-  
-  interface Type {
-    id: string;
-    code: string;
-    name: string;
-  }
-  
-  interface CurrencyModel {
-    id: string;
-    code: string;
-  }
-  
-  interface BusinessTripAttachement {
-    id: number;
-    url: string;
-    file_name: string;
-  }
-  
-  interface Props {
-    users: User[];
-    listPurposeType: PurposeTypeModel[];
-  }
-  
 
 export function DetailAllowance({
     form,
     destinationIndex,
     allowanceField,
+    type,
+    btEdit
   }: {
     form: any;
     destinationIndex: number;
     allowanceField: any;
+    type: any;
+    btEdit: any;
   }) {
     return (
       <table className='w-full allowance-table'>
@@ -122,22 +41,28 @@ export function DetailAllowance({
             allowance={allowance}
             destinationIndex={destinationIndex}
             allowanceIndex={index}
+            type={type}
+            btEdit={btEdit}
           />
         ))}
       </table>
     );
   }
-  
+
   export function AllowanceRowInput({
     form,
     allowance,
     destinationIndex,
     allowanceIndex,
+    type,
+    btEdit
   }: {
     form: any;
     allowance: any;
     destinationIndex: any;
     allowanceIndex: any;
+    type:any;
+    btEdit:any;
   }) {
     const [isExpanded, setIsExpanded] = React.useState<boolean>(false);
     const handleClikRow = (index: number) => {
@@ -148,13 +73,13 @@ export function DetailAllowance({
       control: form.control,
       name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${0}.request_price`, // pastikan memantau field request_price
     });
-  
+
     // Memantau semua detail harga jika allowance.type !== 'TOTAL'
     const details = useWatch({
       control: form.control,
       name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail`,
     });
-  
+
     const calculateTotal = () => {
       if (allowance.type === 'total') {
         // Pastikan basePrice tidak NaN atau undefined
@@ -169,10 +94,10 @@ export function DetailAllowance({
         return total;
       }
     };
-  
+
     const handleInputChange = (field: any) => (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = parseFloat(event.target.value) || 0;
-  
+
       if (allowance.request_value === 'unlimited') {
         // No restrictions on input value
         field.onChange(event);
@@ -206,7 +131,10 @@ export function DetailAllowance({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Input value={field.value} onChange={handleInputChange(field)} />
+                        <Input
+                        value={field.value}
+                        disabled={type == btEdit ? (form.watch(`destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${0}.request_price`) ? true : false) : false}
+                        onChange={handleInputChange(field)} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -242,7 +170,7 @@ export function DetailAllowance({
             </td>
           )}
         </tr>
-  
+
         {isExpanded && (
           <>
             {allowance.detail.map((detail: any, detailIndex: number) => (
@@ -265,6 +193,7 @@ export function DetailAllowance({
                             <Input
                               value={field.value} // Ensure proper value binding
                               // onChange={field.onChange} // Bind change handler to form control
+                              disabled={type == btEdit ? (form.watch(`destinations.${destinationIndex}.allowances.${allowanceIndex}.detail.${detailIndex}.request_price`) ? true : false) : false}
                               onChange={handleInputChange(field)}
                             />
                           </FormControl>
