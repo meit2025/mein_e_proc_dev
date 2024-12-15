@@ -29,7 +29,7 @@ function Create() {
 
 // Assign layout to the page
 Create.layout = (page: ReactNode) => (
-  <MainLayout title='Gateway' description='Gateway Secret Create'>
+  <MainLayout title='Valuation Type' description='Valuation Type Create'>
     {page}
   </MainLayout>
 );
