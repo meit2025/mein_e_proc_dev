@@ -358,14 +358,6 @@ class BusinessTripController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
-    {
-        dd($request->all(), $id);
-    }
-
-    /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)
@@ -420,13 +412,10 @@ class BusinessTripController extends Controller
                     // Ambil nama asli file
                     $originalName = pathinfo($row->getClientOriginalName(), PATHINFO_FILENAME);
                     $extension = $row->getClientOriginalExtension();
-
                     // Tambahkan timestamp di akhir nama file
                     $timestampedName = $originalName . '_' . time() . '.' . $extension;
-
                     // Simpan file dengan nama yang telah dimodifikasi
                     $filePath = $row->storeAs('business_trip', $timestampedName, 'public');
-
                     // Simpan data ke database
                     BusinessTripAttachment::create([
                         'business_trip_id' => $businessTrip->id,
@@ -535,6 +524,46 @@ class BusinessTripController extends Controller
 
 
         return $this->successResponse($data);
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $businessTrip = BusinessTrip::find($id);
+            $businessTrip->remarks = $request->remark;
+            $businessTrip->save();
+
+            // DELETE ATTACHMENT DULU JIKA ADA YANG DI HAPUS
+            $array_id_exist = [];
+            foreach ($request->file_existing as $key => $attachment) {
+                $decode = json_decode($attachment);
+                $array_id_exist[] = $decode->id;
+            }
+            $businessTrip->attachment()->whereNotIn('id', $array_id_exist)->delete();
+            // BARU TAMBAH ATTACHMENT
+
+            if ($request->attachment != null) {
+                foreach ($request->attachment as $row) {
+                    // Ambil nama asli file
+                    $originalName = pathinfo($row->getClientOriginalName(), PATHINFO_FILENAME);
+                    $extension = $row->getClientOriginalExtension();
+                    // Tambahkan timestamp di akhir nama file
+                    $timestampedName = $originalName . '_' . time() . '.' . $extension;
+                    // Simpan file dengan nama yang telah dimodifikasi
+                    $filePath = $row->storeAs('business_trip', $timestampedName, 'public');
+                    // Simpan data ke database
+                    BusinessTripAttachment::create([
+                        'business_trip_id' => $businessTrip->id,
+                        'file_path' => 'business_trip', // Folder tempat file disimpan
+                        'file_name' => $timestampedName, // Nama file dengan timestamp
+                    ]);
+                }
+            }
+
+            // return $this->successResponse("Updated successfully");
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
     }
 
     function printAPI($id)
@@ -743,68 +772,6 @@ class BusinessTripController extends Controller
                 'total_cash_advance' => number_format($destination->total_cash_advance, 0, ',', '.'),
             ];
         }
-        return $this->successResponse($data);
-    }
-
-    function dropdownEmployee(Request $request)
-    {
-        $data = User::selectRaw("name || ' [' || nip || ']' as label, CAST(id AS TEXT) as value");
-        if (Auth::user()->is_admin == 0) $data = $data->where('id', Auth::user()->id);
-        if ($request->search) {
-            $data = $data->where('name', 'ilike', '%' . $request->search . '%')->orWhere('nip', 'ilike', '%' . $request->search . '%');
-        }
-
-        $data = $data->limit(50)->get();
-        return $this->successResponse($data);
-    }
-
-    function dropdownPurposeType(Request $request)
-    {
-        $data = PurposeType::selectRaw("name as label, CAST(id AS TEXT) as value");
-        if ($request->search) {
-            $data = $data->where('name', 'ILIKE', '%' . $request->search . '%');
-        }
-        $data = $data->limit(30)->get();
-        return $this->successResponse($data);
-    }
-
-    function dropdownCostCenter(Request $request)
-    {
-        $data = MasterCostCenter::selectRaw("cost_center as label, CAST(id AS TEXT) as value");
-        if ($request->search) {
-            $data = $data->where('cost_center', 'ILIKE', '%' . $request->search . '%');
-        }
-        $data = $data->limit(30)->get();
-        return $this->successResponse($data);
-    }
-
-    function dropdownDestination(Request $request)
-    {
-        $data = Destination::selectRaw("destination as label, CAST(destination AS TEXT) as value");
-        if ($request->search) {
-            $data = $data->where('destination', 'ILIKE', '%' . $request->search . '%');
-        }
-        $data = $data->limit(30)->get();
-        return $this->successResponse($data);
-    }
-
-    function dropdownTax(Request $request)
-    {
-        $data = Pajak::selectRaw("mwszkz || ' [' || description || ']' as label, CAST(id AS TEXT) as value");
-        if ($request->search) {
-            $data = $data->where('mwszkz', 'ILIKE', '%' . $request->search . '%')->orWhere('description', 'ILIKE', '%' . $request->search . '%');
-        }
-        $data = $data->limit(30)->get();
-        return $this->successResponse($data);
-    }
-
-    function dropdownPurchasingGroup(Request $request)
-    {
-        $data = PurchasingGroup::selectRaw("purchasing_group as label, CAST(id AS TEXT) as value");
-        if ($request->search) {
-            $data = $data->where('purchasing_group', 'ILIKE', '%' . $request->search . '%');
-        }
-        $data = $data->limit(30)->get();
         return $this->successResponse($data);
     }
 }

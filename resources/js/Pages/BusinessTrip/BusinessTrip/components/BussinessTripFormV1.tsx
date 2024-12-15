@@ -45,12 +45,6 @@ import {
   CREATE_API_BUSINESS_TRIP,
   EDIT_API_BUSINESS_TRIP,
   GET_DETAIL_BUSINESS_TRIP,
-  GET_LIST_COST_CENTER,
-  GET_LIST_DESTINATION,
-  GET_LIST_EMPLOYEE,
-  GET_LIST_PURCHASING_GROUP,
-  GET_LIST_PURPOSE_TYPE,
-  GET_LIST_TAX,
 } from '@/endpoint/business-trip/api';
 import {
   GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE,
@@ -75,6 +69,7 @@ import FormAutocomplete from '@/components/Input/formDropdown';
 import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 import { Combobox } from '@/components/shacdn/combobox';
 import { BussinesTripDestination } from './BussinesTripDestination';
+import { jsx } from 'react/jsx-runtime';
 
 interface User {
   id: string;
@@ -230,10 +225,6 @@ export const BussinessTripFormV1 = ({
     business_trip_end_date: Date;
   }
 
-  //   React.useEffect(() => {
-  //     console.log('Form Errors:', form.formState.errors);
-  //   }, [form.formState.errors]);
-
   const [fileAttachment, setfileAttachment] = React.useState<BusinessTripAttachement[]>([]);
 
   async function getDetailData() {
@@ -243,12 +234,16 @@ export const BussinessTripFormV1 = ({
     try {
       const response = await axios.get(url);
       const data = response.data.data;
-      //   console.log(data,' data nya');
-      const getDestination = GET_LIST_DESTINATION_BY_TYPE(data.purpose_type_id);
-      const responseDestination = await axiosInstance.get(getDestination);
-      setListDestination(responseDestination.data.data as DestinationModel[]);
+      getDestination('', {
+        name: 'destination',
+        id: 'destination',
+        tabel: 'destinations',
+        where: {
+          key: 'type',
+          parameter: response.data.data.purpose_type.type,
+        },
+      });
       setfileAttachment(data.attachments as BusinessTripAttachement[]);
-
       form.setValue('purpose_type_id', data.purpose_type_id.toString());
       form.setValue('request_for', data.request_for.id.toString());
       form.setValue('cost_center_id', data.cost_center_id.toString());
@@ -258,16 +253,13 @@ export const BussinessTripFormV1 = ({
       form.setValue('reference_number', data.reference_number);
       form.setValue('total_percent', data.total_percent);
       form.setValue('total_cash_advance', data.total_cash_advance);
+      console.log(data.destinations, ' data.destinations');
       form.setValue(
         'destinations',
         data.destinations.map((destination: any) => ({
           destination: destination.destination,
           pajak_id: destination.pajak_id,
           purchasing_group_id: destination.purchasing_group_id,
-          //   cash_advance: destination.cash_advance == 1 ? true : false,
-          //   reference_number: destination.reference_number,
-          //   total_percent: destination.total_percent,
-          //   total_cash_advance: destination.total_cash_advance,
           business_trip_start_date: new Date(destination.business_trip_start_date),
           business_trip_end_date: new Date(destination.business_trip_end_date),
           detail_attedances: destination.detail_attedances.map((detail: any) => {
@@ -297,7 +289,6 @@ export const BussinessTripFormV1 = ({
   }
 
   const [listAllowances, setListAllowances] = React.useState<AllowanceItemModel[]>([]);
-  const [listDestination, setListDestination] = React.useState<DestinationModel[]>([]);
   const [typePurpose, setTypePurpose] = React.useState<string>('');
   const { dataDropdown: dataDestination, getDropdown: getDestination } = useDropdownOptions();
 
@@ -309,12 +300,9 @@ export const BussinessTripFormV1 = ({
     form.setValue('purpose_type_id', value || '');
     const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
     const url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
-    // const getDestination = GET_LIST_DESTINATION_BY_TYPE(value);
     const getPurposeType = GET_DETAIL_PURPOSE_TYPE(value);
     try {
       const response = await axiosInstance.get(url);
-      //   const responseDestination = await axiosInstance.get(getDestination);
-      //   console.log(responseDestination.data.data, 'responseDestination');
       const responsePurposeType = await axiosInstance.get(getPurposeType);
       const typePurpose = responsePurposeType.data.data.purpose.type;
       if (typePurpose == 'international') {
@@ -322,7 +310,6 @@ export const BussinessTripFormV1 = ({
       }
       setTypePurpose(typePurpose);
       setListAllowances(response.data.data as AllowanceItemModel[]);
-      //   setListDestination(responseDestination.data.data as DestinationModel[]);
       getDestination('', {
         name: 'destination',
         id: 'destination',
@@ -347,7 +334,7 @@ export const BussinessTripFormV1 = ({
   const { showToast } = useAlert();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values, ' valuesss');
+    console.log(fileAttachment, ' valuesss');
     try {
       const formData = new FormData();
       const totalAll = getTotalDes();
@@ -404,7 +391,19 @@ export const BussinessTripFormV1 = ({
         });
         showToast('succesfully created data', 'success');
       } else {
-        await Inertia.post(`${EDIT_API_BUSINESS_TRIP}/${id}`, formData, {
+        const formDataEdit = new FormData();
+        formDataEdit.append('remark', values.remark ?? '');
+        values.attachment.forEach((file: any, index: number) => {
+          if (file) {
+            formDataEdit.append(`attachment[${index}]`, file);
+          }
+        });
+        fileAttachment.forEach((file: any, index: number) => {
+          if (file) {
+            formDataEdit.append(`file_existing[${index}]`, JSON.stringify(file));
+          }
+        });
+        await Inertia.post(`${EDIT_API_BUSINESS_TRIP}/${id}`, formDataEdit, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -461,19 +460,19 @@ export const BussinessTripFormV1 = ({
     name: 'destinations',
   });
 
+  // console.log(BusinessTripType.edit, ' business edit');
+  // console.log(type, ' id type');
   React.useEffect(() => {
-    // console.log(BusinessTripType.edit, ' business edit');
-    // console.log(type, ' id type');
     if (id && type == BusinessTripType.edit) {
       getDetailData();
     }
-  }, []);
+  }, [type]);
 
   React.useEffect(() => {
     if (type == BusinessTripType.create) {
       setAllowancesProperty();
     }
-  }, [totalDestination, listAllowances, id, type, isAdmin, idUser]);
+  }, [totalDestination, listAllowances, isAdmin, idUser]);
 
   const [isShow, setIsShow] = React.useState(false);
   const [approvalRoute, setApprovalRoute] = React.useState({
@@ -552,7 +551,7 @@ export const BussinessTripFormV1 = ({
           approvalFrom,
           acknowledgeFrom: acknowledgeFrom,
         };
-        console.log(dataApproval);
+        // console.log(dataApproval);
         setApprovalRoute(dataApproval);
         setIsShow(true);
       }
@@ -633,11 +632,13 @@ export const BussinessTripFormV1 = ({
       name: 'mwszkz',
       id: 'id',
       tabel: 'pajaks',
+      idType: 'string',
     });
     getPurchasingGroup('', {
       name: 'purchasing_group',
       id: 'id',
       tabel: 'purchasing_groups',
+      idType: 'string',
     });
   }, []);
 
@@ -649,7 +650,7 @@ export const BussinessTripFormV1 = ({
     }
   }, []);
 
-  console.log(dataDestination, 'data destination');
+  //   console.log(form.watch('purpose_type_id'), 'sini');
   return (
     <ScrollArea className='h-[600px] w-full '>
       <Form {...form}>
@@ -667,7 +668,15 @@ export const BussinessTripFormV1 = ({
                   options={dataEmployee}
                   fieldName='request_for'
                   isRequired={true}
-                  disabled={isAdmin == '0'}
+                  disabled={
+                    type == BusinessTripType.edit
+                      ? form.watch(`request_for`)
+                        ? true
+                        : false
+                      : isAdmin == '0'
+                        ? true
+                        : false
+                  }
                   placeholder={'Select Employee'}
                   classNames='mt-2 w-full'
                   onChangeOutside={(value) => {
@@ -684,7 +693,13 @@ export const BussinessTripFormV1 = ({
                   options={dataPurposeType}
                   fieldName='purpose_type_id'
                   isRequired={true}
-                  disabled={false}
+                  disabled={
+                    type == BusinessTripType.edit
+                      ? form.watch(`purpose_type_id`)
+                        ? true
+                        : false
+                      : false
+                  }
                   placeholder={'Select Purpose Type'}
                   classNames='mt-2 w-full'
                   onChangeOutside={async (value: string, data: any) => {
@@ -701,7 +716,13 @@ export const BussinessTripFormV1 = ({
                   options={dataCostCenter}
                   fieldName='cost_center_id'
                   isRequired={true}
-                  disabled={false}
+                  disabled={
+                    type == BusinessTripType.edit
+                      ? form.watch(`cost_center_id`)
+                        ? true
+                        : false
+                      : false
+                  }
                   placeholder={'Select Cost Center'}
                   classNames='mt-2 w-full'
                 />
@@ -772,25 +793,27 @@ export const BussinessTripFormV1 = ({
             {fileAttachment.length > 0 && (
               <tr>
                 <td width={200}></td>
-                {fileAttachment.map((attachment: any, index: number) => (
-                  <td className='flex flex-col pb-3'>
-                    <a
-                      href={attachment.url}
-                      target='_blank'
-                      className='text-blue-500 inline-block'
-                      key={index}
-                    >
-                      {attachment.file_name}
-                    </a>
-                    <button
-                      type='button'
-                      onClick={() => handleDelete(attachment.id)}
-                      className='text-red-500 mt-2'
-                    >
-                      Delete
-                    </button>
-                  </td>
-                ))}
+                <td className='pb-3'>
+                  {fileAttachment.map((attachment: any, index: number) => (
+                    <div className='flex items-center gap-4'>
+                      <a
+                        href={attachment.url}
+                        target='_blank'
+                        className='text-blue-500 inline-block'
+                        key={index}
+                      >
+                        {attachment.file_name}
+                      </a>
+                      <button
+                        type='button'
+                        onClick={() => handleDelete(attachment.id)}
+                        className='text-red-500 mt-2 inline-block ml-2 cursor-pointer'
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                </td>
               </tr>
             )}
             <tr>
@@ -810,7 +833,15 @@ export const BussinessTripFormV1 = ({
                         <Select
                           value={field.value.toString()}
                           onValueChange={totalDestinationHandler}
-                          disabled={typePurpose === 'international'}
+                          disabled={
+                            type == BusinessTripType.edit
+                              ? form.watch(`total_destination`)
+                                ? true
+                                : false
+                              : typePurpose == 'international'
+                                ? true
+                                : false
+                          }
                         >
                           <SelectTrigger className='w-[200px] py-2'>
                             <SelectValue placeholder='-- Select Bussiness Trip --' />
@@ -838,7 +869,6 @@ export const BussinessTripFormV1 = ({
           <BussinesTripDestination
             updateDestination={updateDestination}
             destinationField={destinationField}
-            listDestination={listDestination}
             form={form}
             listAllowances={listAllowances}
             totalDestination={form.getValues('total_destination').toString()}
@@ -848,6 +878,8 @@ export const BussinessTripFormV1 = ({
             dataTax={dataTax}
             dataPurchasingGroup={dataPurchasingGroup}
             dataDestination={dataDestination}
+            type={type}
+            btEdit={BusinessTripType.edit}
           />
           <Separator className='my-4' />
 
