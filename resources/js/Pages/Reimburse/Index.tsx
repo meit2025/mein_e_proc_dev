@@ -6,6 +6,7 @@ import {
   STORE_REIMBURSE,
   UPDATE_REIMBURSE,
 } from '@/endpoint/reimburse/api';
+import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import { FormType } from '@/lib/utils';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import React, { ReactNode } from 'react';
@@ -66,15 +67,9 @@ export const Index = ({
     setOpenForm(!openForm);
   }
 
-  const [selectValue, setSelectValue] = React.useState('');
-
   return (
     <>
       <div className='flex md:mb-4 mb-2 w-full justify-end'>
-        {/* <Button onClick={openFormHandler}>
-          <PlusIcon />
-        </Button> */}
-
         <CustomDialog
           onClose={() => setOpenForm(false)}
           open={openForm}
@@ -99,6 +94,32 @@ export const Index = ({
             }}
           />
         </CustomDialog>
+      </div>
+
+      <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
+          <div>
+            {/* <FormField
+                control={form.control}
+                name='created_at'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <CustomDatePicker
+                        initialDate={field.value}
+                        onDateChange={(date) => field.onChange(date)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              /> */}
+              {/* <label htmlFor="">Created Date: </label>
+              <CustomDatePicker
+              className='!w-full'
+                // initialDate={field.value}
+                // onDateChange={(date) => field.onChange(date)}
+              /> */}
+          </div>
       </div>
 
       <DataGridComponent
