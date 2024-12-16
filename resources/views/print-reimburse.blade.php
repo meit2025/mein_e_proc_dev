@@ -85,7 +85,7 @@
     <p><strong>Request No.:</strong> {{$data['group']['code']}}</p>
     <p><strong>Company:</strong> PT. Mitsubishi Electric Indonesia</p>
     <p><strong>Request For:</strong> {{$data['group']['user']['name']}}</p>
-    <p><strong>Requested By: {{$data['group']['userCreateRequest']['name']}}</p>
+    <p><strong>Requested By:</strong> {{$data['group']['userCreateRequest']['name']}}</p>
     <p><strong>Status:</strong> <span class="status-approved">Fully Approved</span></p>
 
     @php
