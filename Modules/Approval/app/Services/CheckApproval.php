@@ -37,7 +37,7 @@ class CheckApproval
     private function applyConditions($query, $conditions, $value)
     {
         foreach ($conditions as $key => $condition) {
-            $result = $query->$condition->first();
+            $result = $query->where($condition)->first();
             if ($result) {
                 return $result;
             }
