@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Modules\Approval\Models\ApprovalConditionalUsers;
+use Modules\Approval\Models\ApprovalConditionalUsersRoute;
 use Modules\BusinessTrip\Models\BusinessTripGradeUser;
 use Modules\Master\Models\Family;
 use Modules\Master\Models\MasterBusinessPartner;
@@ -102,5 +104,15 @@ class User extends Authenticatable
     public function notifikasis()
     {
         return $this->hasMany(Notifikasi::class);
+    }
+
+    public function approvalConditionalUserRoutes()
+    {
+        return $this->hasMany(ApprovalConditionalUsersRoute::class);
+    }
+
+    public function approvalConditionalUsers()
+    {
+        return $this->belongsToMany(ApprovalConditionalUsers::class, 'approval_conditional_users_to_users', 'user_id', 'approval_conditional_users_id');
     }
 }

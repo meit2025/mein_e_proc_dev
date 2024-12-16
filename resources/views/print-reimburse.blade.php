@@ -85,7 +85,7 @@
     <p><strong>Request No.:</strong> {{$data['group']['code']}}</p>
     <p><strong>Company:</strong> PT. Mitsubishi Electric Indonesia</p>
     <p><strong>Request For:</strong> {{$data['group']['user']['name']}}</p>
-    <p><strong>Requested By: Requester</p>
+    <p><strong>Requested By: {{$data['group']['userCreateRequest']['name']}}</p>
     <p><strong>Status:</strong> <span class="status-approved">Fully Approved</span></p>
 
     @php
@@ -100,7 +100,7 @@
             <table class="info-table">
                 <tr>
                     <td><strong>Type Of Reimbursement</strong></td>
-                    <td>{{$formItems['reimburseType']['name']}}</td>
+                    <td>{{$carbon::parse($formItems['item_delivery_data'])->format('d/m/Y')}}</td>
                 </tr>
                 <tr>
                     <td><strong>Reimbursement Balance Date</strong></td>
@@ -120,7 +120,7 @@
                 </tr>
                 <tr>
                     <td><strong>Balance</strong></td>
-                    <td>{{$formItems['reimburseType']['name']}}</td>
+                    <td>Rp 150.000</td>
                 </tr>
                 <tr>
                     <td><strong>Receipt Date</strong></td>
@@ -140,11 +140,11 @@
                 </tr>
                 <tr>
                     <td><strong>Valid Cost</strong></td>
-                    <td>{{$formItems['reimburseType']['name']}}</td>
+                    <td>Rp {{ number_format($formItems['balance'], 0, ',', '.') }}</td>
                 </tr>
                 <tr>
                     <td><strong>Approved Cost</strong></td>
-                    <td>{{$formItems['reimburseType']['name']}}</td>
+                    <td>Rp {{ number_format($formItems['balance'], 0, ',', '.') }}</td>
                 </tr>
                 <tr>
                     <td><strong>Remark</strong></td>
