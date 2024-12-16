@@ -86,12 +86,12 @@ const LayoutApproval = ({
         setIsLoading(false);
       }
     },
-    [methods, id, type, status_id], // Include `methods` in the dependency array
+    [id, type, methods, status_id, auth?.user?.id], // Include `methods` in the dependency array
   );
 
   useEffect(() => {
     getdetail();
-  }, [getdetail]);
+  }, [getdetail, status_id]);
 
   const handleClose = () => {
     setOpen(false);
