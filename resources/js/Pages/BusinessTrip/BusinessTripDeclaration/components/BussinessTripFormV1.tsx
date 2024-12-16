@@ -271,6 +271,7 @@ export const BussinessTripFormV1 = ({
     approvalRequest: [],
     approvalFrom: [],
     acknowledgeFrom: [],
+    approvalFromStatusRoute: [],
   });
 
   const fetchDataValue = async () => {
@@ -300,10 +301,19 @@ export const BussinessTripFormV1 = ({
           acknowledgeFrom.push(response.data?.data?.hr?.name as unknown as never);
         }
 
+        const approvalFromStatusRoute = (response.data.data?.approval ?? []).map((route: any) => {
+          return {
+            status: '',
+            name: route.name,
+            dateApproved: '',
+          };
+        });
+
         const dataApproval = {
           approvalRequest,
           approvalFrom,
           acknowledgeFrom: acknowledgeFrom,
+          approvalFromStatusRoute: approvalFromStatusRoute,
         };
         setApprovalRoute(dataApproval);
         setIsShow(true);
@@ -496,7 +506,7 @@ export const BussinessTripFormV1 = ({
                   acknowledgeFrom: approvalRoute.acknowledgeFrom,
                 }}
                 workflowApprovalStep={
-                  approvalRoute.approvalFrom as unknown as WorkflowApprovalStepInterface
+                  approvalRoute.approvalFromStatusRoute as unknown as WorkflowApprovalStepInterface
                 }
                 workflowApprovalDiagram={
                   approvalRoute.approvalFrom as unknown as WorkflowApprovalDiagramInterface
