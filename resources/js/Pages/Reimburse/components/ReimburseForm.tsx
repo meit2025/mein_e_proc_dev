@@ -4,6 +4,7 @@ import { Button as ButtonMui } from '@mui/material';
 import { Inertia } from '@inertiajs/inertia';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 import {
   Form,
   FormControl,
@@ -126,6 +127,7 @@ export const ReimburseForm: React.FC<Props> = ({
         item_delivery_data: z.date(),
         start_date: z.date(),
         end_date: z.date(),
+        attachments: z.any().optional(),
         // url: z.string().optional(),
       }),
     ),
@@ -156,6 +158,7 @@ export const ReimburseForm: React.FC<Props> = ({
           item_delivery_data: new Date(),
           start_date: new Date(),
           end_date: new Date(),
+          attachments: [],
           // url: '',
         },
       ],
@@ -187,6 +190,7 @@ export const ReimburseForm: React.FC<Props> = ({
           item_delivery_data: new Date(),
           start_date: new Date(),
           end_date: new Date(),
+          attachments: []
         }
       );
     });
@@ -221,6 +225,7 @@ export const ReimburseForm: React.FC<Props> = ({
           item_delivery_data: new Date(map.item_delivery_data),
           start_date: new Date(map.start_date),
           end_date: new Date(map.end_date),
+          attachments: '',
           // url: GET_LIST_MASTER_REIMBUSE_TYPE,
         };
       });
@@ -371,7 +376,7 @@ export const ReimburseForm: React.FC<Props> = ({
     for (let index = 0; index < formFields.length; index++) {
       form.setValue(`forms.${index}.reimburse_type`, '');
       form.setValue(`forms.${index}.period`, '');
-      if (form.getValues(`forms.${index}.type`) == 'Family') form.setValue(`forms.${index}.for`, '');
+      form.setValue(`forms.${index}.for`, '');
       setDetailLimit((prev) => {
         const newDetailLimit = [...prev];
         newDetailLimit.splice(index, 1)
@@ -400,6 +405,7 @@ export const ReimburseForm: React.FC<Props> = ({
           item_delivery_data: new Date(),
           start_date: new Date(),
           end_date: new Date(),
+          attachments: []
           // url: '',
         };
 
@@ -418,22 +424,22 @@ export const ReimburseForm: React.FC<Props> = ({
     if (detailLimit) {
       for (let index = 0; index < detailLimit.length; index++) {
         let formLength = values.forms.length == 0 ? 0 : values.forms.length - 1;
-        if (parseInt(detailLimit[index]?.limit) < formLength) {
-          showToast('Limit '+index+' has been reached', 'error');
-          return;
-        }
+        // if (parseInt(detailLimit[index]?.limit) < formLength) {
+        //   showToast('Limit '+index+' has been reached', 'error');
+        //   return;
+        // }
 
         const allBalances = values.forms.reduce((acc, curr) => {
           return acc + parseInt(curr.balance);
         }, 0);
 
-        if (parseInt(detailLimit[index]?.balance ?? 0) < allBalances) {
-          showToast(
-            'Please check your balance input in forms is not must be above ' + detailLimit[index]?.balance,
-            'error',
-          );
-          return;
-        }
+        // if (parseInt(detailLimit[index]?.balance ?? 0) < allBalances) {
+        //   showToast(
+        //     'Please check your balance input in forms is not must be above ' + detailLimit[index]?.balance,
+        //     'error',
+        //   );
+        //   return;
+        // }
       }
     }
     const totalNominal = values.forms.reduce((acc, item) => acc + parseInt(item.balance) || 0, 0);
@@ -572,6 +578,7 @@ export const ReimburseForm: React.FC<Props> = ({
                         <FormItem>
                           <FormControl>
                             <Select
+                              disabled={type === FormType.edit}
                               onValueChange={(value) => field.onChange(value)}
                               value={field.value}
                             >
@@ -601,7 +608,7 @@ export const ReimburseForm: React.FC<Props> = ({
                       options={dataEmployee}
                       fieldName='requester'
                       isRequired={true}
-                      disabled={false}
+                      disabled={type === FormType.edit}
                       placeholder={'Select Employee'}
                       onSearch={handleSearchEmployee}
                       onChangeOutside={() => employeeTriggreOtheDropwdownRelation()}
@@ -619,6 +626,7 @@ export const ReimburseForm: React.FC<Props> = ({
                         <FormItem>
                           <FormControl>
                             <Select
+                              disabled={type === FormType.edit}
                               onValueChange={(value) => {
                                 field.onChange(value);
                                 generateForms(value);
@@ -690,6 +698,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                 name={`forms.${index}.type`}
                                 render={({ field }) => (
                                   <Select
+                                    disabled={type === FormType.edit}
                                     onValueChange={(value) => {
                                       updateForm(index, {
                                         ...formValue,
@@ -698,7 +707,7 @@ export const ReimburseForm: React.FC<Props> = ({
 
                                       form.setValue(`forms.${index}.reimburse_type`, '');
                                       form.setValue(`forms.${index}.period`, '');
-                                      if (form.getValues(`forms.${index}.type`) == 'Family') form.setValue(`forms.${index}.for`, '');
+                                      form.setValue(`forms.${index}.for`, '');
                                       setDetailLimit((prev) => {
                                         const newDetailLimit = [...prev];
                                         newDetailLimit.splice(index, 1)
@@ -725,7 +734,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                 options={dataReimburseType[index]}
                                 fieldName={`forms.${index}.reimburse_type`}
                                 isRequired={true}
-                                disabled={form.getValues(`forms.${index}.type`) == '' || form.getValues('requester') == ''}
+                                disabled={form.getValues(`forms.${index}.type`) == '' || form.getValues('requester') == '' || type === FormType.edit}
                                 placeholder={'Select Reimburse Type'}
                                 onChangeOutside={(query: string, data: any) => {
                                   const currentRequester = form.getValues('requester');
@@ -742,7 +751,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   }
 
                                   form.setValue(`forms.${index}.period`, '');
-                                  if (form.getValues(`forms.${index}.type`) == 'Family') form.setValue(`forms.${index}.for`, '');
+                                  form.setValue(`forms.${index}.for`, '');
                                   setDetailLimit((prev) => {
                                     const newDetailLimit = [...prev];
                                     newDetailLimit.splice(index, 1)
@@ -766,6 +775,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   <FormItem>
                                     <FormControl>
                                       <Select
+                                        disabled={type === FormType.edit}
                                         onValueChange={(value) => {
                                           updateForm(index, {
                                             ...formValue,
@@ -804,7 +814,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   <FormItem>
                                     <FormControl>
                                       <Select
-                                        disabled={form.getValues(`forms.${index}.reimburse_type`) == ''}
+                                        disabled={form.getValues(`forms.${index}.reimburse_type`) == '' || type === FormType.edit}
                                         onValueChange={(value) => {
                                           updateForm(index, {
                                             ...formValue,
@@ -820,7 +830,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                             });
                                           }
                                           fetchFamily(index, {type: form.getValues(`forms.${index}.type`), reimburse_type: form.getValues(`forms.${index}.reimburse_type`), period: value})
-                                          if (form.getValues(`forms.${index}.type`) == 'Family') form.setValue(`forms.${index}.for`, '');
+                                          form.setValue(`forms.${index}.for`, '');
                                         }}
                                         defaultValue={formValue.period}
                                       >
@@ -853,7 +863,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   <FormItem>
                                     <FormControl>
                                       <Select
-                                        disabled={form.getValues(`forms.${index}.type`) !== 'Family'}
+                                        disabled={form.getValues(`forms.${index}.type`) !== 'Family' || type === FormType.edit}
                                         onValueChange={(value) =>
                                           {
                                             updateForm(index, {
@@ -894,6 +904,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   <FormItem>
                                     <FormControl>
                                       <Select
+                                        disabled={type === FormType.edit}
                                         onValueChange={(value) => {
                                           updateForm(index, {
                                             ...formValue,
@@ -930,6 +941,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   <FormItem>
                                     <FormControl>
                                       <Select
+                                        disabled={type === FormType.edit}
                                         onValueChange={(value) => {
                                           updateForm(index, {
                                             ...formValue,
@@ -1011,6 +1023,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   <FormItem>
                                     <FormControl>
                                       <CustomDatePicker
+                                        disabled={type === FormType.edit}
                                         initialDate={
                                           field.value instanceof Date
                                             ? field.value
@@ -1038,6 +1051,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   <FormItem>
                                     <FormControl>
                                       <CustomDatePicker
+                                        disabled={type === FormType.edit}
                                         initialDate={
                                           field.value instanceof Date
                                             ? field.value
@@ -1058,6 +1072,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   <FormItem>
                                     <FormControl>
                                       <CustomDatePicker
+                                        disabled={type === FormType.edit}
                                         initialDate={
                                           field.value instanceof Date
                                             ? field.value
@@ -1084,6 +1099,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                     <FormItem>
                                       <FormControl>
                                         <Select
+                                          disabled={type === FormType.edit}
                                           onValueChange={(value) => {
                                             updateForm(index, {
                                               ...formValue,
@@ -1119,27 +1135,21 @@ export const ReimburseForm: React.FC<Props> = ({
                                     <FormItem>
                                       <FormControl>
                                         <Input
-                                          type='number'
-                                          placeholder='0.0'
+                                          type='text'
+                                          placeholder='0'
                                           onChange={(e) => {
+                                            const rawValue = e.target.value.replace(/[^0-9]/g, '');
+                                            const formattedValue = formatRupiah(rawValue, false);
                                             updateForm(index, {
                                               ...formValue,
-                                              balance: e.target.value,
+                                              balance: rawValue,
                                             });
+                                            e.target.value = formattedValue;
                                           }}
                                           defaultValue={formValue.balance}
+                                          disabled={type === FormType.edit}
                                         />
                                       </FormControl>
-
-                                      {/* <FormDescription className='h-6'>
-                                      {parseInt(detailLimit?.balance ?? 0) <
-                                      parseInt(formValue.balance) ? (
-                                        <span className='text-red-500'>
-                                          Reimbuse cost must be not greather than balance
-                                        </span>
-                                      ) : null}
-                                    </FormDescription> */}
-
                                       <FormMessage />
                                     </FormItem>
                                   )}
@@ -1153,7 +1163,7 @@ export const ReimburseForm: React.FC<Props> = ({
                             <td>
                               <FormField
                                 control={form.control}
-                                name={`forms.${index}.attachment`}
+                                name={`forms.${index}.attachments`}
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormControl>
@@ -1162,10 +1172,14 @@ export const ReimburseForm: React.FC<Props> = ({
                                         multiple
                                         accept='image/*,.pdf,.doc,.docx'
                                         onChange={(e) => {
-                                          const files = e.target.files;
+                                          let files = Array.from(e.target.files)[0];
+                                          console.log(e.target);
                                           if (files) {
-                                            const fileArray = Array.from(files);
-                                            field.onChange(fileArray);
+                                            alert('asdas')
+                                            updateForm(index, {
+                                              ...formValue,
+                                              attachments: files,
+                                            });
                                           }
                                         }}
                                       />
