@@ -52,10 +52,7 @@ const ReimburseDetail = () => {
         </p>
         <p className='text-sm'>{/* <strong>Requested By:</strong> {data?.requested_by} */}</p>
         <p className='text-sm'>
-          <strong>Status:</strong>{' '}
-          <span className={`font-bold ${data?.reimbursementStatus?.classname}`}>
-            {data?.reimbursementStatus?.name}
-          </span>
+          <strong>Status:</strong> <span className={`font-bold ${data?.reimbursementStatus?.classname}`}>{data?.reimbursementStatus?.name}</span>
         </p>
 
         <Tabs defaultValue='reimburse1' className='w-full text-sm'>
@@ -102,7 +99,9 @@ const ReimburseDetail = () => {
                     <td>
                       <strong>Pusat Biaya</strong>
                     </td>
-                    <td>{data?.cost_center?.desc}</td>
+                    <td>
+                      {data?.cost_center?.desc}
+                    </td>
                   </tr>
                   <tr>
                     <td>
