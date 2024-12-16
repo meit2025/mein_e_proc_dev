@@ -89,6 +89,7 @@
     <p><strong>Status:</strong> <span class="status-approved">Fully Approved</span></p>
 
     @php
+        dd($data);
         $index = 0;
     @endphp
     @foreach ($data['forms'] as $formItems)
