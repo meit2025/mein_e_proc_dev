@@ -1,20 +1,19 @@
-import { useState, ReactNode, useEffect } from 'react';
-import { Tabs, Tab, Box, Typography, Button } from '@mui/material';
-import { useFormContext, useWatch } from 'react-hook-form';
-import ArrayForm from './ArrayForm';
 import axiosInstance from '@/axiosInstance';
 import { Loading } from '@/components/commons/Loading';
-import { useAlert } from '@/contexts/AlertContext';
 import {
   WorkflowApprovalDiagramInterface,
   WorkflowApprovalStepInterface,
   WorkflowComponent,
 } from '@/components/commons/WorkflowComponent';
 import FormAutocomplete from '@/components/Input/formDropdown';
+import { useAlert } from '@/contexts/AlertContext';
 import useDropdownOptions from '@/lib/getDropdown';
+import { Button } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 
 const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
-  const { getValues, watch } = useFormContext();
+  const { getValues, watch, setValue } = useFormContext();
   const [loading, setLoading] = useState(false);
   const [isShow, setIsShow] = useState(false);
   const [approvalRoute, setApprovalRoute] = useState({
@@ -31,7 +30,15 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
   const fetchDataValue = async () => {
     try {
       const getData = getValues();
-      console.log(getData);
+
+      const dataVendorArray = getValues('vendors').filter(
+        (item: any) => (item.winner || false) === true,
+      );
+
+      const dataVendor = dataVendorArray.length > 0 ? dataVendorArray[0] : null;
+      const winnerUnit = dataVendor.units || [];
+      const totalSum = winnerUnit.reduce((sum: number, item: any) => sum + item.total_amount, 0);
+
       if (getData.document_type === null || getData.document_type === undefined) {
         setLoading(false);
         showToast('Please input Document Type', 'error');
@@ -76,7 +83,7 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
         params: {
           document_type_id: getData.document_type,
           purchasing_group_id: getData.purchasing_groups,
-          value: getData.total_all_amount,
+          value: totalSum,
           user_id: getData.user_id,
           type: 'PR',
           metode_approval: getData.metode_approval,

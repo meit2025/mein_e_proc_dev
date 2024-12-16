@@ -1,6 +1,7 @@
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
 import ItemForm from './itemForm';
 import DetailApproval from '../../../components/approval/detailApproval';
+import CashAdvance from './CashAdvance';
 
 export const formModelEdit: Array<FormFieldModel<any>> = [
   {
@@ -203,5 +204,9 @@ export const formModelEdit: Array<FormFieldModel<any>> = [
   {
     fieldCustome: true,
     fieldCustomeValue: <ItemForm disable={true} />,
+  },
+  {
+    fieldCustome: true,
+    fieldCustomeValue: <CashAdvance disable={true} />,
   },
 ];

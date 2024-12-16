@@ -21,8 +21,13 @@ export const Index = () => {
     detailUrl: DETAIL_PAGE_PR,
   };
 
+  const data = async (data: string) => {
+    console.log(data);
+  };
+
   return (
     <DataGridComponent
+      onExport={async (x: string) => await data(x)}
       isHistory={true}
       role={roleConfig}
       columns={columns}
