@@ -479,6 +479,7 @@ export const BussinessTripFormV1 = ({
     approvalRequest: [],
     approvalFrom: [],
     acknowledgeFrom: [],
+    approvalFromStatusRoute: [],
   });
 
   const calculateTotal = (allowance: any, details: any) => {
@@ -546,10 +547,19 @@ export const BussinessTripFormV1 = ({
           acknowledgeFrom.push(response.data?.data?.hr?.name as unknown as never);
         }
 
+        const approvalFromStatusRoute = (response.data.data?.approval ?? []).map((route: any) => {
+          return {
+            status: '',
+            name: route.name,
+            dateApproved: '',
+          };
+        });
+
         const dataApproval = {
           approvalRequest,
           approvalFrom,
           acknowledgeFrom: acknowledgeFrom,
+          approvalFromStatusRoute: approvalFromStatusRoute,
         };
         // console.log(dataApproval);
         setApprovalRoute(dataApproval);
@@ -583,7 +593,7 @@ export const BussinessTripFormV1 = ({
 
   const totalPercent: any = useWatch({
     control: form.control,
-    name: `total_percent`,
+    name: 'total_percent',
   });
 
   const [totalAllowance, setTotalAllowance] = React.useState(0);
@@ -593,13 +603,13 @@ export const BussinessTripFormV1 = ({
   React.useEffect(() => {
     // console.log(form.getValues('destinations'), ' edit destination');
     if (type == BusinessTripType.edit) {
-      setIsCashAdvance(form.getValues(`cash_advance`) ?? false);
+      setIsCashAdvance(form.getValues('cash_advance') ?? false);
     }
     const percentValue = parseFloat((totalPercent || '0').toString());
     // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
     const total = (percentValue / 100) * allowance; // Multiply percent with allowance
     // console.log(total, ' totalll');
-    form.setValue(`total_cash_advance`, total.toFixed(0)); // Save the total in total_cash_advance field
+    form.setValue('total_cash_advance', total.toFixed(0)); // Save the total in total_cash_advance field
   }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance cha
 
   const { dataDropdown: dataEmployee, getDropdown: getEmployee } = useDropdownOptions();
@@ -670,7 +680,7 @@ export const BussinessTripFormV1 = ({
                   isRequired={true}
                   disabled={
                     type == BusinessTripType.edit
-                      ? form.watch(`request_for`)
+                      ? form.watch('request_for')
                         ? true
                         : false
                       : isAdmin == '0'
@@ -695,7 +705,7 @@ export const BussinessTripFormV1 = ({
                   isRequired={true}
                   disabled={
                     type == BusinessTripType.edit
-                      ? form.watch(`purpose_type_id`)
+                      ? form.watch('purpose_type_id')
                         ? true
                         : false
                       : false
@@ -718,7 +728,7 @@ export const BussinessTripFormV1 = ({
                   isRequired={true}
                   disabled={
                     type == BusinessTripType.edit
-                      ? form.watch(`cost_center_id`)
+                      ? form.watch('cost_center_id')
                         ? true
                         : false
                       : false
@@ -801,6 +811,7 @@ export const BussinessTripFormV1 = ({
                         target='_blank'
                         className='text-blue-500 inline-block'
                         key={index}
+                        rel='noreferrer'
                       >
                         {attachment.file_name}
                       </a>
@@ -835,7 +846,7 @@ export const BussinessTripFormV1 = ({
                           onValueChange={totalDestinationHandler}
                           disabled={
                             type == BusinessTripType.edit
-                              ? form.watch(`total_destination`)
+                              ? form.watch('total_destination')
                                 ? true
                                 : false
                               : typePurpose == 'international'
@@ -889,7 +900,7 @@ export const BussinessTripFormV1 = ({
               <td className='w-[50%]'>Cash Advance</td>
               <td className='w-[50%] pb-0'>
                 <FormSwitch
-                  fieldName={`cash_advance`}
+                  fieldName={'cash_advance'}
                   isRequired={false}
                   disabled={false}
                   onChanges={(e) => handleCashAdvanceChange(e.target.checked)}
@@ -903,7 +914,7 @@ export const BussinessTripFormV1 = ({
                   <td className='w-[50%]'>
                     <FormField
                       control={form.control}
-                      name={`reference_number`}
+                      name={'reference_number'}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
@@ -920,7 +931,7 @@ export const BussinessTripFormV1 = ({
                     />
                     <FormField
                       control={form.control}
-                      name={`total_percent`}
+                      name={'total_percent'}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
@@ -944,7 +955,7 @@ export const BussinessTripFormV1 = ({
                     />
                     <FormField
                       control={form.control}
-                      name={`total_cash_advance`}
+                      name={'total_cash_advance'}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
@@ -978,7 +989,7 @@ export const BussinessTripFormV1 = ({
                   acknowledgeFrom: approvalRoute.acknowledgeFrom,
                 }}
                 workflowApprovalStep={
-                  approvalRoute.approvalFrom as unknown as WorkflowApprovalStepInterface
+                  approvalRoute.approvalFromStatusRoute as unknown as WorkflowApprovalStepInterface
                 }
                 workflowApprovalDiagram={
                   approvalRoute.approvalFrom as unknown as WorkflowApprovalDiagramInterface

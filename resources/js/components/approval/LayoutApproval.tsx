@@ -93,6 +93,12 @@ const LayoutApproval = ({
     getdetail();
   }, [getdetail, status_id]);
 
+  useEffect(() => {
+    if (status_id === 4) {
+      setIsApproval(false);
+    }
+  }, [status_id]);
+
   const handleClose = () => {
     setOpen(false);
     methods.setValue('note', '');
