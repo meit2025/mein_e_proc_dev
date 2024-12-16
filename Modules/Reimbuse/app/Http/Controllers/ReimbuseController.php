@@ -240,7 +240,6 @@ class ReimbuseController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
-        dd($data);
         try {
             $groupData = [
                 'remark' => $data['remark_group'],
@@ -296,20 +295,18 @@ class ReimbuseController extends Controller
 
     public function getDataLimitAndBalance(Request $request)
     {
-
         try {
-            //code...
             $user = $request->user;
             $period = $request->periode;
             $reimbuseTypeID = $request->reimbuse_type_id;
 
 
-            $getCurrentBalance = Reimburse::where('requester', $request->user)
+            $getCurrentBalance = Reimburse::where('requester', $user)
                 ->where('period', $period)
                 ->where('reimburse_type', $reimbuseTypeID)
                 ->sum('balance');
 
-            $getCurrentLimit = Reimburse::where('requester', $request->user)
+            $getCurrentLimit = Reimburse::where('requester', $user)
                 ->where('period', $period)
                 ->where('reimburse_type', $reimbuseTypeID)
                 ->count();
