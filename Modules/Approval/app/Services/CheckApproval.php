@@ -36,8 +36,10 @@ class CheckApproval
     // Method to check approval based on conditions
     private function applyConditions($query, $conditions, $value)
     {
-        foreach ($conditions as $key => $condition) {
-            $result = $query->where($condition)->first();
+        foreach ($conditions as $condition) {
+            $tempQuery = clone $query;
+            $condition($tempQuery);
+            $result = $tempQuery->first();
             if ($result) {
                 return $result;
             }
