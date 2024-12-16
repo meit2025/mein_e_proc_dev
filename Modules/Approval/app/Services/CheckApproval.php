@@ -75,7 +75,7 @@ class CheckApproval
                 fn($query) => $query->where('condition_type', '=', 'range')
                     ->whereRaw("min_value <= ?", [$total])
                     ->whereRaw("max_value >= ?", [$total]),
-                fn($query) => $query->whereNull('condition_type'),
+                fn($query) => $query->whereNull('condition_type')->where('value', '=', $total),
             ];
 
             $result = null;

@@ -6,6 +6,11 @@ import {
   CREATE_APPROVAL_USER_DROPDOWN_ROUTE,
   DETAIL_APPROVAL_USER_DROPDOWN_ROUTE,
 } from '@/endpoint/approvalRoute/api';
+import {
+  CREATE_APPROVAL_CONDITIONAL_USER_DROPDOWN,
+  DETAIL_APPROVAL_CONDITIONAL_USER,
+  LIST_APPROVAL_CONDITIONAL_USER_DROPDOWN,
+} from '@/endpoint/settingApprovalPrConditionalUser/api';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -23,7 +28,7 @@ export const UserAssigmentLayout = ({ id, data }: { id: number; data: any }) => 
     try {
       setIsLoading(true);
 
-      const response = await axiosInstance.get(DETAIL_APPROVAL_USER_DROPDOWN_ROUTE(id));
+      const response = await axiosInstance.get(LIST_APPROVAL_CONDITIONAL_USER_DROPDOWN(id));
       const data = response.data;
       setLeftData(data.data.users);
       setRightData(data.data.data);
@@ -39,7 +44,7 @@ export const UserAssigmentLayout = ({ id, data }: { id: number; data: any }) => 
   const handleTransfer = (left: readonly any[], right: readonly any[]) => {
     const mapRight = right.map((item) => item.value);
     methods.reset({
-      approval_route_id: id,
+      approval_conditional_users_id: id,
       user_ids: mapRight,
     });
   };
@@ -49,7 +54,7 @@ export const UserAssigmentLayout = ({ id, data }: { id: number; data: any }) => 
       <Loading isLoading={isLoading} />
       <div className='card-body'>
         <FormMapping
-          url={CREATE_APPROVAL_USER_DROPDOWN_ROUTE}
+          url={CREATE_APPROVAL_CONDITIONAL_USER_DROPDOWN}
           methods={methods}
           isCustom={true}
           formCustom={

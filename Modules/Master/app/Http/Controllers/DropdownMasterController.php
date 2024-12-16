@@ -68,7 +68,13 @@ class DropdownMasterController extends Controller
 
     function dropdown(Request $request)
     {
-        $data = DB::table($request->tabelname)->select($request->name . ' as label', $request->id . ' as value');
+        $select = [$request->name . ' as label', $request->id . ' as value'];
+
+        if (!$request->groupBy) {
+            $select[] = '*';
+        }
+
+        $data = DB::table($request->tabelname)->select($select);
 
         if ($request->search) {
             $data = $data->where($request->name, 'ilike', '%' . $request->search . '%');
@@ -105,7 +111,7 @@ class DropdownMasterController extends Controller
         }
 
 
-        $data = $data->limit(175)->get();
+        $data = $data->limit(500)->get();
         return $this->successResponse($data);
     }
     function show_tabel(Request $request)

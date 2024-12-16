@@ -24,7 +24,7 @@ export const CustomeForm = ({ data }: { data: any[] }) => {
   const handleRemoveInput = (index: any) => {
     const newInputs = inputs.filter((_, i) => i !== index);
     setInputs(newInputs);
-    setValue('user_approvals', newInputs);
+    setValue('routes', newInputs);
   };
 
   const { dataDropdown, getDropdown } = useDropdownOptions();
@@ -58,7 +58,7 @@ export const CustomeForm = ({ data }: { data: any[] }) => {
               <FormAutocomplete<any[]>
                 options={dataDropdown ?? []}
                 fieldLabel={`Approval L${index + 1}`}
-                fieldName={`user_approvals[${index}].user_id`}
+                fieldName={`routes[${index}].user_id`}
                 isRequired={true}
                 placeholder={'Select User Approval'}
                 style={{
