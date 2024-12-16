@@ -35,7 +35,7 @@ export const Index = () => {
 
 // Assign layout to the page
 Index.layout = (page: ReactNode) => (
-  <MainLayout title='Dokument Type' description='Dokument Type Create PR'>
+  <MainLayout title='Document Type' description='Document Type Create PR'>
     {page}
   </MainLayout>
 );

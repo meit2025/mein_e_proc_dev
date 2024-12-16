@@ -17,6 +17,7 @@ interface StructDropdown {
   search?: string;
   attribut?: string;
   hiddenZero?: boolean;
+  idType?: 'number' | 'string';
 }
 
 function removeLeadingZeros(input: string): string {
@@ -54,9 +55,11 @@ const useDropdownOptions = (urls: string = 'api/master/dropdown') => {
 
       const fetchedData = response.data.data.map((item: any) => {
         const label = struct.hiddenZero ? removeLeadingZeros(item.label) : item.label;
+        const idValue = struct.idType === 'string' ? String(item.value) : item.value;
         return {
+          ...item,
           label: !struct.isMapping ? label : `${label} - ${item.value}`,
-          value: item.value,
+          value: idValue,
         };
       });
       if (object && dropdown !== '') {

@@ -25,7 +25,7 @@ const ReimburseDetail = () => {
         setIsLoading(true);
         // Pastikan endpoint API mengembalikan data relasi `posts`
         const response = await axiosInstance.get(DETAIL_REIMBURSE(id));
-        
+
         setData(response.data.data.group);
         setReimburse(response.data.data.forms);
       } catch (err) {
@@ -37,10 +37,10 @@ const ReimburseDetail = () => {
 
     fetchData();
   }, [id]);
-  
+
   return (
     <>
-      <LayoutApproval id={id} type={'REIM'}>
+      <LayoutApproval id={id} type={'REIM'} status_id={data?.status_id}>
         <p className='text-sm'>
           <strong>Request No.:</strong> {data?.code}
         </p>

@@ -20,7 +20,7 @@ class AuthController extends Controller
     {
 
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            return redirect()->route('portal');
         }
 
         $fileImage = asset('images/mitsubishi_logo.png');

@@ -2,12 +2,14 @@
 
 use App\Http\Middleware\PermissionMiddleware;
 use Illuminate\Support\Facades\Route;
+use Modules\Approval\Http\Controllers\ApprovalConditionalUsersController;
 use Modules\Approval\Http\Controllers\ApprovalController;
 use Modules\Approval\Http\Controllers\ApprovalPrController;
 use Modules\Approval\Http\Controllers\ApprovalToUserController;
 use Modules\Approval\Http\Controllers\ApprovalTrackingNumberAutoController;
 use Modules\Approval\Http\Controllers\ApprovalTrackingNumberChooseController;
 use Modules\Approval\Http\Controllers\SettingApprovalController;
+use Modules\Approval\Models\ApprovalConditionalUsers;
 use Modules\Approval\Models\ApprovalTrackingNumberAuto;
 
 /*
@@ -77,7 +79,21 @@ Route::group(['middleware' => 'auth'], function () {
                 'id' => fn() => request()->route('id'),
             ])->middleware(PermissionMiddleware::class . ':tracking number choose view');
         });
+
+        Route::group(['prefix' => 'approval-conditional-user'], function () {
+            Route::inertia('/',  'Approval/ApprovalConditionalUser/Index')->middleware(PermissionMiddleware::class . ':approval conditional user view');
+            Route::inertia('/create',  'Approval/ApprovalConditionalUser/Create')->middleware(PermissionMiddleware::class . ':approval conditional user create');
+            Route::inertia('/update/{id}',  'Approval/ApprovalConditionalUser/Update', [
+                'id' => fn() => request()->route('id'),
+            ])->middleware(PermissionMiddleware::class . ':approval conditional user update');
+            Route::inertia('/detail/{id}',  'Approval/ApprovalConditionalUser/Detail', [
+                'id' => fn() => request()->route('id'),
+            ])->middleware(PermissionMiddleware::class . ':approval conditional user view');
+        });
     });
+
+
+
     Route::group(['prefix' => 'api/approval', 'middleware' => 'auth'], function () {
         Route::group(['prefix' => 'route'], function () {
             Route::get('/list', [ApprovalController::class, 'index'])->name('approval.route.index')->middleware(PermissionMiddleware::class . ':approval view');
@@ -123,11 +139,23 @@ Route::group(['middleware' => 'auth'], function () {
         });
         Route::group(['prefix' => 'approval-to-user'], function () {
             Route::get('/list', [ApprovalToUserController::class, 'index'])->name('approval.to-users.index')->middleware(PermissionMiddleware::class . ':approval view');
-            Route::post('/create', [ApprovalToUserController::class, 'store'])->name('approval.to-users.store')->middleware(PermissionMiddleware::class . ':approval update');
+            Route::post('/create', [ApprovalToUserController::class, 'store'])->name('approval.to-users.store')->middleware(PermissionMiddleware::class . ':approval create');
             Route::post('/update/{id}', [ApprovalToUserController::class, 'update'])->name('approval.to-users.update')->middleware(PermissionMiddleware::class . ':approval update');
             Route::get('/detail/{id}', [ApprovalToUserController::class, 'show'])->name('approval.to-users.show')->middleware(PermissionMiddleware::class . ':approval view');
 
             Route::get('/get-user-dropdown/{id}', [ApprovalToUserController::class, 'getUsersDropdown'])->name('approval.to-users.getUsersDropdown')->middleware(PermissionMiddleware::class . ':approval update');
+        });
+
+        Route::group(['prefix' => 'approval-conditional-user'], function () {
+            Route::get('/list', [ApprovalConditionalUsersController::class, 'index'])->name('approval.conditional.index')->middleware(PermissionMiddleware::class . ':approval conditional user view');
+            Route::post('/create', [ApprovalConditionalUsersController::class, 'store'])->name('approval.conditional.store')->middleware(PermissionMiddleware::class . ':approval conditional user create');
+            Route::post('/update/{id}', [ApprovalConditionalUsersController::class, 'update'])->name('approval.conditional.update')->middleware(PermissionMiddleware::class . ':approval conditional user update');
+            Route::get('/detail/{id}', [ApprovalConditionalUsersController::class, 'show'])->name('approval.conditional.show')->middleware(PermissionMiddleware::class . ':approval conditional user view');
+            Route::delete('/delete/{id}', [ApprovalConditionalUsersController::class, 'destroy'])->name('approval.tr-choose.destroy')->middleware(PermissionMiddleware::class . ':approval conditional user delete');
+
+
+            Route::get('/get-user-dropdown/{id}', [ApprovalConditionalUsersController::class, 'getUsersDropdown'])->name('approval.conditional.getUsersDropdown')->middleware(PermissionMiddleware::class . ':approval conditional user update');
+            Route::post('/store-user', [ApprovalConditionalUsersController::class, 'storeToUser'])->name('approval.conditional.getUsersDropdown')->middleware(PermissionMiddleware::class . ':approval conditional user update');
         });
     });
 });
