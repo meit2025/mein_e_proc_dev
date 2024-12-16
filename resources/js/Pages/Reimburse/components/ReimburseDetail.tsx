@@ -8,6 +8,7 @@ import '../css/reimburse_detail.scss';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
 import { WorkflowComponent } from '@/components/commons/WorkflowComponent';
 import LayoutApproval from '@/components/approval/LayoutApproval';
+import { CustomStatus } from '@/components/commons/CustomStatus';
 
 const ReimburseDetail = () => {
   const pathname = window.location.pathname;
@@ -36,6 +37,7 @@ const ReimburseDetail = () => {
 
     fetchData();
   }, [id]);
+  
   return (
     <>
       <LayoutApproval id={id} type={'REIM'}>
@@ -50,35 +52,8 @@ const ReimburseDetail = () => {
         </p>
         <p className='text-sm'>{/* <strong>Requested By:</strong> {data?.requested_by} */}</p>
         <p className='text-sm'>
-          <strong>Status:</strong> <span className='status-approved'>Fully Approved</span>
+          <strong>Status:</strong> <span className={`font-bold ${data?.reimbursementStatus?.classname}`}>{data?.reimbursementStatus?.name}</span>
         </p>
-
-        <table className='info-table text-sm mt-4'>
-          <tr>
-            <td>
-              <strong>Pusat Biaya</strong>
-            </td>
-            <td>{data?.cost_center?.desc}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Status</strong>
-            </td>
-            <td>{data?.status}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Remark</strong>
-            </td>
-            <td>{data?.remark}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Attachment File</strong>
-            </td>
-            <td></td>
-          </tr>
-        </table>
 
         <Tabs defaultValue='reimburse1' className='w-full text-sm'>
           <TabsList className={'flex items-center justify-start space-x-4'}>
@@ -118,6 +93,14 @@ const ReimburseDetail = () => {
                     </td>
                     <td>
                       {reimburse?.periode_date?.start} {' - '} {reimburse?.periode_date?.end}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Pusat Biaya</strong>
+                    </td>
+                    <td>
+                      {data?.cost_center?.desc}
                     </td>
                   </tr>
                   <tr>
