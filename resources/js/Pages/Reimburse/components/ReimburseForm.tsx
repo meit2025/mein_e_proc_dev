@@ -1191,7 +1191,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                             });
                                             e.target.value = formattedValue;
                                           }}
-                                          defaultValue={formValue.balance}
+                                          defaultValue={formatRupiah(formValue.balance, false)}
                                           disabled={type === FormType.edit}
                                         />
                                       </FormControl>

@@ -76,6 +76,18 @@
             font-weight: normal;
         }
 
+        .text-orange-600{
+            color: rgb(234 88 12);
+        }
+        
+        .text-red-600{
+            color: rgb(220 38 38);
+        }
+
+        .text-green-600{
+            color: rgb(22 163 74);
+        }
+
     </style>
 </head>
 <body>
@@ -86,9 +98,10 @@
     <p><strong>Company:</strong> PT. Mitsubishi Electric Indonesia</p>
     <p><strong>Request For:</strong> {{$data['group']['user']['name']}}</p>
     <p><strong>Requested By:</strong> {{$data['group']['userCreateRequest']['name']}}</p>
-    <p><strong>Status:</strong> <span class="status-approved">Fully Approved</span></p>
+    <p><strong>Status: <span class='{{$data['group']['reimbursementStatus']['classname']}}'>{{$data['group']['reimbursementStatus']['name']}}</span></strong></p>
 
     @php
+        // dd($data);
         $index = 0;
     @endphp
     @foreach ($data['forms'] as $formItems)
@@ -100,11 +113,11 @@
             <table class="info-table">
                 <tr>
                     <td><strong>Type Of Reimbursement</strong></td>
-                    <td>{{$carbon::parse($formItems['item_delivery_data'])->format('d/m/Y')}}</td>
+                    <td>{{$formItems['reimburseType']['name']}}</td>
                 </tr>
                 <tr>
                     <td><strong>Reimbursement Balance Date</strong></td>
-                    <td>{{$formItems['reimburseType']['name']}}</td>
+                    <td>{{$carbon::parse($formItems['reimburseType']['created_at'])->format('d/m/Y')}}</td>
                 </tr>
                 <tr>
                     <td><strong>Balance Period</strong></td>
@@ -114,13 +127,31 @@
                     <td><strong>Reimburse For</strong></td>
                     <td>{{$formItems['reimburseType']['is_employee'] ? 'Employee' : 'Family' }}</td>
                 </tr>
+                @if (!$formItems['reimburseType']['is_employee'])
+                    @php
+                        $familiesArray = $data['group']['user']['families']->toArray();
+                        $getFamilies = array_filter($familiesArray, function($family) use ($formItems) {
+                            return $family['id'] == $formItems['for'];
+                        });
+                        
+                        $getFamily = reset($getFamilies);
+                    @endphp
+                    <tr>
+                        <td><strong>Family Status</strong></td>
+                        <td>{{$formItems['reimburseType']['family_status']}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Family</strong></td>
+                        <td>{{$getFamily['name']}}</td>
+                    </tr>
+                @endif
                 <tr>
                     <td><strong>Pusat Biaya</strong></td>
                     <td>{{$data['group']['costCenter']['desc']}}</td>
                 </tr>
                 <tr>
                     <td><strong>Balance</strong></td>
-                    <td>Rp 150.000</td>
+                    <td>Rp {{ number_format($formItems['reimburseType']['grade_option'] == 'all' ? $formItems['reimburseType']['grade_all_price'] : $formItems['reimburseType']['gradeReimburseTypes']['plafon'], 0, ',', '.') }}</td>
                 </tr>
                 <tr>
                     <td><strong>Receipt Date</strong></td>

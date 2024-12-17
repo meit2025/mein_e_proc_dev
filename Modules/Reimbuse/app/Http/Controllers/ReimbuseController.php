@@ -240,7 +240,6 @@ class ReimbuseController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
-        dd($data);
         try {
             $groupData = [
                 'remark' => $data['remark_group'],
@@ -296,20 +295,18 @@ class ReimbuseController extends Controller
 
     public function getDataLimitAndBalance(Request $request)
     {
-
         try {
-            //code...
             $user = $request->user;
             $period = $request->periode;
             $reimbuseTypeID = $request->reimbuse_type_id;
 
 
-            $getCurrentBalance = Reimburse::where('requester', $request->user)
+            $getCurrentBalance = Reimburse::where('requester', $user)
                 ->where('period', $period)
                 ->where('reimburse_type', $reimbuseTypeID)
                 ->sum('balance');
 
-            $getCurrentLimit = Reimburse::where('requester', $request->user)
+            $getCurrentLimit = Reimburse::where('requester', $user)
                 ->where('period', $period)
                 ->where('reimburse_type', $reimbuseTypeID)
                 ->count();
@@ -352,7 +349,7 @@ class ReimbuseController extends Controller
     {
 
         $reimburseGroup = ReimburseGroup::where('id', $id)
-            ->with(['user', 'costCenter', 'status', 'userCreateRequest'])
+            ->with(['user.families', 'costCenter', 'status', 'userCreateRequest'])
             ->first();
 
         if ($reimburseGroup) {
@@ -366,8 +363,7 @@ class ReimbuseController extends Controller
             'taxOnSalesModel',
             'reimburseType',
             'periodeDate'
-        ])
-            ->get();
+        ])->get();
 
         $approval = Approval::with('user.divisions')->where('document_id', $id)->where('document_name', 'REIM')->orderBy('id', 'ASC')->get();
 
