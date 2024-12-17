@@ -30,7 +30,7 @@ class MasterTypeReimburseController extends Controller
             $data->getCollection()->transform(function ($map) {
                 $gradeRelations = collect($map->reimburseTypeGrades)->map(function ($relation) {
                     if ($relation->grade) {
-                        return 'Grade ' . ($relation->grade ? $relation->grade->grade : '') . ": " . $relation->plafon;
+                        return 'Grade ' . ($relation->grade ? $relation->grade->grade : '') . ": " . 'Rp '. number_format($relation->plafon, 0, ',', '.');
                     }
 
                     return '';
@@ -43,7 +43,7 @@ class MasterTypeReimburseController extends Controller
                     'family_status' => $map->family_status,
                     'material_number' => $map->masterMaterial->material_number,
                     'grade_option' => $map->grade_option,
-                    'plafon' => ($map->grade_option == 'all') ? $map->grade_all_price : join(" , ", $gradeRelations),
+                    'plafon' => ($map->grade_option == 'all') ? 'Rp '. number_format($map->grade_all_price, 0, ',', '.') : join(" , ", $gradeRelations),
                 ];
             });
             return $this->successResponse($data);

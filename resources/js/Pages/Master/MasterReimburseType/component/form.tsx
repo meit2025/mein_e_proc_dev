@@ -38,6 +38,7 @@ import { CREATE_API_REIMBURSE_TYPE } from '@/endpoint/reimburseType/api';
 import { Loading } from '@/components/commons/Loading';
 import FormAutocomplete from '@/components/Input/formDropdown';
 import useDropdownOptions from '@/lib/getDropdown';
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 
 export interface props {
   onSuccess?: (value: boolean) => void;
@@ -74,7 +75,7 @@ export default function ReimburseTypeForm({
       z.object({
         grade: z.string(),
         id: z.number(),
-        plafon: z.string(),
+        plafon: z.string().min(1, 'balance required'),
       }),
     ),
   });
@@ -299,6 +300,7 @@ export default function ReimburseTypeForm({
                             <SelectValue placeholder='Select Family' />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value='husband'>Husband</SelectItem>
                             <SelectItem value='wife'>Wife</SelectItem>
                             <SelectItem value='child'>Child</SelectItem>
                           </SelectContent>
@@ -412,16 +414,27 @@ export default function ReimburseTypeForm({
                           <td>
                             <div>
                               <FormField
-                                control={form.control}
-                                name={`grades.${gradeIndex}.plafon`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Input {...field} />
-                                    </FormControl>
-                                  </FormItem>
-                                )}
-                              />
+                                  control={form.control}
+                                  name={`grades.${gradeIndex}.plafon`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          type='text'
+                                          placeholder='0'
+                                          onChange={(e) => {
+                                            const rawValue = e.target.value.replace(/[^0-9]/g, '');
+                                            const formattedValue = formatRupiah(rawValue, false);
+                                            field.onChange(rawValue);
+                                            e.target.value = formattedValue;
+                                          }}
+                                          value={formatRupiah(field.value, false)}
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
                             </div>
                           </td>
                         </tr>
