@@ -532,16 +532,18 @@ class BusinessTripController extends Controller
             $businessTrip = BusinessTrip::find($id);
             $businessTrip->remarks = $request->remark;
             $businessTrip->save();
-
-            // DELETE ATTACHMENT DULU JIKA ADA YANG DI HAPUS
-            $array_id_exist = [];
-            foreach ($request->file_existing as $key => $attachment) {
-                $decode = json_decode($attachment);
-                $array_id_exist[] = $decode->id;
+            
+            if($request->file_existing != null){
+                // DELETE ATTACHMENT DULU JIKA ADA YANG DI HAPUS
+                $array_id_exist = [];
+                foreach ($request->file_existing as $key => $attachment) {
+                    $decode = json_decode($attachment);
+                    $array_id_exist[] = $decode->id;
+                }
+                $businessTrip->attachment()->whereNotIn('id', $array_id_exist)->delete();
             }
-            $businessTrip->attachment()->whereNotIn('id', $array_id_exist)->delete();
+            
             // BARU TAMBAH ATTACHMENT
-
             if ($request->attachment != null) {
                 foreach ($request->attachment as $row) {
                     // Ambil nama asli file
@@ -572,6 +574,10 @@ class BusinessTripController extends Controller
         $data = [];
         $data['request_no'] = $findData->request_no;
         $data['remarks'] = $findData->remarks;
+        $data['cash_advance'] = $findData->cash_advance;
+        $data['total_percent'] = $findData->total_percent;
+        $data['total_cash_advance'] = number_format($findData->total_cash_advance, 0, ',', '.');
+        $data['reference_number'] = $findData->reference_number;
         $data['request_for'] = $findData->requestFor->name;
         $data['requested_by'] = $findData->requestedBy->name;
         $data['purpose_type_name'] = $findData->purposeType->name;
@@ -650,6 +656,7 @@ class BusinessTripController extends Controller
             }
 
             $data['business_trip_destination'][] = [
+                'id' => $destination->id,
                 'destination' => $destination->destination,
                 'business_trip_start_date' => $destination->business_trip_start_date,
                 'business_trip_end_date' => $destination->business_trip_end_date,
@@ -669,6 +676,10 @@ class BusinessTripController extends Controller
         $data['status_id'] = $findData->status_id;
         $data['request_no'] = $findData->request_no;
         $data['remarks'] = $findData->remarks;
+        $data['cash_advance'] = $findData->cash_advance;
+        $data['total_percent'] = $findData->total_percent;
+        $data['total_cash_advance'] = $findData->total_cash_advance;
+        $data['reference_number'] = $findData->reference_number;
         $data['request_for'] = $findData->requestFor->name;
         $data['requested_by'] = $findData->requestedBy->name;
         $data['purpose_type_name'] = $findData->purposeType->name;
@@ -693,7 +704,7 @@ class BusinessTripController extends Controller
             $detail_attendance = [];
             foreach ($destination->detailAttendance as $detail) {
                 $detail_attendance[] = [
-                    'date' => $detail->date,
+                    'date' => date('d-m-Y', strtotime($detail->date)),
                     'start_time' => $detail->start_time,
                     'end_time' => $detail->end_time,
                     'shift_code' => $detail->shift_code,
@@ -710,7 +721,7 @@ class BusinessTripController extends Controller
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)$detailDay->standard_value,
+                    'value' => number_format($detailDay->standard_value,0, ',', '.'),
                     'total_day' => $detailDay->total,
                     'total' => number_format($detailDay->standard_value * $detailDay->total, 0, ',', '.'),
                 ];
