@@ -102,4 +102,9 @@ class Reimburse extends Model
     {
         return $this->belongsTo(MasterStatus::class, 'status_id', 'id');
     }
+
+    public function reimburseAttachment()
+    {
+        return $this->hasMany(ReimburseAttachment::class, 'reimburse', 'id');
+    }
 }

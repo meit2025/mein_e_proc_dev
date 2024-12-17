@@ -139,7 +139,7 @@ class ReimbuseController extends Controller
     public function list(Request $request)
     {
         try {
-            $query =  ReimburseGroup::query()->with(['reimburses', 'status']);
+            $query =  ReimburseGroup::query()->with(['user.families', 'reimburses', 'status']);
             if ($request->approval == 1) {
                 $approval = Approval::where('user_id', Auth::user()->id)
                     ->where(['document_name' => 'REIM', 'status' => 'Waiting'])->pluck('document_id')->toArray();
@@ -173,10 +173,11 @@ class ReimbuseController extends Controller
                     $balance += $reimburse->balance;
                 }
                 $map = json_decode($map);
+                
                 return [
                     'id' => $map->id,
                     'code' => $map->code,
-                    'request_for' => $map->requester,
+                    'request_for' => $map->user->name,
                     'remark' => $map->remark,
                     'balance' => $balance,
                     'form' => count($map->reimburses),
@@ -240,6 +241,7 @@ class ReimbuseController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
+        
         try {
             $groupData = [
                 'remark' => $data['remark_group'],
@@ -362,10 +364,11 @@ class ReimbuseController extends Controller
             'purchasingGroupModel',
             'taxOnSalesModel',
             'reimburseType',
-            'periodeDate'
+            'periodeDate',
+            'reimburseAttachment'
         ])->get();
 
-        $approval = Approval::with('user.divisions')->where('document_id', $id)->where('document_name', 'REIM')->orderBy('id', 'ASC')->get();
+        $approval = Approval::with('user.positions')->where('document_id', $id)->where('document_name', 'REIM')->orderBy('id', 'ASC')->get();
 
         return $this->successResponse([
             'group' => $reimburseGroup,
@@ -390,7 +393,8 @@ class ReimbuseController extends Controller
             'purchasingGroupModel',
             'taxOnSalesModel',
             'reimburseType',
-            'periodeDate'
+            'periodeDate',
+            'reimburseAttachment'
         ])->get();
 
         $approval = Approval::with('user.divisions')->where('document_id', $id)->where('document_name', 'REIM')->orderBy('id', 'ASC')->get();

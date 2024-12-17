@@ -8,6 +8,7 @@ import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 import {
   Form,
   FormControl,
+  FormLabel,
   FormDescription,
   FormField,
   FormItem,
@@ -50,6 +51,7 @@ import {
   WorkflowApprovalStepInterface,
   WorkflowComponent,
 } from '@/components/commons/WorkflowComponent';
+import { CustomStatus } from '@/components/commons/CustomStatus';
 
 interface Props {
   onSuccess?: (value?: boolean) => void;
@@ -66,6 +68,12 @@ interface Props {
   type?: FormType;
   currentUser?: User;
   latestPeriod: any;
+}
+
+interface reimburseAttachement {
+  id: number;
+  url: string;
+  file_name: string;
 }
 
 export const ReimburseForm: React.FC<Props> = ({
@@ -95,16 +103,20 @@ export const ReimburseForm: React.FC<Props> = ({
   const [dataReimburseType, setDataReimburseType] = useState<any[]>([]);
   const [dataReimbursePeriod, setDataReimbursePeriod] = useState<any[]>([]);
   const [dataFamily, setDataFamily] = useState<any[]>([]);
-  const [familyUrl, setFamilyUrl] = useState('');
+  const [requestStatus, setRequestStatus] = useState<any[]>(false);
   const [isShow, setIsShow] = useState(false);
   const [isLoading, setLoading] = useState<boolean>(false);
   const [detailLimit, setDetailLimit] = useState<any[]>([]);
+  const [fileAttachment, setfileAttachment] = useState<reimburseAttachement[]>([]);
   const [approvalRoute, setApprovalRoute] = useState({
     approvalRequest: [],
     approvalFrom: [],
     acknowledgeFrom: [],
     approvalFromStatusRoute: [],
   });
+
+  const MAX_FILE_SIZE = 1 * 1024 * 1024; 
+  const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
 
   const formSchema = z.object({
     formCount: z.string().min(1, 'total form must be have value'),
@@ -130,13 +142,21 @@ export const ReimburseForm: React.FC<Props> = ({
         item_delivery_data: z.date(),
         start_date: z.date(),
         end_date: z.date(),
-        attachments: z.any().optional(),
+        attachment: z.array(
+          z
+            .instanceof(File)
+            .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
+              message: 'File type must be JPG, JPEG, PNG, or PDF',
+            })
+            .refine((file) => file.size <= MAX_FILE_SIZE, {
+              message: 'File size must be less than 1MB',
+            }),
+        ),
         // url: z.string().optional(),
       }),
     ),
   });
 
-  // .min(1, 'reimburse type required')
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -161,7 +181,7 @@ export const ReimburseForm: React.FC<Props> = ({
           item_delivery_data: new Date(),
           start_date: new Date(),
           end_date: new Date(),
-          attachments: [],
+          attachment: [],
           // url: '',
         },
       ],
@@ -193,7 +213,7 @@ export const ReimburseForm: React.FC<Props> = ({
           item_delivery_data: new Date(),
           start_date: new Date(),
           end_date: new Date(),
-          attachments: []
+          attachment: []
         }
       );
     });
@@ -210,6 +230,8 @@ export const ReimburseForm: React.FC<Props> = ({
       const response = await axiosInstance.get(edit_url ?? '');
       const reimburseGroup = response.data.data.group;
       const reimburseForms = response.data.data.forms as [];
+
+      setRequestStatus(reimburseGroup.reimbursementStatus)
 
       const reimburseFormMapping = reimburseForms.map((map: any) => {
         return {
@@ -228,7 +250,7 @@ export const ReimburseForm: React.FC<Props> = ({
           item_delivery_data: new Date(map.item_delivery_data),
           start_date: new Date(map.start_date),
           end_date: new Date(map.end_date),
-          attachments: '',
+          attachment: '',
           // url: GET_LIST_MASTER_REIMBUSE_TYPE,
         };
       });
@@ -316,7 +338,7 @@ export const ReimburseForm: React.FC<Props> = ({
   };
 
   const handleSearchReimburseType = async (query: string, index: number) => {
-    if (query.length > 0) {
+    if (query && query.length > 0) {
       try {
         const response = await axiosInstance.get(GET_LIST_MASTER_REIMBUSE_TYPE, {
           params: {
@@ -394,6 +416,18 @@ export const ReimburseForm: React.FC<Props> = ({
         newDetailLimit.splice(index, 1);
         return newDetailLimit;
       });
+
+      setDataReimbursePeriod((prev) => {
+        const newData = [...prev];
+        newData[index] = [];
+        return newData;
+      });
+
+      setDataFamily((prev) => {
+        const newData = [...prev];
+        newData[index] = [];
+        return newData;
+      });
     }
   };
 
@@ -417,7 +451,7 @@ export const ReimburseForm: React.FC<Props> = ({
           item_delivery_data: new Date(),
           start_date: new Date(),
           end_date: new Date(),
-          attachments: []
+          attachment: []
           // url: '',
         };
 
@@ -430,6 +464,10 @@ export const ReimburseForm: React.FC<Props> = ({
 
   const handleTabChange = (tabValue) => {
     setActiveTab(tabValue);
+  };
+
+  const handleDelete = (id: number) => {
+    setfileAttachment((prev) => prev.filter((file) => file.id !== id));
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -461,9 +499,17 @@ export const ReimburseForm: React.FC<Props> = ({
     try {
       let response;
       if (type === FormType.edit) {
-        response = await axiosInstance.put(update_url ?? '', values);
+        response = await axiosInstance.put(update_url ?? '', values, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
       } else {
-        response = await axiosInstance.post(store_url ?? '', values);
+        response = await axiosInstance.post(store_url ?? '', values, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
       }
       showToast(response?.data?.data, 'success');
       onSuccess();
@@ -564,12 +610,16 @@ export const ReimburseForm: React.FC<Props> = ({
             <table className='text-xs mt-4 reimburse-form-table font-thin'>
               <tbody>
                 <tr>
-                  <td className='w-1/4'>Reimburse Request No.</td>
-                  <td>{form?.code ?? '-'}</td>
-                </tr>
-                <tr>
                   <td className='w-1/4'>Request Status</td>
-                  {/* <td>{reimbursement?.status ?? '-'}</td> */}
+                  <td>
+                    {requestStatus && 
+                      <CustomStatus
+                        name={requestStatus?.name}
+                        className={requestStatus?.classname}
+                        code={requestStatus?.code}
+                      />
+                    }
+                  </td>
                 </tr>
                 <tr>
                   <td className='w-1/4'>Remark</td>
@@ -734,6 +784,18 @@ export const ReimburseForm: React.FC<Props> = ({
                                         newDetailLimit.splice(index, 1);
                                         return newDetailLimit;
                                       });
+
+                                      setDataReimbursePeriod((prev) => {
+                                        const newData = [...prev];
+                                        newData[index] = [];
+                                        return newData;
+                                      });
+                                
+                                      setDataFamily((prev) => {
+                                        const newData = [...prev];
+                                        newData[index] = [];
+                                        return newData;
+                                      });
                                     }}
                                     defaultValue={formValue.type}
                                   >
@@ -777,14 +839,27 @@ export const ReimburseForm: React.FC<Props> = ({
                                       type: form.getValues(`forms.${index}.type`),
                                       reimburse_type: data.value,
                                     });
+                                  } else {
+                                    setDataReimbursePeriod((prev) => {
+                                      const newData = [...prev];
+                                      newData[index] = [];
+                                      return newData;
+                                    });
                                   }
-
+                                  
                                   form.setValue(`forms.${index}.period`, '');
                                   form.setValue(`forms.${index}.for`, '');
+                                  
                                   setDetailLimit((prev) => {
                                     const newDetailLimit = [...prev];
                                     newDetailLimit.splice(index, 1);
                                     return newDetailLimit;
+                                  });
+
+                                  setDataFamily((prev) => {
+                                    const newData = [...prev];
+                                    newData[index] = [];
+                                    return newData;
                                   });
                                 }}
                                 onFocus={() =>
@@ -865,6 +940,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                           form.setValue(`forms.${index}.for`, '');
                                         }}
                                         defaultValue={formValue.period}
+                                        value={formValue.period}
                                       >
                                         <SelectTrigger className='w-[200px]'>
                                           <SelectValue placeholder='-' />
@@ -914,6 +990,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                             getDataByLimit(index);
                                         }}
                                         defaultValue={formValue?.for}
+                                        value={formValue.for}
                                       >
                                         <SelectTrigger className='w-[200px]'>
                                           <SelectValue placeholder='-' />
@@ -1204,36 +1281,72 @@ export const ReimburseForm: React.FC<Props> = ({
                           </tr>
 
                           <tr>
-                            <td className='w-1/4'>Attachments</td>
+                            <td className='w-1/4'>File Attachment</td>
                             <td>
                               <FormField
                                 control={form.control}
-                                name={`forms.${index}.attachments`}
+                                name={`forms.${index}.attachment`}
                                 render={({ field }) => (
                                   <FormItem>
+                                    <FormLabel className='text-xs text-gray-500 font-extralight mb-1'>
+                                      Max File: 1000KB
+                                    </FormLabel>
                                     <FormControl>
                                       <input
+                                        className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
                                         type='file'
                                         multiple
-                                        accept='image/*,.pdf,.doc,.docx'
                                         onChange={(e) => {
-                                          let files = Array.from(e.target.files)[0];
-                                          console.log(e.target);
+                                          const files = e.target.files;
                                           if (files) {
-                                            alert('asdas')
+                                            const updatedAttachments = [...formValue.attachment];
+
+                                            const fileArray = Array.from(files);
+
+                                            updatedAttachments.push(...fileArray);
                                             updateForm(index, {
                                               ...formValue,
-                                              attachments: files,
+                                              attachment: updatedAttachments,
                                             });
                                           }
                                         }}
                                       />
                                     </FormControl>
-                                    <FormMessage />
                                   </FormItem>
                                 )}
                               />
                             </td>
+                          </tr>
+                          {/* {fileAttachment.length > 0 && (
+                            <tr>
+                              <td width={200}></td>
+                              <td className='pb-3'>
+                                {fileAttachment.map((attachment: any, index: number) => (
+                                  <div className='flex items-center gap-4'>
+                                    <a
+                                      href={attachment.url}
+                                      target='_blank'
+                                      className='text-blue-500 inline-block'
+                                      key={index}
+                                      rel='noreferrer'
+                                    >
+                                      {attachment.file_name}
+                                    </a>
+                                    <button
+                                      type='button'
+                                      onClick={() => handleDelete(attachment.id)}
+                                      className='text-red-500 mt-2 inline-block ml-2 cursor-pointer'
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                ))}
+                              </td>
+                            </tr>
+                          )} */}
+                          <tr>
+                            <td width={200}>File Extension</td>
+                            <td className='text-gray-500 text-xs font-extralight'>doc,jpg,ods,png,txt,pdf</td>
                           </tr>
                         </tbody>
                       </table>
