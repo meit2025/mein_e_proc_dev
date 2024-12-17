@@ -75,6 +75,22 @@ const ReimburseDetail = () => {
                     </td>
                     <td>{reimburse?.type}</td>
                   </tr>
+                  {reimburse?.type == 'Family' && 
+                    <>
+                      <tr>
+                        <td>
+                          <strong>Family Status</strong>
+                        </td>
+                        <td className='capitalize'>{reimburse?.reimburse_type?.family_status}</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <strong>For</strong>
+                        </td>
+                        <td>{data?.user?.families?.filter(family => family.id == reimburse?.for).map(family => family.name)}</td>
+                      </tr>
+                    </>
+                  }
                   <tr>
                     <td>
                       <strong>Reimburse Type</strong>

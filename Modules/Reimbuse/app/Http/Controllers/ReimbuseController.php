@@ -349,7 +349,7 @@ class ReimbuseController extends Controller
     {
 
         $reimburseGroup = ReimburseGroup::where('id', $id)
-            ->with(['user', 'costCenter', 'status', 'userCreateRequest'])
+            ->with(['user.families', 'costCenter', 'status', 'userCreateRequest'])
             ->first();
 
         if ($reimburseGroup) {
@@ -363,8 +363,7 @@ class ReimbuseController extends Controller
             'taxOnSalesModel',
             'reimburseType',
             'periodeDate'
-        ])
-            ->get();
+        ])->get();
 
         $approval = Approval::with('user.divisions')->where('document_id', $id)->where('document_name', 'REIM')->orderBy('id', 'ASC')->get();
 

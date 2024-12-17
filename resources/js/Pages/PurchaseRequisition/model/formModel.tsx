@@ -1,75 +1,9 @@
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
 import ItemForm from './itemForm';
 import CheckApproval from './checkApproval';
+import CashAdvance from './CashAdvance';
 
 export const formModel: Array<FormFieldModel<any>> = [
-  //   {
-  //     type: 'switch',
-  //     name: 'is_cashAdvance',
-  //     label: 'cash Advance',
-  //     placeholder: 'cash Advance',
-  //     style: {
-  //       width: '65.5rem',
-  //     },
-  //   },
-  //   {
-  //     conditional: true,
-  //     valueConditional: true,
-  //     parameterConditional: 'is_cashAdvance',
-  //     type: 'input',
-  //     name: 'cash_advance_purchases.reference',
-  //     label: 'referance',
-  //     placeholder: 'referance',
-  //     style: {
-  //       width: '63.5rem',
-  //     },
-  //   },
-  //   {
-  //     conditional: true,
-  //     valueConditional: true,
-  //     parameterConditional: 'is_cashAdvance',
-  //     type: 'input',
-  //     name: 'cash_advance_purchases.document_header_text',
-  //     label: 'Document Header Text',
-  //     placeholder: 'Document Header Text',
-  //     style: {
-  //       width: '63.5rem',
-  //     },
-  //   },
-  //   {
-  //     conditional: true,
-  //     valueConditional: true,
-  //     parameterConditional: 'is_cashAdvance',
-  //     type: 'input',
-  //     name: 'cash_advance_purchases.document_date',
-  //     label: 'Delivery Date',
-  //     required: true,
-  //     texttype: 'date',
-  //     placeholder: 'enter your Document Date',
-  //   },
-  //   {
-  //     conditional: true,
-  //     valueConditional: true,
-  //     parameterConditional: 'is_cashAdvance',
-  //     type: 'input',
-  //     name: 'cash_advance_purchases.due_on',
-  //     label: 'due on',
-  //     required: true,
-  //     texttype: 'date',
-  //     placeholder: 'enter your Due On',
-  //   },
-  //   {
-  //     conditional: true,
-  //     valueConditional: true,
-  //     parameterConditional: 'is_cashAdvance',
-  //     type: 'input',
-  //     name: 'cash_advance_purchases.text',
-  //     label: 'text',
-  //     placeholder: 'text',
-  //     style: {
-  //       width: '63.5rem',
-  //     },
-  //   },
   {
     type: 'select',
     name: 'user_id',
@@ -252,6 +186,10 @@ export const formModel: Array<FormFieldModel<any>> = [
   {
     fieldCustome: true,
     fieldCustomeValue: <ItemForm disable={false} />,
+  },
+  {
+    fieldCustome: true,
+    fieldCustomeValue: <CashAdvance disable={false} />,
   },
   {
     fieldCustome: true,

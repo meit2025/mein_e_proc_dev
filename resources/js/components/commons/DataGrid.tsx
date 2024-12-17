@@ -45,7 +45,7 @@ interface DataGridProps {
   labelFilter?: string;
   buttonCustome?: ReactNode;
   defaultSearch?: string;
-  onExport?: () => Promise<void> | void;
+  onExport?: (filter: string) => Promise<void> | void;
   onEdit?: (id: number) => Promise<void> | void;
   onDelete?: (id: number) => Promise<void> | void;
   onDetail?: (id: number) => Promise<void> | void;
@@ -95,6 +95,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   const [value, setValue] = useState(0);
   const [rowCount, setRowCount] = useState(0);
   const [search, setSearch] = useState('');
+  const [onStateFilter, setOnStateFilter] = useState('');
   const { showToast } = useAlert();
 
   const { props } = usePage<{ auth: { permission: string[]; user: User } }>();
@@ -120,9 +121,9 @@ const DataGridComponent: React.FC<DataGridProps> = ({
         .join('&');
 
       try {
-        const response = await axiosInstance.get(
-          `${url.url}${defaultSearch ? defaultSearch : '?'}page=${page + 1}&per_page=${pageSize}&search=${search}&sort_by=${sortBy}&sort_direction=${sortDirection}&approval=${approval}&${filterParams}`,
-        );
+        const filterSearch = `${defaultSearch ? defaultSearch : '?'}page=${page + 1}&per_page=${pageSize}&search=${search}&sort_by=${sortBy}&sort_direction=${sortDirection}&approval=${approval}&${filterParams}`;
+        setOnStateFilter(filterSearch);
+        const response = await axiosInstance.get(`${url.url}${filterSearch}`);
         setRows(response.data.data.data);
         setRowCount(response.data.data.total);
       } catch (error) {
@@ -391,7 +392,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                       <Button
                         className='btn'
                         variant='contained'
-                        onClick={() => onExport()}
+                        onClick={() => onExport(onStateFilter)}
                         color='primary'
                         startIcon={<i className='ki-filled ki-folder-down' />}
                         style={{ marginBottom: '10px' }} // Add margin for spacing

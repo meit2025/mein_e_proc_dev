@@ -102,6 +102,34 @@ abstract class Controller
         return $query->paginate($perPage);
     }
 
+    public function filterNotPaggination($request, $model, array $filterableColumns, $userData = false)
+    {
+        $perPage = $request->get('per_page', 10);
+        $sortBy = $request->get('sort_by', 'id');
+        $sortDirection = $request->get('sort_direction', 'asc');
+
+        $query = $model instanceof \Illuminate\Database\Eloquent\Builder ? $model : $model::query();
+
+        foreach ($request->all() as $key => $value) {
+            if (in_array($key, $filterableColumns)) {
+                list($operator, $filterValue) = array_pad(explode(',', $value, 2), 2, null);
+                $query = $this->applyColumnFilter($query, $key, $operator, $filterValue); // Menggunakan fungsi helper
+            }
+        }
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request, $filterableColumns) {
+                foreach ($filterableColumns as $column) {
+                    $q->orWhere($column, 'ILIKE', '%' . $request->search . '%');
+                }
+            });
+        }
+
+
+        $query->orderBy($sortBy, $sortDirection);
+        return $query->get();
+    }
+
     protected function applyColumnFilter($query, $column, $operator, $value)
     {
         switch ($operator) {
