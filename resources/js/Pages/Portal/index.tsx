@@ -13,11 +13,10 @@ const App = () => {
             <div className="card rounded-3xl shadow-lg my-20">
                 <header style={{ backgroundImage: "url('assets/media/images/2600x1200/bg-14.png')" }} className="p-10 text-center mb-8 bg-cover bg-[right_top_-1rem] bg-no-repeat bg-opacity-60 bg-[#F1F1F4] w-full">
                     <img src="/images/main_logo.png" alt="Company Logo" className="mx-auto mb-4" />
-                    <h1 className="text-2xl font-bold">Welcome to the Company <span className="text-blue-500">System Portal</span></h1>
+                    <h1 className="text-2xl font-bold">Welcome to the MEIN Management Information System</h1>
                 </header>
 
                 <div className="w-full bg-white rounded px-6">
-                    <h2 className="text-xl font-bold text-center mb-5">Welcome to E-Portal</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 bg-white">
                         <div style={{ backgroundImage: "url('assets/media/images/2600x1200/bg-14.png')" }}
                             className={` bg-cover bg-center bg-no-repeat bg-opacity-90  px-6 py-10 rounded-lg shadow-lg text-center bg-[#1B84FF] `}>

@@ -5,7 +5,7 @@ import SVGLoader from '@/components/commons/SvgLoader';
 
 function Index(dataTotal: any) {
     const [selectedStatus, setSelectedStatus] = useState('reim');
-    const [selectedTime, setSelectedTime] = useState('12');
+    const [selectedTime, setSelectedTime] = useState('1year');
     const [categories, setCategories] = useState(dataTotal.dataTotal.categories);
     const [requestData, setRequestData] = useState(dataTotal.dataTotal.request);
 
@@ -20,7 +20,7 @@ function Index(dataTotal: any) {
     useEffect(() => {
         // when the filter state changes
         const fetchFilteredData = async () => {
-            const response = await axios.get(`/dashboard/filter/?status=${selectedStatus}&month=${selectedTime}`);
+            const response = await axios.get(`/dashboard/filter/?status=${selectedStatus}&date=${selectedTime}`);
 
             setRequestData(response.data.dataTotal.request);
             setCategories(response.data.dataTotal.categories);
@@ -142,16 +142,17 @@ function Index(dataTotal: any) {
                                                 <option value="dec">Status Business Trip Declaration</option>
                                             </select>
                                             <select value={selectedTime} onChange={handleTimeChange} className="form-select rounded-lg">
-                                                <option value="12">12 months</option>
-                                                <option value="6">6 months</option>
-                                                <option value="3">3 months</option>
+                                                <option value="1year">a year</option>
+                                                <option value="1month">a month</option>
+                                                <option value="1week">a week</option>
+                                                <option value="1day">a day</option>
                                             </select>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="card-body flex flex-col gap-4 p-5 lg:p-7.5 lg:pt-4">
                                     <div className="flex flex-col gap-0.5">
-                                        <span className="text-sm font-normal text-gray-700">Status {statusNames[selectedStatus] || 'Reimbursement'} {selectedTime} Bulan</span>
+                                        <span className="text-sm font-normal text-gray-700">Status {statusNames[selectedStatus] || 'Reimbursement'} </span>
                                         <div className="flex items-center gap-2.5">
                                             <span className="text-3xl font-semibold text-gray-900">{total}</span>
                                         </div>

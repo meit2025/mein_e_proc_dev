@@ -16,7 +16,7 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $statusFilter = $request->input('status', 'reim');
-        $monthFilter = $request->input('month', '12');
+        $dateFilter = $request->input('date', '1year');
         $user = Auth::user();
 
         // Define status mapping
@@ -33,19 +33,19 @@ class DashboardController extends Controller
         // Base queries based on status filter
         if ($statusFilter === 'reim') {
             $query = ReimburseGroup::query();
-            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'requester');
+            $this->applyUserAndDateFilters($query, $user, $dateFilter, 'requester');
             $categories = $this->countStatuses($query, $statusTypes);
         } elseif ($statusFilter === 'trip') {
             $query = BusinessTrip::query()->where('type', 'request');
-            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'request_for');
+            $this->applyUserAndDateFilters($query, $user, $dateFilter, 'request_for');
             $categories = $this->countStatuses($query, $statusTypes);
         } elseif ($statusFilter === 'dec') {
             $query = BusinessTrip::query()->where('type', 'declaration');
-            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'request_for');
+            $this->applyUserAndDateFilters($query, $user, $dateFilter, 'request_for');
             $categories = $this->countStatuses($query, $statusTypes);
         } elseif ($statusFilter === 'vendor') {
             $query = Purchase::query();
-            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'user_id');
+            $this->applyUserAndDateFilters($query, $user, $dateFilter, 'user_id');
             $categories = $this->countStatuses($query, $statusTypes);
         }
 
@@ -64,7 +64,7 @@ class DashboardController extends Controller
             'title' => 'Dashboard',
             'dataTotal' => $dataTotal,
             'statusFilter' => $statusFilter,
-            'monthFilter' => $monthFilter,
+            'dateFilter' => $dateFilter,
         ]);
     }
 
@@ -72,7 +72,7 @@ class DashboardController extends Controller
     {
         // Retrieve filters from request
         $statusFilter = $request->input('status', 'reim');
-        $monthFilter = $request->input('month', '12');
+        $dateFilter = $request->input('date', '1year');
         $user = Auth::user();
 
         // Define status mapping
@@ -89,19 +89,19 @@ class DashboardController extends Controller
         // Base queries based on status filter
         if ($statusFilter === 'reim') {
             $query = ReimburseGroup::query();
-            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'requester');
+            $this->applyUserAndDateFilters($query, $user, $dateFilter, 'requester');
             $categories = $this->countStatuses($query, $statusTypes);
         } elseif ($statusFilter === 'trip') {
             $query = BusinessTrip::query()->where('type', 'request');
-            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'request_for');
+            $this->applyUserAndDateFilters($query, $user, $dateFilter, 'request_for');
             $categories = $this->countStatuses($query, $statusTypes);
         } elseif ($statusFilter === 'dec') {
             $query = BusinessTrip::query()->where('type', 'declaration');
-            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'request_for');
+            $this->applyUserAndDateFilters($query, $user, $dateFilter, 'request_for');
             $categories = $this->countStatuses($query, $statusTypes);
         } elseif ($statusFilter === 'vendor') {
             $query = Purchase::query();
-            $this->applyUserAndMonthFilters($query, $user, $monthFilter, 'user_id');
+            $this->applyUserAndDateFilters($query, $user, $dateFilter, 'user_id');
             $categories = $this->countStatuses($query, $statusTypes);
         }
 
@@ -120,18 +120,32 @@ class DashboardController extends Controller
         return response()->json([
             'dataTotal' => $dataTotal,
             'statusFilter' => $statusFilter,
-            'monthFilter' => $monthFilter,
+            'dateFilter' => $dateFilter,
         ]);
     }
 
-    private function applyUserAndMonthFilters($query, $user, $monthFilter, $userColumn)
+    private function applyUserAndDateFilters($query, $user, $dateFilter, $userColumn)
     {
         if ($user->is_admin === '0') {
             $query->where($userColumn, $user->id);
         }
 
-        if (!empty($monthFilter) && $monthFilter !== '12') {
-            $query->whereMonth('created_at', $monthFilter);
+        switch ($dateFilter) {
+            case '1year':
+                $query->where('created_at', '>=', now()->subYear());
+                break;
+            case '1month':
+                $query->where('created_at', '>=', now()->subMonth());
+                break;
+            case '1week':
+                $query->where('created_at', '>=', now()->subWeek());
+                break;
+            case '1day':
+                $query->where('created_at', '>=', now()->subDay());
+                break;
+            default:
+                // If no valid filter is provided, return all time
+                break;
         }
     }
 
