@@ -183,14 +183,25 @@
                 </tr>
                 <tr>
                     <td><strong>File Attachment</strong></td>
-                    <td>{{$formItems['reimburseType']['name']}}</td>
+                    <td>
+                        @foreach ($formItems['reimburseAttachment'] as $index => $item)
+                            <a
+                                href="/storage/reimburse/{{$item->url}}"
+                                target='_blank'
+                                className='text-blue-500'
+                                rel='noopener noreferrer'
+                                key={{$index}}
+                            >
+                                {{$item->url}}
+                            </a>
+                            <br />
+                        @endforeach
+                    </td>
                 </tr>
             </table>
         </div>
     @endforeach
-    {{-- @php
-        dd($data);
-    @endphp --}}
+    
     <div class="approval">
         <table>
             <thead>
@@ -199,20 +210,36 @@
                     <td>Position</td>
                     <td>Decision</td>
                     <td>Date</td>
+                    <td>Notes</td>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($data['approval'] as $item)
                     <tr>
                         <td>{{$item['user']['name']}}</td>
-                        <td>{{isset($item['user']['division']) ? $item['user']['division']['name'] : '-'}}</td>
+                        <td>{{isset($item['user']['positions']) ? $item['user']['positions']['name'] : '-'}}</td>
                         <td>{{$item['status']}}</td>
                         <td>{{$carbon::parse($formItems['updated_at'])->format('d M Y (H:i)')}}</td>
+                        <td>{{$item['message']}}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
+
+    <br><br>
+    <h3>
+        Approval is 
+        @if ($data['group']['reimbursementStatus']['code'] == 'waiting_approve')
+            pending
+        @elseif ($data['group']['reimbursementStatus']['code'] == 'reject_to')
+            rejected
+        @elseif ($data['group']['reimbursementStatus']['code'] == 'fully_approve')
+            completed
+        @else
+
+        @endif
+    </h3>
 </div>
 </body>
 </html>
