@@ -37,6 +37,7 @@ Route::group(['middleware' => 'auth'], function () {
 
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/filter', [DashboardController::class, 'filter'])->name('dashboard.filter');
     Route::get('/role', [DashboardController::class, 'roles'])->name('roles');
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('index.notifikasi');
     Route::get('/notifikasi/read', [NotifikasiController::class, 'read'])->name('read.notifikasi');
