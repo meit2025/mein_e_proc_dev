@@ -93,7 +93,7 @@ class User extends Authenticatable
 
     public function families()
     {
-        return $this->hasMany(Family::class, 'user', 'id');
+        return $this->hasMany(Family::class, 'userId', 'id');
     }
 
     public function employee()
