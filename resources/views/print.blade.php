@@ -118,7 +118,9 @@
     <p><strong>Company:</strong> PT. Mitsubishi Electric Indonesia</p>
     <p><strong>Request for:</strong> {{$data['request_for']}}</p>
     <p><strong>Requested By:</strong> {{$data['requested_by']}}</p>
-    <p><strong>Status:</strong> <span class="status-approved">Fully Approved</span></p>
+    <p><strong>Status:</strong>
+        <span class="status-approved">Fully Approved</span>
+    </p>
 
     <table class="info-table">
         <tr>
@@ -143,19 +145,33 @@
         </tr>
         <tr>
             <td><strong>Attachment File</strong></td>
-            <td></td>
+            <td style="display: flex;flex-direction: column;">
+                @foreach ($data['file_attachement'] as $item)
+                <a href="{{$item['url']}}" target='_blank' style="color: blue;padding-bottom: 5px;" rel='noopener noreferrer'>
+                    {{$item['file_name']}}
+                  </a>
+                @endforeach
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Total Percent</strong></td>
+            <td>{{$data['total_percent']}}%</td>
+        </tr>
+        <tr>
+            <td><strong>Total Cash Advance</strong></td>
+            <td>{{$data['total_cash_advance']}}</td>
         </tr>
     </table>
 
     <div class="tabs">
         {{-- LOOPING DESTINASI --}}
         @foreach ($data['business_trip_destination'] as $key => $item)
-            <button class="tab-button {{$key == 0 ? 'active' : ''}}" onclick="openTab(event, '{{$item['destination']}}')">{{$item['destination']}}</button>
+            <button class="tab-button {{$key == 0 ? 'active' : ''}}" onclick="openTab(event, '{{$item['destination'].'-'.$item['id']}}')">{{$item['destination']}}</button>
         @endforeach
     </div>
 
     @foreach ($data['business_trip_destination'] as $idx => $row)
-        <div id="{{$row['destination']}}" class="tab-content {{$key == 0 ? 'active' : ''}}">
+        <div id="{{$row['destination'].'-'.$row['id']}}" class="tab-content {{$idx == 0 ? 'active' : ''}}">
             <h3>Detail {{$row['destination']}}</h3>
             <table class="detail-table">
                 <tr>
@@ -194,9 +210,9 @@
                         <tr>
                             <td>{{ $standar['item_name']  ?? ''}} ({{ $standar['type'] ?? '' }})</td>
                             <td>{{ $standar['currency_code'] ?? '' }}</td>
-                            <td>{{ $standar['value'] ?? '' }}</td>
+                            <td>{{ number_format($standar['value'],0,',','.') }}</td>
                             <td>{{ $standar['total_day'] }}</td>
-                            <td>{{ $standar['total'] }}</td>
+                            <td>{{ number_format($standar['total'],0,',','.') }}</td>
                         </tr>
                         @php
                             $total_standar_value += $standar['total'];
@@ -207,7 +223,7 @@
                         <td>IDR</td>
                         <td></td>
                         <td></td>
-                        <td>{{$total_standar_value}}</td>
+                        <td>{{number_format($total_standar_value,0,',','.')}}</td>
                     </tr>
                 </table>
 
@@ -227,9 +243,9 @@
                         <tr>
                             <td>{{ $request['item_name']  ?? ''}} ({{ $request['type'] ?? '' }})</td>
                             <td>{{ $request['currency_code'] ?? '' }}</td>
-                            <td>{{ $request['value'] ?? '' }}</td>
+                            <td>{{ number_format($request['value'],0,',','.') }}</td>
                             <td>{{ $request['total_day'] }}</td>
-                            <td>{{ $request['total'] }}</td>
+                            <td>{{ number_format($request['total'],0,',','.') }}</td>
                         </tr>
                         @php
                             $total_request_value += $request['total'];
@@ -240,7 +256,7 @@
                         <td>IDR</td>
                         <td></td>
                         <td></td>
-                        <td>{{$total_request_value}}</td>
+                        <td>{{number_format($total_request_value,0,',','.')}}</td>
                     </tr>
                 </table>
             </div>
@@ -250,6 +266,7 @@
 
 <script>
     function openTab(event, tabName) {
+        console.log(tabName)
         // Hide all tab contents
         let tabContents = document.getElementsByClassName("tab-content");
         for (let i = 0; i < tabContents.length; i++) {
