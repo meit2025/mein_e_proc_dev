@@ -67,7 +67,7 @@ class FamilyController extends Controller
     {
         $rules = [
             'name' => 'required',
-            'status' => 'required|in:wife,child',
+            'status' => 'required|in:husband,wife,child',
             'bod' => 'required|date',
             'userId' => 'required|exists:users,id',
         ];
@@ -116,7 +116,7 @@ class FamilyController extends Controller
     {
         $rules = [
             'name' => 'required',
-            'status' => 'required|in:wife,child',
+            'status' => 'required|in:husband,wife,child',
             'bod' => 'required|date',
             'userId' => 'required|exists:users,id',
         ];
