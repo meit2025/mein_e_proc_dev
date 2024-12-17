@@ -20,9 +20,10 @@ class CashAdvancePurchases extends Model
         'document_date',
         'due_on',
         'text',
-        'purchase_id',
         'dp',
-        'unit_id'
+        'nominal',
+        'purchase_id',
+        'unit_id',
     ];
     public function purchase()
     {

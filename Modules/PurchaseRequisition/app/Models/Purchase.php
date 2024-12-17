@@ -26,7 +26,7 @@ class Purchase extends Model
         'storage_locations',
         'total_vendor',
         'total_item',
-        // 'is_cashAdvance',
+        'is_cashAdvance',
         'status_id',
         'createdBy',
         'updatedBy',

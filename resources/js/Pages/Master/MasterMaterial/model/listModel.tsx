@@ -12,6 +12,12 @@ export const columns: GridColDef[] = [
   },
   { field: 'industry', headerName: 'Industry', width: 200, filterable: true },
   { field: 'old_material_number', headerName: 'Old material number', width: 200, filterable: true },
+  {
+    field: 'base_unit_of_measure',
+    headerName: 'base unit of measure',
+    width: 200,
+    filterable: true,
+  },
 ];
 
 export interface MaterialModel {

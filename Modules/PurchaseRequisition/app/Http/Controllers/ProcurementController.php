@@ -4,6 +4,7 @@ namespace Modules\PurchaseRequisition\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\SapJobs;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -76,18 +77,23 @@ class ProcurementController extends Controller
                 $vendor = $purchase->vendors()->create(['vendor' => $vendorData['vendor'],  'winner' => $vendorData['winner'] ?? false]);
                 foreach ($vendorData['units'] as $unitData) {
                     $unitCrate =  $vendor->units()->create($unitData);
-                    if ($unitData['is_cashAdvance'] ?? false) {
-                        $purchase->cashAdvancePurchases()->create([
-                            'unit_id' => $unitCrate->id,
-                            'reference' => $unitData['cash_advance_purchases']['reference'] ?? '',
-                            'document_header_text' => $unitData['cash_advance_purchases']['document_header_text'] ?? '',
-                            'document_date' => $unitData['cash_advance_purchases']['document_date'] ?? '',
-                            'due_on' => $unitData['cash_advance_purchases']['due_on'] ?? '',
-                            'text' => $unitData['cash_advance_purchases']['text'] ?? '',
-                            'dp' => $unitData['cash_advance_purchases']['dp'] ?? '',
-                        ]);
-                    }
                 }
+            }
+
+            $date = Carbon::now();
+            $formattedDate = $date->format('Y-M-D');
+
+            if ($unitData['is_cashAdvance'] ?? false) {
+                $purchase->cashAdvancePurchases()->create([
+                    'unit_id' => $unitCrate->id,
+                    'reference' => $unitData['cash_advance_purchases']['reference'] ?? '',
+                    'document_header_text' => $request['entertainment']['header_not'] ?? '',
+                    'document_date' => $formattedDate,
+                    'due_on' => $request->delivery_date ?? '',
+                    'text' => $request['entertainment']['header_not'] ?? '',
+                    'dp' => $unitData['cash_advance_purchases']['dp'] ?? '',
+                    'nominal' => $unitData['cash_advance_purchases']['nominal'] ?? '0',
+                ]);
             }
 
             $this->approvalServices->PR($request, true, $purchase->id);
