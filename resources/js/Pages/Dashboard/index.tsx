@@ -1,11 +1,36 @@
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useEffect } from 'react';
+import axios from 'axios';
 import MainLayout from '../Layouts/MainLayout';
 import SVGLoader from '@/components/commons/SvgLoader';
 
 function Index(dataTotal: any) {
-    const [selectedStatus, setSelectedStatus] = useState('reim'); // State untuk filter status
-    const [selectedTime, setSelectedTime] = useState('12'); // State untuk filter waktu
+    const [selectedStatus, setSelectedStatus] = useState('reim');
+    const [selectedTime, setSelectedTime] = useState('1year');
+    const [categories, setCategories] = useState(dataTotal.dataTotal.categories);
+    const [requestData, setRequestData] = useState(dataTotal.dataTotal.request);
 
+
+    const statusNames: { [key: string]: string } = {
+        reim: 'Reimbursement',
+        vendor: 'Vendor Selection',
+        trip: 'Business Trip Request',
+        dec: 'Business Trip Declaration'
+    };
+
+    useEffect(() => {
+        // when the filter state changes
+        const fetchFilteredData = async () => {
+            const response = await axios.get(`/dashboard/filter/?status=${selectedStatus}&date=${selectedTime}`);
+
+            setRequestData(response.data.dataTotal.request);
+            setCategories(response.data.dataTotal.categories);
+        };
+
+        fetchFilteredData();
+    }, [selectedStatus, selectedTime]);
+
+
+    // Handle change in status or time
     const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedStatus(e.target.value);
     };
@@ -13,7 +38,16 @@ function Index(dataTotal: any) {
     const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedTime(e.target.value);
     };
-    const url = 'https://api.example.com/submit';
+    // Calculate percentages
+    const total = (categories.waiting ?? 0) + (categories.process ?? 0) +
+        (categories.approved ?? 0) + (categories.rejected ?? 0);
+
+
+    const waitingPercent = total ? ((categories.waiting ?? 0) / total) * 100 : 0;
+    const processPercent = total ? ((categories.process ?? 0) / total) * 100 : 0;
+    const approvedPercent = total ? ((categories.approved ?? 0) / total) * 100 : 0;
+    const rejectedPercent = total ? ((categories.rejected ?? 0) / total) * 100 : 0;
+
     return (
         <>
             <div className='container-fixed'>
@@ -40,7 +74,7 @@ function Index(dataTotal: any) {
                                         </h2>
                                         <div className="flex flex-col gap-1 pb-4 px-5">
                                             <span className="text-3xl font-semibold text-black">
-                                                {dataTotal.dataTotal.purchaseRequisition ?? 0}
+                                                {requestData.vendorSelection ?? 0}
                                             </span>
                                             <span className="text-2sm font-normal text-gray-700">
                                                 Total Vendor Selection
@@ -55,7 +89,7 @@ function Index(dataTotal: any) {
                                         </h2>
                                         <div className="flex flex-col gap-1 pb-4 px-5">
                                             <span className="text-3xl font-semibold text-black">
-                                                {dataTotal.dataTotal.reimburse ?? 0}
+                                                {requestData.reim ?? 0}
                                             </span>
                                             <span className="text-2sm font-normal text-gray-700">
                                                 Total Reimbursement Request
@@ -70,7 +104,7 @@ function Index(dataTotal: any) {
                                         </h2>
                                         <div className="flex flex-col gap-1 pb-4 px-5">
                                             <span className="text-3xl font-semibold text-black">
-                                                {dataTotal.dataTotal.businessTripRequest ?? 0}
+                                                {requestData.businessTrip ?? 0}
                                             </span>
                                             <span className="text-2sm font-normal text-gray-700">
                                                 Total Business Trip Request
@@ -85,7 +119,7 @@ function Index(dataTotal: any) {
                                         </h2>
                                         <div className="flex flex-col gap-1 pb-4 px-5">
                                             <span className="text-3xl font-semibold text-black">
-                                                {dataTotal.dataTotal.businessTripDeclaration ?? 0}
+                                                {requestData.businessDec ?? 0}
                                             </span>
                                             <span className="text-2sm font-normal text-gray-700">
                                                 Total Business Trip Declaration
@@ -98,7 +132,7 @@ function Index(dataTotal: any) {
                         <div className='lg:col-span-2'>
                             <div className="card h-full">
                                 <div className="card-header">
-                                    <h3 className="card-title">Reimbursement Status</h3>
+                                    <h3 className="card-title">{statusNames[selectedStatus] || 'Reimbursement'} Status</h3>
                                     <div className="menu">
                                         <div className="flex gap-3">
                                             <select value={selectedStatus} onChange={handleStatusChange} className="form-select rounded-lg">
@@ -108,25 +142,38 @@ function Index(dataTotal: any) {
                                                 <option value="dec">Status Business Trip Declaration</option>
                                             </select>
                                             <select value={selectedTime} onChange={handleTimeChange} className="form-select rounded-lg">
-                                                <option value="12">12 months</option>
-                                                <option value="6">6 months</option>
-                                                <option value="3">3 months</option>
+                                                <option value="1year">a year</option>
+                                                <option value="1month">a month</option>
+                                                <option value="1week">a week</option>
+                                                <option value="1day">a day</option>
                                             </select>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="card-body flex flex-col gap-4 p-5 lg:p-7.5 lg:pt-4">
                                     <div className="flex flex-col gap-0.5">
-                                        <span className="text-sm font-normal text-gray-700">Status Reimbursement 12 Bulan</span>
+                                        <span className="text-sm font-normal text-gray-700">Status {statusNames[selectedStatus] || 'Reimbursement'} </span>
                                         <div className="flex items-center gap-2.5">
-                                            <span className="text-3xl font-semibold text-gray-900">78</span>
+                                            <span className="text-3xl font-semibold text-gray-900">{total}</span>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-1 mb-1.5">
-                                        <div className="bg-info h-2 w-full max-w-[50%] rounded-sm"></div>
-                                        <div className="bg-warning h-2 w-full max-w-[25%] rounded-sm"></div>
-                                        <div className="bg-success h-2 w-full max-w-[15%] rounded-sm"></div>
-                                        <div className="bg-danger h-2 w-full max-w-[10%] rounded-sm"></div>
+                                        <div
+                                            className="bg-info h-2 rounded-sm"
+                                            style={{ width: `${waitingPercent}%` }}
+                                        ></div>
+                                        <div
+                                            className="bg-warning h-2 rounded-sm"
+                                            style={{ width: `${processPercent}%` }}
+                                        ></div>
+                                        <div
+                                            className="bg-success h-2 rounded-sm"
+                                            style={{ width: `${approvedPercent}%` }}
+                                        ></div>
+                                        <div
+                                            className="bg-danger h-2 rounded-sm"
+                                            style={{ width: `${rejectedPercent}%` }}
+                                        ></div>
                                     </div>
                                     <div className="flex items-center flex-wrap gap-4 mb-1">
                                         <div className="flex items-center gap-1.5">
@@ -154,7 +201,7 @@ function Index(dataTotal: any) {
                                                 <span className="text-sm font-normal text-gray-900">Waiting Approve</span>
                                             </div>
                                             <div className="flex items-center text-sm font-medium text-gray-800 gap-6">
-                                                <span className="lg:text-right">80</span>
+                                                <span className="lg:text-right">{categories.waiting ?? 0}</span>
                                             </div>
                                         </div>
                                         <div className="flex items-center justify-between flex-wrap gap-2">
@@ -163,7 +210,7 @@ function Index(dataTotal: any) {
                                                 <span className="text-sm font-normal text-gray-900">On Proccess</span>
                                             </div>
                                             <div className="flex items-center text-sm font-medium text-gray-800 gap-6">
-                                                <span className="lg:text-right">70</span>
+                                                <span className="lg:text-right">{categories.process ?? 0}</span>
                                             </div>
                                         </div>
                                         <div className="flex items-center justify-between flex-wrap gap-2">
@@ -172,7 +219,7 @@ function Index(dataTotal: any) {
                                                 <span className="text-sm font-normal text-gray-900">Fully Aproved</span>
                                             </div>
                                             <div className="flex items-center text-sm font-medium text-gray-800 gap-6">
-                                                <span className="lg:text-right">60</span>
+                                                <span className="lg:text-right">{categories.approved ?? 0}</span>
                                             </div>
                                         </div>
                                         <div className="flex items-center justify-between flex-wrap gap-2">
@@ -181,7 +228,7 @@ function Index(dataTotal: any) {
                                                 <span className="text-sm font-normal text-gray-900">Reject</span>
                                             </div>
                                             <div className="flex items-center text-sm font-medium text-gray-800 gap-6">
-                                                <span className="lg:text-right">60</span>
+                                                <span className="lg:text-right">{categories.rejected ?? 0}</span>
                                             </div>
                                         </div>
                                     </div>

@@ -8,7 +8,8 @@
     4 => 'Modules\\Master\\Providers\\MasterServiceProvider',
     5 => 'Modules\\PurchaseRequisition\\Providers\\PurchaseRequisitionServiceProvider',
     6 => 'Modules\\Reimbuse\\Providers\\ReimbuseServiceProvider',
-    7 => 'Modules\\User\\Providers\\UserServiceProvider',
+    7 => 'Modules\\Report\\Providers\\ReportServiceProvider',
+    8 => 'Modules\\User\\Providers\\UserServiceProvider',
   ),
   'eager' => 
   array (
@@ -19,7 +20,8 @@
     4 => 'Modules\\Master\\Providers\\MasterServiceProvider',
     5 => 'Modules\\PurchaseRequisition\\Providers\\PurchaseRequisitionServiceProvider',
     6 => 'Modules\\Reimbuse\\Providers\\ReimbuseServiceProvider',
-    7 => 'Modules\\User\\Providers\\UserServiceProvider',
+    7 => 'Modules\\Report\\Providers\\ReportServiceProvider',
+    8 => 'Modules\\User\\Providers\\UserServiceProvider',
   ),
   'deferred' => 
   array (
