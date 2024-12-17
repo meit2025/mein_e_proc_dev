@@ -6,9 +6,6 @@ import {
   CREATE_APPROVAL_USER_DROPDOWN_ROUTE,
   DETAIL_APPROVAL_USER_DROPDOWN_ROUTE,
 } from '@/endpoint/approvalRoute/api';
-import { CREATE_MASTER_DROPDOWN } from '@/endpoint/dokumentType copy/api';
-import useDataDropdown from '@/lib/getDataDropdown';
-import useDropdownOptions from '@/lib/getDropdown';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 

@@ -4,8 +4,8 @@ export const formModel: Array<FormFieldModel<any>> = [
   {
     type: 'input',
     name: 'purchasing_doc',
-    label: 'Dokument',
-    placeholder: 'Enter your Dokument',
+    label: 'Document',
+    placeholder: 'Enter your Document',
     required: true,
   },
   {

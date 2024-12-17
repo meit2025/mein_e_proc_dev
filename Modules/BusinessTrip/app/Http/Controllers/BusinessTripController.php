@@ -358,14 +358,6 @@ class BusinessTripController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
-    {
-        dd($request->all(), $id);
-    }
-
-    /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)
@@ -420,13 +412,10 @@ class BusinessTripController extends Controller
                     // Ambil nama asli file
                     $originalName = pathinfo($row->getClientOriginalName(), PATHINFO_FILENAME);
                     $extension = $row->getClientOriginalExtension();
-
                     // Tambahkan timestamp di akhir nama file
                     $timestampedName = $originalName . '_' . time() . '.' . $extension;
-
                     // Simpan file dengan nama yang telah dimodifikasi
                     $filePath = $row->storeAs('business_trip', $timestampedName, 'public');
-
                     // Simpan data ke database
                     BusinessTripAttachment::create([
                         'business_trip_id' => $businessTrip->id,
@@ -504,9 +493,10 @@ class BusinessTripController extends Controller
 
         // $query->orderBy($sortBy, $sortDirection);
         if ($request->approval == "1") {
-            $data = Approval::where('user_id', Auth::user()->id)
-                ->where('document_name', 'TRIP')->pluck('document_id')->toArray();
+            $data = Approval::where('user_id', Auth::user()->id)->where('document_name', 'TRIP')->pluck('document_id')->toArray();
             $query = $query->whereIn('id', $data);
+        }else{
+            $query = $query->where('created_by', Auth::user()->id)->orWhere('request_for', Auth::user()->id);
         }
 
         $data = $query->where('type', 'request')->latest()->search(request(['search']))->paginate($perPage);
@@ -534,6 +524,46 @@ class BusinessTripController extends Controller
 
 
         return $this->successResponse($data);
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $businessTrip = BusinessTrip::find($id);
+            $businessTrip->remarks = $request->remark;
+            $businessTrip->save();
+
+            // DELETE ATTACHMENT DULU JIKA ADA YANG DI HAPUS
+            $array_id_exist = [];
+            foreach ($request->file_existing as $key => $attachment) {
+                $decode = json_decode($attachment);
+                $array_id_exist[] = $decode->id;
+            }
+            $businessTrip->attachment()->whereNotIn('id', $array_id_exist)->delete();
+            // BARU TAMBAH ATTACHMENT
+
+            if ($request->attachment != null) {
+                foreach ($request->attachment as $row) {
+                    // Ambil nama asli file
+                    $originalName = pathinfo($row->getClientOriginalName(), PATHINFO_FILENAME);
+                    $extension = $row->getClientOriginalExtension();
+                    // Tambahkan timestamp di akhir nama file
+                    $timestampedName = $originalName . '_' . time() . '.' . $extension;
+                    // Simpan file dengan nama yang telah dimodifikasi
+                    $filePath = $row->storeAs('business_trip', $timestampedName, 'public');
+                    // Simpan data ke database
+                    BusinessTripAttachment::create([
+                        'business_trip_id' => $businessTrip->id,
+                        'file_path' => 'business_trip', // Folder tempat file disimpan
+                        'file_name' => $timestampedName, // Nama file dengan timestamp
+                    ]);
+                }
+            }
+
+            // return $this->successResponse("Updated successfully");
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
     }
 
     function printAPI($id)

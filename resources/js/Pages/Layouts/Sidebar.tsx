@@ -34,7 +34,6 @@ import { LIST_PAGE_REIMBURSE_PERIOD } from '@/endpoint/reimbursePeriod/page';
 import { PAGE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/page';
 import { LIST_PAGE_FAMILY } from '@/endpoint/family/page';
 import { PAGE_REIMBURSE } from '@/endpoint/reimburse/page';
-import { PAGE_REPORT, PAGE_REPORT_BT_DEC, PAGE_REPORT_BT_REQ, PAGE_REPORT_PURCHASE } from '@/endpoint/report/page';
 import { LIST_PAGE_MASTER_PERMISSION } from '@/endpoint/permission/page';
 import { LIST_PAGE_DESTINATION } from '@/endpoint/destination/page';
 import { ScrollArea } from '@/components/shacdn/scroll-area';
@@ -45,6 +44,8 @@ import { LIST_PAGE_MASTER_TRACKING_NUMBER } from '@/endpoint/masterTrackingNumbe
 import { LIST_PAGE_SETTING_APPROVAL_PR } from '@/endpoint/settingApprovalPr/page';
 import { LIST_PAGE_TRACKING_NUMBER_AUTO } from '@/endpoint/approvalTrackingNumberAuto/page';
 import { LIST_PAGE_TRACKING_NUMBER_CHOOSE } from '@/endpoint/approvalTrackingNumberChoose/page';
+import { LIST_PAGE_APPROVAL_CONDITIONAL_USER } from '@/endpoint/settingApprovalPrConditionalUser/page';
+import { PAGE_REPORT, PAGE_REPORT_BT_DEC, PAGE_REPORT_BT_REQ, PAGE_REPORT_PURCHASE } from '@/endpoint/report/page';
 
 export const RuteTitle = (title: string) => {
     return (
@@ -306,6 +307,10 @@ const sidebar = [
                     'tracking number choose view',
                     'tracking number choose update',
                     'tracking number choose delete',
+                    'approval conditional user create',
+                    'approval conditional user view',
+                    'approval conditional user update',
+                    'approval conditional user delete',
                 ],
                 sub: [
                     {
@@ -321,6 +326,16 @@ const sidebar = [
                             'approval pr view',
                             'approval pr update',
                             'approval pr delete',
+                        ],
+                    },
+                    {
+                        name: 'Approval Conditional Route',
+                        route: LIST_PAGE_APPROVAL_CONDITIONAL_USER,
+                        role: [
+                            'approval conditional user create',
+                            'approval conditional user view',
+                            'approval conditional user update',
+                            'approval conditional user delete',
                         ],
                     },
                     {

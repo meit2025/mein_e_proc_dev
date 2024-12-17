@@ -55,7 +55,7 @@ export const columns: GridColDef[] = [
       const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
       return formattedDate;
     },
-  }
+  },
 ];
 
 const handlePrintDetail = (id: string) => {
@@ -129,6 +129,7 @@ export interface Group {
   cost_center: string;
   user: User;
   requester: string;
+  status_id: number;
   reimburses: Reimburse[];
 }
 

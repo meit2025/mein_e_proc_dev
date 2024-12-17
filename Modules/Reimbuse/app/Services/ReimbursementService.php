@@ -10,6 +10,7 @@ use Modules\Reimbuse\Models\Reimburse;
 use Modules\Reimbuse\Models\ReimburseGroup;
 use Modules\Reimbuse\Models\ReimburseProgress;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Modules\Reimbuse\Models\ReimburseAttachment;
 use Modules\Approval\Services\CheckApproval;
@@ -68,11 +69,9 @@ class ReimbursementService
             }
             $validatedDataGroup = $validator_group->validated();
 
-            $validatedDataGroup['code'] = $this->generateUniqueGroupCode();
+            $validatedDataGroup['code']                 = $this->generateUniqueGroupCode();
+            $validatedDataGroup['request_created_by']   = Auth::user()->id;
             $group = ReimburseGroup::create($validatedDataGroup);
-
-
-
 
             $balance = 0;
             foreach ($forms as $form) {
@@ -89,10 +88,10 @@ class ReimbursementService
                 $validatedData['item_delivery_data'] = Carbon::parse($form['item_delivery_data'])->format('Y-m-d');
                 $validatedData['start_date'] = Carbon::parse($form['start_date'])->format('Y-m-d');
                 $validatedData['end_date'] = Carbon::parse($form['end_date'])->format('Y-m-d');
-                $validatedData['requester'] = $group['requester'];
+                $validatedData['requester'] = $groupData['requester'];
 
                 $reimburse = Reimburse::create($validatedData);
-
+                
                 if (isset($form['attachments'])) {
                     foreach ($form['attachments'] as $file) {
                         $filePath = $file->store('reimburse_attachments', 'public');
@@ -128,8 +127,8 @@ class ReimbursementService
             DB::beginTransaction();
             $reimburseGroup = ReimburseGroup::find($groupData['groupId']);
             $reimburseGroup->remark         = $groupData['remark'];
-            $reimburseGroup->cost_center    = $groupData['cost_center'];
-            $reimburseGroup->requester      = $groupData['requester'];
+            // $reimburseGroup->cost_center    = $groupData['cost_center'];
+            // $reimburseGroup->requester      = $groupData['requester'];
             $reimburseGroup->save();
             
             foreach ($forms as $form) {
@@ -143,7 +142,9 @@ class ReimbursementService
                 if ($validator->fails()) {
                     return ['error' => $validator->errors()];
                 }
-                $validatedData = $validator->validated();
+                // $validatedData = $validator->validated();
+                $validatedData = ['short_text' => $form['short_text']]; // temporary update data only fiel short_text
+
                 $reimburse = Reimburse::find($form['reimburseId']);
                 if ($reimburse) {
                     $reimburse->update($validatedData);

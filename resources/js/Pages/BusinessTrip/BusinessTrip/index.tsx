@@ -57,6 +57,10 @@ export const Index = ({
   });
 
   function openFormHandler() {
+    setBusinessTripForm({
+        type: BusinessTripType.create,
+        id: null,
+    });
     setOpenForm(!openForm);
   }
 
@@ -111,7 +115,6 @@ export const Index = ({
         }}
         url={{
           url: GET_LIST_BUSINESS_TRIP,
-          deleteUrl: DELET_API_BUSINESS_TRIP,
           detailUrl: DETAIL_PAGE_BUSINESS_TRIP,
         }}
         labelFilter='search'

@@ -30,7 +30,15 @@ export const CustomeForm = ({ data }: { data: any[] }) => {
   const { dataDropdown, getDropdown } = useDropdownOptions();
 
   useEffect(() => {
-    getDropdown('', { name: 'username', id: 'id', tabel: 'users' });
+    getDropdown('', {
+      name: 'username',
+      id: 'id',
+      tabel: 'users',
+      where: {
+        key: 'is_approval',
+        parameter: 'true',
+      },
+    });
   }, []);
 
   useEffect(() => {
