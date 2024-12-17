@@ -57,6 +57,7 @@ const useDropdownOptions = (urls: string = 'api/master/dropdown') => {
         const label = struct.hiddenZero ? removeLeadingZeros(item.label) : item.label;
         const idValue = struct.idType === 'string' ? String(item.value) : item.value;
         return {
+          ...item,
           label: !struct.isMapping ? label : `${label} - ${item.value}`,
           value: idValue,
         };

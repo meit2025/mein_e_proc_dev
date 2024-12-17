@@ -53,6 +53,10 @@ const FormMapping: React.FC<FormMappingProps> = ({
         setTimeout(() => {
           window.location.href = redirectUrl;
         }, 2000);
+      } else {
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.data?.message) {

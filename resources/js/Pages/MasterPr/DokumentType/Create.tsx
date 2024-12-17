@@ -27,7 +27,7 @@ function Create() {
 
 // Assign layout to the page
 Create.layout = (page: ReactNode) => (
-  <MainLayout title='Dokument Type' description='Dokument Type Create'>
+  <MainLayout title='Document Type' description='Document Type Create'>
     {page}
   </MainLayout>
 );

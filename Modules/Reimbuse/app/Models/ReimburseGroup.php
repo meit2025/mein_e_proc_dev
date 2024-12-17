@@ -21,6 +21,7 @@ class ReimburseGroup extends Model
         "code",
         "remark",
         "requester",
+        "request_created_by",
         "cost_center",
         "status_id"
     ];
@@ -38,6 +39,11 @@ class ReimburseGroup extends Model
     public function user()
     {
         return $this->hasOne(User::class, 'nip', 'requester');
+    }
+
+    public function userCreateRequest()
+    {
+        return $this->hasOne(User::class, 'id', 'request_created_by');
     }
 
     // protected static function newFactory(): ReimburseGroupFactory

@@ -4,6 +4,7 @@ namespace Modules\Approval\Services;
 
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Modules\Approval\Models\Approval;
 use Modules\Approval\Models\ApprovalPr;
 use Modules\Approval\Models\ApprovalRoute;
@@ -36,7 +37,9 @@ class CheckApproval
     private function applyConditions($query, $conditions, $value)
     {
         foreach ($conditions as $condition) {
-            $result = $query->where($condition)->first();
+            $tempQuery = clone $query;
+            $condition($tempQuery);
+            $result = $tempQuery->first();
             if ($result) {
                 return $result;
             }
@@ -64,17 +67,17 @@ class CheckApproval
             $total = (int)$request->value ?? (int)$request->total_all_amount;
             $conditions = [
                 fn($query) => $query->where('condition_type', '=', '>')
-                    ->whereRaw("CAST(REGEXP_REPLACE(value, '[^\d]', '', 'g') AS INTEGER) < ?", [$total]),
+                    ->whereRaw('? > value', [$total]),
                 fn($query) => $query->where('condition_type', '=', '>=')
-                    ->whereRaw("CAST(REGEXP_REPLACE(value, '[^\d]', '', 'g') AS INTEGER) <= ?", [$total]),
+                    ->whereRaw('? >= value', [$total]),
                 fn($query) => $query->where('condition_type', '=', '<')
-                    ->whereRaw("CAST(REGEXP_REPLACE(value, '[^\d]', '', 'g') AS INTEGER) <= ?", [$total]),
+                    ->whereRaw('? < value', [$total]),
                 fn($query) => $query->where('condition_type', '=', '<=')
-                    ->whereRaw("CAST(REGEXP_REPLACE(value, '[^\d]', '', 'g') AS INTEGER) >= ?", [$total]),
+                    ->whereRaw('? <= value', [$total]),
                 fn($query) => $query->where('condition_type', '=', 'range')
-                    ->whereRaw("CAST(REGEXP_REPLACE(min_value, '[^\d]', '', 'g') AS INTEGER) <= ?", [$total])
-                    ->whereRaw("CAST(REGEXP_REPLACE(max_value, '[^\d]', '', 'g') AS INTEGER) >= ?", [$total]),
-                fn($query) => $query->whereNull('condition_type'),
+                    ->whereRaw("min_value <= ?", [$total])
+                    ->whereRaw("max_value >= ?", [$total]),
+                fn($query) => $query->where('is_condition', false)->where('value', '=', $total),
             ];
 
             $result = null;
@@ -82,13 +85,8 @@ class CheckApproval
             switch ($request->metode_approval) {
                 case 'approval':
                 case '':
-                    // dd($documentType->id, $purchasingGroup->id, $user->division_id);
                     $query = $this->getApprovalQuery($documentType->id, $purchasingGroup->id, $user->division_id);
-                    // $result = $query->where('condition_type', '=', '<=')
-                    //     ->whereRaw("CAST(REGEXP_REPLACE(value, '[^\d]', '', 'g') AS INTEGER) >= ?", [$total])->first();
                     $result = $this->applyConditions($query, $conditions, $request->value);
-
-
                     break;
 
                 case 'chooses_approval':

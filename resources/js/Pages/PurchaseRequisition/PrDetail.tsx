@@ -122,7 +122,7 @@ const PrDetail = ({ id }: { id: number }) => {
                 color='primary'
                 type='button'
               >
-                Approval
+                APPROVE
               </Button>
               <Button
                 onClick={() => handleOpen('Rejected')}
@@ -133,7 +133,7 @@ const PrDetail = ({ id }: { id: number }) => {
                 color='error'
                 type='button'
               >
-                Rejectd
+                REJECT
               </Button>
             </div>
           </div>

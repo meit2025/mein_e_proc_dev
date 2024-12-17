@@ -60,7 +60,7 @@ export const columns: GridColDef[] = [
   },
   {
     field: 'created_by.name',
-    headerName: 'Requester By',
+    headerName: 'Requested By',
     width: 200,
     filterable: false,
     renderCell: ({ row: { created_by: e } }) => e?.name ?? 'Unknown',
@@ -140,71 +140,5 @@ export const columnsItem: GridColDef[] = [
     headerName: 'Sub Asset Number',
     width: 200,
     filterable: false,
-  },
-  {
-    field: 'is_cashAdvance',
-    headerName: 'cash Advance',
-    width: 200,
-    filterable: false,
-  },
-  {
-    field: 'dp',
-    headerName: 'DP',
-    width: 200,
-    filterable: false,
-    renderCell: (params: any) => {
-      if (!params.row?.cash_advance_purchases) return '';
-      return params.row?.cash_advance_purchases?.dp || '';
-    },
-  },
-  {
-    field: 'reference',
-    headerName: 'Reference',
-    width: 200,
-    filterable: false,
-    renderCell: (params: any) => {
-      if (!params.row?.cash_advance_purchases) return '';
-      return params.row?.cash_advance_purchases?.reference || '';
-    },
-  },
-  {
-    field: 'document_header_text',
-    headerName: 'Document Header Text',
-    width: 200,
-    filterable: false,
-    renderCell: (params: any) => {
-      if (!params.row?.cash_advance_purchases) return '';
-      return params.row?.cash_advance_purchases?.document_header_text || '';
-    },
-  },
-  {
-    field: 'document_date',
-    headerName: 'Document Date',
-    width: 200,
-    filterable: false,
-    renderCell: (params: any) => {
-      if (!params.row?.cash_advance_purchases) return '';
-      return params.row?.cash_advance_purchases?.document_date || '';
-    },
-  },
-  {
-    field: 'due_on',
-    headerName: 'Due on',
-    width: 200,
-    filterable: false,
-    renderCell: (params: any) => {
-      if (!params.row?.cash_advance_purchases) return '';
-      return params.row?.cash_advance_purchases?.due_on || '';
-    },
-  },
-  {
-    field: 'text',
-    headerName: 'text',
-    width: 200,
-    filterable: false,
-    renderCell: (params: any) => {
-      if (!params.row?.cash_advance_purchases) return '';
-      return params.row?.cash_advance_purchases?.text || '';
-    },
   },
 ];

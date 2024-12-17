@@ -147,6 +147,21 @@ class ReimbuseController extends Controller
             } else {
                 if (Auth::user()->is_admin == '0') $data = $query->where('requester', Auth::user()->nip);
             }
+
+            if ($request->search) {
+                $query = $query->orWhere('code', 'ILIKE', '%' . $request->search . '%')
+                ->orWhere('remark', 'ILIKE', '%' . $request->search . '%')
+                ->orWhere('requester', 'ILIKE', '%' . $request->search . '%');
+
+                $query = $query->orWhereHas('reimburses', function ($q) use ($request) {
+                    $q->where('remark', 'ILIKE', '%' . $request->search . '%');
+                });
+
+                $query = $query->orWhereHas('status', function ($q) use ($request) {
+                    $q->where('name', 'ILIKE', '%' . $request->search . '%');
+                });
+            }
+
             $perPage = $request->get('per_page', 10);
             $sortBy = $request->get('sort_by', 'id');
             $sortDirection = $request->get('sort_direction', 'asc');
@@ -280,20 +295,18 @@ class ReimbuseController extends Controller
 
     public function getDataLimitAndBalance(Request $request)
     {
-
         try {
-            //code...
             $user = $request->user;
             $period = $request->periode;
             $reimbuseTypeID = $request->reimbuse_type_id;
 
 
-            $getCurrentBalance = Reimburse::where('requester', $request->user)
+            $getCurrentBalance = Reimburse::where('requester', $user)
                 ->where('period', $period)
                 ->where('reimburse_type', $reimbuseTypeID)
                 ->sum('balance');
 
-            $getCurrentLimit = Reimburse::where('requester', $request->user)
+            $getCurrentLimit = Reimburse::where('requester', $user)
                 ->where('period', $period)
                 ->where('reimburse_type', $reimbuseTypeID)
                 ->count();
@@ -336,8 +349,13 @@ class ReimbuseController extends Controller
     {
 
         $reimburseGroup = ReimburseGroup::where('id', $id)
-            ->with(['user', 'costCenter'])
+            ->with(['user.families', 'costCenter', 'status', 'userCreateRequest'])
             ->first();
+
+        if ($reimburseGroup) {
+            $reimburseGroup->reimbursementStatus = $reimburseGroup->status;
+            unset($reimburseGroup->status);
+        }
 
         $reimburseForms = Reimburse::where('group', $reimburseGroup->code)->with([
             'uomModel',
@@ -345,8 +363,7 @@ class ReimbuseController extends Controller
             'taxOnSalesModel',
             'reimburseType',
             'periodeDate'
-        ])
-            ->get();
+        ])->get();
 
         $approval = Approval::with('user.divisions')->where('document_id', $id)->where('document_name', 'REIM')->orderBy('id', 'ASC')->get();
 
@@ -360,9 +377,14 @@ class ReimbuseController extends Controller
     function print($id)
     {
         $reimburseGroup = ReimburseGroup::where('id', $id)
-            ->with(['user', 'costCenter'])
+            ->with(['user', 'costCenter', 'status'])
             ->first();
 
+        if ($reimburseGroup) {
+            $reimburseGroup->reimbursementStatus = $reimburseGroup->status;
+            unset($reimburseGroup->status);
+        }
+        
         $reimburseForms = Reimburse::where('group', $reimburseGroup->code)->with([
             'uomModel',
             'purchasingGroupModel',

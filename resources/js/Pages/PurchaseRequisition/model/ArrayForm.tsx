@@ -126,15 +126,15 @@ const ArrayForm = ({
       order_number: dataobj.item_order_number,
       asset_number: dataobj.item_asset_number,
       sub_asset_number: dataobj.item_sub_asset_number,
-      is_cashAdvance: dataobj.item_is_cashAdvance,
-      cash_advance_purchases: {
-        dp: dataobj.item_dp,
-        reference: dataobj.item_reference,
-        document_header_text: dataobj.item_document_header_text,
-        document_date: dataobj.item_document_date,
-        due_on: dataobj.item_due_on,
-        text: dataobj.item_text_cash_advance,
-      },
+      //   is_cashAdvance: dataobj.item_is_cashAdvance,
+      //   cash_advance_purchases: {
+      //     dp: dataobj.item_dp,
+      //     reference: dataobj.item_reference,
+      //     document_header_text: dataobj.item_document_header_text,
+      //     document_date: dataobj.item_document_date,
+      //     due_on: dataobj.item_due_on,
+      //     text: dataobj.item_text_cash_advance,
+      //   },
     };
 
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
@@ -147,7 +147,13 @@ const ArrayForm = ({
       updatedItems = [...currentItems, newItem];
     }
 
-    const totalSum = updatedItems.reduce((sum: number, item: any) => sum + item.total_amount, 0);
+    const dataVendorArray = getValues('vendors').filter(
+      (item: any) => (item.winner || false) === true,
+    ); // get the vendor data
+
+    const dataVendor = dataVendorArray.length > 0 ? dataVendorArray[0] : null;
+    const winnerUnit = dataVendor.units || [];
+    const totalSum = winnerUnit.reduce((sum: number, item: any) => sum + item.total_amount, 0);
 
     // Simpan array baru ke React Hook Form state
     setValue(`vendors[${dataIndex}].units`, updatedItems);
@@ -163,24 +169,26 @@ const ArrayForm = ({
     setValue('item_account_assignment_categories', '');
     setValue('item_asset_number', '');
     setValue('item_cost_center', '');
-    setValue('item_document_date', '');
-    setValue('item_document_header_text', '');
-    setValue('item_dp', '');
-    setValue('item_due_on', '');
+
     setValue('item_id', '');
     setValue('item_is_cashAdvance', '');
     setValue('item_material_group', '');
     setValue('item_material_number', '');
     setValue('item_order_number', '');
     setValue('item_qty', '');
-    setValue('item_reference', '');
     setValue('item_short_text', '');
     setValue('item_sub_asset_number', '');
     setValue('item_tax', '');
-    setValue('item_text_cash_advance', '');
     setValue('item_unit_price', '');
     setValue('item_uom', '');
-    setValue('cash_advance_purchases', null);
+
+    // setValue('cash_advance_purchases', null);
+    // setValue('item_document_header_text', '');
+    // setValue('item_document_date', '');
+    // setValue('item_text_cash_advance', '');
+    // setValue('item_reference', '');
+    // setValue('item_dp', '');
+    // setValue('item_due_on', '');
   };
 
   const handelEdit = (data: any, rowIndex: any) => {
@@ -196,7 +204,6 @@ const ArrayForm = ({
     setValue('item_cost_center', data.cost_center ?? '');
 
     setValue('item_id', id);
-    setValue('item_is_cashAdvance', data.cash_advance_purchases?.reference !== null ? true : false);
     setValue('item_material_group', data.material_group ?? '');
     setValue('item_material_number', data.material_number ?? '');
     setValue('item_order_number', data.order_number ?? '');
@@ -207,12 +214,13 @@ const ArrayForm = ({
     setValue('item_unit_price', data.unit_price ?? '0');
     setValue('item_uom', data.uom ?? '');
 
-    setValue('item_reference', data.cash_advance_purchases?.reference ?? '');
-    setValue('item_dp', data.cash_advance_purchases?.dp ?? '');
-    setValue('item_due_on', data.cash_advance_purchases?.due_on ?? '');
-    setValue('item_text_cash_advance', data.cash_advance_purchases?.text ?? '');
-    setValue('item_document_date', data.cash_advance_purchases?.document_date ?? '');
-    setValue('item_document_header_text', data.cash_advance_purchases?.document_header_text ?? '');
+    // setValue('item_is_cashAdvance', data.cash_advance_purchases?.reference !== null ? true : false);
+    // setValue('item_reference', data.cash_advance_purchases?.reference ?? '');
+    // setValue('item_dp', data.cash_advance_purchases?.dp ?? '');
+    // setValue('item_due_on', data.cash_advance_purchases?.due_on ?? '');
+    // setValue('item_text_cash_advance', data.cash_advance_purchases?.text ?? '');
+    // setValue('item_document_date', data.cash_advance_purchases?.document_date ?? '');
+    // setValue('item_document_header_text', data.cash_advance_purchases?.document_header_text ?? '');
   };
 
   const handleDelete = (data: any, rowIndex: any) => {
@@ -449,90 +457,6 @@ const ArrayForm = ({
                   }}
                   placeholder={'Sub Asset Number'}
                   classNames='mt-2'
-                />
-              </>
-            )}
-            <FormSwitch
-              fieldLabel='cash Advance'
-              fieldName={'item_is_cashAdvance'}
-              isRequired={false}
-              disabled={disable}
-            />
-            {watchIsCashAdvance && (
-              <>
-                <hr></hr>
-                <FormAutocomplete<any>
-                  options={[
-                    {
-                      label: '50%',
-                      value: '50',
-                    },
-                    {
-                      label: '40%',
-                      value: '40',
-                    },
-                    {
-                      label: '30%',
-                      value: '30',
-                    },
-                    {
-                      label: '20%',
-                      value: '20',
-                    },
-                    {
-                      label: '10%',
-                      value: '10',
-                    },
-                  ]}
-                  fieldLabel={'Persantase DP'}
-                  fieldName={'item_dp'}
-                  isRequired={false}
-                  disabled={disable}
-                  style={{
-                    width: '56.5rem',
-                  }}
-                  placeholder={'Persantase DP Number'}
-                  classNames='mt-2'
-                />
-                <FormInput
-                  fieldLabel={'reference'}
-                  fieldName={'item_reference'}
-                  isRequired={false}
-                  disabled={disable}
-                  type={'text'}
-                  placeholder={'Enter reference'}
-                />
-                <FormInput
-                  fieldLabel={'Document Header Text'}
-                  fieldName={'item_document_header_text'}
-                  isRequired={false}
-                  disabled={disable}
-                  type={'text'}
-                  placeholder={'Document Header Text'}
-                />
-                <FormInput
-                  fieldLabel={'Document Date'}
-                  fieldName={'item_document_date'}
-                  isRequired={false}
-                  disabled={disable}
-                  type={'date'}
-                  placeholder={'enter your Document Date'}
-                />
-                <FormInput
-                  fieldLabel={'Due On'}
-                  fieldName={'item_due_on'}
-                  isRequired={false}
-                  disabled={disable}
-                  type={'date'}
-                  placeholder={'enter your Due On'}
-                />
-                <FormInput
-                  fieldLabel={'text'}
-                  fieldName={'item_text_cash_advance'}
-                  isRequired={false}
-                  disabled={disable}
-                  type={'text'}
-                  placeholder={'enter your text'}
                 />
               </>
             )}

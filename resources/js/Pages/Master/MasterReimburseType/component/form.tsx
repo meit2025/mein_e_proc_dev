@@ -296,7 +296,7 @@ export default function ReimburseTypeForm({
                           disabled={form.getValues('is_employee') === true}
                         >
                           <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='Child / Wife' />
+                            <SelectValue placeholder='Select Family' />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value='wife'>Wife</SelectItem>
@@ -335,7 +335,7 @@ export default function ReimburseTypeForm({
             </tr>
 
             <tr>
-              <td width={200}>Grade</td>
+              <td className='block' width={200}>Balance</td>
               <td>
                 <FormField
                   control={form.control}
@@ -346,7 +346,7 @@ export default function ReimburseTypeForm({
                         <RadioGroup
                           value={field.value}
                           onValueChange={field.onChange}
-                          className='flex flex space-x-1'
+                          className='flex flex space-x-1 mb-3'
                         >
                           <FormItem className='flex text-xs items-center space-x-3 space-y-0'>
                             <FormControl>

@@ -126,7 +126,7 @@ const BusinessTripDetail = () => {
 
   return (
     <>
-      <LayoutApproval id={id} status_id={data?.status_id || 0} type={'TRIP'}>
+      <LayoutApproval id={id} status_id={data?.status_id} type={'TRIP'}>
         <p className='text-sm'>
           <strong>Request No.:</strong> {data?.request_no}
         </p>

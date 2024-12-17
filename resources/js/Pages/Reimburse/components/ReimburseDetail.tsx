@@ -8,6 +8,7 @@ import '../css/reimburse_detail.scss';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
 import { WorkflowComponent } from '@/components/commons/WorkflowComponent';
 import LayoutApproval from '@/components/approval/LayoutApproval';
+import { CustomStatus } from '@/components/commons/CustomStatus';
 
 const ReimburseDetail = () => {
   const pathname = window.location.pathname;
@@ -24,7 +25,7 @@ const ReimburseDetail = () => {
         setIsLoading(true);
         // Pastikan endpoint API mengembalikan data relasi `posts`
         const response = await axiosInstance.get(DETAIL_REIMBURSE(id));
-        
+
         setData(response.data.data.group);
         setReimburse(response.data.data.forms);
       } catch (err) {
@@ -36,9 +37,10 @@ const ReimburseDetail = () => {
 
     fetchData();
   }, [id]);
+
   return (
     <>
-      <LayoutApproval id={id} type={'REIM'}>
+      <LayoutApproval id={id} type={'REIM'} status_id={data?.status_id}>
         <p className='text-sm'>
           <strong>Request No.:</strong> {data?.code}
         </p>
@@ -50,35 +52,8 @@ const ReimburseDetail = () => {
         </p>
         <p className='text-sm'>{/* <strong>Requested By:</strong> {data?.requested_by} */}</p>
         <p className='text-sm'>
-          <strong>Status:</strong> <span className='status-approved'>Fully Approved</span>
+          <strong>Status:</strong> <span className={`font-bold ${data?.reimbursementStatus?.classname}`}>{data?.reimbursementStatus?.name}</span>
         </p>
-
-        <table className='info-table text-sm mt-4'>
-          <tr>
-            <td>
-              <strong>Pusat Biaya</strong>
-            </td>
-            <td>{data?.cost_center?.desc}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Status</strong>
-            </td>
-            <td>{data?.status}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Remark</strong>
-            </td>
-            <td>{data?.remark}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Attachment File</strong>
-            </td>
-            <td></td>
-          </tr>
-        </table>
 
         <Tabs defaultValue='reimburse1' className='w-full text-sm'>
           <TabsList className={'flex items-center justify-start space-x-4'}>
@@ -100,6 +75,22 @@ const ReimburseDetail = () => {
                     </td>
                     <td>{reimburse?.type}</td>
                   </tr>
+                  {reimburse?.type == 'Family' && 
+                    <>
+                      <tr>
+                        <td>
+                          <strong>Family Status</strong>
+                        </td>
+                        <td className='capitalize'>{reimburse?.reimburse_type?.family_status}</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <strong>For</strong>
+                        </td>
+                        <td>{data?.user?.families?.filter(family => family.id == reimburse?.for).map(family => family.name)}</td>
+                      </tr>
+                    </>
+                  }
                   <tr>
                     <td>
                       <strong>Reimburse Type</strong>
@@ -118,6 +109,14 @@ const ReimburseDetail = () => {
                     </td>
                     <td>
                       {reimburse?.periode_date?.start} {' - '} {reimburse?.periode_date?.end}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Pusat Biaya</strong>
+                    </td>
+                    <td>
+                      {data?.cost_center?.desc}
                     </td>
                   </tr>
                   <tr>

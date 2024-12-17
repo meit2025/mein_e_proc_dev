@@ -7,5 +7,6 @@
     "BusinessTrip": true,
     "Gateway": true,
     "User": true,
-    "PurchaseRequisition": true
+    "PurchaseRequisition": true,
+    "Report": true
 }

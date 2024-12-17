@@ -86,12 +86,18 @@ const LayoutApproval = ({
         setIsLoading(false);
       }
     },
-    [methods, id, type, status_id], // Include `methods` in the dependency array
+    [id, type, methods, status_id, auth?.user?.id], // Include `methods` in the dependency array
   );
 
   useEffect(() => {
     getdetail();
-  }, [getdetail]);
+  }, [getdetail, status_id]);
+
+  useEffect(() => {
+    if (status_id === 4) {
+      setIsApproval(false);
+    }
+  }, [status_id]);
 
   const handleClose = () => {
     setOpen(false);
@@ -118,7 +124,7 @@ const LayoutApproval = ({
                 color='primary'
                 type='button'
               >
-                Approval
+                APPROVE
               </Button>
               <Button
                 onClick={() => handleOpen('Rejected')}
@@ -129,7 +135,7 @@ const LayoutApproval = ({
                 color='error'
                 type='button'
               >
-                Rejectd
+                REJECT
               </Button>
             </div>
           </div>
