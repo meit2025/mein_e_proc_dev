@@ -19,7 +19,7 @@ class FamilySeeder extends Seeder
         for ($i = 0; $i < 20; $i++) {
             Family::make([
                 'name'      => $faker->name(),
-                'status'    => ['child', 'wife'][rand(0,1)],
+                'status'    => ['husband','child', 'wife'][rand(0,1)],
                 'bod'       => $faker->dateTime(),
                 'user'      => User::inRandomOrder()->first()->nip
             ]);

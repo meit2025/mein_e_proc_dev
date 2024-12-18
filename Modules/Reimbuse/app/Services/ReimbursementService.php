@@ -92,12 +92,13 @@ class ReimbursementService
 
                 $reimburse = Reimburse::create($validatedData);
                 
-                if (isset($form['attachments'])) {
-                    foreach ($form['attachments'] as $file) {
-                        $filePath = $file->store('reimburse_attachments', 'public');
+                if (isset($form['attachment'])) {
+                    foreach ($form['attachment'] as $file) {
+                        $fileName = time() . '_' . str_replace(' ', '', $file->getClientOriginalName());
+                        $filePath = $file->storeAs('reimburse', $fileName, 'public');
                         ReimburseAttachment::create([
                             'reimburse' => $reimburse->id,
-                            'url' => $filePath,
+                            'url' => $fileName,
                         ]);
                     }
                 }
@@ -109,8 +110,8 @@ class ReimbursementService
                 'value'     => $balance
             ];
             $this->approvalServices->Payment((object)$parseForApproval, true, $group->id, 'REIM');
-
-            SapJobs::dispatch($group->id, 'REIM');
+            
+            // SapJobs::dispatch($group->id, 'REIM');
 
             DB::commit();
             return "Reimbursements and progress stored successfully.";

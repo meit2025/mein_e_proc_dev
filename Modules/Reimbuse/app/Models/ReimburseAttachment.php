@@ -21,4 +21,9 @@ class ReimburseAttachment extends Model
     // {
     //     // return ReimburseAttachmentFactory::new();
     // }
+
+    public function reimburse()
+    {
+        return $this->belongsTo(Reimburse::class, 'reimburse', 'id');
+    }
 }
