@@ -33,9 +33,10 @@ import { ScrollArea } from '@/components/shacdn/scroll-area';
 import * as React from 'react';
 import {
   CREATE_API_BUSINESS_TRIP_DECLARATION,
+  EDIT_API_BUSINESS_TRIP_DECLARATION,
   GET_DETAIL_BUSINESS_TRIP_DECLARATION,
 } from '@/endpoint/business-trip-declaration/api';
-import { AllowanceItemModel, BusinessTripModel } from '../models/models';
+import { AllowanceItemModel, BusinessTripModel, BusinessTripType } from '../models/models';
 import axiosInstance from '@/axiosInstance';
 import moment from 'moment';
 import FormSwitch from '@/components/Input/formSwitchCustom';
@@ -44,26 +45,45 @@ import { ChevronsUpDown, Plus, UndoIcon, X } from 'lucide-react';
 import axios, { AxiosError } from 'axios';
 import { Inertia } from '@inertiajs/inertia';
 import { useAlert } from '@/contexts/AlertContext';
-import { Button as ButtonMui } from '@mui/material';
+import { Button as ButtonMui, filledInputClasses } from '@mui/material';
 import {
   WorkflowApprovalDiagramInterface,
   WorkflowApprovalStepInterface,
   WorkflowComponent,
 } from '@/components/commons/WorkflowComponent';
+import FormAutocomplete from '@/components/Input/formDropdown';
+import useDropdownOptions from '@/lib/getDropdown';
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 
-interface Props {
-  listBusinessTrip: BusinessTripModel[];
+interface BusinessTripAttachement {
+  id: number;
+  url: string;
+  file_name: string;
 }
 
+const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
+const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+
 export const BussinessTripFormV1 = ({
-  listBusinessTrip,
+  type,
+  id,
 }: {
-  listBusinessTrip: BusinessTripModel[];
+  type: BusinessTripType;
+  id: string | undefined;
 }) => {
   const formSchema = z.object({
     request_no: z.string().nonempty('Request for required'),
     remark: z.string().nonempty('Remark is required'),
-    attachment: z.instanceof(File).nullable().optional(),
+    attachment: z.array(
+      z
+        .instanceof(File)
+        .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
+          message: 'File type must be JPG, JPEG, PNG, or PDF',
+        })
+        .refine((file) => file.size <= MAX_FILE_SIZE, {
+          message: 'File size must be less than 1MB',
+        }),
+    ),
     total_destination: z.number().int('Total Destinantion Required'),
     destinations: z.array(
       z.object({
@@ -111,7 +131,7 @@ export const BussinessTripFormV1 = ({
     defaultValues: {
       request_no: '',
       remark: '',
-      attachment: null,
+      attachment: [],
       total_destination: 1,
       destinations: [
         {
@@ -166,35 +186,53 @@ export const BussinessTripFormV1 = ({
 
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values, ' valuesnya');
+    // console.log(values, ' valuesnya');
     try {
-      const totalAll = getTotalDes();
-      const formData = new FormData();
-      // Append group data
+      if (type == BusinessTripType.create) {
+        const totalAll = getTotalDes();
+        const formData = new FormData();
+        formData.append('user_id', businessTripDetail.request_for?.id.toString() ?? '');
+        formData.append('value', totalAll.toString());
+        formData.append('request_no', values.request_no ?? '');
+        formData.append('remark', values.remark ?? '');
+        values.attachment.forEach((file: any, index: number) => {
+          if (file) {
+            formData.append(`attachment[${index}]`, file);
+          }
+        });
+        formData.append('total_destination', `${values.total_destination}`);
+        values.destinations.forEach((item, index) => {
+          formData.append(`destinations[${index}]`, JSON.stringify(item));
+        });
+        await Inertia.post(CREATE_API_BUSINESS_TRIP_DECLARATION, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
 
-      formData.append('user_id', businessTripDetail.request_for?.id.toString() ?? '');
-      formData.append('value', totalAll.toString());
-
-      formData.append('request_no', values.request_no ?? '');
-      formData.append('remark', values.remark ?? '');
-      formData.append('attachment', values.attachment ?? '');
-      formData.append('total_destination', `${values.total_destination}`);
-      values.destinations.forEach((item, index) => {
-        formData.append(`destinations[${index}]`, JSON.stringify(item));
-      });
-
-      // const response = axios.post(CREATE_API_BUSINESS_TRIP, formData);
-
-      await Inertia.post(CREATE_API_BUSINESS_TRIP_DECLARATION, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      showToast('succesfully created data', 'success');
+        showToast('succesfully created data', 'success');
+      } else {
+        const formDataEdit = new FormData();
+        formDataEdit.append('remark', values.remark ?? '');
+        values.attachment.forEach((file: any, index: number) => {
+          if (file) {
+            formDataEdit.append(`attachment[${index}]`, file);
+          }
+        });
+        // fileAttachment.forEach((file: any, index: number) => {
+        //     if (file) {
+        //         formDataEdit.append(`file_existing[${index}]`, JSON.stringify(file));
+        //     }
+        // });
+        await Inertia.post(`${EDIT_API_BUSINESS_TRIP_DECLARATION}/${id}`, formDataEdit, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        showToast('succesfully updated data', 'success');
+      }
     } catch (e) {
       const error = e as AxiosError;
-
       console.log(error);
     }
   };
@@ -210,6 +248,7 @@ export const BussinessTripFormV1 = ({
 
     try {
       const response = await axiosInstance.get(url);
+      console.log(value, ' get');
       const businessTripData = response.data.data;
       console.log(businessTripData, ' Response Detail Business Trip');
       form.setValue('remark', businessTripData.remarks || '');
@@ -323,12 +362,36 @@ export const BussinessTripFormV1 = ({
     }
   };
 
+  const { dataDropdown: dataRequestNo, getDropdown: getdataRequestNo } = useDropdownOptions();
+
   React.useEffect(() => {
     const totalAll = getTotalDes();
     if (totalAll > 0) {
       fetchDataValue();
     }
+
+    getdataRequestNo('', {
+      name: 'request_no',
+      id: 'id',
+      tabel: 'business_trip',
+      idType: 'string',
+      where: {
+        key: 'type',
+        parameter: 'request',
+      },
+      declaration: 'true',
+    });
   }, [form.watch('destinations')]);
+
+  const [fileAttachment, setfileAttachment] = React.useState<BusinessTripAttachement[]>([]);
+
+  async function getDetailData() {}
+
+  React.useEffect(() => {
+    if (id && type == BusinessTripType.edit) {
+      getDetailData();
+    }
+  }, [type]);
 
   return (
     <ScrollArea className='h-[600px] w-full '>
@@ -342,29 +405,23 @@ export const BussinessTripFormV1 = ({
             <tr>
               <td width={200}>Request No.</td>
               <td>
-                <FormField
-                  control={form.control}
-                  name='request_no'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={(value) => handleGetBusinessTrip(value)}
-                          value={field.value}
-                        >
-                          <SelectTrigger className='w-[200px] py-2'>
-                            <SelectValue placeholder='-- Select One --' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {listBusinessTrip.map((item: any) => (
-                              <SelectItem value={item.id.toString()}>{item.request_no}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <FormAutocomplete<any>
+                  fieldLabel=''
+                  options={dataRequestNo}
+                  fieldName='request_no'
+                  isRequired={true}
+                  disabled={
+                    type == BusinessTripType.edit
+                      ? form.watch('request_no')
+                        ? true
+                        : false
+                      : false
+                  }
+                  placeholder={'Select Request No.'}
+                  classNames='mt-2 w-full'
+                  onChangeOutside={(value) => {
+                    handleGetBusinessTrip(value);
+                  }}
                 />
               </td>
             </tr>
@@ -421,17 +478,26 @@ export const BussinessTripFormV1 = ({
                         <input
                           className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
                           type='file'
+                          multiple // Menambahkan atribut multiple
                           onChange={(e) => {
-                            const file = e.target.files?.[0]; // Ambil file pertama
-                            if (file) {
-                              field.onChange(file); // Panggil onChange dengan event untuk react-hook-form
+                            const files = e.target.files; // Ambil file yang dipilih
+                            if (files) {
+                              const fileArray = Array.from(files); // Konversi FileList ke Array
+                              field.onChange(fileArray); // Panggil onChange dengan array file
                             } else {
-                              field.onChange(null); // Jika tidak ada file, set null
+                              field.onChange([]); // Jika tidak ada file, set array kosong
                             }
                           }}
                         />
                       </FormControl>
-                      <FormMessage />
+                      {form.formState.errors.attachment &&
+                      Array.isArray(form.formState.errors.attachment)
+                        ? form.formState.errors.attachment.map((error, index) => (
+                            <p key={index} className='text-[0.8rem] font-medium text-destructive'>
+                              {error.message}
+                            </p>
+                          ))
+                        : null}
                     </FormItem>
                   )}
                 />
@@ -439,7 +505,7 @@ export const BussinessTripFormV1 = ({
             </tr>
             <tr>
               <td width={200}>File Extension</td>
-              <td className='text-gray-500 text-xs font-extralight'>Not Availabe</td>
+              <td className='text-gray-500 text-xs font-extralight'>jpg,jpeg,png,pdf</td>
             </tr>
             <tr>
               <td width={200}>Total Destination</td>
@@ -1078,11 +1144,20 @@ export function DetailAllowance({
                     <FormControl>
                       <Input
                         type='number'
+                        min='0'
                         value={field.value ?? ''} // Gunakan string kosong jika nilai null/undefined
                         onChange={(e) => {
-                          const parsedValue =
-                            e.target.value === '' ? undefined : Number(e.target.value); // Konversi ke angka atau undefined
-                          field.onChange(parsedValue); // Serahkan nilai yang sudah dikonversi
+                          let value = e.target.value;
+
+                          // Izinkan input kosong
+                          if (value === '') {
+                            field.onChange(undefined);
+                            return;
+                          }
+
+                          // Pastikan nilai tidak negatif
+                          const parsedValue = Math.max(0, Number(value));
+                          field.onChange(parsedValue);
                         }}
                       />
                     </FormControl>
@@ -1096,7 +1171,7 @@ export function DetailAllowance({
           <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
             <div className='flex items-center'>
               <span className='text-sm' style={{ padding: '2px 5px' }}>
-                = IDR {calculateTotalOther()}
+                = IDR {formatRupiah(calculateTotalOther(), false)}
               </span>
             </div>
           </td>
@@ -1238,14 +1313,14 @@ export function AllowanceRowInput({
           ) : (
             <span className='text-sm'>
               {' '}
-              {allowance.detail.length} Days * {allowance.subtotal} * 100%
+              {allowance.detail.length} Days * {formatRupiah(allowance.subtotal, false)} * 100%
             </span>
           )}
         </td>
         <td style={{ verticalAlign: 'middle', padding: '2px 5px' }}>
           <div className='flex items-center'>
             <span className='text-sm total' style={{ padding: '2px 5px' }}>
-              = IDR {calculateTotal()}
+              = IDR {formatRupiah(calculateTotal(), false)}
             </span>
           </div>
         </td>

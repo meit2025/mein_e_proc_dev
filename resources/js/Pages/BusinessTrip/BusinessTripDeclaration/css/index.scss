@@ -33,7 +33,7 @@ table {
     }
 }
 
-.status-approved {
+.status-appr    d {
     color: green;
     font-weight: bold;
 }
@@ -56,6 +56,8 @@ table {
     margin-top: 10px;
     border-collapse: collapse;
     text-align: left;
+    flex: 1;
+    min-width: 0;
 }
 
 .detail-table th, .detail-table td,
@@ -72,6 +74,7 @@ table {
 .tables-wrapper {
     display: flex;
     gap: 20px;
+    justify-content: space-between;
 }
 
 .value-table td:nth-child(1),
