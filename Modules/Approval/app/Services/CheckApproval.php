@@ -64,7 +64,7 @@ class CheckApproval
             $purchasingGroup = PurchasingGroup::where('purchasing_group', $request->purchasing_group_id ?? $request->purchasing_groups)->first();
 
             // Define the conditions
-            $total = (int)$request->value ?? (int)$request->total_all_amount;
+            $total = (int)$request->value == 0 ? (int)$request->total_all_amount : (int)$request->value;
             $conditions = [
                 fn($query) => $query->where('condition_type', '=', '>')
                     ->whereRaw('? > value', [$total]),
