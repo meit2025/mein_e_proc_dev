@@ -404,7 +404,7 @@ class BusinessTripController extends Controller
                 'cash_advance' => $request->cash_advance == "true" ? 1 : 0,
                 'reference_number' => $request->cash_advance == "true" ? $request->reference_number : null,
                 'total_percent' => $request->cash_advance == "true" ? $request->total_percent : null,
-                'total_cash_advance' => $request->cash_advance == "true" ? $request->total_cash_advance : null,
+                'total_cash_advance' => $request->cash_advance == "true" ? str_replace('.', '', $request->total_cash_advance) : null,
             ]);
 
             if ($request->attachment != null) {
@@ -486,7 +486,7 @@ class BusinessTripController extends Controller
     public function listAPI(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType', 'status']);
+        $query =  BusinessTrip::query()->with(['purposeType', 'status'])->where('type', 'request');
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
@@ -494,12 +494,12 @@ class BusinessTripController extends Controller
         // $query->orderBy($sortBy, $sortDirection);
         if ($request->approval == "1") {
             $data = Approval::where('user_id', Auth::user()->id)->where('document_name', 'TRIP')->pluck('document_id')->toArray();
-            $query = $query->whereIn('id', $data);
+            $query = $query->whereIn('id', $data)->where('status_id',1);
         }else{
             $query = $query->where('created_by', Auth::user()->id)->orWhere('request_for', Auth::user()->id);
         }
 
-        $data = $query->where('type', 'request')->latest()->search(request(['search']))->paginate($perPage);
+        $data = $query->latest()->search(request(['search']))->paginate($perPage);
 
         $data->getCollection()->transform(function ($map) {
 
@@ -532,7 +532,7 @@ class BusinessTripController extends Controller
             $businessTrip = BusinessTrip::find($id);
             $businessTrip->remarks = $request->remark;
             $businessTrip->save();
-            
+
             if($request->file_existing != null){
                 // DELETE ATTACHMENT DULU JIKA ADA YANG DI HAPUS
                 $array_id_exist = [];
@@ -541,8 +541,10 @@ class BusinessTripController extends Controller
                     $array_id_exist[] = $decode->id;
                 }
                 $businessTrip->attachment()->whereNotIn('id', $array_id_exist)->delete();
+            }else{
+                $businessTrip->attachment()->delete();
             }
-            
+
             // BARU TAMBAH ATTACHMENT
             if ($request->attachment != null) {
                 foreach ($request->attachment as $row) {
@@ -591,6 +593,16 @@ class BusinessTripController extends Controller
             ];
         });
         $data['file_attachement'] = $attachments;
+        $data['approval'] = Approval::with('user.divisions')->where('document_id', $id)->where('document_name', 'TRIP')->orderBy('id', 'ASC')->get();
+
+        $data['status'] = [
+            'id' => $findData->status_id,
+            'name' => $findData->status->name,
+            'color' => $findData->status->color,
+            'code' => $findData->status->code,
+            'classname' => $findData->status->classname,
+        ];
+        // dd($data['status']);
 
         foreach ($findData->businessTripDestination as $destination) {
             $detail_attendance = [];

@@ -109,7 +109,7 @@ const dummyPrice = 25000;
 // const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
-const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
+const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
 
 export const BussinessTripFormV1 = ({
   users,
@@ -253,7 +253,7 @@ export const BussinessTripFormV1 = ({
       form.setValue('reference_number', data.reference_number);
       form.setValue('total_percent', data.total_percent);
       form.setValue('total_cash_advance', data.total_cash_advance);
-      console.log(data.destinations, ' data.destinations');
+      //   console.log(data.destinations, ' data.destinations');
       form.setValue(
         'destinations',
         data.destinations.map((destination: any) => ({
@@ -609,7 +609,7 @@ export const BussinessTripFormV1 = ({
     // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
     const total = (percentValue / 100) * allowance; // Multiply percent with allowance
     // console.log(total, ' totalll');
-    form.setValue('total_cash_advance', total.toFixed(0)); // Save the total in total_cash_advance field
+    form.setValue('total_cash_advance', formatRupiah(total.toFixed(0), false)); // Save the total in total_cash_advance field
   }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance cha
 
   const { dataDropdown: dataEmployee, getDropdown: getEmployee } = useDropdownOptions();
@@ -829,7 +829,7 @@ export const BussinessTripFormV1 = ({
             )}
             <tr>
               <td width={200}>File Extension</td>
-              <td className='text-gray-500 text-xs font-extralight'>doc,jpg,ods,png,txt,pdf</td>
+              <td className='text-gray-500 text-xs font-extralight'>jpg,jpeg,png,pdf</td>
             </tr>
             <tr>
               <td width={200}>Total Destination</td>
@@ -902,7 +902,13 @@ export const BussinessTripFormV1 = ({
                 <FormSwitch
                   fieldName={'cash_advance'}
                   isRequired={false}
-                  disabled={false}
+                  disabled={
+                    type == BusinessTripType.edit
+                      ? form.watch('cash_advance')
+                        ? false
+                        : true
+                      : false
+                  }
                   onChanges={(e) => handleCashAdvanceChange(e.target.checked)}
                 />
               </td>
@@ -910,8 +916,8 @@ export const BussinessTripFormV1 = ({
             {isCashAdvance && (
               <>
                 <tr>
-                  <td className='w-[50%]'>Total Percent</td>
-                  <td className='w-[50%]'>
+                  <td className='w-[50%]'>Reference Number</td>
+                  <td className='w-[50%]' style={{ paddingBottom: 0 }}>
                     <FormField
                       control={form.control}
                       name={'reference_number'}
@@ -929,6 +935,11 @@ export const BussinessTripFormV1 = ({
                         </FormItem>
                       )}
                     />
+                  </td>
+                </tr>
+                <tr>
+                  <td className='w-[50%]'>Total Percent</td>
+                  <td className='w-[50%]'>
                     <FormField
                       control={form.control}
                       name={'total_percent'}
@@ -976,6 +987,14 @@ export const BussinessTripFormV1 = ({
             variant='contained'
             color='primary'
             type='button'
+            style={{
+              display:
+                type == BusinessTripType.edit
+                  ? form.watch('total_destination')
+                    ? 'none'
+                    : 'block'
+                  : 'block',
+            }}
           >
             Check Approval
           </ButtonMui>
