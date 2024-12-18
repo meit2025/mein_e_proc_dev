@@ -110,8 +110,8 @@ class ReimbursementService
                 'value'     => $balance
             ];
             $this->approvalServices->Payment((object)$parseForApproval, true, $group->id, 'REIM');
-
-            SapJobs::dispatch($group->id, 'REIM');
+            
+            // SapJobs::dispatch($group->id, 'REIM');
 
             DB::commit();
             return "Reimbursements and progress stored successfully.";
