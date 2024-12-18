@@ -9,6 +9,7 @@ import FormAutocomplete from '@/components/Input/formDropdown';
 import { useAlert } from '@/contexts/AlertContext';
 import useDropdownOptions from '@/lib/getDropdown';
 import { Button } from '@mui/material';
+import { AxiosError } from 'axios';
 import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
@@ -38,7 +39,9 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
       const dataVendor = dataVendorArray.length > 0 ? dataVendorArray[0] : null;
       const winnerUnit = dataVendor.units || [];
       const totalSum = winnerUnit.reduce((sum: number, item: any) => sum + item.total_amount, 0);
+      setValue('total_all_amount', totalSum);
 
+      console.log(getData);
       if (getData.document_type === null || getData.document_type === undefined) {
         setLoading(false);
         showToast('Please input Document Type', 'error');
@@ -110,7 +113,14 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
     } catch (error) {
       setLoading(false);
       setIsShow(false);
-      showToast(error?.response?.data?.message, 'error');
+      if (error instanceof AxiosError && error.response) {
+        const message = error.response.data?.message || 'An unexpected error occurred';
+        showToast(message, 'error');
+      } else if (error instanceof Error) {
+        showToast(error.message, 'error');
+      } else {
+        showToast('An unexpected error occurred', 'error');
+      }
     }
   };
 
