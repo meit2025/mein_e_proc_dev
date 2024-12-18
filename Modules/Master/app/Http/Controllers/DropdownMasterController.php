@@ -4,7 +4,9 @@ namespace Modules\Master\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Modules\BusinessTrip\Models\BusinessTrip;
 use Modules\Master\Models\DataDropdown;
 
 class DropdownMasterController extends Controller
@@ -110,6 +112,13 @@ class DropdownMasterController extends Controller
             }
         }
 
+        if($request->declaration == 'true'){
+            $inBusinessTripRequest = BusinessTrip::where('type', 'declaration')->pluck('parent_id')->toArray();
+            $data = $data->where('deleted_at',null)->where('status_id',5)->whereNotIn('id', $inBusinessTripRequest);
+            if(Auth::user()->is_admin == "0"){
+                $data = $data->where('created_by', Auth::user()->id);
+            }
+        }
 
         $data = $data->limit(500)->get();
         return $this->successResponse($data);

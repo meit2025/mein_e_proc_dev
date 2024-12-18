@@ -66,6 +66,17 @@ class BusinessTripDeclarationController extends Controller
         $data = BusinessTrip::with(['costCenter'])->where('id', $id)->first();
         $data->name_request = $data->requestFor->name;
         $data->name_purpose = $data->purposeType->name;
+        $data->cash_advance = $data->cash_advance;
+        $data->total_percent = $data->total_percent;
+        $data->total_cash_advance = $data->total_cash_advance;
+        $data->reference_number = $data->reference_number;
+        $attachments = $data->attachment->map(function ($attachment) {
+            return [
+                'url' => asset('storage/' . $attachment->file_path . '/' . $attachment->file_name),
+                'file_name' => $attachment->file_name,
+            ];
+        });
+        $data->file_attachement = $attachments;
         $destinations = [];
         foreach ($data->businessTripDestination as $key => $value) {
             // Inisialisasi array allowances dengan kunci allowance_id
@@ -165,10 +176,27 @@ class BusinessTripDeclarationController extends Controller
         $data['remarks'] = $findData->remarks;
         $data['request_for'] = $findData->requestFor->name;
         $data['requested_by'] = $findData->requestedBy->name;
+        $data['cash_advance'] = $findData->cash_advance;
+        $data['total_percent'] = $findData->total_percent;
+        $data['total_cash_advance'] = $findData->total_cash_advance;
+        $data['reference_number'] = $findData->reference_number;
         $data['parent_business_trip_request_no'] = $findData->parentBusinessTrip->request_no;
         $data['purpose_type_name'] = $findData->purposeType->name;
         $data['cost_center'] = $findData->costCenter?->cost_center;
         $data['created_at'] = date('d-m-Y', strtotime($findData->created_at));
+        $attachments = $findData->attachment->map(function ($attachment) {
+            return [
+                'url' => asset('storage/' . $attachment->file_path . '/' . $attachment->file_name),
+                'file_name' => $attachment->file_name,
+            ];
+        });
+        $data['file_attachement'] = $attachments;
+        $data['status'] = [
+            'id' => $findData->status_id,
+            'name' => $findData->status->name,
+            'color' => $findData->status->color,
+            'code' => $findData->status->code
+        ];
 
         $parentDestination = [];
         $request_detail_allowance_from_parent = [];
@@ -334,10 +362,13 @@ class BusinessTripDeclarationController extends Controller
         if ($request->approval == "1") {
             $data = Approval::where('user_id', Auth::user()->id)
                 ->where('document_name', 'TRIP_DECLARATION')->pluck('document_id')->toArray();
-            $query = $query->whereIn('id', $data);
+            $query = $query->whereIn('id', $data)->where('status_id',1);
         }
+        // else{
+            // $query = $query->where('created_by', Auth::user()->id)->orWhere('request_for', Auth::user()->id);
+        // }
 
-        $data = $query->where('type', 'declaration')->latest()->paginate($perPage);
+        $data = $query->where('type', 'declaration')->search(request(['search']))->latest()->paginate($perPage);
 
         $data->getCollection()->transform(function ($map) {
 
@@ -420,12 +451,29 @@ class BusinessTripDeclarationController extends Controller
                 'total_cash_advance' => $dataBusiness->total_cash_advance,
             ]);
 
+            // if ($request->attachment != null) {
+            //     BusinessTripAttachment::create([
+            //         'business_trip_id' => $businessTrip->id,
+            //         'file_path' => explode('/', $request->attachment->store('business_trip', 'public'))[0],
+            //         'file_name' => explode('/', $request->attachment->store('business_trip', 'public'))[1],
+            //     ]);
+            // }
             if ($request->attachment != null) {
-                BusinessTripAttachment::create([
-                    'business_trip_id' => $businessTrip->id,
-                    'file_path' => explode('/', $request->attachment->store('business_trip', 'public'))[0],
-                    'file_name' => explode('/', $request->attachment->store('business_trip', 'public'))[1],
-                ]);
+                foreach ($request->attachment as $row) {
+                    // Ambil nama asli file
+                    $originalName = pathinfo($row->getClientOriginalName(), PATHINFO_FILENAME);
+                    $extension = $row->getClientOriginalExtension();
+                    // Tambahkan timestamp di akhir nama file
+                    $timestampedName = $originalName . '_' . time() . '.' . $extension;
+                    // Simpan file dengan nama yang telah dimodifikasi
+                    $filePath = $row->storeAs('business_trip', $timestampedName, 'public');
+                    // Simpan data ke database
+                    BusinessTripAttachment::create([
+                        'business_trip_id' => $businessTrip->id,
+                        'file_path' => 'business_trip', // Folder tempat file disimpan
+                        'file_name' => $timestampedName, // Nama file dengan timestamp
+                    ]);
+                }
             }
 
             foreach ($request->destinations as $key => $value) {
@@ -494,13 +542,31 @@ class BusinessTripDeclarationController extends Controller
         $data = [];
         $data['request_no'] = $findData->request_no;
         $data['remarks'] = $findData->remarks;
+        $data['cash_advance'] = $findData->cash_advance;
+        $data['total_percent'] = $findData->total_percent;
+        $data['total_cash_advance'] = $findData->total_cash_advance;
+        $data['reference_number'] = $findData->reference_number;
         $data['request_for'] = $findData->requestFor->name;
         $data['requested_by'] = $findData->requestedBy->name;
         $data['parent_business_trip_request_no'] = $findData->parentBusinessTrip->request_no;
         $data['purpose_type_name'] = $findData->purposeType->name;
         $data['cost_center'] = $findData->costCenter?->cost_center;
         $data['created_at'] = date('d-m-Y', strtotime($findData->created_at));
-
+        $attachments = $findData->attachment->map(function ($attachment) {
+            return [
+                'url' => asset('storage/' . $attachment->file_path . '/' . $attachment->file_name),
+                'file_name' => $attachment->file_name,
+            ];
+        });
+        $data['file_attachement'] = $attachments;
+        $data['status'] = [
+            'id' => $findData->status_id,
+            'name' => $findData->status->name,
+            'color' => $findData->status->color,
+            'code' => $findData->status->code,
+            'classname' => $findData->status->classname,
+        ];
+        $data['approval'] = Approval::with('user.divisions')->where('document_id', $id)->where('document_name', 'TRIP_DECLARATION')->orderBy('id', 'ASC')->get();
         $parentDestination = [];
         $request_detail_allowance_from_parent = [];
         foreach ($findData->parentBusinessTrip->businessTripDestination as $parent) {

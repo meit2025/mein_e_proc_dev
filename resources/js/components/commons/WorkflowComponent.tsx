@@ -66,6 +66,7 @@ export interface WorkflowApprovalStepInterfaceStatus {
   status: string;
   name: string;
   dateApproved: string;
+  note: string;
 }
 
 export function WorkflowApprovalStep({
@@ -74,16 +75,19 @@ export function WorkflowApprovalStep({
       status: 'Approved',
       name: 'dono',
       dateApproved: '2022-01-01',
+      note: 'note',
     },
     {
       status: 'Approved',
       name: 'kasino',
       dateApproved: '2022-01-01',
+      note: 'note',
     },
     {
       status: 'Approved',
       name: 'indro',
       dateApproved: '2022-01-01',
+      note: 'note',
     },
   ],
 }: WorkflowApprovalStepInterface) {
@@ -96,6 +100,7 @@ export function WorkflowApprovalStep({
             <td>Name</td>
             <td>Status</td>
             <td>Date Approved</td>
+            <td>Note</td>
           </tr>
           {workflowApprovalDiagram.map(
             (item: WorkflowApprovalStepInterfaceStatus, index: number) => {
@@ -109,10 +114,10 @@ export function WorkflowApprovalStep({
                     {item.status === 'Waiting' && <RemoveCircleIcon style={{ color: 'orange' }} />}
                   </td>
                   <td>
-                    {' '}
                     {(item.status === 'Approved' || item.status === 'Rejected') &&
                       item.dateApproved}
                   </td>
+                  <td>{item.status !== '' && item.note}</td>
                 </tr>
               );
             },

@@ -18,6 +18,7 @@ interface StructDropdown {
   attribut?: string;
   hiddenZero?: boolean;
   idType?: 'number' | 'string';
+  declaration?: string;
 }
 
 function removeLeadingZeros(input: string): string {
@@ -45,6 +46,7 @@ const useDropdownOptions = (urls: string = 'api/master/dropdown') => {
           isNotNull: struct.where?.isNotNull ?? '', // Handle optional values
           key: struct.where?.key ?? '',
           parameter: struct.where?.parameter ?? '',
+          declaration: struct.declaration ?? '',
           groupBy: struct.where?.groupBy ?? '',
           attribut: struct.attribut ?? '',
         },

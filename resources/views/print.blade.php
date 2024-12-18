@@ -1,3 +1,4 @@
+@inject('carbon', 'Carbon\Carbon')
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -108,6 +109,53 @@
         .tab-content.active {
             display: block;
         }
+
+        .approval table {
+            width: 100%;
+            margin-top: 2rem;
+        }
+
+        .approval table tbody tr td {
+            font-weight: normal;
+            padding: 2px;
+        }
+
+        .button-container {
+            text-align: center;
+        }
+
+        .waiting-approve {
+            background-color: #fef6e0; /* Light background */
+            color: #b57c00; /* Darker text color */
+            border: 2px solid #b57c00; /* Border color */
+            border-radius: 25px; /* Rounded corners */
+            padding: 8px 17px; /* Padding */
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            cursor: pointer; /* Pointer cursor */
+            display: flex;
+            align-items: center;
+            cursor: default;
+        }
+        .icon {
+            margin-right: 8px; /* Space between icon and text */
+        }
+
+        .waiting{
+            background-color: #f4e5bd; /* Light background */
+            color: rgb(202 138 4); /* Darker text color */
+            border: 2px solid rgb(202 138 4 ); /* Border color */
+        }
+        .approve{
+            background-color: #dcffd8; /* Light background */
+            color: rgb(22 163 74); /* Darker text color */
+            border: 2px solid rgb(22 163 74); /* Border color */
+        }
+        .reject{
+            background-color: #fef6e0; /* Light background */
+            color: red; /* Darker text color */
+            border: 2px solid #ff4e4e; /* Border color */
+        }
     </style>
 </head>
 <body>
@@ -118,9 +166,40 @@
     <p><strong>Company:</strong> PT. Mitsubishi Electric Indonesia</p>
     <p><strong>Request for:</strong> {{$data['request_for']}}</p>
     <p><strong>Requested By:</strong> {{$data['requested_by']}}</p>
-    <p><strong>Status:</strong>
-        <span class="status-approved">Fully Approved</span>
-    </p>
+    <div style="display: flex; align-items: center;gap: 10px;margin-bottom:1rem;">
+        <strong>Status:</strong>
+        @if ($data['status']['code'] == 'waiting_approve')
+            @php
+                $color = 'waiting';
+                $icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>';
+            @endphp
+        @elseif ($data['status']['code'] == 'fully_approve')
+            @php
+                $color = 'approve';
+                $icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>';
+            @endphp
+        @elseif ($data['status']['code'] == 'reject_to')
+            @php
+                $color = 'reject';
+                $icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ban"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg>';
+            @endphp
+        @elseif ($data['status']['code'] == 'cancel')
+            @php
+                $color = 'waiting';
+                $icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>';
+            @endphp
+        @elseif ($data['status']['code'] == 'approve_to')
+            @php
+                $color = 'waiting';
+                $icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>';
+            @endphp
+        @endif
+        <button class="waiting-approve {{$color}}">
+            <span class="icon">
+                {!!$icon!!}    
+            </span> {{$data['status']['name']}}
+        </button>
+    </div>
 
     <table class="info-table">
         <tr>
@@ -153,6 +232,11 @@
                 @endforeach
             </td>
         </tr>
+        @if ($data['cash_advance'] == 1) 
+        <tr>
+            <td><strong>Ref Number</strong></td>
+            <td>{{$data['reference_number']}}</td>
+        </tr>
         <tr>
             <td><strong>Total Percent</strong></td>
             <td>{{$data['total_percent']}}%</td>
@@ -161,6 +245,7 @@
             <td><strong>Total Cash Advance</strong></td>
             <td>{{$data['total_cash_advance']}}</td>
         </tr>
+        @endif
     </table>
 
     <div class="tabs">
@@ -262,6 +347,29 @@
             </div>
         </div>
     @endforeach
+
+    <div class="approval">
+        <table>
+            <thead>
+                <tr>
+                    <td>Approver</td>
+                    <td>Position</td>
+                    <td>Decision</td>
+                    <td>Date</td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($data['approval'] as $item)
+                    <tr>
+                        <td>{{$item['user']['name']}}</td>
+                        <td>{{isset($item['user']['division']) ? $item['user']['division']['name'] : '-'}}</td>
+                        <td>{{$item['status']}}</td>
+                        <td>{{$item['is_status'] ? $carbon::parse($item['updated_at'])->format('d M Y (H:i)') : '-'}}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
