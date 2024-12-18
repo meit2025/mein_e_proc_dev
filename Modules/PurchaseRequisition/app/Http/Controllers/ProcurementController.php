@@ -83,16 +83,16 @@ class ProcurementController extends Controller
             $date = Carbon::now();
             $formattedDate = $date->format('Y-M-D');
 
-            if ($unitData['is_cashAdvance'] ?? false) {
+            if ($request->is_cashAdvance ?? false) {
                 $purchase->cashAdvancePurchases()->create([
                     'unit_id' => $unitCrate->id,
-                    'reference' => $unitData['cash_advance_purchases']['reference'] ?? '',
+                    'reference' => $request['cash_advance_purchases']['reference'] ?? '',
                     'document_header_text' => $request['entertainment']['header_not'] ?? '',
                     'document_date' => $formattedDate,
                     'due_on' => $request->delivery_date ?? '',
                     'text' => $request['entertainment']['header_not'] ?? '',
-                    'dp' => $unitData['cash_advance_purchases']['dp'] ?? '',
-                    'nominal' => $unitData['cash_advance_purchases']['nominal'] ?? '0',
+                    'dp' => $request['cash_advance_purchases']['dp'] ?? '',
+                    'nominal' => $request['cash_advance_purchases']['nominal'] ?? '0',
                 ]);
             }
 
@@ -130,6 +130,8 @@ class ProcurementController extends Controller
     public function retryPr($id, $type)
     {
         SapJobs::dispatch($id, $type);
+
+
         return $this->successResponse();
     }
 
