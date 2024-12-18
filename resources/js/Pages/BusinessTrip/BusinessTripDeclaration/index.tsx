@@ -28,6 +28,10 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
   });
 
   function openFormHandler() {
+    setBusinessTripForm({
+      type: BusinessTripType.create,
+      id: null,
+    });
     setOpenForm(!openForm);
   }
   return (
@@ -42,11 +46,7 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
           open={openForm}
           onOpenChange={openFormHandler}
         >
-          <BussinessTripFormV1
-            users={users}
-            listPurposeType={listPurposeType}
-            listBusinessTrip={listBusinessTrip}
-          />
+          <BussinessTripFormV1 type={businessTripForm.type} id={businessTripForm.id} />
         </CustomDialog>
       </div>
       <DataGridComponent
@@ -59,7 +59,6 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         }}
         onCreate={openFormHandler}
         columns={columns}
-        actionType='dropdown'
         onEdit={(value) => {
           setBusinessTripForm({
             type: BusinessTripType.edit,
@@ -69,7 +68,6 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         }}
         url={{
           url: GET_LIST_BUSINESS_TRIP_DECLARATION,
-          deleteUrl: DELET_API,
           detailUrl: DETAIL_PAGE_BUSINESS_TRIP_DECLARATION,
         }}
         labelFilter='search'

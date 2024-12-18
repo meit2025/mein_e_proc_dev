@@ -99,6 +99,7 @@ interface BusinessTrip {
   total_cash_advance: string;
   total_percent: string;
   cash_advance: number;
+  reference_number: number;
 }
 
 const BusinessTripDetail = () => {
@@ -201,7 +202,17 @@ const BusinessTripDetail = () => {
               <>
                 <tr>
                   <td>
-                    <strong>Total Percent <br /> Cash Advance</strong>
+                    <strong>
+                      Ref Number
+                    </strong>
+                  </td>
+                  <td>{data?.reference_number}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>
+                      Total Percent <br /> Cash Advance
+                    </strong>
                   </td>
                   <td>{data?.total_percent}%</td>
                 </tr>
@@ -209,7 +220,7 @@ const BusinessTripDetail = () => {
                   <td>
                     <strong>Total Cash Advance</strong>
                   </td>
-                  <td>{formatRupiah(data?.total_cash_advance)}</td>
+                  <td>{formatRupiah(data?.total_cash_advance ?? '')}</td>
                 </tr>
               </>
             )}
