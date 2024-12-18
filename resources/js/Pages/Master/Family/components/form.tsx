@@ -171,9 +171,10 @@ export default function FamilyHeaderForm({
                       <FormControl>
                         <Select onValueChange={(value) => field.onChange(value)} value={field.value}>
                           <SelectTrigger className='w-[200px]'>
-                            <SelectValue placeholder='Child / Wife' />
+                            <SelectValue placeholder='Select Family Status' />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value='husband'>Husband</SelectItem>
                             <SelectItem value='wife'>Wife</SelectItem>
                             <SelectItem value='child'>Child</SelectItem>
                           </SelectContent>

@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Modules\Approval\Models\SettingApproval;
 use Modules\Master\Models\MasterBusinessPartner;
+use Modules\Master\Models\MasterCostCenter;
 use Modules\Master\Models\MasterMaterial;
 use Modules\Master\Models\MasterTypeReimburse;
 use Modules\Master\Models\MaterialGroup;
@@ -181,6 +182,8 @@ class ReimburseServices
         $purchasingGroup = PurchasingGroup::find($value->purchasing_group);
         $uom = Uom::find($value->purchase_requisition_unit_of_measure);
 
+        $costCenter = MasterCostCenter::where('id', $reim->cost_center)->first();
+
         return [
             'purchase_id' => $reim->id,
             'code_transaction' => 'REIM', // code_transaction
@@ -208,7 +211,7 @@ class ReimburseServices
             'item_category' => '', // pstyp
             'short_text' => $reim->short_text,  // txz01
             'plant' => $plant, // werks
-            'cost_center' => $value->cost_center,  // kostl
+            'cost_center' => $costCenter->cost_center,  // kostl
             'order_number' => '', // AUFNR
             'asset_subnumber' => '',  // anln2
             'main_asset_number' => '',  // anln1

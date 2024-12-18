@@ -7,6 +7,7 @@ import { GET_DETAIL_BUSINESS_TRIP_REQUEST } from '@/endpoint/business-trip/api';
 import { WorkflowComponent } from '@/components/commons/WorkflowComponent';
 import LayoutApproval from '@/components/approval/LayoutApproval';
 import { CustomStatus } from '@/components/commons/CustomStatus';
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 
 interface PurposeType {
   id: number;
@@ -95,6 +96,10 @@ interface BusinessTrip {
   file_attachement: BusinessTripAttachment[];
   business_trip_destination: BusinessTripDestination[];
   status: { name: string; code: string; classname: string };
+  total_cash_advance: string;
+  total_percent: string;
+  cash_advance: number;
+  reference_number: number;
 }
 
 const BusinessTripDetail = () => {
@@ -107,8 +112,8 @@ const BusinessTripDetail = () => {
     const fetchBusinessTrip = async () => {
       try {
         setIsLoading(true);
-        // Pastikan endpoint API mengembalikan data relasi `posts`
         const response = await axiosInstance.get(GET_DETAIL_BUSINESS_TRIP_REQUEST(id));
+        console.log(response.data.data);
         setData(response.data.data);
       } catch (err) {
         console.error('Error fetching detail:', err);
@@ -193,6 +198,32 @@ const BusinessTripDetail = () => {
                 ))}
               </td>
             </tr>
+            {data?.cash_advance != 0 && (
+              <>
+                <tr>
+                  <td>
+                    <strong>
+                      Ref Number
+                    </strong>
+                  </td>
+                  <td>{data?.reference_number}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>
+                      Total Percent <br /> Cash Advance
+                    </strong>
+                  </td>
+                  <td>{data?.total_percent}%</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Total Cash Advance</strong>
+                  </td>
+                  <td>{formatRupiah(data?.total_cash_advance ?? '')}</td>
+                </tr>
+              </>
+            )}
           </table>
         </div>
 

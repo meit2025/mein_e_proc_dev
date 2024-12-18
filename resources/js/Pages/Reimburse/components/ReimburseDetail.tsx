@@ -51,8 +51,13 @@ const ReimburseDetail = () => {
           <strong>Request for:</strong> {data?.user?.name}
         </p>
         <p className='text-sm'>{/* <strong>Requested By:</strong> {data?.requested_by} */}</p>
-        <p className='text-sm'>
-          <strong>Status:</strong> <span className={`font-bold ${data?.reimbursementStatus?.classname}`}>{data?.reimbursementStatus?.name}</span>
+        <p className='text-sm flex items-center gap-2'>
+          <strong>Status:</strong>{' '}
+          <CustomStatus
+            name={data?.reimbursementStatus?.name!}
+            className={data?.reimbursementStatus?.classname!}
+            code={data?.reimbursementStatus?.code}
+          />
         </p>
 
         <Tabs defaultValue='reimburse1' className='w-full text-sm'>
@@ -165,13 +170,28 @@ const ReimburseDetail = () => {
                     <td>
                       <strong>Reimburse Cost</strong>
                     </td>
-                    <td>{formatRupiah(reimburse?.balance || 0)}</td>
+                    <td>{reimburse?.currency} {formatRupiah(reimburse?.balance || 0).replace('Rp', '')}</td>
                   </tr>
                   <tr>
                     <td>
                       <strong>Attachment File</strong>
                     </td>
-                    <td></td>
+                    <td>
+                      {reimburse?.reimburse_attachment.map((attachment: any, index: number) => (
+                        <>
+                          <a
+                            href={`/storage/reimburse/${attachment.url}`}
+                            target='_blank'
+                            className='text-blue-500'
+                            rel='noopener noreferrer'
+                            key={index}
+                          >
+                            {attachment.url}
+                          </a>
+                          <br />
+                        </>
+                      ))}
+                    </td>
                   </tr>
                 </table>
               </div>

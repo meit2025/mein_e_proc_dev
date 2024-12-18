@@ -404,7 +404,7 @@ class BusinessTripController extends Controller
                 'cash_advance' => $request->cash_advance == "true" ? 1 : 0,
                 'reference_number' => $request->cash_advance == "true" ? $request->reference_number : null,
                 'total_percent' => $request->cash_advance == "true" ? $request->total_percent : null,
-                'total_cash_advance' => $request->cash_advance == "true" ? $request->total_cash_advance : null,
+                'total_cash_advance' => $request->cash_advance == "true" ? str_replace('.', '', $request->total_cash_advance) : null,
             ]);
 
             if ($request->attachment != null) {
@@ -486,7 +486,7 @@ class BusinessTripController extends Controller
     public function listAPI(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType', 'status']);
+        $query =  BusinessTrip::query()->with(['purposeType', 'status'])->where('type', 'request');
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
@@ -494,12 +494,12 @@ class BusinessTripController extends Controller
         // $query->orderBy($sortBy, $sortDirection);
         if ($request->approval == "1") {
             $data = Approval::where('user_id', Auth::user()->id)->where('document_name', 'TRIP')->pluck('document_id')->toArray();
-            $query = $query->whereIn('id', $data);
+            $query = $query->whereIn('id', $data)->where('status_id',1);
         }else{
             $query = $query->where('created_by', Auth::user()->id)->orWhere('request_for', Auth::user()->id);
         }
 
-        $data = $query->where('type', 'request')->latest()->search(request(['search']))->paginate($perPage);
+        $data = $query->latest()->search(request(['search']))->paginate($perPage);
 
         $data->getCollection()->transform(function ($map) {
 
@@ -533,15 +533,19 @@ class BusinessTripController extends Controller
             $businessTrip->remarks = $request->remark;
             $businessTrip->save();
 
-            // DELETE ATTACHMENT DULU JIKA ADA YANG DI HAPUS
-            $array_id_exist = [];
-            foreach ($request->file_existing as $key => $attachment) {
-                $decode = json_decode($attachment);
-                $array_id_exist[] = $decode->id;
+            if($request->file_existing != null){
+                // DELETE ATTACHMENT DULU JIKA ADA YANG DI HAPUS
+                $array_id_exist = [];
+                foreach ($request->file_existing as $key => $attachment) {
+                    $decode = json_decode($attachment);
+                    $array_id_exist[] = $decode->id;
+                }
+                $businessTrip->attachment()->whereNotIn('id', $array_id_exist)->delete();
+            }else{
+                $businessTrip->attachment()->delete();
             }
-            $businessTrip->attachment()->whereNotIn('id', $array_id_exist)->delete();
-            // BARU TAMBAH ATTACHMENT
 
+            // BARU TAMBAH ATTACHMENT
             if ($request->attachment != null) {
                 foreach ($request->attachment as $row) {
                     // Ambil nama asli file
@@ -572,6 +576,10 @@ class BusinessTripController extends Controller
         $data = [];
         $data['request_no'] = $findData->request_no;
         $data['remarks'] = $findData->remarks;
+        $data['cash_advance'] = $findData->cash_advance;
+        $data['total_percent'] = $findData->total_percent;
+        $data['total_cash_advance'] = number_format($findData->total_cash_advance, 0, ',', '.');
+        $data['reference_number'] = $findData->reference_number;
         $data['request_for'] = $findData->requestFor->name;
         $data['requested_by'] = $findData->requestedBy->name;
         $data['purpose_type_name'] = $findData->purposeType->name;
@@ -585,6 +593,16 @@ class BusinessTripController extends Controller
             ];
         });
         $data['file_attachement'] = $attachments;
+        $data['approval'] = Approval::with('user.divisions')->where('document_id', $id)->where('document_name', 'TRIP')->orderBy('id', 'ASC')->get();
+
+        $data['status'] = [
+            'id' => $findData->status_id,
+            'name' => $findData->status->name,
+            'color' => $findData->status->color,
+            'code' => $findData->status->code,
+            'classname' => $findData->status->classname,
+        ];
+        // dd($data['status']);
 
         foreach ($findData->businessTripDestination as $destination) {
             $detail_attendance = [];
@@ -650,6 +668,7 @@ class BusinessTripController extends Controller
             }
 
             $data['business_trip_destination'][] = [
+                'id' => $destination->id,
                 'destination' => $destination->destination,
                 'business_trip_start_date' => $destination->business_trip_start_date,
                 'business_trip_end_date' => $destination->business_trip_end_date,
@@ -669,6 +688,10 @@ class BusinessTripController extends Controller
         $data['status_id'] = $findData->status_id;
         $data['request_no'] = $findData->request_no;
         $data['remarks'] = $findData->remarks;
+        $data['cash_advance'] = $findData->cash_advance;
+        $data['total_percent'] = $findData->total_percent;
+        $data['total_cash_advance'] = $findData->total_cash_advance;
+        $data['reference_number'] = $findData->reference_number;
         $data['request_for'] = $findData->requestFor->name;
         $data['requested_by'] = $findData->requestedBy->name;
         $data['purpose_type_name'] = $findData->purposeType->name;
@@ -693,7 +716,7 @@ class BusinessTripController extends Controller
             $detail_attendance = [];
             foreach ($destination->detailAttendance as $detail) {
                 $detail_attendance[] = [
-                    'date' => $detail->date,
+                    'date' => date('d-m-Y', strtotime($detail->date)),
                     'start_time' => $detail->start_time,
                     'end_time' => $detail->end_time,
                     'shift_code' => $detail->shift_code,
@@ -710,7 +733,7 @@ class BusinessTripController extends Controller
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)$detailDay->standard_value,
+                    'value' => number_format($detailDay->standard_value,0, ',', '.'),
                     'total_day' => $detailDay->total,
                     'total' => number_format($detailDay->standard_value * $detailDay->total, 0, ',', '.'),
                 ];

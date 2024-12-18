@@ -5,6 +5,8 @@ import axios, { AxiosError } from 'axios';
 import axiosInstance from '@/axiosInstance';
 import { GET_DETAIL_BUSINESS_TRIP_DECLARATION_PRINT } from '@/endpoint/business-trip-declaration/api';
 import LayoutApproval from '@/components/approval/LayoutApproval';
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
+import { CustomStatus } from '@/components/commons/CustomStatus';
 
 interface PurposeType {
   id: number;
@@ -63,6 +65,12 @@ interface BusinessTripDestination {
   detail_attendance: BusinessTripDetailAttendance[];
 }
 
+interface BusinessTripAttachment {
+  id: number;
+  url: string;
+  file_name: string;
+}
+
 interface BusinessTrip {
   status_id?: number;
   id: number;
@@ -81,6 +89,12 @@ interface BusinessTrip {
   parent_business_trip_request_no: string;
   purpose_type_name: string;
   created_at: string;
+  file_attachement: BusinessTripAttachment[];
+  reference_number: string;
+  total_cash_advance: string;
+  total_percent: string;
+  cash_advance: number;
+  status: { name: string; code: string; classname: string };
 }
 
 const BusinessTripDeclarationDetail = () => {
@@ -122,54 +136,97 @@ const BusinessTripDeclarationDetail = () => {
         <p className='text-sm'>
           <strong>Requested By:</strong> {data?.requested_by}
         </p>
-        <p className='text-sm'>
-          <strong>Status:</strong> <span className='status-approved'>Fully Approved</span>
+        <p className='text-sm flex items-center gap-2'>
+          <strong>Status:</strong>
+          {''}
+          <CustomStatus
+            name={data?.status?.name!}
+            className={data?.status?.classname!}
+            code={data?.status?.code}
+          />
         </p>
-
-        <table className='info-table text-sm mt-4'>
-          <tr>
-            <td>
-              <strong>Request For</strong>
-            </td>
-            <td>{data?.request_for}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Business Trip Request Number</strong>
-            </td>
-            <td>{data?.parent_business_trip_request_no}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Purpose Type</strong>
-            </td>
-            <td>{data?.purpose_type_name}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Pusat Biaya</strong>
-            </td>
-            <td>{data?.cost_center}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Request Date</strong>
-            </td>
-            <td>{data?.created_at}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Remark</strong>
-            </td>
-            <td>{data?.remarks}</td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Attachment File</strong>
-            </td>
-            <td></td>
-          </tr>
-        </table>
+        <div>
+          <table className='info-table text-sm mt-4'>
+            <tr>
+              <td>
+                <strong>Request For</strong>
+              </td>
+              <td>{data?.request_for}</td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Business Trip Request Number</strong>
+              </td>
+              <td>{data?.parent_business_trip_request_no}</td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Purpose Type</strong>
+              </td>
+              <td>{data?.purpose_type_name}</td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Pusat Biaya</strong>
+              </td>
+              <td>{data?.cost_center}</td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Request Date</strong>
+              </td>
+              <td>{data?.created_at}</td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Remark</strong>
+              </td>
+              <td>{data?.remarks}</td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Attachment File</strong>
+              </td>
+              <td className='flex flex-col'>
+                {data?.file_attachement.map((attachment: any, index: number) => (
+                  <a
+                    href={attachment.url}
+                    target='_blank'
+                    className='text-blue-500'
+                    rel='noopener noreferrer'
+                    key={index}
+                  >
+                    {attachment.file_name}
+                  </a>
+                ))}
+              </td>
+            </tr>
+            {data?.cash_advance != 0 && (
+              <>
+                <tr>
+                  <td>
+                    <strong>Ref Number</strong>
+                  </td>
+                  <td>{data?.reference_number}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>
+                      Total Percent <br /> Cash Advance
+                    </strong>
+                  </td>
+                  <td>{data?.total_percent}%</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Total Cash Advance</strong>
+                  </td>
+                  <td>{formatRupiah(data?.total_cash_advance ?? '')}</td>
+                </tr>
+              </>
+            )}
+          </table>
+        </div>
 
         <Tabs defaultValue='destination1' className='w-full text-sm'>
           <TabsList className={'flex items-center justify-start space-x-4'}>
@@ -205,107 +262,109 @@ const BusinessTripDeclarationDetail = () => {
                     ),
                   )}
                 </table>
-                <div className='tables-wrapper'>
-                  <table className='value-table'>
-                    <caption>Standard Value</caption>
-                    <tr>
-                      <th>Item Name</th>
-                      <th>Currency Code</th>
-                      <th>Value</th>
-                      <th>Total Days</th>
-                      <th>Total</th>
-                    </tr>
-                    {destination.standar_detail_allowance.map((item: any, index: number) => (
-                      <tr key={index}>
-                        <td>
-                          {item.item_name} ({item.type})
-                        </td>
-                        <td>{item.currency_code}</td>
-                        <td>{item.value}</td>
-                        <td className='text-center'>{item.total_day}</td>
-                        <td>{item.total}</td>
+                <div>
+                  <div className='tables-wrapper'>
+                    <table className='value-table'>
+                      <caption>Standard Value</caption>
+                      <tr>
+                        <th>Item Name</th>
+                        <th>Currency Code</th>
+                        <th>Value</th>
+                        <th>Total Days</th>
+                        <th>Total</th>
                       </tr>
-                    ))}
+                      {destination.standar_detail_allowance.map((item: any, index: number) => (
+                        <tr key={index}>
+                          <td>
+                            {item.item_name} ({item.type})
+                          </td>
+                          <td>{item.currency_code}</td>
+                          <td>{formatRupiah(item.value)}</td>
+                          <td className='text-center'>{item.total_day}</td>
+                          <td>{formatRupiah(item.total)}</td>
+                        </tr>
+                      ))}
 
-                    <tr>
-                      <td>
-                        <strong>Total Standar Value</strong>
-                      </td>
-                      <td>IDR</td>
-                      <td></td>
-                      <td className='text-center'></td>
-                      <td>{destination.total_standard}</td>
-                    </tr>
-                  </table>
-
-                  <table className='value-table'>
-                    <caption>Requested Value</caption>
-                    <tr>
-                      <th>Item Name</th>
-                      <th>Currency Code</th>
-                      <th>Value</th>
-                      <th>Total Days</th>
-                      <th>Total</th>
-                    </tr>
-                    {destination.request_detail_allowance.map((item: any, index: number) => (
-                      <tr key={index}>
+                      <tr>
                         <td>
-                          {item.item_name} ({item.type})
+                          <strong>Total Standar Value</strong>
                         </td>
-                        <td>{item.currency_code}</td>
-                        <td>{item.value}</td>
-                        <td className='text-center'>{item.total_day}</td>
-                        <td>{item.total}</td>
+                        <td>IDR</td>
+                        <td></td>
+                        <td className='text-center'></td>
+                        <td>{formatRupiah(destination.total_standard)}</td>
                       </tr>
-                    ))}
-                    <tr>
-                      <td>
-                        <strong>Total Request Value</strong>
-                      </td>
-                      <td>IDR</td>
-                      <td></td>
-                      <td className='text-center'></td>
-                      <td>{destination.total_request}</td>
-                    </tr>
-                  </table>
+                    </table>
 
-                  <table className='value-table'>
-                    <caption>Declared Value</caption>
-                    <tr>
-                      <th>Item Name</th>
-                      <th>Currency Code</th>
-                      <th>Value</th>
-                      <th>Total Days</th>
-                      <th>Total</th>
-                    </tr>
-                    {destination.declaration_detail_allowance.map((item: any, index: number) => (
-                      <tr key={index}>
-                        <td>
-                          {item.item_name} ({item.type})
-                        </td>
-                        <td>{item.currency_code}</td>
-                        <td>{item.value}</td>
-                        <td className='text-center'>{item.total_day}</td>
-                        <td>{item.total}</td>
+                    <table className='value-table'>
+                      <caption>Requested Value</caption>
+                      <tr>
+                        <th>Item Name</th>
+                        <th>Currency Code</th>
+                        <th>Value</th>
+                        <th>Total Days</th>
+                        <th>Total</th>
                       </tr>
-                    ))}
-                    <tr>
-                      <td>Other Allowance</td>
-                      <td>IDR</td>
-                      <td></td>
-                      <td className='text-center'>-</td>
-                      <td>{destination.other_allowance}</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <strong>Total Request Value</strong>
-                      </td>
-                      <td>IDR</td>
-                      <td></td>
-                      <td className='text-center'></td>
-                      <td>{destination.total_declaration}</td>
-                    </tr>
-                  </table>
+                      {destination.request_detail_allowance.map((item: any, index: number) => (
+                        <tr key={index}>
+                          <td>
+                            {item.item_name} ({item.type})
+                          </td>
+                          <td>{item.currency_code}</td>
+                          <td>{formatRupiah(item.value)}</td>
+                          <td className='text-center'>{item.total_day}</td>
+                          <td>{formatRupiah(item.total)}</td>
+                        </tr>
+                      ))}
+                      <tr>
+                        <td>
+                          <strong>Total Request Value</strong>
+                        </td>
+                        <td>IDR</td>
+                        <td></td>
+                        <td className='text-center'></td>
+                        <td>{formatRupiah(destination.total_request)}</td>
+                      </tr>
+                    </table>
+
+                    <table className='value-table'>
+                      <caption>Declared Value</caption>
+                      <tr>
+                        <th>Item Name</th>
+                        <th>Currency Code</th>
+                        <th>Value</th>
+                        <th>Total Days</th>
+                        <th>Total</th>
+                      </tr>
+                      {destination.declaration_detail_allowance.map((item: any, index: number) => (
+                        <tr key={index}>
+                          <td>
+                            {item.item_name} ({item.type})
+                          </td>
+                          <td>{item.currency_code}</td>
+                          <td>{formatRupiah(item.value)}</td>
+                          <td className='text-center'>{item.total_day}</td>
+                          <td>{formatRupiah(item.total)}</td>
+                        </tr>
+                      ))}
+                      <tr>
+                        <td>Other Allowance</td>
+                        <td>IDR</td>
+                        <td></td>
+                        <td className='text-center'>-</td>
+                        <td>{formatRupiah(destination.other_allowance, false)}</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <strong>Total Request Value</strong>
+                        </td>
+                        <td>IDR</td>
+                        <td></td>
+                        <td className='text-center'></td>
+                        <td>{formatRupiah(destination.total_declaration)}</td>
+                      </tr>
+                    </table>
+                  </div>
                 </div>
               </div>
             </TabsContent>

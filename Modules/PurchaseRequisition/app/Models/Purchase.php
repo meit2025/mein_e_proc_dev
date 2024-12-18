@@ -59,7 +59,7 @@ class Purchase extends Model
     }
     public function cashAdvancePurchases()
     {
-        return $this->hasMany(CashAdvancePurchases::class);
+        return $this->hasOne(CashAdvancePurchases::class);
     }
 
     public function user()
