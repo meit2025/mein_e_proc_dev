@@ -75,9 +75,6 @@ services:
       - ./:/var/www/html/mein
     networks:
       - utama
-    depends_on:
-      - postgresql-mein
-
 
 networks:
   utama:
