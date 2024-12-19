@@ -12,6 +12,6 @@ Artisan::command('inspire', function () {
 
 Schedule::job(new SendApprovalEmailJob())
     ->hourlyAt(0)
-    ->between('08:00', '17:00');
+    ->between('01:00', '10:00');
 
 Schedule::job(new SendApprovalEmailJob())->everyFiveSeconds();
