@@ -1,1 +1,0 @@
-const r=[{type:"input",name:"purchasing_group",label:"purchasing group",placeholder:"Enter your purchasing group",required:!0},{type:"input",name:"purchasing_group_desc",label:"purchasing group description",placeholder:"Enter your purchasing group description",required:!0}];export{r as formModel};
