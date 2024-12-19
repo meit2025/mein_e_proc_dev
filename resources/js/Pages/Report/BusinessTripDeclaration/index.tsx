@@ -12,6 +12,9 @@ import {
 import { DETAIL_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
 import { PurposeTypeModel } from '../PurposeType/models/models';
 import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
+import { REPORT_BT_DEC_EXPORT, REPORT_BT_DEC_LIST } from '@/endpoint/report/api';
+import { useAlert } from '@/contexts/AlertContext';
+import axiosInstance from '@/axiosInstance';
 
 interface propsType {
     listPurposeType: PurposeTypeModel[];
@@ -26,6 +29,36 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         type: BusinessTripType.create,
         id: undefined,
     });
+
+    const { showToast } = useAlert();
+
+    const exporter = async (data: string) => {
+        try {
+            console.log(data);
+
+            // Kirim permintaan ke endpoint dengan filter
+            const response = await axiosInstance.get(REPORT_BT_DEC_EXPORT + data, {
+            });
+
+            console.log(response);
+
+
+            // Membuat file dari respons
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'Business_Trip_Declaration_Report.csv'); // Nama file
+            document.body.appendChild(link);
+            link.click();
+
+            showToast('File berhasil diekspor!', 'success');
+        } catch (error: any) {
+            showToast(
+                error.response?.data?.message || 'Terjadi kesalahan saat ekspor.',
+                'error'
+            );
+        }
+    };
 
     function openFormHandler() {
         setOpenForm(!openForm);
@@ -50,28 +83,26 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
                 </CustomDialog>
             </div>
             <DataGridComponent
-                isHistory={true}
+                isHistory={false}
                 role={{
                     detail: `${roleAkses} view`,
-                    create: `${roleAkses} create`,
-                    update: `${roleAkses} update`,
-                    delete: `${roleAkses} delete`,
+                    create: `${roleAkses} export`,
                 }}
                 // onCreate={openFormHandler}
-                onExport={async () => await data(x)}
+                onExport={async (x: string) => await exporter(x)}
                 columns={columns}
-                actionType='dropdown'
-                onEdit={(value) => {
-                    setBusinessTripForm({
-                        type: BusinessTripType.edit,
-                        id: value.toString(),
-                    });
-                    setOpenForm(true);
-                }}
+                // actionType='dropdown'
+                // onEdit={(value) => {
+                //     setBusinessTripForm({
+                //         type: BusinessTripType.edit,
+                //         id: value.toString(),
+                //     });
+                //     setOpenForm(true);
+                // }}
                 url={{
-                    url: GET_LIST_BUSINESS_TRIP_DECLARATION,
-                    deleteUrl: DELET_API,
-                    detailUrl: DETAIL_PAGE_BUSINESS_TRIP_DECLARATION,
+                    url: REPORT_BT_DEC_LIST,
+                    // deleteUrl: DELET_API,
+                    // detailUrl: DETAIL_PAGE_BUSINESS_TRIP_DECLARATION,
                 }}
                 labelFilter='search'
             />

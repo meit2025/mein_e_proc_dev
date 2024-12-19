@@ -64,12 +64,13 @@ const LayoutApproval = ({
         if (status_id !== 4 && firstFalseStatus?.user_id === auth?.user?.id) {
           setIsApproval(true);
         }
-
+        console.log('data', data.data);
         const approvalFromStatusRoute = (data.data ?? []).map((route: any) => {
           return {
             status: route.status,
             name: route.user.name,
             dateApproved: moment(route.updated_at).format('YYYY-MM-DD'),
+            note: route.message,
           };
         });
 
