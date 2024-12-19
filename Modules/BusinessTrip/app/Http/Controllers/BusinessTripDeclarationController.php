@@ -152,6 +152,7 @@ class BusinessTripDeclarationController extends Controller
 
             $destinations[] = [
                 'destination' => $value->destination,
+                'other_allowance' => $value->other_allowance,
                 'pajak' => $value->pajak->mwszkz ?? '',
                 'purchasing_group' => $value->purchasingGroup->purchasing_group ?? '',
                 'business_trip_start_date' => $value->business_trip_start_date,
@@ -329,7 +330,24 @@ class BusinessTripDeclarationController extends Controller
      */
     public function edit($id)
     {
-        return view('businesstrip::edit');
+        $data = BusinessTrip::with(['costCenter', 'pajak', 'purchasingGroup'])->where('id', $id)->first();
+        $attachments = $data->attachment->map(function ($attachment) {
+            return [
+                'id' => $attachment->id,
+                'url' => asset('storage/' . $attachment->file_path . '/' . $attachment->file_name),
+                'file_name' => $attachment->file_name,
+            ];
+        });
+        $data->attachments = $attachments;
+        $destinations = [];
+        foreach ($data->businessTripDestination as $key => $value) {
+            $destinations[] = [
+                'is_other' => $value->other_allowance == 0 ? false : true,
+                'other' => $value->other_allowance,
+            ];
+        }
+        $data->destinations = $destinations;
+        return $this->successResponse($data->makeHidden(['created_at', 'updated_at']));
     }
 
     /**
@@ -337,7 +355,46 @@ class BusinessTripDeclarationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            $businessTrip = BusinessTrip::find($id);
+            $businessTrip->remarks = $request->remark;
+            $businessTrip->save();
+
+            if($request->file_existing != null){
+                // DELETE ATTACHMENT DULU JIKA ADA YANG DI HAPUS
+                $array_id_exist = [];
+                foreach ($request->file_existing as $key => $attachment) {
+                    $decode = json_decode($attachment);
+                    $array_id_exist[] = $decode->id;
+                }
+                $businessTrip->attachment()->whereNotIn('id', $array_id_exist)->delete();
+            }else{
+                $businessTrip->attachment()->delete();
+            }
+
+            // BARU TAMBAH ATTACHMENT
+            if ($request->attachment != null) {
+                foreach ($request->attachment as $row) {
+                    // Ambil nama asli file
+                    $originalName = pathinfo($row->getClientOriginalName(), PATHINFO_FILENAME);
+                    $extension = $row->getClientOriginalExtension();
+                    // Tambahkan timestamp di akhir nama file
+                    $timestampedName = $originalName . '_' . time() . '.' . $extension;
+                    // Simpan file dengan nama yang telah dimodifikasi
+                    $filePath = $row->storeAs('business_trip', $timestampedName, 'public');
+                    // Simpan data ke database
+                    BusinessTripAttachment::create([
+                        'business_trip_id' => $businessTrip->id,
+                        'file_path' => 'business_trip', // Folder tempat file disimpan
+                        'file_name' => $timestampedName, // Nama file dengan timestamp
+                    ]);
+                }
+            }
+
+            // return $this->successResponse("Updated successfully");
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
     }
 
     /**
@@ -401,15 +458,6 @@ class BusinessTripDeclarationController extends Controller
 
     public function storeAPI(Request $request)
     {
-        $rules = [
-            'destination.*' => 'required'
-        ];
-
-        $validator =  Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return $this->errorResponse("erorr", 400, $validator->errors());
-        }
         try {
             DB::beginTransaction();
             $dataBusiness = BusinessTrip::find($request->request_no);
@@ -482,6 +530,7 @@ class BusinessTripDeclarationController extends Controller
                 if (count($data_destination['other']) > 0) {
                     $other = $data_destination['other'][0]['value'];
                 }
+
                 $businessTripDestination = BusinessTripDestination::create([
                     'business_trip_id' => $businessTrip->id,
                     'destination' => $data_destination['destination'],
@@ -531,7 +580,6 @@ class BusinessTripDeclarationController extends Controller
             $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP_DECLARATION');
             DB::commit();
         } catch (\Exception $e) {
-            dd($e);
             DB::rollBack();
         }
     }
