@@ -14,4 +14,4 @@ Schedule::job(new SendApprovalEmailJob())
     ->hourlyAt(0)
     ->between('01:00', '10:00');
 
-Schedule::job(new SendApprovalEmailJob())->everyFiveSeconds();
+// Schedule::job(new SendApprovalEmailJob())->everyFiveSeconds();
