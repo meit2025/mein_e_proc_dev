@@ -577,9 +577,7 @@ export const BussinessTripFormV1 = ({
     }
     // console.log(listDestination, ' get value');
   }, [form.watch('destinations')]);
-
-  const [deletedFiles, setDeletedFiles] = React.useState<number[]>([]); // Simpan index file yang dihapus
-
+  
   // Menandai file untuk dihapus
   const handleDelete = (id: number) => {
     setfileAttachment((prev) => prev.filter((file) => file.id !== id));
