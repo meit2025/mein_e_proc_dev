@@ -115,6 +115,7 @@ Route::group(['prefix' => 'api/'], function () {
             Route::get('/detail-bt/{id}', [BusinessTripDeclarationController::class, 'detailBtDeclareAPI'])->name('business-trip-declaration.detail');
             Route::delete('/delete/{id}', [BusinessTripDeclarationController::class, 'destroy'])->name('business-trip-declaration.destroy');
             Route::post('/update/{id}', [BusinessTripDeclarationController::class, 'update'])->name('business-trip-declaration.update');
+            Route::get('/edit/{id}', [BusinessTripDeclarationController::class, 'edit'])->name('business-trip-declaration.edit');
         });
     });
 

@@ -35,6 +35,7 @@ import {
   CREATE_API_BUSINESS_TRIP_DECLARATION,
   EDIT_API_BUSINESS_TRIP_DECLARATION,
   GET_DETAIL_BUSINESS_TRIP_DECLARATION,
+  GET_EDIT_BUSINESS_TRIP_DECLARATION,
 } from '@/endpoint/business-trip-declaration/api';
 import { AllowanceItemModel, BusinessTripModel, BusinessTripType } from '../models/models';
 import axiosInstance from '@/axiosInstance';
@@ -85,6 +86,10 @@ export const BussinessTripFormV1 = ({
         }),
     ),
     total_destination: z.number().int('Total Destinantion Required'),
+    cash_advance: z.boolean().nullable().optional(),
+    reference_number: z.string().nullable().optional(),
+    total_percent: z.string().nullable().optional(),
+    total_cash_advance: z.string().nullable().optional(),
     destinations: z.array(
       z.object({
         destination: z.string().nonempty('Destinantion Required'),
@@ -133,6 +138,10 @@ export const BussinessTripFormV1 = ({
       remark: '',
       attachment: [],
       total_destination: 1,
+      cash_advance: false,
+      reference_number: '',
+      total_percent: '',
+      total_cash_advance: '0',
       destinations: [
         {
           destination: '',
@@ -183,10 +192,10 @@ export const BussinessTripFormV1 = ({
 
     return totalAll;
   };
-
+  const [otherAllowance, setOtherAllowance] = React.useState<boolean>(false);
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    // console.log(values, ' valuesnya');
+    // console.log(otherAllowance, ' valuesnya');
     try {
       if (type == BusinessTripType.create) {
         const totalAll = getTotalDes();
@@ -209,7 +218,6 @@ export const BussinessTripFormV1 = ({
             'Content-Type': 'multipart/form-data',
           },
         });
-
         showToast('succesfully created data', 'success');
       } else {
         const formDataEdit = new FormData();
@@ -219,11 +227,11 @@ export const BussinessTripFormV1 = ({
             formDataEdit.append(`attachment[${index}]`, file);
           }
         });
-        // fileAttachment.forEach((file: any, index: number) => {
-        //     if (file) {
-        //         formDataEdit.append(`file_existing[${index}]`, JSON.stringify(file));
-        //     }
-        // });
+        fileAttachment.forEach((file: any, index: number) => {
+          if (file) {
+            formDataEdit.append(`file_existing[${index}]`, JSON.stringify(file));
+          }
+        });
         await Inertia.post(`${EDIT_API_BUSINESS_TRIP_DECLARATION}/${id}`, formDataEdit, {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -242,24 +250,22 @@ export const BussinessTripFormV1 = ({
   const [listAllowances, setListAllowances] = React.useState<AllowanceItemModel[]>([]);
   const [listDestination, setListDestination] = React.useState<[]>([]);
 
+  const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
+  console.log(otherAllowance);
   async function handleGetBusinessTrip(value: string) {
     form.setValue('request_no', value || '');
     const url = GET_DETAIL_BUSINESS_TRIP_DECLARATION(value);
 
     try {
       const response = await axiosInstance.get(url);
-      console.log(value, ' get');
       const businessTripData = response.data.data;
-      console.log(businessTripData, ' Response Detail Business Trip');
+      setIsCashAdvance(businessTripData.cash_advance == 1 ? true : false);
       form.setValue('remark', businessTripData.remarks || '');
       form.setValue('total_destination', businessTripData.total_destination || 1);
-
-      //   form.setValue('attachment', businessTripData.attachment || null);
-      //   form.setValue('cash_advance', businessTripData.cash_advance || false);
-      //   form.setValue('total_percent', businessTripData.total_percent || '0');
-      //   form.setValue('total_cash_advance', businessTripData.total_cash_advance || '0');
-      //   form.setValue('destinations', businessTripData.total_cash_advance || '0');
-
+      form.setValue('cash_advance', businessTripData.cash_advance == 1 ? true : false);
+      form.setValue('reference_number', businessTripData.reference_number);
+      form.setValue('total_percent', businessTripData.total_percent);
+      form.setValue('total_cash_advance', businessTripData.total_cash_advance);
       setBusinessTripDetail(response.data.data as BusinessTripModel);
       setListDestination(businessTripData.destinations);
       setTotalDestination(businessTripData.total_destination);
@@ -275,7 +281,7 @@ export const BussinessTripFormV1 = ({
     const valueToInt = parseInt(value);
     setTotalDestination(value);
   };
-  console.log(businessTripDetail, 'businessTripDetail');
+  //   console.log(businessTripDetail, 'businessTripDetail');
 
   function setAllowancesProperty(destinations: any[]) {
     const destinationForm = destinations.map((destination) => ({
@@ -363,6 +369,8 @@ export const BussinessTripFormV1 = ({
   };
 
   const { dataDropdown: dataRequestNo, getDropdown: getdataRequestNo } = useDropdownOptions();
+  const { dataDropdown: dataRequestNoEdit, getDropdown: getdataRequestNoEdit } =
+    useDropdownOptions();
 
   React.useEffect(() => {
     const totalAll = getTotalDes();
@@ -385,13 +393,38 @@ export const BussinessTripFormV1 = ({
 
   const [fileAttachment, setfileAttachment] = React.useState<BusinessTripAttachement[]>([]);
 
-  async function getDetailData() {}
+  async function getDetailData() {
+    form.setValue('destinations', []);
+    const url = GET_EDIT_BUSINESS_TRIP_DECLARATION(id);
+    const response = await axios.get(url);
+    const data = response.data.data;
+    await handleGetBusinessTrip(data.parent_id.toString());
+    setfileAttachment(data.attachments as BusinessTripAttachement[]);
+    try {
+    } catch (e) {
+      const error = e as AxiosError;
+    }
+  }
 
   React.useEffect(() => {
     if (id && type == BusinessTripType.edit) {
       getDetailData();
+      getdataRequestNoEdit('', {
+        name: 'request_no',
+        id: 'id',
+        tabel: 'business_trip',
+        idType: 'string',
+        where: {
+          key: 'type',
+          parameter: 'request',
+        },
+      });
     }
   }, [type]);
+
+  const handleDelete = (id: number) => {
+    setfileAttachment((prev) => prev.filter((file) => file.id !== id));
+  };
 
   return (
     <ScrollArea className='h-[600px] w-full '>
@@ -407,7 +440,13 @@ export const BussinessTripFormV1 = ({
               <td>
                 <FormAutocomplete<any>
                   fieldLabel=''
-                  options={dataRequestNo}
+                  options={
+                    type == BusinessTripType.edit
+                      ? form.watch('request_no')
+                        ? dataRequestNoEdit
+                        : dataRequestNo
+                      : dataRequestNo
+                  }
                   fieldName='request_no'
                   isRequired={true}
                   disabled={
@@ -503,6 +542,33 @@ export const BussinessTripFormV1 = ({
                 />
               </td>
             </tr>
+            {fileAttachment.length > 0 && (
+              <tr>
+                <td width={200}></td>
+                <td className='pb-3'>
+                  {fileAttachment.map((attachment: any, index: number) => (
+                    <div className='flex items-center gap-4'>
+                      <a
+                        href={attachment.url}
+                        target='_blank'
+                        className='text-blue-500 inline-block'
+                        key={index}
+                        rel='noreferrer'
+                      >
+                        {attachment.file_name}
+                      </a>
+                      <button
+                        type='button'
+                        onClick={() => handleDelete(attachment.id)}
+                        className='text-red-500 mt-2 inline-block ml-2 cursor-pointer'
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                </td>
+              </tr>
+            )}
             <tr>
               <td width={200}>File Extension</td>
               <td className='text-gray-500 text-xs font-extralight'>jpg,jpeg,png,pdf</td>
@@ -552,6 +618,12 @@ export const BussinessTripFormV1 = ({
             totalDestination={form.getValues('total_destination').toString()}
             setTotalAllowance={setTotalAllowance}
             businessTripDetail={businessTripDetail}
+            type={type}
+            btEdit={BusinessTripType.edit}
+            setIsCashAdvance={setIsCashAdvance}
+            isCashAdvance={isCashAdvance}
+            setOtherAllowance={setOtherAllowance}
+            otherAllowance={otherAllowance}
           />
           <Separator className='my-4' />
           <ButtonMui
@@ -596,6 +668,12 @@ export function BussinesTripDestination({
   updateDestination,
   setTotalAllowance,
   businessTripDetail,
+  type,
+  btEdit,
+  setIsCashAdvance,
+  isCashAdvance,
+  setOtherAllowance,
+  otherAllowance,
 }: {
   totalDestination: string;
   listAllowances: AllowanceItemModel[];
@@ -604,6 +682,12 @@ export function BussinesTripDestination({
   updateDestination: any;
   setTotalAllowance: any;
   businessTripDetail: any;
+  type: any;
+  btEdit: any;
+  setIsCashAdvance: any;
+  isCashAdvance: any;
+  setOtherAllowance: any;
+  otherAllowance: any;
 }) {
   return (
     <Tabs defaultValue='destination1' className='w-full'>
@@ -622,6 +706,12 @@ export function BussinesTripDestination({
           index={index}
           setTotalAllowance={setTotalAllowance}
           businessTripDetail={businessTripDetail}
+          type={type}
+          btEdit={BusinessTripType.edit}
+          setIsCashAdvance={setIsCashAdvance}
+          isCashAdvance={isCashAdvance}
+          setOtherAllowance={setOtherAllowance}
+          otherAllowance={otherAllowance}
         />
       ))}
     </Tabs>
@@ -636,6 +726,12 @@ export function BussinessDestinationForm({
   listAllowances,
   setTotalAllowance,
   businessTripDetail,
+  type,
+  btEdit,
+  setIsCashAdvance,
+  isCashAdvance,
+  setOtherAllowance,
+  otherAllowance,
 }: {
   form: any;
   index: number;
@@ -644,6 +740,12 @@ export function BussinessDestinationForm({
   listAllowances: any;
   setTotalAllowance: any;
   businessTripDetail: any;
+  type: any;
+  btEdit: any;
+  setIsCashAdvance: any;
+  isCashAdvance: any;
+  setOtherAllowance: any;
+  otherAllowance: any;
 }) {
   const {
     fields: detailAttedanceFields,
@@ -752,8 +854,6 @@ export function BussinessDestinationForm({
     });
   }
 
-  const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
-
   const handleCashAdvanceChange = (value: boolean) => {
     setIsCashAdvance(value);
   };
@@ -814,7 +914,13 @@ export function BussinessDestinationForm({
             <td></td>
           </tr>
         </table>
-        <DetailAllowance allowanceField={allowancesField} destinationIndex={index} form={form} />
+        <DetailAllowance
+          allowanceField={allowancesField}
+          destinationIndex={index}
+          form={form}
+          setOtherAllowance={setOtherAllowance}
+          otherAllowance={otherAllowance}
+        />
       </div>
       {/* disini */}
       {/* <ResultTotalItem
@@ -824,11 +930,104 @@ export function BussinessDestinationForm({
         setTotalAllowance={setTotalAllowance}
       /> */}
 
-      <table className='w-full text-sm mt-10'>
+      {/* <table className='w-full text-sm mt-10'>
         <tr>
-          <td className='w-[20%]'>Cash Advance</td>
+          <td className='w-[20%]'>Ref Number</td>
           <td className='w-[80%] flex'>{allowance}</td>
         </tr>
+        <tr>
+          <td className='w-[20%]'>Total Percent Cash Advance</td>
+          <td className='w-[80%] flex'>{allowance}</td>
+        </tr>
+        <tr>
+          <td className='w-[20%]'>Total Cash Advance</td>
+          <td className='w-[80%] flex'>{allowance}</td>
+        </tr>
+      </table> */}
+      <table className='w-full text-sm mt-10'>
+        <tr>
+          <td className='w-[50%]'>Cash Advance</td>
+          <td className='w-[50%] pb-0'>
+            <FormSwitch
+              fieldName={'cash_advance'}
+              isRequired={false}
+              disabled={true}
+              //   disabled={
+              //     type == BusinessTripType.edit ? (form.watch('cash_advance') ? false : true) : false
+              //   }
+              onChanges={(e) => handleCashAdvanceChange(e.target.checked)}
+            />
+          </td>
+        </tr>
+        {isCashAdvance && (
+          <>
+            <tr>
+              <td className='w-[50%]'>Reference Number</td>
+              <td className='w-[50%]' style={{ paddingBottom: 0 }}>
+                <FormField
+                  control={form.control}
+                  name={'reference_number'}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          className='w-[50%] mb-2'
+                          placeholder='Reference Number'
+                          disabled={true}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td className='w-[50%]'>Total Percent</td>
+              <td className='w-[50%]'>
+                <FormField
+                  control={form.control}
+                  name={'total_percent'}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          value={field.value || undefined}
+                          disabled={true}
+                          onValueChange={(value) => field.onChange(value)}
+                        >
+                          <SelectTrigger className='w-[50%] mb-2'>
+                            <SelectValue placeholder='-- Select Total Percent --' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='10'>10%</SelectItem>
+                            <SelectItem value='25'>25%</SelectItem>
+                            <SelectItem value='50'>50%</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={'total_cash_advance'}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input value={field.value || ''} readOnly={true} className='w-[50%]' />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </td>
+            </tr>
+          </>
+        )}
       </table>
     </TabsContent>
   );
@@ -1070,13 +1269,16 @@ export function DetailAllowance({
   form,
   destinationIndex,
   allowanceField,
+  setOtherAllowance,
+  otherAllowance,
 }: {
   form: any;
   destinationIndex: number;
   allowanceField: any;
+  setOtherAllowance: any;
+  otherAllowance: any;
 }) {
   const detailAllowanceceWatch = form.watch(`destinations[${destinationIndex}].allowances`);
-  console.log('detailAllowanceceWatch', detailAllowanceceWatch);
   React.useEffect(() => {}, [detailAllowanceceWatch]);
 
   // Field array untuk menyimpan other allowances
