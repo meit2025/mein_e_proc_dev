@@ -1,0 +1,1 @@
+* * * * * root cd /var/www/html/mein && php artisan schedule:run >> /var/www/html/mein/storage/logs/cron.log 2>&1
