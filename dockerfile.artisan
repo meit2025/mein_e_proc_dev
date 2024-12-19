@@ -1,0 +1,32 @@
+FROM php:8.2-fpm-alpine
+
+# Install dependencies
+RUN apk --no-cache add \
+    bash \
+    git \
+    dcron \
+    supervisor \
+    && apk add --no-cache --virtual .build-deps \
+    libzip-dev \
+    && docker-php-ext-install zip \
+    && apk del .build-deps
+
+# Salin project Laravel ke container
+WORKDIR /var/www/html/mein
+COPY . .
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
+
+
+# Salin konfigurasi supervisor
+COPY ./docker/supervisord.conf /etc/supervisord.conf
+
+# Salin cron file
+COPY ./docker/laravel-cron /etc/cron.d/laravel-cron
+
+# Berikan hak akses pada cron job
+RUN chmod 0644 /etc/cron.d/laravel-cron && crontab /etc/cron.d/laravel-cron
+
+# Jalankan supervisor di background
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]
