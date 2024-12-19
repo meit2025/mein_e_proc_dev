@@ -37,11 +37,17 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
       );
 
       const dataVendor = dataVendorArray.length > 0 ? dataVendorArray[0] : null;
-      const winnerUnit = dataVendor.units || [];
+
+      if (dataVendor === null || dataVendor === undefined) {
+        setLoading(false);
+        showToast('Please Select Vendor Winner', 'error');
+        return;
+      }
+
+      const winnerUnit = dataVendor?.units || [];
       const totalSum = winnerUnit.reduce((sum: number, item: any) => sum + item.total_amount, 0);
       setValue('total_all_amount', totalSum);
 
-      console.log(getData);
       if (getData.document_type === null || getData.document_type === undefined) {
         setLoading(false);
         showToast('Please input Document Type', 'error');

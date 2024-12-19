@@ -12,6 +12,7 @@ import DataGridComponent from '@/components/commons/DataGrid';
 import { DataGrid } from '@mui/x-data-grid';
 import { columnsItem } from './listModel';
 import { Link } from '@inertiajs/react';
+import { useAlert } from '@/contexts/AlertContext';
 
 const ArrayForm = ({
   dataIndex,
@@ -35,6 +36,7 @@ const ArrayForm = ({
   const { dataDropdown: dataUom, getDropdown: getUom } = useDropdownOptions();
   const { dataDropdown: dataIo, getDropdown: getIo } = useDropdownOptions();
   const { dataDropdown: dataMainAsset, getDropdown: getMainAssetNumber } = useDropdownOptions();
+  const { showToast } = useAlert();
 
   //   const [value, setValue] = useState(0);
 
@@ -152,7 +154,13 @@ const ArrayForm = ({
     ); // get the vendor data
 
     const dataVendor = dataVendorArray.length > 0 ? dataVendorArray[0] : null;
+
+    if (dataVendor === null || dataVendor === undefined) {
+      showToast('Please Select Vendor Winner', 'error');
+      return;
+    }
     const winnerUnit = dataVendor.units || [];
+
     const totalSum = winnerUnit.reduce((sum: number, item: any) => sum + item.total_amount, 0);
 
     // Simpan array baru ke React Hook Form state
