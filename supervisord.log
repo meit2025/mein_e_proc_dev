@@ -80,3 +80,24 @@
 2024-12-19 02:40:44,936 INFO gave up: reverb entered FATAL state, too many start retries too quickly
 2024-12-19 02:40:44,947 WARN exited: queue (exit status 1; not expected)
 2024-12-19 02:40:45,954 INFO gave up: queue entered FATAL state, too many start retries too quickly
+2024-12-22 01:43:05,837 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-12-22 01:43:05,840 INFO supervisord started with pid 1
+2024-12-22 01:43:06,842 INFO spawnerr: can't find command 'cron'
+2024-12-22 01:43:06,856 INFO spawned: 'queue' with pid 13
+2024-12-22 01:43:06,866 INFO spawned: 'reverb' with pid 14
+2024-12-22 01:43:08,010 INFO spawnerr: can't find command 'cron'
+2024-12-22 01:43:08,011 INFO success: queue entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-22 01:43:08,011 INFO success: reverb entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-22 01:43:08,167 WARN exited: reverb (exit status 1; not expected)
+2024-12-22 01:43:08,195 INFO spawned: 'reverb' with pid 20
+2024-12-22 01:43:08,205 WARN exited: queue (exit status 1; not expected)
+2024-12-22 01:43:08,207 INFO spawned: 'queue' with pid 21
+2024-12-22 01:43:08,732 WARN exited: reverb (exit status 1; not expected)
+2024-12-22 01:43:08,757 WARN exited: queue (exit status 1; not expected)
+2024-12-22 01:43:09,759 INFO spawned: 'queue' with pid 28
+2024-12-22 01:43:09,761 INFO spawned: 'reverb' with pid 29
+2024-12-22 01:43:10,315 INFO spawnerr: can't find command 'cron'
+2024-12-22 01:43:10,322 WARN exited: reverb (exit status 1; not expected)
+2024-12-22 01:43:10,348 WARN exited: queue (exit status 1; not expected)
+2024-12-22 01:43:12,353 INFO spawned: 'queue' with pid 35
+2024-12-22 01:43:12,355 INFO spawned: 'reverb' with pid 36

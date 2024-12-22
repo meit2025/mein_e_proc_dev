@@ -159,6 +159,7 @@ class ApprovalController extends Controller
 
     public  function ApprovalOrRejceted(Request $request)
     {
+        DB::beginTransaction();
         try {
             Approval::where('id', $request->approvalId)->where('document_id',  $request->id)
                 ->update([
@@ -171,11 +172,12 @@ class ApprovalController extends Controller
                 $request->id,
                 $request->function_name,
                 'INFO',
-                $request->status . ' Procurement ' . Auth::user()->name . ' Pada Tanggal ' . $this->DateTimeNow(),
+                $request->status . ' Dokument ' . Auth::user()->name . ' Pada Tanggal ' . $this->DateTimeNow(),
                 $request->note
             );
 
             $ceksedSap = Approval::where('is_status', false)->where('document_id', $request->id)->get();
+
             if ($request->status == 'Rejected') {
                 if ($request->type == 'procurement') {
                     Purchase::where('id', $request->id)->update(['status_id' => 4]);
@@ -193,12 +195,33 @@ class ApprovalController extends Controller
                     BusinessTrip::where('id', $request->id)->update(['status_id' => 4]);
                 }
             }
+
+            if ($request->status == 'Revise') {
+
+                if ($request->type == 'procurement') {
+
+                    Purchase::where('id', $request->id)->update(['status_id' => 6]);
+                }
+
+                if ($request->type == 'reim') {
+                    ReimburseGroup::where('id', $request->id)->update(['status_id' => 6]);
+                }
+
+                if ($request->type == 'trip') {
+                    BusinessTrip::where('id', $request->id)->update(['status_id' => 6]);
+                }
+
+                if ($request->type == 'trip_declaration') {
+                    BusinessTrip::where('id', $request->id)->update(['status_id' => 6]);
+                }
+            }
+
             if ($ceksedSap->count() == 0 && $request->status == 'Approved') {
-                
+
                 if ($request->type == 'procurement') {
                     Purchase::where('id', $request->id)->update(['status_id' => 5]);
                 }
-                
+
                 if ($request->type == 'reim') {
                     ReimburseGroup::where('id', $request->id)->update(['status_id' => 5]);
                 }
@@ -236,11 +259,13 @@ class ApprovalController extends Controller
 
                 SapJobs::dispatch($request->id, $dokumnetType);
             }
-            
+
+            DB::commit();
             return $this->successResponse($request->all());
             //code...
         } catch (\Throwable $th) {
             //throw $th;
+            DB::rollBack();
             return $this->errorResponse($th->getMessage());
         }
     }

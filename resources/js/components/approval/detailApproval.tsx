@@ -7,7 +7,11 @@ import { useForm, useFormContext } from 'react-hook-form';
 
 const DetailApproval = ({ methods }: { methods: ReturnType<typeof useForm> }) => {
   return (
-    <>
+    <div
+      style={{
+        marginTop: '20px',
+      }}
+    >
       <WorkflowComponent
         workflowApproval={{
           approvalRequest: methods.getValues('approvalRequest') ?? [],
@@ -21,7 +25,7 @@ const DetailApproval = ({ methods }: { methods: ReturnType<typeof useForm> }) =>
           methods.getValues('approvalFrom') as unknown as WorkflowApprovalDiagramInterface
         }
       />
-    </>
+    </div>
   );
 };
 

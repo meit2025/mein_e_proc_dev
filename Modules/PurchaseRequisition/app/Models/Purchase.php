@@ -21,7 +21,6 @@ class Purchase extends Model
         'user_id',
         'document_type',
         'purchasing_groups',
-        // 'account_assignment_categories',
         'delivery_date',
         'storage_locations',
         'total_vendor',
@@ -51,6 +50,11 @@ class Purchase extends Model
     public function purchaseRequisitions()
     {
         return $this->hasMany(PurchaseRequisition::class);
+    }
+
+    public function attachment()
+    {
+        return $this->hasMany(AttachmentPurchaseRequisition::class);
     }
 
     public function entertainment()

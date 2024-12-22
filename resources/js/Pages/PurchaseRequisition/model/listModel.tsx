@@ -1,5 +1,6 @@
 import { CustomStatus } from '@/components/commons/CustomStatus';
 import { DETAIL_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 import { Link } from '@inertiajs/react';
 import { GridColDef } from '@mui/x-data-grid';
 export const columns: GridColDef[] = [
@@ -80,6 +81,9 @@ export const columnsItem: GridColDef[] = [
     headerName: 'Total Amount ',
     width: 200,
     filterable: false,
+    renderCell: (params) => {
+      return formatRupiah(params.row.total_amount);
+    },
   },
   {
     field: 'account_assignment_categories',
@@ -140,5 +144,54 @@ export const columnsItem: GridColDef[] = [
     headerName: 'Sub Asset Number',
     width: 200,
     filterable: false,
+  },
+];
+
+export const columnsAttachment: GridColDef[] = [
+  {
+    field: 'file_name',
+    headerName: 'Name',
+    width: 400,
+    filterable: false,
+  },
+  {
+    field: 'file_path',
+    headerName: 'File',
+    width: 200,
+    filterable: false,
+    renderCell: (params) => {
+      const handleDownload = () => {
+        const fileData = params.value; // filePath atau Base64
+        const fileName = params.row.file_name || 'download';
+
+        if (fileData.startsWith('data:')) {
+          // Jika Base64, buat Blob dan unduh
+          const blob = new Blob([atob(fileData.split(',')[1])], {
+            type: fileData.split(';')[0].split(':')[1],
+          });
+          const blobUrl = URL.createObjectURL(blob);
+
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = fileName;
+          link.click();
+
+          // Hapus URL sementara
+          URL.revokeObjectURL(blobUrl);
+        } else {
+          // Jika URL filePath, langsung unduh
+          const link = document.createElement('a');
+          link.href = fileData;
+          link.download = fileName;
+          link.click();
+        }
+      };
+
+      return (
+        <button onClick={handleDownload} type='button' className='text-blue-500 underline'>
+          Download
+        </button>
+      );
+    },
   },
 ];

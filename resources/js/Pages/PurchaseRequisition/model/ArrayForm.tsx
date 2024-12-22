@@ -1,14 +1,11 @@
 import FormAutocomplete from '@/components/Input/formDropdown';
 import FormInput from '@/components/Input/formInput';
 import useDropdownOptions from '@/lib/getDropdown';
-import { Box, Button, Tab, Tabs } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { a11yProps, TabPanel } from './itemForm';
+import { Box, Button } from '@mui/material';
+import { useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
-import ArrayItem from './ArrayItem';
 import FormSwitch from '@/components/Input/formSwitch';
 import FormTextArea from '@/components/Input/formTextArea';
-import DataGridComponent from '@/components/commons/DataGrid';
 import { DataGrid } from '@mui/x-data-grid';
 import { columnsItem } from './listModel';
 import { Link } from '@inertiajs/react';
@@ -38,22 +35,12 @@ const ArrayForm = ({
   const { dataDropdown: dataMainAsset, getDropdown: getMainAssetNumber } = useDropdownOptions();
   const { showToast } = useAlert();
 
-  //   const [value, setValue] = useState(0);
-
-  //   const handleChange = (event: any, newValue: number) => {
-  //     setValue(newValue);
-  //   };
-
   // Watch the 'total_vendor' value
-  const watchData = useWatch({ name: 'total_item' });
   const dataArrayItem = watch(`vendors[${dataIndex}].units`);
 
   const watchAccountAssigment = useWatch({ name: 'item_account_assignment_categories' });
 
   const watchDocumentType = useWatch({ name: 'document_type' });
-  const watchIsCashAdvance = useWatch({ name: 'item_is_cashAdvance' });
-
-  const tabCount = watchData > 0 ? watchData : 1;
 
   useEffect(() => {
     getCostCenter('', { name: 'desc', id: 'cost_center', tabel: 'master_cost_centers' });
@@ -128,15 +115,6 @@ const ArrayForm = ({
       order_number: dataobj.item_order_number,
       asset_number: dataobj.item_asset_number,
       sub_asset_number: dataobj.item_sub_asset_number,
-      //   is_cashAdvance: dataobj.item_is_cashAdvance,
-      //   cash_advance_purchases: {
-      //     dp: dataobj.item_dp,
-      //     reference: dataobj.item_reference,
-      //     document_header_text: dataobj.item_document_header_text,
-      //     document_date: dataobj.item_document_date,
-      //     due_on: dataobj.item_due_on,
-      //     text: dataobj.item_text_cash_advance,
-      //   },
     };
 
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
@@ -189,14 +167,6 @@ const ArrayForm = ({
     setValue('item_tax', '');
     setValue('item_unit_price', '');
     setValue('item_uom', '');
-
-    // setValue('cash_advance_purchases', null);
-    // setValue('item_document_header_text', '');
-    // setValue('item_document_date', '');
-    // setValue('item_text_cash_advance', '');
-    // setValue('item_reference', '');
-    // setValue('item_dp', '');
-    // setValue('item_due_on', '');
   };
 
   const handelEdit = (data: any, rowIndex: any) => {
@@ -221,14 +191,6 @@ const ArrayForm = ({
     setValue('item_tax', data.tax ?? '');
     setValue('item_unit_price', data.unit_price ?? '0');
     setValue('item_uom', data.uom ?? '');
-
-    // setValue('item_is_cashAdvance', data.cash_advance_purchases?.reference !== null ? true : false);
-    // setValue('item_reference', data.cash_advance_purchases?.reference ?? '');
-    // setValue('item_dp', data.cash_advance_purchases?.dp ?? '');
-    // setValue('item_due_on', data.cash_advance_purchases?.due_on ?? '');
-    // setValue('item_text_cash_advance', data.cash_advance_purchases?.text ?? '');
-    // setValue('item_document_date', data.cash_advance_purchases?.document_date ?? '');
-    // setValue('item_document_header_text', data.cash_advance_purchases?.document_header_text ?? '');
   };
 
   const handleDelete = (data: any, rowIndex: any) => {
