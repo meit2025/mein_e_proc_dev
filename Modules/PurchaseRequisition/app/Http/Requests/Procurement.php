@@ -40,6 +40,7 @@ class Procurement extends FormRequest
             'vendors.*.units.*.total_amount' => 'required|numeric|min:0',
             'vendors.*.units.*.tax' => 'required|string',
             'vendors.*.units.*.short_text' => 'nullable|string|max:255',
+            'attachment' => 'required|array',
         ];
     }
 

@@ -21,6 +21,7 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
     approvalRequest: [],
     approvalFrom: [],
     acknowledgeFrom: [],
+    approvalFromStatusRoute: [],
   });
   const { dataDropdown, getDropdown } = useDropdownOptions();
 
@@ -107,10 +108,19 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
         const approvalFrom = response.data?.data?.approval_route.map(
           (route: any) => route.user.name,
         );
+        const approvalFromStatusRoute = (response.data?.data?.approval ?? []).map((route: any) => {
+          return {
+            status: '',
+            name: route.user.name,
+            dateApproved: '',
+          };
+        });
+
         setApprovalRoute({
           approvalRequest,
           approvalFrom,
           acknowledgeFrom: [],
+          approvalFromStatusRoute: approvalFromStatusRoute,
         });
         setIsShow(true);
       }
@@ -203,7 +213,7 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
                 acknowledgeFrom: approvalRoute.acknowledgeFrom,
               }}
               workflowApprovalStep={
-                approvalRoute.approvalFrom as unknown as WorkflowApprovalStepInterface
+                approvalRoute.approvalFromStatusRoute as unknown as WorkflowApprovalStepInterface
               }
               workflowApprovalDiagram={
                 approvalRoute.approvalFrom as unknown as WorkflowApprovalDiagramInterface

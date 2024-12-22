@@ -77,6 +77,7 @@ const PrDetail = ({ id }: { id: number }) => {
             status: route.status,
             name: route.user.name,
             dateApproved: moment(route.updated_at).format('YYYY-MM-DD'),
+            note: route.message,
           };
         });
 
