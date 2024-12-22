@@ -1,1 +1,0 @@
-const I="/api/business-trip-declaration",E=`${I}/list`,T=`${I}/create`,s=`${I}/update`,t=_=>`${I}/detail/${_}`,A=_=>`${I}/detail-bt/${_}`,S=`${I}/delete`;export{T as C,S as D,s as E,t as G,A as a,E as b};
