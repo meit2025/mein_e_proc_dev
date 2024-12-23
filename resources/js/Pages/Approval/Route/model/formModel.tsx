@@ -27,10 +27,6 @@ export const formModel: Array<FormFieldModel<any>> = [
         label: 'Start',
         value: 'start',
       },
-      {
-        label: 'End',
-        value: 'end',
-      },
     ],
     required: true,
     style: {

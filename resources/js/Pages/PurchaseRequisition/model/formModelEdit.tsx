@@ -2,6 +2,7 @@ import { FormFieldModel } from '@/interfaces/form/formWrapper';
 import ItemForm from './itemForm';
 import DetailApproval from '../../../components/approval/detailApproval';
 import CashAdvance from './CashAdvance';
+import Attachment from './attachment';
 
 export const formModelEdit: Array<FormFieldModel<any>> = [
   {
@@ -200,6 +201,10 @@ export const formModelEdit: Array<FormFieldModel<any>> = [
     required: true,
     texttype: 'number',
     placeholder: 'enter your Total Vendor',
+  },
+  {
+    fieldCustome: true,
+    fieldCustomeValue: <Attachment isDisabled={true} />,
   },
   {
     fieldCustome: true,

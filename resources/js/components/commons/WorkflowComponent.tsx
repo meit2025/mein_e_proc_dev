@@ -110,14 +110,18 @@ export function WorkflowApprovalStep({
                   <td>{item.name}</td>
                   <td>
                     {item.status === 'Approved' && <CheckCircleIcon style={{ color: 'green' }} />}
-                    {item.status === 'Rejected' && <CancelIcon style={{ color: 'red' }} />}
+                    {(item.status === 'Rejected' || item.status === 'Revise') && (
+                      <CancelIcon style={{ color: 'red' }} />
+                    )}
                     {item.status === 'Waiting' && <RemoveCircleIcon style={{ color: 'orange' }} />}
                   </td>
                   <td>
-                    {(item.status === 'Approved' || item.status === 'Rejected') &&
+                    {(item.status === 'Approved' ||
+                      item.status === 'Rejected' ||
+                      item.status === 'Revise') &&
                       item.dateApproved}
                   </td>
-                  <td>{item.status !== '' && item.note}</td>
+                  <td>{item.note}</td>
                 </tr>
               );
             },

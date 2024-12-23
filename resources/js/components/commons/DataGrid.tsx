@@ -22,6 +22,7 @@ import { User } from '@/Pages/Layouts/Header';
 import { Tab, Tabs } from '@mui/material';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { Edit, Trash2Icon } from 'lucide-react';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 interface UrlDataGrid {
     url: string;
@@ -29,6 +30,7 @@ interface UrlDataGrid {
     editUrl?: string;
     deleteUrl?: string;
     detailUrl?: string;
+    clone?: string;
 }
 
 interface RolesDataGrid {
@@ -46,10 +48,10 @@ interface DataGridProps {
     buttonCustome?: ReactNode;
     defaultSearch?: string;
     onExport?: (filter: string) => Promise<void> | void;
-    onExportPdf?: (filter: string) => Promise<void> | void;
     onEdit?: (id: number) => Promise<void> | void;
     onDelete?: (id: number) => Promise<void> | void;
     onDetail?: (id: number) => Promise<void> | void;
+    onClone?: (id: number) => Promise<void> | void;
     onCreate?: () => Promise<void> | void;
     actionType?: string;
     buttonActionCustome?: ReactNode;
@@ -69,13 +71,13 @@ const DataGridComponent: React.FC<DataGridProps> = ({
     columns,
     buttonCustome,
     onExport,
-    onExportPdf,
     url,
     labelFilter = 'Search', // Default label filter
     onEdit,
     onDelete,
     onDetail,
     onCreate,
+    onClone,
     defaultSearch,
     actionType,
     buttonActionCustome,
@@ -116,7 +118,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
             setLoading(true);
 
             const sortBy = sortModel.length > 0 ? sortModel[0].field : 'id';
-            const sortDirection = sortModel.length > 0 ? sortModel[0].sort : 'asc';
+            const sortDirection = sortModel.length > 0 ? sortModel[0].sort : 'desc';
 
             const filterParams = filterModel.items
                 .map((item) => `${item.field}=${item.operator},${item.value}`)
@@ -274,6 +276,24 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                                             )}
                                         </>
                                     )}
+                                    {(onClone || url.clone) && (
+                                        <>
+                                            {(!role || permissions.includes(role?.create ?? '')) && (
+                                                <Link
+                                                    href={url.clone === '' ? '#' : `${url.clone}/${params.row.id}`}
+                                                    onClick={(e) => {
+                                                        if (onClone) {
+                                                            e.preventDefault();
+                                                            onClone && onClone(params.row.id);
+                                                        }
+                                                    }}
+                                                    alt='detail'
+                                                >
+                                                    <i className=' ki-filled ki-copy text-warning text-2xl'></i>
+                                                </Link>
+                                            )}
+                                        </>
+                                    )}
 
                                     {(onEdit || url.editUrl) && value === 0 && (
                                         <>
@@ -400,19 +420,6 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                                                 style={{ marginBottom: '10px' }} // Add margin for spacing
                                             >
                                                 Export TXT
-                                            </Button>
-                                        )}
-
-                                        {onExportPdf && (
-                                            <Button
-                                                className='btn'
-                                                variant='contained'
-                                                onClick={() => onExportPdf(onStateFilter)}
-                                                color='warning'
-                                                startIcon={<i className='ki-filled ki-folder-down' />}
-                                                style={{ marginBottom: '10px' }} // Add margin for spacing
-                                            >
-                                                Export PDF
                                             </Button>
                                         )}
 

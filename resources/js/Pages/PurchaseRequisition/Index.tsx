@@ -3,7 +3,12 @@ import { ReactNode } from 'react';
 import DataGridComponent from '@/components/commons/DataGrid';
 import { DELET_PR, GET_PR } from '@/endpoint/purchaseRequisition/api';
 import { columns } from './model/listModel';
-import { CREATE_PAGE_PR, DETAIL_PAGE_PR, EDIT_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
+import {
+  CLONE_PAGE_PR,
+  CREATE_PAGE_PR,
+  DETAIL_PAGE_PR,
+  EDIT_PAGE_PR,
+} from '@/endpoint/purchaseRequisition/page';
 
 const roleAkses = 'purchase requisition';
 const roleConfig = {
@@ -19,6 +24,7 @@ export const Index = () => {
     editUrl: EDIT_PAGE_PR,
     deleteUrl: DELET_PR,
     detailUrl: DETAIL_PAGE_PR,
+    clone: CLONE_PAGE_PR,
   };
 
   const data = async (data: string) => {

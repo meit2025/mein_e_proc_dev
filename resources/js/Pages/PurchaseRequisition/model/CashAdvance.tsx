@@ -93,6 +93,7 @@ const CashAdvance = ({ disable }: { disable: boolean }) => {
             disabled={true}
             type={'number'}
             placeholder={'Enter amount cashadvance'}
+            isRupiah={true}
           />
         </>
       )}

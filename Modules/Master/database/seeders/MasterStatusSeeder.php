@@ -32,13 +32,13 @@ class MasterStatusSeeder extends Seeder
             ],
             [
                 "id" => 3,
-                "name" => 'Approve To :name',
+                "name" => 'Approve',
                 'code' => 'approve_to',
                 'classname' => 'bg-green-100 text-green-600 border-green-600'
             ],
             [
                 "id" => 4,
-                "name" => 'Reject To :name',
+                "name" => 'Reject',
                 'code' => 'reject_to',
                 'classname' => 'bg-red-100 text-red-600 border-red-600'
             ],
@@ -47,6 +47,12 @@ class MasterStatusSeeder extends Seeder
                 "name" => 'Fully Approve',
                 'code' => 'fully_approve',
                 'classname' => 'bg-green-100 text-green-600 border-green-600'
+            ],
+            [
+                "id" => 6,
+                "name" => 'Revise',
+                'code' => 'revise',
+                'classname' => 'bg-red-100 text-red-600 border-red-600'
             ],
 
         ];
@@ -58,11 +64,14 @@ class MasterStatusSeeder extends Seeder
 
 
             if (!$check) {
-                MasterStatus::create([
-                    'code' => $dat['code'],
-                    'name' => $dat['name'],
-                    'classname' => $dat['classname']
-                ]);
+                MasterStatus::create(
+                    [
+                        'id' => $dat['id'],
+                        'code' => $dat['code'],
+                        'name' => $dat['name'],
+                        'classname' => $dat['classname']
+                    ]
+                );
             }
         }
     }

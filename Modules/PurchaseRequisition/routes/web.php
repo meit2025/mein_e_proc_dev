@@ -21,9 +21,15 @@ Route::group(['middleware' => 'auth'], function () {
     Route::group(['prefix' => 'purchase-requisition'], function () {
         Route::inertia('/',  'PurchaseRequisition/Index')->middleware(PermissionMiddleware::class . ':purchase requisition view');
         Route::inertia('/create',  'PurchaseRequisition/Create')->middleware(PermissionMiddleware::class . ':purchase requisition create');
+
+        Route::inertia('/clone/{id}',  'PurchaseRequisition/Clone', [
+            'id' => fn() => request()->route('id'),
+        ])->middleware(PermissionMiddleware::class . ':purchase requisition create');
+
         Route::inertia('/update/{id}',  'PurchaseRequisition/Update', [
             'id' => fn() => request()->route('id'),
         ])->middleware(PermissionMiddleware::class . ':purchase requisition update');
+
         Route::inertia('/detail/{id}',  'PurchaseRequisition/Detail', [
             'id' => fn() => request()->route('id'),
         ])->middleware(PermissionMiddleware::class . ':purchase requisition view');
