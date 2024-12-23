@@ -38,16 +38,14 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
 
             // Kirim permintaan ke endpoint dengan filter
             const response = await axiosInstance.get(REPORT_BT_DEC_EXPORT + data, {
+                responseType: "blob"
             });
-
-            console.log(response);
-
 
             // Membuat file dari respons
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', 'Business_Trip_Declaration_Report.csv'); // Nama file
+            link.setAttribute('download', 'Business_Trip_Declarations.xlsx'); // Nama file
             document.body.appendChild(link);
             link.click();
 
