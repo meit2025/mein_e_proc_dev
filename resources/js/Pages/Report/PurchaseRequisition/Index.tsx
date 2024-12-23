@@ -19,17 +19,17 @@ export const Index = () => {
 
     const exporter = async (data: string) => {
         try {
-            console.log(data);
 
             // Kirim permintaan ke endpoint dengan filter
             const response = await axiosInstance.get(REPORT_PURCHASE_EXPORT + data, {
+                responseType: "blob"
             });
 
             // Membuat file dari respons
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', 'Purchase_Report.csv'); // Nama file
+            link.setAttribute('download', 'Purchase_Requisition_Report.xlsx'); // Nama file
             document.body.appendChild(link);
             link.click();
 

@@ -70,22 +70,20 @@ export const Index = ({
 
     const { showToast } = useAlert();
 
-    const exporter = async (data: string) => {
+    const exporter = async (data: string, pdf: boolean) => {
         try {
             console.log(data);
 
             // Kirim permintaan ke endpoint dengan filter
-            const response = await axiosInstance.get(REPORT_REIMBURSE_EXPORT + data, {
+            const response = await axiosInstance.get(REPORT_REIMBURSE_EXPORT + data + '&pdf=' + pdf, {
+                responseType: "blob"
             });
-
-            console.log(response);
-
 
             // Membuat file dari respons
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', 'Reimburse_Report.csv'); // Nama file
+            link.setAttribute('download', 'Reimburse_Report.xlsx'); // Nama file
             document.body.appendChild(link);
             link.click();
 
@@ -106,7 +104,8 @@ export const Index = ({
 
             <DataGridComponent
                 isHistory={false}
-                onExport={async (x: string) => await exporter(x)}
+                onExport={async (x: string) => await exporter(x, false)}
+                // onExportPdf={async (x: string) => await exporter(x, true)}
                 role={roleConfig}
                 columns={columns}
                 url={{
