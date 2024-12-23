@@ -62,6 +62,7 @@ export default function ReimburseTypeForm({
     name: z.string().min(1, 'Name is required'),
     is_employee: z.boolean(),
     family_status: z.string().optional(),
+    interval_claim_period: z.number().nullable(),
     limit: z.number(),
     material_group: z.number().refine((val) => val > 0, {
       message: 'Material Group must be chosen',
@@ -75,15 +76,25 @@ export default function ReimburseTypeForm({
       z.object({
         grade: z.string(),
         id: z.number(),
-        plafon: z.string().min(1, 'balance required'),
+        plafon: z.string().min(1, 'Balance required'),
       }),
     ),
   });
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [keySearchMaterialGroup, setKeySearchMaterialGroup] = React.useState('');
   const { dataDropdown: dataMaterialGroup, getDropdown: getMaterialGroup } = useDropdownOptions();
   const { dataDropdown: dataMaterialNumber, getDropdown: getMaterialNumber } = useDropdownOptions();
+  const dayOnYear = 365;
+  const dataIntervalClaimPeriod = [
+    {
+      label: '1 Year',
+      value: dayOnYear * 1
+    },
+    {
+      label: '2 Year',
+      value: dayOnYear * 2
+    }
+  ];
 
   const defaultValues = {
     code: '',
@@ -91,11 +102,12 @@ export default function ReimburseTypeForm({
     material_group: null,
     material_number: null,
     family_status: '',
+    interval_claim_period: null,
     is_employee: true,
     grade_option: 'all',
     grade_all_price: '0',
     grades: [],
-    limit: 0, // Pastikan semua properti ada jika diperlukan
+    limit: 0,
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -114,6 +126,7 @@ export default function ReimburseTypeForm({
         limit: data.limit,
         is_employee: data.is_employee,
         family_status: data.family_status,
+        interval_claim_period: data.interval_claim_period ? parseInt(data.interval_claim_period) : null,
         material_group: parseInt(data.material_group.id),
         material_number: parseInt(data.material_number),
         grade_option: data.grade_option,
@@ -391,11 +404,11 @@ export default function ReimburseTypeForm({
                       onSelect={(value) => {
                         form.setValue(
                           'grades',
-                          value.map((item: any) => {
+                          value.map((item: any, key: any) => {
                             return {
                               id: item.id,
                               grade: item.grade,
-                              plafon: 0,
+                              plafon: form.getValues('grades')?.[item]?.plafon || '0',
                             };
                           }),
                         );
@@ -414,27 +427,27 @@ export default function ReimburseTypeForm({
                           <td>
                             <div>
                               <FormField
-                                  control={form.control}
-                                  name={`grades.${gradeIndex}.plafon`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormControl>
-                                        <Input
-                                          type='text'
-                                          placeholder='0'
-                                          onChange={(e) => {
-                                            const rawValue = e.target.value.replace(/[^0-9]/g, '');
-                                            const formattedValue = formatRupiah(rawValue, false);
-                                            field.onChange(rawValue);
-                                            e.target.value = formattedValue;
-                                          }}
-                                          value={formatRupiah(field.value, false)}
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
+                                control={form.control}
+                                name={`grades.${gradeIndex}.plafon`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Input
+                                        type='text'
+                                        placeholder='0'
+                                        onChange={(e) => {
+                                          const rawValue = e.target.value.replace(/[^0-9]/g, '');
+                                          const formattedValue = formatRupiah(rawValue, false);
+                                          field.onChange(rawValue);
+                                          e.target.value = formattedValue;
+                                        }}
+                                        value={formatRupiah(field.value, false)}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
                             </div>
                           </td>
                         </tr>
@@ -442,6 +455,19 @@ export default function ReimburseTypeForm({
                     </table>
                   </div>
                 ) : null}
+              </td>
+            </tr>
+
+            <tr>
+              <td width={200}>Interval Claim Period</td>
+              <td>
+                <FormAutocomplete<any>
+                  options={dataIntervalClaimPeriod}
+                  fieldName='interval_claim_period'
+                  placeholder={'Select Interval'}
+                  classNames='mt-2 w-full'
+                  fieldLabel={''}
+                />
               </td>
             </tr>
 
