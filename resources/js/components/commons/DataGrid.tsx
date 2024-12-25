@@ -29,6 +29,7 @@ interface UrlDataGrid {
   editUrl?: string;
   deleteUrl?: string;
   detailUrl?: string;
+  cloneUrl?: string;
 }
 
 interface RolesDataGrid {
@@ -50,6 +51,7 @@ interface DataGridProps {
   onDelete?: (id: number) => Promise<void> | void;
   onDetail?: (id: number) => Promise<void> | void;
   onCreate?: () => Promise<void> | void;
+  onClone?: (id: number) => Promise<void> | void;
   actionType?: string;
   buttonActionCustome?: ReactNode;
   deleteConfirmationText?: string;
@@ -74,6 +76,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   onDelete,
   onDetail,
   onCreate,
+  onClone,
   defaultSearch,
   actionType,
   buttonActionCustome,
@@ -172,9 +175,11 @@ const DataGridComponent: React.FC<DataGridProps> = ({
     onEdit ||
     onDelete ||
     onDetail ||
+    onClone ||
     url.detailUrl ||
     url.editUrl ||
     url.deleteUrl ||
+    url.cloneUrl ||
     buttonActionCustome
       ? [
           {
@@ -287,6 +292,25 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                             alt='edit'
                           >
                             <i className=' ki-duotone ki-notepad-edit text-success text-2xl'></i>
+                          </Link>
+                        )}
+                      </>
+                    )}
+
+                    {(onClone || url.cloneUrl) && value === 0 && (
+                      <>
+                        {(!role || permissions.includes(role?.update ?? '')) && (
+                          <Link
+                            href={url.cloneUrl === '' ? '#' : `${url.cloneUrl}/${params.row.id}`}
+                            onClick={(e) => {
+                              if (onClone) {
+                                e.preventDefault();
+                                onClone && onClone(params.row.id);
+                              }
+                            }}
+                            alt='clone'
+                          >
+                            <i className=' ki-duotone ki-note text-success text-2xl'></i>
                           </Link>
                         )}
                       </>

@@ -1,9 +1,9 @@
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import DataGridComponent from '@/components/commons/DataGrid';
 import { DELET_API_BUSINESS_TRIP, GET_LIST_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
-import { DETAIL_PAGE_BUSINESS_TRIP } from '@/endpoint/business-trip/page';
+import { DETAIL_PAGE_BUSINESS_TRIP, EDIT_PAGE_BUSINESS_TRIP } from '@/endpoint/business-trip/page';
 import MainLayout from '@/Pages/Layouts/MainLayout';
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import React, { ReactNode } from 'react';
 import { DestinationModel } from '../Destination/models/models';
 import { PurposeTypeModel } from '../PurposeType/models/models';
@@ -58,8 +58,8 @@ export const Index = ({
 
   function openFormHandler() {
     setBusinessTripForm({
-        type: BusinessTripType.create,
-        id: null,
+      type: BusinessTripType.create,
+      id: null,
     });
     setOpenForm(!openForm);
   }
@@ -113,9 +113,18 @@ export const Index = ({
           });
           setOpenForm(true);
         }}
+        onClone={(value) => {
+          setBusinessTripForm({
+            type: BusinessTripType.clone,
+            id: value.toString(),
+          });
+          setOpenForm(true);
+        }}
         url={{
           url: GET_LIST_BUSINESS_TRIP,
           detailUrl: DETAIL_PAGE_BUSINESS_TRIP,
+          editUrl: EDIT_PAGE_BUSINESS_TRIP,
+          cloneUrl: EDIT_PAGE_BUSINESS_TRIP,
         }}
         labelFilter='search'
       />

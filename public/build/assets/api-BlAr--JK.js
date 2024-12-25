@@ -1,0 +1,1 @@
+const I="/api/business-trip-declaration",E=`${I}/list`,T=`${I}/create`,s=`${I}/update`,t=_=>`${I}/detail/${_}`,A=_=>`${I}/edit/${_}`,S=_=>`${I}/detail-bt/${_}`,a=`${I}/delete`;export{T as C,a as D,s as E,t as G,S as a,A as b,E as c};

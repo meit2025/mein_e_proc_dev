@@ -137,16 +137,18 @@ export const BussinessTripFormV1 = ({
     request_for: z.string().min(1, 'Request is required'),
     cost_center_id: z.string().min(1, 'Cost Center is required'),
     remark: z.string().min(1, 'Remark is required'),
-    attachment: z.array(
-      z
-        .instanceof(File)
-        .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
-          message: 'File type must be JPG, JPEG, PNG, or PDF',
-        })
-        .refine((file) => file.size <= MAX_FILE_SIZE, {
-          message: 'File size must be less than 1MB',
-        }),
-    ),
+    attachment: z
+      .array(
+        z
+          .instanceof(File)
+          .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
+            message: 'File type must be JPG, JPEG, PNG, or PDF',
+          })
+          .refine((file) => file.size <= MAX_FILE_SIZE, {
+            message: 'File size must be less than 1MB',
+          }),
+      )
+      .min(1, { message: 'At least one file must be attached' }),
     total_destination: z.number().min(1, 'Total Destinantion Required'),
     cash_advance: z.boolean().nullable().optional(),
     reference_number: z.string().nullable().optional(),
@@ -577,7 +579,7 @@ export const BussinessTripFormV1 = ({
     }
     // console.log(listDestination, ' get value');
   }, [form.watch('destinations')]);
-  
+
   // Menandai file untuk dihapus
   const handleDelete = (id: number) => {
     setfileAttachment((prev) => prev.filter((file) => file.id !== id));
@@ -669,7 +671,9 @@ export const BussinessTripFormV1 = ({
               <td>ODR-YYYY-MM-XXXXXXXX</td>
             </tr>
             <tr>
-              <td width={200}>Request For</td>
+              <td width={200}>
+                Request For <span className='text-red-600'>*</span>
+              </td>
               <td>
                 <FormAutocomplete<any>
                   fieldLabel=''
@@ -694,7 +698,9 @@ export const BussinessTripFormV1 = ({
               </td>
             </tr>
             <tr>
-              <td width={200}>Bussiness Trip Purpose Type</td>
+              <td width={200}>
+                Bussiness Trip Purpose Type<span className='text-red-600'>*</span>
+              </td>
               <td>
                 <FormAutocomplete<any>
                   fieldLabel=''
@@ -717,7 +723,9 @@ export const BussinessTripFormV1 = ({
               </td>
             </tr>
             <tr>
-              <td width={200}>Cost Center</td>
+              <td width={200}>
+                Cost Center<span className='text-red-600'>*</span>
+              </td>
               <td>
                 <FormAutocomplete<any>
                   fieldLabel=''
@@ -737,7 +745,9 @@ export const BussinessTripFormV1 = ({
               </td>
             </tr>
             <tr>
-              <td width={200}>Remark</td>
+              <td width={200}>
+                Remark<span className='text-red-600'>*</span>
+              </td>
               <td>
                 <FormField
                   control={form.control}
@@ -759,7 +769,9 @@ export const BussinessTripFormV1 = ({
               </td>
             </tr>
             <tr>
-              <td width={200}>File Attachment</td>
+              <td width={200}>
+                File Attachment<span className='text-red-600'>*</span>
+              </td>
               <td>
                 <FormField
                   control={form.control}
@@ -827,10 +839,14 @@ export const BussinessTripFormV1 = ({
             )}
             <tr>
               <td width={200}>File Extension</td>
-              <td className='text-gray-500 text-xs font-extralight'>jpg,jpeg,png,pdf</td>
+              <td className='text-gray-500 text-xs font-extralight'>
+                PDF, JPG, JPEG, dan PNG Max 1mb
+              </td>
             </tr>
             <tr>
-              <td width={200}>Total Destination</td>
+              <td width={200}>
+                Total Destination<span className='text-red-600'>*</span>
+              </td>
               <td>
                 {' '}
                 <FormField
@@ -847,9 +863,7 @@ export const BussinessTripFormV1 = ({
                               ? form.watch('total_destination')
                                 ? true
                                 : false
-                              : typePurpose == 'international'
-                                ? true
-                                : false
+                              : false
                           }
                         >
                           <SelectTrigger className='w-[200px] py-2'>

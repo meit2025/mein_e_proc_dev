@@ -113,7 +113,7 @@ export function BussinessDestinationForm({
   dataPurchasingGroup,
   dataDestination,
   type,
-  btEdit
+  btEdit,
 }: {
   form: any;
   index: number;
@@ -216,14 +216,22 @@ export function BussinessDestinationForm({
       <div key={index}>
         <table className='text-xs mt-4 reimburse-form-detail font-thin'>
           <tr>
-            <td width={200}>Destination {destination.destination}</td>
+            <td width={200}>
+              Destination<span className='text-red-600'>*</span>
+            </td>
             <td>
               <FormAutocomplete<any>
                 fieldLabel=''
                 options={dataDestination}
                 fieldName={`destinations.${index}.destination`}
                 isRequired={true}
-                disabled={type == btEdit ? (form.watch(`destinations.${index}.destination`) ? true : false) : false}
+                disabled={
+                  type == btEdit
+                    ? form.watch(`destinations.${index}.destination`)
+                      ? true
+                      : false
+                    : false
+                }
                 placeholder={'Select Destination'}
                 classNames='mt-2 w-full'
                 onChangeOutside={(value) => {
@@ -236,14 +244,22 @@ export function BussinessDestinationForm({
             </td>
           </tr>
           <tr>
-            <td width={200}>Pajak</td>
+            <td width={200}>
+              Pajak<span className='text-red-600'>*</span>
+            </td>
             <td>
               <FormAutocomplete<any>
                 fieldLabel=''
                 options={dataTax}
                 fieldName={`destinations.${index}.pajak_id`}
                 isRequired={true}
-                disabled={type == btEdit ? (form.watch(`destinations.${index}.pajak_id`) ? true : false) : false}
+                disabled={
+                  type == btEdit
+                    ? form.watch(`destinations.${index}.pajak_id`)
+                      ? true
+                      : false
+                    : false
+                }
                 placeholder={'Select Pajak'}
                 classNames='mt-2 w-full'
                 onChangeOutside={(value) => {
@@ -256,14 +272,22 @@ export function BussinessDestinationForm({
             </td>
           </tr>
           <tr>
-            <td width={200}>Purchasing Group</td>
+            <td width={200}>
+              Purchasing Group<span className='text-red-600'>*</span>
+            </td>
             <td>
               <FormAutocomplete<any>
                 fieldLabel=''
                 options={dataPurchasingGroup}
                 fieldName={`destinations.${index}.purchasing_group_id`}
                 isRequired={true}
-                disabled={type == btEdit ? (form.watch(`destinations.${index}.purchasing_group_id`) ? true : false) : false}
+                disabled={
+                  type == btEdit
+                    ? form.watch(`destinations.${index}.purchasing_group_id`)
+                      ? true
+                      : false
+                    : false
+                }
                 placeholder={'Select Purchasing Group'}
                 classNames='mt-2 w-full'
                 onChangeOutside={(value) => {
@@ -276,7 +300,9 @@ export function BussinessDestinationForm({
             </td>
           </tr>
           <tr>
-            <td width={200}>Bussines Trip Date</td>
+            <td width={200}>
+              Bussines Trip Date<span className='text-red-600'>*</span>
+            </td>
             <td className='flex space-x-2 items-center'>
               <FormField
                 control={form.control}
@@ -292,7 +318,13 @@ export function BussinessDestinationForm({
                             business_trip_start_date: value,
                           });
                         }}
-                        disabled={type == btEdit ? (form.watch(`destinations.${index}.business_trip_start_date`) ? true : false) : false}
+                        disabled={
+                          type == btEdit
+                            ? form.watch(`destinations.${index}.business_trip_start_date`)
+                              ? true
+                              : false
+                            : false
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -315,7 +347,13 @@ export function BussinessDestinationForm({
                             business_trip_end_date: value,
                           });
                         }}
-                        disabled={type == btEdit ? (form.watch(`destinations.${index}.business_trip_end_date`) ? true : false) : false}
+                        disabled={
+                          type == btEdit
+                            ? form.watch(`destinations.${index}.business_trip_end_date`)
+                              ? true
+                              : false
+                            : false
+                        }
                       />
                     </FormControl>
                     {/* <FormDescription>This is your public display name.</FormDescription> */}
@@ -326,7 +364,13 @@ export function BussinessDestinationForm({
 
               <Button
                 type='button'
-                className={type == btEdit ? (form.watch(`destinations.${index}.destination`) ? 'hidden' : '') : ''}
+                className={
+                  type == btEdit
+                    ? form.watch(`destinations.${index}.destination`)
+                      ? 'hidden'
+                      : ''
+                    : ''
+                }
                 onClick={() => detailAttedancesGenerate()}
               >
                 Get Detail
@@ -349,7 +393,13 @@ export function BussinessDestinationForm({
             <td></td>
           </tr>
         </table>
-        <DetailAllowance allowanceField={allowancesField} destinationIndex={index} form={form} type={type} btEdit={btEdit} />
+        <DetailAllowance
+          allowanceField={allowancesField}
+          destinationIndex={index}
+          form={form}
+          type={type}
+          btEdit={btEdit}
+        />
       </div>
 
       <ResultTotalItem

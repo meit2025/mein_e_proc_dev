@@ -486,7 +486,7 @@ class BusinessTripController extends Controller
     public function listAPI(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType', 'status'])->where('type', 'request');
+        $query =  BusinessTrip::query()->with(['purposeType', 'status']);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
@@ -496,12 +496,17 @@ class BusinessTripController extends Controller
             $data = Approval::where('user_id', Auth::user()->id)->where('document_name', 'TRIP')->pluck('document_id')->toArray();
             $query = $query->whereIn('id', $data)->where('status_id',1);
         }else{
-            $query = $query->where('created_by', Auth::user()->id)->orWhere('request_for', Auth::user()->id);
+            $query = $query->where(function($query) {
+                $query->where('created_by', Auth::user()->id)
+                      ->orWhere('request_for', Auth::user()->id);
+            });
         }
 
-        $data = $query->latest()->search(request(['search']))->paginate($perPage);
+        $query = $query->where('type','=','request');
 
-        $data->getCollection()->transform(function ($map) {
+        $query = $query->latest()->search(request(['search']))->paginate($perPage);
+
+        $query->getCollection()->transform(function ($map) {
 
             $purposeRelations = $map->purposeType ? $map->purposeType->name : ''; // Assuming 'name' is the field
 
@@ -523,7 +528,7 @@ class BusinessTripController extends Controller
         });
 
 
-        return $this->successResponse($data);
+        return $this->successResponse($query);
     }
 
     public function update(Request $request, $id)
