@@ -21,9 +21,6 @@ Route::group(['prefix' => 'reimburse'], function () {
     Route::get('/', [ReimbuseController::class, 'index'])->name('reimburse.index');
     Route::get('/edit/{id}', [ReimbuseController::class, 'edit'])->name('reimburse.edit');
 
-    Route::get('/type/{type}', [ReimbuseController::class, 'getTypeData'])->name('reimburse.type');
-    Route::post('/is_required', [ReimbuseController::class, 'is_required'])->name('reimburse.is_required');
-
     Route::get('/get-data-family/{user_id}', [ReimbuseController::class, 'getFamilyDataAPI'])->name('reimbuse.get-data-family');
 
     Route::inertia('/detail/{id}',  'Reimburse/Detail', [
@@ -42,7 +39,6 @@ Route::group(['prefix' => 'api/reimburse'], function () {
 
     Route::get('/detail/{id}', [ReimbuseController::class, 'detailAPI'])->name('reimburse.detail');
     Route::get('/get-list-master-reimburse-type', [ReimbuseController::class, 'getListMasterReimburseTypeAPI'])->name('reimburse.get-list-master-reimburse-type');
-    Route::get('/get-period-reimburse', [ReimbuseController::class, 'getPeriodAPI'])->name('reimburse.get-reimburse-period');
     Route::get('/get-employee-reimburse', [ReimbuseController::class, 'dropdownEmployee'])->name('reimburse.get-reimburse-employee');
     Route::get('/get-family-reimburse', [ReimbuseController::class, 'dropdownFamily'])->name('reimburse.get-reimburse-family');
 

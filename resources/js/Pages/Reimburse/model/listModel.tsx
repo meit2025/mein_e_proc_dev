@@ -19,6 +19,7 @@ export const columns: GridColDef[] = [
     ),
   },
   { field: 'request_for', headerName: 'Reimburse for', width: 200, filterable: true },
+  { field: 'request_by', headerName: 'Reimburse by', width: 200, filterable: true },
   { field: 'remark', headerName: 'Remark', width: 200, filterable: true },
   {
     field: 'balance',
@@ -63,15 +64,6 @@ const handlePrintDetail = (id: string) => {
   window.open(printUrl, '_blank');
 };
 
-export interface Quota {
-  id: string;
-  user: User[];
-  period: Period[];
-  type: TypeReimburse[];
-  limit: number;
-  plafon: number;
-}
-
 export interface Tax {
   id: string;
   mwszkz: number;
@@ -107,7 +99,6 @@ export interface Reimburse {
   currency: string;
   tax_on_sales: string;
   purchasing_group: string;
-  period: string;
   type: string;
   item_delivery_data: Date;
   start_date: Date;
@@ -136,13 +127,6 @@ export interface Group {
 export interface Currency {
   code: string;
   name: string;
-}
-
-export interface Period {
-  id: string;
-  code: string;
-  start: string;
-  end: string;
 }
 
 export interface PurchasingGroup {
