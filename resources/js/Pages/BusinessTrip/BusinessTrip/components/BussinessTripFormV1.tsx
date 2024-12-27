@@ -109,7 +109,13 @@ const dummyPrice = 25000;
 // const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
-const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+const ACCEPTED_FILE_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/heic',
+  'application/pdf',
+];
 
 export const BussinessTripFormV1 = ({
   users,
@@ -137,19 +143,20 @@ export const BussinessTripFormV1 = ({
     request_for: z.string().min(1, 'Request is required'),
     cost_center_id: z.string().min(1, 'Cost Center is required'),
     remark: z.string().min(1, 'Remark is required'),
-    attachment: z.array(
-      z
-        .instanceof(File)
-        .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
-          message: 'File type must be JPG, JPEG, PNG, or PDF',
-        })
-        .refine((file) => file.size <= MAX_FILE_SIZE, {
-          message: 'File size must be less than 1MB',
-        }),
-    ),
+    attachment: z
+      .array(
+        z
+          .instanceof(File)
+          .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
+            message: 'File type must be JPG, JPEG, PNG, or PDF',
+          })
+          .refine((file) => file.size <= MAX_FILE_SIZE, {
+            message: 'File size must be less than 1MB',
+          }),
+      )
+      .min(1, { message: 'At least one file must be attached' }),
     total_destination: z.number().min(1, 'Total Destinantion Required'),
     cash_advance: z.boolean().nullable().optional(),
-    reference_number: z.string().nullable().optional(),
     total_percent: z.string().nullable().optional(),
     total_cash_advance: z.string().nullable().optional(),
     destinations: z.array(
@@ -200,7 +207,6 @@ export const BussinessTripFormV1 = ({
       attachment: [],
       total_destination: 1,
       cash_advance: false,
-      reference_number: '',
       total_percent: '',
       total_cash_advance: '0',
       destinations: [
@@ -226,6 +232,8 @@ export const BussinessTripFormV1 = ({
   }
 
   const [fileAttachment, setfileAttachment] = React.useState<BusinessTripAttachement[]>([]);
+  const [fromRequestNo, setFromRequestNo] = React.useState(null);
+  const [listAllowances, setListAllowances] = React.useState<AllowanceItemModel[]>([]);
 
   async function getDetailData() {
     const url = GET_DETAIL_BUSINESS_TRIP(id);
@@ -234,15 +242,23 @@ export const BussinessTripFormV1 = ({
     try {
       const response = await axios.get(url);
       const data = response.data.data;
+      //   console.log(data, 'data');
+      const urlGetAllowance = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(
+        data.purpose_type_id,
+        data.request_for.id,
+      );
+      const responsePurposeType = await axiosInstance.get(urlGetAllowance);
+      setListAllowances(responsePurposeType.data.data as AllowanceItemModel[]);
       getDestination('', {
         name: 'destination',
         id: 'destination',
         tabel: 'destinations',
         where: {
           key: 'type',
-          parameter: response.data.data.purpose_type.type,
+          parameter: data.purpose_type.type,
         },
       });
+      setFromRequestNo(data.request_no);
       setfileAttachment(data.attachments as BusinessTripAttachement[]);
       form.setValue('purpose_type_id', data.purpose_type_id.toString());
       form.setValue('request_for', data.request_for.id.toString());
@@ -250,7 +266,6 @@ export const BussinessTripFormV1 = ({
       form.setValue('remark', data.remarks);
       form.setValue('total_destination', data.total_destination);
       form.setValue('cash_advance', data.cash_advance == 1 ? true : false);
-      form.setValue('reference_number', data.reference_number);
       form.setValue('total_percent', data.total_percent);
       form.setValue('total_cash_advance', data.total_cash_advance);
       //   console.log(data.destinations, ' data.destinations');
@@ -288,7 +303,6 @@ export const BussinessTripFormV1 = ({
     }
   }
 
-  const [listAllowances, setListAllowances] = React.useState<AllowanceItemModel[]>([]);
   const [typePurpose, setTypePurpose] = React.useState<string>('');
   const { dataDropdown: dataDestination, getDropdown: getDestination } = useDropdownOptions();
 
@@ -304,10 +318,10 @@ export const BussinessTripFormV1 = ({
     try {
       const response = await axiosInstance.get(url);
       const responsePurposeType = await axiosInstance.get(getPurposeType);
-      const typePurpose = responsePurposeType.data.data.purpose.type;
-      if (typePurpose == 'international') {
-        totalDestinationHandler('1');
-      }
+      //   const typePurpose = responsePurposeType.data.data.purpose.type;
+      //   if (typePurpose == 'international') {
+      //     totalDestinationHandler('1');
+      //   }
       setTypePurpose(typePurpose);
       setListAllowances(response.data.data as AllowanceItemModel[]);
       getDestination('', {
@@ -346,7 +360,6 @@ export const BussinessTripFormV1 = ({
       formData.append('request_for', values.request_for ?? '');
       formData.append('cost_center_id', values.cost_center_id ?? '');
       formData.append('remark', values.remark ?? '');
-      formData.append('reference_number', `${values.reference_number}`);
       formData.append('cash_advance', `${values.cash_advance}`);
       formData.append('total_percent', `${values.total_percent}`);
       formData.append('total_cash_advance', `${values.total_cash_advance}`);
@@ -460,11 +473,12 @@ export const BussinessTripFormV1 = ({
     name: 'destinations',
   });
 
-  // console.log(BusinessTripType.edit, ' business edit');
-  // console.log(type, ' id type');
+  const [isClone, setIsClone] = React.useState(false);
+
   React.useEffect(() => {
-    if (id && type == BusinessTripType.edit) {
+    if (id && type == BusinessTripType.clone) {
       getDetailData();
+      setIsClone(true);
     }
   }, [type]);
 
@@ -571,13 +585,12 @@ export const BussinessTripFormV1 = ({
   };
 
   React.useEffect(() => {
-    const totalAll = getTotalDes();
-    if (totalAll > 0) {
-      fetchDataValue();
-    }
-    // console.log(listDestination, ' get value');
+    // const totalAll = getTotalDes();
+    // if (totalAll > 0) {
+    //   fetchDataValue();
+    // }
   }, [form.watch('destinations')]);
-  
+
   // Menandai file untuk dihapus
   const handleDelete = (id: number) => {
     setfileAttachment((prev) => prev.filter((file) => file.id !== id));
@@ -600,7 +613,7 @@ export const BussinessTripFormV1 = ({
   //   // Calculate total based on totalPercent and allowance
   React.useEffect(() => {
     // console.log(form.getValues('destinations'), ' edit destination');
-    if (type == BusinessTripType.edit) {
+    if (type == BusinessTripType.clone) {
       setIsCashAdvance(form.getValues('cash_advance') ?? false);
     }
     const percentValue = parseFloat((totalPercent || '0').toString());
@@ -651,7 +664,7 @@ export const BussinessTripFormV1 = ({
   }, []);
 
   React.useEffect(() => {
-    if (type != BusinessTripType.edit) {
+    if (type != BusinessTripType.clone) {
       if (isAdmin == '0') {
         form.setValue('request_for', idUser?.toString() ?? '');
       }
@@ -668,23 +681,23 @@ export const BussinessTripFormV1 = ({
               <td width={200}>Request No.</td>
               <td>ODR-YYYY-MM-XXXXXXXX</td>
             </tr>
+            {isClone && (
+              <tr>
+                <td width={200}>From Request No.</td>
+                <td className='text-sm'>{fromRequestNo}</td>
+              </tr>
+            )}
             <tr>
-              <td width={200}>Request For</td>
+              <td width={200}>
+                Request For <span className='text-red-600'>*</span>
+              </td>
               <td>
                 <FormAutocomplete<any>
                   fieldLabel=''
                   options={dataEmployee}
                   fieldName='request_for'
                   isRequired={true}
-                  disabled={
-                    type == BusinessTripType.edit
-                      ? form.watch('request_for')
-                        ? true
-                        : false
-                      : isAdmin == '0'
-                        ? true
-                        : false
-                  }
+                  disabled={isAdmin == '0' ? true : false}
                   placeholder={'Select Employee'}
                   classNames='mt-2 w-full'
                   onChangeOutside={(value) => {
@@ -694,20 +707,16 @@ export const BussinessTripFormV1 = ({
               </td>
             </tr>
             <tr>
-              <td width={200}>Bussiness Trip Purpose Type</td>
+              <td width={200}>
+                Bussiness Trip Purpose Type<span className='text-red-600'>*</span>
+              </td>
               <td>
                 <FormAutocomplete<any>
                   fieldLabel=''
                   options={dataPurposeType}
                   fieldName='purpose_type_id'
                   isRequired={true}
-                  disabled={
-                    type == BusinessTripType.edit
-                      ? form.watch('purpose_type_id')
-                        ? true
-                        : false
-                      : false
-                  }
+                  disabled={false}
                   placeholder={'Select Purpose Type'}
                   classNames='mt-2 w-full'
                   onChangeOutside={async (value: string, data: any) => {
@@ -717,27 +726,25 @@ export const BussinessTripFormV1 = ({
               </td>
             </tr>
             <tr>
-              <td width={200}>Cost Center</td>
+              <td width={200}>
+                Cost Center<span className='text-red-600'>*</span>
+              </td>
               <td>
                 <FormAutocomplete<any>
                   fieldLabel=''
                   options={dataCostCenter}
                   fieldName='cost_center_id'
                   isRequired={true}
-                  disabled={
-                    type == BusinessTripType.edit
-                      ? form.watch('cost_center_id')
-                        ? true
-                        : false
-                      : false
-                  }
+                  disabled={false}
                   placeholder={'Select Cost Center'}
                   classNames='mt-2 w-full'
                 />
               </td>
             </tr>
             <tr>
-              <td width={200}>Remark</td>
+              <td width={200}>
+                Remark<span className='text-red-600'>*</span>
+              </td>
               <td>
                 <FormField
                   control={form.control}
@@ -759,7 +766,9 @@ export const BussinessTripFormV1 = ({
               </td>
             </tr>
             <tr>
-              <td width={200}>File Attachment</td>
+              <td width={200}>
+                File Attachment<span className='text-red-600'>*</span>
+              </td>
               <td>
                 <FormField
                   control={form.control}
@@ -803,7 +812,7 @@ export const BussinessTripFormV1 = ({
                 <td width={200}></td>
                 <td className='pb-3'>
                   {fileAttachment.map((attachment: any, index: number) => (
-                    <div className='flex items-center gap-4'>
+                    <div className='flex items-center gap-4' key={index}>
                       <a
                         href={attachment.url}
                         target='_blank'
@@ -827,10 +836,14 @@ export const BussinessTripFormV1 = ({
             )}
             <tr>
               <td width={200}>File Extension</td>
-              <td className='text-gray-500 text-xs font-extralight'>jpg,jpeg,png,pdf</td>
+              <td className='text-gray-500 text-xs font-extralight'>
+                PDF, JPG, JPEG, PNG and HEIC Max 1mb
+              </td>
             </tr>
             <tr>
-              <td width={200}>Total Destination</td>
+              <td width={200}>
+                Total Destination<span className='text-red-600'>*</span>
+              </td>
               <td>
                 {' '}
                 <FormField
@@ -842,15 +855,7 @@ export const BussinessTripFormV1 = ({
                         <Select
                           value={field.value.toString()}
                           onValueChange={totalDestinationHandler}
-                          disabled={
-                            type == BusinessTripType.edit
-                              ? form.watch('total_destination')
-                                ? true
-                                : false
-                              : typePurpose == 'international'
-                                ? true
-                                : false
-                          }
+                          disabled={false}
                         >
                           <SelectTrigger className='w-[200px] py-2'>
                             <SelectValue placeholder='-- Select Bussiness Trip --' />
@@ -888,7 +893,7 @@ export const BussinessTripFormV1 = ({
             dataPurchasingGroup={dataPurchasingGroup}
             dataDestination={dataDestination}
             type={type}
-            btEdit={BusinessTripType.edit}
+            btClone={BusinessTripType.clone}
           />
           <Separator className='my-4' />
 
@@ -900,41 +905,13 @@ export const BussinessTripFormV1 = ({
                 <FormSwitch
                   fieldName={'cash_advance'}
                   isRequired={false}
-                  disabled={
-                    type == BusinessTripType.edit
-                      ? form.watch('cash_advance')
-                        ? false
-                        : true
-                      : false
-                  }
+                  disabled={false}
                   onChanges={(e) => handleCashAdvanceChange(e.target.checked)}
                 />
               </td>
             </tr>
             {isCashAdvance && (
               <>
-                <tr>
-                  <td className='w-[50%]'>Reference Number</td>
-                  <td className='w-[50%]' style={{ paddingBottom: 0 }}>
-                    <FormField
-                      control={form.control}
-                      name={'reference_number'}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              value={field.value || ''}
-                              onChange={(e) => field.onChange(e.target.value)}
-                              className='w-[50%] mb-2'
-                              placeholder='Reference Number'
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                </tr>
                 <tr>
                   <td className='w-[50%]'>Total Percent</td>
                   <td className='w-[50%]'>
@@ -985,14 +962,14 @@ export const BussinessTripFormV1 = ({
             variant='contained'
             color='primary'
             type='button'
-            style={{
-              display:
-                type == BusinessTripType.edit
-                  ? form.watch('total_destination')
-                    ? 'none'
-                    : 'block'
-                  : 'block',
-            }}
+            // style={{
+            //   display:
+            //     type == BusinessTripType.edit
+            //       ? form.watch('total_destination')
+            //         ? 'none'
+            //         : 'block'
+            //       : 'block',
+            // }}
           >
             Check Approval
           </ButtonMui>

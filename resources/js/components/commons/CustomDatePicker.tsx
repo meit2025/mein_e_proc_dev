@@ -13,6 +13,9 @@ interface CustomDatePickerProps {
   initialDate?: Date;
   onDateChange?: (date: Date | undefined) => void;
   disabled?: boolean;
+  disabledDays?: Array<
+    { before?: Date; after?: Date; from?: Date; to?: Date } | Date | ((date: Date) => boolean)
+  >;
 }
 
 export function CustomDatePicker({
@@ -22,6 +25,7 @@ export function CustomDatePicker({
   initialDate,
   disabled = false,
   onDateChange,
+  disabledDays = [],
 }: CustomDatePickerProps) {
   const [date, setDate] = React.useState<Date | undefined>(initialDate);
 
@@ -33,6 +37,13 @@ export function CustomDatePicker({
       }
     }
   };
+
+  // Tanggal yang akan di-disable
+  //   const disabledDays = [
+  //     { before: new Date() }, // Disable semua tanggal sebelum hari ini
+  //     new Date(2024, 11, 25), // Disable tanggal spesifik (misalnya 25 Desember 2024)
+  //     (date: Date) => date.getDay() === 0, // Disable setiap hari Minggu
+  //   ];
 
   React.useEffect(() => {
     setDate(initialDate);
@@ -55,7 +66,13 @@ export function CustomDatePicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent className='w-auto p-0'>
-        <Calendar mode='single' selected={date} onSelect={handleDateChange} initialFocus />
+        <Calendar
+          mode='single'
+          selected={date}
+          onSelect={handleDateChange}
+          initialFocus
+          disabled={disabledDays}
+        />
       </PopoverContent>
     </Popover>
   );

@@ -100,12 +100,8 @@ Route::group(['prefix' => 'api/'], function () {
             Route::delete('/delete/{id}', [BusinessTripController::class, 'destroy'])->name('business-trip.destroy');
             Route::get('/detail-bt/{id}', [BusinessTripController::class, 'detailBtRequestAPI'])->name('business-trip.detail');
             Route::post('/update/{id}', [BusinessTripController::class, 'update'])->name('business-trip.update');
-            Route::get('/get-employee', [BusinessTripController::class, 'dropdownEmployee'])->name('business-trip.get-employee');
-            Route::get('/get-purpose-type', [BusinessTripController::class, 'dropdownPurposeType'])->name('business-trip.get-purpose-type');
-            Route::get('/get-cost-center', [BusinessTripController::class, 'dropdownCostCenter'])->name('business-trip.get-cost-center');
-            Route::get('/get-destination', [BusinessTripController::class, 'dropdownDestination'])->name('business-trip.get-destination');
-            Route::get('/get-tax', [BusinessTripController::class, 'dropdownTax'])->name('business-trip.get-tax');
-            Route::get('/get-purchasing-group', [BusinessTripController::class, 'dropdownPurchasingGroup'])->name('business-trip.get-purchasing-group');
+            Route::get('/clone/{id}', [BusinessTripController::class, 'clone'])->name('business-trip.clone');
+            Route::get('/detail-bt/{id}', [BusinessTripController::class, 'detailBtRequestAPI'])->name('business-trip.detail');
         });
 
         Route::group(['prefix' => 'business-trip-declaration'], function () {
