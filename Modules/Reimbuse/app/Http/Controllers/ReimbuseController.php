@@ -48,9 +48,9 @@ class ReimbuseController extends Controller
             END) || 
             MAX(COALESCE(master_type_reimburses.family_status, '')) as label
             , master_type_reimburses.code as value")
-            ->join('master_type_reimburse_grades as mtrg', 'mtrg.reimburse_type_id', '=', 'master_type_reimburses.id')
-            ->join('business_trip_grade_users as btgu', 'btgu.grade_id', '=', 'mtrg.grade_id')
-            ->join('users as u', 'u.id', '=', 'btgu.user_id')
+            ->leftJoin('master_type_reimburse_grades as mtrg', 'mtrg.reimburse_type_id', '=', 'master_type_reimburses.id')
+            ->leftJoin('business_trip_grade_users as btgu', 'btgu.grade_id', '=', 'mtrg.grade_id')
+            ->leftJoin('users as u', 'u.id', '=', 'btgu.user_id')
             ->where(['u.nip' => $nip]);
         
         if (count($getFamilieStatus) == 0) {
@@ -58,6 +58,7 @@ class ReimbuseController extends Controller
         } else {
             $data = $data->where('master_type_reimburses.family_status', null)->orWhereIn('master_type_reimburses.family_status', $getFamilieStatus);
         }
+        $data = $data->orWhere(['master_type_reimburses.grade_option' => 'all']);
         if ($request->search) $data = $data->where('master_type_reimburses.name', 'ilike', '%' . $request->search . '%')
                                     ->orWhere('master_type_reimburses.code', 'ilike', '%' . $request->search . '%')
                                     ->orWhere('master_type_reimburses.family_status', 'ilike', '%' . $request->search . '%');
@@ -65,13 +66,6 @@ class ReimbuseController extends Controller
         $data = $data->limit(50)->groupBy('master_type_reimburses.name', 'master_type_reimburses.code')->get();
         
         return $this->successResponse($data);
-    }
-
-    public function checkBalance(Request $request)
-    {
-
-        $user = $request->user;
-        $type = $request->type;
     }
 
     public function list(Request $request)
