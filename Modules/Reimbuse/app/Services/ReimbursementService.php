@@ -34,9 +34,7 @@ class ReimbursementService
         'short_text'            =>  'nullable',
         'balance'               =>  'required|numeric',
         'item_delivery_data'    =>  'required|date',
-        'start_date'            =>  'required|date',
-        'end_date'              =>  'required|date',
-        'period'                =>  'required|string|exists:master_period_reimburses,code',
+        'claim_date'            =>  'required|date',
         'currency'              =>  'required|string|exists:currencies,code',
         'for'                   =>  'required',
         'desired_vendor'        =>  'required',
@@ -86,8 +84,7 @@ class ReimbursementService
                 $validatedData['group'] = $group->code;
                 $validatedData['purchase_requisition_unit_of_measure']   = $form['purchase_requisition_unit_of_measure'];
                 $validatedData['item_delivery_data'] = Carbon::parse($form['item_delivery_data'])->format('Y-m-d');
-                $validatedData['start_date'] = Carbon::parse($form['start_date'])->format('Y-m-d');
-                $validatedData['end_date'] = Carbon::parse($form['end_date'])->format('Y-m-d');
+                $validatedData['claim_date'] = Carbon::parse($form['claim_date'])->format('Y-m-d');
                 $validatedData['requester'] = $groupData['requester'];
 
                 $reimburse = Reimburse::create($validatedData);
@@ -136,8 +133,7 @@ class ReimbursementService
                 if (!isset($form['for'])) $form['for'] = $groupData['requester'];
                 $form['desired_vendor']   = $groupData['requester'];
                 $form['item_delivery_data']         = Carbon::parse($form['item_delivery_data'])->format('Y-m-d');
-                $form['start_date']                 = Carbon::parse($form['start_date'])->format('Y-m-d');
-                $form['end_date']                   = Carbon::parse($form['end_date'])->format('Y-m-d');
+                $form['claim_date']                 = Carbon::parse($form['claim_date'])->format('Y-m-d');
                 
                 $validator = Validator::make($form, $this->validator_rule_reimburse);
                 if ($validator->fails()) {
@@ -194,6 +190,14 @@ class ReimbursementService
 
     protected function generateUniqueGroupCode()
     {
-        return 'GROUP-' . uniqid();
+        $latestRecord = ReimburseGroup::latest('id')->first();
+        if (empty($latestRecord)) {
+            $incerement = str_pad(0, 8, '0', STR_PAD_LEFT);
+        } else {
+            $getIncerement  = intval(explode('-', $latestRecord->code)[3]) + 1;
+            $incerement     = str_pad($getIncerement, 8, '0', STR_PAD_LEFT);
+        }
+        
+        return 'REIM-' . date('Y-m') . '-' . $incerement;
     }
 }

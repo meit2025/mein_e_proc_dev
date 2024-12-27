@@ -34,10 +34,8 @@ export function MultiSelect({ options, label, id, onSelect, value = [] }: multiS
 
   const [all, setAll] = React.useState<boolean>(false);
 
-  // console.log(leftItems)
 
   function selectItemHandler(e: any, item: any) {
-    console.log(item.id);
 
     e.stopPropagation();
     // this is to stop click propagation to the native document click
@@ -46,7 +44,6 @@ export function MultiSelect({ options, label, id, onSelect, value = [] }: multiS
 
     if (itemSelect.find((find: any) => find[id] == item[id])) {
       const filteredItem = itemSelect.filter((filter: any) => filter[id] != item[id]);
-      console.log(filteredItem);
       setItemSelect(filteredItem);
     } else {
       setItemSelect((itemSelect) => [...itemSelect, item]);
@@ -54,7 +51,6 @@ export function MultiSelect({ options, label, id, onSelect, value = [] }: multiS
   }
 
   function rightSelectHandler(e: any, item: any) {
-    console.log(item.id);
 
     e.stopPropagation();
     // this is to stop click propagation to the native document click
@@ -108,13 +104,6 @@ export function MultiSelect({ options, label, id, onSelect, value = [] }: multiS
     setRightSelect([]);
   }
 
-  // console.log('value', value);
-  // console.log('options', options);
-  // console.log(
-  //   'right values',
-  //   options.filter((filter) => value.includes(filter[id])),
-  // );
-
   React.useEffect(() => {
     setLeftValues(options.filter((filter) => !value.includes(filter[id])));
     setRightValues(options.filter((filter) => value.includes(filter[id])));
@@ -128,13 +117,11 @@ export function MultiSelect({ options, label, id, onSelect, value = [] }: multiS
 
   React.useEffect(() => {
     if (rightValues.length === options.length) {
-      console.log('right values', rightValues);
 
       setAll(true);
     } else {
       setAll(false);
     }
-    console.log(rightValues.length === options.length);
   }, [rightValues]);
 
   return (

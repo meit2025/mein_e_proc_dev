@@ -888,27 +888,7 @@ const sidebar = [
                             'master reimburse type update',
                             'master reimburse type delete',
                         ],
-                    },
-                    {
-                        name: 'Reimburse Period',
-                        route: LIST_PAGE_REIMBURSE_PERIOD,
-                        role: [
-                            'master reimburse period create',
-                            'master reimburse period view',
-                            'master reimburse period update',
-                            'master reimburse period delete',
-                        ],
-                    },
-                    {
-                        name: 'Reimburse Quota',
-                        route: PAGE_REIMBURSE_QUOTA,
-                        role: [
-                            'master reimburse quota create',
-                            'master reimburse quota view',
-                            'master reimburse quota update',
-                            'master reimburse quota delete',
-                        ],
-                    },
+                    }
                 ],
             },
         ],
