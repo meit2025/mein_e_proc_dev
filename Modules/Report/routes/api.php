@@ -14,6 +14,6 @@ use Modules\Report\Http\Controllers\ReportController;
  *
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('report', ReportController::class)->names('report');
-});
+// Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
+//     Route::apiResource('report', ReportController::class)->names('report');
+// });

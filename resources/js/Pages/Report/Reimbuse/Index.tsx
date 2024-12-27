@@ -20,6 +20,8 @@ import {
 } from './model/listModel';
 import { useAlert } from '@/contexts/AlertContext';
 import axiosInstance from '@/axiosInstance';
+import { PAGE_REPORT } from '@/endpoint/report/page';
+import { REPORT_REIMBURSE_EXPORT, REPORT_REIMBURSE_LIST } from '@/endpoint/report/api';
 
 interface Props {
     users: User[];
@@ -68,25 +70,24 @@ export const Index = ({
 
     const { showToast } = useAlert();
 
-    const data = async (data: string) => {
+    const exporter = async (data: string, pdf: boolean) => {
         try {
             console.log(data);
 
             // Kirim permintaan ke endpoint dengan filter
-            // const response = await axiosInstance.post(LIST_REIMBURSE, {
-            //     filters, // Mengirimkan filter ke backend jika diperlukan
-            //     export: true, // Opsi tambahan untuk ekspor
-            // });
+            const response = await axiosInstance.get(REPORT_REIMBURSE_EXPORT + data + '&pdf=' + pdf, {
+                responseType: "blob"
+            });
 
-            // // Membuat file dari respons
-            // const url = window.URL.createObjectURL(new Blob([response.data]));
-            // const link = document.createElement('a');
-            // link.href = url;
-            // link.setAttribute('download', 'Reimburse_Report.xlsx'); // Nama file
-            // document.body.appendChild(link);
-            // link.click();
+            // Membuat file dari respons
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'Reimburse_Report.xlsx'); // Nama file
+            document.body.appendChild(link);
+            link.click();
 
-            // showToast('File berhasil diekspor!', 'success');
+            showToast('File berhasil diekspor!', 'success');
         } catch (error: any) {
             showToast(
                 error.response?.data?.message || 'Terjadi kesalahan saat ekspor.',
@@ -103,12 +104,13 @@ export const Index = ({
 
             <DataGridComponent
                 isHistory={false}
-                onExport={async () => await data(x)}
+                onExport={async (x: string) => await exporter(x, false)}
+                // onExportPdf={async (x: string) => await exporter(x, true)}
                 role={roleConfig}
                 columns={columns}
                 url={{
-                    url: LIST_REIMBURSE,
-                    detailUrl: '/reimburse/detail',
+                    url: REPORT_REIMBURSE_LIST,
+                    // detailUrl: '/reimburse/detail',
                 }}
                 labelFilter='search'
             />

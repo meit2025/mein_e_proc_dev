@@ -77,7 +77,7 @@ function Index(dataTotal: any) {
                                                 {requestData.vendorSelection ?? 0}
                                             </span>
                                             <span className="text-2sm font-normal text-gray-700">
-                                                Total Vendor Selection
+                                                Total Purchase Requisition
                                             </span>
                                         </div>
                                     </div>

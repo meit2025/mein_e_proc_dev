@@ -1,1 +1,0 @@
-const E="/api/master/reimburse-type",s=`${E}/`,R=_=>`${E}/listUserGrade/${_}`,t=`${E}/create`,e=_=>`${E}/edit/${_}`,I=_=>`${E}/update/${_}`,T=`${E}/delete`;export{t as C,T as D,e as E,s as L,I as U,R as a};

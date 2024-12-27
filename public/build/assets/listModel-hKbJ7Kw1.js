@@ -1,1 +1,0 @@
-const a=[{field:"purchasing_group.purchasing_group",headerName:"Purch Group",width:200,renderCell:e=>{var r;return(r=e.row.purchasing_group)==null?void 0:r.purchasing_group}},{field:"master_tracking_number.name",headerName:"Tracking Number",width:200,renderCell:e=>{var r;return(r=e.row.master_tracking_number)==null?void 0:r.name}}];export{a as columns};

@@ -1,1 +1,0 @@
-const O="/api/approval/approval-conditional-user",_=`${O}/list`,R=`${O}/create`,s=`${O}/update`,L=A=>`${O}/detail/${A}`,E=`${O}/delete`,I=A=>`${O}/get-user-dropdown/${A}`,N=`${O}/store-user`;export{R as C,L as D,s as E,_ as G,I as L,E as a,N as b};

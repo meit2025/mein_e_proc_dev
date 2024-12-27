@@ -402,7 +402,7 @@ class BusinessTripController extends Controller
                 'created_by' => auth()->user()->id,
                 'type' => 'request',
                 'cash_advance' => $request->cash_advance == "true" ? 1 : 0,
-                'reference_number' => $request->cash_advance == "true" ? $request->reference_number : null,
+                'reference_number' => $requestNo,
                 'total_percent' => $request->cash_advance == "true" ? $request->total_percent : null,
                 'total_cash_advance' => $request->cash_advance == "true" ? str_replace('.', '', $request->total_cash_advance) : null,
             ]);

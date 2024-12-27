@@ -16,6 +16,9 @@ import {
     PurchasingGroup,
     UserModel,
 } from './models/models';
+import { REPORT_BT_EXPORT, REPORT_BT_LIST } from '@/endpoint/report/api';
+import { useAlert } from '@/contexts/AlertContext';
+import axiosInstance from '@/axiosInstance';
 interface propsType {
     listPurposeType: PurposeTypeModel[];
     users: UserModel[];
@@ -39,7 +42,7 @@ interface SharedProps {
     };
 }
 
-const roleAkses = 'business trip report';
+const roleAkses = 'report business trip';
 
 export const Index = ({
     listPurposeType,
@@ -66,40 +69,48 @@ export const Index = ({
     const userId = auth.user?.id;
     const isAdmin = auth.user?.is_admin;
 
+    const { showToast } = useAlert();
+
+    const exporter = async (data: string) => {
+        try {
+            console.log(data);
+
+            // Kirim permintaan ke endpoint dengan filter
+            const response = await axiosInstance.get(REPORT_BT_EXPORT + data, {
+                responseType: "blob"
+            });
+
+            console.log(response);
+
+
+            // Membuat file dari respons
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'Business_Trip_Request_Report.xlsx'); // Nama file
+            document.body.appendChild(link);
+            link.click();
+
+            showToast('File berhasil diekspor!', 'success');
+        } catch (error: any) {
+            showToast(
+                error.response?.data?.message || 'Terjadi kesalahan saat ekspor.',
+                'error'
+            );
+        }
+    };
+
     return (
         <>
             <div className='flex md:mb-4 mb-2 w-full justify-end'>
-                {/* <Button onClick={openFormHandler}>
-          <PlusIcon />
-        </Button> */}
-
-                {/* <CustomDialog
-          onClose={() => setOpenForm(false)}
-          open={openForm}
-          onOpenChange={openFormHandler}
-        >
-          <BussinessTripFormV1
-            listDestination={listDestination}
-            users={users}
-            idUser={userId}
-            isAdmin={isAdmin}
-            listPurposeType={listPurposeType}
-            pajak={pajak}
-            costcenter={costcenter}
-            purchasingGroup={purchasingGroup}
-            type={businessTripForm.type}
-            id={businessTripForm.id}
-          />
-        </CustomDialog> */}
             </div>
             <DataGridComponent
-                isHistory={true}
+                isHistory={false}
                 role={{
                     detail: `${roleAkses} view`,
-                    create: `${roleAkses} create`,
-                    update: `${roleAkses} update`,
-                    delete: `${roleAkses} delete`,
+                    create: `${roleAkses} export`,
                 }}
+                onExport={async (x: string) => await exporter(x)}
                 // onCreate={openFormHandler}
                 columns={columns}
                 // onEdit={(value) => {
@@ -110,9 +121,7 @@ export const Index = ({
                 //     setOpenForm(true);
                 // }}
                 url={{
-                    url: GET_LIST_BUSINESS_TRIP,
-                    deleteUrl: DELET_API_BUSINESS_TRIP,
-                    detailUrl: DETAIL_PAGE_BUSINESS_TRIP,
+                    url: REPORT_BT_LIST,
                 }}
                 labelFilter='search'
             />

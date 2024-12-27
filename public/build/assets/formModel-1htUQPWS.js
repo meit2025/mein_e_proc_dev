@@ -1,1 +1,0 @@
-const e=[{type:"select",name:"purchasing_group_id",label:"Purchasing group",placeholder:"Purchasing group",options:[],required:!0,style:{width:"63.5rem"}},{type:"select",name:"master_tracking_number_id",label:"Tracking number",placeholder:"Tracking number",options:[],style:{width:"63.5rem"}}];export{e as formModel};

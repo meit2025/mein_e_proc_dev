@@ -12,7 +12,7 @@ interface FormFileUploadProps {
   requiredMessage?: string;
   allowedExtensions?: string[];
   classNames?: string;
-  onFileChangeOutside?: (file: File | null) => void;
+  onFileChangeOutside?: (file: string | null, fileName: string) => void;
 }
 
 const FormFileUpload: React.FC<FormFileUploadProps> = ({
@@ -55,12 +55,33 @@ const FormFileUpload: React.FC<FormFileUploadProps> = ({
         });
         return;
       }
+
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      // Event handler untuk sukses membaca file
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          if (onFileChangeOutside) {
+            onFileChangeOutside(reader.result, file.name);
+          }
+        } else {
+          setError(fieldName, {
+            type: 'manual',
+            message: 'Failed to read file as Base64',
+          });
+        }
+      };
+
+      reader.onerror = () =>
+        setError(fieldName, {
+          type: 'manual',
+          message: 'Failed to read file as Base64',
+        });
+
       clearErrors(fieldName);
       setFileName(file.name);
       onChange(file);
-      if (onFileChangeOutside) {
-        onFileChangeOutside(file);
-      }
     } else {
       onChange(null);
       setFileName(null);
@@ -77,13 +98,16 @@ const FormFileUpload: React.FC<FormFileUploadProps> = ({
       }}
       render={({ field }) => (
         <div style={style} className={classNames}>
-          <label>{fieldLabel}</label>
+          <label className='block mb-2 text-sm font-medium text-gray-900 max-w-75'>
+            {fieldLabel}
+          </label>
           <Input
             type='file'
+            className='block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none'
             disabled={disabled}
             onChange={(e) => handleFileChange(e as ChangeEvent<HTMLInputElement>, field.onChange)}
           />
-          {fileName && <p>Selected file: {fileName}</p>}
+
           {errors[fieldName] && (
             <FormHelperText error>{String(errors[fieldName]?.message)}</FormHelperText>
           )}
