@@ -1,0 +1,1 @@
+const s="/api/report",R=`${s}/reimburse/list`,t=`${s}/reimburse/export`,E=`${s}/business-trip/list`,T=`${s}/business-trip/export`,e=`${s}/business-trip-dec/list`,_=`${s}/business-trip-dec/export`,r=`${s}/purchase/list`,i=`${s}/purchase/export`;export{E as R,T as a,e as b,_ as c,i as d,r as e,R as f,t as g};

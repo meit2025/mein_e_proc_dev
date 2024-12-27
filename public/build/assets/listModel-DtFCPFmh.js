@@ -1,0 +1,1 @@
+const e=[{field:"titel",headerName:"Title Setting",width:200,filterable:!0},{field:"key",headerName:"Key  Setting",width:200,filterable:!0},{field:"value",headerName:"value  Setting",width:200,filterable:!0},{field:"is_active",headerName:"Active",width:200,filterable:!0}];export{e as columns};

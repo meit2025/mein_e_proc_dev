@@ -39,6 +39,7 @@ class MasterTypeReimburseController extends Controller
                     'id' => $map->id,
                     'code' => $map->code,
                     'is_employee' => $map->is_employee ? 'Employee' : 'Family',
+                    'interval_claim_period' => $map->interval_claim_period ?  $map->interval_claim_period / 365 . ' Year' : '-',
                     'material_group' => $map->materialGroup->material_group,
                     'family_status' => $map->family_status,
                     'material_number' => $map->masterMaterial->material_number,
@@ -111,6 +112,7 @@ class MasterTypeReimburseController extends Controller
             'limit' => 'required|min:1|numeric',
             'is_employee' => 'required|boolean',
             'family_status' => '',
+            'interval_claim_period' => '',
             'material_group' => 'required',
             'material_number' => 'required',
             'grade_option' => 'required'
@@ -189,6 +191,7 @@ class MasterTypeReimburseController extends Controller
             'is_employee' => 'required|boolean',
             'family_status' => '',
             'material_group' => 'required',
+            'interval_claim_period' => '',
             'material_number' => 'required',
             'grade_option' => 'required'
         ];
