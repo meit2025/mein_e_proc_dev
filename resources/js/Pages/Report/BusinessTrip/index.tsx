@@ -77,6 +77,7 @@ export const Index = ({
 
             // Kirim permintaan ke endpoint dengan filter
             const response = await axiosInstance.get(REPORT_BT_EXPORT + data, {
+                responseType: "blob"
             });
 
             console.log(response);
@@ -86,7 +87,7 @@ export const Index = ({
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', 'Business_Trip_Request_Report.csv'); // Nama file
+            link.setAttribute('download', 'Business_Trip_Request_Report.xlsx'); // Nama file
             document.body.appendChild(link);
             link.click();
 
