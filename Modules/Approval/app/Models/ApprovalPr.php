@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Master\Models\DocumentType;
 use Modules\Master\Models\MasterDivision;
+use Modules\Master\Models\MasterPosition;
 use Modules\Master\Models\MasterTrackingNumber;
 use Modules\Master\Models\PurchasingGroup;
 
@@ -29,6 +30,7 @@ class ApprovalPr extends Model
         'master_division_id',
         'purchasing_group_id',
         'master_tracking_number_id',
+        'master_position_id',
     ];
 
     // protected static function newFactory(): ApprovalPrFactory
@@ -48,6 +50,10 @@ class ApprovalPr extends Model
     public function masterDivision()
     {
         return $this->belongsTo(MasterDivision::class);
+    }
+    public function masterPosition()
+    {
+        return $this->belongsTo(MasterPosition::class);
     }
 
     public function purchasingGroup()

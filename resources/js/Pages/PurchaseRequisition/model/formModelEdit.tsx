@@ -8,7 +8,7 @@ export const formModelEdit: Array<FormFieldModel<any>> = [
   {
     type: 'select',
     name: 'user_id',
-    label: 'Requisition',
+    label: 'Request For ',
     required: true,
     disabled: true,
     options: [],

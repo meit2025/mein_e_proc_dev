@@ -122,7 +122,7 @@ class ProcurementController extends Controller
         } catch (\Throwable $th) {
             //throw $th;
             DB::rollBack();
-            return $this->errorResponse($th->getMessage());
+            return $this->errorResponse("Error: contact your administrator");
         }
     }
 
@@ -131,7 +131,7 @@ class ProcurementController extends Controller
      */
     public function show($id)
     {
-        $procurement = Purchase::with('vendors.units.cashAdvancePurchases', 'entertainment', 'cashAdvancePurchases', 'attachment', 'status')->find($id);
+        $procurement = Purchase::with('vendors.units.cashAdvancePurchases', 'entertainment', 'cashAdvancePurchases', 'attachment', 'status', 'createdBy', 'updatedBy')->find($id);
         $approval = Approval::with('user.divisions')->where('document_id', $id)->where('document_name', 'PR')->orderBy('id', 'ASC')->get();
         return $this->successResponse([
             'data' => $procurement,

@@ -86,10 +86,11 @@ const ArrayForm = ({
 
   const handelGetMaterialNumber = async (value: string) => {
     getMaterialNumber('', {
-      name: 'material_number',
+      name: 'material_description',
       id: 'material_number',
       tabel: 'master_materials',
       attribut: value,
+      isMapping: true,
       where: {
         key: 'material_group',
         parameter: value,
@@ -127,25 +128,26 @@ const ArrayForm = ({
       updatedItems = [...currentItems, newItem];
     }
 
+    // Simpan array baru ke React Hook Form state
+    setValue(`vendors[${dataIndex}].units`, updatedItems);
+    setValue('indexEdit', 0);
+    setValue('item_id', null);
+
     const dataVendorArray = getValues('vendors').filter(
       (item: any) => (item.winner || false) === true,
     ); // get the vendor data
 
     const dataVendor = dataVendorArray.length > 0 ? dataVendorArray[0] : null;
 
-    if (dataVendor === null || dataVendor === undefined) {
-      showToast('Please Select Vendor Winner', 'error');
-      return;
+    if (dataVendor !== null) {
+      const winnerUnit = dataVendor.units || [];
+
+      const totalSum = winnerUnit.reduce((sum: number, item: any) => sum + item.total_amount, 0);
+      setValue('total_all_amount', totalSum);
+      const data = (parseInt(watch('cash_advance_purchases.dp')) / 100) * totalSum;
+      setValue('cash_advance_purchases.nominal', data);
     }
-    const winnerUnit = dataVendor.units || [];
 
-    const totalSum = winnerUnit.reduce((sum: number, item: any) => sum + item.total_amount, 0);
-
-    // Simpan array baru ke React Hook Form state
-    setValue(`vendors[${dataIndex}].units`, updatedItems);
-    setValue('total_all_amount', totalSum);
-    setValue('indexEdit', 0);
-    setValue('item_id', null);
     resetindex();
   };
 
@@ -255,7 +257,7 @@ const ArrayForm = ({
       />
 
       <FormSwitch
-        fieldLabel='Vendor Winner'
+        fieldLabel='Propose Vendor'
         fieldName={`vendors[${dataIndex}].winner`}
         isRequired={false}
         disabled={disable}

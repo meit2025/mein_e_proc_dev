@@ -108,13 +108,15 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
         const approvalFrom = response.data?.data?.approval_route.map(
           (route: any) => route.user.name,
         );
-        const approvalFromStatusRoute = (response.data?.data?.approval ?? []).map((route: any) => {
-          return {
-            status: '',
-            name: route.user.name,
-            dateApproved: '',
-          };
-        });
+        const approvalFromStatusRoute = (response.data?.data?.approval_route ?? []).map(
+          (route: any) => {
+            return {
+              status: '',
+              name: route.user.name,
+              dateApproved: '',
+            };
+          },
+        );
 
         setApprovalRoute({
           approvalRequest,
