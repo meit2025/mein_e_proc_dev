@@ -1,47 +1,26 @@
+import React from 'react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import DataGridComponent from '@/components/commons/DataGrid';
-import {
-    DETAIL_REIMBURSE,
-    LIST_REIMBURSE,
-    STORE_REIMBURSE,
-    UPDATE_REIMBURSE,
-} from '@/endpoint/reimburse/api';
-import { FormType } from '@/lib/utils';
+import { REPORT_REIMBURSE_LIST, REPORT_REIMBURSE_EXPORT } from '@/endpoint/report/api';
 import MainLayout from '@/Pages/Layouts/MainLayout';
-import React, { ReactNode } from 'react';
-import {
-    columns,
-    CostCenter,
-    Currency,
-    Period,
-    PurchasingGroup,
-    Tax,
-    User,
-} from './model/listModel';
 import { useAlert } from '@/contexts/AlertContext';
 import axiosInstance from '@/axiosInstance';
-import { PAGE_REPORT } from '@/endpoint/report/page';
-import { REPORT_REIMBURSE_EXPORT, REPORT_REIMBURSE_LIST } from '@/endpoint/report/api';
+import { FormType } from '@/lib/utils';
+import { columns } from './model/listModel';
 
 interface Props {
-    users: User[];
+    users: any[];
     categories: string;
-    periods: Period[];
-    currencies: Currency[];
-    purchasing_groups: PurchasingGroup[];
-    taxes: Tax[];
-    cost_center: CostCenter[];
-    currentUser: User;
+    periods: any[];
+    currencies: any[];
+    purchasing_groups: any[];
+    taxes: any[];
+    cost_center: any[];
+    currentUser: any;
     latestPeriod: any;
+    types: any[];
+    statuses: any[];
 }
-
-const roleAkses = 'reimburse';
-const roleConfig = {
-    detail: `${roleAkses} view`,
-    create: `${roleAkses} create`,
-    update: `${roleAkses} update`,
-    delete: `${roleAkses} delete`,
-};
 
 export const Index = ({
     purchasing_groups,
@@ -53,6 +32,8 @@ export const Index = ({
     periods,
     currentUser,
     latestPeriod,
+    types,
+    statuses,
 }: Props) => {
     const [openForm, setOpenForm] = React.useState<boolean>(false);
     const [formType, setFormType] = React.useState({
@@ -60,29 +41,36 @@ export const Index = ({
         id: undefined,
     });
 
-    function openFormHandler() {
-        setFormType({
-            type: FormType.create,
-            id: null,
-        });
-        setOpenForm(!openForm);
-    }
+    // Filter states
+    const [startDate, setStartDate] = React.useState<string | null>(null);
+    const [endDate, setEndDate] = React.useState<string | null>(null);
+    const [status, setStatus] = React.useState<string>('');
+    const [type, setType] = React.useState<string>('');
 
     const { showToast } = useAlert();
 
-    const exporter = async (data: string, pdf: boolean) => {
+    // Handle Exporter
+    const exporter = async (data: string) => {
         try {
-            console.log(data);
+            // const params = new URLSearchParams({
+            //     startDate: startDate || '',
+            //     endDate: endDate || '',
+            //     status: status || '',
+            //     type: type || '',
+            //     pdf: String(pdf),
+            // }).toString();
 
-            // Kirim permintaan ke endpoint dengan filter
-            const response = await axiosInstance.get(REPORT_REIMBURSE_EXPORT + data + '&pdf=' + pdf, {
+            // const response = await axiosInstance.get(`${REPORT_REIMBURSE_EXPORT}?${params}`, {
+            //     responseType: 'blob',
+            // });
+            const response = await axiosInstance.get(REPORT_REIMBURSE_EXPORT + data, {
                 responseType: "blob"
             });
 
-            // Membuat file dari respons
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
+            // link.setAttribute('download', `Reimburse_Report.${pdf ? 'pdf' : 'xlsx'}`);
             link.setAttribute('download', 'Reimburse_Report.xlsx'); // Nama file
             document.body.appendChild(link);
             link.click();
@@ -98,28 +86,81 @@ export const Index = ({
 
     return (
         <>
-            <div className='flex md:mb-4 mb-2 w-full justify-end'>
-                {/* Tambahkan tombol atau elemen lain di sini jika diperlukan */}
-            </div >
+            <div className='flex flex-col md:mb-4 mb-2 w-full'>
+                {/* Filters */}
+                <div className='flex gap-4 mb-4'>
+                    <div>
+                        <label htmlFor='start-date' className='block mb-1'>Start Date</label>
+                        <input
+                            type='date'
+                            value={startDate || ''}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            className='input-class'
+                            placeholder='Start Date'
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>End Date</label>
+                        <input
+                            type='date'
+                            value={endDate || ''}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            className='input-class'
+                            placeholder='End Date'
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>Status</label>
+                        <select value={status} onChange={(e) => setStatus(e.target.value)} className='select-class'>
+                            <option value=''>All Status</option>
+                            <option value='waiting_approve'>Waiting Approve</option>
+                            <option value='cancel'>Cancel</option>
+                            <option value='approve_to'>Approved</option>
+                            <option value='reject_to'>Rejected</option>
+                            <option value='fully_approve'>Fully Approved</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>Type</label>
+                        <select
+                            value={type}
+                            onChange={(e) => setType(e.target.value)}
+                            className="select-class"
+                            id="type"
+                        >
+                            <option value="">All Types</option>
+                            {types.map((typeOption) => (
+                                <option
+                                    key={typeOption.code}
+                                    value={typeOption.code}
+                                >
+                                    {typeOption.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+            </div>
 
+            {/* Data Grid Component */}
             <DataGridComponent
                 isHistory={false}
-                onExport={async (x: string) => await exporter(x, false)}
-                // onExportPdf={async (x: string) => await exporter(x, true)}
-                role={roleConfig}
+                // onExport={async () => await exporter(false)}
+                onExport={async (x: string) => await exporter(x)}
+                // onExportPdf={async () => await exporter(true)}
+                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&`}
                 columns={columns}
                 url={{
-                    url: REPORT_REIMBURSE_LIST,
-                    // detailUrl: '/reimburse/detail',
+                    url: `${REPORT_REIMBURSE_LIST}`,
                 }}
-                labelFilter='search'
+                labelFilter='Search'
             />
         </>
     );
 };
 
 // Assign layout to the page
-Index.layout = (page: ReactNode) => (
+Index.layout = (page: React.ReactNode) => (
     <MainLayout title='Report' description='Reimburse'>
         {page}
     </MainLayout>
