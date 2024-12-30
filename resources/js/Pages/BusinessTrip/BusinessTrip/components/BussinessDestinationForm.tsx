@@ -78,28 +78,6 @@ interface User {
   name: string;
 }
 
-interface Type {
-  id: string;
-  code: string;
-  name: string;
-}
-
-interface CurrencyModel {
-  id: string;
-  code: string;
-}
-
-interface BusinessTripAttachement {
-  id: number;
-  url: string;
-  file_name: string;
-}
-
-interface Props {
-  users: User[];
-  listPurposeType: PurposeTypeModel[];
-}
-
 export function BussinessDestinationForm({
   form,
   index,
@@ -113,7 +91,7 @@ export function BussinessDestinationForm({
   dataPurchasingGroup,
   dataDestination,
   type,
-  btEdit
+  btClone,
 }: {
   form: any;
   index: number;
@@ -127,7 +105,7 @@ export function BussinessDestinationForm({
   dataPurchasingGroup: any;
   dataDestination: any;
   type: any;
-  btEdit: any;
+  btClone: any;
 }) {
   const {
     fields: detailAttedanceFields,
@@ -207,23 +185,77 @@ export function BussinessDestinationForm({
             : generateDetailAllowanceByDate(item.grade_price),
       };
     });
+    console.log(allowancesForm, 'allowancesForm');
     replaceAllowance(allowancesForm);
   }
 
-  //   console.log(listDestination, 'listDestination 123');
+  const [selectedDates, setSelectedDates] = React.useState<
+    { start: Date | undefined; end: Date | undefined }[]
+  >([]);
+
+  const handleDateStartChange = (value: Date | undefined, index: number) => {
+    updateDestination(index, {
+      ...destination,
+      business_trip_start_date: value,
+    });
+    console.log(index);
+    setSelectedDates((prev) => {
+      const updated = [...prev];
+
+      // Pastikan array memiliki panjang yang cukup
+      //   while (updated.length <= index) {
+      //     updated.push({ start: undefined, end: undefined });
+      //   }
+
+      // Perbarui hanya elemen yang ditargetkan
+      updated[index] = {
+        ...updated[index], // Pastikan data sebelumnya tetap ada
+        start: value,
+      };
+
+      return updated;
+    });
+  };
+
+  const handleDateEndChange = (value: Date | undefined, index: number) => {
+    updateDestination(index, {
+      ...destination,
+      business_trip_end_date: value,
+    });
+    setSelectedDates((prev) => {
+      const updated = [...prev];
+
+      // Pastikan array memiliki panjang yang cukup
+      //   while (updated.length <= index) {
+      //     updated.push({ start: undefined, end: undefined });
+      //   }
+
+      // Perbarui hanya elemen yang ditargetkan
+      updated[index] = {
+        ...updated[index], // Pastikan data sebelumnya tetap ada
+        end: value,
+      };
+
+      return updated;
+    });
+  };
+
+  console.log(selectedDates, 'Destination');
   return (
     <TabsContent value={`destination${index + 1}`}>
       <div key={index}>
         <table className='text-xs mt-4 reimburse-form-detail font-thin'>
           <tr>
-            <td width={200}>Destination {destination.destination}</td>
+            <td width={200}>
+              Destination<span className='text-red-600'>*</span>
+            </td>
             <td>
               <FormAutocomplete<any>
                 fieldLabel=''
                 options={dataDestination}
                 fieldName={`destinations.${index}.destination`}
                 isRequired={true}
-                disabled={type == btEdit ? (form.watch(`destinations.${index}.destination`) ? true : false) : false}
+                disabled={false}
                 placeholder={'Select Destination'}
                 classNames='mt-2 w-full'
                 onChangeOutside={(value) => {
@@ -236,14 +268,16 @@ export function BussinessDestinationForm({
             </td>
           </tr>
           <tr>
-            <td width={200}>Pajak</td>
+            <td width={200}>
+              Pajak<span className='text-red-600'>*</span>
+            </td>
             <td>
               <FormAutocomplete<any>
                 fieldLabel=''
                 options={dataTax}
                 fieldName={`destinations.${index}.pajak_id`}
                 isRequired={true}
-                disabled={type == btEdit ? (form.watch(`destinations.${index}.pajak_id`) ? true : false) : false}
+                disabled={false}
                 placeholder={'Select Pajak'}
                 classNames='mt-2 w-full'
                 onChangeOutside={(value) => {
@@ -256,14 +290,16 @@ export function BussinessDestinationForm({
             </td>
           </tr>
           <tr>
-            <td width={200}>Purchasing Group</td>
+            <td width={200}>
+              Purchasing Group<span className='text-red-600'>*</span>
+            </td>
             <td>
               <FormAutocomplete<any>
                 fieldLabel=''
                 options={dataPurchasingGroup}
                 fieldName={`destinations.${index}.purchasing_group_id`}
                 isRequired={true}
-                disabled={type == btEdit ? (form.watch(`destinations.${index}.purchasing_group_id`) ? true : false) : false}
+                disabled={false}
                 placeholder={'Select Purchasing Group'}
                 classNames='mt-2 w-full'
                 onChangeOutside={(value) => {
@@ -276,7 +312,9 @@ export function BussinessDestinationForm({
             </td>
           </tr>
           <tr>
-            <td width={200}>Bussines Trip Date</td>
+            <td width={200}>
+              Bussines Trip Date<span className='text-red-600'>*</span>
+            </td>
             <td className='flex space-x-2 items-center'>
               <FormField
                 control={form.control}
@@ -287,19 +325,16 @@ export function BussinessDestinationForm({
                       <CustomDatePicker
                         initialDate={destination.business_trip_start_date}
                         onDateChange={(value) => {
-                          updateDestination(index, {
-                            ...destination,
-                            business_trip_start_date: value,
-                          });
+                          handleDateStartChange(value, index);
                         }}
-                        disabled={type == btEdit ? (form.watch(`destinations.${index}.business_trip_start_date`) ? true : false) : false}
+                        disabled={false}
+                        disabledDays={[]}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
               <span>To</span>
               <FormField
                 control={form.control}
@@ -310,12 +345,10 @@ export function BussinessDestinationForm({
                       <CustomDatePicker
                         initialDate={destination.business_trip_end_date}
                         onDateChange={(value) => {
-                          updateDestination(index, {
-                            ...destination,
-                            business_trip_end_date: value,
-                          });
+                          handleDateEndChange(value, index);
                         }}
-                        disabled={type == btEdit ? (form.watch(`destinations.${index}.business_trip_end_date`) ? true : false) : false}
+                        disabled={false}
+                        disabledDays={[]}
                       />
                     </FormControl>
                     {/* <FormDescription>This is your public display name.</FormDescription> */}
@@ -326,8 +359,14 @@ export function BussinessDestinationForm({
 
               <Button
                 type='button'
-                className={type == btEdit ? (form.watch(`destinations.${index}.destination`) ? 'hidden' : '') : ''}
                 onClick={() => detailAttedancesGenerate()}
+                // className={
+                //   type == btEdit
+                //     ? form.watch(`destinations.${index}.destination`)
+                //       ? 'hidden'
+                //       : ''
+                //     : ''
+                // }
               >
                 Get Detail
               </Button>
@@ -341,7 +380,7 @@ export function BussinessDestinationForm({
           updateAttedanceFields={updateDetailAttedances}
           destinationIndex={index}
           type={type}
-          btEdit={btEdit}
+          btClone={btClone}
         />
         <table className='text-xs mt-4 reimburse-form-detail font-thin'>
           <tr>
@@ -349,7 +388,13 @@ export function BussinessDestinationForm({
             <td></td>
           </tr>
         </table>
-        <DetailAllowance allowanceField={allowancesField} destinationIndex={index} form={form} type={type} btEdit={btEdit} />
+        <DetailAllowance
+          allowanceField={allowancesField}
+          destinationIndex={index}
+          form={form}
+          type={type}
+          btClone={btClone}
+        />
       </div>
 
       <ResultTotalItem
