@@ -134,6 +134,7 @@ export default function AllowanceItemForm({
       const response = await axiosInstance.get(detailUrl ?? '');
 
       const allowance = response.data.data.allowance;
+      console.log(allowance);
       getMaterials(allowance.material_group);
 
       const grades = response.data.data.grades;
@@ -142,12 +143,12 @@ export default function AllowanceItemForm({
         code: allowance.code,
         name: allowance.name,
         type: allowance.type,
-        material_number: allowance.material_group,
+        material_number: allowance.material_number,
         material_group: allowance.material_group,
         currency_id: allowance.currency_id,
         // formula: allowance.formula,
         allowance_category_id: allowance.allowance_category_id,
-        request_value: allowance.request_value,
+        //   request_value: allowance.request_value,
         grade_option: allowance.grade_option,
         grade_all_price: allowance.grade_all_price,
         grades: grades,
@@ -155,6 +156,7 @@ export default function AllowanceItemForm({
 
       // form.setValue('material_number', allowance.material_number);
       // form.setValue('request_value', allowance.request_value);
+      form.setValue('request_value', allowance.request_value);
     } catch (e) {
       const error = e as AxiosError;
     }
@@ -164,8 +166,6 @@ export default function AllowanceItemForm({
     control: form.control,
     name: `grades`,
   });
-
-  console.log('type', type);
 
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -423,7 +423,7 @@ export default function AllowanceItemForm({
                 />
               </td>
             </tr>
-            {/* 
+            {/*
             <tr>
               <td width={200}>Purpose Type</td>
               <td>
@@ -449,33 +449,54 @@ export default function AllowanceItemForm({
             </tr> */}
             <tr>
               <td width={200}>Grade</td>
-              <td>
+              <td className='gap-4'>
                 <FormField
                   control={form.control}
                   name='grade_option'
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className='flex flex space-x-1'
+                        <Select
+                          onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
+                          value={field.value} // Set the current value from React Hook Form
                         >
-                          <FormItem className='flex text-xs items-center space-x-3 space-y-0'>
-                            <FormControl>
-                              <RadioGroupItem value='all' />
-                            </FormControl>
-                            <FormLabel className='text-xs'>All</FormLabel>
-                          </FormItem>
-                          <FormItem className='flex items-center space-x-3 space-y-0'>
-                            <FormControl>
-                              <RadioGroupItem value='grade' />
-                            </FormControl>
-                            <FormLabel className='text-xs'>Grade</FormLabel>
-                          </FormItem>
-                        </RadioGroup>
+                          <SelectTrigger className='w-[200px]'>
+                            <SelectValue placeholder='Select Request Value' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem key='all' value='all'>
+                              All
+                            </SelectItem>
+                            <SelectItem key='grade' value='grade'>
+                              grade
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
+                    // <FormItem>
+                    //   <FormControl>
+                    //     <RadioGroup
+                    //       onValueChange={field.onChange}
+                    //       defaultValue={field.value}
+                    //       className='flex flex space-x-1'
+                    //     >
+                    //       <FormItem className='flex text-xs items-center space-x-3 space-y-0'>
+                    //         <FormControl>
+                    //           <RadioGroupItem value='all' />
+                    //         </FormControl>
+                    //         <FormLabel className='text-xs'>All</FormLabel>
+                    //       </FormItem>
+                    //       <FormItem className='flex items-center space-x-3 space-y-0'>
+                    //         <FormControl>
+                    //           <RadioGroupItem value='grade' />
+                    //         </FormControl>
+                    //         <FormLabel className='text-xs'>Grade</FormLabel>
+                    //       </FormItem>
+                    //     </RadioGroup>
+                    //   </FormControl>
+                    // </FormItem>
                   )}
                 />
                 {form.getValues('grade_option') === 'all' ? (
@@ -546,7 +567,7 @@ export default function AllowanceItemForm({
             </tr>
 
             <tr>
-              <td width={200}>Request Value {form.getValues('request_value')}</td>
+              <td width={200}>Request Value</td>
               <td>
                 <FormField
                   control={form.control}
@@ -554,32 +575,56 @@ export default function AllowanceItemForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className='flex flex space-x-1'
+                        <Select
+                          onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
+                          value={field.value} // Set the current value from React Hook Form
                         >
-                          <FormItem className='flex text-xs items-center space-x-3 space-y-0'>
-                            <FormControl>
-                              <RadioGroupItem value='unlimited' />
-                            </FormControl>
-                            <FormLabel className='text-xs'>Unlimited</FormLabel>
-                          </FormItem>
-                          <FormItem className='flex items-center space-x-3 space-y-0'>
-                            <FormControl>
-                              <RadioGroupItem value='up to max value' />
-                            </FormControl>
-                            <FormLabel className='text-xs'>Up To Max Value</FormLabel>
-                          </FormItem>
-                          <FormItem className='flex items-center space-x-3 space-y-0'>
-                            <FormControl>
-                              <RadioGroupItem value='fixed value' />
-                            </FormControl>
-                            <FormLabel className='text-xs'>Fixed Value</FormLabel>
-                          </FormItem>
-                        </RadioGroup>
+                          <SelectTrigger className='w-[200px]'>
+                            <SelectValue placeholder='Select Request Value' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem key='unlimited' value='unlimited'>
+                              Unlimited
+                            </SelectItem>
+                            <SelectItem key='up to max value' value='up to max value'>
+                              Up to Max Value
+                            </SelectItem>
+                            <SelectItem key='fixed value' value='fixed value'>
+                              Fixed Value
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
+                    // <FormItem>
+                    //   <FormControl>
+                    //     <RadioGroup
+                    //       onValueChange={field.onChange}
+                    //       defaultValue={field.value}
+                    //       className='flex flex space-x-1'
+                    //     >
+                    //       <FormItem className='flex text-xs items-center space-x-3 space-y-0'>
+                    //         <FormControl>
+                    //           <RadioGroupItem value='unlimited' />
+                    //         </FormControl>
+                    //         <FormLabel className='text-xs'>Unlimited</FormLabel>
+                    //       </FormItem>
+                    //       <FormItem className='flex items-center space-x-3 space-y-0'>
+                    //         <FormControl>
+                    //           <RadioGroupItem value='up to max value' />
+                    //         </FormControl>
+                    //         <FormLabel className='text-xs'>Up To Max Value</FormLabel>
+                    //       </FormItem>
+                    //       <FormItem className='flex items-center space-x-3 space-y-0'>
+                    //         <FormControl>
+                    //           <RadioGroupItem value='fixed value' />
+                    //         </FormControl>
+                    //         <FormLabel className='text-xs'>Fixed Value</FormLabel>
+                    //       </FormItem>
+                    //     </RadioGroup>
+                    //   </FormControl>
+                    // </FormItem>
                   )}
                 />
               </td>

@@ -13,7 +13,7 @@ const App = () => {
             <div className="card rounded-3xl shadow-lg my-20">
                 <header style={{ backgroundImage: "url('assets/media/images/2600x1200/bg-14.png')" }} className="p-10 text-center mb-8 bg-cover bg-[right_top_-1rem] bg-no-repeat bg-opacity-60 bg-[#F1F1F4] w-full">
                     <img src="/images/main_logo.png" alt="Company Logo" className="mx-auto mb-4" />
-                    <h1 className="text-2xl font-bold">Welcome to the MEIN Management Information System</h1>
+                    <h1 className="text-2xl font-bold">Welcome to MEIN Information System Portal</h1>
                 </header>
 
                 <div className="w-full bg-white rounded px-6">
@@ -27,7 +27,6 @@ const App = () => {
                             <p className="text-white mb-6">This is our central hub for accessing all your self service company resource and tools.</p>
                             <a href='/business-trip' className='btn bg-transparent border px-4 m-2 border-solid border-white text-white rounded-full'>Business Trip</a>
                             <a href='/reimburse' className='btn bg-transparent border px-4 m-2 border-solid border-white text-white rounded-full'>Reimbursement</a>
-                            <a href='/business-trip/business-trip-declaration' className='btn bg-transparent border px-4 m-2 border-solid border-white text-white rounded-full'>Claim</a>
                         </div>
                         <div style={{ backgroundImage: "url('assets/media/images/2600x1200/bg-14.png')" }}
                             className={` bg-cover bg-center bg-no-repeat bg-opacity-90 px-6 py-10 rounded-lg shadow-lg text-center bg-green-500 `}>

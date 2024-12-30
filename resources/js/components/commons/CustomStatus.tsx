@@ -37,6 +37,10 @@ export function CustomStatus({ className, code, name }: CustomStatusProps) {
       classess = 'bg-green-50 border-green-600  text-green-600';
       iconComponent = <CircleCheck size={iconSize} />;
       break;
+    case 'revise':
+      classess = 'bg-red-50 border-red-600  text-red-600';
+      iconComponent = <Ban size={iconSize} />;
+      break;
     default:
       classess = 'bg-green-50 border-green-400 text-green-600 ';
       iconComponent = <CircleCheck size={iconSize} />;

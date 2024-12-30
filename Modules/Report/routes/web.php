@@ -38,5 +38,6 @@ Route::group(['prefix' => 'api/report', 'middleware' => 'auth'], function () {
     Route::group(['prefix' => 'purchase'], function () {
         Route::get('/list', [ReportController::class, 'purchase'])->name('report.purchase.index')->middleware(PermissionMiddleware::class . ':report purchase requisition view');
         Route::get('/export', [ReportController::class, 'purchaseExport'])->name('report.purchase.export')->middleware(PermissionMiddleware::class . ':report purchase requisition export');
+        Route::get('/types', [ReportController::class, 'purchaseTypes'])->name('report.purchase.types')->middleware(PermissionMiddleware::class . ':report purchase requisition view');
     });
 });

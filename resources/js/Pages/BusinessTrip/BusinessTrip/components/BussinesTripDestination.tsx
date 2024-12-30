@@ -111,7 +111,7 @@ export function BussinesTripDestination({
   dataPurchasingGroup,
   dataDestination,
   type,
-  btEdit
+  btClone,
 }: {
   updateDestination: any;
   destinationField: any;
@@ -125,7 +125,7 @@ export function BussinesTripDestination({
   dataPurchasingGroup: any;
   dataDestination: any;
   type: any;
-  btEdit: any;
+  btClone: any;
 }) {
   const [startDate, setStartDate] = React.useState<Date>();
   const [endDate, setEndDate] = React.useState<Date>();
@@ -142,11 +142,11 @@ export function BussinesTripDestination({
 
       {destinationField.map((destination: any, index: number) => (
         <BussinessDestinationForm
-          listAllowances={listAllowances}
-          updateDestination={updateDestination}
-          destination={destination}
           form={form}
           index={index}
+          destination={destination}
+          updateDestination={updateDestination}
+          listAllowances={listAllowances}
           setTotalAllowance={setTotalAllowance}
           pajak={pajak}
           purchasingGroup={purchasingGroup}
@@ -154,7 +154,7 @@ export function BussinesTripDestination({
           dataPurchasingGroup={dataPurchasingGroup}
           dataDestination={dataDestination}
           type={type}
-          btEdit={BusinessTripType.edit}
+          btClone={btClone}
         />
       ))}
     </Tabs>

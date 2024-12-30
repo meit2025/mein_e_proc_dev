@@ -1,0 +1,1 @@
+const E="/api/master/reimburse-quota",R=`${E}/`,t=_=>`${E}/detailData/${_}`,s=`${E}/create`,U=_=>`${E}/edit/${_}`,a=_=>`${E}/update/${_}`,I=`${E}/delete`,T=`${E}/getPeriodDropdown`;export{I as D,U as E,t as L,s as S,a as U,R as a,T as b};

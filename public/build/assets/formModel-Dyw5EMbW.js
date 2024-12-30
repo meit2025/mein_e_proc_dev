@@ -1,0 +1,1 @@
+const e=[{type:"input",name:"account",label:"Name account",placeholder:"Enter your account",required:!0},{type:"input",name:"description",label:"description",placeholder:"Enter your description",required:!0}];export{e as formModel};

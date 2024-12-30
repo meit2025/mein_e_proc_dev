@@ -16,6 +16,7 @@ import { Box, Modal } from '@mui/material';
 import FormTextArea from '@/components/Input/formTextArea';
 import DetailApproval from '@/components/approval/detailApproval';
 import moment from 'moment';
+import { CustomStatus } from '@/components/commons/CustomStatus';
 
 const style = {
   position: 'absolute',
@@ -68,7 +69,11 @@ const PrDetail = ({ id }: { id: number }) => {
           (item: any) => item.is_status === false,
         );
 
-        if (data.data?.data?.status_id !== 4 && firstFalseStatus?.user_id === auth?.user?.id) {
+        if (
+          data.data?.data?.status_id !== 4 &&
+          data.data?.data?.status_id !== 6 &&
+          firstFalseStatus?.user_id === auth?.user?.id
+        ) {
           setIsApproval(true);
         }
 
@@ -77,6 +82,7 @@ const PrDetail = ({ id }: { id: number }) => {
             status: route.status,
             name: route.user.name,
             dateApproved: moment(route.updated_at).format('YYYY-MM-DD'),
+            note: route.message,
           };
         });
 
@@ -107,6 +113,7 @@ const PrDetail = ({ id }: { id: number }) => {
   const handleOpen = (status: string) => {
     setOpen(true);
     methods.setValue('status', status);
+    methods.setValue('type', 'procurement');
   };
 
   return (
@@ -125,6 +132,17 @@ const PrDetail = ({ id }: { id: number }) => {
                 APPROVE
               </Button>
               <Button
+                onClick={() => handleOpen('Revise')}
+                style={{
+                  marginLeft: '1rem',
+                }}
+                variant='contained'
+                color='warning'
+                type='button'
+              >
+                Revise
+              </Button>
+              <Button
                 onClick={() => handleOpen('Rejected')}
                 style={{
                   marginLeft: '1rem',
@@ -138,6 +156,17 @@ const PrDetail = ({ id }: { id: number }) => {
             </div>
           </div>
         )}
+
+        <div className='w-full'>
+          <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
+            <label className='form-label max-w-40'>{'Status'}</label>
+            <CustomStatus
+              name={methods.watch('status.name')}
+              className={methods.watch('status.classname')}
+              code={methods.watch('status.code')}
+            />
+          </div>
+        </div>
 
         <div className='card-body'>
           <FormMapping

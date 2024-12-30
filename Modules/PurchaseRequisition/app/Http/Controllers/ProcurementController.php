@@ -96,6 +96,17 @@ class ProcurementController extends Controller
                 ]);
             }
 
+            if ($request->has('attachment') && is_array($request->attachment) && count($request->attachment) > 0) {
+                foreach ($request->attachment as $key => $value) {
+                    # code...
+                    $path = $this->saveBase64Image($value['file_path'], 'purchaserequisition');
+                    $purchase->attachment()->create([
+                        'file_name' => $value['file_name'],
+                        'file_path' => $path,
+                    ]);
+                }
+            }
+
             $this->approvalServices->PR($request, true, $purchase->id);
             DB::commit();
             $this->logToDatabase(
@@ -120,7 +131,7 @@ class ProcurementController extends Controller
      */
     public function show($id)
     {
-        $procurement = Purchase::with('vendors.units.cashAdvancePurchases', 'entertainment', 'cashAdvancePurchases')->findOrFail($id);
+        $procurement = Purchase::with('vendors.units.cashAdvancePurchases', 'entertainment', 'cashAdvancePurchases', 'attachment', 'status')->find($id);
         $approval = Approval::with('user.divisions')->where('document_id', $id)->where('document_name', 'PR')->orderBy('id', 'ASC')->get();
         return $this->successResponse([
             'data' => $procurement,

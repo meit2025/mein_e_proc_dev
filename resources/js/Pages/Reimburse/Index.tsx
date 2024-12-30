@@ -15,9 +15,7 @@ import {
   columns,
   CostCenter,
   Currency,
-  Period,
   PurchasingGroup,
-  Tax,
   User,
 } from './model/listModel';
 import { WorkflowApproval, WorkflowComponent } from '@/components/commons/WorkflowComponent';
@@ -25,10 +23,8 @@ import { WorkflowApproval, WorkflowComponent } from '@/components/commons/Workfl
 interface Props {
   users: User[];
   categories: string;
-  periods: Period[];
   currencies: Currency[];
   purchasing_groups: PurchasingGroup[];
-  taxes: Tax[];
   cost_center: CostCenter[];
   currentUser: User;
   latestPeriod: any;
@@ -47,9 +43,7 @@ export const Index = ({
   users,
   categories,
   currencies,
-  taxes,
   cost_center,
-  periods,
   currentUser,
   latestPeriod,
 }: Props) => {
@@ -80,10 +74,7 @@ export const Index = ({
             users={users}
             categories={categories}
             currencies={currencies}
-            periods={periods}
             currentUser={currentUser}
-            latestPeriod={latestPeriod}
-            taxes={taxes}
             cost_center={cost_center}
             edit_url={DETAIL_REIMBURSE(formType.id)}
             update_url={UPDATE_REIMBURSE(formType.id)}

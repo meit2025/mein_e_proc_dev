@@ -1,6 +1,7 @@
 import { FormHelperText } from '@mui/material';
 import { Controller, useFormContext } from 'react-hook-form';
 import { CSSProperties, ReactNode } from 'react';
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 
 interface FormInputProps {
   fieldLabel: string;
@@ -17,6 +18,7 @@ interface FormInputProps {
   lengthLabel?: string;
   icon?: ReactNode;
   onChanges?: (data: any) => void;
+  isRupiah?: boolean;
 }
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -34,10 +36,12 @@ const FormInput: React.FC<FormInputProps> = ({
   icon,
   onChanges,
   lengthLabel = 40,
+  isRupiah = false,
 }) => {
   const {
     control,
     formState: { errors },
+    watch,
   } = useFormContext();
 
   return (
@@ -90,6 +94,7 @@ const FormInput: React.FC<FormInputProps> = ({
                   minLength={minLength}
                   maxLength={maxLength}
                 />
+                {isRupiah && <span>{formatRupiah(watch(fieldName) ?? 0)}</span>}
               </label>
             );
           }}

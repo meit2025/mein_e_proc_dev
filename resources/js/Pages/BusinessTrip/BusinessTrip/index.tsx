@@ -1,9 +1,13 @@
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import DataGridComponent from '@/components/commons/DataGrid';
 import { DELET_API_BUSINESS_TRIP, GET_LIST_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
-import { DETAIL_PAGE_BUSINESS_TRIP } from '@/endpoint/business-trip/page';
+import {
+  CLONE_PAGE_BUSINESS_TRIP,
+  DETAIL_PAGE_BUSINESS_TRIP,
+  EDIT_PAGE_BUSINESS_TRIP,
+} from '@/endpoint/business-trip/page';
 import MainLayout from '@/Pages/Layouts/MainLayout';
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import React, { ReactNode } from 'react';
 import { DestinationModel } from '../Destination/models/models';
 import { PurposeTypeModel } from '../PurposeType/models/models';
@@ -22,7 +26,6 @@ interface propsType {
   pajak: Pajak[];
   costcenter: Costcenter[];
   purchasingGroup: PurchasingGroup[];
-  listDestination: DestinationModel[];
 }
 
 interface UserAuth {
@@ -31,6 +34,7 @@ interface UserAuth {
   email: string;
   role: string;
   role_id: string;
+  is_admin: string;
 }
 
 interface SharedProps {
@@ -47,7 +51,6 @@ export const Index = ({
   pajak,
   costcenter,
   purchasingGroup,
-  listDestination,
 }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
@@ -58,8 +61,8 @@ export const Index = ({
 
   function openFormHandler() {
     setBusinessTripForm({
-        type: BusinessTripType.create,
-        id: null,
+      type: BusinessTripType.create,
+      id: null,
     });
     setOpenForm(!openForm);
   }
@@ -83,7 +86,6 @@ export const Index = ({
           onOpenChange={openFormHandler}
         >
           <BussinessTripFormV1
-            listDestination={listDestination}
             users={users}
             idUser={userId}
             isAdmin={isAdmin}
@@ -106,9 +108,16 @@ export const Index = ({
         }}
         onCreate={openFormHandler}
         columns={columns}
-        onEdit={(value) => {
+        // onEdit={(value) => {
+        //   setBusinessTripForm({
+        //     type: BusinessTripType.edit,
+        //     id: value.toString(),
+        //   });
+        //   setOpenForm(true);
+        // }}
+        onClone={(value) => {
           setBusinessTripForm({
-            type: BusinessTripType.edit,
+            type: BusinessTripType.clone,
             id: value.toString(),
           });
           setOpenForm(true);
@@ -116,6 +125,8 @@ export const Index = ({
         url={{
           url: GET_LIST_BUSINESS_TRIP,
           detailUrl: DETAIL_PAGE_BUSINESS_TRIP,
+          //   editUrl: EDIT_PAGE_BUSINESS_TRIP,
+          clone: CLONE_PAGE_BUSINESS_TRIP,
         }}
         labelFilter='search'
       />

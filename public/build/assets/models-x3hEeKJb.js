@@ -1,0 +1,1 @@
+const e=[{field:"code",headerName:"Purpose Type Code",width:200,filterable:!0},{field:"name",headerName:"Purpose Type Name",width:200,filterable:!0},{field:"allowances",headerName:"Allowances",width:200,filterable:!0}];export{e as columns};
