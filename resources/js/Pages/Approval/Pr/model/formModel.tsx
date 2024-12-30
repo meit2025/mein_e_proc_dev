@@ -109,6 +109,17 @@ export const formModel: Array<FormFieldModel<any>> = [
   },
   {
     type: 'select',
+    name: 'master_position_id',
+    label: 'Position',
+    placeholder: 'Position',
+    options: [],
+    required: true,
+    style: {
+      width: '63.5rem',
+    },
+  },
+  {
+    type: 'select',
     name: 'purchasing_group_id',
     label: 'Purchasing group',
     placeholder: 'Purchasing group',

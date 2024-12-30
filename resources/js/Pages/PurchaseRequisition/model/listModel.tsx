@@ -6,7 +6,7 @@ import { GridColDef } from '@mui/x-data-grid';
 export const columns: GridColDef[] = [
   {
     field: 'user.name',
-    headerName: 'Requisition',
+    headerName: 'Request for',
     width: 200,
     filterable: false,
     renderCell: (params: any) => {

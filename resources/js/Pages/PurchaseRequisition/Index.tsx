@@ -25,15 +25,11 @@ export const Index = () => {
     deleteUrl: DELET_PR,
     detailUrl: DETAIL_PAGE_PR,
     clone: CLONE_PAGE_PR,
-  };
-
-  const data = async (data: string) => {
-    console.log(data);
+    cancelApproval: 'procurement',
   };
 
   return (
     <DataGridComponent
-      onExport={async (x: string) => await data(x)}
       isHistory={true}
       role={roleConfig}
       columns={columns}

@@ -99,7 +99,7 @@ export function WorkflowApprovalStep({
             <td width='300'>Step</td>
             <td>Name</td>
             <td>Status</td>
-            <td>Date Approved</td>
+            <td>Date</td>
             <td>Note</td>
           </tr>
           {workflowApprovalDiagram.map(
@@ -174,8 +174,12 @@ export function WorkflowComponent({
   return (
     <div className='flex flex-col rounded-xl space-y-6 border border-gray-200 p-4'>
       <WorkflowApproval workflowApproval={workflowApproval} />
-      <WorkflowApprovalStep workflowApprovalDiagram={workflowApprovalStep} />
-      <WorkflowApprovalDiagram workflowApprovalDiagram={workflowApprovalDiagram} />
+      <WorkflowApprovalStep
+        workflowApprovalDiagram={workflowApprovalStep as WorkflowApprovalStepInterfaceStatus[]}
+      />
+      <WorkflowApprovalDiagram
+        workflowApprovalDiagram={workflowApprovalDiagram as unknown as string[]}
+      />
     </div>
   );
 }
