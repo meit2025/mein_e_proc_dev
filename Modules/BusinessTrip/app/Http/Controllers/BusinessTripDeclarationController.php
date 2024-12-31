@@ -418,12 +418,28 @@ class BusinessTripDeclarationController extends Controller
         // $query->orderBy($sortBy, $sortDirection);
         if ($request->approval == "1") {
             $data = Approval::where('user_id', Auth::user()->id)
-                ->where('document_name', 'TRIP_DECLARATION')->pluck('document_id')->toArray();
-            $query = $query->whereIn('id', $data)->where('status_id',1);
+            ->where('document_name', 'TRIP_DECLARATION')->get();
+            $arr = $data->filter(function ($value) {
+                $previousApproval = Approval::where('id', '<', $value->id)
+                    ->where('document_id', $value->document_id)
+                    ->orderBy('id', 'asc')
+                    ->first();
+
+                if (is_null($previousApproval)) {
+                    return !$value->is_status;
+                }
+
+                return Approval::where('id', $previousApproval->id)
+                    ->where('is_status', true)
+                    ->exists();
+            })->pluck('document_id');
+            $query = $query->whereIn('id', $arr)->where('status_id',1);
+        }else{
+            $query = $query->where(function($query) {
+                $query->where('created_by', Auth::user()->id)
+                      ->orWhere('request_for', Auth::user()->id);
+            });
         }
-        // else{
-            // $query = $query->where('created_by', Auth::user()->id)->orWhere('request_for', Auth::user()->id);
-        // }
 
         $data = $query->where('type', 'declaration')->search(request(['search']))->latest()->paginate($perPage);
 
@@ -432,7 +448,7 @@ class BusinessTripDeclarationController extends Controller
             // $purposeRelations = $map->purposeType ? $map->purposeType->name : '';
             $requestFor = $map->requestFor ? $map->requestFor->name : '';
             $requestNo = $map->parentBusinessTrip ? $map->parentBusinessTrip->request_no : '';
-
+            
             return [
                 'id' => $map->id,
                 'declaration_no' => $map->request_no,

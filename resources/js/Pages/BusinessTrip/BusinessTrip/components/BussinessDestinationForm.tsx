@@ -92,6 +92,8 @@ export function BussinessDestinationForm({
   dataDestination,
   type,
   btClone,
+  setSelectedDates,
+  selectedDates,
 }: {
   form: any;
   index: number;
@@ -106,6 +108,8 @@ export function BussinessDestinationForm({
   dataDestination: any;
   type: any;
   btClone: any;
+  setSelectedDates: any;
+  selectedDates: any;
 }) {
   const {
     fields: detailAttedanceFields,
@@ -127,8 +131,6 @@ export function BussinessDestinationForm({
     control: form.control,
     name: `destinations.${index}.allowances`,
   });
-
-  //generate detail
 
   function detailAttedancesGenerate() {
     let momentStart = moment(destination.business_trip_start_date).startOf('day');
@@ -189,28 +191,18 @@ export function BussinessDestinationForm({
     replaceAllowance(allowancesForm);
   }
 
-  const [selectedDates, setSelectedDates] = React.useState<
-    { start: Date | undefined; end: Date | undefined }[]
-  >([]);
-
   const handleDateStartChange = (value: Date | undefined, index: number) => {
     updateDestination(index, {
       ...destination,
       business_trip_start_date: value,
     });
     console.log(index);
-    setSelectedDates((prev) => {
+    setSelectedDates((prev: any) => {
       const updated = [...prev];
-
-      // Pastikan array memiliki panjang yang cukup
-      //   while (updated.length <= index) {
-      //     updated.push({ start: undefined, end: undefined });
-      //   }
-
       // Perbarui hanya elemen yang ditargetkan
       updated[index] = {
         ...updated[index], // Pastikan data sebelumnya tetap ada
-        start: value,
+        from: value,
       };
 
       return updated;
@@ -222,25 +214,16 @@ export function BussinessDestinationForm({
       ...destination,
       business_trip_end_date: value,
     });
-    setSelectedDates((prev) => {
+    setSelectedDates((prev: any) => {
       const updated = [...prev];
-
-      // Pastikan array memiliki panjang yang cukup
-      //   while (updated.length <= index) {
-      //     updated.push({ start: undefined, end: undefined });
-      //   }
-
       // Perbarui hanya elemen yang ditargetkan
       updated[index] = {
         ...updated[index], // Pastikan data sebelumnya tetap ada
-        end: value,
+        to: value,
       };
-
       return updated;
     });
   };
-
-  console.log(selectedDates, 'Destination');
   return (
     <TabsContent value={`destination${index + 1}`}>
       <div key={index}>
@@ -328,7 +311,7 @@ export function BussinessDestinationForm({
                           handleDateStartChange(value, index);
                         }}
                         disabled={false}
-                        disabledDays={[]}
+                        disabledDays={selectedDates}
                       />
                     </FormControl>
                     <FormMessage />
@@ -348,7 +331,7 @@ export function BussinessDestinationForm({
                           handleDateEndChange(value, index);
                         }}
                         disabled={false}
-                        disabledDays={[]}
+                        disabledDays={selectedDates}
                       />
                     </FormControl>
                     {/* <FormDescription>This is your public display name.</FormDescription> */}
