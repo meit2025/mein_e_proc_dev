@@ -493,8 +493,23 @@ class BusinessTripController extends Controller
 
         // $query->orderBy($sortBy, $sortDirection);
         if ($request->approval == "1") {
-            $data = Approval::where('user_id', Auth::user()->id)->where('document_name', 'TRIP')->pluck('document_id')->toArray();
-            $query = $query->whereIn('id', $data)->where('status_id',1);
+            $data = Approval::where('user_id', Auth::user()->id)
+            ->where('document_name', 'TRIP')->get();
+            $arr = $data->filter(function ($value) {
+                $previousApproval = Approval::where('id', '<', $value->id)
+                    ->where('document_id', $value->document_id)
+                    ->orderBy('id', 'asc')
+                    ->first();
+
+                if (is_null($previousApproval)) {
+                    return !$value->is_status;
+                }
+
+                return Approval::where('id', $previousApproval->id)
+                    ->where('is_status', true)
+                    ->exists();
+            })->pluck('document_id');
+            $query = $query->whereIn('id', $arr)->where('status_id',1);
         }else{
             $query = $query->where(function($query) {
                 $query->where('created_by', Auth::user()->id)
@@ -509,7 +524,11 @@ class BusinessTripController extends Controller
         $query->getCollection()->transform(function ($map) {
 
             $purposeRelations = $map->purposeType ? $map->purposeType->name : ''; // Assuming 'name' is the field
-
+            $status = $map->status->name;
+            if ($map->status->name == 'Reject To :name') {
+                $name_reject = $map->approval->where('status','Rejected')->first()?->user?->name;
+                $status = str_replace(':name',$name_reject,$status);
+            }
             return [
                 'id' => $map->id,
                 'status_id' => $map->status_id,
@@ -517,7 +536,7 @@ class BusinessTripController extends Controller
                 'remarks' => $map->remarks,
                 'request_for' => $map->requestFor->name,
                 'status' => [
-                    'name' => $map->status->name,
+                    'name' => $status,
                     'classname' => $map->status->classname,
                     'code' => $map->status->code
                 ],

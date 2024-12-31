@@ -9,7 +9,10 @@ import {
   DELET_API,
   GET_LIST_BUSINESS_TRIP_DECLARATION,
 } from '@/endpoint/business-trip-declaration/api';
-import { DETAIL_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
+import {
+  CLONE_PAGE_BUSINESS_TRIP_DECLARATION,
+  DETAIL_PAGE_BUSINESS_TRIP_DECLARATION,
+} from '@/endpoint/business-trip-declaration/page';
 import { PurposeTypeModel } from '../PurposeType/models/models';
 import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
 
@@ -59,9 +62,16 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         }}
         onCreate={openFormHandler}
         columns={columns}
-        onEdit={(value) => {
+        // onEdit={(value) => {
+        //   setBusinessTripForm({
+        //     type: BusinessTripType.edit,
+        //     id: value.toString(),
+        //   });
+        //   setOpenForm(true);
+        // }}
+        onClone={(value) => {
           setBusinessTripForm({
-            type: BusinessTripType.edit,
+            type: BusinessTripType.clone,
             id: value.toString(),
           });
           setOpenForm(true);
@@ -69,6 +79,7 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         url={{
           url: GET_LIST_BUSINESS_TRIP_DECLARATION,
           detailUrl: DETAIL_PAGE_BUSINESS_TRIP_DECLARATION,
+          clone: CLONE_PAGE_BUSINESS_TRIP_DECLARATION,
         }}
         labelFilter='search'
       />

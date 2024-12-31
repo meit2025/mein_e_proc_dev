@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Approval\Models\Approval;
 use Modules\Master\Models\MasterCostCenter;
 use Modules\Master\Models\MasterStatus;
 use Modules\Master\Models\Pajak;
@@ -116,5 +117,9 @@ class BusinessTrip extends Model
                 $query->where('name', 'ILIKE', '%' . $search . '%');
             });
         });
+    }
+
+    function approval() {
+        return $this->hasMany(Approval::class,'document_id','id');
     }
 }
