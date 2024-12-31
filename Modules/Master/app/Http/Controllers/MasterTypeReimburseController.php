@@ -8,11 +8,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Modules\BusinessTrip\Models\BusinessTripGrade;
+use Modules\BusinessTrip\Models\BusinessTripGradeUser;
 use Modules\Master\Models\MasterTypeReimburse;
 use Modules\Master\Models\MasterTypeReimburseGrades;
-use Modules\Master\Models\MasterMaterial;
-use Modules\Master\Models\MaterialGroup;
-use Modules\BusinessTrip\Models\BusinessTripGradeUser;
+use Modules\Reimbuse\Models\Reimburse;
 use App\Models\User;
 
 
@@ -126,8 +125,8 @@ class MasterTypeReimburseController extends Controller
         DB::beginTransaction();
         try {
             $validatedData  = $validator->validated();
-
-            // dd($validatedData);
+            $validatedData['family_status'] = $validatedData['is_employee'] == true ? null : $validatedData['family_status'];
+            
             $createData     = MasterTypeReimburse::create($validatedData);
 
             if ($createData) {
@@ -205,6 +204,7 @@ class MasterTypeReimburseController extends Controller
         try {
             $getData        = MasterTypeReimburse::find($id);
             $validatedData  = $validator->validated();
+            $validatedData['family_status'] = $validatedData['is_employee'] == true ? null : $validatedData['family_status'];
             $getData->fill($validatedData);
             $getData->save();
 
@@ -233,8 +233,12 @@ class MasterTypeReimburseController extends Controller
     {
         DB::beginTransaction();
         try {
+            $dataReimburseType = MasterTypeReimburse::find($id);
+            $checkReimburse = Reimburse::where('reimburse_type', $dataReimburseType->code)->first();
+            if (!empty($checkReimburse)) return $this->errorResponse('Failed, Cannot delete this data because it is related to reimburse request data.');
+            
+            $dataReimburseType->delete();
             MasterTypeReimburseGrades::where('reimburse_type_id', $id)->delete();
-            MasterTypeReimburse::find($id)->delete();
 
             DB::commit();
 
