@@ -6,19 +6,11 @@ import {
   STORE_REIMBURSE,
   UPDATE_REIMBURSE,
 } from '@/endpoint/reimburse/api';
-import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import { FormType } from '@/lib/utils';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import React, { ReactNode } from 'react';
 import { ReimburseForm } from './components/ReimburseForm';
-import {
-  columns,
-  CostCenter,
-  Currency,
-  PurchasingGroup,
-  User,
-} from './model/listModel';
-import { WorkflowApproval, WorkflowComponent } from '@/components/commons/WorkflowComponent';
+import { columns, CostCenter, Currency, PurchasingGroup, User } from './model/listModel';
 
 interface Props {
   users: User[];
@@ -93,8 +85,8 @@ export const Index = ({
       </div>
 
       <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
-          <div>
-            {/* <FormField
+        <div>
+          {/* <FormField
                 control={form.control}
                 name='created_at'
                 render={({ field }) => (
@@ -109,13 +101,13 @@ export const Index = ({
                   </FormItem>
                 )}
               /> */}
-              {/* <label htmlFor="">Created Date: </label>
+          {/* <label htmlFor="">Created Date: </label>
               <CustomDatePicker
               className='!w-full'
                 // initialDate={field.value}
                 // onDateChange={(date) => field.onChange(date)}
               /> */}
-          </div>
+        </div>
       </div>
 
       <DataGridComponent
@@ -133,6 +125,7 @@ export const Index = ({
         url={{
           url: LIST_REIMBURSE,
           detailUrl: '/reimburse/detail',
+          cancelApproval: 'reim',
         }}
         labelFilter='search'
       />

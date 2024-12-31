@@ -53,7 +53,7 @@ class MasterStatusSeeder extends Seeder
                 "name" => 'Revise',
                 'code' => 'revise',
                 'classname' => 'bg-red-100 text-red-600 border-red-600'
-            ],
+            ]
 
         ];
 

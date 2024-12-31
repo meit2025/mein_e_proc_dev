@@ -254,24 +254,33 @@ abstract class Controller
      * @return string The path to the saved image.
      * @throws \Exception If the base64 image string is invalid, or if the image fails to save.
      */
-    function saveBase64Image(string $base64Image, string $directory = 'images')
+    function saveBase64Image(string $base64File, string $directory = 'images')
     {
         try {
             // Cek apakah input adalah path file
             $baseUrl = env('APP_URL');
-            $filePathWithoutBaseUrl = str_replace($baseUrl, '', $base64Image);
+            $filePathWithoutBaseUrl = str_replace($baseUrl, '', $base64File);
             if (File::exists(ltrim($filePathWithoutBaseUrl, '/'))) {
                 return $filePathWithoutBaseUrl; // Jika file path valid, langsung kembalikan path
             }
 
-            // Validasi apakah input adalah string Base64
-            if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches)) {
-                $extension = $matches[1];
-                $base64Image = substr($base64Image, strpos($base64Image, ',') + 1);
-                $base64Image = base64_decode($base64Image);
+            if (preg_match('/^data:([a-zA-Z0-9\/\+\.\-]+);base64,/', $base64File, $matches)) {
+                $mimeType = $matches[1];
+                $base64File = substr($base64File, strpos($base64File, ',') + 1);
+                $base64File = base64_decode($base64File);
 
-                if ($base64Image === false) {
+                if ($base64File === false) {
                     throw new \Exception('Invalid Base64 string.');
+                }
+
+                // Determine file extension from MIME type
+                $extension = explode('/', $mimeType)[1];
+                if ($extension == 'vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+                    $extension = 'xlsx';
+                } elseif ($extension == 'vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                    $extension = 'docx';
+                } elseif ($extension == 'plain') {
+                    $extension = 'txt';
                 }
 
                 // Tentukan path direktori tujuan
@@ -287,13 +296,13 @@ abstract class Controller
 
                 // Simpan file
                 $filePath = $fullDirectory . '/' . $fileName;
-                if (!file_put_contents($filePath, $base64Image)) {
-                    throw new \Exception('Failed to save image.');
+                if (!file_put_contents($filePath, $base64File)) {
+                    throw new \Exception('Failed to save file.');
                 }
 
                 return $directory . '/' . $fileName;
             } else {
-                throw new \Exception('Invalid input: not a valid Base64 string or existing file path.');
+                throw new \Exception('Please Check Your Attachment Format');
             }
         } catch (\Exception $e) {
             throw new \Exception('Error processing image: ' . $e->getMessage());

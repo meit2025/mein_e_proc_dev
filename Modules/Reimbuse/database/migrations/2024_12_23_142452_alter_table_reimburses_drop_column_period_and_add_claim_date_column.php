@@ -33,7 +33,6 @@ return new class extends Migration
 
 
             $table->foreign('period')->references('code')->on('master_period_reimburses')->cascadeOnUpdate();
-            
         });
     }
 };

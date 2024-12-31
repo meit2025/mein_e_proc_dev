@@ -10,25 +10,29 @@ import {
     GET_LIST_BUSINESS_TRIP_DECLARATION,
 } from '@/endpoint/business-trip-declaration/api';
 import { DETAIL_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
-import { PurposeTypeModel } from '../PurposeType/models/models';
 import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
 import { REPORT_BT_DEC_EXPORT, REPORT_BT_DEC_LIST } from '@/endpoint/report/api';
 import { useAlert } from '@/contexts/AlertContext';
 import axiosInstance from '@/axiosInstance';
 
 interface propsType {
-    listPurposeType: PurposeTypeModel[];
+    listPurposeType: any[];
     users: UserModel[];
-    listBusinessTrip: any;
 }
 const roleAkses = 'business trip declaration';
-export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) => {
+export const Index = ({ listPurposeType, users }: propsType) => {
     const [openForm, setOpenForm] = React.useState<boolean>(false);
 
     const [businessTripForm, setBusinessTripForm] = React.useState({
         type: BusinessTripType.create,
         id: undefined,
     });
+
+    // Filter states
+    const [startDate, setStartDate] = React.useState<string | null>(null);
+    const [endDate, setEndDate] = React.useState<string | null>(null);
+    const [status, setStatus] = React.useState<string>('');
+    const [type, setType] = React.useState<string>('');
 
     const { showToast } = useAlert();
 
@@ -63,40 +67,68 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
     }
     return (
         <>
-            <div className='flex md:mb-4 mb-2 w-full justify-end'>
-                {/* <Button onClick={openFormHandler}>
-          <PlusIcon />
-        </Button> */}
+            <div className='flex md:mb-4 mb-2 w-full'>
+                {/* Filters */}
+                <div className='flex gap-4 mb-4'>
+                    <div>
+                        <label htmlFor='start-date' className='block mb-1'>Start Date</label>
+                        <input
+                            type='date'
+                            value={startDate || ''}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            className='input-class'
+                            placeholder='Start Date'
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>End Date</label>
+                        <input
+                            type='date'
+                            value={endDate || ''}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            className='input-class'
+                            placeholder='End Date'
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>Status</label>
+                        <select value={status} onChange={(e) => setStatus(e.target.value)} className='select-class'>
+                            <option value=''>All Status</option>
+                            <option value='waiting_approve'>Waiting Approve</option>
+                            <option value='cancel'>Cancel</option>
+                            <option value='approve_to'>Approved</option>
+                            <option value='reject_to'>Rejected</option>
+                            <option value='fully_approve'>Fully Approved</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>Type</label>
+                        <select
+                            value={type}
+                            onChange={(e) => setType(e.target.value)}
+                            className="select-class"
+                            id="type"
+                        >
+                            <option value="">All Types</option>
+                            {listPurposeType.map((typeOption) => (
+                                <option
+                                    key={typeOption.id}
+                                    value={typeOption.id}
+                                >
+                                    {typeOption.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
 
-                <CustomDialog
-                    onClose={() => setOpenForm(false)}
-                    open={openForm}
-                    onOpenChange={openFormHandler}
-                >
-                    <BussinessTripFormV1
-                        users={users}
-                        listPurposeType={listPurposeType}
-                        listBusinessTrip={listBusinessTrip}
-                    />
-                </CustomDialog>
             </div>
             <DataGridComponent
                 isHistory={false}
-                role={{
-                    detail: `${roleAkses} view`,
-                    create: `${roleAkses} export`,
-                }}
                 // onCreate={openFormHandler}
                 onExport={async (x: string) => await exporter(x)}
+                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&`}
                 columns={columns}
-                // actionType='dropdown'
-                // onEdit={(value) => {
-                //     setBusinessTripForm({
-                //         type: BusinessTripType.edit,
-                //         id: value.toString(),
-                //     });
-                //     setOpenForm(true);
-                // }}
                 url={{
                     url: REPORT_BT_DEC_LIST,
                     // deleteUrl: DELET_API,

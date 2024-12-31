@@ -16,6 +16,14 @@ export const modelDropdowns = [
     },
   },
   {
+    dropdown: 'master_position_id',
+    struct: {
+      name: 'name',
+      id: 'id',
+      tabel: 'master_positions',
+    },
+  },
+  {
     dropdown: 'purchasing_group_id',
     struct: {
       name: 'purchasing_group_desc',
