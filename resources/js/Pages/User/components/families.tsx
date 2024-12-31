@@ -1,12 +1,14 @@
 import React, { ReactNode, useState } from 'react';
 import DataGridComponent from '@/components/commons/DataGrid';
-import { columnsValue } from '../model/listModel';
+import { columnsValue as originalColumnsValue } from '../model/listModel';
+import { reimburseHistoryColumns } from '../model/listModel';
 import {
   LIST_API_FAMILY,
   CREATE_API_FAMILY,
   EDIT_FAMILY,
   UPDATE_FAMILY,
   DESTROY_FAMILY,
+  LIST_HISTORY_REIMBURSE_FAMILY
 } from '@/endpoint/family/api';
 import { Button } from '@/components/shacdn/button';
 import FamilyHeaderForm from '@/Pages/Master/Family/components/form';
@@ -15,6 +17,7 @@ import { FormType } from '@/lib/utils';
 
 export const FamiliyLayout = ({ id }: { id: number }) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
+  const [openReimburseHistory, setOpenreimburseHistory] = React.useState<Array<any>>([]);
 
   const [formType, setFormType] = React.useState({
     type: FormType.create,
@@ -28,6 +31,30 @@ export const FamiliyLayout = ({ id }: { id: number }) => {
     });
     setOpenForm(!openForm);
   }
+
+  const openReimburseHistoryHandler = (item:any) => {
+    setOpenreimburseHistory({id:item.id, familyName:item.name, familyStatus:item.status});
+  }
+  console.log(openReimburseHistory);
+  
+  const columnsValue = [
+    ...originalColumnsValue,
+    {
+      field: 'id',
+      headerName: 'Reimburse History',
+      width: 200,
+      filterable: true,
+      renderCell: (params:any) => 
+        <Button
+          onClick={() => openReimburseHistoryHandler({ id: params.id, name: params.row.name, status: params.row.status })}
+          className='bg-slate-400 items-baseline'
+          style={{ marginRight: '10px', marginBottom: '10px' }}
+        >
+          View History
+        </Button>
+    },
+  ];
+
   return (
     <>
       <Button
@@ -54,7 +81,6 @@ export const FamiliyLayout = ({ id }: { id: number }) => {
       </CustomDialog>
       <DataGridComponent
         columns={columnsValue}
-        actionType='dropdown'
         onEdit={(value) => {
           setFormType({
             type: FormType.edit,
@@ -68,6 +94,22 @@ export const FamiliyLayout = ({ id }: { id: number }) => {
         }}
         labelFilter='search'
       />
+
+      {/* modal history reimburse */}
+      <CustomDialog
+        onClose={() => setOpenreimburseHistory([])}
+        open={openReimburseHistory.length !== 0}
+        className='md:max-w-[1200px]'
+      >
+        <h2>Reimburse History : {openReimburseHistory?.familyName} ( {openReimburseHistory?.familyStatus} )</h2>
+        <DataGridComponent
+          columns={reimburseHistoryColumns}
+          url={{
+            url: LIST_HISTORY_REIMBURSE_FAMILY(openReimburseHistory?.id),
+          }}
+          labelFilter='search'
+        />
+      </CustomDialog>
     </>
   );
 };
