@@ -19,11 +19,12 @@ use Modules\Master\Models\PurchasingGroup;
 class CheckApproval
 {
     // Helper function to get the base query
-    private function getApprovalQuery($documentTypeId, $purchasingGroupId, $divisionId, $trackingNumberId = null)
+    private function getApprovalQuery($documentTypeId, $purchasingGroupId, $divisionId, $positionId, $trackingNumberId = null)
     {
         $query = ApprovalPr::with('approvalRoute.user.divisions')
             ->where('document_type_id', $documentTypeId)
             ->where('purchasing_group_id', $purchasingGroupId)
+            ->where('master_position_id', $positionId)
             ->where('master_division_id', $divisionId);
 
         if ($trackingNumberId) {
@@ -85,19 +86,19 @@ class CheckApproval
             switch ($request->metode_approval) {
                 case 'approval':
                 case '':
-                    $query = $this->getApprovalQuery($documentType->id, $purchasingGroup->id, $user->division_id);
+                    $query = $this->getApprovalQuery($documentType->id, $purchasingGroup->id, $user->division_id, $user->position_id);
                     $result = $this->applyConditions($query, $conditions, $request->value);
                     break;
 
                 case 'chooses_approval':
                     $approvalTrackingNumberChoose = ApprovalTrackingNumberChooseRoute::where('approval_tracking_number_choose_id', $request->chooses_approval_id)
                         ->first();
-                    $query = $this->getApprovalQuery($documentType->id, $purchasingGroup->id, $user->division_id, $approvalTrackingNumberChoose->master_tracking_number_id);
+                    $query = $this->getApprovalQuery($documentType->id, $purchasingGroup->id, $user->division_id, $user->position_id, $approvalTrackingNumberChoose->master_tracking_number_id);
                     $result = $this->applyConditions($query, $conditions, $request->value);
                     break;
 
                 case 'automatic_approval_by_purchasing_group':
-                    $query = $this->getApprovalQuery($documentType->id, $purchasingGroup->id, $user->division_id, $purchasingGroup->master_tracking_number_id);
+                    $query = $this->getApprovalQuery($documentType->id, $purchasingGroup->id, $user->division_id, $user->position_id, $purchasingGroup->master_tracking_number_id);
                     $result = $this->applyConditions($query, $conditions, $request->value);
                     break;
 

@@ -1,4 +1,5 @@
 import MainLayout from '@/Pages/Layouts/MainLayout';
+import React from 'react';
 import { ReactNode } from 'react';
 import DataGridComponent from '@/components/commons/DataGrid';
 import { DELET_PR, GET_PR } from '@/endpoint/purchaseRequisition/api';
@@ -7,15 +8,53 @@ import { CREATE_PAGE_PR, DETAIL_PAGE_PR, EDIT_PAGE_PR } from '@/endpoint/purchas
 import { useAlert } from '@/contexts/AlertContext';
 import axiosInstance from '@/axiosInstance';
 import { PAGE_REPORT_PURCHASE } from '@/endpoint/report/page';
-import { REPORT_PURCHASE_EXPORT, REPORT_PURCHASE_LIST } from '@/endpoint/report/api';
+import { REPORT_PURCHASE_EXPORT, REPORT_PURCHASE_LIST, REPORT_PURCHASE_TYPES } from '@/endpoint/report/api';
+interface ReportType {
+    id: string;
+    purchasing_doc: string;
+}
+
 
 const roleAkses = 'report purchase requisition';
 const roleConfig = {
     detail: `${roleAkses} view`,
     export: `${roleAkses} export`,
 };
+
+
+
 export const Index = () => {
+    React.useEffect(() => {
+        const loadReportTypes = async () => {
+            try {
+                const reportTypes = await fetchReportTypes();
+                setTypes(reportTypes);
+
+            } catch (error) {
+                showToast('Failed to load report types', 'error');
+            }
+        };
+
+        loadReportTypes();
+    }, []);
+
     const { showToast } = useAlert();
+    // Filter states
+    const [startDate, setStartDate] = React.useState<string | null>(null);
+    const [endDate, setEndDate] = React.useState<string | null>(null);
+    const [status, setStatus] = React.useState<string>('');
+    const [type, setType] = React.useState<string>('');
+    const [types, setTypes] = React.useState<ReportType[]>([]);
+
+    const fetchReportTypes = async (): Promise<ReportType[]> => {
+        try {
+            const response = await axiosInstance.get(REPORT_PURCHASE_TYPES);
+            return response.data.data;
+        } catch (error) {
+            console.error('Error fetching report types:', error);
+            return []; // Return an empty array to prevent errors
+        }
+    };
 
     const exporter = async (data: string) => {
         try {
@@ -50,13 +89,70 @@ export const Index = () => {
     };
 
     return (
-        <DataGridComponent
-            onExport={async (x: string) => await exporter(x)}
-            role={roleConfig}
-            columns={columns}
-            url={urlConfig}
-            labelFilter='search'
-        />
+        <>
+            <div className='flex flex-col md:mb-4 mb-2 w-full'>
+                {/* Filters */}
+                <div className='flex gap-4 mb-4'>
+                    <div>
+                        <label htmlFor='start-date' className='block mb-1'>Start Date</label>
+                        <input
+                            type='date'
+                            value={startDate || ''}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            className='input-class'
+                            placeholder='Start Date'
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>End Date</label>
+                        <input
+                            type='date'
+                            value={endDate || ''}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            className='input-class'
+                            placeholder='End Date'
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>Status</label>
+                        <select value={status} onChange={(e) => setStatus(e.target.value)} className='select-class'>
+                            <option value=''>All Status</option>
+                            <option value='waiting_approve'>Waiting Approve</option>
+                            <option value='cancel'>Cancel</option>
+                            <option value='approve_to'>Approved</option>
+                            <option value='reject_to'>Rejected</option>
+                            <option value='fully_approve'>Fully Approved</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>Type</label>
+                        <select
+                            value={type}
+                            onChange={(e) => setType(e.target.value)}
+                            className="select-class"
+                            id="type"
+                        >
+                            <option value="">All Types</option>
+                            {types.map((typeOption) => (
+                                <option
+                                    key={typeOption.id}
+                                    value={typeOption.id}
+                                >
+                                    {typeOption.purchasing_doc}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <DataGridComponent
+                onExport={async (x: string) => await exporter(x)}
+                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&`}
+                columns={columns}
+                url={urlConfig}
+                labelFilter='search'
+            />
+        </>
     );
 };
 

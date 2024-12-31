@@ -69,7 +69,7 @@
         }
 
         .approval table {
-            width: 100%;
+            width: 80%;
         }
 
         .approval table tbody tr td {
@@ -120,10 +120,6 @@
                     <td>{{$carbon::parse($formItems['reimburseType']['created_at'])->format('d/m/Y')}}</td>
                 </tr>
                 <tr>
-                    <td><strong>Balance Period</strong></td>
-                    <td>{{$carbon::parse($formItems['periodeDate']['start'])->format('d/m/Y')}} - {{$carbon::parse($formItems['periodeDate']['end'])->format('d/m/Y')}}</td>
-                </tr>
-                <tr>
                     <td><strong>Reimburse For</strong></td>
                     <td>{{$formItems['reimburseType']['is_employee'] ? 'Employee' : 'Family' }}</td>
                 </tr>
@@ -162,8 +158,8 @@
                     <td>{{$carbon::parse($formItems['created_at'])->format('d/m/Y')}}</td>
                 </tr>
                 <tr>
-                    <td><strong>Start Date -  End Date</strong></td>
-                    <td>{{$carbon::parse($formItems['start_date'])->format('d/m/Y')}} - {{$carbon::parse($formItems['end_date'])->format('d/m/Y')}}</td>
+                    <td><strong>Claim Date</strong></td>
+                    <td>{{$carbon::parse($formItems['claim_date'])->format('d/m/Y')}}</td>
                 </tr>
                 <tr>
                     <td><strong>Reimburse Cost</strong></td>
@@ -219,27 +215,13 @@
                         <td>{{$item['user']['name']}}</td>
                         <td>{{isset($item['user']['positions']) ? $item['user']['positions']['name'] : '-'}}</td>
                         <td>{{$item['status']}}</td>
-                        <td>{{$carbon::parse($formItems['updated_at'])->format('d M Y (H:i)')}}</td>
+                        <td>{{$item['status'] === 'Waiting' ? '' : $carbon::parse($formItems['updated_at'])->format('d M Y (H:i)')}}</td>
                         <td>{{$item['message']}}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
-
-    <br><br>
-    <h3>
-        Approval is 
-        @if ($data['group']['reimbursementStatus']['code'] == 'waiting_approve')
-            pending
-        @elseif ($data['group']['reimbursementStatus']['code'] == 'reject_to')
-            rejected
-        @elseif ($data['group']['reimbursementStatus']['code'] == 'fully_approve')
-            completed
-        @else
-
-        @endif
-    </h3>
 </div>
 </body>
 </html>

@@ -5,8 +5,6 @@ namespace Modules\Reimbuse\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
-use Modules\Master\Models\MasterPeriodReimburse;
 use Modules\Master\Models\MasterStatus;
 use Modules\Master\Models\MasterTypeReimburse;
 use Modules\Master\Models\Pajak;
@@ -70,6 +68,11 @@ class Reimburse extends Model
     ];
 
 
+    public function reimburseGroup()
+    {
+        return $this->belongsTo(ReimburseGroup::class, 'group', 'code');
+    }
+
     public function uomModel()
     {
         return $this->belongsTo(Uom::class, 'purchase_requisition_unit_of_measure', 'id');
@@ -89,11 +92,6 @@ class Reimburse extends Model
     public function reimburseType()
     {
         return $this->belongsTo(MasterTypeReimburse::class, 'reimburse_type', 'code');
-    }
-
-    public function periodeDate()
-    {
-        return $this->belongsTo(MasterPeriodReimburse::class, 'period', 'code');
     }
 
     public function status()

@@ -5,8 +5,6 @@ import { DETAIL_PAGE_BUSINESS_TRIP } from '@/endpoint/business-trip/page';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import { usePage } from '@inertiajs/react';
 import React, { ReactNode } from 'react';
-import { DestinationModel } from '../Destination/models/models';
-import { PurposeTypeModel } from '../PurposeType/models/models';
 import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
 import {
     BusinessTripType,
@@ -20,12 +18,11 @@ import { REPORT_BT_EXPORT, REPORT_BT_LIST } from '@/endpoint/report/api';
 import { useAlert } from '@/contexts/AlertContext';
 import axiosInstance from '@/axiosInstance';
 interface propsType {
-    listPurposeType: PurposeTypeModel[];
     users: UserModel[];
     pajak: Pajak[];
     costcenter: Costcenter[];
-    purchasingGroup: PurchasingGroup[];
-    listDestination: DestinationModel[];
+    types: any[];
+    listPurposeType: any[];
 }
 
 interface UserAuth {
@@ -45,12 +42,11 @@ interface SharedProps {
 const roleAkses = 'report business trip';
 
 export const Index = ({
-    listPurposeType,
     users,
     pajak,
     costcenter,
-    purchasingGroup,
-    listDestination,
+    types,
+    listPurposeType
 }: propsType) => {
     const [openForm, setOpenForm] = React.useState<boolean>(false);
 
@@ -59,15 +55,17 @@ export const Index = ({
         id: undefined,
     });
 
+    // Filter states
+    const [startDate, setStartDate] = React.useState<string | null>(null);
+    const [endDate, setEndDate] = React.useState<string | null>(null);
+    const [status, setStatus] = React.useState<string>('');
+    const [type, setType] = React.useState<string>('');
+
     function openFormHandler() {
         setOpenForm(!openForm);
     }
 
     const { auth } = usePage().props as unknown as SharedProps;
-
-    // Get the logged-in user's ID
-    const userId = auth.user?.id;
-    const isAdmin = auth.user?.is_admin;
 
     const { showToast } = useAlert();
 
@@ -102,24 +100,66 @@ export const Index = ({
 
     return (
         <>
-            <div className='flex md:mb-4 mb-2 w-full justify-end'>
+            <div className='flex md:mb-4 mb-2 w-full'>
+                {/* Filters */}
+                <div className='flex gap-4 mb-4'>
+                    <div>
+                        <label htmlFor='start-date' className='block mb-1'>Start Date</label>
+                        <input
+                            type='date'
+                            value={startDate || ''}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            className='input-class'
+                            placeholder='Start Date'
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>End Date</label>
+                        <input
+                            type='date'
+                            value={endDate || ''}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            className='input-class'
+                            placeholder='End Date'
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>Status</label>
+                        <select value={status} onChange={(e) => setStatus(e.target.value)} className='select-class'>
+                            <option value=''>All Status</option>
+                            <option value='waiting_approve'>Waiting Approve</option>
+                            <option value='cancel'>Cancel</option>
+                            <option value='approve_to'>Approved</option>
+                            <option value='reject_to'>Rejected</option>
+                            <option value='fully_approve'>Fully Approved</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>Type</label>
+                        <select
+                            value={type}
+                            onChange={(e) => setType(e.target.value)}
+                            className="select-class"
+                            id="type"
+                        >
+                            <option value="">All Types</option>
+                            {listPurposeType.map((typeOption) => (
+                                <option
+                                    key={typeOption.id}
+                                    value={typeOption.id}
+                                >
+                                    {typeOption.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
             </div>
             <DataGridComponent
                 isHistory={false}
-                role={{
-                    detail: `${roleAkses} view`,
-                    create: `${roleAkses} export`,
-                }}
                 onExport={async (x: string) => await exporter(x)}
-                // onCreate={openFormHandler}
+                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&`}
                 columns={columns}
-                // onEdit={(value) => {
-                //     setBusinessTripForm({
-                //         type: BusinessTripType.edit,
-                //         id: value.toString(),
-                //     });
-                //     setOpenForm(true);
-                // }}
                 url={{
                     url: REPORT_BT_LIST,
                 }}
