@@ -216,6 +216,8 @@ Route::group(['middleware' => 'auth'], function () {
             Route::put('/update/{id}', [FamilyController::class, 'update'])->name('master.family.update');
             Route::get('/edit/{id}', [FamilyController::class, 'edit'])->name('master.family.edit');
             Route::delete('/delete/{id}', [FamilyController::class, 'destroy'])->name('master.family.destroy');
+
+            Route::get('/reimburse-history/{familyId}', [FamilyController::class, 'listReimburseHistory'])->name('master.family.list.historyReimburse');
         });
 
         Route::group(['prefix' => 'dropdown'], function () {

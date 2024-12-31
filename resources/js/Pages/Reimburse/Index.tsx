@@ -19,6 +19,8 @@ interface Props {
   purchasing_groups: PurchasingGroup[];
   cost_center: CostCenter[];
   currentUser: User;
+  taxDefaultValue: string;
+  uomDefaultValue: string;
   latestPeriod: any;
 }
 
@@ -37,7 +39,8 @@ export const Index = ({
   currencies,
   cost_center,
   currentUser,
-  latestPeriod,
+  taxDefaultValue,
+  uomDefaultValue
 }: Props) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
   const [formType, setFormType] = React.useState({
@@ -63,6 +66,8 @@ export const Index = ({
         >
           <ReimburseForm
             purchasing_groups={purchasing_groups}
+            taxDefaultValue={taxDefaultValue}
+            uomDefaultValue={uomDefaultValue}
             users={users}
             categories={categories}
             currencies={currencies}

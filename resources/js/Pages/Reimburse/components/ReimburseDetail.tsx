@@ -110,10 +110,10 @@ const ReimburseDetail = () => {
                   </tr>
                   <tr>
                     <td>
-                      <strong>Periode Date</strong>
+                      <strong>Interval Claim</strong>
                     </td>
                     <td>
-                      {reimburse?.periode_date?.start} {' - '} {reimburse?.periode_date?.end}
+                      {reimburse?.reimburse_type?.interval_claim_period !== null ? reimburse?.reimburse_type?.interval_claim_period / 365 + ' Year' : 'No have interval'}
                     </td>
                   </tr>
                   <tr>
@@ -141,22 +141,7 @@ const ReimburseDetail = () => {
                     <td>
                       <strong>Claim Date</strong>
                     </td>
-                    <td>
-                      <div className='flex space-x-4 items-center'>
-                        <div className='space-x-1'>
-                          <span>Start date</span>
-                          <span>:</span>
-                          <span>{reimburse.start_date}</span>
-                        </div>
-                        <div className='flex space-x-4 items-center'>
-                          <div className='space-x-1'>
-                            <span>End Date</span>
-                            <span>:</span>
-                            <span>{reimburse.end_date}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
+                    <td>{reimburse.claim_date}</td>
                   </tr>
 
                   <tr>
