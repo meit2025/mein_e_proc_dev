@@ -112,13 +112,20 @@ class DropdownMasterController extends Controller
             }
         }
 
-        if($request->declaration == 'true'){
+        if ($request->declaration == 'true') {
             $inBusinessTripRequest = BusinessTrip::where('type', 'declaration')->pluck('parent_id')->toArray();
-            $data = $data->where('deleted_at',null)->where('status_id',5)->whereNotIn('id', $inBusinessTripRequest);
-            if(Auth::user()->is_admin == "0"){
+            $data = $data->where('deleted_at', null)->where('status_id', 5)->whereNotIn('id', $inBusinessTripRequest);
+            if (Auth::user()->is_admin == "0") {
                 $data = $data->where('created_by', Auth::user()->id);
             }
         }
+
+        if ($request->join) {
+            $variableJoin = explode(",", $request->join);
+            $data = $data->join($variableJoin[0], $variableJoin[1], $variableJoin[2], $variableJoin[3]);
+        }
+
+
 
         $data = $data->limit(500)->get();
         return $this->successResponse($data);
