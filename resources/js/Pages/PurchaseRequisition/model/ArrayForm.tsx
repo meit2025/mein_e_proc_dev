@@ -121,10 +121,8 @@ const ArrayForm = ({
       asset_number: dataobj.item_asset_number,
       sub_asset_number: dataobj.item_sub_asset_number,
     };
-    console.log('newItem', newItem);
 
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
-    console.log('currentItems', currentItems);
     let updatedItems = [];
     if (dataobj.action === 'edit') {
       updatedItems = currentItems.map((item: any, index: any) =>
@@ -133,7 +131,6 @@ const ArrayForm = ({
     } else {
       updatedItems = [...currentItems, newItem];
     }
-    console.log('updatedItems', updatedItems);
 
     // Simpan array baru ke React Hook Form state
     setValue(`vendors[${dataIndex}].units`, updatedItems);
