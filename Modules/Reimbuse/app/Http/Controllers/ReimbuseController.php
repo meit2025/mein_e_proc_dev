@@ -16,11 +16,10 @@ use Modules\BusinessTrip\Models\BusinessTripGrade;
 use Modules\BusinessTrip\Models\BusinessTripGradeUser;
 use Modules\Master\Models\Family;
 use Modules\Master\Models\MasterCostCenter;
-use Modules\Master\Models\MasterPeriodReimburse;
-use Modules\Master\Models\MasterQuotaReimburseUser;
 use Modules\Master\Models\MasterTypeReimburse;
 use Modules\Master\Models\MasterTypeReimburseGrades;
 use Modules\Master\Models\Pajak;
+use Modules\Master\Models\Uom;
 use Modules\Master\Models\PurchasingGroup;
 use Modules\Reimbuse\Services\ReimbursementService;
 
@@ -36,11 +35,12 @@ class ReimbuseController extends Controller
     public function getListMasterReimburseTypeAPI(Request $request)
     {
         $nip = $request->user;
+        $hasValue = $request->hasValue;
 
-        $getFamilieStatus = User::select('f.status')->join('families as f', 'f.userId', '=', 'users.id')->where('users.nip', $nip)->groupBy('f.status')->pluck('f.status')->toArray();
+        $getFamilieStatus       = User::select('f.status')->join('families as f', 'f.userId', '=', 'users.id')->where('users.nip', $nip)->groupBy('f.status')->pluck('f.status')->toArray();
         
         $data = MasterTypeReimburse::selectRaw(
-"MAX(CASE WHEN master_type_reimburses.is_employee IS TRUE THEN 1 ELSE 0 END) AS is_employee,
+            "MAX(CASE WHEN master_type_reimburses.is_employee IS TRUE THEN 1 ELSE 0 END) AS is_employee,
             master_type_reimburses.name || ' (' || code || ')' || ' - for ' || 
             MAX(CASE 
                 WHEN master_type_reimburses.is_employee IS TRUE THEN 'employee' 
@@ -51,14 +51,41 @@ class ReimbuseController extends Controller
             ->leftJoin('master_type_reimburse_grades as mtrg', 'mtrg.reimburse_type_id', '=', 'master_type_reimburses.id')
             ->leftJoin('business_trip_grade_users as btgu', 'btgu.grade_id', '=', 'mtrg.grade_id')
             ->leftJoin('users as u', 'u.id', '=', 'btgu.user_id')
+            ->leftJoinSub("
+                select
+                    max(mtr.interval_claim_period),
+                    max(r.claim_date + (mtr.interval_claim_period || ' days')::INTERVAL) as on_interval,
+                    mtr.code as codes
+                FROM
+                    master_type_reimburses AS mtr
+                JOIN
+                    reimburses AS r ON r.reimburse_type = mtr.code
+                where r.requester = '". $nip ."' 
+                and (r.claim_date BETWEEN r.claim_date and r.claim_date + (mtr.interval_claim_period || ' days')::INTERVAL
+                or mtr.interval_claim_period is null)
+                group by mtr.code
+            ",
+            'checkInterval',
+            function ($join) {
+                $join->on('checkInterval.codes', '=', 'master_type_reimburses.code');
+            })
             ->where(['u.nip' => $nip]);
         
         if (count($getFamilieStatus) == 0) {
-            $data = $data->where('master_type_reimburses.is_employee', true);
+            $data = $data->where('master_type_reimburses.is_employee', true)
+            ->orWhere(function($query)  {
+                $query->where('master_type_reimburses.grade_option', 'all')
+                ->where('master_type_reimburses.is_employee', true);
+            })
+            ->where('checkInterval.codes', null);
+            if ($hasValue !== null) $data = $data->orWhere('checkInterval.codes', $hasValue);
         } else {
-            $data = $data->where('master_type_reimburses.family_status', null)->orWhereIn('master_type_reimburses.family_status', $getFamilieStatus);
+            $data = $data->where('master_type_reimburses.family_status', null)
+            ->orWhereIn('master_type_reimburses.family_status', $getFamilieStatus)
+            ->where('checkInterval.codes', null);
+            if ($hasValue !== null) $data = $data->orWhere('checkInterval.codes', $hasValue);
+            $data = $data->orWhere('master_type_reimburses.grade_option', 'all');
         }
-        $data = $data->orWhere(['master_type_reimburses.grade_option' => 'all']);
         if ($request->search) $data = $data->where('master_type_reimburses.name', 'ilike', '%' . $request->search . '%')
                                     ->orWhere('master_type_reimburses.code', 'ilike', '%' . $request->search . '%')
                                     ->orWhere('master_type_reimburses.family_status', 'ilike', '%' . $request->search . '%');
@@ -151,10 +178,11 @@ class ReimbuseController extends Controller
             $purchasing_groups = PurchasingGroup::select('id', 'purchasing_group', 'purchasing_group_desc')->get();
             $currencies = Currency::select('code', 'name')->where('code', 'IDR')->get();
             $cost_center = MasterCostCenter::select('id', 'cost_center')->get();
-
+            $taxDefaultValue = (string) Pajak::where('mwszkz', 'V0')->first()->id;
+            $uomDefaultValue = (string) Uom::where('iso_code', 'PCE')->first()->id;
             return Inertia::render(
                 'Reimburse/Index',
-                compact('purchasing_groups', 'currentUser',  'users', 'categories', 'currencies', 'cost_center')
+                compact('purchasing_groups', 'currentUser',  'users', 'categories', 'currencies', 'cost_center', 'taxDefaultValue', 'uomDefaultValue')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -228,8 +256,7 @@ class ReimbuseController extends Controller
     {
         try {
             $user = $request->user;
-            $reimbuseTypeID = $request->reimbuse_type_id;
-
+            $reimbuseTypeID = $request->reimbuse_type;
 
             $getCurrentBalance = Reimburse::where('requester', $user)
                 ->where('reimburse_type', $reimbuseTypeID)
@@ -239,14 +266,9 @@ class ReimbuseController extends Controller
                 ->where('reimburse_type', $reimbuseTypeID)
                 ->count();
 
-
-            $reimbuseType = MasterTypeReimburse::where('code', $reimbuseTypeID)->first();
-
-
-
-            $user =  User::where('nip', $user)->first();
-
-            $balance =  (float) $reimbuseType->grade_all_price - (float) $getCurrentBalance;
+            $reimbuseType   = MasterTypeReimburse::where('code', $reimbuseTypeID)->first();
+            $user           = User::where('nip', $user)->first();
+            $balance        = (float) $reimbuseType->grade_all_price - (float) $getCurrentBalance;
 
             if ($reimbuseType->grade_option == 'grade') {
                 $userGrade = BusinessTripGradeUser::where('user_id', $user->id)->first();
@@ -290,7 +312,6 @@ class ReimbuseController extends Controller
             'purchasingGroupModel',
             'taxOnSalesModel',
             'reimburseType',
-            'periodeDate',
             'reimburseAttachment'
         ])->get();
 
