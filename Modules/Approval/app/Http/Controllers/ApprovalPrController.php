@@ -23,6 +23,7 @@ class ApprovalPrController extends Controller
             'master_division_id',
             'purchasing_group_id',
             'master_tracking_number_id',
+            'master_position_id',
         ];
         $data = $this->filterAndPaginate($request, ApprovalPr::with(['masterTrackingNumber', 'approvalRoute', 'documentType', 'masterDivision', 'purchasingGroup']), $filterableColumns);
         return $this->successResponse($data);
@@ -55,6 +56,7 @@ class ApprovalPrController extends Controller
                 'master_division_id',
                 'purchasing_group_id',
                 'master_tracking_number_id',
+                'master_position_id',
             ]);
 
             $approvalRouteData['value'] = $request->value ?? 0;
@@ -121,6 +123,7 @@ class ApprovalPrController extends Controller
             'master_division_id',
             'purchasing_group_id',
             'master_tracking_number_id',
+            'master_position_id',
         ]);
         $approvalRoute->update($approvalRouteData);
 

@@ -9,7 +9,10 @@ const Attachment = ({ isDisabled }: { isDisabled?: boolean }) => {
   const { getValues, watch, setValue } = useFormContext();
 
   const handleDelete = (data: any) => {
-    console.log(data);
+    setValue(
+      'attachment',
+      getValues('attachment').filter((item: any) => item.id !== data.row.id),
+    );
   };
 
   const action = [

@@ -77,7 +77,7 @@ class ProcurementService
         } catch (Exception $e) {
             Log::channel('pr_txt')->error($e->getMessage(), ['id' => $id]);
             DB::rollBack();
-            throw new Exception($e->getMessage());
+            throw new Exception($e);
         }
     }
 

@@ -127,6 +127,7 @@ export const Index = ({
           detailUrl: DETAIL_PAGE_BUSINESS_TRIP,
           //   editUrl: EDIT_PAGE_BUSINESS_TRIP,
           clone: CLONE_PAGE_BUSINESS_TRIP,
+          cancelApproval: 'trip',
         }}
         labelFilter='search'
       />

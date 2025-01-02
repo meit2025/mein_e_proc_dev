@@ -7,7 +7,6 @@ import { DataGrid, GridColDef, GridFilterModel, GridSortModel } from '@mui/x-dat
 import axios from 'axios';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { ConfirmationDeleteModal } from './ConfirmationDeleteModal';
-
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -31,6 +30,7 @@ interface UrlDataGrid {
     deleteUrl?: string;
     detailUrl?: string;
     clone?: string;
+    cancelApproval?: string;
 }
 
 interface RolesDataGrid {
@@ -169,6 +169,35 @@ const DataGridComponent: React.FC<DataGridProps> = ({
         }
     };
 
+    const handleCancel = async (id: number) => {
+        setDeleteLoading(true);
+        try {
+            const request = await axiosInstance.post('api/approval/approval_or_rejceted', {
+                id,
+                type: url.cancelApproval,
+                status: 'Cancel',
+                function_name: url.cancelApproval,
+            });
+            showToast(request?.data?.message || 'cancel successfully', 'success');
+
+            // set delete loading
+            setDeleteLoading(false);
+            setModalDelete(null);
+
+            onDelete && (await onDelete(id));
+            fetchRows(paginationModel.page, paginationModel.pageSize, search, sortModel, filterModel, 0);
+        } catch (error) {
+            setDeleteLoading(false);
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || 'Failed to cancel record';
+                showToast(errorMessage, 'error');
+            } else {
+                showToast('An unexpected error occurred', 'error');
+            }
+            setDeleteLoading(false);
+        }
+    };
+
     const openConfirmationDelete = (id: number) => {
         setModalDelete(id);
     };
@@ -186,7 +215,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                 {
                     field: 'actions',
                     headerName: 'Actions',
-                    width: 150,
+                    width: 250,
                     renderCell: (params: any) => (
                         <>
                             {actionType === 'dropdown' ? (
@@ -280,7 +309,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                                     )}
                                     {(onClone || url.clone) && (
                                         <>
-                                            {(!role || permissions.includes(role?.create ?? '')) && (
+                                            {(!role || permissions.includes(role?.create ?? '')) && value === 0 && (
                                                 <Link
                                                     href={url.clone === '' ? '#' : `${url.clone}/${params.row.id}`}
                                                     onClick={(e) => {
@@ -316,7 +345,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                                         </>
                                     )}
 
-                                    {(url.deleteUrl || onDelete) && (
+                                    {(url.deleteUrl || onDelete) && value === 0 && (
                                         <>
                                             {(!role || permissions.includes(role?.delete ?? '')) && (
                                                 <Link href={''} onClick={() => handleDelete(params.row.id)} alt='delete'>
@@ -325,6 +354,17 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                                             )}
                                         </>
                                     )}
+
+                                    {url.cancelApproval && params.row.status_id === 1 && value === 0 ? (
+                                        <>
+                                            <Link href={''} onClick={() => handleCancel(params.row.id)} alt='delete'>
+                                                <i className='ki-filled ki-cross-square text-danger text-2xl'></i>
+                                            </Link>
+                                        </>
+                                    ) : (
+                                        <></>
+                                    )}
+
                                     {buttonActionCustome}
                                 </div>
                             )}
@@ -356,7 +396,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                                 <Tab key={0} label={'List'} {...a11yProps(0)} />
                                 <Tab key={1} label={'Approval'} {...a11yProps(0)} />
                             </Tabs>
-                        </Box>
+                        </Box >
                     )}
 
                     <div className='lg:col-span-2 mt-2'>
@@ -424,6 +464,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                                                 Export TXT
                                             </Button>
                                         )}
+
                                         {onExportXls && (
                                             <Button
                                                 className='btn'
@@ -474,9 +515,9 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                             </div>
                         </div>
                     </div>
-                </Box>
-            </Box>
-        </Box>
+                </Box >
+            </Box >
+        </Box >
     );
 };
 

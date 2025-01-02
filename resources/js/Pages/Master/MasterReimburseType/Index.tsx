@@ -47,10 +47,6 @@ export const Index = ({ listGrades }: propsType) => {
   return (
     <>
       <div className='flex md:mb-4 mb-2 w-full justify-end'>
-        {/* <Button onClick={openFormHandler}>
-          <PlusIcon />
-        </Button> */}
-
         <CustomDialog
           onClose={() => setOpenForm(false)}
           open={openForm}
@@ -69,7 +65,6 @@ export const Index = ({ listGrades }: propsType) => {
         role={roleConfig}
         onCreate={openFormHandler}
         columns={columns}
-        actionType='dropdown'
         onEdit={(value) => {
           setFormType({
             type: FormType.edit,

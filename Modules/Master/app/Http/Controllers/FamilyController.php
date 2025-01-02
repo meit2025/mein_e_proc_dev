@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Modules\Master\Models\Family;
+use Modules\Reimbuse\Models\Reimburse;
 
 class FamilyController extends Controller
 {
@@ -147,6 +148,9 @@ class FamilyController extends Controller
     {
         DB::beginTransaction();
         try {
+            $checkReimburse = Reimburse::where('for', $id)->first();
+            if (!empty($checkReimburse)) return $this->errorResponse('Failed, Cannot delete this data because it is related to reimburse request data.');
+
             Family::find($id)->delete();
             DB::commit();
 
@@ -155,6 +159,39 @@ class FamilyController extends Controller
             DB::rollBack();
             if ($e instanceof \PDOException && $e->getCode() == '23503') return $this->errorResponse('Failed, Cannot delete this data because it is related to other data.');
             return $this->errorResponse($e);
+        }
+    }
+
+    public function listReimburseHistory(Request $request, $familyId)  {
+        try {
+            $query          = Reimburse::query()->with(['reimburseGroup.costCenter', 'uomModel', 'purchasingGroupModel', 'reimburseType', 'taxOnSalesModel', 'status'])->where('for', $familyId);
+            $perPage        = $request->get('per_page', 10);
+            $sortBy         = $request->get('sort_by', 'id');
+            $sortDirection  = $request->get('sort_direction', 'desc');
+            $query->orderBy($sortBy, $sortDirection);
+            $data           = $query->paginate($perPage);
+            $data->getCollection()->transform(function ($map) {
+                $map = json_decode($map);
+                
+                return [
+                    'id'                => $map->id,
+                    'balance'           => $map->balance,
+                    'claimDate'         => $map->claim_date,
+                    'reimburseType'     => $map->reimburse_type->name,
+                    'purchasingGroup'   => $map->purchasing_group_model->purchasing_group,
+                    'costCenter'        => $map->reimburse_group->cost_center->desc,
+                    'uom'               => $map->uom_model->unit_of_measurement_text,
+                    'tax'               => $map->tax_on_sales_model->description,
+                    'status'            => [
+                        'name'              => $map->status->name,
+                        'classname'         => $map->status->classname,
+                        'code'              => $map->status->code
+                    ],
+                ];
+            });
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
         }
     }
 }

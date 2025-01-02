@@ -71,6 +71,7 @@ const PrDetail = ({ id }: { id: number }) => {
 
         if (
           data.data?.data?.status_id !== 4 &&
+          data.data?.data?.status_id !== 2 &&
           data.data?.data?.status_id !== 6 &&
           firstFalseStatus?.user_id === auth?.user?.id
         ) {
@@ -165,6 +166,13 @@ const PrDetail = ({ id }: { id: number }) => {
               className={methods.watch('status.classname')}
               code={methods.watch('status.code')}
             />
+          </div>
+        </div>
+
+        <div className='w-full mt-4'>
+          <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
+            <label className='form-label max-w-40'>{'Request By'}</label>
+            {methods.watch('created_by.name')}
           </div>
         </div>
 

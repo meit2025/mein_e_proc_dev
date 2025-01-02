@@ -34,14 +34,14 @@ class Purchase extends Model
         'total_all_amount'
     ];
 
-    public function getCreatedAtFormattedAttribute()
-    {
-        return $this->created_at->format('y-m-d'); // Format as DD.MM.YY
-    }
-    public function getDeliveryDateFormattedAttribute()
-    {
-        return $this->created_at->format('y-m-d'); // Format as DD.MM.YY
-    }
+    // public function getCreatedAtFormattedAttribute()
+    // {
+    //     return $this->created_at->format('y-m-d'); // Format as DD.MM.YY
+    // }
+    // public function getDeliveryDateFormattedAttribute()
+    // {
+    //     return $this->delivery_date->format('y-m-d'); // Format as DD.MM.YY
+    // }
 
     public function vendors()
     {

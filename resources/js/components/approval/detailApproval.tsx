@@ -3,7 +3,7 @@ import {
   WorkflowApprovalStepInterface,
   WorkflowComponent,
 } from '@/components/commons/WorkflowComponent';
-import { useForm, useFormContext } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 
 const DetailApproval = ({ methods }: { methods: ReturnType<typeof useForm> }) => {
   return (

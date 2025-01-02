@@ -8,7 +8,7 @@ export const formModel: Array<FormFieldModel<any>> = [
   {
     type: 'select',
     name: 'user_id',
-    label: 'Requester',
+    label: 'Request For',
     required: true,
     options: [],
     style: {
@@ -179,10 +179,10 @@ export const formModel: Array<FormFieldModel<any>> = [
   {
     type: 'input',
     name: 'total_vendor',
-    label: 'Total Vendor',
+    label: 'Purchase Requisition',
     required: true,
     texttype: 'number',
-    placeholder: 'enter your Total Vendor',
+    placeholder: 'enter your Purchase Requisition',
   },
   {
     fieldCustome: true,

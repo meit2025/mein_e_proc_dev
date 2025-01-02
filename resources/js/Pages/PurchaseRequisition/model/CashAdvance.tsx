@@ -27,6 +27,7 @@ const CashAdvance = ({ disable }: { disable: boolean }) => {
   };
 
   useEffect(() => {
+    console.log('total', total);
     if (total > 0) {
       const data = (parseInt(watch('cash_advance_purchases.dp')) / 100) * total;
       setValue('cash_advance_purchases.nominal', data);
