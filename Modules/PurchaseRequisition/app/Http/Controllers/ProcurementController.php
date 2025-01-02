@@ -104,7 +104,7 @@ class ProcurementController extends Controller
                     $path = $this->saveBase64Image($value['file_path'], 'purchaserequisition');
                     $purchase->attachment()->create([
                         'file_name' => $value['file_name'],
-                        'file_path' => $path,
+                        'file_path' => ltrim($path, '/'),
                     ]);
                 }
             }
@@ -168,65 +168,29 @@ class ProcurementController extends Controller
             // Find the purchase by ID
             $purchase = Purchase::with('vendors.units')->findOrFail($id);
 
-            $insert = $request->only([
-                'user_id',
-                'document_type',
-                'purchasing_groups',
-                'account_assignment_categories',
-                'delivery_date',
-                'storage_locations',
-                'total_vendor',
-                'total_item',
-                'is_cashAdvance'
-            ]);
-            $insert['updatedBy'] = Auth::user()->id;
-
-            // Update the purchase fields
-            $purchase->update($insert);
-
-            $entertain = $purchase->entertainment()->updateOrCreate([
+            $purchase->entertainment()->updateOrCreate([
                 'purchase_id' => $id
             ], $request['entertainment']);
 
-            if ($request->is_cashAdvance) {
-                $update = $purchase->cashAdvancePurchases()->updateOrCreate([
-                    'purchase_id' => $id
-                ], $request['cash_advance_purchases']);
-            }
 
-            // Update vendors and units
-            foreach ($request['vendors'] as $vendorData) {
-                // Check if the vendor exists, if not create it
-                $vendor = $purchase->vendors()->updateOrCreate(
-                    ['vendor' => $vendorData['vendor']],  // Check for existing vendor
-                    ['winner' => $vendorData['winner']]  // No additional fields to update
-                );
-
-                // Update or create units for the vendor
-                foreach ($vendorData['units'] as $unitData) {
-                    $vendor->units()->updateOrCreate(
-                        ['id' => $unitData['id']],  // Check for existing unit by material number
-                        $unitData  // Update or create with the new data
-                    );
-
-                    CashAdvancePurchases::updateOrCreate(
+            if ($request->has('attachment') && is_array($request->attachment) && count($request->attachment) > 0) {
+                foreach ($request->attachment as $key => $value) {
+                    # code...
+                    $path = $this->saveBase64Image($value['file_path'], 'purchaserequisition');
+                    $purchase->attachment()->updateOrCreate(
                         [
-                            'unit_id' => $unitData['id'],
+                            'file_path' => ltrim($path, '/'),
                             'purchase_id' => $id,
                         ],
                         [
-                            'purchase_id' => $id,
-                            'unit_id' => $unitData['id'],
-                            'reference' => $unitData['cash_advance_purchases']['reference'] ?? '',
-                            'document_header_text' => $unitData['cash_advance_purchases']['document_header_text'] ?? '',
-                            'document_date' => $unitData['cash_advance_purchases']['document_date'] ?? '',
-                            'due_on' => $unitData['cash_advance_purchases']['due_on'] ?? '',
-                            'text' => $unitData['cash_advance_purchases']['text'] ?? '',
-                            'dp' => $unitData['cash_advance_purchases']['dp'] ?? '',
+                            'file_name' => $value['file_name'],
+                            'file_path' => ltrim($path, '/'),
                         ]
                     );
                 }
             }
+
+
             $this->logToDatabase(
                 $purchase->id,
                 'procurement',

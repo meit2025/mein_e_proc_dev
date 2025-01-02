@@ -2,7 +2,7 @@ import { ReactNode, useCallback, useEffect, useState } from 'react';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import FormMapping from '@/components/form/FormMapping';
 import useDropdownOptionsArray from '@/lib/getDropdownArray';
-import { formModel } from './model/formModel';
+import { formModelEdit } from './model/formModel';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@/axiosInstance';
 import { usePage } from '@inertiajs/react';
@@ -21,11 +21,11 @@ const Update = ({ id }: { id: number }) => {
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [dataModel, setDataModel] = useState(formModel);
+  const [dataModel, setDataModel] = useState(formModelEdit);
   const { dropdownOptions, getDropdown } = useDropdownOptionsArray();
 
   useEffect(() => {
-    getDropdown(modelDropdowns, formModel);
+    getDropdown(modelDropdowns, formModelEdit);
   }, []);
 
   useEffect(() => {
