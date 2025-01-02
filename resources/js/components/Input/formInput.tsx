@@ -19,6 +19,7 @@ interface FormInputProps {
   icon?: ReactNode;
   onChanges?: (data: any) => void;
   isRupiah?: boolean;
+  note?: string;
 }
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -37,6 +38,7 @@ const FormInput: React.FC<FormInputProps> = ({
   onChanges,
   lengthLabel = 40,
   isRupiah = false,
+  note,
 }) => {
   const {
     control,
@@ -99,6 +101,10 @@ const FormInput: React.FC<FormInputProps> = ({
             );
           }}
         />
+      </div>
+      <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 mt-2'>
+        <label className={`form-label max-w-${lengthLabel}`}>{''}</label>
+        {note && <span>{note}</span>}
       </div>
       <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
         <label className='form-label max-w-32'>{''}</label>
