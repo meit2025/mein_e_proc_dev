@@ -47,6 +47,7 @@ const FormFileUpload: React.FC<FormFileUploadProps> = ({
         fileExtension &&
         !allowedExtensions.includes(fileExtension)
       ) {
+        e.target.value = '';
         onChange(null);
         setFileName(null);
         setError(fieldName, {
@@ -97,21 +98,26 @@ const FormFileUpload: React.FC<FormFileUploadProps> = ({
         required: isRequired ? (requiredMessage ?? `${fieldLabel} is required`) : false,
       }}
       render={({ field }) => (
-        <div style={style} className={classNames}>
-          <label className='block mb-2 text-sm font-medium text-gray-900 max-w-75'>
-            {fieldLabel}
-          </label>
-          <Input
-            type='file'
-            className='block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none'
-            disabled={disabled}
-            onChange={(e) => handleFileChange(e as ChangeEvent<HTMLInputElement>, field.onChange)}
-          />
-
-          {errors[fieldName] && (
-            <FormHelperText error>{String(errors[fieldName]?.message)}</FormHelperText>
-          )}
-        </div>
+        <>
+          <div style={style} className={classNames}>
+            <label className='block mb-2 text-sm font-medium text-gray-900 max-w-75'>
+              {fieldLabel}
+            </label>
+            <Input
+              type='file'
+              className='block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none'
+              disabled={disabled}
+              onChange={(e) => handleFileChange(e as ChangeEvent<HTMLInputElement>, field.onChange)}
+            />
+          </div>
+          <span style={{ marginLeft: '6rem', marginTop: '0.5rem', fontSize: '0.75rem' }}>
+            {allowedExtensions.length > 0 && <>Allowed types: {allowedExtensions.join(', ')}</>}
+            <br></br>
+            {errors[fieldName] && (
+              <FormHelperText error>{String(errors[fieldName]?.message)}</FormHelperText>
+            )}
+          </span>
+        </>
       )}
     />
   );
