@@ -99,7 +99,10 @@ abstract class Controller
             if ($request->approval == 1) {
 
                 $data = Approval::where('user_id', Auth::user()->id)
-                    ->where('document_name', 'PR')->pluck('document_id')->toArray();
+                    ->where('document_name', 'PR')
+                    ->where('status', 'Waiting')
+                    ->pluck('document_id')
+                    ->toArray();
                 $query = $query->whereIn('id', $data);
             } else {
                 $query->where(function ($q) use ($request, $filterableColumns) {
