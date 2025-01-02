@@ -48,6 +48,7 @@ interface DataGridProps {
     buttonCustome?: ReactNode;
     defaultSearch?: string;
     onExport?: (filter: string) => Promise<void> | void;
+    onExportXls?: (filter: string) => Promise<void> | void;
     onEdit?: (id: number) => Promise<void> | void;
     onDelete?: (id: number) => Promise<void> | void;
     onDetail?: (id: number) => Promise<void> | void;
@@ -71,6 +72,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
     columns,
     buttonCustome,
     onExport,
+    onExportXls,
     url,
     labelFilter = 'Search', // Default label filter
     onEdit,
@@ -420,6 +422,18 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                                                 style={{ marginBottom: '10px' }} // Add margin for spacing
                                             >
                                                 Export TXT
+                                            </Button>
+                                        )}
+                                        {onExportXls && (
+                                            <Button
+                                                className='btn'
+                                                variant='contained'
+                                                onClick={() => onExportXls(onStateFilter)}
+                                                color='primary'
+                                                startIcon={<i className='ki-filled ki-folder-down' />}
+                                                style={{ marginBottom: '10px' }} // Add margin for spacing
+                                            >
+                                                Export Excel
                                             </Button>
                                         )}
 
