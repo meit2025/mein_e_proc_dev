@@ -24,6 +24,7 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
     approvalFromStatusRoute: [],
   });
   const { dataDropdown, getDropdown } = useDropdownOptions();
+  const { dataDropdown: dataChooseApproval, getDropdown: getChoseApproval } = useDropdownOptions();
 
   const { showToast } = useAlert();
   const dokumnentType = watch('document_type');
@@ -61,7 +62,11 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
         return;
       }
 
-      if (getData.total_all_amount === null || getData.total_all_amount === undefined) {
+      if (
+        watch('total_all_amount') === null ||
+        watch('total_all_amount') === undefined ||
+        totalSum === 0
+      ) {
         setLoading(false);
         showToast('Please input Item', 'error');
         return;
@@ -98,6 +103,7 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
           type: 'PR',
           metode_approval: getData.metode_approval,
           chooses_approval_id: getData.chooses_approval_id,
+          tracking_approval_id: getData.tracking_approval_id,
         },
       });
       if (response.data.status_code === 200) {
@@ -140,6 +146,19 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
         showToast('An unexpected error occurred', 'error');
       }
     }
+  };
+
+  const onChangeApprovalChose = (value: any) => {
+    getChoseApproval('', {
+      name: 'master_tracking_numbers.name',
+      id: 'master_tracking_numbers.id',
+      tabel: 'approval_tracking_number_choose_routes',
+      join: 'master_tracking_numbers,master_tracking_numbers.id,=,approval_tracking_number_choose_routes.master_tracking_number_id',
+      where: {
+        key: 'approval_tracking_number_choose_id',
+        parameter: value,
+      },
+    });
   };
 
   useEffect(() => {
@@ -192,18 +211,35 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
                 classNames='mt-2'
               />
               {metodeApproval === 'chooses_approval' && (
-                <FormAutocomplete<any>
-                  options={dataDropdown}
-                  fieldLabel={'Select Chooses approval'}
-                  fieldName={'chooses_approval_id'}
-                  isRequired={true}
-                  disabled={false}
-                  style={{
-                    width: '58.5rem',
-                  }}
-                  placeholder={'Select Chooses approval'}
-                  classNames='mt-2'
-                />
+                <>
+                  <FormAutocomplete<any>
+                    options={dataDropdown}
+                    fieldLabel={'Chooses approval'}
+                    fieldName={'chooses_approval_id'}
+                    isRequired={true}
+                    disabled={false}
+                    style={{
+                      width: '58.5rem',
+                    }}
+                    placeholder={'Select Chooses approval'}
+                    classNames='mt-2'
+                    onChangeOutside={(x) => {
+                      onChangeApprovalChose(x);
+                    }}
+                  />
+                  <FormAutocomplete<any>
+                    options={dataChooseApproval}
+                    fieldLabel={'Tracking Approval'}
+                    fieldName={'tracking_approval_id'}
+                    isRequired={true}
+                    disabled={false}
+                    style={{
+                      width: '58.5rem',
+                    }}
+                    placeholder={'Select Chooses approval'}
+                    classNames='mt-2'
+                  />
+                </>
               )}
             </>
           )}
