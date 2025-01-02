@@ -37,6 +37,7 @@ const ArrayForm = ({
 
   // Watch the 'total_vendor' value
   const dataArrayItem = watch(`vendors[${dataIndex}].units`);
+  console.log('dataArrayItems', dataArrayItem);
 
   const watchAccountAssigment = useWatch({ name: 'item_account_assignment_categories' });
 
@@ -99,7 +100,10 @@ const ArrayForm = ({
   };
   const handleClick = async () => {
     const dataobj = getValues();
-    const id = dataobj.item_id ?? `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
+    const id =
+      dataobj.item_id !== undefined && dataobj.item_id !== null && dataobj.item_id !== ''
+        ? dataobj.item_id
+        : `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
 
     const newItem = {
       id: id,
@@ -117,8 +121,10 @@ const ArrayForm = ({
       asset_number: dataobj.item_asset_number,
       sub_asset_number: dataobj.item_sub_asset_number,
     };
+    console.log('newItem', newItem);
 
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
+    console.log('currentItems', currentItems);
     let updatedItems = [];
     if (dataobj.action === 'edit') {
       updatedItems = currentItems.map((item: any, index: any) =>
@@ -127,6 +133,7 @@ const ArrayForm = ({
     } else {
       updatedItems = [...currentItems, newItem];
     }
+    console.log('updatedItems', updatedItems);
 
     // Simpan array baru ke React Hook Form state
     setValue(`vendors[${dataIndex}].units`, updatedItems);
