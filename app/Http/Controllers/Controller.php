@@ -308,4 +308,12 @@ abstract class Controller
             throw new \Exception('Error processing image: ' . $e->getMessage());
         }
     }
+
+    function IncrementTotalData($tabelName)
+    {
+        $totalRows = DB::table($tabelName)->count();
+        $newValue = str_pad($totalRows + 1, 8, '0', STR_PAD_LEFT);
+
+        return $newValue;
+    }
 }
