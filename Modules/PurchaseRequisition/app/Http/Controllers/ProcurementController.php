@@ -39,6 +39,7 @@ class ProcurementController extends Controller
             'storage_locations',
             'total_vendor',
             'total_item',
+            'purchases_number',
         ];
 
         $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user');
@@ -67,6 +68,7 @@ class ProcurementController extends Controller
             $dataInsert = $request->all();
             $dataInsert['total_item'] = count($request['vendors'][0]['units']);
             $dataInsert['createdBy'] = Auth::user()->id;
+            $dataInsert['purchases_number'] = 'PR' . '-' . Carbon::now()->format('Y-m') . '-' . $this->IncrementTotalData('purchases');
             $purchase = Purchase::create($dataInsert);
 
             if ($request['entertainment']) {

@@ -31,17 +31,18 @@ class Purchase extends Model
         'updatedBy',
         'metode_approval',
         'chooses_approval_id',
-        'total_all_amount'
+        'total_all_amount',
+        'purchases_number'
     ];
 
-    // public function getCreatedAtFormattedAttribute()
-    // {
-    //     return $this->created_at->format('y-m-d'); // Format as DD.MM.YY
-    // }
-    // public function getDeliveryDateFormattedAttribute()
-    // {
-    //     return $this->delivery_date->format('y-m-d'); // Format as DD.MM.YY
-    // }
+    public function getCreatedAtFormattedAttribute()
+    {
+        return $this->created_at->format('y-m-d'); // Format as DD.MM.YY
+    }
+    public function getDeliveryDateFormattedAttribute()
+    {
+        return $this->delivery_date->format('y-m-d'); // Format as DD.MM.YY
+    }
 
     public function vendors()
     {
