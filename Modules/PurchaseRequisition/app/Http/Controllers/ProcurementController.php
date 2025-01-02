@@ -81,7 +81,7 @@ class ProcurementController extends Controller
             }
 
             $date = Carbon::now();
-            $formattedDate = $date->format('Y-M-D');
+            $formattedDate = $date->format('Y-m-d');
 
             if ($request->is_cashAdvance ?? false) {
                 $purchase->cashAdvancePurchases()->create([

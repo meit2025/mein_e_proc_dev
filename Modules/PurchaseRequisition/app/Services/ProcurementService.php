@@ -62,12 +62,13 @@ class ProcurementService
                 );
                 $array[] = $datainsert;
                 PurchaseRequisition::create($datainsert);
-                $cashData = CashAdvancePurchases::where('purchase_id', $id)->where('unit_id', $value->id)->first();
-                if ($cashData) {
-                    $datainsertCash = $this->prepareCashAdvanceData($procurement, $vendor, $value, $cashData, $reqno, $settings);
-                    CashAdvance::create($datainsertCash);
-                    $arrayCash[] = $datainsertCash;
-                }
+            }
+
+            $cashData = CashAdvancePurchases::where('purchase_id', $id)->first();
+            if ($cashData) {
+                $datainsertCash = $this->prepareCashAdvanceData($procurement, $vendor, $value, $cashData, $reqno, $settings);
+                CashAdvance::create($datainsertCash);
+                $arrayCash[] = $datainsertCash;
             }
 
             SettingApproval::where('key', 'dokumenType_' . $procurement->document_type)->update(['value' => $reqno]);
