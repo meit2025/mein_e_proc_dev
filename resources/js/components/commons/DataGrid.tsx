@@ -307,7 +307,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                     )}
                     {(onClone || url.clone) && (
                       <>
-                        {(!role || permissions.includes(role?.create ?? '')) && (
+                        {(!role || permissions.includes(role?.create ?? '')) && value === 0 && (
                           <Link
                             href={url.clone === '' ? '#' : `${url.clone}/${params.row.id}`}
                             onClick={(e) => {
