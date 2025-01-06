@@ -93,7 +93,12 @@ return [
             'level' => 'debug',
             'days' => 14,
         ],
-
+        'purchasing_txt' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/prurchasing_request_' . date('Y-m-d') . '.log'),
+            'level' => 'debug',
+            'days' => 14,
+        ],
         'papertrail' => [
             'driver' => 'monolog',
             'level' => env('LOG_LEVEL', 'debug'),
