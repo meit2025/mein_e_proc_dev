@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\Approval\Models\Approval;
 use Modules\PurchaseRequisition\Http\Requests\Procurement as RequestsProcurement;
 use Modules\PurchaseRequisition\Models\CashAdvancePurchases;
@@ -122,7 +123,7 @@ class ProcurementController extends Controller
 
             return $this->successResponse($request->all());
         } catch (\Throwable $th) {
-            //throw $th;
+            Log::channel('purchasing_txt')->error($th, ['request' => Auth::user()->name]);
             DB::rollBack();
             return $this->errorResponse("Error: contact your administrator");
         }
