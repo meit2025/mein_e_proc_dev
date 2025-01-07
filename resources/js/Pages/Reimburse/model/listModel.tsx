@@ -3,7 +3,6 @@ import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 import { GridColDef } from '@mui/x-data-grid';
 
 export const columns: GridColDef[] = [
-  { field: 'id', headerName: 'Request Number', width: 200, filterable: true },
   {
     field: 'code',
     headerName: 'Request Number',
