@@ -143,18 +143,16 @@ export const BussinessTripFormV1 = ({
     request_for: z.string().min(1, 'Request is required'),
     cost_center_id: z.string().min(1, 'Cost Center is required'),
     remark: z.string().min(1, 'Remark is required'),
-    attachment: z
-      .array(
-        z
-          .instanceof(File)
-          .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
-            message: 'File type must be JPG, JPEG, PNG, or PDF',
-          })
-          .refine((file) => file.size <= MAX_FILE_SIZE, {
-            message: 'File size must be less than 1MB',
-          }),
-      )
-      .min(1, { message: 'At least one file must be attached' }),
+    attachment: z.array(
+      z
+        .instanceof(File)
+        .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
+          message: 'File type must be JPG, JPEG, PNG, HEIC or PDF',
+        })
+        .refine((file) => file.size <= MAX_FILE_SIZE, {
+          message: 'File size must be less than 1MB',
+        }),
+    ),
     total_destination: z.number().min(1, 'Total Destinantion Required'),
     cash_advance: z.boolean().nullable().optional(),
     total_percent: z.string().nullable().optional(),

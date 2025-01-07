@@ -91,9 +91,8 @@ class CheckApproval
                     break;
 
                 case 'chooses_approval':
-                    $approvalTrackingNumberChoose = ApprovalTrackingNumberChooseRoute::where('approval_tracking_number_choose_id', $request->chooses_approval_id)
-                        ->first();
-                    $query = $this->getApprovalQuery($documentType->id, $purchasingGroup->id, $user->division_id, $user->position_id, $approvalTrackingNumberChoose->master_tracking_number_id);
+
+                    $query = $this->getApprovalQuery($documentType->id, $purchasingGroup->id, $user->division_id, $user->position_id, $request->tracking_approval_id);
                     $result = $this->applyConditions($query, $conditions, $request->value);
                     break;
 

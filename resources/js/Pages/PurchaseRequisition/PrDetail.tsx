@@ -176,6 +176,13 @@ const PrDetail = ({ id }: { id: number }) => {
           </div>
         </div>
 
+        <div className='w-full mt-4'>
+          <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
+            <label className='form-label max-w-40'>{'Purchases number'}</label>
+            {methods.watch('purchases_number')}
+          </div>
+        </div>
+
         <div className='card-body'>
           <FormMapping
             formModel={dataModel}

@@ -63,7 +63,13 @@ interface BusinessTripAttachement {
 }
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
-const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+const ACCEPTED_FILE_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/heic',
+  'application/pdf',
+];
 
 export const BussinessTripFormV1 = ({
   type,
@@ -79,7 +85,7 @@ export const BussinessTripFormV1 = ({
       z
         .instanceof(File)
         .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
-          message: 'File type must be JPG, JPEG, PNG, or PDF',
+          message: 'File type must be JPG, JPEG, PNG, HEIC or PDF',
         })
         .refine((file) => file.size <= MAX_FILE_SIZE, {
           message: 'File size must be less than 1MB',
@@ -407,7 +413,7 @@ export const BussinessTripFormV1 = ({
   }
 
   React.useEffect(() => {
-    if (id && type == BusinessTripType.edit) {
+    if (id && type == BusinessTripType.clone) {
       getDetailData();
       getdataRequestNoEdit('', {
         name: 'request_no',
@@ -440,22 +446,10 @@ export const BussinessTripFormV1 = ({
               <td>
                 <FormAutocomplete<any>
                   fieldLabel=''
-                  options={
-                    type == BusinessTripType.edit
-                      ? form.watch('request_no')
-                        ? dataRequestNoEdit
-                        : dataRequestNo
-                      : dataRequestNo
-                  }
+                  options={dataRequestNo}
                   fieldName='request_no'
                   isRequired={true}
-                  disabled={
-                    type == BusinessTripType.edit
-                      ? form.watch('request_no')
-                        ? true
-                        : false
-                      : false
-                  }
+                  disabled={false}
                   placeholder={'Select Request No.'}
                   classNames='mt-2 w-full'
                   onChangeOutside={(value) => {
@@ -571,7 +565,9 @@ export const BussinessTripFormV1 = ({
             )}
             <tr>
               <td width={200}>File Extension</td>
-              <td className='text-gray-500 text-xs font-extralight'>jpg,jpeg,png,pdf</td>
+              <td className='text-gray-500 text-xs font-extralight'>
+                PDF, JPG, JPEG, PNG and HEIC Max 1mb
+              </td>
             </tr>
             <tr>
               <td width={200}>Total Destination</td>

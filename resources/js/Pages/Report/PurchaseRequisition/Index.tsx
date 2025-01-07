@@ -122,6 +122,7 @@ export const Index = () => {
                             <option value='approve_to'>Approved</option>
                             <option value='reject_to'>Rejected</option>
                             <option value='fully_approve'>Fully Approved</option>
+                            <option value='revise'>Revise</option>
                         </select>
                     </div>
                     <div>
@@ -146,7 +147,7 @@ export const Index = () => {
                 </div>
             </div>
             <DataGridComponent
-                onExport={async (x: string) => await exporter(x)}
+                onExportXls={async (x: string) => await exporter(x)}
                 defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&`}
                 columns={columns}
                 url={urlConfig}

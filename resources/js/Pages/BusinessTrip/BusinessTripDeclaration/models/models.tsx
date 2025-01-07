@@ -115,4 +115,5 @@ export enum BusinessTripType {
   create,
   edit,
   update,
+  clone,
 }

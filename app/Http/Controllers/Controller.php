@@ -92,6 +92,12 @@ abstract class Controller
                 foreach ($filterableColumns as $column) {
                     $q->orWhere($column, 'ILIKE', '%' . $request->search . '%');
                 }
+
+                foreach ($filterableColumns as $column) {
+                    $q->orWhereHas('role', function ($q) use ($request) {
+                        $q->where('name', 'ILIKE', '%' . $request->search . '%');
+                    });
+                }
             });
         }
 
@@ -99,7 +105,74 @@ abstract class Controller
             if ($request->approval == 1) {
 
                 $data = Approval::where('user_id', Auth::user()->id)
-                    ->where('document_name', 'PR')->pluck('document_id')->toArray();
+                    ->where('document_name', 'PR')
+                    ->where('status', 'Waiting')
+                    ->pluck('document_id')
+                    ->toArray();
+                $query = $query->whereIn('id', $data);
+            } else {
+                $query->where(function ($q) use ($request, $filterableColumns) {
+                    $q->orWhere('user_id', Auth::user()->id)
+                        ->orWhere('createdBy', Auth::user()->id);
+                });
+            }
+        }
+
+        $query->orderBy($sortBy, $sortDirection);
+        return $query->paginate($perPage);
+    }
+
+    public function filterAndPaginateHasJoin($request, $model, array $filterableColumns, array $hasFilters, $userData = false)
+    {
+        $perPage = $request->get('per_page', 10);
+        $sortBy = $request->get('sort_by', 'id');
+        $sortDirection = $request->get('sort_direction', 'desc');
+
+        $query = $model instanceof \Illuminate\Database\Eloquent\Builder ? $model : $model::query();
+
+        foreach ($request->all() as $key => $value) {
+            if (in_array($key, $filterableColumns)) {
+                list($operator, $filterValue) = array_pad(explode(',', $value, 2), 2, null);
+                $query = $this->applyColumnFilter($query, $key, $operator, $filterValue); // Menggunakan fungsi helper
+            }
+
+            // Check if the key matches a relationship column in $hasColumns
+            foreach ($hasFilters as $relation) {
+                $relationshipKey = "{$relation['join']}_{$relation['column']}";
+
+                if ($key === $relationshipKey) {
+                    list($operator, $filterValue) = array_pad(explode(',', $value, 2), 2, null);
+
+                    $query->whereHas($relation['join'], function ($q) use ($relation, $operator, $filterValue) {
+                        $this->applyColumnFilter($q, $relation['column'], $operator, $filterValue);
+                    });
+                    break;
+                }
+            }
+        }
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request, $filterableColumns, $hasFilters) {
+                foreach ($filterableColumns as $column) {
+                    $q->orWhere($column, 'ILIKE', '%' . $request->search . '%');
+                }
+
+                foreach ($hasFilters as $hasFilter) {
+                    $q->orWhereHas($hasFilter['join'], function ($q) use ($request, $hasFilter) {
+                        $q->where($hasFilter['column'], 'ILIKE', '%' . $request->search . '%');
+                    });
+                }
+            });
+        }
+
+        if ($userData) {
+            if ($request->approval == 1) {
+
+                $data = Approval::where('user_id', Auth::user()->id)
+                    ->where('document_name', 'PR')
+                    ->where('status', 'Waiting')
+                    ->pluck('document_id')
+                    ->toArray();
                 $query = $query->whereIn('id', $data);
             } else {
                 $query->where(function ($q) use ($request, $filterableColumns) {
@@ -210,6 +283,7 @@ abstract class Controller
         }
     }
 
+
     /**
      * Logs a message to the database.
      *
@@ -307,5 +381,13 @@ abstract class Controller
         } catch (\Exception $e) {
             throw new \Exception('Error processing image: ' . $e->getMessage());
         }
+    }
+
+    function IncrementTotalData($tabelName)
+    {
+        $totalRows = DB::table($tabelName)->count();
+        $newValue = str_pad($totalRows + 1, 8, '0', STR_PAD_LEFT);
+
+        return $newValue;
     }
 }

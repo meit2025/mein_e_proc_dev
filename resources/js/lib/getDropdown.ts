@@ -16,6 +16,7 @@ interface StructDropdown {
   where?: WhereProps;
   search?: string;
   attribut?: string;
+  join?: string;
   hiddenZero?: boolean;
   idType?: 'number' | 'string';
   declaration?: string;
@@ -49,6 +50,7 @@ const useDropdownOptions = (urls: string = 'api/master/dropdown') => {
           declaration: struct.declaration ?? '',
           groupBy: struct.where?.groupBy ?? '',
           attribut: struct.attribut ?? '',
+          join: struct.join ?? '',
         },
         headers: {
           'Content-Type': 'application/json',

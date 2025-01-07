@@ -271,8 +271,10 @@ class ReportController extends Controller
         if ($request->approval == "1") {
             $data = Approval::where('user_id', Auth::user()->id)->where('document_name', 'TRIP')->pluck('document_id')->toArray();
             $query = $query->whereIn('id', $data);
-        } else {
-            $query = $query->where('created_by', Auth::user()->id)->orWhere('request_for', Auth::user()->id);
+        }
+        if (Auth::user()->is_admin != '1') {
+            $query = $query->where('created_by', Auth::user()->id)
+                ->orWhere('request_for', Auth::user()->id);
         }
 
         if ($startDate && $endDate) {
@@ -317,7 +319,7 @@ class ReportController extends Controller
 
     public function exportBT(Request $request)
     {
-        $query = BusinessTrip::query()->with(['purposeType', 'status']);
+        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor']);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
         $startDate = $request->get('startDate');
@@ -345,7 +347,8 @@ class ReportController extends Controller
                 ->pluck('document_id')
                 ->toArray();
             $query = $query->whereIn('id', $data);
-        } else {
+        }
+        if (Auth::user()->is_admin != '1') {
             $query = $query->where('created_by', Auth::user()->id)
                 ->orWhere('request_for', Auth::user()->id);
         }
@@ -361,7 +364,7 @@ class ReportController extends Controller
 
             return [
                 'Request No' => $map->request_no,
-                'Request For' => $map->request_for->name,
+                'Request For' => $map->requestFor->name,
                 'Purpose Type' => $purposeRelations,
                 'Remarks' => $map->remarks,
                 'Request Date' => date('d/m/Y', strtotime($map->created_at)),
@@ -402,6 +405,10 @@ class ReportController extends Controller
             $data = Approval::where('user_id', Auth::user()->id)
                 ->where('document_name', 'TRIP_DECLARATION')->pluck('document_id')->toArray();
             $query = $query->whereIn('id', $data);
+        }
+        if (Auth::user()->is_admin != '1') {
+            $query = $query->where('created_by', Auth::user()->id)
+                ->orWhere('request_for', Auth::user()->id);
         }
         if ($startDate && $endDate) {
             $query->whereBetween('created_at', [$startDate, $endDate]);
@@ -449,6 +456,10 @@ class ReportController extends Controller
 
     public function exportBTDec(Request $request)
     {
+        $startDate = $request->get('startDate');
+        $endDate = $request->get('endDate');
+        $status = $request->get('status');
+        $type = $request->get('type');
         $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'parentBusinessTrip']);
 
         // Check approval filter
@@ -459,6 +470,23 @@ class ReportController extends Controller
                 ->toArray();
 
             $query = $query->whereIn('id', $data);
+        }
+        if (Auth::user()->is_admin != '1') {
+            $query = $query->where('created_by', Auth::user()->id)
+                ->orWhere('request_for', Auth::user()->id);
+        }
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        }
+        if ($status) {
+            $query->whereHas('status', function ($q) use ($status) {
+                $q->where('code', $status);
+            });
+        }
+        if ($type) {
+            $query->whereHas('purposeType', function ($q) use ($type) {
+                $q->where('id', $type);
+            });
         }
 
         // Filter for type declaration
