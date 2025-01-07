@@ -118,7 +118,7 @@ const ReimburseDetail = () => {
                   </tr>
                   <tr>
                     <td>
-                      <strong>Pusat Biaya</strong>
+                      <strong>Cost Center</strong>
                     </td>
                     <td>
                       {data?.cost_center?.desc}

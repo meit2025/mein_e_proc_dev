@@ -56,7 +56,7 @@ const ReimburseDetail = () => {
         <table className='info-table text-sm mt-4'>
           <tr>
             <td>
-              <strong>Pusat Biaya</strong>
+              <strong>Cost Center</strong>
             </td>
             <td>{data?.cost_center?.desc}</td>
           </tr>
