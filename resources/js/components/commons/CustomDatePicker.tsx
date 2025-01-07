@@ -6,16 +6,20 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/shacdn/button';
 import { Calendar } from '@/components/shacdn/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/shacdn/popover';
+import { DayModifiers } from 'react-day-picker';
 
 interface CustomDatePickerProps {
   className?: string;
   dateFormat?: string;
   initialDate?: Date;
   onDateChange?: (date: Date | undefined) => void;
+  onDayClick?: (date: Date | undefined, modifiers: any | undefined) => void;
   disabled?: boolean;
   disabledDays?: Array<
-    { before?: Date; after?: Date; from?: Date; to?: Date } | Date | ((date: Date) => boolean)
+  { before?: Date; after?: Date; from?: Date; to?: Date } | Date | ((date: Date) => boolean)
   >;
+  modifiers?: DayModifiers | undefined;
+  footer?: React.ReactNode;
 }
 
 export function CustomDatePicker({
@@ -25,7 +29,10 @@ export function CustomDatePicker({
   initialDate,
   disabled = false,
   onDateChange,
+  onDayClick,
   disabledDays = [],
+  modifiers,
+  footer,
 }: CustomDatePickerProps) {
   const [date, setDate] = React.useState<Date | undefined>(initialDate);
 
@@ -38,17 +45,9 @@ export function CustomDatePicker({
     }
   };
 
-  // Tanggal yang akan di-disable
-  //   const disabledDays = [
-  //     { before: new Date() }, // Disable semua tanggal sebelum hari ini
-  //     new Date(2024, 11, 25), // Disable tanggal spesifik (misalnya 25 Desember 2024)
-  //     (date: Date) => date.getDay() === 0, // Disable setiap hari Minggu
-  //   ];
-
   React.useEffect(() => {
     setDate(initialDate);
   }, [initialDate]);
-
   return (
     <Popover>
       <PopoverTrigger asChild disabled={disabled}>
@@ -72,6 +71,9 @@ export function CustomDatePicker({
           onSelect={handleDateChange}
           initialFocus
           disabled={disabledDays}
+          onDayClick={onDayClick}
+          modifiers={modifiers}
+          footer={footer}
         />
       </PopoverContent>
     </Popover>

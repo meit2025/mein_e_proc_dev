@@ -160,6 +160,7 @@ export const BussinessTripFormV1 = ({
     destinations: z.array(
       z.object({
         destination: z.string().min(1, 'Destinantion is Required'),
+        restricted_area: z.boolean().nullable().optional(),
         pajak_id: z.string().min(1, 'Pajak is required'),
         purchasing_group_id: z.string().min(1, 'Purchasing Group is required'),
         business_trip_start_date: z.date().optional(),
@@ -212,6 +213,7 @@ export const BussinessTripFormV1 = ({
           detail_attedances: [],
           allowances: [],
           destination: '',
+          restricted_area: 0,
           pajak_id: '',
           purchasing_group_id: '',
           business_trip_start_date: new Date(),
@@ -271,6 +273,7 @@ export const BussinessTripFormV1 = ({
         'destinations',
         data.destinations.map((destination: any) => ({
           destination: destination.destination,
+          restricted_area: destination.restricted_area,
           pajak_id: destination.pajak_id,
           purchasing_group_id: destination.purchasing_group_id,
           business_trip_start_date: new Date(destination.business_trip_start_date),

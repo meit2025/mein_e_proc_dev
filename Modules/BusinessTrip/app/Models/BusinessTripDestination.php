@@ -29,6 +29,7 @@ class BusinessTripDestination extends Model
         'total_percent',
         'total_cash_advance',
         'reference_number',
+        'restricted_area',
     ];
 
     function detailAttendance()
