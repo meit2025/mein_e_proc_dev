@@ -1,16 +1,35 @@
 import FormAutocomplete from '@/components/Input/formDropdown';
 import FormInput from '@/components/Input/formInput';
 import FormSwitch from '@/components/Input/formSwitch';
-import { useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
 const CashAdvance = ({ disable }: { disable: boolean }) => {
   const { getValues, setValue, watch } = useFormContext();
+  const [isWinner, setIsWinner] = useState(true);
   const watchIsCashAdvance = useWatch({
     name: 'is_cashAdvance',
   });
 
-  const total = watch('total_all_amount') || 0;
+  const vendor = useWatch({
+    name: 'vendors',
+  });
+
+  const getWinner = (vendor: any) => {
+    if (!Array.isArray(vendor)) return null;
+    return vendor.find((item: any) => item && item.winner === true);
+  };
+
+  useEffect(() => {
+    const winner = getWinner(vendor);
+    if (winner) {
+      setIsWinner(false);
+    } else {
+      setIsWinner(true);
+    }
+  }, [vendor]);
+
+  const total = watch('total_all_amount');
 
   const dataAmaout = (value: any) => {
     // get persentase dp
@@ -27,7 +46,6 @@ const CashAdvance = ({ disable }: { disable: boolean }) => {
   };
 
   useEffect(() => {
-    console.log('total', total);
     if (total > 0) {
       const data = (parseInt(watch('cash_advance_purchases.dp')) / 100) * total;
       setValue('cash_advance_purchases.nominal', data);
@@ -95,6 +113,7 @@ const CashAdvance = ({ disable }: { disable: boolean }) => {
             type={'number'}
             placeholder={'Enter amount cashadvance'}
             isRupiah={true}
+            note={isWinner ? 'Please Chose The Propose Vendor' : ''}
           />
         </>
       )}

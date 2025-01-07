@@ -17,41 +17,38 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->get('per_page', 10);
-        $sortBy = $request->get('sort_by', 'id');
-        $sortDirection = $request->get('sort_direction', 'asc');
-
         $query = User::with(['role', 'positions', 'divisions', 'departements']);
 
         $filterableColumns =  [
             'nip',
             'name',
             'email',
-            'role_id',
-            'job_level',
-            'division',
-            'immediate_spv',
+            'username',
         ];
 
-        foreach ($request->all() as $key => $value) {
-            if (in_array($key, $filterableColumns)) {
-                list($operator, $filterValue) = array_pad(explode(',', $value, 2), 2, null);
-                $query = $this->applyColumnFilter($query, $key, $operator, $filterValue); // Use the helper function
-            }
-        }
+        $hasColumns =  [
+            [
+                "join" => "role",
+                "column" => "name",
+            ],
+            [
+                "join" => "positions",
+                "column" => "name",
+            ],
+            [
+                "join" => "divisions",
+                "column" => "name",
+            ],
+            [
+                "join" => "departements",
+                "column" => "name",
+            ],
+        ];
 
-        if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('nip', 'like', '%' . $request->search . '%')
-                    ->orWhere('name', 'like', '%' . $request->search . '%')
-                    ->orWhere('email', 'like', '%' . $request->search . '%')
-                    ->orWhere('role_id', 'like', '%' . $request->search . '%')
-                    ->orWhere('job_level', 'like', '%' . $request->search . '%')
-                    ->orWhere('division', 'like', '%' . $request->search . '%')
-                    ->orWhere('immediate_spv', 'like', '%' . $request->search . '%');
-            });
-        }
 
-        $query->orderBy($sortBy, $sortDirection);
+
+
+        $data = $this->filterAndPaginateHasJoin($request, $query, $filterableColumns, $hasColumns, false);
         $data = $query->paginate($perPage);
 
         return $this->successResponse($data);

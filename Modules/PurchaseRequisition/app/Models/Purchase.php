@@ -31,7 +31,8 @@ class Purchase extends Model
         'updatedBy',
         'metode_approval',
         'chooses_approval_id',
-        'total_all_amount'
+        'total_all_amount',
+        'purchases_number'
     ];
 
     public function getCreatedAtFormattedAttribute()
@@ -40,7 +41,7 @@ class Purchase extends Model
     }
     public function getDeliveryDateFormattedAttribute()
     {
-        return $this->created_at->format('y-m-d'); // Format as DD.MM.YY
+        return $this->delivery_date->format('y-m-d'); // Format as DD.MM.YY
     }
 
     public function vendors()

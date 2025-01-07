@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\Approval\Models\Approval;
 use Modules\PurchaseRequisition\Http\Requests\Procurement as RequestsProcurement;
 use Modules\PurchaseRequisition\Models\CashAdvancePurchases;
@@ -39,6 +40,7 @@ class ProcurementController extends Controller
             'storage_locations',
             'total_vendor',
             'total_item',
+            'purchases_number',
         ];
 
         $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user');
@@ -67,6 +69,7 @@ class ProcurementController extends Controller
             $dataInsert = $request->all();
             $dataInsert['total_item'] = count($request['vendors'][0]['units']);
             $dataInsert['createdBy'] = Auth::user()->id;
+            $dataInsert['purchases_number'] = 'PR' . '-' . Carbon::now()->format('Y-m') . '-' . $this->IncrementTotalData('purchases');
             $purchase = Purchase::create($dataInsert);
 
             if ($request['entertainment']) {
@@ -81,7 +84,7 @@ class ProcurementController extends Controller
             }
 
             $date = Carbon::now();
-            $formattedDate = $date->format('Y-M-D');
+            $formattedDate = $date->format('Y-m-d');
 
             if ($request->is_cashAdvance ?? false) {
                 $purchase->cashAdvancePurchases()->create([
@@ -102,7 +105,7 @@ class ProcurementController extends Controller
                     $path = $this->saveBase64Image($value['file_path'], 'purchaserequisition');
                     $purchase->attachment()->create([
                         'file_name' => $value['file_name'],
-                        'file_path' => $path,
+                        'file_path' => ltrim($path, '/'),
                     ]);
                 }
             }
@@ -120,7 +123,7 @@ class ProcurementController extends Controller
 
             return $this->successResponse($request->all());
         } catch (\Throwable $th) {
-            //throw $th;
+            Log::channel('purchasing_txt')->error($th, ['request' => Auth::user()->name]);
             DB::rollBack();
             return $this->errorResponse("Error: contact your administrator");
         }
@@ -166,65 +169,29 @@ class ProcurementController extends Controller
             // Find the purchase by ID
             $purchase = Purchase::with('vendors.units')->findOrFail($id);
 
-            $insert = $request->only([
-                'user_id',
-                'document_type',
-                'purchasing_groups',
-                'account_assignment_categories',
-                'delivery_date',
-                'storage_locations',
-                'total_vendor',
-                'total_item',
-                'is_cashAdvance'
-            ]);
-            $insert['updatedBy'] = Auth::user()->id;
-
-            // Update the purchase fields
-            $purchase->update($insert);
-
-            $entertain = $purchase->entertainment()->updateOrCreate([
+            $purchase->entertainment()->updateOrCreate([
                 'purchase_id' => $id
             ], $request['entertainment']);
 
-            if ($request->is_cashAdvance) {
-                $update = $purchase->cashAdvancePurchases()->updateOrCreate([
-                    'purchase_id' => $id
-                ], $request['cash_advance_purchases']);
-            }
 
-            // Update vendors and units
-            foreach ($request['vendors'] as $vendorData) {
-                // Check if the vendor exists, if not create it
-                $vendor = $purchase->vendors()->updateOrCreate(
-                    ['vendor' => $vendorData['vendor']],  // Check for existing vendor
-                    ['winner' => $vendorData['winner']]  // No additional fields to update
-                );
-
-                // Update or create units for the vendor
-                foreach ($vendorData['units'] as $unitData) {
-                    $vendor->units()->updateOrCreate(
-                        ['id' => $unitData['id']],  // Check for existing unit by material number
-                        $unitData  // Update or create with the new data
-                    );
-
-                    CashAdvancePurchases::updateOrCreate(
+            if ($request->has('attachment') && is_array($request->attachment) && count($request->attachment) > 0) {
+                foreach ($request->attachment as $key => $value) {
+                    # code...
+                    $path = $this->saveBase64Image($value['file_path'], 'purchaserequisition');
+                    $purchase->attachment()->updateOrCreate(
                         [
-                            'unit_id' => $unitData['id'],
+                            'file_path' => ltrim($path, '/'),
                             'purchase_id' => $id,
                         ],
                         [
-                            'purchase_id' => $id,
-                            'unit_id' => $unitData['id'],
-                            'reference' => $unitData['cash_advance_purchases']['reference'] ?? '',
-                            'document_header_text' => $unitData['cash_advance_purchases']['document_header_text'] ?? '',
-                            'document_date' => $unitData['cash_advance_purchases']['document_date'] ?? '',
-                            'due_on' => $unitData['cash_advance_purchases']['due_on'] ?? '',
-                            'text' => $unitData['cash_advance_purchases']['text'] ?? '',
-                            'dp' => $unitData['cash_advance_purchases']['dp'] ?? '',
+                            'file_name' => $value['file_name'],
+                            'file_path' => ltrim($path, '/'),
                         ]
                     );
                 }
             }
+
+
             $this->logToDatabase(
                 $purchase->id,
                 'procurement',

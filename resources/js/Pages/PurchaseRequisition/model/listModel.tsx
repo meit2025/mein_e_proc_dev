@@ -5,6 +5,17 @@ import { Link } from '@inertiajs/react';
 import { GridColDef } from '@mui/x-data-grid';
 export const columns: GridColDef[] = [
   {
+    field: 'purchases_number',
+    headerName: 'Purchases number',
+    width: 200,
+    filterable: false,
+    renderCell: (params: any) => {
+      return (
+        <Link href={`${DETAIL_PAGE_PR}/${params?.row?.id}`}>{params?.row?.purchases_number}</Link>
+      );
+    },
+  },
+  {
     field: 'user.name',
     headerName: 'Request for',
     width: 200,
