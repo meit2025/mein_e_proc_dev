@@ -4,6 +4,7 @@ use App\Http\Controllers\FamilyController;
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\Http\Controllers\AuthController;
 use Modules\Reimbuse\Http\Controllers\ReimbuseController;
+use Modules\Reimbuse\Http\Controllers\MyReimburseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +29,11 @@ Route::group(['prefix' => 'reimburse'], function () {
     ]);
     Route::get('/print/{id}', [ReimbuseController::class, 'print'])->name('reimburse.print');
     Route::get('/data-limit-and-balance', [ReimbuseController::class, 'getDataLimitAndBalance'])->name('reimburse.data-limit-balance');
+
+    Route::group(['prefix' => 'my-reimburse'], function () {
+        Route::get('/', [MyReimburseController::class, 'index'])->name('reimburse.myReimburse.index');    
+        Route::get('/{isEmployee}', [MyReimburseController::class, 'list'])->name('reimburse.myReimburse.list');    
+    });
 });
 
 
@@ -42,9 +48,6 @@ Route::group(['prefix' => 'api/reimburse'], function () {
     Route::get('/get-employee-reimburse', [ReimbuseController::class, 'dropdownEmployee'])->name('reimburse.get-reimburse-employee');
     Route::get('/get-family-reimburse', [ReimbuseController::class, 'dropdownFamily'])->name('reimburse.get-reimburse-family');
 
-    // getPeriodAPI
 });
-
-// });
 
 Route::get('/family/show/{employee}', [FamilyController::class, 'show']);
