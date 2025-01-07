@@ -978,14 +978,14 @@ export const ReimburseForm: React.FC<Props> = ({
                           </tr>
 
                           <tr>
-                            <td className='w-1/4'>Sisa Balance</td>
+                            <td className='w-1/4'>Current Balance</td>
                             <td>
                             <span className='font-bold'>{detailLimit[index]?.balance && formatRupiah(detailLimit[index]?.balance)}</span>
                             </td>
                           </tr>
 
                           <tr>
-                            <td className='w-1/4'>Sisa Limit</td>
+                            <td className='w-1/4'>Limit Claim</td>
                             <td>
                               <span className='font-bold'>{detailLimit[index]?.limit}</span>{' '}
                             </td>
