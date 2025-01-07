@@ -4,17 +4,13 @@ namespace Modules\Master\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\Reimbuse\Models\Reimburse;
 
 class MasterTypeReimburse extends Model
 {
     use HasFactory;
 
     protected $fillable = ["code", "name", "is_employee", "limit", "material_group", "material_number", "grade_option", "grade_all_price", "family_status", "interval_claim_period"];
-
-    public function quotas()
-    {
-        return $this->hasMany(MasterQuotaReimburse::class, 'type', 'code');
-    }
 
     public function reimburseTypeGrades()
     {
@@ -47,5 +43,10 @@ class MasterTypeReimburse extends Model
     public function materialGroup()
     {
         return $this->belongsTo(MaterialGroup::class, 'material_group', 'id');
+    }
+
+    public function reimburses()
+    {
+        return $this->hasMany(Reimburse::class, 'reimburse_type', 'code');
     }
 }

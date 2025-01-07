@@ -30,10 +30,7 @@ import { LIST_PAGE_MASTER_UOM } from '@/endpoint/uom/page';
 import { LIST_PAGE_MASTER_PAJAK } from '@/endpoint/pajak/page';
 import { LIST_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
 import { PAGE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/page';
-import { LIST_PAGE_REIMBURSE_PERIOD } from '@/endpoint/reimbursePeriod/page';
-import { PAGE_REIMBURSE_QUOTA } from '@/endpoint/reimburseQuota/page';
-import { LIST_PAGE_FAMILY } from '@/endpoint/family/page';
-import { PAGE_REIMBURSE } from '@/endpoint/reimburse/page';
+import { PAGE_REIMBURSE, PAGE_MY_REIMBURSE } from '@/endpoint/reimburse/page';
 import { LIST_PAGE_MASTER_PERMISSION } from '@/endpoint/permission/page';
 import { LIST_PAGE_DESTINATION } from '@/endpoint/destination/page';
 import { ScrollArea } from '@/components/shacdn/scroll-area';
@@ -174,9 +171,20 @@ const sidebar = [
             {
                 title: 'Reimburse',
                 icon: 'ki-element-11',
-                route: PAGE_REIMBURSE,
+                route: '/',
                 role: ['reimburse view', 'reimburse create', 'reimburse update', 'reimburse delete'],
-                sub: [],
+                sub: [
+                    {
+                        name: 'Reimbursement Request',
+                        route: PAGE_REIMBURSE,
+                        role: ['reimburse view', 'reimburse create', 'reimburse update', 'reimburse delete'],
+                    },
+                    {
+                        name: 'My Reimbursement',
+                        route: PAGE_MY_REIMBURSE,
+                        role: ['reimburse view', 'reimburse create', 'reimburse update', 'reimburse delete'],
+                    },
+                ],
             },
 
             {
