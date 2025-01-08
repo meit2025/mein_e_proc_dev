@@ -76,6 +76,10 @@ class BusinessTripDestination extends Model
         return $this->belongsTo(PurchasingGroup::class, 'purchasing_group_id', 'id');
     }
 
+    function businessTrip() {
+        return $this->belongsTo(BusinessTrip::class, 'business_trip_id', 'id');
+    }
+
     //   $table->string('destination');
     //         $table->date('business_trip_start_date');
     //         $table->date('business_trip_end_date');
