@@ -23,54 +23,19 @@ import { Separator } from '@/components/shacdn/separator';
 import '../css/index.scss';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
-
-import axiosInstance from '@/axiosInstance';
 import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
-import {
-  WorkflowApprovalDiagramInterface,
-  WorkflowApprovalStepInterface,
-  WorkflowComponent,
-} from '@/components/commons/WorkflowComponent';
-import FormSwitch from '@/components/Input/formSwitchCustom';
-import { Input } from '@/components/shacdn/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/shacdn/select';
-import { useAlert } from '@/contexts/AlertContext';
-import {
-  CREATE_API_BUSINESS_TRIP,
-  EDIT_API_BUSINESS_TRIP,
-  GET_DETAIL_BUSINESS_TRIP,
-} from '@/endpoint/business-trip/api';
-import {
-  GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE,
-  GET_DETAIL_PURPOSE_TYPE,
-} from '@/endpoint/purpose-type/api';
-import { Button as ButtonMui } from '@mui/material';
-import axios, { AxiosError } from 'axios';
 import moment from 'moment';
 import * as React from 'react';
-import { DestinationModel } from '../../Destination/models/models';
-import { PurposeTypeModel } from '../../PurposeType/models/models';
 import {
-  AllowanceItemModel,
-  BusinessTripType,
-  Costcenter,
   Pajak,
   PurchasingGroup,
 } from '../models/models';
-import { GET_LIST_DESTINATION_BY_TYPE } from '@/endpoint/destination/api';
-import useDropdownOptions from '@/lib/getDropdown';
 import FormAutocomplete from '@/components/Input/formDropdown';
-import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
-import { Combobox } from '@/components/shacdn/combobox';
 import { DetailAttedances } from './DetailAttedances';
 import { DetailAllowance } from './DetailAllowance';
 import { ResultTotalItem } from './ResultTotalItem';
+import { DayPickerProps } from 'react-day-picker';
+import { Checkbox } from '@/components/shacdn/checkbox';
 
 interface User {
   id: string;
@@ -79,6 +44,7 @@ interface User {
 }
 
 export function BussinessDestinationForm({
+    key,
   form,
   index,
   destination,
@@ -95,6 +61,7 @@ export function BussinessDestinationForm({
   setSelectedDates,
   selectedDates,
 }: {
+  key: any;
   form: any;
   index: number;
   destination: any;
@@ -191,41 +158,94 @@ export function BussinessDestinationForm({
     replaceAllowance(allowancesForm);
   }
 
-  const handleDateStartChange = (value: Date | undefined, index: number) => {
-    updateDestination(index, {
-      ...destination,
-      business_trip_start_date: value,
-    });
-    console.log(index);
-    setSelectedDates((prev: any) => {
-      const updated = [...prev];
-      // Perbarui hanya elemen yang ditargetkan
-      updated[index] = {
-        ...updated[index], // Pastikan data sebelumnya tetap ada
-        from: value,
-      };
+    const handleDateStartChange = (value: Date | undefined, index: number) => {
+        setSelectedDates((prev: any) => {
+            const updated = [...prev];
+            // Jika nilai ada, perbarui elemen target
+            updated[index] = {
+            ...updated[index],
+            from: value,
+            };
+            return updated;
+        });
+    };
 
-      return updated;
-    });
-  };
+    const handleDateEndChange = (value: Date | undefined, index: number) => {
+        updateDestination(index, {
+        ...destination,
+        business_trip_end_date: value,
+        });
+        setSelectedDates((prev: any) => {
+            const updated = [...prev];
+            // Perbarui hanya elemen yang ditargetkan
+            updated[index] = {
+                ...updated[index], // Pastikan data sebelumnya tetap ada
+                to: value,
+            };
+        return updated;
+        });
+    };
+    const [selectedDateRemove, setSelectedDateRemove] = React.useState<Date | undefined>();
+    const modifiers: DayPickerProps["modifiers"] = {};
+    if (selectedDateRemove) {
+        modifiers.selected = selectedDateRemove;
+    }
 
-  const handleDateEndChange = (value: Date | undefined, index: number) => {
-    updateDestination(index, {
-      ...destination,
-      business_trip_end_date: value,
-    });
-    setSelectedDates((prev: any) => {
-      const updated = [...prev];
-      // Perbarui hanya elemen yang ditargetkan
-      updated[index] = {
-        ...updated[index], // Pastikan data sebelumnya tetap ada
-        to: value,
-      };
-      return updated;
-    });
-  };
+    const handleResetClick = (index: number, type: string): void => {
+        if (type === 'start') {
+            updateDestination(index,{
+                ...destination,
+                business_trip_start_date: null,
+            });
+
+            setSelectedDates((prev: any) => {
+                const updated = [...prev];
+
+                // Jika nilai undefined, hapus elemen target
+                updated[index] = {
+                    ...updated[index],
+                    from: undefined,
+                };
+                return updated;
+            });
+        }
+        if (type === 'end') {
+            updateDestination(index,{
+                ...destination,
+                business_trip_end_date: null,
+            });
+
+            setSelectedDates((prev: any) => {
+                const updated = [...prev];
+
+                // Jika nilai undefined, hapus elemen target
+                updated[index] = {
+                    ...updated[index],
+                    to: undefined,
+                };
+                return updated;
+            });
+        }
+
+        setSelectedDateRemove(undefined);
+    }
+
+
+    let footerStart = (
+        <>
+            <button type='button' className='btn btn-danger' onClick={() => handleResetClick(index, 'start')}>Reset</button>
+        </>
+    );
+
+    let footerEnd = (
+        <>
+            <button type='button' className='btn btn-danger' onClick={() => handleResetClick(index, 'end')}>Reset</button>
+        </>
+    );
+
+  console.log(selectedDates, 'selectedDatesxwerewferge');
   return (
-    <TabsContent value={`destination${index + 1}`}>
+    <TabsContent key={key} value={`destination${index + 1}`}>
       <div key={index}>
         <table className='text-xs mt-4 reimburse-form-detail font-thin'>
           <tr>
@@ -247,6 +267,33 @@ export function BussinessDestinationForm({
                     destination: value,
                   });
                 }}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td width={200}>
+            Restricted Area
+            </td>
+            <td>
+            <FormField
+                control={form.control}
+                name={`destinations.${index}.restricted_area`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                    <Checkbox
+                        checked={destination.restricted_area}
+                        onCheckedChange={(value) => {
+                            updateDestination(index, {
+                                ...destination,
+                                restricted_area: value,
+                            });
+                        }}
+                    />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </td>
           </tr>
@@ -307,11 +354,30 @@ export function BussinessDestinationForm({
                     <FormControl>
                       <CustomDatePicker
                         initialDate={destination.business_trip_start_date}
-                        onDateChange={(value) => {
-                          handleDateStartChange(value, index);
+                        // onDateChange={(value) => {
+                        //   handleDateStartChange(value, index);
+                        // }}
+                        modifiers={modifiers}
+                        onDayClick={(day, modifiers) => {
+                            if (modifiers.selected) {
+                                handleDateStartChange(undefined, index);
+                                setSelectedDateRemove(undefined);
+                                updateDestination(index, {
+                                    ...destination,
+                                    business_trip_start_date: undefined,
+                                });
+                            } else {
+                                handleDateStartChange(day, index);
+                                setSelectedDateRemove(day);
+                                updateDestination(index, {
+                                    ...destination,
+                                    business_trip_start_date: day,
+                                });
+                            }
                         }}
                         disabled={false}
                         disabledDays={selectedDates}
+                        footer={footerStart}
                       />
                     </FormControl>
                     <FormMessage />
@@ -327,11 +393,30 @@ export function BussinessDestinationForm({
                     <FormControl>
                       <CustomDatePicker
                         initialDate={destination.business_trip_end_date}
-                        onDateChange={(value) => {
-                          handleDateEndChange(value, index);
+                        // onDateChange={(value) => {
+                        //   handleDateEndChange(value, index);
+                        // }}
+                        modifiers={modifiers}
+                        onDayClick={(day, modifiers) => {
+                            if (modifiers.selected) {
+                                handleDateEndChange(undefined, index);
+                                setSelectedDateRemove(undefined);
+                                updateDestination(index, {
+                                    ...destination,
+                                    business_trip_end_date: undefined,
+                                });
+                            } else {
+                                handleDateEndChange(day, index);
+                                setSelectedDateRemove(day);
+                                updateDestination(index, {
+                                    ...destination,
+                                    business_trip_end_date: day,
+                                });
+                            }
                         }}
                         disabled={false}
                         disabledDays={selectedDates}
+                        footer={footerEnd}
                       />
                     </FormControl>
                     {/* <FormDescription>This is your public display name.</FormDescription> */}

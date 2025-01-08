@@ -99,6 +99,12 @@ return [
             'level' => 'debug',
             'days' => 14,
         ],
+        'notification_email' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/notification_email' . date('Y-m-d') . '.log'),
+            'level' => 'debug',
+            'days' => 14,
+        ],
         'papertrail' => [
             'driver' => 'monolog',
             'level' => env('LOG_LEVEL', 'debug'),

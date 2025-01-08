@@ -37,7 +37,6 @@ class TextPrServices
             DB::commit();
             return $generate;
         } catch (Exception $e) {
-            dd($e);
             DB::rollBack();
             throw new Exception($e->getMessage());
         }

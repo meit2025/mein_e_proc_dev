@@ -161,8 +161,30 @@ class ApprovalController extends Controller
     {
         DB::beginTransaction();
         try {
+            $dokumnetType = 'PR';
+            $dokumentApproval = 'PR';
+            switch ($request->function_name) {
+                case 'procurement':
+                    $dokumnetType = 'PR';
+                    $dokumentApproval = 'PR';
+                    break;
+                case 'reim':
+                    $dokumnetType = 'REIM';
+                    $dokumentApproval = 'REIM';
+                    break;
+                case 'trip':
+                    $dokumnetType = 'BT';
+                    $dokumentApproval = 'TRIP';
+                    break;
+                case 'trip_declaration':
+                    $dokumnetType = 'BTPO';
+                    $dokumentApproval = 'TRIP_DECLARATION';
+                    break;
+            }
+
             if ($request->status != 'Cancel') {
                 Approval::where('id', $request->approvalId)->where('document_id',  $request->id)
+                    ->where('document_name', $dokumentApproval)
                     ->update([
                         'status' => $request->status,
                         'message' => $request->note,
@@ -180,6 +202,7 @@ class ApprovalController extends Controller
 
             $ceksedSap = Approval::where('is_status', false)->where('document_id', $request->id)
                 ->where('id', '!=', $request->approvalId)
+                ->where('document_name', $dokumentApproval)
                 ->get();
 
             $modelMap = [
@@ -226,22 +249,6 @@ class ApprovalController extends Controller
                     'Generate PR TO SAP',
                     'SEND SAP SUCCESS'
                 );
-                $dokumnetType = 'PR';
-                switch ($request->function_name) {
-                    case 'procurement':
-                        $dokumnetType = 'PR';
-                        break;
-                    case 'reim':
-                        $dokumnetType = 'REIM';
-                        break;
-                    case 'trip':
-                        $dokumnetType = 'BT';
-                        break;
-                    case 'trip_declaration':
-                        $dokumnetType = 'BTPO';
-                        break;
-                }
-
                 SapJobs::dispatch($request->id, $dokumnetType);
             }
 

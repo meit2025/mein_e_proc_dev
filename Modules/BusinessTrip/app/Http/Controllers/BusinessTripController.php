@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Modules\Approval\Models\Approval;
@@ -204,10 +205,13 @@ class BusinessTripController extends Controller
 
             $destinations[] = [
                 'destination' => $value->destination,
+                'restricted_area' => $value->restricted_area,
                 'business_trip_start_date' => $value->business_trip_start_date,
                 'business_trip_end_date' => $value->business_trip_end_date,
                 'pajak_id' => "$value->pajak_id",
+                'pajak' => $value->pajak,
                 'purchasing_group_id' => "$value->purchasing_group_id",
+                'purchasing_group' => $value->purchasingGroup,
                 'reference_number' => $value->reference_number,
                 'cash_advance' => $value->cash_advance,
                 'total_cash_advance' => $value->total_cash_advance,
@@ -392,11 +396,13 @@ class BusinessTripController extends Controller
             // Gabungkan prefix dan nomor urut
             $requestNo = $prefix . $sequence;
 
+            $getCostCenter = MasterCostCenter::where('cost_center', $request->cost_center_id)->first();
+
             $businessTrip = BusinessTrip::create([
                 'request_no' => $requestNo,
                 'purpose_type_id' => $request->purpose_type_id,
                 'request_for' => $request->request_for,
-                'cost_center_id' => $request->cost_center_id,
+                'cost_center_id' => $getCostCenter->id,
                 'remarks' => $request->remark,
                 'total_destination' => $request->total_destination,
                 'created_by' => auth()->user()->id,
@@ -427,13 +433,16 @@ class BusinessTripController extends Controller
 
             foreach ($request->destinations as $key => $value) {
                 $data_destination = json_decode($value, true);
+                $getPajak = Pajak::where('mwszkz', $data_destination['pajak_id'])->first();
+                $getPurchasingGroup = PurchasingGroup::where('purchasing_group', $data_destination['purchasing_group_id'])->first();
                 $businessTripDestination = BusinessTripDestination::create([
                     'business_trip_id' => $businessTrip->id,
                     'destination' => $data_destination['destination'],
                     'business_trip_start_date' => date('Y-m-d', strtotime($data_destination['business_trip_start_date'])),
                     'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
-                    'pajak_id' => $data_destination['pajak_id'],
-                    'purchasing_group_id' => $data_destination['purchasing_group_id'],
+                    'pajak_id' => $getPajak->id,
+                    'purchasing_group_id' => $getPurchasingGroup->id,
+                    'restricted_area' => $data_destination['restricted_area'],
                 ]);
                 foreach ($data_destination['detail_attedances'] as $key => $destination) {
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
@@ -820,5 +829,163 @@ class BusinessTripController extends Controller
             ];
         }
         return $this->successResponse($data);
+    }
+
+    function getDateByUser($user_id) {
+        $data = BusinessTripDestination::whereHas('businessTrip', function ($query) use ($user_id) {
+            $query->where('request_for', $user_id)
+                ->where('type', 'request');
+        })->get();
+        $destination = [];
+        $offset = 10;
+        foreach ($data as $key => $value) {
+             // Pastikan status approval bukan 'Cancel' atau 'Reject'
+            $hasValidApproval = Approval::where('document_id', $value->business_trip_id)->whereIn('status',['Rejected','Cancel'])->exists();
+
+            if (!$hasValidApproval) {
+                $destination[$key + $offset] = [
+                    'from' => $value->business_trip_start_date,
+                    'to' => $value->business_trip_end_date,
+                ];
+            }
+        }
+        return $this->successResponse($destination);
+    }
+
+    function cloneStore(Request $request, $id) {
+        try {
+            DB::beginTransaction();
+            $yearMonth = now()->format('Y-m'); // Format tahun dan bulan
+            $prefix = "ODR-{$yearMonth}-"; // Prefix untuk request number
+
+            // Cari nomor urut terakhir berdasarkan prefix dan type
+            $latestOrder = BusinessTrip::where('request_no', 'like', "$prefix%")
+                ->where('type', 'request') // Filter berdasarkan tipe
+                ->latest('id') // Urutkan berdasarkan ID terbaru
+                ->first();
+
+            // Ambil nomor urut terakhir dari kode, atau mulai dari 1 jika belum ada
+            $sequence = $latestOrder
+                ? (int)substr($latestOrder->request_no, strlen($prefix)) + 1
+                : 1;
+
+            // Format menjadi angka 8 digit (misalnya 00000001, 00000002, dst.)
+            $sequence = str_pad($sequence, 8, '0', STR_PAD_LEFT);
+
+            // Gabungkan prefix dan nomor urut
+            $requestNo = $prefix . $sequence;
+
+            $getCostCenter = MasterCostCenter::where('cost_center', $request->cost_center_id)->first();
+
+            $businessTrip = BusinessTrip::create([
+                'request_no' => $requestNo,
+                'purpose_type_id' => $request->purpose_type_id,
+                'request_for' => $request->request_for,
+                'cost_center_id' => $getCostCenter->id,
+                'remarks' => $request->remark,
+                'total_destination' => $request->total_destination,
+                'created_by' => auth()->user()->id,
+                'type' => 'request',
+                'cash_advance' => $request->cash_advance == "true" ? 1 : 0,
+                'reference_number' => $requestNo,
+                'total_percent' => $request->cash_advance == "true" ? $request->total_percent : null,
+                'total_cash_advance' => $request->cash_advance == "true" ? str_replace('.', '', $request->total_cash_advance) : null,
+                'clone_id' => $id
+            ]);
+
+            if ($request->attachment != null) {
+                foreach ($request->attachment as $row) {
+                    // Ambil nama asli file
+                    $originalName = pathinfo($row->getClientOriginalName(), PATHINFO_FILENAME);
+                    $extension = $row->getClientOriginalExtension();
+                    // Tambahkan timestamp di akhir nama file
+                    $timestampedName = $originalName . '_' . time() . '.' . $extension;
+                    // Simpan file dengan nama yang telah dimodifikasi
+                    $filePath = $row->storeAs('business_trip', $timestampedName, 'public');
+                    // Simpan data ke database
+                    BusinessTripAttachment::create([
+                        'business_trip_id' => $businessTrip->id,
+                        'file_path' => 'business_trip', // Folder tempat file disimpan
+                        'file_name' => $timestampedName, // Nama file dengan timestamp
+                    ]);
+                }
+            }
+
+            if($request->file_existing != null){
+                // DELETE ATTACHMENT DULU JIKA ADA YANG DI HAPUS
+                $array_id_exist = [];
+                foreach ($request->file_existing as $key => $attachment) {
+                    $decode = json_decode($attachment);
+                    $fileName = basename($decode->url); // Mendapatkan nama file dari URL
+                    // Mendapatkan konten file dari URL
+                    $fileContents = file_get_contents($decode->url);
+                    // Menyimpan file ke storage (misalnya ke folder "public/images")
+                    Storage::put("public/business_trip/{$fileName}", $fileContents);
+
+                    BusinessTripAttachment::create([
+                        'business_trip_id' => $businessTrip->id,
+                        'file_path' => 'business_trip', // Folder tempat file disimpan
+                        'file_name' => $fileName, // Nama file dengan timestamp
+                    ]);
+                }
+            }
+
+            foreach ($request->destinations as $key => $value) {
+                $data_destination = json_decode($value, true);
+                $getPajak = Pajak::where('mwszkz', $data_destination['pajak_id'])->first();
+                $getPurchasingGroup = PurchasingGroup::where('purchasing_group', $data_destination['purchasing_group_id'])->first();
+                $businessTripDestination = BusinessTripDestination::create([
+                    'business_trip_id' => $businessTrip->id,
+                    'destination' => $data_destination['destination'],
+                    'business_trip_start_date' => date('Y-m-d', strtotime($data_destination['business_trip_start_date'])),
+                    'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
+                    'pajak_id' => $getPajak->id,
+                    'purchasing_group_id' => $getPurchasingGroup->id,
+                    'restricted_area' => $data_destination['restricted_area'],
+                ]);
+                foreach ($data_destination['detail_attedances'] as $key => $destination) {
+                    $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
+                        'business_trip_destination_id' => $businessTripDestination->id,
+                        'business_trip_id' => $businessTrip->id,
+                        'date' => date('Y-m-d', strtotime($destination['date'])),
+                        'shift_code' => $destination['shift_code'],
+                        'shift_start' => $destination['shift_start'],
+                        'shift_end' => $destination['shift_end'],
+                        'start_time' => $destination['start_time'],
+                        'end_time' => $destination['end_time'],
+                    ]);
+                }
+                foreach ($data_destination['allowances'] as $key => $allowance) {
+                    if (strtolower($allowance['type']) == 'total') {
+                        foreach ($allowance['detail'] as $detail) {
+                            BusinessTripDetailDestinationTotal::create([
+                                'business_trip_destination_id' => $businessTripDestination->id,
+                                'business_trip_id' => $businessTrip->id,
+                                'price' => $detail['request_price'],
+                                'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
+                                'standard_value' => $allowance['subtotal'],
+                            ]);
+                        }
+                    } else {
+                        foreach ($allowance['detail'] as $detail) {
+                            BusinessTripDetailDestinationDayTotal::create([
+                                'business_trip_destination_id' => $businessTripDestination->id,
+                                'date' => $detail['date'],
+                                'business_trip_id' => $businessTrip->id,
+                                'price' => $detail['request_price'],
+                                'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
+                                'standard_value' => $allowance['subtotal'],
+                            ]);
+                        }
+                    }
+                }
+            }
+            $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP');
+            DB::commit();
+            // return $this->successResponse("Clone successfully");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $this->errorResponse($th->getMessage());
+        }
     }
 }
