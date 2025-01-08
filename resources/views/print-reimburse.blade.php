@@ -142,7 +142,7 @@
                     </tr>
                 @endif
                 <tr>
-                    <td><strong>Pusat Biaya</strong></td>
+                    <td><strong>Cost Center</strong></td>
                     <td>{{$data['group']['costCenter']['desc']}}</td>
                 </tr>
                 <tr>
