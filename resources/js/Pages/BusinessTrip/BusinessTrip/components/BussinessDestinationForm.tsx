@@ -365,6 +365,7 @@ export function BussinessDestinationForm({
                                 updateDestination(index, {
                                     ...destination,
                                     business_trip_start_date: undefined,
+                                    business_trip_end_date: undefined,
                                 });
                             } else {
                                 handleDateStartChange(day, index);
@@ -372,6 +373,7 @@ export function BussinessDestinationForm({
                                 updateDestination(index, {
                                     ...destination,
                                     business_trip_start_date: day,
+                                    business_trip_end_date: day,
                                 });
                             }
                         }}

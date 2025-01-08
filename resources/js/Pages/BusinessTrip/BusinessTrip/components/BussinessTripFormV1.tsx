@@ -315,7 +315,8 @@ export const BussinessTripFormV1 = ({
 
     const [dateBusinessTripByUser, setDateBusinessTripByUser] = React.useState<[]>([]);
 
-    async function getDateBusinessTrip(userid: any) {
+    async function getDateBusinessTrip() {
+        const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
         const url = GET_DATE_BUSINESS_TRIP_BY_USER(userid);
         const response = await axiosInstance.get(url);
         setDateBusinessTripByUser(response.data.data);
@@ -496,6 +497,7 @@ export const BussinessTripFormV1 = ({
     if (type == BusinessTripType.create) {
       setAllowancesProperty();
     }
+    getDateBusinessTrip();
   }, [totalDestination, listAllowances, isAdmin, idUser]);
 
   const [isShow, setIsShow] = React.useState(false);
@@ -715,7 +717,7 @@ export const BussinessTripFormV1 = ({
                   classNames='mt-2 w-full'
                   onChangeOutside={(value) => {
                     setSelectedUserId(value);
-                    getDateBusinessTrip(value);
+                    // getDateBusinessTrip(value);
                   }}
                 />
               </td>
