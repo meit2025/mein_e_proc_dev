@@ -34,10 +34,6 @@ export function BussinesTripDestination({
   type: any;
   btClone: any;
 }) {
-  const [startDate, setStartDate] = React.useState<Date>();
-  const [endDate, setEndDate] = React.useState<Date>();
-  const [selectedDestinationIdex, setDestinationIndex] = React.useState<number>(0);
-  const { showToast } = useAlert();
   const [selectedDates, setSelectedDates] = React.useState<
     { start: Date | undefined; end: Date | undefined }[]
   >([]);
@@ -45,12 +41,13 @@ export function BussinesTripDestination({
     <Tabs defaultValue='destination1' className='w-full'>
       <TabsList className={'flex items-center justify-start space-x-4'}>
         {destinationField.map((field: any, index: number) => (
-          <TabsTrigger value={`destination${index + 1}`}>Destination {index + 1}</TabsTrigger>
+          <TabsTrigger key={`trigger-${index}`} value={`destination${index + 1}`}>Destination {index + 1}</TabsTrigger>
         ))}
       </TabsList>
 
       {destinationField.map((destination: any, index: number) => (
         <BussinessDestinationForm
+          key={`destination-form-${index}`}
           form={form}
           index={index}
           destination={destination}
