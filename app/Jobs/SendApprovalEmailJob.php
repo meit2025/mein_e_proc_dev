@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Mail\ApprovalNotificationMail;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Modules\Approval\Models\Approval;
 use Modules\BusinessTrip\Models\BusinessTrip;
@@ -28,6 +29,8 @@ class SendApprovalEmailJob implements ShouldQueue
      */
     public function handle(): void
     {
+        Log::channel('notification_email')->error('SendApprovalEmailJob started');
+
         // Daftar jenis dokumen dan model terkait
         $documents = [
             'REIMBURSEMENT' => ['REIM', ReimburseGroup::class],

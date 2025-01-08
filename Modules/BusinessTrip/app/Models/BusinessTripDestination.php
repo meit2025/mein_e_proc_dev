@@ -29,6 +29,7 @@ class BusinessTripDestination extends Model
         'total_percent',
         'total_cash_advance',
         'reference_number',
+        'restricted_area',
     ];
 
     function detailAttendance()
@@ -73,6 +74,10 @@ class BusinessTripDestination extends Model
 
     function purchasingGroup() {
         return $this->belongsTo(PurchasingGroup::class, 'purchasing_group_id', 'id');
+    }
+
+    function businessTrip() {
+        return $this->belongsTo(BusinessTrip::class, 'business_trip_id', 'id');
     }
 
     //   $table->string('destination');

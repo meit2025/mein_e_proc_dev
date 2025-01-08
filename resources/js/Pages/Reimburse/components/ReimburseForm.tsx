@@ -114,7 +114,7 @@ export const ReimburseForm: React.FC<Props> = ({
   const formSchema = z.object({
     formCount: z.string().min(1, 'total form must be have value'),
     remark_group: z.string().optional(),
-    cost_center: z.string().min(1, 'pusat biaya required'),
+    cost_center: z.string().min(1, 'cost center required'),
     requester: z.string().min(1, 'requester required'),
     value: z.number().optional(),
     user_id: z.string().optional(),
@@ -978,14 +978,14 @@ export const ReimburseForm: React.FC<Props> = ({
                           </tr>
 
                           <tr>
-                            <td className='w-1/4'>Sisa Balance</td>
+                            <td className='w-1/4'>Current Balance</td>
                             <td>
                             <span className='font-bold'>{detailLimit[index]?.balance && formatRupiah(detailLimit[index]?.balance)}</span>
                             </td>
                           </tr>
 
                           <tr>
-                            <td className='w-1/4'>Sisa Limit</td>
+                            <td className='w-1/4'>Limit Claim</td>
                             <td>
                               <span className='font-bold'>{detailLimit[index]?.limit}</span>{' '}
                             </td>
