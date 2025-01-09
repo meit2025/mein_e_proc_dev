@@ -133,3 +133,10 @@ export interface PurchasingGroup {
   purchasing_group: string;
   purchasing_group_desc: string;
 }
+
+export enum ReimburseFormType {
+  create,
+  edit,
+  update,
+  clone,
+}
