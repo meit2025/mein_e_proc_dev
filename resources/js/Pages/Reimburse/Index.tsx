@@ -6,11 +6,15 @@ import {
   STORE_REIMBURSE,
   UPDATE_REIMBURSE,
 } from '@/endpoint/reimburse/api';
+import {
+  PAGE_DETAIL_REIMBURSE,
+  CLONE_REIMBURSE
+} from '@/endpoint/reimburse/page';
 import { FormType } from '@/lib/utils';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import React, { ReactNode } from 'react';
 import { ReimburseForm } from './components/ReimburseForm';
-import { columns, CostCenter, Currency, PurchasingGroup, User } from './model/listModel';
+import { columns, CostCenter, Currency, PurchasingGroup, User, ReimburseFormType } from './model/listModel';
 
 interface Props {
   users: User[];
@@ -44,13 +48,13 @@ export const Index = ({
 }: Props) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
   const [formType, setFormType] = React.useState({
-    type: FormType.create,
+    type: ReimburseFormType.create,
     id: undefined,
   });
 
   function openFormHandler() {
     setFormType({
-      type: FormType.create,
+      type: ReimburseFormType.create,
       id: null,
     });
     setOpenForm(!openForm);
@@ -117,14 +121,22 @@ export const Index = ({
         columns={columns}
         onEdit={(value) => {
           setFormType({
-            type: FormType.edit,
+            type: ReimburseFormType.edit,
+            id: value.toString(),
+          });
+          setOpenForm(true);
+        }}
+        onClone={(value) => {
+          setFormType({
+            type: ReimburseFormType.clone,
             id: value.toString(),
           });
           setOpenForm(true);
         }}
         url={{
           url: LIST_REIMBURSE,
-          detailUrl: '/reimburse/detail',
+          detailUrl: PAGE_DETAIL_REIMBURSE,
+          clone: CLONE_REIMBURSE,
           cancelApproval: 'reim',
         }}
         labelFilter='search'

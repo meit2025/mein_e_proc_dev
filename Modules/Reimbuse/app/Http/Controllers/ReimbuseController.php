@@ -76,8 +76,7 @@ class ReimbuseController extends Controller
             ->orWhere(function($query)  {
                 $query->where('master_type_reimburses.grade_option', 'all')
                 ->where('master_type_reimburses.is_employee', true);
-            })
-            ->where('checkInterval.codes', null);
+            });
             if ($hasValue !== null) $data = $data->orWhere('checkInterval.codes', $hasValue);
         } else {
             $data = $data->where('master_type_reimburses.family_status', null)
@@ -141,6 +140,7 @@ class ReimbuseController extends Controller
                     'remark' => $map->remark,
                     'balance' => $balance,
                     'form' => count($map->reimburses),
+                    'status_id' => $map->status_id,
                     'status' => [
                         'name' => $map->status->name,
                         'classname' => $map->status->classname,
@@ -258,12 +258,16 @@ class ReimbuseController extends Controller
             $user = $request->user;
             $reimbuseTypeID = $request->reimbuse_type;
 
-            $getCurrentBalance = Reimburse::where('requester', $user)
-                ->where('reimburse_type', $reimbuseTypeID)
+            $getCurrentBalance = Reimburse::join('reimburse_groups as rb', 'rb.code', '=', 'reimburses.group' )
+                ->whereIn('rb.status_id', [1,5])
+                ->where('reimburses.requester', $user)
+                ->where('reimburses.reimburse_type', $reimbuseTypeID)
                 ->sum('balance');
-
-            $getCurrentLimit = Reimburse::where('requester', $user)
-                ->where('reimburse_type', $reimbuseTypeID)
+            
+            $getCurrentLimit = Reimburse::join('reimburse_groups as rb', 'rb.code', '=', 'reimburses.group' )
+                ->whereIn('rb.status_id', [1,5])
+                ->where('reimburses.requester', $user)
+                ->where('reimburses.reimburse_type', $reimbuseTypeID)
                 ->count();
 
             $reimbuseType   = MasterTypeReimburse::where('code', $reimbuseTypeID)->first();
@@ -340,7 +344,6 @@ class ReimbuseController extends Controller
             'purchasingGroupModel',
             'taxOnSalesModel',
             'reimburseType',
-            'periodeDate',
             'reimburseAttachment'
         ])->get();
 
