@@ -50,7 +50,17 @@ class RunSendApprovalEmailJob extends Command
         // Proses untuk setiap jenis dokumen
         foreach ($documents as $documentName => [$documentApproval, $model]) {
             // Ambil semua entri dengan status_id = 1
-            $model::where('status_id', 1)->chunk(100, function ($items) use ($documentName, $documentApproval) {
+            $dataQuery = $model::where('status_id', 1);
+
+            if ($documentApproval == 'TRIP') {
+                $dataQuery->where('type', 'request');
+            }
+
+            if ($documentApproval == 'TRIP_DECLARATION') {
+                $dataQuery->where('type', 'declaration');
+            }
+
+            $dataQuery->chunk(100, function ($items) use ($documentName, $documentApproval) {
                 Log::channel('notification_email')->info('SendApprovalEmailJob started ' . $documentApproval);
                 $this->info('SendApprovalEmailJob started ' . $documentApproval);
 
