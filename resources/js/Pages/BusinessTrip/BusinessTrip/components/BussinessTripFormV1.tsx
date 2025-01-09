@@ -42,8 +42,10 @@ import {
 } from '@/components/shacdn/select';
 import { useAlert } from '@/contexts/AlertContext';
 import {
+    CLONE_API_BUSINESS_TRIP,
   CREATE_API_BUSINESS_TRIP,
   EDIT_API_BUSINESS_TRIP,
+  GET_DATE_BUSINESS_TRIP_BY_USER,
   GET_DETAIL_BUSINESS_TRIP,
 } from '@/endpoint/business-trip/api';
 import {
@@ -213,7 +215,7 @@ export const BussinessTripFormV1 = ({
           detail_attedances: [],
           allowances: [],
           destination: '',
-          restricted_area: 0,
+          restricted_area: false,
           pajak_id: '',
           purchasing_group_id: '',
           business_trip_start_date: new Date(),
@@ -242,7 +244,7 @@ export const BussinessTripFormV1 = ({
     try {
       const response = await axios.get(url);
       const data = response.data.data;
-      //   console.log(data, 'data');
+        console.log(data, 'data');
       const urlGetAllowance = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(
         data.purpose_type_id,
         data.request_for.id,
@@ -262,7 +264,7 @@ export const BussinessTripFormV1 = ({
       setfileAttachment(data.attachments as BusinessTripAttachement[]);
       form.setValue('purpose_type_id', data.purpose_type_id.toString());
       form.setValue('request_for', data.request_for.id.toString());
-      form.setValue('cost_center_id', data.cost_center_id.toString());
+      form.setValue('cost_center_id', data.cost_center.cost_center.toString());
       form.setValue('remark', data.remarks);
       form.setValue('total_destination', data.total_destination);
       form.setValue('cash_advance', data.cash_advance == 1 ? true : false);
@@ -273,9 +275,9 @@ export const BussinessTripFormV1 = ({
         'destinations',
         data.destinations.map((destination: any) => ({
           destination: destination.destination,
-          restricted_area: destination.restricted_area,
-          pajak_id: destination.pajak_id,
-          purchasing_group_id: destination.purchasing_group_id,
+          restricted_area: destination.restricted_area == 1 ? true : false,
+          pajak_id: destination.pajak.mwszkz,
+          purchasing_group_id: destination.purchasing_group.purchasing_group,
           business_trip_start_date: new Date(destination.business_trip_start_date),
           business_trip_end_date: new Date(destination.business_trip_end_date),
           detail_attedances: destination.detail_attedances.map((detail: any) => {
@@ -304,12 +306,21 @@ export const BussinessTripFormV1 = ({
     }
   }
 
-  const [typePurpose, setTypePurpose] = React.useState<string>('');
-  const { dataDropdown: dataDestination, getDropdown: getDestination } = useDropdownOptions();
+    // const [typePurpose, setTypePurpose] = React.useState<string>('');
+    const { dataDropdown: dataDestination, getDropdown: getDestination } = useDropdownOptions();
 
-  const [selectedUserId, setSelectedUserId] = React.useState(
-    isAdmin === '0' ? idUser?.toString() : '',
-  );
+    const [selectedUserId, setSelectedUserId] = React.useState(
+        isAdmin === '0' ? idUser?.toString() : '',
+    );
+
+    const [dateBusinessTripByUser, setDateBusinessTripByUser] = React.useState<[]>([]);
+
+    async function getDateBusinessTrip() {
+        const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
+        const url = GET_DATE_BUSINESS_TRIP_BY_USER(userid);
+        const response = await axiosInstance.get(url);
+        setDateBusinessTripByUser(response.data.data);
+    }
 
   async function handlePurposeType(value: string) {
     form.setValue('purpose_type_id', value || '');
@@ -323,7 +334,7 @@ export const BussinessTripFormV1 = ({
       //   if (typePurpose == 'international') {
       //     totalDestinationHandler('1');
       //   }
-      setTypePurpose(typePurpose);
+    //   setTypePurpose(typePurpose);
       setListAllowances(response.data.data as AllowanceItemModel[]);
       getDestination('', {
         name: 'destination',
@@ -405,19 +416,19 @@ export const BussinessTripFormV1 = ({
         });
         showToast('succesfully created data', 'success');
       } else {
-        const formDataEdit = new FormData();
-        formDataEdit.append('remark', values.remark ?? '');
-        values.attachment.forEach((file: any, index: number) => {
-          if (file) {
-            formDataEdit.append(`attachment[${index}]`, file);
-          }
-        });
+        // const formDataEdit = new FormData();
+        // formDataEdit.append('remark', values.remark ?? '');
+        // values.attachment.forEach((file: any, index: number) => {
+        //   if (file) {
+        //     formDataEdit.append(`attachment[${index}]`, file);
+        //   }
+        // });
         fileAttachment.forEach((file: any, index: number) => {
           if (file) {
-            formDataEdit.append(`file_existing[${index}]`, JSON.stringify(file));
+            formData.append(`file_existing[${index}]`, JSON.stringify(file));
           }
         });
-        await Inertia.post(`${EDIT_API_BUSINESS_TRIP}/${id}`, formDataEdit, {
+        await Inertia.post(`${CLONE_API_BUSINESS_TRIP}/${id}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -449,6 +460,7 @@ export const BussinessTripFormV1 = ({
         business_trip_end_date: new Date(),
         pajak_id: '',
         purchasing_group_id: '',
+        restricted_area: false,
         cash_advance: false,
         total_percent: '',
         total_cash_advance: '0',
@@ -456,8 +468,6 @@ export const BussinessTripFormV1 = ({
         detail_attedances: [],
       });
     }
-
-    // console.log(destinationForm);
 
     form.setValue('destinations', destinationForm);
   }
@@ -487,6 +497,7 @@ export const BussinessTripFormV1 = ({
     if (type == BusinessTripType.create) {
       setAllowancesProperty();
     }
+    getDateBusinessTrip();
   }, [totalDestination, listAllowances, isAdmin, idUser]);
 
   const [isShow, setIsShow] = React.useState(false);
@@ -645,22 +656,25 @@ export const BussinessTripFormV1 = ({
       idType: 'string',
     });
     getCostCenter('', {
-      name: 'cost_center',
-      id: 'id',
+      name: 'desc',
+      id: 'cost_center',
       tabel: 'master_cost_centers',
       idType: 'string',
+      isMapping: true,
     });
     getTax('', {
-      name: 'mwszkz',
-      id: 'id',
-      tabel: 'pajaks',
-      idType: 'string',
+        name: 'description',
+        id: 'mwszkz',
+        tabel: 'pajaks',
+        idType: 'string',
+        isMapping: true,
     });
     getPurchasingGroup('', {
-      name: 'purchasing_group',
-      id: 'id',
+      name: 'purchasing_group_desc',
+      id: 'purchasing_group',
       tabel: 'purchasing_groups',
       idType: 'string',
+      isMapping: true,
     });
   }, []);
 
@@ -703,6 +717,7 @@ export const BussinessTripFormV1 = ({
                   classNames='mt-2 w-full'
                   onChangeOutside={(value) => {
                     setSelectedUserId(value);
+                    // getDateBusinessTrip(value);
                   }}
                 />
               </td>
@@ -895,6 +910,7 @@ export const BussinessTripFormV1 = ({
             dataDestination={dataDestination}
             type={type}
             btClone={BusinessTripType.clone}
+            dateBusinessTripByUser={dateBusinessTripByUser}
           />
           <Separator className='my-4' />
 

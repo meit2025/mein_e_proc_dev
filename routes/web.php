@@ -25,6 +25,11 @@ Route::get('/test-upload-file', function () {
     ]);
 });
 
+Route::get('/test', function () {
+    $fileContents = file_get_contents('https://mein.majapahit.id/storage/business_trip/mnxcGLqGovlxf5XpVALJ8oftdnccwTiZoq7SJDP1.jpg');
+    dd($fileContents);
+});
+
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/test-notif', function () {
         SendNotification::dispatch(Auth::user(),  'Test Notifikasi', 'gateway/api');
