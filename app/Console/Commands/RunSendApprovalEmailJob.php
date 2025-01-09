@@ -76,8 +76,8 @@ class RunSendApprovalEmailJob extends Command
                             $this->info('Failed send email to ' . $approval->user->email ?? 'not found');
                         }
                     } else {
-                        Log::channel('notification_email')->info('Approval not found item id ' . $item->id . ' documentApproval ' . $documentApproval,  $approval->toArray());
-                        $this->info('Approval not found item id ' . $item->id . ' documentApproval ' . $documentApproval,  $approval->toArray());
+                        Log::channel('notification_email')->info('Approval not found item id ' . $item->id . ' documentApproval ' . $documentApproval,  ["data" => $approval]);
+                        $this->info('Approval not found item id ' . $item->id . ' documentApproval ' . $documentApproval,  ["data" => $approval]);
                     }
                 }
             });
