@@ -29,7 +29,7 @@ class SendApprovalEmailJob implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::channel('notification_email')->error('SendApprovalEmailJob started');
+        Log::channel('notification_email')->info('SendApprovalEmailJob started');
 
         // Daftar jenis dokumen dan model terkait
         $documents = [
@@ -43,6 +43,7 @@ class SendApprovalEmailJob implements ShouldQueue
         foreach ($documents as $documentName => [$documentApproval, $model]) {
             // Ambil semua entri dengan status_id = 1
             $model::where('status_id', 1)->chunk(100, function ($items) use ($documentName, $documentApproval) {
+                Log::channel('notification_email')->info('SendApprovalEmailJob started ' . $documentApproval);
                 foreach ($items as $item) {
                     // Ambil approval terakhir untuk dokumen ini
                     $approval = Approval::with('user.divisions')
@@ -54,11 +55,15 @@ class SendApprovalEmailJob implements ShouldQueue
                     // Pastikan approval ada dan belum diproses
                     if ($approval && !$approval->is_status && $approval->user && $approval->user->email) {
                         try {
+                            Log::channel('notification_email')->info('Send email to ' . $approval->user->email);
                             // Kirim email dengan mailable yang sesuai dan queue-kan pengirimannya
-                            Mail::to($approval->user->email)->queue(new ApprovalNotificationMail($approval->user, $documentName));
+                            Mail::to($approval->user->email)->send(new ApprovalNotificationMail($approval->user, $documentName));
                         } catch (\Exception $e) {
                             report($e);  // Log jika terjadi kesalahan saat mengirim email
+                            Log::channel('notification_email')->info('Failed send email to ' . $approval->user->email);
                         }
+                    } else {
+                        Log::channel('notification_email')->info('Approval not found' . $item->id);
                     }
                 }
             });

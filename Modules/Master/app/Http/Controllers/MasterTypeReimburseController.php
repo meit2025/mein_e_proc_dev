@@ -37,6 +37,7 @@ class MasterTypeReimburseController extends Controller
                 return [
                     'id' => $map->id,
                     'code' => $map->code,
+                    'name' => $map->name,
                     'is_employee' => $map->is_employee ? 'Employee' : 'Family',
                     'interval_claim_period' => $map->interval_claim_period ?  $map->interval_claim_period / 365 . ' Year' : '-',
                     'material_group' => $map->materialGroup->material_group,
@@ -120,7 +121,7 @@ class MasterTypeReimburseController extends Controller
 
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-            return $this->errorResponse($validator->errors());
+            return $this->errorResponse($validator->errors()->first());
         }
         DB::beginTransaction();
         try {
