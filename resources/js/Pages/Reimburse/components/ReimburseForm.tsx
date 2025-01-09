@@ -404,14 +404,15 @@ export const ReimburseForm: React.FC<Props> = ({
     if (detailLimit) {
       for (let index = 0; index < detailLimit.length; index++) {
         let formLength = values.forms.length == 0 ? 0 : values.forms.length - 1;
-        if (parseInt(detailLimit[index]?.limit) < formLength) {
-          showToast('Limit in form '+index+' has been reached', 'error');
+        
+        if (parseInt(detailLimit[index]?.limit) == 0) {
+          showToast('LiThe request limit for form '+index+' has been reached', 'error');
           return;
         }
 
         if (parseInt(detailLimit[index]?.balance ?? 0) < parseInt(values.forms[index].balance ?? 0)) {
           showToast(
-            'Please check your balance input in forms '+ (index + 1) +'  is not must be above ' + detailLimit[index]?.balance,
+            'Please check your balance input for forms '+ (index + 1) +'  is not must be above ' + detailLimit[index]?.balance,
             'error',
           );
           return;
@@ -486,7 +487,6 @@ export const ReimburseForm: React.FC<Props> = ({
         index,
         value: item.balance ? parseInt(item.balance) : 0,
       }));
-      console.log(totalNominal);
       
       const hasZeroValue = totalNominal.some(item => item.value === 0);
       if (hasZeroValue) {

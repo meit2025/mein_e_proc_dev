@@ -122,7 +122,7 @@ export const Index = ({
                         </select>
                     </div>
                     <div>
-                        <label htmlFor='end-date' className='block mb-1'>Type</label>
+                        <label htmlFor='end-date' className='block mb-1'>Reimburse Type</label>
                         <select
                             value={type}
                             onChange={(e) => setType(e.target.value)}
@@ -153,6 +153,7 @@ export const Index = ({
                 columns={columns}
                 url={{
                     url: `${REPORT_REIMBURSE_LIST}`,
+                    detailUrl: '/reimburse/detail',
                 }}
                 labelFilter='Search'
             />
