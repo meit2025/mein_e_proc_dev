@@ -7,6 +7,7 @@ use App\Jobs\SapJobs;
 use App\Models\Currency;
 use App\Models\User;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -912,15 +913,25 @@ class BusinessTripController extends Controller
             }
 
             if($request->file_existing != null){
-                // DELETE ATTACHMENT DULU JIKA ADA YANG DI HAPUS
-                $array_id_exist = [];
                 foreach ($request->file_existing as $key => $attachment) {
                     $decode = json_decode($attachment);
-                    $fileName = basename($decode->url); // Mendapatkan nama file dari URL
-                    // Mendapatkan konten file dari URL
-                    $fileContents = file_get_contents($decode->url);
-                    // Menyimpan file ke storage (misalnya ke folder "public/images")
-                    Storage::put("public/business_trip/{$fileName}", $fileContents);
+
+                    $url = $decode->url;
+                    // return saveImageFromUrl($url);
+                    // Membuat instance Guzzle client
+                    $client = new Client();
+
+                    // Mengambil gambar dari URL
+                    $response = $client->get($url);
+                    // Mendapatkan konten gambar
+                    $imageContent = $response->getBody()->getContents();
+
+                    // Menentukan nama file dan path penyimpanan
+                    $fileName = 'clone-'.time().basename($url); // Mengambil nama file dari URL
+                    $path = 'business_trip/' . $fileName; // Menentukan path penyimpanan
+
+                    // Menyimpan gambar ke storage
+                    Storage::disk('public')->put($path, $imageContent);
 
                     BusinessTripAttachment::create([
                         'business_trip_id' => $businessTrip->id,
@@ -987,5 +998,27 @@ class BusinessTripController extends Controller
             DB::rollBack();
             return $this->errorResponse($th->getMessage());
         }
+    }
+
+    public function saveImageFromUrl($url)
+    {
+        // Membuat instance Guzzle client
+        $client = new Client();
+
+        // Mengambil gambar dari URL
+        $response = $client->get($url);
+        dd($response);
+
+        // Mendapatkan konten gambar
+        $imageContent = $response->getBody()->getContents();
+
+        // Menentukan nama file dan path penyimpanan
+        $fileName = basename($url); // Mengambil nama file dari URL
+        $path = 'business_trip/' . $fileName; // Menentukan path penyimpanan
+
+        // Menyimpan gambar ke storage
+        Storage::disk('public')->put($path, $imageContent);
+
+        return 'Gambar berhasil disimpan di: ' . $path;
     }
 }
