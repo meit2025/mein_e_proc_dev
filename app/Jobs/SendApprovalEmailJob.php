@@ -54,11 +54,15 @@ class SendApprovalEmailJob implements ShouldQueue
                     // Pastikan approval ada dan belum diproses
                     if ($approval && !$approval->is_status && $approval->user && $approval->user->email) {
                         try {
+                            Log::channel('notification_email')->error('Send email to ' . $approval->user->email);
                             // Kirim email dengan mailable yang sesuai dan queue-kan pengirimannya
                             Mail::to($approval->user->email)->queue(new ApprovalNotificationMail($approval->user, $documentName));
                         } catch (\Exception $e) {
                             report($e);  // Log jika terjadi kesalahan saat mengirim email
+                            Log::channel('notification_email')->error('Failed send email to ' . $approval->user->email);
                         }
+                    } else {
+                        Log::channel('notification_email')->error('Approval not found' . $item->id);
                     }
                 }
             });
