@@ -26,6 +26,7 @@ use Modules\Master\Models\Pajak;
 use Modules\Master\Models\PurchasingGroup;
 use Modules\PurchaseRequisition\Models\Purchase;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
+use Modules\PurchaseRequisition\Models\Vendor;
 use Modules\Reimbuse\Models\ReimburseGroup;
 
 class ReportController extends Controller
@@ -258,7 +259,7 @@ class ReportController extends Controller
     public function listBT(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType', 'status']);
+        $query =  BusinessTrip::query()->with(['purposeType', 'status', 'businessTripDestination']);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
@@ -266,6 +267,7 @@ class ReportController extends Controller
         $endDate = $request->get('endDate');
         $status = $request->get('status');
         $type = $request->get('type');
+        $destination = $request->get('destination');
 
         // $query->orderBy($sortBy, $sortDirection);
         if ($request->approval == "1") {
@@ -285,6 +287,12 @@ class ReportController extends Controller
                 $q->where('code', $status);
             });
         }
+        if ($destination) {
+            $query->whereHas('businessTripDestination', function ($q) use ($destination) {
+                $q->where('destination', $destination);
+            });
+        }
+
         if ($type) {
             $query->whereHas('purposeType', function ($q) use ($type) {
                 $q->where('id', $type);
@@ -319,13 +327,15 @@ class ReportController extends Controller
 
     public function exportBT(Request $request)
     {
-        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor']);
+        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'businessTripDestination']);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
         $startDate = $request->get('startDate');
         $endDate = $request->get('endDate');
         $status = $request->get('status');
         $type = $request->get('type');
+        $destination = $request->get('destination');
+
 
         if ($startDate && $endDate) {
             $query->whereBetween('created_at', [$startDate, $endDate]);
@@ -351,6 +361,11 @@ class ReportController extends Controller
         if (Auth::user()->is_admin != '1') {
             $query = $query->where('created_by', Auth::user()->id)
                 ->orWhere('request_for', Auth::user()->id);
+        }
+        if ($destination) {
+            $query->whereHas('businessTripDestination', function ($q) use ($destination) {
+                $q->where('destination', $destination);
+            });
         }
 
         $data = $query->where('type', 'request')
@@ -385,7 +400,8 @@ class ReportController extends Controller
         $inBusinessTripRequest = BusinessTrip::where('type', 'declaration')->pluck('parent_id')->toArray();
         $listBusinessTrip = BusinessTrip::where('type', 'request')->whereNotIn('id', $inBusinessTripRequest)->get();
         $listPurposeType = PurposeType::select('name', 'id')->get();
-        return Inertia::render('Report/BusinessTripDeclaration/index', compact('users', 'listPurposeType', 'listBusinessTrip'));
+        $listDestination = Destination::get();
+        return Inertia::render('Report/BusinessTripDeclaration/index', compact('users', 'listPurposeType', 'listBusinessTrip', 'listDestination'));
     }
 
     public function listBTDec(Request $request)
@@ -399,6 +415,7 @@ class ReportController extends Controller
         $endDate = $request->get('endDate');
         $status = $request->get('status');
         $type = $request->get('type');
+        $destination = $request->get('destination');
 
         // $query->orderBy($sortBy, $sortDirection);
         if ($request->approval == "1") {
@@ -423,6 +440,12 @@ class ReportController extends Controller
                 $q->where('id', $type);
             });
         }
+        if ($destination) {
+            $query->whereHas('businessTripDestination', function ($q) use ($destination) {
+                $q->where('destination', $destination);
+            });
+        }
+
 
         $data = $query->where('type', 'declaration')->latest()->paginate($perPage);
 
@@ -460,7 +483,9 @@ class ReportController extends Controller
         $endDate = $request->get('endDate');
         $status = $request->get('status');
         $type = $request->get('type');
-        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'parentBusinessTrip']);
+        $destination = $request->get('destination');
+
+        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'parentBusinessTrip', 'businessTripDestination']);
 
         // Check approval filter
         if ($request->approval == "1") {
@@ -486,6 +511,12 @@ class ReportController extends Controller
         if ($type) {
             $query->whereHas('purposeType', function ($q) use ($type) {
                 $q->where('id', $type);
+            });
+        }
+
+        if ($destination) {
+            $query->whereHas('businessTripDestination', function ($q) use ($destination) {
+                $q->where('destination', $destination);
             });
         }
 
@@ -518,6 +549,7 @@ class ReportController extends Controller
         $endDate = $request->get('endDate');
         $status = $request->get('status');
         $type = $request->get('type');
+        $vendor = $request->get('vendor');
         $filterableColumns = [
             'user_id',
             'document_type',
@@ -528,7 +560,7 @@ class ReportController extends Controller
             'total_item',
         ];
 
-        $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user');
+        $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user', 'vendors');
         if ($startDate && $endDate) {
             $data->whereBetween('created_at', [$startDate, $endDate]);
         }
@@ -539,6 +571,12 @@ class ReportController extends Controller
         }
         if ($type) {
             $data->where('document_type', $type);
+        }
+
+        if ($vendor) {
+            $data->whereHas('vendors', function ($q) use ($vendor) {
+                $q->where('id', $vendor);
+            });
         }
 
         $data = $this->filterAndPaginate($request, $data, $filterableColumns, true);
@@ -551,6 +589,8 @@ class ReportController extends Controller
         $endDate = $request->get('endDate');
         $status = $request->get('status');
         $type = $request->get('type');
+        $vendor = $request->get('vendor');
+
         $filterableColumns = [
             'user_id',
             'document_type',
@@ -561,7 +601,7 @@ class ReportController extends Controller
             'total_item',
         ];
 
-        $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user');
+        $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user', 'vendors');
         if ($startDate && $endDate) {
             $data->whereBetween('created_at', [$startDate, $endDate]);
         }
@@ -573,6 +613,11 @@ class ReportController extends Controller
         if ($type) {
             $data->where('document_type', $type);
         }
+        if ($vendor) {
+            $data->whereHas('vendors', function ($q) use ($vendor) {
+                $q->where('id', $vendor);
+            });
+        }
         $data = $this->filterNotPaggination($request, $data, $filterableColumns, true);
 
         $filename = 'Purchase.xlsx';
@@ -583,6 +628,24 @@ class ReportController extends Controller
     public function purchaseTypes(Request $request)
     {
         $data = DocumentType::select('id', 'purchasing_doc')->get();
+        return $this->successResponse($data);
+    }
+
+    public function purchaseVendors(Request $request)
+    {
+        $data = Vendor::with('masterBusinesPartnerss') // Eager load the relationship
+            ->where('winner', true) // Filter winners
+            ->get(['id', 'winner']); // Select columns only from the `vendors` table
+        dd($data);
+
+        // Map related data to the result
+        $data = $data->map(function ($vendor) {
+            return [
+                'id' => $vendor->id,
+                'vendor' => $vendor->masterBusinesPartnerss->name_one ?? null, // Access related column
+            ];
+        });
+
         return $this->successResponse($data);
     }
 }
