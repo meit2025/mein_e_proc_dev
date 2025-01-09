@@ -34,7 +34,7 @@ import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import { Input } from '@/components/shacdn/input';
 import { useAlert } from '../../../contexts/AlertContext.jsx';
 import { usePage } from '@inertiajs/react';
-import { Currency, PurchasingGroup, User, Tax, CostCenter } from '../model/listModel';
+import { Currency, PurchasingGroup, User, Tax, CostCenter, ReimburseFormType } from '../model/listModel';
 import { FormType } from '@/lib/utils';
 import useDropdownOptions from '@/lib/getDropdown';
 import {
@@ -62,7 +62,7 @@ interface Props {
   edit_url?: string;
   update_url?: string;
   store_url?: string;
-  type?: FormType;
+  type?: ReimburseFormType;
   currentUser?: User;
 }
 
@@ -142,7 +142,7 @@ export const ReimburseForm: React.FC<Props> = ({
             .refine((file) => file.size <= MAX_FILE_SIZE, {
               message: 'File size must be less than 1MB',
             })
-        ).min(type === FormType.create ? 1 : 0, 'Attachment is required'),
+        ).min(type === ReimburseFormType.create ? 1 : 0, 'Attachment is required'),
         // url: z.string().optional(),
       }),
     ),
@@ -235,7 +235,7 @@ export const ReimburseForm: React.FC<Props> = ({
           group: String(map.group),
           reimburse_type: map.reimburse_type.code,
           short_text: map.short_text,
-          balance: map.balance,
+          balance: type === ReimburseFormType.edit ? map.balance : '',
           currency: map.currency,
           tax_on_sales: String(map.tax_on_sales),
           purchase_requisition_unit_of_measure: String(map.purchase_requisition_unit_of_measure),
@@ -278,7 +278,7 @@ export const ReimburseForm: React.FC<Props> = ({
   }
 
   useEffect(() => {
-    if (type === FormType.edit) {
+    if (type === ReimburseFormType.edit || type === ReimburseFormType.clone) {
       setLoading(true);
       getDetailData();
     }
@@ -424,7 +424,7 @@ export const ReimburseForm: React.FC<Props> = ({
     values.user_id = values?.requester || '0';
     try {
       let response;
-      if (type === FormType.edit) {
+      if (type === ReimburseFormType.edit) {
         response = await axiosInstance.put(update_url ?? '', values, {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -591,7 +591,7 @@ export const ReimburseForm: React.FC<Props> = ({
                         <FormItem>
                           <FormControl>
                             <Select
-                              disabled={type === FormType.edit}
+                              disabled={type === ReimburseFormType.edit}
                               onValueChange={(value) => field.onChange(value)}
                               value={field.value}
                             >
@@ -621,7 +621,7 @@ export const ReimburseForm: React.FC<Props> = ({
                       options={dataEmployee}
                       fieldName='requester'
                       isRequired={true}
-                      disabled={String(currentUser?.is_admin) === '0' || type === FormType.edit}
+                      disabled={String(currentUser?.is_admin) === '0' || type === ReimburseFormType.edit}
                       placeholder={'Select Employee'}
                       onSearch={handleSearchEmployee}
                       onChangeOutside={(value) => onChangeEmployee(value)}
@@ -639,7 +639,7 @@ export const ReimburseForm: React.FC<Props> = ({
                         <FormItem>
                           <FormControl>
                             <Select
-                              disabled={type === FormType.edit}
+                              disabled={type === ReimburseFormType.edit}
                               onValueChange={(value) => {
                                 field.onChange(value);
                                 generateForms(value);
@@ -710,7 +710,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                 options={dataReimburseType[index]}
                                 fieldName={`forms.${index}.reimburse_type`}
                                 isRequired={true}
-                                disabled={form.getValues('requester') == '' || type === FormType.edit}
+                                disabled={form.getValues('requester') == '' || type === ReimburseFormType.edit}
                                 placeholder={'Select Reimburse Type'}
                                 onChangeOutside={(query: string, data: any) => {
                                   const currentRequester = form.getValues('requester');
@@ -794,7 +794,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   <FormItem>
                                     <FormControl>
                                       <Select
-                                        disabled={(dataReimburseType?.[index]?.filter(reimburseType => reimburseType?.value == form.getValues(`forms.${index}.reimburse_type`))?.[0])?.is_employee === 1 || type === FormType.edit}
+                                        disabled={(dataReimburseType?.[index]?.filter(reimburseType => reimburseType?.value == form.getValues(`forms.${index}.reimburse_type`))?.[0])?.is_employee === 1 || type === ReimburseFormType.edit}
                                         onValueChange={(value) =>
                                           {
                                             updateForm(index, {
@@ -840,7 +840,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   <FormItem>
                                     <FormControl>
                                       <Select
-                                        disabled={type === FormType.edit}
+                                        disabled={type === ReimburseFormType.edit}
                                         onValueChange={(value) => {
                                           updateForm(index, {
                                             ...formValue,
@@ -1001,7 +1001,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   <FormItem>
                                     <FormControl>
                                       <CustomDatePicker
-                                        disabled={type === FormType.edit}
+                                        disabled={type === ReimburseFormType.edit}
                                         initialDate={
                                           field.value instanceof Date
                                             ? field.value
@@ -1027,7 +1027,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   <FormItem>
                                     <FormControl>
                                       <CustomDatePicker
-                                        disabled={type === FormType.edit}
+                                        disabled={type === ReimburseFormType.edit}
                                         initialDate={
                                           field.value instanceof Date
                                             ? field.value
@@ -1054,7 +1054,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                     <FormItem>
                                       <FormControl>
                                         <Select
-                                          disabled={type === FormType.edit}
+                                          disabled={type === ReimburseFormType.edit}
                                           onValueChange={(value) => {
                                             updateForm(index, {
                                               ...formValue,
@@ -1131,7 +1131,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                           }}
                                           defaultValue={formatRupiah(formValue.balance, false)}
                                           value={formatRupiah(formValue.balance, false)}
-                                          disabled={typeof detailLimit[index] === 'undefined' || detailLimit[index]?.length === 0 || type === FormType.edit}
+                                          disabled={typeof detailLimit[index] === 'undefined' || detailLimit[index]?.length === 0 || type === ReimburseFormType.edit}
                                         />
                                       </FormControl>
                                       <FormMessage />
@@ -1151,7 +1151,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel className='text-xs text-gray-500 font-extralight mb-1'>
-                                      Max File: 1000KB, Extension : doc,jpg,ods,png,txt,pdf,heic
+                                      Max File: 1000KB, Extension : jpg,jpeg,png,pdf,heic
                                     </FormLabel>
                                     <FormControl>
                                       <input
