@@ -21,7 +21,11 @@ class PurchaseRequisitionExport implements FromCollection, WithHeadings
     public function collection()
     {
         $numberedData = $this->data->map(function ($item, $index) {
-            return array_merge(['Nomor' => $index + 1], $item);
+            // Ensure $item is an array
+            $itemArray = (array) $item;
+
+            // Merge the array with the numbering
+            return array_merge(['Nomor' => $index + 1], $itemArray);
         });
 
         return collect($numberedData);

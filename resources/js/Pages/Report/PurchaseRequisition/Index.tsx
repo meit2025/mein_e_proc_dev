@@ -8,10 +8,15 @@ import { CREATE_PAGE_PR, DETAIL_PAGE_PR, EDIT_PAGE_PR } from '@/endpoint/purchas
 import { useAlert } from '@/contexts/AlertContext';
 import axiosInstance from '@/axiosInstance';
 import { PAGE_REPORT_PURCHASE } from '@/endpoint/report/page';
-import { REPORT_PURCHASE_EXPORT, REPORT_PURCHASE_LIST, REPORT_PURCHASE_TYPES } from '@/endpoint/report/api';
+import { REPORT_PURCHASE_EXPORT, REPORT_PURCHASE_LIST, REPORT_PURCHASE_TYPES, REPORT_PURCHASE_VENDORS } from '@/endpoint/report/api';
 interface ReportType {
     id: string;
     purchasing_doc: string;
+};
+
+interface ReportVendor {
+    id: string;
+    vendor: string;
 }
 
 
@@ -34,8 +39,18 @@ export const Index = () => {
                 showToast('Failed to load report types', 'error');
             }
         };
+        const loadReportVendors = async () => {
+            try {
+                const reporVendors = await fetchReportVendors();
+                setVendors(reporVendors);
+
+            } catch (error) {
+                showToast('Failed to load report types', 'error');
+            }
+        };
 
         loadReportTypes();
+        loadReportVendors();
     }, []);
 
     const { showToast } = useAlert();
@@ -45,10 +60,22 @@ export const Index = () => {
     const [status, setStatus] = React.useState<string>('');
     const [type, setType] = React.useState<string>('');
     const [types, setTypes] = React.useState<ReportType[]>([]);
+    const [vendor, setVendor] = React.useState<string>('');
+    const [vendors, setVendors] = React.useState<ReportVendor[]>([]);
 
     const fetchReportTypes = async (): Promise<ReportType[]> => {
         try {
             const response = await axiosInstance.get(REPORT_PURCHASE_TYPES);
+            return response.data.data;
+        } catch (error) {
+            console.error('Error fetching report types:', error);
+            return []; // Return an empty array to prevent errors
+        }
+    };
+
+    const fetchReportVendors = async (): Promise<ReportVendor[]> => {
+        try {
+            const response = await axiosInstance.get(REPORT_PURCHASE_VENDORS);
             return response.data.data;
         } catch (error) {
             console.error('Error fetching report types:', error);
@@ -85,7 +112,7 @@ export const Index = () => {
         // addUrl: CREATE_PAGE_PR,
         // editUrl: EDIT_PAGE_PR,
         // deleteUrl: DELET_PR,
-        // detailUrl: DETAIL_PAGE_PR,
+        detailUrl: DETAIL_PAGE_PR,
     };
 
     return (
@@ -126,7 +153,7 @@ export const Index = () => {
                         </select>
                     </div>
                     <div>
-                        <label htmlFor='end-date' className='block mb-1'>Type</label>
+                        <label htmlFor='end-date' className='block mb-1'>Document Type</label>
                         <select
                             value={type}
                             onChange={(e) => setType(e.target.value)}
@@ -144,11 +171,31 @@ export const Index = () => {
                             ))}
                         </select>
                     </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>Propose vendor
+                        </label>
+                        <select
+                            value={vendor}
+                            onChange={(e) => setVendor(e.target.value)}
+                            className="select-class"
+                            id="vendor"
+                        >
+                            <option value="">All Vendor</option>
+                            {vendors.map((vendorOption) => (
+                                <option
+                                    key={vendorOption.id}
+                                    value={vendorOption.id}
+                                >
+                                    {vendorOption.vendor}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
             </div>
             <DataGridComponent
                 onExportXls={async (x: string) => await exporter(x)}
-                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&`}
+                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&vendor=${vendor || ''}&`}
                 columns={columns}
                 url={urlConfig}
                 labelFilter='search'

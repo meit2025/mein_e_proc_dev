@@ -154,7 +154,7 @@ export function BussinessDestinationForm({
             : generateDetailAllowanceByDate(item.grade_price),
       };
     });
-    console.log(allowancesForm, 'allowancesForm');
+    // console.log(allowancesForm, 'allowancesForm');
     replaceAllowance(allowancesForm);
   }
 
@@ -243,7 +243,7 @@ export function BussinessDestinationForm({
         </>
     );
 
-  console.log(selectedDates, 'selectedDatesxwerewferge');
+//   console.log(selectedDates, 'selectedDatesxwerewferge');
   return (
     <TabsContent key={key} value={`destination${index + 1}`}>
       <div key={index}>

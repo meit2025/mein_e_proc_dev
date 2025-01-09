@@ -72,7 +72,7 @@ export function BussinesTripDestination({
         fetchAndSetDates();
       }, [dateBusinessTripByUser]);
 
-      console.log(selectedDates, 'selectedDatesxxx');
+    //   console.log(selectedDates, 'selectedDatesxxx');
 
     return (
     <Tabs defaultValue='destination1' className='w-full'>

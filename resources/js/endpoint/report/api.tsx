@@ -9,5 +9,6 @@ export const REPORT_BT_DEC_EXPORT = `${ROUTE_REPORT}/business-trip-dec/export`;
 export const REPORT_PURCHASE_LIST = `${ROUTE_REPORT}/purchase/list`;
 export const REPORT_PURCHASE_EXPORT = `${ROUTE_REPORT}/purchase/export`;
 export const REPORT_PURCHASE_TYPES = `${ROUTE_REPORT}/purchase/types`;
+export const REPORT_PURCHASE_VENDORS = `${ROUTE_REPORT}/purchase/vendors`;
 
 // get - list - master - reimburse - type;
