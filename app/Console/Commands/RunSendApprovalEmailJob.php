@@ -69,6 +69,7 @@ class RunSendApprovalEmailJob extends Command
                     $approval = Approval::with('user.divisions')
                         ->where('document_id', $item->id)
                         ->where('document_name', $documentApproval)
+                        ->where('is_status', false)
                         ->latest('id')
                         ->first();
 
