@@ -17,10 +17,11 @@ import axiosInstance from '@/axiosInstance';
 
 interface propsType {
     listPurposeType: any[];
+    listDestination: any[];
     users: UserModel[];
 }
 const roleAkses = 'business trip declaration';
-export const Index = ({ listPurposeType, users }: propsType) => {
+export const Index = ({ listPurposeType, listDestination, users }: propsType) => {
     const [openForm, setOpenForm] = React.useState<boolean>(false);
 
     const [businessTripForm, setBusinessTripForm] = React.useState({
@@ -33,6 +34,7 @@ export const Index = ({ listPurposeType, users }: propsType) => {
     const [endDate, setEndDate] = React.useState<string | null>(null);
     const [status, setStatus] = React.useState<string>('');
     const [type, setType] = React.useState<string>('');
+    const [destination, setDestination] = React.useState<string>('');
 
     const { showToast } = useAlert();
 
@@ -121,6 +123,25 @@ export const Index = ({ listPurposeType, users }: propsType) => {
                             ))}
                         </select>
                     </div>
+                    <div>
+                        <label htmlFor='destination' className='block mb-1'>Destination</label>
+                        <select
+                            value={destination}
+                            onChange={(e) => setDestination(e.target.value)}
+                            className="select-class"
+                            id="destination"
+                        >
+                            <option value="">All Destination</option>
+                            {listDestination.map((typeOption) => (
+                                <option
+                                    key={typeOption.id}
+                                    value={typeOption.id}
+                                >
+                                    {typeOption.destination}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
             </div>
@@ -128,12 +149,12 @@ export const Index = ({ listPurposeType, users }: propsType) => {
                 isHistory={false}
                 // onCreate={openFormHandler}
                 onExportXls={async (x: string) => await exporter(x)}
-                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&`}
+                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&destination=${destination || ''}&`}
                 columns={columns}
                 url={{
                     url: REPORT_BT_DEC_LIST,
                     // deleteUrl: DELET_API,
-                    // detailUrl: DETAIL_PAGE_BUSINESS_TRIP_DECLARATION,
+                    detailUrl: DETAIL_PAGE_BUSINESS_TRIP_DECLARATION,
                 }}
                 labelFilter='search'
             />
