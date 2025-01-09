@@ -74,10 +74,10 @@ class RunSendApprovalEmailJob extends Command
                         ->first();
 
                     // Pastikan approval ada dan belum diproses
-                    if ($approval && !$approval->is_status && $approval->user && $approval->user->email) {
+                    if ($approval && $approval->user && $approval->user->email) {
                         try {
                             Log::channel('notification_email')->info('Send email to ' . $approval->user->email);
-                            $this->info('Send email to ' . $approval->user->email, ' documentApproval ' . $documentApproval . ' item id ' . $item->id);
+                            $this->info('Send email to ' . $approval->user->email . ' documentApproval ' . $documentApproval . ' item id ' . $item->id);
 
                             // Kirim email dengan mailable yang sesuai dan queue-kan pengirimannya
                             Mail::to($approval->user->email)->send(new ApprovalNotificationMail($approval->user, $documentName));
