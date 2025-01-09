@@ -82,9 +82,7 @@ class RunSendApprovalEmailJob extends Command
                             // Kirim email dengan mailable yang sesuai dan queue-kan pengirimannya
                             Mail::to($approval->user->email)->send(new ApprovalNotificationMail($approval->user, $documentName));
                         } catch (\Exception $e) {
-                            report($e);  // Log jika terjadi kesalahan saat mengirim email
-                            Log::channel('notification_email')->info('Failed send email to ' . $approval->user->email ?? 'not found');
-                            $this->info('Failed send email to ' . $approval->user->email ?? 'not found');
+                            $this->info($e->getMessage());
                         }
                     } else {
                         Log::channel('notification_email')->info('Approval not found item id ' . $item->id . ' documentApproval ' . $documentApproval);
