@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PortalController;
 use App\Jobs\SendNotification;
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Modules\BusinessTrip\Models\BusinessTrip;
@@ -26,8 +27,26 @@ Route::get('/test-upload-file', function () {
 });
 
 Route::get('/test', function () {
-    $fileContents = file_get_contents('https://mein.majapahit.id/storage/business_trip/mnxcGLqGovlxf5XpVALJ8oftdnccwTiZoq7SJDP1.jpg');
-    dd($fileContents);
+    // $fileContents = file_get_contents('http://127.0.0.1:8008/storage/business_trip/dummy_1736238179.pdf');
+    // dd($fileContents);
+    $url = 'http://127.0.0.1:8008/storage/business_trip/dummy_1736238179.pdf';
+    // return saveImageFromUrl($url);
+    // Membuat instance Guzzle client
+    $client = new Client();
+
+    // Mengambil gambar dari URL
+    $response = $client->get($url);
+    // Mendapatkan konten gambar
+    $imageContent = $response->getBody()->getContents();
+
+    // Menentukan nama file dan path penyimpanan
+    $fileName = basename($url); // Mengambil nama file dari URL
+    $path = 'business_trip/' .'clone-'. time(). $fileName; // Menentukan path penyimpanan
+
+    // Menyimpan gambar ke storage
+    Storage::disk('public')->put($path, $imageContent);
+
+    return 'Gambar berhasil disimpan di: ' . $path;
 });
 
 Route::group(['middleware' => 'auth'], function () {
