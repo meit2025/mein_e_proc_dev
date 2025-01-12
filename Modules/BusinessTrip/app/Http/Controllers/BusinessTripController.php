@@ -535,10 +535,10 @@ class BusinessTripController extends Controller
 
             $purposeRelations = $map->purposeType ? $map->purposeType->name : ''; // Assuming 'name' is the field
             $status = $map->status->name;
-            if ($map->status->name == 'Reject To :name') {
-                $name_reject = $map->approval->where('status','Rejected')->first()?->user?->name;
-                $status = str_replace(':name',$name_reject,$status);
-            }
+            // if ($map->status->name == 'Reject To :name') {
+            //     $name_reject = $map->approval->where('status','Rejected')->first()?->user?->name;
+            //     $status = str_replace(':name',$name_reject,$status);
+            // }
             return [
                 'id' => $map->id,
                 'status_id' => $map->status_id,

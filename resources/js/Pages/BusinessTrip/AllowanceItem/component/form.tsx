@@ -52,6 +52,8 @@ import { MaterialModel } from '@/Pages/Master/MasterMaterial/model/listModel';
 import { GET_LIST_MASTERIAL_BY_MATERIAL_GROUP } from '@/endpoint/masterMaterial/api';
 import { FormType } from '@/lib/utils';
 import { AsyncDropdownComponent } from '@/components/commons/AsyncDropdownComponent';
+import FormAutocomplete from '@/components/Input/formDropdown';
+import useDropdownOptions from '@/lib/getDropdown';
 //
 
 export enum AllowanceType {
@@ -128,6 +130,9 @@ export default function AllowanceItemForm({
     defaultValues: defaultValues,
   });
 
+  const { dataDropdown: dataMaterialGroup, getDropdown: getMaterialGroup } = useDropdownOptions();
+  const { dataDropdown: dataMaterialNumber, getDropdown: getMaterialNumber } = useDropdownOptions();
+
   //   console.log('currency_id', listCurrency);
   async function getDetailData() {
     try {
@@ -135,7 +140,18 @@ export default function AllowanceItemForm({
 
       const allowance = response.data.data.allowance;
       console.log(allowance);
-      getMaterials(allowance.material_group);
+    //   getMaterials(allowance.material_group);
+        getMaterialNumber('', {
+            name: 'material_description',
+            id: 'material_number',
+            tabel: 'master_materials',
+            attribut: allowance.material_group,
+            isMapping: true,
+            where: {
+            key: 'material_group',
+            parameter: allowance.material_group,
+            },
+        });
 
       const grades = response.data.data.grades;
 
@@ -207,11 +223,35 @@ export default function AllowanceItemForm({
   //   }
   // }, [id, type]);
 
+
   React.useEffect(() => {
     if (type === FormType.detail || type === FormType.edit) {
       getDetailData();
     }
+    getMaterialGroup('', {
+        name: 'material_group_desc',
+        id: 'material_group',
+        tabel: 'material_groups',
+        idType: 'string',
+    });
   }, [type]);
+
+
+
+  const handelGetMaterialNumber = async (value: string) => {
+    getMaterialNumber('', {
+      name: 'material_description',
+      id: 'material_number',
+      tabel: 'master_materials',
+      attribut: value,
+      isMapping: true,
+      where: {
+        key: 'material_group',
+        parameter: value,
+      },
+    });
+  };
+
 
   return (
     <ScrollArea className='h-[600px] w-full'>
@@ -303,7 +343,7 @@ export default function AllowanceItemForm({
             <tr>
               <td width={200}>Material Group</td>
               <td>
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name='material_group'
                   render={({ field }) => (
@@ -331,32 +371,33 @@ export default function AllowanceItemForm({
                       <FormMessage />
                     </FormItem>
                   )}
+                /> */}
+
+                <FormAutocomplete<any>
+                    fieldLabel=''
+                    options={dataMaterialGroup}
+                    fieldName='material_group'
+                    isRequired={true}
+                    disabled={false}
+                    placeholder={'Select Material Group'}
+                    classNames='mt-2 w-full'
+                    onChangeOutside={async (value: string, data: any) => {
+                        await handelGetMaterialNumber(value);
+                    }}
                 />
               </td>
             </tr>
             <tr>
-              <td width={200}>Material Number {form.getValues('material_number')}</td>
+              <td width={200}>Material Number</td>
               <td>
-                <FormField
-                  control={form.control}
-                  name='material_number'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <AsyncDropdownComponent
-                          onSelectChange={(value) => {
-                            field.onChange(value);
-                          }}
-                          value={field.value}
-                          filter={['material_number']}
-                          id='material_number'
-                          label='material_number'
-                          url={materialURL}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              <FormAutocomplete<any>
+                fieldLabel=''
+                options={dataMaterialNumber}
+                fieldName={'material_number'}
+                isRequired={false}
+                disabled={false}
+                placeholder={'Material number'}
+                classNames='mt-2 w-full'
                 />
               </td>
             </tr>
