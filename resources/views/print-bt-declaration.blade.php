@@ -195,7 +195,7 @@
         @endif
         <button class="waiting-approve {{$color}}">
             <span class="icon">
-                {!!$icon!!}    
+                {!!$icon!!}
             </span> {{$data['status']['name']}}
         </button>
     </div>
@@ -239,7 +239,7 @@
                 @endforeach
             </td>
         </tr>
-        @if ($data['cash_advance'] == 1) 
+        @if ($data['cash_advance'] == 1)
         <tr>
             <td><strong>Ref Number</strong></td>
             <td>{{$data['reference_number']}}</td>
@@ -381,7 +381,7 @@
                         <td>IDR</td>
                         <td></td>
                         <td></td>
-                        <td>{{number_format($row['other_allowance'],0,'','')}}</td>
+                        <td>{{number_format($row['other_allowance'],0,',','.')}}</td>
                     </tr>
                     <tr>
                         <td><strong>Total Declaration Value</strong></td>
@@ -389,6 +389,25 @@
                         <td></td>
                         <td></td>
                         <td>{{number_format($total_declaration_value + $row['other_allowance'],0,',','.')}}</td>
+                    </tr>
+                </table>
+            </div>
+            <div style="margin-top: 1rem;">
+                <table style="border-collapse: collapse;">
+                    <tr style="">
+                        <th style="text-align: left;padding: 5px;">Total Request Value</th>
+                        <td>:</td>
+                        <td>{{number_format($total_request_value,0,',','.')}}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #000">
+                        <th style="text-align: left;padding: 5px;">Total Declaration Value</th>
+                        <td>:</td>
+                        <td>{{number_format($total_declaration_value + $row['other_allowance'],0,',','.')}} +</td>
+                    </tr>
+                    <tr>
+                        <th>Deviation Value</th>
+                        <th>:</th>
+                        <th style="padding-top: 5px;">{{number_format($total_request_value - ($total_declaration_value + $row['other_allowance']),0,',','.')}}</th>
                     </tr>
                 </table>
             </div>

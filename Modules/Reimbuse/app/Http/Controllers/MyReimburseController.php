@@ -36,8 +36,10 @@ class MyReimburseController extends Controller
         try {
             $query  = MasterTypeReimburse::with([
                 'reimburses' => function ($query) {
-                    $query->where(['requester' => Auth::user()->nip])
-                    ->whereIn('status_id', [1,5]);
+                    $query->join('reimburse_groups as rg', 'reimburses.group', '=', 'rg.code')
+                    ->where(['reimburses.requester' => Auth::user()->nip])
+                    ->whereIn('rg.status_id', [1, 5])
+                    ->select('reimburses.*');
                 },
                 'reimburseTypeGrades.grade.gradeUsers' => function ($query) {
                     $query->where('user_id', Auth::user()->id);
@@ -59,7 +61,16 @@ class MyReimburseController extends Controller
                 // return $map;
                 // Balance Plafon
                 if (count($map->reimburse_type_grades) > 0) {
-                    $maximumBalance = collect($map->reimburse_type_grades)->pluck('plafon')->first();
+                    $maximumBalance = collect($map->reimburse_type_grades)
+                    ->filter(function ($reimburseTypeGrade) {
+                        return isset($reimburseTypeGrade->grade) &&
+                            !empty($reimburseTypeGrade->grade->grade_users) &&
+                            collect($reimburseTypeGrade->grade->grade_users)
+                                ->contains('user_id', Auth::user()->id);
+                    })
+                    ->pluck('plafon')
+                    ->first();
+
                 } else {
                     $maximumBalance = $map->grade_all_price;
                 }

@@ -448,7 +448,7 @@ class BusinessTripDeclarationController extends Controller
             // $purposeRelations = $map->purposeType ? $map->purposeType->name : '';
             $requestFor = $map->requestFor ? $map->requestFor->name : '';
             $requestNo = $map->parentBusinessTrip ? $map->parentBusinessTrip->request_no : '';
-            
+
             return [
                 'id' => $map->id,
                 'declaration_no' => $map->request_no,
@@ -458,8 +458,7 @@ class BusinessTripDeclarationController extends Controller
                 'status' => [
                     'name' => $map->status->name,
                     'classname' => $map->status->classname,
-                    'code' =>
-                    $map->status->code
+                    'code' => $map->status->code
                 ],
                 'created_at' => date('d/m/Y', strtotime($map->created_at)),
                 // 'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array

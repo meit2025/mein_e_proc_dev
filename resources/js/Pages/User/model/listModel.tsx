@@ -114,7 +114,7 @@ export const reimburseHistoryColumns: GridColDef[] = [
   },
   {
     field: 'costCenter',
-    headerName: 'Pusat Biaya',
+    headerName: 'Cost Center',
     width: 300,
     filterable: true,
   },
