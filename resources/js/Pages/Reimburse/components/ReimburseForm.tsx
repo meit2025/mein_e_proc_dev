@@ -90,7 +90,7 @@ export const ReimburseForm: React.FC<Props> = ({
   const { dataDropdown: dataUom, getDropdown: getUom } = useDropdownOptions();
   const { dataDropdown: dataTax, getDropdown: getTax } = useDropdownOptions();
   const { dataDropdown: dataPurchasingGroup, getDropdown: getPurchasingGroup } = useDropdownOptions('api/master-pr/purchasing-group/dropdown-list');
-  const { dataDropdown: dataCostCenter, getDropdown: getCostCenter } = useDropdownOptions();
+  const { dataDropdown: dataCostCenter, getDropdown: getCostCenter } = useDropdownOptions('api/master/cost-center/dropdown-list');
 
   const [dataReimburseType, setDataReimburseType] = useState<any[]>([]);
   const [dataFamily, setDataFamily] = useState<any[]>([]);
@@ -107,7 +107,7 @@ export const ReimburseForm: React.FC<Props> = ({
   });
 
   const MAX_FILE_SIZE = 1 * 1024 * 1024; 
-  const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf', 'image/heic'];
+  const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf', 'image/heic', 'image/heif'];
 
   const formSchema = z.object({
     formCount: z.string().min(1, 'total form must be have value'),
@@ -135,7 +135,7 @@ export const ReimburseForm: React.FC<Props> = ({
           z
             .instanceof(File)
             .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
-              message: 'File type must be JPG, JPEG, PNG, or PDF',
+              message: 'File type must be JPG, JPEG, PNG, HEIC, or PDF',
             })
             .refine((file) => file.size <= MAX_FILE_SIZE, {
               message: 'File size must be less than 1MB',
@@ -283,8 +283,6 @@ export const ReimburseForm: React.FC<Props> = ({
       setLoading(false);
     } catch (e) {
       const error = e as AxiosError;
-
-      console.log(error);
       setLoading(false);
     }
   }
@@ -600,13 +598,17 @@ export const ReimburseForm: React.FC<Props> = ({
                       disabled={type === ReimburseFormType.edit}
                       placeholder={'Cost Center'}
                       classNames='mt-2 w-full'
-                      onChangeOutside={async (search) => await getCostCenter(search, {
-                        name: 'cost_center',
-                        id: 'id',
-                        tabel: 'master_cost_centers',
-                        idType: 'string',
-                        search: search,
-                      })}
+                      onChangeOutside={async (search, data) => {
+                        if (search.length > 0 && search !== data?.value) {
+                          getCostCenter(search, {
+                            name: 'cost_center',
+                            id: 'id',
+                            tabel: 'master_cost_centers',
+                            idType: 'string',
+                            search: search,
+                          })
+                        }
+                      }}
                     />
                   </td>
                 </tr>
@@ -1148,6 +1150,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                         className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
                                         type='file'
                                         multiple
+                                        accept='image/*,.pdf,.heic'
                                         onChange={(e) => {
                                           const files = e.target.files;
                                           if (files) {

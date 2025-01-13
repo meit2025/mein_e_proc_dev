@@ -63,7 +63,7 @@ export default function ReimburseTypeForm({
     is_employee: z.boolean(),
     family_status: z.string().optional(),
     interval_claim_period: z.number().nullable(),
-    limit: z.number(),
+    limit: z.any(),
     material_group: z.number().refine((val) => val > 0, {
       message: 'Material Group must be chosen',
     }),
@@ -107,7 +107,7 @@ export default function ReimburseTypeForm({
     grade_option: 'all',
     grade_all_price: '0',
     grades: [],
-    limit: 0,
+    limit: null,
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -340,7 +340,7 @@ export default function ReimburseTypeForm({
                       <FormControl>
                         <Input
                           onChange={(e) => field.onChange(parseInt(e.target.value.replace(/[^0-9]/g, '')))}
-                          value={parseInt(field.value)}
+                          value={field.value}
                         />
                       </FormControl>
                       <FormMessage />
@@ -419,7 +419,7 @@ export default function ReimburseTypeForm({
                             return {
                               id: item.id,
                               grade: item.grade,
-                              plafon: form.getValues('grades')?.[item]?.plafon || '0',
+                              plafon: form.getValues('grades')?.[key]?.plafon || '0',
                             };
                           }),
                         );
