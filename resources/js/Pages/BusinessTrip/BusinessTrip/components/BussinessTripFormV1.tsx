@@ -116,6 +116,7 @@ const ACCEPTED_FILE_TYPES = [
   'image/jpg',
   'image/png',
   'image/heic',
+  'image/heif',
   'application/pdf',
 ];
 
@@ -154,7 +155,7 @@ export const BussinessTripFormV1 = ({
         .refine((file) => file.size <= MAX_FILE_SIZE, {
           message: 'File size must be less than 1MB',
         }),
-    ),
+    ).min(1, 'Attachment is required'),
     total_destination: z.number().min(1, 'Total Destinantion Required'),
     cash_advance: z.boolean().nullable().optional(),
     total_percent: z.string().nullable().optional(),
@@ -360,7 +361,9 @@ export const BussinessTripFormV1 = ({
   const { showToast } = useAlert();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(fileAttachment, ' valuesss');
+  console.log(form.formState.errors.attachment)
+
+    console.log(values, ' valuesss');
     try {
       const formData = new FormData();
       const totalAll = getTotalDes();
@@ -456,8 +459,10 @@ export const BussinessTripFormV1 = ({
     for (let i = 0; i < destinationCount; i++) {
       destinationForm.push({
         destination: '',
-        business_trip_start_date: new Date(),
-        business_trip_end_date: new Date(),
+        // business_trip_start_date: new Date(),
+        // business_trip_end_date: new Date(),
+        business_trip_start_date: '',
+        business_trip_end_date: '',
         pajak_id: '',
         purchasing_group_id: '',
         restricted_area: false,
@@ -613,7 +618,6 @@ export const BussinessTripFormV1 = ({
   const handleCashAdvanceChange = (value: boolean) => {
     setIsCashAdvance(value);
   };
-
   const totalPercent: any = useWatch({
     control: form.control,
     name: 'total_percent',
@@ -810,14 +814,23 @@ export const BussinessTripFormV1 = ({
                           }}
                         />
                       </FormControl>
-                      {form.formState.errors.attachment &&
+                      {/* {form.formState.errors.attachment &&
                       Array.isArray(form.formState.errors.attachment)
                         ? form.formState.errors.attachment.map((error, index) => (
                             <p key={index} className='text-[0.8rem] font-medium text-destructive'>
                               {error.message}
                             </p>
                           ))
-                        : null}
+                        : null} */}
+                        {form.formState.errors.attachment && (
+                        <p className="text-[0.8rem] font-medium text-destructive">
+                            {Array.isArray(form.formState.errors.attachment)
+                            ? form.formState.errors.attachment.map((error, index) => (
+                                <span key={index}>{error.message}</span>
+                                ))
+                            : form.formState.errors.attachment.message}
+                        </p>
+                        )}
                     </FormItem>
                   )}
                 />

@@ -50,7 +50,17 @@ class RunSendApprovalEmailJob extends Command
         // Proses untuk setiap jenis dokumen
         foreach ($documents as $documentName => [$documentApproval, $model]) {
             // Ambil semua entri dengan status_id = 1
-            $model::where('status_id', 1)->chunk(100, function ($items) use ($documentName, $documentApproval) {
+            $dataQuery = $model::where('status_id', 1);
+
+            if ($documentApproval == 'TRIP') {
+                $dataQuery->where('type', 'request');
+            }
+
+            if ($documentApproval == 'TRIP_DECLARATION') {
+                $dataQuery->where('type', 'declaration');
+            }
+
+            $dataQuery->chunk(100, function ($items) use ($documentName, $documentApproval) {
                 Log::channel('notification_email')->info('SendApprovalEmailJob started ' . $documentApproval);
                 $this->info('SendApprovalEmailJob started ' . $documentApproval);
 
@@ -59,25 +69,24 @@ class RunSendApprovalEmailJob extends Command
                     $approval = Approval::with('user.divisions')
                         ->where('document_id', $item->id)
                         ->where('document_name', $documentApproval)
+                        ->where('is_status', false)
                         ->latest('id')
                         ->first();
 
                     // Pastikan approval ada dan belum diproses
-                    if ($approval && !$approval->is_status && $approval->user && $approval->user->email) {
+                    if ($approval && $approval->user && $approval->user->email) {
                         try {
                             Log::channel('notification_email')->info('Send email to ' . $approval->user->email);
-                            $this->info('Send email to ' . $approval->user->email);
+                            $this->info('Send email to ' . $approval->user->email . ' documentApproval ' . $documentApproval . ' item id ' . $item->id);
 
                             // Kirim email dengan mailable yang sesuai dan queue-kan pengirimannya
                             Mail::to($approval->user->email)->send(new ApprovalNotificationMail($approval->user, $documentName));
                         } catch (\Exception $e) {
-                            report($e);  // Log jika terjadi kesalahan saat mengirim email
-                            Log::channel('notification_email')->info('Failed send email to ' . $approval->user->email ?? 'not found');
-                            $this->info('Failed send email to ' . $approval->user->email ?? 'not found');
+                            $this->info($e->getMessage());
                         }
                     } else {
-                        Log::channel('notification_email')->info('Approval not found' . $item->id);
-                        $this->info('Approval not found' . $item->id);
+                        Log::channel('notification_email')->info('Approval not found item id ' . $item->id . ' documentApproval ' . $documentApproval);
+                        $this->info('Approval not found item id ' . $item->id . ' documentApproval ' . $documentApproval);
                     }
                 }
             });

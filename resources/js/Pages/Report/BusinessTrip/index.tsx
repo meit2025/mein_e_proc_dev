@@ -23,6 +23,7 @@ interface propsType {
     costcenter: Costcenter[];
     types: any[];
     listPurposeType: any[];
+    listDestination: any[];
 }
 
 interface UserAuth {
@@ -46,7 +47,8 @@ export const Index = ({
     pajak,
     costcenter,
     types,
-    listPurposeType
+    listPurposeType,
+    listDestination
 }: propsType) => {
     const [openForm, setOpenForm] = React.useState<boolean>(false);
 
@@ -60,6 +62,7 @@ export const Index = ({
     const [endDate, setEndDate] = React.useState<string | null>(null);
     const [status, setStatus] = React.useState<string>('');
     const [type, setType] = React.useState<string>('');
+    const [destination, setDestination] = React.useState<string>('');
 
     function openFormHandler() {
         setOpenForm(!openForm);
@@ -136,7 +139,7 @@ export const Index = ({
                         </select>
                     </div>
                     <div>
-                        <label htmlFor='end-date' className='block mb-1'>Type</label>
+                        <label htmlFor='type' className='block mb-1'>Purpose Type</label>
                         <select
                             value={type}
                             onChange={(e) => setType(e.target.value)}
@@ -154,15 +157,35 @@ export const Index = ({
                             ))}
                         </select>
                     </div>
+                    <div>
+                        <label htmlFor='destination' className='block mb-1'>Destination</label>
+                        <select
+                            value={destination}
+                            onChange={(e) => setDestination(e.target.value)}
+                            className="select-class"
+                            id="destination"
+                        >
+                            <option value="">All Destination</option>
+                            {listDestination.map((typeOption) => (
+                                <option
+                                    key={typeOption.id}
+                                    value={typeOption.id}
+                                >
+                                    {typeOption.destination}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
             </div>
             <DataGridComponent
                 isHistory={false}
                 onExportXls={async (x: string) => await exporter(x)}
-                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&`}
+                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&destination=${destination || ''}&`}
                 columns={columns}
                 url={{
                     url: REPORT_BT_LIST,
+                    detailUrl: DETAIL_PAGE_BUSINESS_TRIP,
                 }}
                 labelFilter='search'
             />
