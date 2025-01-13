@@ -5,6 +5,7 @@ import {
   LIST_REIMBURSE,
   STORE_REIMBURSE,
   UPDATE_REIMBURSE,
+  CHECK_CLONE_VALIDATION_REIMBURSE
 } from '@/endpoint/reimburse/api';
 import {
   PAGE_DETAIL_REIMBURSE,
@@ -13,6 +14,9 @@ import {
 import { FormType } from '@/lib/utils';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import React, { ReactNode } from 'react';
+import axiosInstance from '@/axiosInstance';
+import { AxiosError } from 'axios';
+import { useAlert } from '../../contexts/AlertContext';
 import { ReimburseForm } from './components/ReimburseForm';
 import { columns, CostCenter, Currency, PurchasingGroup, User, ReimburseFormType } from './model/listModel';
 
@@ -20,8 +24,6 @@ interface Props {
   users: User[];
   categories: string;
   currencies: Currency[];
-  purchasing_groups: PurchasingGroup[];
-  cost_center: CostCenter[];
   currentUser: User;
   taxDefaultValue: string;
   uomDefaultValue: string;
@@ -37,11 +39,9 @@ const roleConfig = {
 };
 
 export const Index = ({
-  purchasing_groups,
   users,
   categories,
   currencies,
-  cost_center,
   currentUser,
   taxDefaultValue,
   uomDefaultValue
@@ -51,6 +51,7 @@ export const Index = ({
     type: ReimburseFormType.create,
     id: undefined,
   });
+  const { showToast } = useAlert();
 
   function openFormHandler() {
     setFormType({
@@ -58,6 +59,24 @@ export const Index = ({
       id: null,
     });
     setOpenForm(!openForm);
+  }
+
+  async function cloneFormHandler(id:string) {
+    try {
+      const response = await axiosInstance.get(CHECK_CLONE_VALIDATION_REIMBURSE(id), {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      showToast(response?.data?.data, 'success');
+      setFormType({
+        type: ReimburseFormType.clone,
+        id: id,
+      });
+      setOpenForm(!openForm);
+    } catch (e) {
+      showToast(e?.response?.data?.message, 'error');
+    }
   }
 
   return (
@@ -69,14 +88,12 @@ export const Index = ({
           onOpenChange={openFormHandler}
         >
           <ReimburseForm
-            purchasing_groups={purchasing_groups}
             taxDefaultValue={taxDefaultValue}
             uomDefaultValue={uomDefaultValue}
             users={users}
             categories={categories}
             currencies={currencies}
             currentUser={currentUser}
-            cost_center={cost_center}
             edit_url={DETAIL_REIMBURSE(formType.id)}
             update_url={UPDATE_REIMBURSE(formType.id)}
             store_url={STORE_REIMBURSE}
@@ -127,11 +144,7 @@ export const Index = ({
           setOpenForm(true);
         }}
         onClone={(value) => {
-          setFormType({
-            type: ReimburseFormType.clone,
-            id: value.toString(),
-          });
-          setOpenForm(true);
+          cloneFormHandler(value.toString())
         }}
         url={{
           url: LIST_REIMBURSE,
