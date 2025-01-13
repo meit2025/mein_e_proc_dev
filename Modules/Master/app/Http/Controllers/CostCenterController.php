@@ -80,4 +80,12 @@ class CostCenterController extends Controller
     {
         //
     }
+
+    public function dropdownList(Request $request)
+    {
+        $data = MasterCostCenter::selectRaw("cost_center || ' - ' || \"desc\" as label, id as value");
+        if ($request->search) $data = $data->where('cost_center', 'ilike', '%' . $request->search . '%')->orWhere('desc', 'ilike', '%' . $request->search . '%');
+        $data = $data->limit(50)->get();
+        return $this->successResponse($data);
+    }
 }
