@@ -80,4 +80,12 @@ class PurchasingGroupController extends Controller
         $data = PurchasingGroup::find($id)->delete();
         return $this->successResponse($data);
     }
+
+    public function dropdownList(Request $request)
+    {
+        $data = PurchasingGroup::selectRaw("purchasing_group || ' - ' || purchasing_group_desc as label, id as value");
+        if ($request->search) $data = $data->where('purchasing_group', 'ilike', '%' . $request->search . '%')->orWhere('purchasing_group_desc', 'ilike', '%' . $request->search . '%');
+        $data = $data->limit(50)->get();
+        return $this->successResponse($data);
+    }
 }

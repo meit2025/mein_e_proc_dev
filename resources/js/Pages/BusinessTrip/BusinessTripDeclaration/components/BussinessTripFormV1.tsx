@@ -68,6 +68,7 @@ const ACCEPTED_FILE_TYPES = [
   'image/jpg',
   'image/png',
   'image/heic',
+  'image/heif',
   'application/pdf',
 ];
 
@@ -82,15 +83,15 @@ export const BussinessTripFormV1 = ({
     request_no: z.string().nonempty('Request for required'),
     remark: z.string().nonempty('Remark is required'),
     attachment: z.array(
-      z
+        z
         .instanceof(File)
         .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
-          message: 'File type must be JPG, JPEG, PNG, HEIC or PDF',
+            message: 'File type must be JPG, JPEG, PNG, HEIC or PDF',
         })
         .refine((file) => file.size <= MAX_FILE_SIZE, {
-          message: 'File size must be less than 1MB',
+            message: 'File size must be less than 1MB',
         }),
-    ),
+    ).min(1, 'Attachment is required'),
     total_destination: z.number().int('Total Destinantion Required'),
     cash_advance: z.boolean().nullable().optional(),
     reference_number: z.string().nullable().optional(),
@@ -504,9 +505,9 @@ export const BussinessTripFormV1 = ({
                   name='attachment'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='text-xs text-gray-500 font-extralight mb-1'>
+                      {/* <FormLabel className='text-xs text-gray-500 font-extralight mb-1'>
                         Max File: 1000KB
-                      </FormLabel>
+                      </FormLabel> */}
                       <FormControl>
                         <input
                           className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
@@ -523,14 +524,15 @@ export const BussinessTripFormV1 = ({
                           }}
                         />
                       </FormControl>
-                      {form.formState.errors.attachment &&
-                      Array.isArray(form.formState.errors.attachment)
-                        ? form.formState.errors.attachment.map((error, index) => (
-                            <p key={index} className='text-[0.8rem] font-medium text-destructive'>
-                              {error.message}
-                            </p>
-                          ))
-                        : null}
+                      {form.formState.errors.attachment && (
+                        <p className="text-[0.8rem] font-medium text-destructive">
+                            {Array.isArray(form.formState.errors.attachment)
+                            ? form.formState.errors.attachment.map((error, index) => (
+                                <span key={index}>{error.message}</span>
+                                ))
+                            : form.formState.errors.attachment.message}
+                        </p>
+                        )}
                     </FormItem>
                   )}
                 />

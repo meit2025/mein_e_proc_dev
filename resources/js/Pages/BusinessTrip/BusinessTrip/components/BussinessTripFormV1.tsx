@@ -116,6 +116,7 @@ const ACCEPTED_FILE_TYPES = [
   'image/jpg',
   'image/png',
   'image/heic',
+  'image/heif',
   'application/pdf',
 ];
 
@@ -411,12 +412,12 @@ export const BussinessTripFormV1 = ({
       });
 
       if (type == BusinessTripType.create) {
-        // await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
-        //   headers: {
-        //     'Content-Type': 'multipart/form-data',
-        //   },
-        // });
-        // showToast('succesfully created data', 'success');
+        await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        showToast('succesfully created data', 'success');
       } else {
         // const formDataEdit = new FormData();
         // formDataEdit.append('remark', values.remark ?? '');
