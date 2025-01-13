@@ -90,7 +90,7 @@ export const ReimburseForm: React.FC<Props> = ({
   const { dataDropdown: dataUom, getDropdown: getUom } = useDropdownOptions();
   const { dataDropdown: dataTax, getDropdown: getTax } = useDropdownOptions();
   const { dataDropdown: dataPurchasingGroup, getDropdown: getPurchasingGroup } = useDropdownOptions('api/master-pr/purchasing-group/dropdown-list');
-  const { dataDropdown: dataCostCenter, getDropdown: getCostCenter } = useDropdownOptions();
+  const { dataDropdown: dataCostCenter, getDropdown: getCostCenter } = useDropdownOptions('api/master/cost-center/dropdown-list');
 
   const [dataReimburseType, setDataReimburseType] = useState<any[]>([]);
   const [dataFamily, setDataFamily] = useState<any[]>([]);
@@ -600,13 +600,17 @@ export const ReimburseForm: React.FC<Props> = ({
                       disabled={type === ReimburseFormType.edit}
                       placeholder={'Cost Center'}
                       classNames='mt-2 w-full'
-                      onChangeOutside={async (search) => await getCostCenter(search, {
-                        name: 'cost_center',
-                        id: 'id',
-                        tabel: 'master_cost_centers',
-                        idType: 'string',
-                        search: search,
-                      })}
+                      onChangeOutside={async (search, data) => {
+                        if (search.length > 0 && search !== data?.value) {
+                          getCostCenter(search, {
+                            name: 'cost_center',
+                            id: 'id',
+                            tabel: 'master_cost_centers',
+                            idType: 'string',
+                            search: search,
+                          })
+                        }
+                      }}
                     />
                   </td>
                 </tr>
