@@ -148,7 +148,7 @@ const ArrayForm = ({
 
       const totalSum = winnerUnit.reduce((sum: number, item: any) => sum + item.total_amount, 0);
       setValue('total_all_amount', totalSum);
-      const data = (parseInt(watch('cash_advance_purchases.dp')) / 100) * totalSum;
+      const data = (parseInt(watch('cash_advance_purchases.dp')) / 100) * parseInt(totalSum);
       setValue('cash_advance_purchases.nominal', data);
     }
 

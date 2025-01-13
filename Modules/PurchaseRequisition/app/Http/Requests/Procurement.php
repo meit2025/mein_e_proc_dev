@@ -83,6 +83,20 @@ class Procurement extends FormRequest
         ];
     }
 
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            // Memastikan ada vendor dengan `winner` bernilai true
+            $hasWinner = collect($this->vendors)->contains(function ($vendor) {
+                return isset($vendor['winner']) && $vendor['winner'] === true;
+            });
+
+            if (!$hasWinner) {
+                $validator->errors()->add('vendors', 'At least one vendor must be marked as the winner.');
+            }
+        });
+    }
+
 
     /**
      * Handle a failed validation attempt.
