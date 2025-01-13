@@ -6,7 +6,7 @@ import { GridColDef } from '@mui/x-data-grid';
 export const columns: GridColDef[] = [
   {
     field: 'purchases_number',
-    headerName: 'Purchases number',
+    headerName: 'Purchase Number',
     width: 200,
     filterable: false,
     renderCell: (params: any) => {
@@ -17,7 +17,7 @@ export const columns: GridColDef[] = [
   },
   {
     field: 'user.name',
-    headerName: 'Request for',
+    headerName: 'Request For',
     width: 200,
     filterable: false,
     renderCell: (params: any) => {
@@ -27,31 +27,31 @@ export const columns: GridColDef[] = [
   { field: 'document_type', headerName: 'document type', width: 200, filterable: true },
   {
     field: 'purchasing_groups',
-    headerName: 'purchasing groups',
+    headerName: 'Purchasing Groups',
     width: 200,
     filterable: true,
   },
   {
     field: 'delivery_date',
-    headerName: 'delivery date',
+    headerName: 'Delivery Date',
     width: 200,
     filterable: true,
   },
   {
     field: 'storage_locations',
-    headerName: 'storage locations',
+    headerName: 'Storage Locations',
     width: 200,
     filterable: true,
   },
   {
     field: 'total_vendor',
-    headerName: 'total vendor',
+    headerName: 'Total Vendor',
     width: 200,
     filterable: true,
   },
   {
     field: 'total_item',
-    headerName: 'total item',
+    headerName: 'Total Item',
     width: 200,
     filterable: true,
   },
@@ -98,7 +98,7 @@ export const columnsItem: GridColDef[] = [
   },
   {
     field: 'account_assignment_categories',
-    headerName: 'account assignment categories',
+    headerName: 'Account Assignment Categories',
     width: 200,
     filterable: false,
   },
@@ -116,19 +116,19 @@ export const columnsItem: GridColDef[] = [
   },
   {
     field: 'material_number',
-    headerName: 'Material number',
+    headerName: 'Material Number',
     width: 200,
     filterable: false,
   },
   {
     field: 'uom',
-    headerName: 'Uom',
+    headerName: 'UOM',
     width: 200,
     filterable: false,
   },
   {
     field: 'tax',
-    headerName: 'Tax on sales',
+    headerName: 'Tax On Sales',
     width: 200,
     filterable: false,
   },
@@ -191,10 +191,8 @@ export const columnsAttachment: GridColDef[] = [
           URL.revokeObjectURL(blobUrl);
         } else {
           // Jika URL filePath, langsung unduh
-          const link = document.createElement('a');
-          link.href = fileData;
-          link.download = fileName;
-          link.click();
+          // Jika URL filePath, buka di tab baru
+          window.open(fileData, '_blank');
         }
       };
 

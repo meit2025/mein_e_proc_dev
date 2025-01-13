@@ -125,7 +125,7 @@ class ProcurementController extends Controller
         } catch (\Throwable $th) {
             Log::channel('purchasing_txt')->error($th, ['request' => Auth::user()->name]);
             DB::rollBack();
-            return $this->errorResponse("Error: contact your administrator");
+            return $this->errorResponse("Error: contact your administrator," . " error : " . $th->getMessage());
         }
     }
 

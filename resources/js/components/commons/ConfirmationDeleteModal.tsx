@@ -35,6 +35,7 @@ interface ConfirmationDeleteProps {
   className?: string;
   title?: string;
   description?: string;
+  labelConfirmButton?: string;
 }
 const ConfirmationDeleteModal = ({
   open,
@@ -46,6 +47,7 @@ const ConfirmationDeleteModal = ({
   isLoading,
   title,
   description,
+  labelConfirmButton = 'Delete',
 }: PropsWithChildren<ConfirmationDeleteProps>) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -64,7 +66,7 @@ const ConfirmationDeleteModal = ({
                 <LoadingSpin />
               ) : (
                 <Button type='submit' onClick={onDelete}>
-                  Delete
+                  {labelConfirmButton}
                 </Button>
               )}
             </>
