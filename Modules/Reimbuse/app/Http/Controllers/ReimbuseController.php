@@ -37,7 +37,7 @@ class ReimbuseController extends Controller
         $nip = $request->user;
         $hasValue = $request->hasValue;
 
-        $getFamilieStatus       = User::select('f.status')->join('families as f', 'f.userId', '=', 'users.id')->where('users.nip', $nip)->groupBy('f.status')->pluck('f.status')->toArray();
+        $getFamilieStatus = User::select('f.status')->join('families as f', 'f.userId', '=', 'users.id')->where('users.nip', $nip)->groupBy('f.status')->pluck('f.status')->toArray();
         
         $data = MasterTypeReimburse::selectRaw(
             "MAX(CASE WHEN master_type_reimburses.is_employee IS TRUE THEN 1 ELSE 0 END) AS is_employee,
@@ -182,7 +182,7 @@ class ReimbuseController extends Controller
             $uomDefaultValue = (string) Uom::where('iso_code', 'PCE')->first()->id;
             return Inertia::render(
                 'Reimburse/Index',
-                compact('purchasing_groups', 'currentUser',  'users', 'categories', 'currencies', 'cost_center', 'taxDefaultValue', 'uomDefaultValue')
+                compact('currentUser',  'users', 'categories', 'currencies', 'taxDefaultValue', 'uomDefaultValue')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -361,16 +361,15 @@ class ReimbuseController extends Controller
     public function dropdownFamily(Request $request)
     {
         $userId             = $request->user;
-        $familyRelationship = $request->familyRelationship;
         $reimburseType      = $request->reimburseType;
         $getFamilyStatus    = MasterTypeReimburse::where('code', $reimburseType)->first()->family_status ?? '';
-
-        $data = MasterTypeReimburse::select('f.name as label', 'f.id as value')
-            ->join('master_type_reimburse_grades as mtrg', 'mtrg.reimburse_type_id', '=', 'master_type_reimburses.id')
-            ->join('business_trip_grade_users as btgu', 'btgu.grade_id', '=', 'mtrg.grade_id')
-            ->join('users as u', 'u.id', '=', 'btgu.user_id')
-            ->join('families as f', 'f.userId', '=', 'u.id')
-            ->where(['u.nip' => $userId, 'master_type_reimburses.is_employee' => (string)$familyRelationship, 'master_type_reimburses.code' => $reimburseType, 'f.status' => $getFamilyStatus]);
+        
+        $data = User::select('f.name as label', 'f.id as value')
+            ->join('families as f', 'f.userId', '=', 'users.id')
+            ->where([
+                'users.nip' => $userId, 
+                'f.status' => $getFamilyStatus,
+            ]);
 
         if ($request->search) {
             $data = $data->Where('f.name', 'ilike', '%' . $request->search . '%');
@@ -390,5 +389,17 @@ class ReimbuseController extends Controller
 
         $data = $data->limit(50)->get();
         return $this->successResponse($data);
+    }
+
+    public function cloneValidation($id) {
+        $data =  ReimburseGroup::with(['reimburses.reimburseType'])->where('id', $id)->first();
+        foreach ($data->reimburses as $key => $value) {
+            $dateNow = Carbon::now()->format('Y-m-d');
+            if ($value->reimburseType->interval_claim_period != null && ($dateNow >= $value->claim_date && $dateNow <= Carbon::createFromFormat('Y-m-d', $value->claim_date)->addDays($value->reimburseType->interval_claim_period))) {
+                return $this->errorResponse('Failed, unable to clone this data as the data type reimbursement used falls within the claim period.');
+            };
+        }
+
+        return true;
     }
 }

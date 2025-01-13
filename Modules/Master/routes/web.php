@@ -443,6 +443,7 @@ Route::group(['middleware' => 'auth'], function () {
                 ->middleware(PermissionMiddleware::class . ':master pr purchasing group view');
             Route::delete('/delete/{id}', [PurchasingGroupController::class, 'destroy'])->name('master.purchasing-group.destroy')
                 ->middleware(PermissionMiddleware::class . ':master pr purchasing group delete');
+            Route::get('/dropdown-list', [PurchasingGroupController::class, 'dropdownList'])->name('master.purchasing-group.dropdownList');
         });
 
         // Account Assignment Category API

@@ -47,6 +47,7 @@ Route::group(['prefix' => 'api/reimburse'], function () {
     Route::get('/get-list-master-reimburse-type', [ReimbuseController::class, 'getListMasterReimburseTypeAPI'])->name('reimburse.get-list-master-reimburse-type');
     Route::get('/get-employee-reimburse', [ReimbuseController::class, 'dropdownEmployee'])->name('reimburse.get-reimburse-employee');
     Route::get('/get-family-reimburse', [ReimbuseController::class, 'dropdownFamily'])->name('reimburse.get-reimburse-family');
+    Route::get('/clone-validation/{id}', [ReimbuseController::class, 'cloneValidation'])->name('reimburse.cloneValidation');
 
 });
 
