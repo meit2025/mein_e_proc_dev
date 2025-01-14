@@ -329,7 +329,8 @@ export default function ReimburseTypeForm({
 
             <tr>
               <td width={200}>
-                Limit <span className='text-red-500'>*</span>
+                Limit Request
+                <p className='text-xs italic text-slate-400'>( Clear the form input to set an unlimited limit for the request reimbursement )</p>
               </td>
               <td>
                 <FormField
