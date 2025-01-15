@@ -81,7 +81,7 @@ class ReportController extends Controller
             $status = $request->get('status');
             $type = $request->get('type');
 
-            $query =  ReimburseGroup::query()->with(['reimburses', 'status']);
+            $query =  ReimburseGroup::query()->with(['reimburses', 'status', 'user']);
 
             if ($request->approval == 1) {
                 $approval = Approval::where('user_id', Auth::user()->id)
@@ -133,7 +133,7 @@ class ReportController extends Controller
                 return [
                     'id' => $map->id,
                     'code' => $map->code,
-                    'request_for' => $map->requester,
+                    'request_for' => $map->user->name,
                     'remark' => $map->remark,
                     'balance' => $balance,
                     'form' => count($map->reimburses),
@@ -161,7 +161,7 @@ class ReportController extends Controller
             $status = $request->get('status');
             $type = $request->get('type');
             // Start the query with relationships
-            $query = ReimburseGroup::query()->with(['reimburses', 'status']);
+            $query = ReimburseGroup::query()->with(['reimburses', 'status', 'user']);
 
             // Handle approval-specific filtering
             if ($request->approval == 1) {
@@ -223,9 +223,8 @@ class ReportController extends Controller
                 $balance = $item->reimburses->sum('balance');
 
                 return [
-                    'id' => $item->id,
                     'code' => $item->code,
-                    'request_for' => $item->requester,
+                    'request_for' => $item->user->name,
                     'remark' => $item->remark,
                     'balance' => $balance,
                     'form_count' => $item->reimburses->count(),
