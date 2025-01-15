@@ -19,7 +19,7 @@ use Modules\BusinessTrip\Models\Destination;
 use Modules\BusinessTrip\Models\PurposeType;
 use Modules\Master\Models\DocumentType;
 use Modules\Master\Models\MasterCostCenter;
-use Modules\Master\Models\MasterPeriodReimburse;
+// use Modules\Master\Models\MasterPeriodReimburse;
 use Modules\Master\Models\MasterStatus;
 use Modules\Master\Models\MasterTypeReimburse;
 use Modules\Master\Models\Pajak;
@@ -55,18 +55,18 @@ class ReportController extends Controller
             $categories = ['Employee', 'Family'];
             $purchasing_groups = PurchasingGroup::select('id', 'purchasing_group', 'purchasing_group_desc')->get();
             $currencies = Currency::select('code', 'name')->where('code', 'IDR')->get();
-            $periods = MasterPeriodReimburse::select('id', 'code', 'start', 'end')->get();
+            // $periods = MasterPeriodReimburse::select('id', 'code', 'start', 'end')->get();
             $cost_center = MasterCostCenter::select('id', 'cost_center')->get();
             $taxes = Pajak::select('id', 'mwszkz')->get();
 
             $types = MasterTypeReimburse::select('code', 'name')->get();
             $statuses = MasterStatus::select('code', 'name')->get();
 
-            $latestPeriod = MasterPeriodReimburse::orderBy('id', 'desc')->first();
+            // $latestPeriod = MasterPeriodReimburse::orderBy('id', 'desc')->first();
 
             return Inertia::render(
                 'Report/Reimbuse/Index',
-                compact('purchasing_groups', 'currentUser', 'latestPeriod',  'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes', 'types', 'statuses')
+                compact('purchasing_groups', 'currentUser',  'users', 'categories', 'currencies', 'cost_center', 'taxes', 'types', 'statuses')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -81,7 +81,7 @@ class ReportController extends Controller
             $status = $request->get('status');
             $type = $request->get('type');
 
-            $query =  ReimburseGroup::query()->with(['reimburses', 'status']);
+            $query =  ReimburseGroup::query()->with(['reimburses', 'status', 'user']);
 
             if ($request->approval == 1) {
                 $approval = Approval::where('user_id', Auth::user()->id)
@@ -133,7 +133,7 @@ class ReportController extends Controller
                 return [
                     'id' => $map->id,
                     'code' => $map->code,
-                    'request_for' => $map->requester,
+                    'request_for' => $map->user->name,
                     'remark' => $map->remark,
                     'balance' => $balance,
                     'form' => count($map->reimburses),
@@ -161,7 +161,7 @@ class ReportController extends Controller
             $status = $request->get('status');
             $type = $request->get('type');
             // Start the query with relationships
-            $query = ReimburseGroup::query()->with(['reimburses', 'status']);
+            $query = ReimburseGroup::query()->with(['reimburses', 'status', 'user']);
 
             // Handle approval-specific filtering
             if ($request->approval == 1) {
@@ -223,9 +223,8 @@ class ReportController extends Controller
                 $balance = $item->reimburses->sum('balance');
 
                 return [
-                    'id' => $item->id,
                     'code' => $item->code,
-                    'request_for' => $item->requester,
+                    'request_for' => $item->user->name,
                     'remark' => $item->remark,
                     'balance' => $balance,
                     'form_count' => $item->reimburses->count(),
