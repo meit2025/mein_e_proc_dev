@@ -109,7 +109,7 @@ class MasterTypeReimburseController extends Controller
         $rules = [
             'code' => 'required|unique:master_type_reimburses',
             'name' => 'required',
-            'limit' => 'required|min:1|numeric',
+            'limit' => '',
             'is_employee' => 'required|boolean',
             'family_status' => '',
             'interval_claim_period' => '',
@@ -187,7 +187,7 @@ class MasterTypeReimburseController extends Controller
     {
         $rules = [
             'name' => 'required',
-            'limit' => 'required|min:1|numeric',
+            'limit' => '',
             'is_employee' => 'required|boolean',
             'family_status' => '',
             'material_group' => 'required',
