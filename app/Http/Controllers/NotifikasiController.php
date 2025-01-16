@@ -44,17 +44,21 @@ class NotifikasiController extends Controller
     {
         // Mail::to($request->email)->send(new TestEmail());
 
+        ini_set("SMTP", "10.236.112.162"); // Ganti dengan server SMTP Anda
+        ini_set("smtp_port", "25");         // Ganti dengan port SMTP Anda
+        ini_set("sendmail_path", "/usr/sbin/sendmail -t -i"); // Path sendmail jika diperlukan
+
         $message = "
-<html>
-<head>
-<title>Test Email</title>
-</head>
-<body>
-<h1>Hello!</h1>
-<p>This is a test email sent from PHP.</p>
-</body>
-</html>
-";
+        <html>
+        <head>
+        <title>Test Email</title>
+        </head>
+        <body>
+        <h1>Hello!</h1>
+        <p>This is a test email sent from PHP.</p>
+        </body>
+        </html>
+        ";
 
         // Header email
         $headers = "MIME-Version: 1.0" . "\r\n";
