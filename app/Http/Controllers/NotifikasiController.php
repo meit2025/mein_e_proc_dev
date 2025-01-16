@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\TestEmail;
 use App\Models\Notifikasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class NotifikasiController extends Controller
 {
@@ -36,5 +38,12 @@ class NotifikasiController extends Controller
         $user = Auth::user();
         $notifications = Notifikasi::where('user_id', $user->id)->delete();
         return $this->successResponse($notifications);
+    }
+
+    public function sendTestEmail(Request $request)
+    {
+        Mail::to($request->email)->send(new TestEmail());
+
+        return $this->successResponse('Email sent');
     }
 }
