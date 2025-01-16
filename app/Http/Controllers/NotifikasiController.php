@@ -52,8 +52,8 @@ class NotifikasiController extends Controller
             $mail->isSMTP();
             $mail->Host = '10.236.112.162'; // Alamat server SMTP Anda
             $mail->SMTPAuth = true; // Jika server SMTP memerlukan otentikasi
-            $mail->Username = 'your-username'; // Ganti dengan username SMTP Anda
-            $mail->Password = 'your-password'; // Ganti dengan password SMTP Anda
+            $mail->Username = null; // Ganti dengan username SMTP Anda
+            $mail->Password = null; // Ganti dengan password SMTP Anda
             $mail->Port = 25; // Port SMTP
 
             // Pengaturan email
