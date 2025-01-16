@@ -42,7 +42,33 @@ class NotifikasiController extends Controller
 
     public function sendTestEmail(Request $request)
     {
-        Mail::to($request->email)->send(new TestEmail());
+        // Mail::to($request->email)->send(new TestEmail());
+
+        $message = "
+<html>
+<head>
+<title>Test Email</title>
+</head>
+<body>
+<h1>Hello!</h1>
+<p>This is a test email sent from PHP.</p>
+</body>
+</html>
+";
+
+        // Header email
+        $headers = "MIME-Version: 1.0" . "\r\n";
+        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+
+        // Tambahkan informasi pengirim
+        $headers .= "From: mein-it-support_dl@asia.meap.com" . "\r\n";
+
+        // Kirim email
+        if (mail('mein-it-support_dl@asia.meap.com', "test", $message, $headers)) {
+            echo "Email berhasil dikirim.";
+        } else {
+            echo "Gagal mengirim email.";
+        }
 
         return $this->successResponse('Email sent');
     }
