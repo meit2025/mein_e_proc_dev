@@ -7,6 +7,8 @@ use App\Models\Notifikasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 class NotifikasiController extends Controller
 {
@@ -43,35 +45,29 @@ class NotifikasiController extends Controller
     public function sendTestEmail(Request $request)
     {
         // Mail::to($request->email)->send(new TestEmail());
+        $mail = new PHPMailer(true);
 
-        ini_set("SMTP", "10.236.112.162"); // Ganti dengan server SMTP Anda
-        ini_set("smtp_port", "25");         // Ganti dengan port SMTP Anda
-        ini_set("sendmail_path", "/usr/sbin/sendmail -t -i"); // Path sendmail jika diperlukan
+        try {
+            // Pengaturan server SMTP
+            $mail->isSMTP();
+            $mail->Host = '10.236.112.162'; // Alamat server SMTP Anda
+            $mail->SMTPAuth = true; // Jika server SMTP memerlukan otentikasi
+            $mail->Username = 'your-username'; // Ganti dengan username SMTP Anda
+            $mail->Password = 'your-password'; // Ganti dengan password SMTP Anda
+            $mail->Port = 25; // Port SMTP
 
-        $message = "
-        <html>
-        <head>
-        <title>Test Email</title>
-        </head>
-        <body>
-        <h1>Hello!</h1>
-        <p>This is a test email sent from PHP.</p>
-        </body>
-        </html>
-        ";
+            // Pengaturan email
+            $mail->setFrom('mein-it-support_dl@asia.meap.com', 'IT Support'); // Alamat pengirim
+            $mail->addAddress('mein-it-support_dl@asia.meap.com'); // Alamat penerima
+            $mail->Subject = 'Test Email';
+            $mail->Body = '<p>This is a test email sent via PHPMailer.</p>';
+            $mail->isHTML(true); // Kirim email dalam format HTML
 
-        // Header email
-        $headers = "MIME-Version: 1.0" . "\r\n";
-        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-
-        // Tambahkan informasi pengirim
-        $headers .= "From: mein-it-support_dl@asia.meap.com" . "\r\n";
-
-        // Kirim email
-        if (mail('mein-it-support_dl@asia.meap.com', "test", $message, $headers)) {
-            echo "Email berhasil dikirim.";
-        } else {
-            echo "Gagal mengirim email.";
+            // Kirim email
+            $mail->send();
+            echo 'Email berhasil dikirim.';
+        } catch (Exception $e) {
+            echo "Gagal mengirim email. Error: {$mail->ErrorInfo}";
         }
 
         return $this->successResponse('Email sent');
