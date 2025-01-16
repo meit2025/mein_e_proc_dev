@@ -11,17 +11,55 @@ class LdapAuthService
     const LDAP_USR = "majapahit";
     const LDAP_PASS = "abcd.1234567890";
 
-    function connect()
+    private $ldapHost;
+    private $ldapDn;
+    private $ldapUser;
+    private $ldapPass;
+
+    public function __construct()
+    {
+        // Get LDAP details from environment variables
+        $this->ldapHost = env('LDAP_HOST');
+        $this->ldapDn = env('LDAP_BASE_DN');
+        $this->ldapUser = env('LDAP_USER');
+        $this->ldapPass = env('LDAP_ADMIN_PASSWORD');
+    }
+
+    // function connect()
+    // {
+    //     try {
+    //         $ldapConnection = ldap_connect($this::LDAP_HOST);
+    //         return $ldapConnection;
+    //     } catch (\Throwable $th) {
+    //         throw new Exception($th->getMessage(), 1);
+    //     }
+    // }
+
+    // function login($ldapConnection, $username, $password)
+    // {
+    //     try {
+    //         ldap_set_option($ldapConnection, LDAP_OPT_REFERRALS, 0);
+    //         ldap_set_option($ldapConnection, LDAP_OPT_PROTOCOL_VERSION, 3);
+    //         $ldapBind = @ldap_bind($ldapConnection, $username, $password);
+    //         return $ldapBind;
+    //     } catch (Exception $error) {
+    //         return response()->json(['message' => $error]);
+    //     }
+    // }
+
+    // Method to establish connection
+    public function connect()
     {
         try {
-            $ldapConnection = ldap_connect($this::LDAP_HOST);
+            $ldapConnection = ldap_connect($this->ldapHost);
             return $ldapConnection;
-        } catch (\Throwable $th) {
-            throw new Exception($th->getMessage(), 1);
+        } catch (Exception $e) {
+            throw new Exception("Connection error: " . $e->getMessage());
         }
     }
 
-    function login($ldapConnection, $username, $password)
+    // Method to bind user credentials
+    public function login($ldapConnection, $username, $password)
     {
         try {
             ldap_set_option($ldapConnection, LDAP_OPT_REFERRALS, 0);
@@ -29,7 +67,7 @@ class LdapAuthService
             $ldapBind = @ldap_bind($ldapConnection, $username, $password);
             return $ldapBind;
         } catch (Exception $error) {
-            return response()->json(['message' => $error]);
+            throw new Exception("LDAP login failed: " . $error->getMessage());
         }
     }
 }
