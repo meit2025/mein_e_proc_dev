@@ -1,0 +1,43 @@
+import DataGridComponent from '@/components/commons/DataGrid';
+import { DELET_MASTER_DOKUMENT_TYPE, GET_MASTER_DOKUMENT_TYPE } from '@/endpoint/dokumentType/api';
+import {
+  CREATE_PAGE_MASTER_DOKUMENT_TYPE,
+  DETAIL_PAGE_MASTER_DOKUMENT_TYPE,
+  EDIT_PAGE_MASTER_DOKUMENT_TYPE,
+} from '@/endpoint/dokumentType/page';
+import MainLayout from '@/Pages/Layouts/MainLayout';
+import { ReactNode } from 'react';
+import { columns } from './model/listModel';
+
+const roleAkses = 'master pr document type';
+const roleConfig = {
+  detail: `${roleAkses} view`,
+  create: `${roleAkses} create`,
+  update: `${roleAkses} update`,
+  delete: `${roleAkses} delete`,
+};
+export const Index = () => {
+  return (
+    <DataGridComponent
+      role={roleConfig}
+      columns={columns}
+      url={{
+        url: GET_MASTER_DOKUMENT_TYPE,
+        addUrl: CREATE_PAGE_MASTER_DOKUMENT_TYPE,
+        editUrl: EDIT_PAGE_MASTER_DOKUMENT_TYPE,
+        deleteUrl: DELET_MASTER_DOKUMENT_TYPE,
+        detailUrl: DETAIL_PAGE_MASTER_DOKUMENT_TYPE,
+      }}
+      labelFilter='search'
+    />
+  );
+};
+
+// Assign layout to the page
+Index.layout = (page: ReactNode) => (
+  <MainLayout title='Document Type' description='Document Type Create PR'>
+    {page}
+  </MainLayout>
+);
+
+export default Index;

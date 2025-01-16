@@ -1,0 +1,11 @@
+{
+    "name": "PurchaseRequisition",
+    "alias": "purchaserequisition",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\PurchaseRequisition\\Providers\\PurchaseRequisitionServiceProvider"
+    ],
+    "files": []
+}

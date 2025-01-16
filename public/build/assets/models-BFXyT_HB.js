@@ -1,0 +1,1 @@
+const e=[{field:"code",headerName:"Destination Code",width:200,filterable:!0},{field:"destination",headerName:"Destination Name",width:200,filterable:!0},{field:"type",headerName:"Destination Type",width:200,filterable:!0}];export{e as columns};

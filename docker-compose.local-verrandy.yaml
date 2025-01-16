@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  postgress_mein:
+    image: postgres:latest
+    container_name: postgress_mein
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5444:5432"  # Map PostgreSQL to port 5444 on the host
+    networks:
+      - pgnetwork
+    expose:
+      - "5432"  # Exposes PostgreSQL internally to other services on the same network
+
+  pgadmin-mein:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin_mein
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com  # pgAdmin default login
+      PGADMIN_DEFAULT_PASSWORD: admin          # pgAdmin default password
+    ports:
+      - "5054:80"  # Expose pgAdmin on port 5050
+    networks:
+      - pgnetwork
+    depends_on:
+      - postgress_mein  # Ensure PostgreSQL starts first
+
+networks:
+  pgnetwork:
+    driver: bridge

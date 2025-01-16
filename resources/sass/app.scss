@@ -1,0 +1,11 @@
+// Variables
+
+// If you want to override variables do it here
+@import 'variables';
+@import 'custom';
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: $primary-color;
+  pointer-events: auto !important;
+}

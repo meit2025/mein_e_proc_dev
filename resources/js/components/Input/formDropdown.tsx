@@ -1,0 +1,123 @@
+import { Autocomplete, CircularProgress, FormHelperText, TextField } from '@mui/material';
+import { CSSProperties } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
+
+// Define the option type as a generic T for flexibility
+interface Option<T> {
+  label: string;
+  value: T;
+}
+
+interface FormAutocompleteProps<T> {
+  fieldLabel: string;
+  fieldName: string;
+  isRequired?: boolean;
+  disabled?: boolean;
+  style?: CSSProperties;
+  requiredMessage?: string;
+  options: Option<T>[];
+  placeholder?: string;
+  classNames?: string;
+  lengthLabel?: string;
+  onChangeOutside?: (value: T | null, data?: any) => void;
+  onSearch?: (query: string) => Promise<Option<T>[]>;
+  loading?: boolean;
+  onFocus?: () => void;
+}
+
+const FormAutocomplete = <T,>({
+  fieldLabel,
+  fieldName,
+  isRequired = false,
+  disabled = false,
+  style,
+  requiredMessage,
+  options,
+  placeholder,
+  classNames,
+  onChangeOutside,
+  lengthLabel = '40',
+  onSearch,
+  loading = false,
+  onFocus,
+}: FormAutocompleteProps<T>) => {
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext();
+
+  return (
+    <div className='w-full' style={{ pointerEvents: 'auto' }}>
+      <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
+        {fieldLabel && (
+          <label className={`form-label max-w-${lengthLabel}`}>
+            {fieldLabel} <span className='text-red-700'> {isRequired ? '*' : ''}</span>
+          </label>
+        )}
+        <Controller
+          name={fieldName}
+          control={control}
+          rules={{
+            required: isRequired ? (requiredMessage ?? `${fieldLabel} is required`) : false,
+          }}
+          render={({ field }) => (
+            <div className={`${classNames}`}>
+              <Autocomplete
+                {...field}
+                value={(options ?? []).find((option) => option.value === field.value) || null} // Make sure the value is controlled
+                options={options}
+                getOptionLabel={(option) => option.label}
+                isOptionEqualToValue={(option, value) => option.value === value}
+                onChange={(_, data) => {
+                  field.onChange(data ? data.value : null);
+                  if (onChangeOutside) {
+                    onChangeOutside(data ? data.value : null, data);
+                  }
+                }}
+                sx={{ ...style, pointerEvents: 'auto !important', cursor: 'auto !important' }}
+                disabled={disabled}
+                loading={loading}
+                onInputChange={(_, newInputValue) => {
+                  if (onSearch) {
+                    onSearch(newInputValue);
+                  }
+                }}
+                onFocus={onFocus}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder={placeholder}
+                    error={Boolean(errors[fieldName])}
+                    required={isRequired}
+                    InputProps={{
+                      ...params.InputProps,
+                      sx: {
+                        height: '36px',
+                        pointerEvents: 'auto !important',
+                        cursor: 'auto !important',
+                      },
+                      endAdornment: (
+                        <>
+                          {loading ? <CircularProgress color='inherit' size={20} /> : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    }}
+                  />
+                )}
+              />
+            </div>
+          )}
+        />
+      </div>
+      <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
+        <label className='form-label max-w-32'>{''}</label>
+        {errors[fieldName] && (
+          <FormHelperText error>{String(errors[fieldName]?.message)}</FormHelperText>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default FormAutocomplete;
