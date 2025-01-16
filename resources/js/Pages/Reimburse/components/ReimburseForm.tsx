@@ -52,13 +52,11 @@ import { CustomStatus } from '@/components/commons/CustomStatus';
 
 interface Props {
   onSuccess?: (value?: boolean) => void;
-  purchasing_groups: PurchasingGroup[];
   taxDefaultValue: string;
   uomDefaultValue: string;
   currencies: Currency[];
   categories: string;
   users: User[];
-  cost_center: CostCenter[];
   edit_url?: string;
   update_url?: string;
   store_url?: string;
@@ -74,13 +72,11 @@ interface reimburseAttachement {
 
 export const ReimburseForm: React.FC<Props> = ({
   onSuccess,
-  purchasing_groups,
   currencies,
   taxDefaultValue,
   uomDefaultValue,
   categories,
   users,
-  cost_center,
   edit_url,
   update_url,
   store_url,
@@ -93,6 +89,8 @@ export const ReimburseForm: React.FC<Props> = ({
   const { dataDropdown: dataEmployee, getDropdown: getEmployee } = useDropdownOptions(GET_LIST_EMPLOYEE_REIMBURSE);
   const { dataDropdown: dataUom, getDropdown: getUom } = useDropdownOptions();
   const { dataDropdown: dataTax, getDropdown: getTax } = useDropdownOptions();
+  const { dataDropdown: dataPurchasingGroup, getDropdown: getPurchasingGroup } = useDropdownOptions('api/master-pr/purchasing-group/dropdown-list');
+  const { dataDropdown: dataCostCenter, getDropdown: getCostCenter } = useDropdownOptions('api/master/cost-center/dropdown-list');
 
   const [dataReimburseType, setDataReimburseType] = useState<any[]>([]);
   const [dataFamily, setDataFamily] = useState<any[]>([]);
@@ -109,7 +107,7 @@ export const ReimburseForm: React.FC<Props> = ({
   });
 
   const MAX_FILE_SIZE = 1 * 1024 * 1024; 
-  const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf', 'image/heic'];
+  const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf', 'image/heic', 'image/heif'];
 
   const formSchema = z.object({
     formCount: z.string().min(1, 'total form must be have value'),
@@ -137,7 +135,7 @@ export const ReimburseForm: React.FC<Props> = ({
           z
             .instanceof(File)
             .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
-              message: 'File type must be JPG, JPEG, PNG, or PDF',
+              message: 'File type must be JPG, JPEG, PNG, HEIC, or PDF',
             })
             .refine((file) => file.size <= MAX_FILE_SIZE, {
               message: 'File size must be less than 1MB',
@@ -167,6 +165,20 @@ export const ReimburseForm: React.FC<Props> = ({
         key       : 'iso_code',
         parameter : 'PCE'
       }
+    });
+
+    getPurchasingGroup('', {
+      name: 'purchasing_group_desc',
+      id: 'id',
+      tabel: 'purchasing_groups',
+      idType: 'string',
+    });
+
+    getCostCenter('', {
+      name: 'cost_center',
+      id: 'id',
+      tabel: 'master_cost_centers',
+      idType: 'string',
     });
 
     getEmployee('', {
@@ -240,7 +252,7 @@ export const ReimburseForm: React.FC<Props> = ({
           tax_on_sales: String(map.tax_on_sales),
           purchase_requisition_unit_of_measure: String(map.purchase_requisition_unit_of_measure),
           purchasing_group: String(map.purchasing_group),
-          type: map.type == 'Family' ? '0' : '1',
+          type: map.type,
           item_delivery_data: new Date(map.item_delivery_data),
           claim_date: new Date(map.claim_date),
           attachment: [],
@@ -258,7 +270,7 @@ export const ReimburseForm: React.FC<Props> = ({
       for (const map of reimburseForms) {
         await fetchReimburseType(formCounter, {reimburse_type: map.reimburse_type.code})
         await fetchFamily(formCounter, {
-          type: map.type == 'Family' ? '0' : '1',
+          type: map.type,
           reimburse_type: map.reimburse_type.code
         });
         await getDataByLimit(formCounter, {
@@ -271,8 +283,6 @@ export const ReimburseForm: React.FC<Props> = ({
       setLoading(false);
     } catch (e) {
       const error = e as AxiosError;
-
-      console.log(error);
       setLoading(false);
     }
   }
@@ -319,7 +329,6 @@ export const ReimburseForm: React.FC<Props> = ({
           params: {
             search: query,
             user: form.getValues('requester'),
-            familyRelationship: form.getValues(`forms.${index}.type`),
           },
         });
         setDataReimburseType((prev) => {
@@ -337,7 +346,7 @@ export const ReimburseForm: React.FC<Props> = ({
     const response = await axiosInstance.get(GET_LIST_FAMILY_REIMBURSE, {
       params: {
         user: form.getValues('requester'),
-        familyRelationship: otherParams.type,
+        familyRelationship: otherParams.type == 'Family' ? '0' : '1',
         reimburseType: otherParams.reimburse_type
       },
       headers: {
@@ -406,7 +415,7 @@ export const ReimburseForm: React.FC<Props> = ({
         let formLength = values.forms.length == 0 ? 0 : values.forms.length - 1;
         
         if (parseInt(detailLimit[index]?.limit) == 0) {
-          showToast('LiThe request limit for form '+index+' has been reached', 'error');
+          showToast('Claim Limit for form '+index+' is Empty, Please Contact the Admin', 'error');
           return;
         }
 
@@ -442,8 +451,6 @@ export const ReimburseForm: React.FC<Props> = ({
       onSuccess();
     } catch (e) {
       const error = e as AxiosError;
-
-      console.log(error);
     }
   };
 
@@ -582,34 +589,26 @@ export const ReimburseForm: React.FC<Props> = ({
                 </tr>
 
                 <tr>
-                  <td className='w-1/4'>Pusat Biaya</td>
+                  <td className='w-1/4'>Cost Center</td>
                   <td>
-                    <FormField
-                      control={form.control}
-                      name='cost_center'
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Select
-                              disabled={type === ReimburseFormType.edit}
-                              onValueChange={(value) => field.onChange(value)}
-                              value={field.value}
-                            >
-                              <SelectTrigger className='w-[200px]'>
-                                <SelectValue placeholder='-' />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {cost_center.map((value) => (
-                                  <SelectItem key={value.id} value={value.id.toString()}>
-                                    {value.cost_center}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                    <FormAutocomplete<any>
+                      fieldLabel={''}
+                      options={dataCostCenter}
+                      fieldName='cost_center'
+                      disabled={type === ReimburseFormType.edit}
+                      placeholder={'Cost Center'}
+                      classNames='mt-2 w-full'
+                      onChangeOutside={async (search, data) => {
+                        if (search.length > 0 && search !== data?.value) {
+                          getCostCenter(search, {
+                            name: 'cost_center',
+                            id: 'id',
+                            tabel: 'master_cost_centers',
+                            idType: 'string',
+                            search: search,
+                          })
+                        }
+                      }}
                     />
                   </td>
                 </tr>
@@ -737,7 +736,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                         return newDetailLimit;
                                       })
                                       form.setValue(`forms.${index}.balance`, '')
-                                      fetchFamily(index, {type: selectedValue.is_employee, reimburse_type: data?.value})
+                                      fetchFamily(index, {type: 'Family', reimburse_type: data?.value})
                                     }
                                     
                                   } else {
@@ -833,38 +832,31 @@ export const ReimburseForm: React.FC<Props> = ({
                           <tr>
                             <td className='w-1/4'>Purchasing Group</td>
                             <td>
-                              <FormField
-                                control={form.control}
-                                name={`forms.${index}.purchasing_group`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Select
-                                        disabled={type === ReimburseFormType.edit}
-                                        onValueChange={(value) => {
-                                          updateForm(index, {
-                                            ...formValue,
-                                            purchasing_group: String(value),
-                                          });
-                                        }}
-                                        defaultValue={formValue.purchasing_group}
-                                      >
-                                        <SelectTrigger className='w-[200px]'>
-                                          <SelectValue placeholder='-' />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {purchasing_groups.map((value) => (
-                                            <SelectItem key={value.id} value={value.id.toString()}>
-                                              {value.purchasing_group_desc} -{' '}
-                                              {value.purchasing_group}
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
+                              <FormAutocomplete<any>
+                                fieldLabel={''}
+                                options={dataPurchasingGroup}
+                                fieldName={`forms.${index}.purchasing_group`}
+                                disabled={type === ReimburseFormType.edit}
+                                placeholder={'Puchasing Group'}
+                                classNames='mt-2 w-full'
+                                onChangeOutside={async (search, data) => {
+                                  if (search.length > 0 && search !== data?.value) {
+                                    await getPurchasingGroup(search, {
+                                      name: 'purchasing_group_desc',
+                                      id: 'id',
+                                      tabel: 'purchasing_groups',
+                                      idType: 'string',
+                                      search: search,
+                                    })
+                                  }
+                                  
+                                  if (data?.value) {
+                                    updateForm(index, {
+                                      ...formValue,
+                                      purchasing_group: data?.value,
+                                    });
+                                  }
+                                }}
                               />
                             </td>
                           </tr>
@@ -1158,6 +1150,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                         className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
                                         type='file'
                                         multiple
+                                        accept='image/*,.pdf,.heic'
                                         onChange={(e) => {
                                           const files = e.target.files;
                                           if (files) {

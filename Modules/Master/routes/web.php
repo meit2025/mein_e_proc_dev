@@ -16,7 +16,6 @@ use Modules\Master\Http\Controllers\MasterDepartmentController;
 use Modules\Master\Http\Controllers\MasterDivisionController;
 use Modules\Master\Http\Controllers\MasterMaterialController;
 use Modules\Master\Http\Controllers\MaterialGroupController;
-use Modules\Master\Http\Controllers\MasterPeriodReimburseController;
 use Modules\Master\Http\Controllers\MasterPositionController;
 use Modules\Master\Http\Controllers\MasterQuotaReimburseController;
 use Modules\Master\Http\Controllers\MasterTrackingNumberController;
@@ -158,6 +157,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/update/{id}', [CostCenterController::class, 'update'])->name('master.cost-center.update')->middleware(PermissionMiddleware::class . ':master sap cost center update');
             Route::get('/detail/{id}', [CostCenterController::class, 'show'])->name('master.cost-center.show')->middleware(PermissionMiddleware::class . ':master sap cost center view');
             Route::delete('/delete/{id}', [CostCenterController::class, 'destroy'])->name('master.cost-center.destroy')->middleware(PermissionMiddleware::class . ':master sap cost center delete');
+            Route::get('/dropdown-list', [CostCenterController::class, 'dropdownList'])->name('master.costCenter.dropdownList');
         });
         Route::group(['prefix' => 'order'], function () {
             Route::get('/list', [OrderController::class, 'index'])->name('master.order.index')->middleware(PermissionMiddleware::class . ':master sap internal order view');
@@ -189,14 +189,6 @@ Route::group(['middleware' => 'auth'], function () {
             Route::put('/update/{id}', [MasterTypeReimburseController::class, 'update'])->name('master.reimburse-type.update')->middleware(PermissionMiddleware::class . ':master reimburse type update');
             Route::get('/edit/{id}', [MasterTypeReimburseController::class, 'edit'])->name('master.reimburse-type.edit')->middleware(PermissionMiddleware::class . ':master reimburse type update');
             Route::delete('/delete/{id}', [MasterTypeReimburseController::class, 'destroy'])->name('master.reimburse-type.destroy')->middleware(PermissionMiddleware::class . ':master reimburse type delete');
-        });
-
-        Route::group(['prefix' => 'reimburse-period'], function () {
-            Route::get('/list', [MasterPeriodReimburseController::class, 'index'])->name('master.reimburse-period.index')->middleware(PermissionMiddleware::class . ':master reimburse period view');
-            Route::post('/create', [MasterPeriodReimburseController::class, 'store'])->name('master.reimburse-period.store')->middleware(PermissionMiddleware::class . ':master reimburse period create');
-            Route::put('/update/{id}', [MasterPeriodReimburseController::class, 'update'])->name('master.reimburse-period.update')->middleware(PermissionMiddleware::class . ':master reimburse period update');
-            Route::get('/edit/{id}', [MasterPeriodReimburseController::class, 'edit'])->name('master.reimburse-period.edit')->middleware(PermissionMiddleware::class . ':master reimburse period update');
-            Route::delete('/delete/{id}', [MasterPeriodReimburseController::class, 'destroy'])->name('master.reimburse-period.destroy')->middleware(PermissionMiddleware::class . ':master reimburse period delete');
         });
 
         Route::group(['prefix' => 'reimburse-quota'], function () {
@@ -443,6 +435,7 @@ Route::group(['middleware' => 'auth'], function () {
                 ->middleware(PermissionMiddleware::class . ':master pr purchasing group view');
             Route::delete('/delete/{id}', [PurchasingGroupController::class, 'destroy'])->name('master.purchasing-group.destroy')
                 ->middleware(PermissionMiddleware::class . ':master pr purchasing group delete');
+            Route::get('/dropdown-list', [PurchasingGroupController::class, 'dropdownList'])->name('master.purchasing-group.dropdownList');
         });
 
         // Account Assignment Category API

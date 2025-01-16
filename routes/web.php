@@ -25,6 +25,7 @@ Route::get('/test-upload-file', function () {
         'sukses' => 'sukses'
     ]);
 });
+Route::get('/test-email', [NotifikasiController::class, 'sendTestEmail']);
 
 Route::get('/test', function () {
     // $fileContents = file_get_contents('http://127.0.0.1:8008/storage/business_trip/dummy_1736238179.pdf');
@@ -41,7 +42,7 @@ Route::get('/test', function () {
 
     // Menentukan nama file dan path penyimpanan
     $fileName = basename($url); // Mengambil nama file dari URL
-    $path = 'business_trip/' .'clone-'. time(). $fileName; // Menentukan path penyimpanan
+    $path = 'business_trip/' . 'clone-' . time() . $fileName; // Menentukan path penyimpanan
 
     // Menyimpan gambar ke storage
     Storage::disk('public')->put($path, $imageContent);
