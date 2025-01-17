@@ -326,7 +326,7 @@ class ReportController extends Controller
 
     public function exportBT(Request $request)
     {
-        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'businessTripDestination']);
+        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'businessTripDestination', 'requestedBy', 'requestedBy.positions', 'requestedBy.divisions', 'requestedBy.departements']);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
         $startDate = $request->get('startDate');
@@ -373,17 +373,31 @@ class ReportController extends Controller
             ->get();
 
         // Transform the data for export
-        $transformedData = $data->map(function ($map) {
-            $purposeRelations = $map->purposeType ? $map->purposeType->name : '';
+        $transformedData = $data->map(function ($businessTrip) {
+            $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
+                $allowanceItems = $destination->detailDestinationTotal->map(function ($allowanceItem) {
+                    return [
+                        'item_name' => $allowanceItem->allowance->name,
+                        'amount' => $allowanceItem->price,
+                    ];
+                });
+
+                return [
+                    'destination' => $destination->destination,
+                    'start_date' => $destination->business_trip_start_date,
+                    'end_date' => $destination->business_trip_end_date,
+                    'allowance_items' => $allowanceItems,
+                    'total_allowance' => $allowanceItems->sum('price'),
+                ];
+            });
 
             return [
-                'Request No' => $map->request_no,
-                'Request For' => $map->requestFor->name,
-                'Purpose Type' => $purposeRelations,
-                'Remarks' => $map->remarks,
-                'Request Date' => date('d/m/Y', strtotime($map->created_at)),
-                'Status' => $map->status->name,
-                'Total Destination' => $map->total_destination,
+                'requestedBy' => $businessTrip->requestedBy,
+                'requestFor' => $businessTrip->requestFor,
+                'status' => $businessTrip->status,
+                'purposeType' => $businessTrip->purposeType,
+                'remarks' => $businessTrip->remarks,
+                'destinations' => $destinations,
             ];
         });
 
@@ -522,18 +536,32 @@ class ReportController extends Controller
         // Filter for type declaration
         $data = $query->where('type', 'declaration')->latest()->get();
 
-        // Transform data
-        $transformedData = $data->map(function ($map) {
-            $requestFor = $map->requestFor ? $map->requestFor->name : '';
-            $requestNo = $map->parentBusinessTrip ? $map->parentBusinessTrip->request_no : '';
+        // Transform the data for export
+        $transformedData = $data->map(function ($businessTrip) {
+            $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
+                $allowanceItems = $destination->detailDestinationTotal->map(function ($allowanceItem) {
+                    return [
+                        'item_name' => $allowanceItem->allowance->name,
+                        'amount' => $allowanceItem->price,
+                    ];
+                });
+
+                return [
+                    'destination' => $destination->destination,
+                    'start_date' => $destination->business_trip_start_date,
+                    'end_date' => $destination->business_trip_end_date,
+                    'allowance_items' => $allowanceItems,
+                    'total_allowance' => $allowanceItems->sum('price'),
+                ];
+            });
 
             return [
-                'declaration_no' => $map->request_no,
-                'request_no' => $requestNo,
-                'request_for' => $requestFor,
-                'created_at' => date('d/m/Y', strtotime($map->created_at)),
-                'remarks' => $map->remarks,
-                'status' =>  $map->status->name ?? '',
+                'requestedBy' => $businessTrip->requestedBy,
+                'requestFor' => $businessTrip->requestFor,
+                'status' => $businessTrip->status,
+                'purposeType' => $businessTrip->purposeType,
+                'remarks' => $businessTrip->remarks,
+                'destinations' => $destinations,
             ];
         });
 
