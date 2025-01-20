@@ -387,13 +387,14 @@ class ReportController extends Controller
                     'start_date' => $destination->business_trip_start_date,
                     'end_date' => $destination->business_trip_end_date,
                     'allowance_items' => $allowanceItems,
-                    'total_allowance' => $allowanceItems->sum('price'),
+                    'total_allowance' => $allowanceItems->sum('amount'),
                 ];
             });
 
             return [
                 'requestedBy' => $businessTrip->requestedBy,
                 'requestFor' => $businessTrip->requestFor,
+                'requestNo' => $businessTrip->request_no,
                 'status' => $businessTrip->status,
                 'purposeType' => $businessTrip->purposeType,
                 'remarks' => $businessTrip->remarks,
@@ -551,13 +552,14 @@ class ReportController extends Controller
                     'start_date' => $destination->business_trip_start_date,
                     'end_date' => $destination->business_trip_end_date,
                     'allowance_items' => $allowanceItems,
-                    'total_allowance' => $allowanceItems->sum('price'),
+                    'total_allowance' => $allowanceItems->sum('amount'),
                 ];
             });
 
             return [
                 'requestedBy' => $businessTrip->requestedBy,
                 'requestFor' => $businessTrip->requestFor,
+                'requestNo' => $businessTrip->request_no,
                 'status' => $businessTrip->status,
                 'purposeType' => $businessTrip->purposeType,
                 'remarks' => $businessTrip->remarks,
