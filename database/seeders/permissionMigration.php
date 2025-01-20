@@ -164,14 +164,6 @@ class permissionMigration extends Seeder
             'master reimburse type view',
             'master reimburse type update',
             'master reimburse type delete',
-            'master reimburse period create',
-            'master reimburse period view',
-            'master reimburse period update',
-            'master reimburse period delete',
-            'master reimburse quota create',
-            'master reimburse quota view',
-            'master reimburse quota update',
-            'master reimburse quota delete',
         ];
 
         // Insert permissions into database

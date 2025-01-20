@@ -408,14 +408,14 @@ export const ReimburseForm: React.FC<Props> = ({
   const handleTabChange = (tabValue) => {
     setActiveTab(tabValue);
   };
-
+  
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (detailLimit) {
       for (let index = 0; index < detailLimit.length; index++) {
         let formLength = values.forms.length == 0 ? 0 : values.forms.length - 1;
         
-        if (parseInt(detailLimit[index]?.limit) == 0) {
-          showToast('Claim Limit for form '+index+' is Empty, Please Contact the Admin', 'error');
+        if (detailLimit[index]?.type_limit !== 'Unlimited' && parseInt(detailLimit[index]?.limit) == 0) {
+          showToast('Claim Limit for form '+ (index + 1) +' is Empty, Please Contact the Admin', 'error');
           return;
         }
 
@@ -478,7 +478,7 @@ export const ReimburseForm: React.FC<Props> = ({
         newData[index] = {
           ...response.data.data,
           balance: response.data.data.balance - totalBalance,
-          limit: Math.max(0, response.data.data.limit - (index > 0 ? 1 : 0)),
+          limit: response.data.data.type_limit == 'Unlimited' ? response.data.data.type_limit : Math.max(0, response.data.data.limit - (index > 0 ? 1 : 0)),
         };
         return newData;
       });
@@ -642,6 +642,19 @@ export const ReimburseForm: React.FC<Props> = ({
                               onValueChange={(value) => {
                                 field.onChange(value);
                                 generateForms(value);
+                                handleTabChange(`form${parseInt(value)}`);
+
+                                const forms = form.getValues('forms');
+                                if (forms.length > parseInt(value)) {
+                                  const updatedForms = forms.slice(0, parseInt(value));
+                                  form.setValue('forms', updatedForms);
+
+                                  setDetailLimit((prev) => {
+                                    let newDetailLimit = [...prev];
+                                    newDetailLimit = newDetailLimit.slice(0, parseInt(value));
+                                    return newDetailLimit;
+                                  })
+                                }
                               }}
                               value={field.value?.toString()}
                             >
@@ -768,8 +781,14 @@ export const ReimburseForm: React.FC<Props> = ({
                                           newDetailLimit[idx] = {
                                             ...newDetailLimit[idx],
                                             balance: remainingBalance + parseInt(formValue.balance || '0'),
-                                            limit: remainingLimit + 1,
                                           };
+
+                                          if (detailLimit[idx]?.type_limit !== 'Unlimited') {
+                                            newDetailLimit[idx] = {
+                                              ...newDetailLimit[idx],
+                                              limit: remainingLimit + 1,
+                                            };
+                                          }
                                           return newDetailLimit;
                                         });
 

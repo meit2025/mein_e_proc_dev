@@ -50,7 +50,9 @@ const ReimburseDetail = () => {
         <p className='text-sm'>
           <strong>Request for:</strong> {data?.user?.name}
         </p>
-        <p className='text-sm'>{/* <strong>Requested By:</strong> {data?.requested_by} */}</p>
+        <p className='text-sm'>
+          <strong>Requested By:</strong> {data?.user_create_request?.name}
+          </p>
         <p className='text-sm flex items-center gap-2'>
           <strong>Status:</strong>{' '}
           <CustomStatus
