@@ -92,12 +92,6 @@ abstract class Controller
                 foreach ($filterableColumns as $column) {
                     $q->orWhere($column, 'ILIKE', '%' . $request->search . '%');
                 }
-
-                foreach ($filterableColumns as $column) {
-                    $q->orWhereHas('role', function ($q) use ($request) {
-                        $q->where('name', 'ILIKE', '%' . $request->search . '%');
-                    });
-                }
             });
         }
 

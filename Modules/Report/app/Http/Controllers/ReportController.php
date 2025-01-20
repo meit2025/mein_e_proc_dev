@@ -19,7 +19,7 @@ use Modules\BusinessTrip\Models\Destination;
 use Modules\BusinessTrip\Models\PurposeType;
 use Modules\Master\Models\DocumentType;
 use Modules\Master\Models\MasterCostCenter;
-use Modules\Master\Models\MasterPeriodReimburse;
+// use Modules\Master\Models\MasterPeriodReimburse;
 use Modules\Master\Models\MasterStatus;
 use Modules\Master\Models\MasterTypeReimburse;
 use Modules\Master\Models\Pajak;
@@ -55,18 +55,18 @@ class ReportController extends Controller
             $categories = ['Employee', 'Family'];
             $purchasing_groups = PurchasingGroup::select('id', 'purchasing_group', 'purchasing_group_desc')->get();
             $currencies = Currency::select('code', 'name')->where('code', 'IDR')->get();
-            $periods = MasterPeriodReimburse::select('id', 'code', 'start', 'end')->get();
+            // $periods = MasterPeriodReimburse::select('id', 'code', 'start', 'end')->get();
             $cost_center = MasterCostCenter::select('id', 'cost_center')->get();
             $taxes = Pajak::select('id', 'mwszkz')->get();
 
             $types = MasterTypeReimburse::select('code', 'name')->get();
             $statuses = MasterStatus::select('code', 'name')->get();
 
-            $latestPeriod = MasterPeriodReimburse::orderBy('id', 'desc')->first();
+            // $latestPeriod = MasterPeriodReimburse::orderBy('id', 'desc')->first();
 
             return Inertia::render(
                 'Report/Reimbuse/Index',
-                compact('purchasing_groups', 'currentUser', 'latestPeriod',  'users', 'categories', 'currencies', 'periods', 'cost_center', 'taxes', 'types', 'statuses')
+                compact('purchasing_groups', 'currentUser',  'users', 'categories', 'currencies', 'cost_center', 'taxes', 'types', 'statuses')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -81,7 +81,7 @@ class ReportController extends Controller
             $status = $request->get('status');
             $type = $request->get('type');
 
-            $query =  ReimburseGroup::query()->with(['reimburses', 'status']);
+            $query =  ReimburseGroup::query()->with(['reimburses', 'status', 'user']);
 
             if ($request->approval == 1) {
                 $approval = Approval::where('user_id', Auth::user()->id)
@@ -133,7 +133,7 @@ class ReportController extends Controller
                 return [
                     'id' => $map->id,
                     'code' => $map->code,
-                    'request_for' => $map->requester,
+                    'request_for' => $map->user->name,
                     'remark' => $map->remark,
                     'balance' => $balance,
                     'form' => count($map->reimburses),
@@ -161,7 +161,7 @@ class ReportController extends Controller
             $status = $request->get('status');
             $type = $request->get('type');
             // Start the query with relationships
-            $query = ReimburseGroup::query()->with(['reimburses', 'status']);
+            $query = ReimburseGroup::query()->with(['reimburses', 'status', 'user']);
 
             // Handle approval-specific filtering
             if ($request->approval == 1) {
@@ -223,9 +223,8 @@ class ReportController extends Controller
                 $balance = $item->reimburses->sum('balance');
 
                 return [
-                    'id' => $item->id,
                     'code' => $item->code,
-                    'request_for' => $item->requester,
+                    'request_for' => $item->user->name,
                     'remark' => $item->remark,
                     'balance' => $balance,
                     'form_count' => $item->reimburses->count(),
@@ -327,7 +326,7 @@ class ReportController extends Controller
 
     public function exportBT(Request $request)
     {
-        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'businessTripDestination']);
+        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'businessTripDestination', 'requestedBy', 'requestedBy.positions', 'requestedBy.divisions', 'requestedBy.departements']);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
         $startDate = $request->get('startDate');
@@ -374,17 +373,31 @@ class ReportController extends Controller
             ->get();
 
         // Transform the data for export
-        $transformedData = $data->map(function ($map) {
-            $purposeRelations = $map->purposeType ? $map->purposeType->name : '';
+        $transformedData = $data->map(function ($businessTrip) {
+            $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
+                $allowanceItems = $destination->detailDestinationTotal->map(function ($allowanceItem) {
+                    return [
+                        'item_name' => $allowanceItem->allowance->name,
+                        'amount' => $allowanceItem->price,
+                    ];
+                });
+
+                return [
+                    'destination' => $destination->destination,
+                    'start_date' => $destination->business_trip_start_date,
+                    'end_date' => $destination->business_trip_end_date,
+                    'allowance_items' => $allowanceItems,
+                    'total_allowance' => $allowanceItems->sum('price'),
+                ];
+            });
 
             return [
-                'Request No' => $map->request_no,
-                'Request For' => $map->requestFor->name,
-                'Purpose Type' => $purposeRelations,
-                'Remarks' => $map->remarks,
-                'Request Date' => date('d/m/Y', strtotime($map->created_at)),
-                'Status' => $map->status->name,
-                'Total Destination' => $map->total_destination,
+                'requestedBy' => $businessTrip->requestedBy,
+                'requestFor' => $businessTrip->requestFor,
+                'status' => $businessTrip->status,
+                'purposeType' => $businessTrip->purposeType,
+                'remarks' => $businessTrip->remarks,
+                'destinations' => $destinations,
             ];
         });
 
@@ -523,18 +536,32 @@ class ReportController extends Controller
         // Filter for type declaration
         $data = $query->where('type', 'declaration')->latest()->get();
 
-        // Transform data
-        $transformedData = $data->map(function ($map) {
-            $requestFor = $map->requestFor ? $map->requestFor->name : '';
-            $requestNo = $map->parentBusinessTrip ? $map->parentBusinessTrip->request_no : '';
+        // Transform the data for export
+        $transformedData = $data->map(function ($businessTrip) {
+            $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
+                $allowanceItems = $destination->detailDestinationTotal->map(function ($allowanceItem) {
+                    return [
+                        'item_name' => $allowanceItem->allowance->name,
+                        'amount' => $allowanceItem->price,
+                    ];
+                });
+
+                return [
+                    'destination' => $destination->destination,
+                    'start_date' => $destination->business_trip_start_date,
+                    'end_date' => $destination->business_trip_end_date,
+                    'allowance_items' => $allowanceItems,
+                    'total_allowance' => $allowanceItems->sum('price'),
+                ];
+            });
 
             return [
-                'declaration_no' => $map->request_no,
-                'request_no' => $requestNo,
-                'request_for' => $requestFor,
-                'created_at' => date('d/m/Y', strtotime($map->created_at)),
-                'remarks' => $map->remarks,
-                'status' =>  $map->status->name ?? '',
+                'requestedBy' => $businessTrip->requestedBy,
+                'requestFor' => $businessTrip->requestFor,
+                'status' => $businessTrip->status,
+                'purposeType' => $businessTrip->purposeType,
+                'remarks' => $businessTrip->remarks,
+                'destinations' => $destinations,
             ];
         });
 

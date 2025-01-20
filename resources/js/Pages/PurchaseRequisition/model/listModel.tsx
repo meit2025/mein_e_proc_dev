@@ -3,6 +3,7 @@ import { DETAIL_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
 import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 import { Link } from '@inertiajs/react';
 import { GridColDef } from '@mui/x-data-grid';
+import moment from 'moment';
 export const columns: GridColDef[] = [
   {
     field: 'purchases_number',
@@ -76,6 +77,15 @@ export const columns: GridColDef[] = [
     width: 200,
     filterable: false,
     renderCell: ({ row: { created_by: e } }) => e?.name ?? 'Unknown',
+  },
+  {
+    field: 'created_at',
+    headerName: 'Created At',
+    width: 200,
+    filterable: false,
+    renderCell: (params: any) => {
+      return moment(params.row.created_at).format('DD-MM-YYYY');
+    },
   },
 ];
 

@@ -78,7 +78,7 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        $user = User::find($id);
+        $user = User::with(['role', 'positions', 'divisions', 'departements', 'employee'])->find($id);
         return $this->successResponse($user);
     }
 

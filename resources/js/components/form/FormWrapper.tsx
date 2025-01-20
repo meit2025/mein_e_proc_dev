@@ -31,6 +31,7 @@ const FormWrapper = <T,>({ model, onChangeOutside }: FormWrapperProps<T>) => {
           maxLength={model.maxLength}
           classNames={model.classNames}
           icon={model.icon}
+          note={model.note}
         />
       );
     case 'textarea':
@@ -44,6 +45,7 @@ const FormWrapper = <T,>({ model, onChangeOutside }: FormWrapperProps<T>) => {
           requiredMessage={model.requiredMessage}
           placeholder={model.placeholder}
           classNames={model.classNames}
+          maxLength={model.maxLength}
         />
       );
 

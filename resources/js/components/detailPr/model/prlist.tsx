@@ -1,3 +1,4 @@
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 import { GridColDef } from '@mui/x-data-grid';
 
 export const columns: GridColDef[] = [
@@ -98,6 +99,14 @@ export const columns: GridColDef[] = [
   { field: 'code', headerName: 'Code', width: 150, filterable: true },
   { field: 'message', headerName: 'Message', width: 200, filterable: true },
   { field: 'attachment', headerName: 'Attachment', width: 200, filterable: true },
-  { field: 'balance', headerName: 'Balance', width: 150, filterable: true },
+  {
+    field: 'balance',
+    headerName: 'Balance',
+    width: 150,
+    filterable: true,
+    renderCell: (params) => {
+      return formatRupiah(params.row.balance);
+    },
+  },
   { field: 'attachment_link', headerName: 'Attachment Link', width: 250, filterable: true },
 ];

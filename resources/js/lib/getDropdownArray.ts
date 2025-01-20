@@ -14,6 +14,7 @@ interface StructDropdown {
   search?: string;
   where?: WhereProps;
   isMapping?: boolean;
+  hiddenZero?: boolean;
 }
 
 interface DropdownProps {
@@ -42,10 +43,15 @@ const useDropdownOptionsArray = () => {
         //   value: item.value,
         // }));
 
-        const fetchedData = response.data.data.map((items: any) => ({
-          label: !item.struct.isMapping ? items.label : `${items.label} - ${items.value}`,
-          value: items.value,
-        }));
+        const fetchedData = response.data.data.map((items: any) => {
+          const label = item.struct.hiddenZero ? removeLeadingZeros(items.label) : items.label;
+          const value = item.struct.hiddenZero ? removeLeadingZeros(items.value) : items.value;
+          return {
+            ...items,
+            label: !item.struct.isMapping ? label : `${label} - ${value}`,
+            value: value,
+          };
+        });
 
         if (dataObject && item.dropdown !== '') {
           const updatedObject = dataObject.map((field) =>
@@ -64,3 +70,9 @@ const useDropdownOptionsArray = () => {
 };
 
 export default useDropdownOptionsArray;
+function removeLeadingZeros(input: string): string {
+  if (/^0+\d+$/.test(input)) {
+    return input.replace(/^0+/, '');
+  }
+  return input;
+}

@@ -23,7 +23,10 @@ interface StructDropdown {
 }
 
 function removeLeadingZeros(input: string): string {
-  return Number(input).toString();
+  if (/^0+\d+$/.test(input)) {
+    return input.replace(/^0+/, '');
+  }
+  return input;
 }
 
 const useDropdownOptions = (urls: string = 'api/master/dropdown') => {
@@ -59,10 +62,11 @@ const useDropdownOptions = (urls: string = 'api/master/dropdown') => {
 
       const fetchedData = response.data.data.map((item: any) => {
         const label = struct.hiddenZero ? removeLeadingZeros(item.label) : item.label;
-        const idValue = struct.idType === 'string' ? String(item.value) : item.value;
+        const value = struct.hiddenZero ? removeLeadingZeros(item.value) : item.value;
+        const idValue = struct.idType === 'string' ? String(value) : value;
         return {
           ...item,
-          label: !struct.isMapping ? label : `${label} - ${item.value}`,
+          label: !struct.isMapping ? label : `${label} - ${value}`,
           value: idValue,
         };
       });
