@@ -1,29 +1,30 @@
-import { useFormContext } from 'react-hook-form';
-import FormInput from '@/components/Input/formInput';
-import { useEffect, useState } from 'react';
 import FormAutocomplete from '@/components/Input/formDropdown';
 import useDropdownOptions from '@/lib/getDropdown';
+import { useEffect, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 
 interface ApprovalProps {
   master_tracking_number_id: string;
 }
 
 export const CustomeForm = ({ data }: { data: any[] }) => {
-  const { getValues } = useFormContext();
+  const { getValues, setValue, watch } = useFormContext();
   const [inputs, setInputs] = useState<ApprovalProps[]>(data);
 
   const handleAddInput = () => {
-    setInputs([
-      ...inputs,
-      {
-        master_tracking_number_id: '',
-      },
-    ]);
+    const inputs = getValues('approval_tracking_number_route');
+    const newInputs = [...inputs, { master_tracking_number_id: '' }];
+    setValue('approval_tracking_number_route', newInputs);
   };
 
   const handleRemoveInput = (index: any) => {
-    const newInputs = inputs.filter((_, i) => i !== index);
+    console.log('index', index);
+    const newInputs = watch('approval_tracking_number_route').filter(
+      (_: any, i: number) => i !== index,
+    );
+    console.log('newInputs', newInputs);
     setInputs(newInputs);
+    setValue('approval_tracking_number_route', newInputs);
   };
 
   const { dataDropdown, getDropdown } = useDropdownOptions();
@@ -46,7 +47,13 @@ export const CustomeForm = ({ data }: { data: any[] }) => {
     <>
       <div className='w-full mt-8 border rounded-md shadow-md'>
         <div className='p-4'>Tracking Approval</div>
-        {inputs.map((input, index) => (
+        {(
+          watch('approval_tracking_number_route') ?? [
+            {
+              master_tracking_number_id: '',
+            },
+          ]
+        ).map((input: any, index: number) => (
           <div key={index} className='p-4 mb-2'>
             <div className='flex items-center gap-4'>
               {/* Use flexbox here */}

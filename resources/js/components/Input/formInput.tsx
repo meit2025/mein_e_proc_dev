@@ -86,6 +86,14 @@ const FormInput: React.FC<FormInputProps> = ({
                 <input
                   {...restField} // Spread the remaining properties excluding onChange
                   onChange={(e) => {
+                    const value = e.target.value;
+                    if (
+                      type === 'number' &&
+                      maxLength !== undefined &&
+                      parseInt(value) > maxLength
+                    ) {
+                      return; // Prevent user from typing more than maxLength
+                    }
                     onChange(e); // Call the default onChange handler from react-hook-form
                     if (onChanges) onChanges(e); // Also call custom onChanges if provided
                   }}
@@ -95,6 +103,11 @@ const FormInput: React.FC<FormInputProps> = ({
                   disabled={disabled}
                   minLength={minLength}
                   maxLength={maxLength}
+                  onKeyDown={(e) => {
+                    if (type === 'number' && e.key === '-') {
+                      e.preventDefault(); // Cegah pengguna mengetik "-" lebih dari sekali
+                    }
+                  }}
                 />
                 {isRupiah && <span>{formatRupiah(watch(fieldName) ?? 0)}</span>}
               </label>
@@ -104,7 +117,17 @@ const FormInput: React.FC<FormInputProps> = ({
       </div>
       <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 mt-2'>
         <label className={`form-label max-w-${lengthLabel}`}>{''}</label>
-        {note && <span>{note}</span>}
+        {note && (
+          <span
+            style={{
+              color: '#6B7280',
+              fontSize: '0.75rem',
+              lineHeight: '1.25rem',
+            }}
+          >
+            {note}
+          </span>
+        )}
       </div>
       <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
         <label className='form-label max-w-32'>{''}</label>

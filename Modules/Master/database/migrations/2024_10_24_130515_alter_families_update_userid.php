@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('families', function (Blueprint $table) {
-            $table->foreignId('userId')->constrained('users')->cascadeOnUpdate();
-            $table->dropColumn('user');
-        });
+        // Schema::table('families', function (Blueprint $table) {
+        //     $table->foreignId('userId')->constrained('users')->cascadeOnUpdate();
+        //     $table->dropColumn('user');
+        // });
     }
 
     /**

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Approval Notification</title>
+    <title>Status Update Notification</title>
     <style>
         /* Styling untuk email */
         body {
@@ -58,16 +58,18 @@
     <div class="email-container">
         <!-- Header with Logo -->
         <div class="header">
-            {{-- <img src="https://www.mitsubishielectric.co.id/assets_gws_template_responsive/img/mein-logo-header1.png" alt="Company Logo">  <!-- Ganti dengan URL logo Anda --> --}}
-            <h2>Approval Notification {{ucfirst(strtolower($type))}}</h2>
+            {{-- <img src="https://www.mitsubishielectric.co.id/assets_gws_template_responsive/img/mein-logo-header1.png" alt="Company Logo"> --}}
+            <h2>Status Update Notification: {{ ucfirst(strtolower($type)) }}</h2>
         </div>
 
         <!-- Email Content -->
         <div class="content">
-            <h1>Dear {{ $user->name }},</h1>  <!-- Nama pengguna yang dikirim dari mailable -->
-            <p> {{ucfirst(strtolower($type))}} document is awaiting your <strong>approved</strong>. Kindly log in to the website to review and approve it.</p>
-            <p>Please feel free to contact us if you have any questions or concerns.</p>
-            <p>Thank you for your patience!</p>
+            <h1>Dear {{ $user->name }},</h1>
+            <p>The status of your <strong>{{ ucfirst(strtolower($type)) }}</strong> document has been updated.</p>
+            <p><strong>{{ strtoupper($status) }}</strong></p>
+            <p>You can log in to the website to review the latest changes.</p>
+            <p>If you have any questions or concerns, please feel free to contact us.</p>
+            <p>Thank you!</p>
         </div>
 
         <!-- Footer -->
