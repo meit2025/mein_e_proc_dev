@@ -241,8 +241,7 @@ const BusinessTripDetail = () => {
                 <h3>Detail {destination.destination}</h3>
                 <table className='detail-table'>
                   <tr>
-                    <th>Request Date</th>
-                    <th>Declaration Date</th>
+                    <th>Date</th>
                     <th>Shift Code</th>
                     <th>Shift Start</th>
                     <th>Shift End</th>
@@ -252,7 +251,6 @@ const BusinessTripDetail = () => {
                   {destination.business_trip_detail_attendance.map(
                     (attendance: any, index: number) => (
                       <tr key={index}>
-                        <td>{attendance.date}</td>
                         <td>{attendance.date}</td>
                         <td>{attendance.shift_code}</td>
                         <td>{attendance.shift_start}</td>
