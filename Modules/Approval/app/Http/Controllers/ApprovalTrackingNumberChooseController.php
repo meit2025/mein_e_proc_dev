@@ -99,7 +99,7 @@ class ApprovalTrackingNumberChooseController extends Controller
         $userIds = $request->get('approval_tracking_number_route');
 
         // Hapus user_approvals yang lama terkait approval_route ini
-        ApprovalTrackingNumberChooseRoute::where('master_tracking_number_id', $approvalRoute->id)->delete();
+        ApprovalTrackingNumberChooseRoute::where('approval_tracking_number_choose_id', $approvalRoute->id)->delete();
 
         // Insert user_id baru ke user_approvals
         foreach ($userIds as $userId) {
