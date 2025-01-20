@@ -26,6 +26,6 @@ class MasterTypeReimburseGrades extends Model
 
     public function reimburseType()
     {
-        return $this->belongsTo(MasterQuotaReimburse::class, 'reimburse_type_id', 'id');
+        return $this->belongsTo(MasterTypeReimburseUserAssign::class, 'reimburse_type_id', 'id');
     }
 }

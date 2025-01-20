@@ -5,18 +5,20 @@ namespace Modules\Master\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Modules\Master\Models\MasterQuotaReimburse;
+use Modules\Master\Models\MasterTypeReimburse;
 
-class MasterQuotaReimburseUser extends Model
+class MasterTypeReimburseUserAssign extends Model
 {
     use HasFactory;
 
     /**
      * The attributes that are mass assignable.
      */
+    protected $table ='master_type_reimburse_user_assign';
     protected $fillable = [
         'user_id',
-        'quota_reimburses_id'
+        'reimburse_type_id',
+        'is_assign'
     ];
 
     public function user() {
@@ -27,8 +29,8 @@ class MasterQuotaReimburseUser extends Model
         return $this->hasMany(Family::class, 'userId', 'user_id');
     }
 
-    public function quotaReimburses()
+    public function reimburseTypeUserAssign()
     {
-        return $this->belongsTo(MasterQuotaReimburse::class, 'quota_reimburses_id', 'id');
+        return $this->belongsTo(MasterTypeReimburse::class, 'reimburse_type_id', 'id');
     }
 }
