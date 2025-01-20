@@ -105,7 +105,7 @@ export default function ReimburseTypeForm({
     interval_claim_period: null,
     is_employee: true,
     grade_option: 'all',
-    grade_all_price: '0',
+    grade_all_price: '',
     grades: [],
     limit: null,
   };
@@ -340,8 +340,9 @@ export default function ReimburseTypeForm({
                     <FormItem>
                       <FormControl>
                         <Input
-                          onChange={(e) => field.onChange(parseInt(e.target.value.replace(/[^0-9]/g, '')))}
-                          value={field.value}
+                          type='text'
+                          onChange={(e) => field.onChange(parseInt(e.target.value.replace(/[^0-9]/g, '')) || '')}
+                          value={field.value ?? ''}
                         />
                       </FormControl>
                       <FormMessage />
@@ -392,14 +393,13 @@ export default function ReimburseTypeForm({
                           <FormControl>
                             <Input
                               type='text'
-                              placeholder='0'
                               onChange={(e) => {
                                 const rawValue = e.target.value.replace(/[^0-9]/g, '');
                                 const formattedValue = formatRupiah(rawValue, false);
                                 field.onChange(rawValue);
                                 e.target.value = formattedValue;
                               }}
-                              value={formatRupiah(String(field.value), false)}
+                              value={formatRupiah(String(field.value), false) || 0}
                             />
                           </FormControl>
                         </FormItem>
