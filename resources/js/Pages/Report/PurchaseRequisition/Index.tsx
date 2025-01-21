@@ -8,7 +8,7 @@ import { CREATE_PAGE_PR, DETAIL_PAGE_PR, EDIT_PAGE_PR } from '@/endpoint/purchas
 import { useAlert } from '@/contexts/AlertContext';
 import axiosInstance from '@/axiosInstance';
 import { PAGE_REPORT_PURCHASE } from '@/endpoint/report/page';
-import { REPORT_PURCHASE_EXPORT, REPORT_PURCHASE_LIST, REPORT_PURCHASE_TYPES, REPORT_PURCHASE_VENDORS } from '@/endpoint/report/api';
+import { REPORT_PURCHASE_EXPORT, REPORT_PURCHASE_LIST, REPORT_PURCHASE_TYPES, REPORT_PURCHASE_VENDORS, REPORT_PURCHASE_DEPARTMENTS } from '@/endpoint/report/api';
 interface ReportType {
     id: string;
     purchasing_doc: string;
@@ -17,6 +17,11 @@ interface ReportType {
 interface ReportVendor {
     id: string;
     vendor: string;
+}
+
+interface ReportDepartment {
+    id: string;
+    name: string;
 }
 
 
@@ -48,9 +53,19 @@ export const Index = () => {
                 showToast('Failed to load report types', 'error');
             }
         };
+        const loadReportDepartments = async () => {
+            try {
+                const reportDepartments = await fetchReportDepartments();
+                setDepartments(reportDepartments);
+
+            } catch (error) {
+                showToast('Failed to load report types', 'error');
+            }
+        };
 
         loadReportTypes();
         loadReportVendors();
+        loadReportDepartments();
     }, []);
 
     const { showToast } = useAlert();
@@ -62,6 +77,8 @@ export const Index = () => {
     const [types, setTypes] = React.useState<ReportType[]>([]);
     const [vendor, setVendor] = React.useState<string>('');
     const [vendors, setVendors] = React.useState<ReportVendor[]>([]);
+    const [department, setDepartment] = React.useState<string>('');
+    const [departments, setDepartments] = React.useState<ReportDepartment[]>([]);
 
     const fetchReportTypes = async (): Promise<ReportType[]> => {
         try {
@@ -76,6 +93,16 @@ export const Index = () => {
     const fetchReportVendors = async (): Promise<ReportVendor[]> => {
         try {
             const response = await axiosInstance.get(REPORT_PURCHASE_VENDORS);
+            return response.data.data;
+        } catch (error) {
+            console.error('Error fetching report types:', error);
+            return []; // Return an empty array to prevent errors
+        }
+    };
+
+    const fetchReportDepartments = async (): Promise<ReportDepartment[]> => {
+        try {
+            const response = await axiosInstance.get(REPORT_PURCHASE_DEPARTMENTS);
             return response.data.data;
         } catch (error) {
             console.error('Error fetching report types:', error);
@@ -187,6 +214,25 @@ export const Index = () => {
                                     value={vendorOption.id}
                                 >
                                     {vendorOption.vendor}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>Department</label>
+                        <select
+                            value={department}
+                            onChange={(e) => setDepartment(e.target.value)}
+                            className="select-class"
+                            id="department"
+                        >
+                            <option value="">All Department</option>
+                            {departments.map((dept) => (
+                                <option
+                                    key={dept.id}
+                                    value={dept.id}
+                                >
+                                    {dept.name}
                                 </option>
                             ))}
                         </select>
