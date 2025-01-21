@@ -397,7 +397,7 @@ class BusinessTripController extends Controller
             // Gabungkan prefix dan nomor urut
             $requestNo = $prefix . $sequence;
 
-            $getCostCenter = MasterCostCenter::where('cost_center', $request->cost_center_id)->first();
+            $getCostCenter = MasterCostCenter::where('cost_center', '0000000'.$request->cost_center_id)->first();
 
             $businessTrip = BusinessTrip::create([
                 'request_no' => $requestNo,
@@ -489,7 +489,7 @@ class BusinessTripController extends Controller
             // return $this->successResponse("All data has been processed successfully");
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->errorResponse($e->getMessage());
+            return $this->errorResponse($e->getMessage().'-'.$e->getLine());
         }
     }
 
