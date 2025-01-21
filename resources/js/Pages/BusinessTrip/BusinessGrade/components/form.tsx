@@ -127,6 +127,7 @@ export function GradeForm({
     if (type === FormType.detail || type === FormType.edit) {
       getDetailData();
     } else {
+        console.log(listUser)
       setUsers(listUser);
     }
   }, [type]);

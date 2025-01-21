@@ -104,17 +104,40 @@ export default function AllowanceItemForm({
       z.object({
         grade: z.string(),
         id: z.number(),
-        plafon: z.string().min(1, 'Plafon is required'),
+        plafon: z.string(),
       }),
-    ).superRefine((data, ctx) => {
-        if (data.grade_option === 'grade' && data.grades.length === 0) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'At least one grade is required when grade_option is "grade".',
-            path: ['grades'],
-          });
+    ),
+  })
+  .superRefine((data, ctx) => {
+    // Validasi jika grade_option adalah 'grade'
+    if (data.grade_option === 'grade') {
+      if (data.grades.length === 0) {
+        // Jika array grades kosong
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['grades'],
+          message: 'At least one grade is required when grade_option is "grade".',
+        });
+      } else {
+        // Validasi setiap elemen dalam array grades
+        data.grades.forEach((grade, index) => {
+          if (!grade.grade || grade.grade.trim() === '') {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+              path: ['grades', index, 'grade'],
+              message: 'Grade is required.',
+            });
+          }
+          if (type == FormType.create && (!grade.plafon || grade.plafon.trim() === '')) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['grades', index, 'plafon'],
+                message: 'Plafon is required.',
+            });
         }
-      }),
+        });
+      }
+    }
   });
 
   const [materials, setMaterials] = React.useState([]);
@@ -147,7 +170,7 @@ export default function AllowanceItemForm({
       const response = await axiosInstance.get(detailUrl ?? '');
 
       const allowance = response.data.data.allowance;
-      console.log(allowance);
+    //   console.log(response);
     //   getMaterials(allowance.material_group);
         getMaterialNumber('', {
             name: 'material_description',
@@ -162,7 +185,7 @@ export default function AllowanceItemForm({
         });
 
       const grades = response.data.data.grades;
-
+        console.log(grades)
       form.reset({
         code: allowance.code,
         name: allowance.name,
@@ -571,13 +594,15 @@ export default function AllowanceItemForm({
                       value={form.getValues('grades').map((item) => item.id)}
                       isHidden='hidden'
                       onSelect={(value) => {
+                        const currentGrades = form.getValues('grades');
                         form.setValue(
                           'grades',
                           value.map((item) => {
+                            const existingGrade = currentGrades.find((grade) => grade.id === item.id);
                             return {
-                              id: item.id,
-                              grade: item.grade,
-                              plafon: '',
+                                id: item.id,
+                                grade: item.grade,
+                                plafon: existingGrade ? existingGrade.plafon : '', // Pertahankan plafon jika ada
                             };
                           }),
                         );
@@ -601,11 +626,7 @@ export default function AllowanceItemForm({
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormControl>
-                                      <Input
-                                        type="text"
-                                        {...field}
-                                        onChange={(e) => field.onChange(e.target.value)}
-                                      />
+                                    <Input {...field}/>
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
