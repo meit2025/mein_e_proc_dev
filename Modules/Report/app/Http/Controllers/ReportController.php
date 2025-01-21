@@ -19,6 +19,7 @@ use Modules\BusinessTrip\Models\Destination;
 use Modules\BusinessTrip\Models\PurposeType;
 use Modules\Master\Models\DocumentType;
 use Modules\Master\Models\MasterCostCenter;
+use Modules\Master\Models\MasterDepartment;
 // use Modules\Master\Models\MasterPeriodReimburse;
 use Modules\Master\Models\MasterStatus;
 use Modules\Master\Models\MasterTypeReimburse;
@@ -61,12 +62,13 @@ class ReportController extends Controller
 
             $types = MasterTypeReimburse::select('code', 'name')->get();
             $statuses = MasterStatus::select('code', 'name')->get();
+            $departments = MasterDepartment::select('id', 'name')->get();
 
             // $latestPeriod = MasterPeriodReimburse::orderBy('id', 'desc')->first();
 
             return Inertia::render(
                 'Report/Reimbuse/Index',
-                compact('purchasing_groups', 'currentUser',  'users', 'categories', 'currencies', 'cost_center', 'taxes', 'types', 'statuses')
+                compact('purchasing_groups', 'currentUser',  'users', 'categories', 'currencies', 'cost_center', 'taxes', 'types', 'statuses', 'departments')
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -80,6 +82,7 @@ class ReportController extends Controller
             $endDate = $request->get('endDate');
             $status = $request->get('status');
             $type = $request->get('type');
+            $department = $request->get('department');
 
             $query =  ReimburseGroup::query()->with(['reimburses', 'status', 'user']);
 
@@ -116,6 +119,12 @@ class ReportController extends Controller
             if ($type) {
                 $query->whereHas('reimburses', function ($q) use ($type) {
                     $q->where('type', $type);
+                });
+            }
+
+            if ($department) {
+                $query->whereHas('user', function ($q) use ($department) {
+                    $q->where('department_id', $department);
                 });
             }
 
@@ -160,6 +169,8 @@ class ReportController extends Controller
             $endDate = $request->get('endDate');
             $status = $request->get('status');
             $type = $request->get('type');
+            $department = $request->get('department');
+
             // Start the query with relationships
             $query = ReimburseGroup::query()->with(['reimburses', 'status', 'user']);
 
@@ -208,6 +219,11 @@ class ReportController extends Controller
                     $q->where('type', $type);
                 });
             }
+            if ($department) {
+                $query->whereHas('user', function ($q) use ($department) {
+                    $q->where('department_id', $department);
+                });
+            }
 
             // Handle pagination and sorting
             $sortBy = $request->get('sort_by', 'id');
@@ -252,13 +268,15 @@ class ReportController extends Controller
         $purchasingGroup = PurchasingGroup::select('id', 'purchasing_group')->get();
 
         $listDestination = Destination::get();
-        return Inertia::render('Report/BusinessTrip/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup', 'listDestination'));
+        $departments = MasterDepartment::select('id', 'name')->get();
+
+        return Inertia::render('Report/BusinessTrip/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup', 'listDestination', 'departments'));
     }
 
     public function listBT(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType', 'status', 'businessTripDestination']);
+        $query =  BusinessTrip::query()->with(['purposeType', 'status', 'businessTripDestination', 'requestFor']);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
@@ -267,6 +285,7 @@ class ReportController extends Controller
         $status = $request->get('status');
         $type = $request->get('type');
         $destination = $request->get('destination');
+        $department = $request->get('department');
 
         // $query->orderBy($sortBy, $sortDirection);
         if ($request->approval == "1") {
@@ -295,6 +314,12 @@ class ReportController extends Controller
         if ($type) {
             $query->whereHas('purposeType', function ($q) use ($type) {
                 $q->where('id', $type);
+            });
+        }
+
+        if ($department) {
+            $query->whereHas('requestFor', function ($q) use ($department) {
+                $q->where('department_id', $department);
             });
         }
 
@@ -334,6 +359,7 @@ class ReportController extends Controller
         $status = $request->get('status');
         $type = $request->get('type');
         $destination = $request->get('destination');
+        $department = $request->get('department');
 
 
         if ($startDate && $endDate) {
@@ -364,6 +390,12 @@ class ReportController extends Controller
         if ($destination) {
             $query->whereHas('businessTripDestination', function ($q) use ($destination) {
                 $q->where('destination', $destination);
+            });
+        }
+
+        if ($department) {
+            $query->whereHas('requestFor', function ($q) use ($department) {
+                $q->where('department_id', $department);
             });
         }
 
@@ -415,13 +447,15 @@ class ReportController extends Controller
         $listBusinessTrip = BusinessTrip::where('type', 'request')->whereNotIn('id', $inBusinessTripRequest)->get();
         $listPurposeType = PurposeType::select('name', 'id')->get();
         $listDestination = Destination::get();
-        return Inertia::render('Report/BusinessTripDeclaration/index', compact('users', 'listPurposeType', 'listBusinessTrip', 'listDestination'));
+        $departments = MasterDepartment::select('id', 'name')->get();
+
+        return Inertia::render('Report/BusinessTripDeclaration/index', compact('users', 'listPurposeType', 'listBusinessTrip', 'listDestination', 'departments'));
     }
 
     public function listBTDec(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType', 'status']);
+        $query =  BusinessTrip::query()->with(['purposeType', 'status', 'requestFor']);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'asc');
@@ -430,6 +464,7 @@ class ReportController extends Controller
         $status = $request->get('status');
         $type = $request->get('type');
         $destination = $request->get('destination');
+        $department = $request->get('department');
 
         // $query->orderBy($sortBy, $sortDirection);
         if ($request->approval == "1") {
@@ -457,6 +492,12 @@ class ReportController extends Controller
         if ($destination) {
             $query->whereHas('businessTripDestination', function ($q) use ($destination) {
                 $q->where('destination', $destination);
+            });
+        }
+
+        if ($department) {
+            $query->whereHas('requestFor', function ($q) use ($department) {
+                $q->where('department_id', $department);
             });
         }
 
@@ -498,6 +539,8 @@ class ReportController extends Controller
         $status = $request->get('status');
         $type = $request->get('type');
         $destination = $request->get('destination');
+        $department = $request->get('department');
+
 
         $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'parentBusinessTrip', 'businessTripDestination']);
 
@@ -531,6 +574,12 @@ class ReportController extends Controller
         if ($destination) {
             $query->whereHas('businessTripDestination', function ($q) use ($destination) {
                 $q->where('destination', $destination);
+            });
+        }
+
+        if ($department) {
+            $query->whereHas('requestFor', function ($q) use ($department) {
+                $q->where('department_id', $department);
             });
         }
 
@@ -579,6 +628,7 @@ class ReportController extends Controller
         $status = $request->get('status');
         $type = $request->get('type');
         $vendor = $request->get('vendor');
+        $department = $request->get('department');
         $filterableColumns = [
             'user_id',
             'document_type',
@@ -605,6 +655,11 @@ class ReportController extends Controller
         if ($vendor) {
             $data->whereHas('vendors', function ($q) use ($vendor) {
                 $q->where('id', $vendor);
+            });
+        }
+        if ($department) {
+            $data->whereHas('user', function ($q) use ($department) {
+                $q->where('department_id', $department);
             });
         }
 
@@ -619,6 +674,7 @@ class ReportController extends Controller
         $status = $request->get('status');
         $type = $request->get('type');
         $vendor = $request->get('vendor');
+        $department = $request->get('department');
 
         $filterableColumns = [
             'user_id',
@@ -647,6 +703,12 @@ class ReportController extends Controller
                 $q->where('id', $vendor);
             });
         }
+        if ($department) {
+            $data->whereHas('user', function ($q) use ($department) {
+                $q->where('department_id', $department);
+            });
+        }
+
         $data = $this->filterNotPaggination($request, $data, $filterableColumns, true);
 
         $filename = 'Purchase.xlsx';
@@ -660,12 +722,17 @@ class ReportController extends Controller
         return $this->successResponse($data);
     }
 
+    public function departments(Request $request)
+    {
+        $data = MasterDepartment::select('id', 'name')->get();
+        return $this->successResponse($data);
+    }
+
     public function purchaseVendors(Request $request)
     {
         $data = Vendor::with('masterBusinesPartnerss') // Eager load the relationship
             ->where('winner', true) // Filter winners
             ->get(['id', 'winner']); // Select columns only from the `vendors` table
-        dd($data);
 
         // Map related data to the result
         $data = $data->map(function ($vendor) {
