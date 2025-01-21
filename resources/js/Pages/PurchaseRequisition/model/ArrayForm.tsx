@@ -310,7 +310,7 @@ const ArrayForm = ({
           />
 
           <FormSwitch
-            fieldLabel='Total Vendor Comparison'
+            fieldLabel='Propose Vendor'
             fieldName={`vendors[${dataIndex}].winner`}
             isRequired={false}
             disabled={disable}

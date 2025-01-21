@@ -101,7 +101,7 @@ export const columns: GridColDef[] = [
   { field: 'attachment', headerName: 'Attachment', width: 200, filterable: true },
   {
     field: 'balance',
-    headerName: 'Balance',
+    headerName: 'Amount',
     width: 150,
     filterable: true,
     renderCell: (params) => {

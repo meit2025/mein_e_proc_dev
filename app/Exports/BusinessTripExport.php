@@ -38,7 +38,7 @@ class BusinessTripExport implements FromArray, WithHeadings, WithEvents, WithCus
                         'Division' => $firstRow ? $businessTrip['requestedBy']->divisions->name : '',
                         'Requested By' => $firstRow ? $businessTrip['requestFor']->name : '',
                         'Request Date' => $firstRow ? $businessTrip['requestedBy']->created_at->format('d/m/Y') : '',
-                        'Request Number' => $firstRow ? $businessTrip['requestedBy']->request_no : '',
+                        'Request Number' => $firstRow ? $businessTrip['requestNo'] : '',
                         'Request Status' => $firstRow ? $businessTrip['status']->name : '',
                         'Purpose Type' => $firstRow ? $businessTrip['purposeType']->name : '',
                         'Remarks' => $firstRow ? $businessTrip['remarks'] : '',
@@ -71,7 +71,7 @@ class BusinessTripExport implements FromArray, WithHeadings, WithEvents, WithCus
                     'Destination' => '',
                     'Start Date' => '',
                     'End Date' => '',
-                    'Allowance Item' => 'Total Allowance',
+                    'Allowance Item' => '',
                     'Allowance Value' => '',
                     'Total Allowance' => 'IDR ' . number_format($destination['total_allowance'], 0, ',', '.'),
                 ];

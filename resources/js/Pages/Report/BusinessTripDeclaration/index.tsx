@@ -19,9 +19,10 @@ interface propsType {
     listPurposeType: any[];
     listDestination: any[];
     users: UserModel[];
+    departments: any[];
 }
 const roleAkses = 'business trip declaration';
-export const Index = ({ listPurposeType, listDestination, users }: propsType) => {
+export const Index = ({ listPurposeType, listDestination, users, departments }: propsType) => {
     const [openForm, setOpenForm] = React.useState<boolean>(false);
 
     const [businessTripForm, setBusinessTripForm] = React.useState({
@@ -35,6 +36,7 @@ export const Index = ({ listPurposeType, listDestination, users }: propsType) =>
     const [status, setStatus] = React.useState<string>('');
     const [type, setType] = React.useState<string>('');
     const [destination, setDestination] = React.useState<string>('');
+    const [department, setDepartment] = React.useState<string>('');
 
     const { showToast } = useAlert();
 
@@ -138,6 +140,25 @@ export const Index = ({ listPurposeType, listDestination, users }: propsType) =>
                                     value={typeOption.id}
                                 >
                                     {typeOption.destination}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>Department</label>
+                        <select
+                            value={department}
+                            onChange={(e) => setDepartment(e.target.value)}
+                            className="select-class"
+                            id="department"
+                        >
+                            <option value="">All Department</option>
+                            {departments.map((dept) => (
+                                <option
+                                    key={dept.id}
+                                    value={dept.id}
+                                >
+                                    {dept.name}
                                 </option>
                             ))}
                         </select>
