@@ -325,6 +325,25 @@ const BusinessTripDetail = () => {
                     </tr>
                   </table>
                 </div>
+                <div>
+                    <table>
+                        <tr>
+                            <th>Total Request Value</th>
+                            <td>:</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Total Declaration Value</th>
+                            <td>:</td>
+                            <td> +</td>
+                        </tr>
+                        <tr>
+                            <th>Deviation Value</th>
+                            <th>:</th>
+                            <th></th>
+                        </tr>
+                    </table>
+                </div>
               </div>
             </TabsContent>
           ))}

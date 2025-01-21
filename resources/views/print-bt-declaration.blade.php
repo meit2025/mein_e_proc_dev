@@ -267,7 +267,8 @@
             <h3>Detail {{$row['destination']}}</h3>
             <table class="detail-table">
                 <tr>
-                    <th>Date</th>
+                    <th>Request Date</th>
+                    <th>Declaration Date</th>
                     <th>Shift</th>
                     <th>Shift Start</th>
                     <th>Shift End</th>
@@ -276,6 +277,7 @@
                 </tr>
                 @foreach ($row['business_trip_detail_attendance'] as $detail)
                     <tr>
+                        <td>{{date('d/m/Y',strtotime($detail['date']))}}</td>
                         <td>{{date('d/m/Y',strtotime($detail['date']))}}</td>
                         <td>{{$detail['shift_code']}}</td>
                         <td>{{$detail['shift_start']}}</td>
