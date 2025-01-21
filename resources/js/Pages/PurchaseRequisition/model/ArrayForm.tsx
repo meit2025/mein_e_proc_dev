@@ -44,27 +44,47 @@ const ArrayForm = ({
   const watchDocumentType = useWatch({ name: 'document_type' });
 
   useEffect(() => {
-    getCostCenter('', { name: 'desc', id: 'cost_center', tabel: 'master_cost_centers' });
-    getVendor('', { name: 'name_one', id: 'id', tabel: 'master_business_partners' });
+    getCostCenter('', {
+      name: 'desc',
+      id: 'cost_center',
+      tabel: 'master_cost_centers',
+      hiddenZero: true,
+      isMapping: true,
+    });
+    getVendor('', {
+      name: 'name_one',
+      id: 'id',
+      tabel: 'master_business_partners',
+      hiddenZero: true,
+      isMapping: true,
+    });
     getMaterialGroup('', {
       name: 'material_group_desc',
       id: 'material_group',
       tabel: 'material_groups',
+      hiddenZero: true,
+      isMapping: true,
     });
     getTax('', {
       name: 'description',
       id: 'mwszkz',
       tabel: 'pajaks',
+      hiddenZero: true,
+      isMapping: true,
     });
     getUom('', {
       name: 'unit_of_measurement_text',
       id: 'commercial',
       tabel: 'uoms',
+      hiddenZero: true,
+      isMapping: true,
     });
     getIo('', {
       name: 'desc',
       id: 'order_number',
       tabel: 'master_orders',
+      hiddenZero: true,
+      isMapping: true,
     });
     getMainAssetNumber('', {
       name: 'desc',
@@ -73,6 +93,8 @@ const ArrayForm = ({
       where: {
         groupBy: 'asset,desc',
       },
+      hiddenZero: true,
+      isMapping: true,
     });
   }, []);
 
@@ -82,6 +104,8 @@ const ArrayForm = ({
       id: 'account',
       tabel: 'account_assignment_categories',
       attribut: watchDocumentType,
+      hiddenZero: true,
+      isMapping: true,
     });
   }, [watchDocumentType]);
 
@@ -92,6 +116,7 @@ const ArrayForm = ({
       tabel: 'master_materials',
       attribut: value,
       isMapping: true,
+      hiddenZero: true,
       where: {
         key: 'material_group',
         parameter: value,
@@ -247,10 +272,19 @@ const ArrayForm = ({
 
   return (
     <div>
-      <FormAutocomplete<any[]>
-        options={dataVendor}
-        fieldLabel={'Select Vendor'}
-        fieldName={`vendors[${dataIndex}].vendor`}
+      <FormAutocomplete<string>
+        options={[
+          {
+            label: 'Existing',
+            value: 'existing',
+          },
+          {
+            label: 'New',
+            value: 'new',
+          },
+        ]}
+        fieldLabel={'Select Type Vendor'}
+        fieldName={`vendors[${dataIndex}].type_vendor`}
         isRequired={true}
         style={{
           width: '56.5rem',
@@ -260,12 +294,43 @@ const ArrayForm = ({
         disabled={disable}
       />
 
-      <FormSwitch
-        fieldLabel='Propose Vendor'
-        fieldName={`vendors[${dataIndex}].winner`}
-        isRequired={false}
-        disabled={disable}
-      />
+      {watch(`vendors[${dataIndex}].type_vendor`) === 'existing' && (
+        <>
+          <FormAutocomplete<any[]>
+            options={dataVendor}
+            fieldLabel={'Select Vendor'}
+            fieldName={`vendors[${dataIndex}].vendor`}
+            isRequired={true}
+            style={{
+              width: '56.5rem',
+            }}
+            placeholder={'Select Vendor'}
+            classNames='mt-2'
+            disabled={disable}
+          />
+
+          <FormSwitch
+            fieldLabel='Propose Vendor'
+            fieldName={`vendors[${dataIndex}].winner`}
+            isRequired={false}
+            disabled={disable}
+          />
+        </>
+      )}
+
+      {watch(`vendors[${dataIndex}].type_vendor`) === 'new' && (
+        <>
+          <FormInput
+            fieldLabel={'Vendor Name'}
+            fieldName={`vendors[${dataIndex}].vendor_name_text`}
+            isRequired={false}
+            type={'text'}
+            placeholder={'Enter your vendor'}
+            disabled={disable}
+          />
+        </>
+      )}
+
       {!disable && (
         <div className='card mt-2'>
           <div className='card-header'>
@@ -343,14 +408,14 @@ const ArrayForm = ({
 
             <FormAutocomplete<any>
               options={dataMaterial}
-              fieldLabel={'Material number'}
+              fieldLabel={'Material Number'}
               fieldName={'item_material_number'}
               isRequired={false}
               disabled={disable}
               style={{
                 width: '56.5rem',
               }}
-              placeholder={'Material number'}
+              placeholder={'Material Number'}
               classNames='mt-2'
             />
 
@@ -369,7 +434,7 @@ const ArrayForm = ({
 
             <FormAutocomplete<any>
               options={dataTax}
-              fieldLabel={'Tax on sales'}
+              fieldLabel={'Tax On Sales'}
               fieldName={'item_tax'}
               isRequired={false}
               disabled={disable}

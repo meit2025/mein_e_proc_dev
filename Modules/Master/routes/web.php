@@ -17,9 +17,9 @@ use Modules\Master\Http\Controllers\MasterDivisionController;
 use Modules\Master\Http\Controllers\MasterMaterialController;
 use Modules\Master\Http\Controllers\MaterialGroupController;
 use Modules\Master\Http\Controllers\MasterPositionController;
-use Modules\Master\Http\Controllers\MasterQuotaReimburseController;
 use Modules\Master\Http\Controllers\MasterTrackingNumberController;
 use Modules\Master\Http\Controllers\MasterTypeReimburseController;
+use Modules\Master\Http\Controllers\MasterTypeReimburseUserAssignController;
 use Modules\Master\Http\Controllers\OrderController;
 use Modules\Master\Http\Controllers\PajakController;
 use Modules\Master\Http\Controllers\PurchasingGroupController;
@@ -61,12 +61,10 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['prefix' => 'business-partner'], function () {
             Route::inertia('/',  'Master/MasterBusinessPartner/Index')->middleware(PermissionMiddleware::class . ':master sap business partner view');
         });
-        Route::group(['prefix' => 'reimburse-period'], function () {
-            Route::inertia('/',  'Master/MasterReimbursePeriod/Index')->middleware(PermissionMiddleware::class . ':master reimburse period view,master reimburse period create,master reimburse period update,master reimburse period delete');
-        });
+        
         Route::get('reimburse-type/', [MasterTypeReimburseController::class, 'index'])->name('type.master.reimburse-type.index')->middleware(PermissionMiddleware::class . ':master reimburse type view,master reimburse type create,master reimburse type update,master reimburse type delete');
-        Route::get('reimburse-quota/', [MasterQuotaReimburseController::class, 'index'])->name('master.reimburse-quota.index')->middleware(PermissionMiddleware::class . ':master reimburse quota view,master reimburse quota create,master reimburse quota update,master reimburse quota delete');
-        Route::get('reimburse-quota/detail/{id}', [MasterQuotaReimburseController::class, 'detail'])->name('master.reimburse-quota.detail')->middleware(PermissionMiddleware::class . ':master reimburse quota view');
+        Route::get('reimburse-type-user-assign/{id}', [MasterTypeReimburseUserAssignController::class, 'index'])->name('type.master.reimburse-type-user-assign')->middleware(PermissionMiddleware::class . ':master reimburse type view,master reimburse type create,master reimburse type update,master reimburse type delete');
+        
         Route::get('family/', [FamilyController::class, 'index'])->name('master.family.index');
 
         Route::group(['prefix' => 'position', 'middleware' => 'auth'], function () {
@@ -191,15 +189,10 @@ Route::group(['middleware' => 'auth'], function () {
             Route::delete('/delete/{id}', [MasterTypeReimburseController::class, 'destroy'])->name('master.reimburse-type.destroy')->middleware(PermissionMiddleware::class . ':master reimburse type delete');
         });
 
-        Route::group(['prefix' => 'reimburse-quota'], function () {
-            Route::get('/', [MasterQuotaReimburseController::class, 'list'])->name('master.reimburse-quota.list')->middleware(PermissionMiddleware::class . ':master reimburse quota view');
-            Route::get('/detailData/{id}', [MasterQuotaReimburseController::class, 'detailData'])->name('master.reimburse-quota.detail.list')->middleware(PermissionMiddleware::class . ':master reimburse quota view');
-            Route::post('/create', [MasterQuotaReimburseController::class, 'store'])->name('master.reimburse-quota.store')->middleware(PermissionMiddleware::class . ':master reimburse quota create');
-            Route::put('/update/{id}', [MasterQuotaReimburseController::class, 'update'])->name('master.reimburse-quota.update')->middleware(PermissionMiddleware::class . ':master reimburse quota update');
-            Route::get('/edit/{id}', [MasterQuotaReimburseController::class, 'edit'])->name('master.reimburse-quota.edit')->middleware(PermissionMiddleware::class . ':master reimburse quota update');
-            Route::delete('/delete/{id}', [MasterQuotaReimburseController::class, 'destroy'])->name('master.reimburse-quota.destroy')->middleware(PermissionMiddleware::class . ':master reimburse quota delete');
-            Route::delete('/delete/{id}', [MasterQuotaReimburseController::class, 'destroy'])->name('master.reimburse-quota.destroy')->middleware(PermissionMiddleware::class . ':master reimburse quota delete');
-            Route::get('/getPeriodDropdown', [MasterQuotaReimburseController::class, 'dropdownPeriod'])->name('master.reimburse.quota.dropdown.period')->middleware(PermissionMiddleware::class . ':master reimburse quota view');
+        Route::group(['prefix' => 'reimburse-type-user-assign'], function () {
+            Route::get('/update-user-assign/{reimburseTypeId}', [MasterTypeReimburseUserAssignController::class, 'updateUserAssign'])->name('master.reimburse-type-user-assign.updateUserAssign')->middleware(PermissionMiddleware::class . ':master reimburse type update');
+            Route::get('/update-batch-user-assign', [MasterTypeReimburseUserAssignController::class, 'updateBatchUserAssign'])->name('master.reimburse-type-user-assign.updateBatchUserAssign')->middleware(PermissionMiddleware::class . ':master reimburse type update');
+            Route::get('/{reimburseTypeId}', [MasterTypeReimburseUserAssignController::class, 'list'])->name('master.reimburse-type-user-assign.list')->middleware(PermissionMiddleware::class . ':master reimburse type view');
         });
 
         Route::group(['prefix' => 'family'], function () {

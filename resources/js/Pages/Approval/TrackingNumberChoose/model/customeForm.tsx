@@ -1,31 +1,18 @@
-import { useFormContext } from 'react-hook-form';
-import FormInput from '@/components/Input/formInput';
-import { useEffect, useState } from 'react';
 import FormAutocomplete from '@/components/Input/formDropdown';
 import useDropdownOptions from '@/lib/getDropdown';
-
-interface ApprovalProps {
-  master_tracking_number_id: string;
-}
+import { useEffect } from 'react';
+import { useFieldArray, useFormContext } from 'react-hook-form';
 
 export const CustomeForm = ({ data }: { data: any[] }) => {
-  const { getValues } = useFormContext();
-  const [inputs, setInputs] = useState<ApprovalProps[]>(data);
+  const { control, setValue, watch } = useFormContext();
 
-  const handleAddInput = () => {
-    setInputs([
-      ...inputs,
-      {
-        master_tracking_number_id: '',
-      },
-    ]);
-  };
+  // 🔹 Gunakan useFieldArray untuk menangani daftar input dinamis
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'approval_tracking_number_route',
+  });
 
-  const handleRemoveInput = (index: any) => {
-    const newInputs = inputs.filter((_, i) => i !== index);
-    setInputs(newInputs);
-  };
-
+  // 🔹 Dropdown Data
   const { dataDropdown, getDropdown } = useDropdownOptions();
 
   useEffect(() => {
@@ -36,42 +23,44 @@ export const CustomeForm = ({ data }: { data: any[] }) => {
     });
   }, []);
 
+  // 🔹 Set Default Data Saat Pertama Kali Render
   useEffect(() => {
-    if (inputs.length === 0) {
-      setInputs(data);
+    if (fields.length === 0 && data.length > 0) {
+      data.forEach((item) => append({ master_tracking_number_id: item.master_tracking_number_id }));
     }
-  }, [data]);
+  }, [data, fields]);
 
   return (
     <>
       <div className='w-full mt-8 border rounded-md shadow-md'>
         <div className='p-4'>Tracking Approval</div>
-        {inputs.map((input, index) => (
-          <div key={index} className='p-4 mb-2'>
+
+        {fields.map((field, index) => (
+          <div key={field.id} className='p-4 mb-2'>
             <div className='flex items-center gap-4'>
-              {/* Use flexbox here */}
               <FormAutocomplete<any[]>
                 options={dataDropdown ?? []}
                 fieldLabel={`Tracking Number ${index + 1}`}
-                fieldName={`approval_tracking_number_route[${index}].master_tracking_number_id`}
+                fieldName={`approval_tracking_number_route.${index}.master_tracking_number_id`}
                 isRequired={true}
                 placeholder={'Select Tracking Number'}
                 style={{
                   width: '60.5rem',
                 }}
               />
-              <span onClick={() => handleRemoveInput(index)} style={{ cursor: 'pointer' }}>
+              <span onClick={() => remove(index)} style={{ cursor: 'pointer' }}>
                 <i className='ki-duotone ki-trash-square text-danger text-2xl'></i>
               </span>
             </div>
           </div>
         ))}
+
         <button
           type='button'
-          onClick={handleAddInput}
+          onClick={() => append({ master_tracking_number_id: '' })}
           className='mt-4 bg-blue-500 text-white p-2 m-4 rounded-md'
         >
-          add Form
+          Add Form
         </button>
       </div>
     </>

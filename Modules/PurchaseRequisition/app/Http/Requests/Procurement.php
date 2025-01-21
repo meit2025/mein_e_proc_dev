@@ -31,7 +31,6 @@ class Procurement extends FormRequest
             'storage_locations' => 'required|string|max:4',
             'total_vendor' => 'required|integer|min:1',
             'vendors' => 'required|array',
-            'vendors.*.vendor' => 'required|integer', // Assuming vendors table has an 'id' field
             'vendors.*.units' => 'required|array',
             'vendors.*.units.*.material_group' => 'required|string|max:255',
             'vendors.*.units.*.uom' => 'required|string',
@@ -62,8 +61,6 @@ class Procurement extends FormRequest
             'total_vendor.required' => 'Total vendor is required.',
             'vendors.required' => 'Vendors are required.',
             'vendors.array' => 'Vendors must be an array.',
-            'vendors.*.vendor.required' => 'Vendor ID is required in each vendor.',
-            'vendors.*.vendor.integer' => 'Vendor ID must be an integer.',
             'vendors.*.units.required' => 'Item are required in each vendor.',
             'vendors.*.units.array' => 'Item must be an array in each vendor.',
             'vendors.*.units.*.material_group.required' => 'Material group is required in each unit.',
@@ -79,7 +76,7 @@ class Procurement extends FormRequest
             'vendors.*.units.*.total_amount.min' => 'Total amount must be at least 0 in each unit.',
             'vendors.*.units.*.tax.required' => 'Tax is required in each unit.',
             'vendors.*.units.*.short_text.max' => 'Short text must not exceed 255 characters in each unit.',
-            'attachment.required' => 'Attachments are required.',
+            'attachment.required' => 'Please Input The File.',
         ];
     }
 
