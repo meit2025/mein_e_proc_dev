@@ -196,6 +196,28 @@ export const BussinessTripFormV1 = ({
         ),
       }),
     ),
+  })
+  .superRefine(({ cash_advance, total_percent }, refinementContext) => {
+    if (cash_advance === true) {
+        // Validasi jika total_percent kosong
+        if (!total_percent || total_percent.trim() === '') {
+          refinementContext.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['total_percent'],
+            message: 'Total Percent is required',
+          });
+        } else {
+          // Validasi jika total_percent berada di luar rentang 1-100
+          const totalPercentValue = Number(total_percent);
+          if (isNaN(totalPercentValue) || totalPercentValue < 1 || totalPercentValue > 100) {
+            refinementContext.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ['total_percent'],
+              message: 'Total Percent must be a number between 1 and 100',
+            });
+          }
+        }
+      }
   });
   const [totalDestination, setTotalDestination] = React.useState<string>('1');
 
@@ -466,9 +488,9 @@ export const BussinessTripFormV1 = ({
         pajak_id: '',
         purchasing_group_id: '',
         restricted_area: false,
-        cash_advance: false,
-        total_percent: '',
-        total_cash_advance: '0',
+        // cash_advance: false,
+        // total_percent: '',
+        // total_cash_advance: '0',
         allowances: [],
         detail_attedances: [],
       });
@@ -658,6 +680,7 @@ export const BussinessTripFormV1 = ({
       id: 'id',
       tabel: 'purpose_types',
       idType: 'string',
+      softDelete: true
     });
     getCostCenter('', {
       name: 'desc',
@@ -802,6 +825,7 @@ export const BussinessTripFormV1 = ({
                         <input
                           className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
                           type='file'
+                          accept='.jpg,.jpeg,.png,.pdf,.heic,.heif'
                           multiple // Menambahkan atribut multiple
                           onChange={(e) => {
                             const files = e.target.files; // Ambil file yang dipilih
@@ -951,19 +975,7 @@ export const BussinessTripFormV1 = ({
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Select
-                              value={field.value || undefined}
-                              onValueChange={(value) => field.onChange(value)}
-                            >
-                              <SelectTrigger className='w-[50%] mb-2'>
-                                <SelectValue placeholder='-- Select Total Percent --' />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value='10'>10%</SelectItem>
-                                <SelectItem value='25'>25%</SelectItem>
-                                <SelectItem value='50'>50%</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <Input type="number" {...field} value={field.value || ''} className='w-[50%]' min="1" max="100" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -975,7 +987,7 @@ export const BussinessTripFormV1 = ({
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input value={field.value || ''} readOnly={true} className='w-[50%]' />
+                            <Input value={field.value || ''} readOnly={true} className='w-[50%] mt-3'/>
                           </FormControl>
                           <FormMessage />
                         </FormItem>

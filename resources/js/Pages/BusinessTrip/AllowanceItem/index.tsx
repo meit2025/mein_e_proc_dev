@@ -31,7 +31,7 @@ export const Index = ({ listAllowanceCategory, listCurrency, listGrade }: propsT
 
   const [formType, setFormType] = React.useState({
     type: FormType.create,
-    id: null,
+    id: undefined,
   });
 
   function openFormHandler() {

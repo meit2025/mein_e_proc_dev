@@ -122,6 +122,10 @@ class DropdownMasterController extends Controller
             }
         }
 
+        if ($request->softDelete == 'true') {
+            $data = $data->whereNull('deleted_at');
+        }
+
         if ($request->join) {
             $variableJoin = explode(",", $request->join);
             $data = $data->join($variableJoin[0], $variableJoin[1], $variableJoin[2], $variableJoin[3]);

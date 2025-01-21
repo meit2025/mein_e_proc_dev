@@ -22,6 +22,6 @@ class BusinessTripDetailDestinationTotal extends Model
 
     function allowance()
     {
-        return $this->belongsTo(AllowanceItem::class, 'allowance_item_id', 'id');
+        return $this->belongsTo(AllowanceItem::class, 'allowance_item_id', 'id')->withTrashed();
     }
 }
