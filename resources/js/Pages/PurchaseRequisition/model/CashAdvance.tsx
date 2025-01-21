@@ -32,6 +32,7 @@ const CashAdvance = ({ disable }: { disable: boolean }) => {
   const total = watch('total_all_amount');
 
   const dataAmaout = (value: any) => {
+    console.log(value);
     // get persentase dp
     const dataVendorArray = getValues('vendors').filter(
       (item: any) => (item.winner || false) === true,
@@ -63,7 +64,7 @@ const CashAdvance = ({ disable }: { disable: boolean }) => {
       {watchIsCashAdvance && (
         <>
           <hr></hr>
-          <FormAutocomplete<any>
+          {/* <FormAutocomplete<any>
             options={[
               {
                 label: '50%',
@@ -88,7 +89,7 @@ const CashAdvance = ({ disable }: { disable: boolean }) => {
             ]}
             fieldLabel={'Persantase DP'}
             fieldName={'cash_advance_purchases.dp'}
-            isRequired={false}
+            isRequired={true}
             disabled={disable}
             style={{
               width: '56.5rem',
@@ -96,6 +97,17 @@ const CashAdvance = ({ disable }: { disable: boolean }) => {
             placeholder={'Persantase DP Number'}
             classNames='mt-2'
             onChangeOutside={(value, data) => dataAmaout(value)}
+          /> */}
+          <FormInput
+            fieldLabel={'Persantase DP Number'}
+            fieldName={'cash_advance_purchases.dp'}
+            isRequired={false}
+            disabled={disable}
+            type={'number'}
+            placeholder={'Enter reference'}
+            maxLength={100}
+            minLength={1}
+            onChanges={(data) => dataAmaout(data.target.value)}
           />
           <FormInput
             fieldLabel={'reference'}

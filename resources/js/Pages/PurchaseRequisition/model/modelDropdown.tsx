@@ -5,6 +5,8 @@ export const modelDropdowns = [
       name: 'purchasing_dsc',
       id: 'purchasing_doc',
       tabel: 'document_types',
+      hiddenZero: true,
+      isMapping: true,
     },
   },
   {
@@ -25,6 +27,8 @@ export const modelDropdowns = [
       name: 'purchasing_group_desc',
       id: 'purchasing_group',
       tabel: 'purchasing_groups',
+      hiddenZero: true,
+      isMapping: true,
     },
   },
   {
@@ -33,6 +37,8 @@ export const modelDropdowns = [
       name: 'storage_location_desc',
       id: 'storage_location',
       tabel: 'storage_locations',
+      hiddenZero: true,
+      isMapping: true,
     },
   },
 ];

@@ -79,7 +79,7 @@ class Procurement extends FormRequest
             'vendors.*.units.*.total_amount.min' => 'Total amount must be at least 0 in each unit.',
             'vendors.*.units.*.tax.required' => 'Tax is required in each unit.',
             'vendors.*.units.*.short_text.max' => 'Short text must not exceed 255 characters in each unit.',
-            'attachment.required' => 'Attachments are required.',
+            'attachment.required' => 'Please Input The File.',
         ];
     }
 

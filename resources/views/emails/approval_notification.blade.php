@@ -58,7 +58,7 @@
     <div class="email-container">
         <!-- Header with Logo -->
         <div class="header">
-            <img src="https://www.mitsubishielectric.co.id/assets_gws_template_responsive/img/mein-logo-header1.png" alt="Company Logo">  <!-- Ganti dengan URL logo Anda -->
+            {{-- <img src="https://www.mitsubishielectric.co.id/assets_gws_template_responsive/img/mein-logo-header1.png" alt="Company Logo">  <!-- Ganti dengan URL logo Anda --> --}}
             <h2>Approval Notification {{ucfirst(strtolower($type))}}</h2>
         </div>
 

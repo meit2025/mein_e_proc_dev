@@ -155,6 +155,7 @@ class AuthController extends Controller
                     return $this->successResponse($credentials);
                 }
             } catch (\Throwable $th) {
+                dd($th);
                 return $this->attemptLocalLogin($credentials, $remember);
             }
         }

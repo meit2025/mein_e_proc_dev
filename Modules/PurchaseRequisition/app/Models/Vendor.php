@@ -18,7 +18,9 @@ class Vendor extends Model
     protected $fillable = [
         'purchase_id',
         'vendor',
-        'winner'
+        'winner',
+        'vendor_name_text',
+        'type_vendor',
     ];
 
     public function units()

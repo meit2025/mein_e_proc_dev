@@ -26,6 +26,7 @@ function Create() {
   }, []);
 
   useEffect(() => {
+    methods.setValue('total_vendor', 1);
     if (auth?.user?.is_admin !== '1') {
       const updatedObject = (dropdownOptions ?? []).map((field) =>
         field.name === 'user_id' ? { ...field, disabled: true } : field,

@@ -26,6 +26,7 @@ export interface FormFieldModel<T = any> {
   valueConditional?: any;
   conditionalType?: string;
   parameterConditional?: string;
+  note?: string;
   fieldCustome?: boolean;
   fieldCustomeValue?: ReactNode;
 }

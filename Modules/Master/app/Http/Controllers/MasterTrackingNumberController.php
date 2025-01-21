@@ -4,6 +4,7 @@ namespace Modules\Master\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Modules\Approval\Models\ApprovalTrackingNumberChooseRoute;
 use Modules\Master\Models\MasterTrackingNumber;
 
 class MasterTrackingNumberController extends Controller
@@ -52,6 +53,14 @@ class MasterTrackingNumberController extends Controller
      */
     public function destroy($id)
     {
+        $isReferenced = ApprovalTrackingNumberChooseRoute::where('master_tracking_number_id', $id)->exists();
+
+        if ($isReferenced) {
+            return response()->json([
+                'message' => 'You cannot delete this data because it is still being used in approval tracking number choose.'
+            ], 400);
+        }
+
         $data = MasterTrackingNumber::find($id)->delete();
         return $this->successResponse($data);
     }

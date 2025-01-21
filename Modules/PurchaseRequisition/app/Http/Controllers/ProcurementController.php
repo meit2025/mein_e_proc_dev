@@ -77,7 +77,14 @@ class ProcurementController extends Controller
             }
 
             foreach ($request['vendors'] as $vendorData) {
-                $vendor = $purchase->vendors()->create(['vendor' => $vendorData['vendor'],  'winner' => $vendorData['winner'] ?? false]);
+                $vendor = $purchase->vendors()->create(
+                    [
+                        'vendor' => $vendorData['vendor'] ?? null,
+                        'winner' => $vendorData['winner'] ?? false,
+                        'vendor_name_text' => $vendorData['vendor_name_text'] ?? null,
+                        'type_vendor' => $vendorData['type_vendor'] ?? null,
+                    ]
+                );
                 foreach ($vendorData['units'] as $unitData) {
                     $unitCrate =  $vendor->units()->create($unitData);
                 }

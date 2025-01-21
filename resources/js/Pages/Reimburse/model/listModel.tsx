@@ -18,7 +18,7 @@ export const columns: GridColDef[] = [
     ),
   },
   { field: 'request_for', headerName: 'Reimburse for', width: 200, filterable: true },
-  { field: 'request_by', headerName: 'Reimburse by', width: 200, filterable: true },
+  { field: 'request_by', headerName: 'Requested by', width: 200, filterable: true },
   {
     field: 'balance',
     headerName: 'Total Balance',
