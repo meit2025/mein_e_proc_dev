@@ -2,6 +2,7 @@
 
 namespace Modules\Master\Http\Controllers;
 
+use App\Jobs\InsertBatchUserAssignmentRimburseType;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +26,11 @@ class MasterTypeReimburseController extends Controller
             $sortBy = $request->get('sort_by', 'id');
             $sortDirection = $request->get('sort_direction', 'asc');
             $query->orderBy($sortBy, $sortDirection);
+
+            if ($request->search) $query = $query->where('code', 'ilike', '%' . $request->search . '%')
+                                    ->orWhere('name', 'ilike', '%' . $request->search . '%')
+                                    ->orWhere('family_status', 'ilike', '%' . $request->search . '%');
+
             $data = $query->paginate($perPage);
             $data->getCollection()->transform(function ($map) {
                 $gradeRelations = collect($map->reimburseTypeGrades)->map(function ($relation) {
@@ -79,8 +85,6 @@ class MasterTypeReimburseController extends Controller
      */
     public function index()
     {
-
-
         try {
             $listGrades             = BusinessTripGrade::select('id', 'grade')->get();
 
@@ -129,7 +133,7 @@ class MasterTypeReimburseController extends Controller
             $validatedData['family_status'] = $validatedData['is_employee'] == true ? null : $validatedData['family_status'];
             
             $createData     = MasterTypeReimburse::create($validatedData);
-
+            
             if ($createData) {
                 $request->grades = array_map(function ($grade) use ($createData) {
                     return [
@@ -140,6 +144,8 @@ class MasterTypeReimburseController extends Controller
                 }, $request->grades);
 
                 MasterTypeReimburseGrades::insert($request->grades);
+                
+                dispatch(new InsertBatchUserAssignmentRimburseType($createData->id));
             }
             DB::commit();
             return $this->successResponse("Create Reimburse Type Successfully");
@@ -238,8 +244,8 @@ class MasterTypeReimburseController extends Controller
             $checkReimburse = Reimburse::where('reimburse_type', $dataReimburseType->code)->first();
             if (!empty($checkReimburse)) return $this->errorResponse('Failed, Cannot delete this data because it is related to reimburse request data.');
             
-            $dataReimburseType->delete();
             MasterTypeReimburseGrades::where('reimburse_type_id', $id)->delete();
+            $dataReimburseType->delete();
 
             DB::commit();
 

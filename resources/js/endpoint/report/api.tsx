@@ -10,5 +10,6 @@ export const REPORT_PURCHASE_LIST = `${ROUTE_REPORT}/purchase/list`;
 export const REPORT_PURCHASE_EXPORT = `${ROUTE_REPORT}/purchase/export`;
 export const REPORT_PURCHASE_TYPES = `${ROUTE_REPORT}/purchase/types`;
 export const REPORT_PURCHASE_VENDORS = `${ROUTE_REPORT}/purchase/vendors`;
+export const REPORT_PURCHASE_DEPARTMENTS = `${ROUTE_REPORT}/purchase/departments`;
 
 // get - list - master - reimburse - type;

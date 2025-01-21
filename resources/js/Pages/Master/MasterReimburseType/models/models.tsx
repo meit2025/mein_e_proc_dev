@@ -1,14 +1,43 @@
+import { Link, usePage } from '@inertiajs/react';
+import { Button } from '@/components/shacdn/button';
 import { GridColDef } from '@mui/x-data-grid';
+import {
+  PAGE_REIMBURSE_TYPE_USER_ASSIGN
+} from '@/endpoint/reimburseTypeUserAssign/page';
 
 export const columns: GridColDef[] = [
   { field: 'code', headerName: 'Code', width: 200, filterable: true },
   { field: 'name', headerName: 'Name', width: 200, filterable: true },
-  { field: 'is_employee', headerName: 'Status', width: 200, filterable: true },
+  { 
+    field: 'is_employee', 
+    headerName: 'Status', 
+    width: 200, 
+    filterable: true,
+    renderCell: (params:any) => {
+      return params.formattedValue == 'Family' ? params.formattedValue + ' (' + params.row.family_status +')' : params.formattedValue;
+    }
+  },
   { field: 'interval_claim_period', headerName: 'Interval Claim Period', width: 200, filterable: true },
   { field: 'material_group', headerName: 'Material Group', width: 200, filterable: true },
   { field: 'material_number', headerName: 'Material Number', width: 200, filterable: true },
   { field: 'grade_option', headerName: 'Grade Option', width: 200, filterable: true },
   { field: 'plafon', headerName: 'Plafon', width: 200, filterable: true },
+  {
+    field: 'id',
+      headerName: 'Assingment Users',
+      width: 250,
+      filterable: true,
+      renderCell: (params:any) => 
+        <Link
+          href={PAGE_REIMBURSE_TYPE_USER_ASSIGN(params?.row?.id)}>
+          <Button
+            className='bg-slate-400 hover:bg-slate-400 items-baseline'
+            style={{ marginRight: '10px', marginBottom: '10px' }}
+          >
+            Assingment Users Check
+          </Button>
+        </Link>
+  }
 ];
 
 export interface Grade {

@@ -35,7 +35,6 @@ export const FamiliyLayout = ({ id }: { id: number }) => {
   const openReimburseHistoryHandler = (item:any) => {
     setOpenreimburseHistory({id:item.id, familyName:item.name, familyStatus:item.status});
   }
-  console.log(openReimburseHistory);
   
   const columnsValue = [
     ...originalColumnsValue,

@@ -19,6 +19,7 @@ interface Props {
     currentUser: any;
     latestPeriod: any;
     types: any[];
+    departments: any[];
     statuses: any[];
 }
 
@@ -33,6 +34,7 @@ export const Index = ({
     currentUser,
     latestPeriod,
     types,
+    departments,
     statuses,
 }: Props) => {
     const [openForm, setOpenForm] = React.useState<boolean>(false);
@@ -46,6 +48,7 @@ export const Index = ({
     const [endDate, setEndDate] = React.useState<string | null>(null);
     const [status, setStatus] = React.useState<string>('');
     const [type, setType] = React.useState<string>('');
+    const [department, setDepartment] = React.useState<string>('');
 
     const { showToast } = useAlert();
 
@@ -140,6 +143,25 @@ export const Index = ({
                             ))}
                         </select>
                     </div>
+                    <div>
+                        <label htmlFor='end-date' className='block mb-1'>Department</label>
+                        <select
+                            value={department}
+                            onChange={(e) => setDepartment(e.target.value)}
+                            className="select-class"
+                            id="department"
+                        >
+                            <option value="">All Department</option>
+                            {departments.map((dept) => (
+                                <option
+                                    key={dept.id}
+                                    value={dept.id}
+                                >
+                                    {dept.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -149,7 +171,7 @@ export const Index = ({
                 // onExport={async () => await exporter(false)}
                 onExportXls={async (x: string) => await exporter(x)}
                 // onExportPdf={async () => await exporter(true)}
-                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&`}
+                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&department=${department || ''}&`}
                 columns={columns}
                 url={{
                     url: `${REPORT_REIMBURSE_LIST}`,
