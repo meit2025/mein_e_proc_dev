@@ -1,1 +1,0 @@
-const s="/api/report",R=`${s}/reimburse/list`,E=`${s}/reimburse/export`,t=`${s}/business-trip/list`,T=`${s}/business-trip/export`,e=`${s}/business-trip-dec/list`,_=`${s}/business-trip-dec/export`,r=`${s}/purchase/list`,P=`${s}/purchase/export`,c=`${s}/purchase/types`,o=`${s}/purchase/vendors`;export{t as R,T as a,e as b,_ as c,c as d,o as e,P as f,r as g,R as h,E as i};

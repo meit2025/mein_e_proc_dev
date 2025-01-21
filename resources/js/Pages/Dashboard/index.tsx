@@ -2,6 +2,7 @@ import { useState, ReactNode, useEffect } from 'react';
 import axios from 'axios';
 import MainLayout from '../Layouts/MainLayout';
 import SVGLoader from '@/components/commons/SvgLoader';
+import DeclarationPieChart from '@/components/commons/DeclarationPieChart';
 
 function Index(dataTotal: any) {
     const [selectedStatus, setSelectedStatus] = useState('reim');
@@ -47,6 +48,9 @@ function Index(dataTotal: any) {
     const processPercent = total ? ((categories.process ?? 0) / total) * 100 : 0;
     const approvedPercent = total ? ((categories.approved ?? 0) / total) * 100 : 0;
     const rejectedPercent = total ? ((categories.rejected ?? 0) / total) * 100 : 0;
+
+    const declaration = categories.approved ?? 0;
+    const notDeclaration = (categories.process ?? 0) + (categories.waiting ?? 0) + (categories.rejected ?? 0)
 
     return (
         <>
@@ -235,6 +239,19 @@ function Index(dataTotal: any) {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div className="container-fixed">
+                <div className='card h-full'>
+                    <div className='card-header'>
+                        <h3 className='card-title'>Business Trip Declaration & Not Declaration</h3>
+                    </div>
+                    <div className='card-body'>
+                        <DeclarationPieChart
+                            declaration={declaration}
+                            notDeclaration={notDeclaration}
+                        />
                     </div>
                 </div>
             </div>
