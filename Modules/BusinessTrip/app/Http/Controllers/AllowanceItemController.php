@@ -244,7 +244,6 @@ class AllowanceItemController extends Controller
 
     public function updateAPI($id, Request $request)
     {
-
         $rules = [
             'allowance_category_id' => 'required',
             // 'code' => 'required',
