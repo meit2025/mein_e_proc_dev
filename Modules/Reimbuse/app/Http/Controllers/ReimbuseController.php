@@ -39,55 +39,85 @@ class ReimbuseController extends Controller
         $hasValue = $request->hasValue;
 
         $getFamilieStatus = User::select('f.status')->join('families as f', 'f.userId', '=', 'users.id')->where('users.nip', $nip)->groupBy('f.status')->pluck('f.status')->toArray();
-        $getAssignGrade = User::select('mtr.id')
-            ->join('business_trip_grade_users as btgu', 'btgu.user_id', '=', 'users.id')
-            ->join('master_type_reimburse_grades as mtrg', 'mtrg.grade_id', '=', 'btgu.grade_id')
-            ->join('master_type_reimburses as mtr', 'mtr.id', '=', 'mtrg.reimburse_type_id')
-            ->where('users.nip', $nip)
-            ->pluck('mtr.id')
-            ->toArray();
-        $intervalValidation = Reimburse::select('mtr.id')
-            ->join('master_type_reimburses as mtr', 'mtr.code', '=', 'reimburses.reimburse_type')
-            ->join('master_type_reimburse_user_assign as mtra', 'mtra.reimburse_type_id', '=', 'mtr.id')
-            ->join('users as u', 'u.id', '=', 'mtra.user_id')
-            ->whereRaw("(reimburses.claim_date BETWEEN reimburses.claim_date AND reimburses.claim_date + (mtr.interval_claim_period || ' days')::INTERVAL)")
-            ->whereNotNull('mtr.interval_claim_period')
-            ->where('u.nip', $nip)
-            ->where('reimburses.requester', $nip)
-            ->pluck('mtr.id')
-            ->groupBy('mtr.id')
-            ->toArray();
-
-
+        
         $data = MasterTypeReimburse::selectRaw(
-            "
-            CASE WHEN master_type_reimburses.is_employee IS TRUE THEN 1 ELSE 0 END AS is_employee,
+            "MAX(CASE WHEN master_type_reimburses.is_employee IS TRUE THEN 1 ELSE 0 END) AS is_employee,
             master_type_reimburses.name || ' (' || code || ')' || ' - for ' || 
-            CASE 
-                when master_type_reimburses.is_employee is true then 'employee '
-                else 'family ' || family_status 
-            END as label
+            MAX(CASE 
+                WHEN master_type_reimburses.is_employee IS TRUE THEN 'employee' 
+                ELSE 'family ' 
+            END) || 
+            MAX(COALESCE(master_type_reimburses.family_status, '')) as label
             , master_type_reimburses.code as value")
-        ->where(function ($query) use ($getFamilieStatus, $getAssignGrade) {
-            $query->whereIn('master_type_reimburses.id', $getAssignGrade);
-            if (count($getFamilieStatus) > 0) $query = $query->whereIn('master_type_reimburses.family_status', $getFamilieStatus);
-            $query = $query->orWhere('master_type_reimburses.is_employee', true);
-        });
-
-        $data = $data->orWhere('master_type_reimburses.grade_option', 'all');
-        if (count($getFamilieStatus) > 0) {
-            $data = $data->where(function ($query) use ($getFamilieStatus) {
-                $query = $query->whereIn('master_type_reimburses.family_status', $getFamilieStatus)->orWhere('master_type_reimburses.is_employee', true);
+            ->leftJoin('master_type_reimburse_grades as mtrg', 'mtrg.reimburse_type_id', '=', 'master_type_reimburses.id')
+            ->leftJoin('business_trip_grades as btg', 'btg.id', '=', 'mtrg.grade_id')
+            ->leftJoin('business_trip_grade_users as btgu', 'btgu.grade_id', '=', 'btg.id')
+            ->leftJoin('master_type_reimburse_user_assign as mtrua', 'mtrua.user_id', '=', 'btgu.user_id')
+            ->leftJoin('users as u', 'u.id', '=', 'mtrua.user_id')
+            ->leftJoinSub("
+                SELECT
+                    MAX(mtr.interval_claim_period) AS max_interval_claim_period,
+                    MAX(
+                        CASE 
+                            WHEN CURRENT_DATE >= r.claim_date 
+                                AND CURRENT_DATE <= r.claim_date + (mtr.interval_claim_period || ' days')::interval 
+                            THEN 1
+                            ELSE 0
+                        END
+                    ) AS on_interval,
+                    mtr.code AS codes
+                FROM
+                    master_type_reimburses AS mtr
+                JOIN reimburses AS r ON
+                    r.reimburse_type = mtr.code
+                WHERE
+                    r.requester = '". $nip ."'
+                GROUP BY
+                    mtr.code
+            ",
+            'checkInterval',
+            function ($join) {
+                $join->on('checkInterval.codes', '=', 'master_type_reimburses.code');
+            })
+            ->where('u.nip', $nip)
+            ->whereNull('master_type_reimburses.family_status')
+            ->where(function($query) {
+                $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
             });
+        
+        if (count($getFamilieStatus) == 0) {
+            $data = 
+                $data->orWhere(function($query) use ($getFamilieStatus) {
+                    $query->where('master_type_reimburses.grade_option', 'all')
+                    ->where(function($query) {
+                        $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
+                    })->where('master_type_reimburses.is_employee', true);
+                });
         } else {
-            $data = $data->where('master_type_reimburses.is_employee', true);
+            $data = 
+                $data->orWhere(function($query) use ($nip, $getFamilieStatus) {
+                    $query->where('u.nip', $nip)
+                    ->where(function($query) {
+                        $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
+                    })
+                    ->whereIn('master_type_reimburses.family_status', $getFamilieStatus);
+                })->orWhere(function($query) use ($getFamilieStatus) {
+                    $query->where('master_type_reimburses.grade_option', 'all')
+                    ->where(function($query) {
+                        $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
+                    })->where(function($query) use ($getFamilieStatus) {
+                        $query->whereIn('master_type_reimburses.family_status', $getFamilieStatus)
+                        ->orWhere('master_type_reimburses.is_employee', true);
+                    });
+                });
         }
-        
+        if ($hasValue !== null) $data = $data->orWhere('checkInterval.codes', $hasValue);
         if ($request->search) $data = $data->where('master_type_reimburses.name', 'ilike', '%' . $request->search . '%')
-            ->orWhere('master_type_reimburses.code', 'ilike', '%' . $request->search . '%')
-            ->orWhere('master_type_reimburses.family_status', 'ilike', '%' . $request->search . '%');
-        $data = $data->limit(100)->get();
+                                    ->orWhere('master_type_reimburses.code', 'ilike', '%' . $request->search . '%')
+                                    ->orWhere('master_type_reimburses.family_status', 'ilike', '%' . $request->search . '%');
         
+        $data = $data->limit(50)->groupBy('master_type_reimburses.name', 'master_type_reimburses.code')->get();
+    
         return $this->successResponse($data);
     }
 
@@ -96,8 +126,28 @@ class ReimbuseController extends Controller
         try {
             $query =  ReimburseGroup::query()->with(['user.families', 'reimburses', 'status', 'userCreateRequest']);
             if ($request->approval == 1) {
-                $approval = Approval::where('user_id', Auth::user()->id)
-                    ->where(['document_name' => 'REIM', 'status' => 'Waiting'])->pluck('document_id')->toArray();
+                $approval = Approval::leftJoinSub("
+                    SELECT
+                        MIN(user_id) as user_id,
+                        document_id
+                    FROM
+                        approvals
+                    WHERE
+                        document_name = 'REIM'
+                        AND status = 'Waiting'
+                    GROUP BY document_id
+                ",
+                'approvalQueueUser',
+                function ($join) {
+                    $join->on('approvalQueueUser.document_id', '=', 'approvals.document_id');
+                })
+                ->where([
+                    'approvals.document_name' => 'REIM', 
+                    'approvals.status' => 'Waiting', 
+                    'approvals.user_id' => Auth::user()->id,
+                ])
+                ->whereColumn('approvalQueueUser.user_id', 'approvals.user_id')
+                ->pluck('approvals.document_id')->toArray();
                 $query = $query->whereIn('id', $approval);
             } else {
                 $data = $query->where('requester', Auth::user()->nip)->orWhere('request_created_by', Auth::user()->id);
@@ -256,13 +306,13 @@ class ReimbuseController extends Controller
             $reimbuseTypeID = $request->reimbuse_type;
 
             $getCurrentBalance = Reimburse::join('reimburse_groups as rb', 'rb.code', '=', 'reimburses.group' )
-                ->whereIn('rb.status_id', [1,5])
+                ->whereIn('rb.status_id', [1])
                 ->where('reimburses.requester', $user)
                 ->where('reimburses.reimburse_type', $reimbuseTypeID)
                 ->sum('balance');
             
             $getCurrentLimit = Reimburse::join('reimburse_groups as rb', 'rb.code', '=', 'reimburses.group' )
-                ->whereIn('rb.status_id', [1,5])
+                ->whereIn('rb.status_id', [1])
                 ->where('reimburses.requester', $user)
                 ->where('reimburses.reimburse_type', $reimbuseTypeID)
                 ->count();
