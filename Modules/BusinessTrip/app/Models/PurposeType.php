@@ -27,7 +27,7 @@ class PurposeType extends Model
 
     public function listAllowance()
     {
-        return $this->hasMany(PurposeTypeAllowance::class, 'purpose_type_id', 'id');
+        return $this->hasMany(PurposeTypeAllowance::class, 'purpose_type_id', 'id')->withTrashed();
     }
 
     protected static function newFactory(): PurposeTypeFactory

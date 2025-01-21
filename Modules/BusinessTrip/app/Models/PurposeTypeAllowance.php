@@ -23,7 +23,7 @@ class PurposeTypeAllowance extends Model
 
     public function allowanceItem()
     {
-        return $this->belongsTo(AllowanceItem::class, 'allowance_items_id', 'id');
+        return $this->belongsTo(AllowanceItem::class, 'allowance_items_id', 'id')->withTrashed();
     }
 
     public function purposeType()

@@ -98,15 +98,23 @@ export default function AllowanceItemForm({
     // formula: z.string().min(1, 'Formula is required'),
     allowance_category_id: z.string().min(1, 'Allowance Category is required'),
     request_value: z.string().min(1, 'Required'),
-    grade_option: z.string().min(1, 'Grade must be selected'),
     grade_all_price: z.string().optional(),
+    grade_option: z.string().min(1, 'Grade must be selected'),
     grades: z.array(
       z.object({
         grade: z.string(),
         id: z.number(),
-        plafon: z.string(),
+        plafon: z.string().min(1, 'Plafon is required'),
       }),
-    ),
+    ).superRefine((data, ctx) => {
+        if (data.grade_option === 'grade' && data.grades.length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'At least one grade is required when grade_option is "grade".',
+            path: ['grades'],
+          });
+        }
+      }),
   });
 
   const [materials, setMaterials] = React.useState([]);
@@ -501,7 +509,7 @@ export default function AllowanceItemForm({
                           onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
                           value={field.value} // Set the current value from React Hook Form
                         >
-                          <SelectTrigger className='w-[200px]'>
+                          <SelectTrigger className='w-[200px] mb-3'>
                             <SelectValue placeholder='Select Request Value' />
                           </SelectTrigger>
                           <SelectContent>
@@ -561,6 +569,7 @@ export default function AllowanceItemForm({
                       id='id'
                       options={listGrade}
                       value={form.getValues('grades').map((item) => item.id)}
+                      isHidden='hidden'
                       onSelect={(value) => {
                         form.setValue(
                           'grades',
@@ -581,7 +590,7 @@ export default function AllowanceItemForm({
                   <div className='mt-4'>
                     <table>
                       {gradeFields.map((grade, gradeIndex) => (
-                        <tr key={grade}>
+                        <tr key={gradeIndex}>
                           <td>Grade {grade.grade}</td>
                           <td>:</td>
                           <td>
@@ -592,8 +601,13 @@ export default function AllowanceItemForm({
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormControl>
-                                      <Input {...field} />
+                                      <Input
+                                        type="text"
+                                        {...field}
+                                        onChange={(e) => field.onChange(e.target.value)}
+                                      />
                                     </FormControl>
+                                    <FormMessage />
                                   </FormItem>
                                 )}
                               />

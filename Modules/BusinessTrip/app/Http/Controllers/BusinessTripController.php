@@ -656,24 +656,24 @@ class BusinessTripController extends Controller
             $standar_detail_allowance = [];
             foreach ($destination->detailDestinationDay as $detailDay) {
                 $standar_detail_allowance[] = [
-                    'item_name' => $detailDay->allowance->name,
-                    'type' => $detailDay->allowance->type,
-                    'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)$detailDay->standard_value,
-                    'total_day' => $detailDay->total,
-                    'total' => $detailDay->standard_value * $detailDay->total,
+                    'item_name' => $detailDay?->allowance->name,
+                    'type' => $detailDay?->allowance->type,
+                    'currency_code' => $detailDay?->allowance->currency_id,
+                    'value' => (int)$detailDay?->standard_value,
+                    'total_day' => $detailDay?->total,
+                    'total' => $detailDay?->standard_value * $detailDay?->total,
                 ];
             }
 
 
             foreach ($destination->detailDestinationTotal as $detailTotal) {
                 $standar_detail_allowance[] = [
-                    'item_name' => $detailTotal->allowance->name,
-                    'type' => $detailTotal->allowance->type,
-                    'currency_code' => $detailTotal->allowance->currency_id,
-                    'value' => (int)$detailTotal->standard_value,
+                    'item_name' => $detailTotal?->allowance?->name,
+                    'type' => $detailTotal?->allowance?->type,
+                    'currency_code' => $detailTotal?->allowance?->currency_id,
+                    'value' => (int)$detailTotal?->standard_value,
                     'total_day' => '-',
-                    'total' => (int)$detailTotal->standard_value,
+                    'total' => (int)$detailTotal?->standard_value,
                 ];
             }
 
@@ -681,23 +681,23 @@ class BusinessTripController extends Controller
             $request_detail_allowance = [];
             foreach ($destination->detailDestinationDay as $detailDay) {
                 $request_detail_allowance[] = [
-                    'item_name' => $detailDay->allowance->name,
-                    'type' => $detailDay->allowance->type,
-                    'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)$detailDay->price / $detailDay->total,
-                    'total_day' => $detailDay->total,
-                    'total' => $detailDay->price,
+                    'item_name' => $detailDay?->allowance?->name,
+                    'type' => $detailDay?->allowance?->type,
+                    'currency_code' => $detailDay?->allowance?->currency_id,
+                    'value' => (int)$detailDay?->price / $detailDay?->total,
+                    'total_day' => $detailDay?->total,
+                    'total' => $detailDay?->price,
                 ];
             }
 
             foreach ($destination->detailDestinationTotal as $detailTotal) {
                 $request_detail_allowance[] = [
-                    'item_name' => $detailTotal->allowance->name,
-                    'type' => $detailTotal->allowance->type,
-                    'currency_code' => $detailTotal->allowance->currency_id,
-                    'value' => (int)$detailTotal->price,
+                    'item_name' => $detailTotal?->allowance?->name,
+                    'type' => $detailTotal?->allowance?->type,
+                    'currency_code' => $detailTotal?->allowance?->currency_id,
+                    'value' => (int)$detailTotal?->price,
                     'total_day' => '-',
-                    'total' => (int)$detailTotal->price,
+                    'total' => (int)$detailTotal?->price,
                 ];
             }
 
@@ -764,14 +764,14 @@ class BusinessTripController extends Controller
             $total_standard = 0;
             foreach ($destination->detailDestinationDay as $detailDay) {
                 $standar_detail_allowance[] = [
-                    'item_name' => $detailDay->allowance->name,
-                    'type' => $detailDay->allowance->type,
-                    'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => number_format($detailDay->standard_value,0, ',', '.'),
-                    'total_day' => $detailDay->total,
-                    'total' => number_format($detailDay->standard_value * $detailDay->total, 0, ',', '.'),
+                    'item_name' => $detailDay?->allowance->name,
+                    'type' => $detailDay?->allowance->type,
+                    'currency_code' => $detailDay?->allowance->currency_id,
+                    'value' => number_format($detailDay?->standard_value,0, ',', '.'),
+                    'total_day' => $detailDay?->total,
+                    'total' => number_format($detailDay?->standard_value * $detailDay?->total, 0, ',', '.'),
                 ];
-                $total_standard += $detailDay->standard_value * $detailDay->total;
+                $total_standard += $detailDay?->standard_value * $detailDay?->total;
             }
 
 
