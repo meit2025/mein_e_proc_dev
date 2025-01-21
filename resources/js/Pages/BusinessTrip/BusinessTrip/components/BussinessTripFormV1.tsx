@@ -688,6 +688,7 @@ export const BussinessTripFormV1 = ({
       tabel: 'master_cost_centers',
       idType: 'string',
       isMapping: true,
+      hiddenZero:true
     });
     getTax('', {
         name: 'description',
