@@ -179,10 +179,10 @@ export const formModel: Array<FormFieldModel<any>> = [
   {
     type: 'input',
     name: 'total_vendor',
-    label: 'Purchase Requisition',
+    label: 'Total Vendor Comparison',
     required: true,
     texttype: 'number',
-    placeholder: 'enter your Purchase Requisition',
+    placeholder: 'enter your Total Vendor Comparison',
   },
   {
     fieldCustome: true,
@@ -393,10 +393,10 @@ export const formModelEdit: Array<FormFieldModel<any>> = [
     disabled: true,
     type: 'input',
     name: 'total_vendor',
-    label: 'Purchase Requisition',
+    label: 'Total Vendor Comparison',
     required: true,
     texttype: 'number',
-    placeholder: 'enter your Purchase Requisition',
+    placeholder: 'enter your Total Vendor Comparison',
   },
   {
     fieldCustome: true,
