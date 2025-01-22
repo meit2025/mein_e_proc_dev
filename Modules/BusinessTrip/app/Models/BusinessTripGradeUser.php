@@ -5,7 +5,7 @@ namespace Modules\BusinessTrip\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\BusinessTrip\Database\Factories\BusinessTripGradeUserFactory;
+use Modules\Master\Models\MasterTypeReimburseUserAssign;
 
 class BusinessTripGradeUser extends Model
 {
@@ -31,5 +31,10 @@ class BusinessTripGradeUser extends Model
     public function grade()
     {
         return $this->belongsTo(BusinessTripGrade::class, 'grade_id', 'id');
+    }
+
+    public function reimburseTypeAssignUsers()
+    {
+        return $this->belongsTo(MasterTypeReimburseUserAssign::class, 'user_id', 'user_id');
     }
 }

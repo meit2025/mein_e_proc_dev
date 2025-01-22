@@ -5,6 +5,7 @@ namespace Modules\Master\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\BusinessTrip\Models\BusinessTripGradeUser;
 use Modules\Master\Models\MasterTypeReimburse;
 
 class MasterTypeReimburseUserAssign extends Model
@@ -30,6 +31,11 @@ class MasterTypeReimburseUserAssign extends Model
     }
 
     public function reimburseTypeUserAssign()
+    {
+        return $this->belongsTo(MasterTypeReimburse::class, 'reimburse_type_id', 'id');
+    }
+
+    public function masterTypeReimburse()
     {
         return $this->belongsTo(MasterTypeReimburse::class, 'reimburse_type_id', 'id');
     }
