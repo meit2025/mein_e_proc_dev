@@ -38,7 +38,8 @@ class ReimbuseController extends Controller
         $nip = $request->user;
         $hasValue = $request->hasValue;
 
-        $getFamilieStatus = User::select('f.status')->join('families as f', 'f.userId', '=', 'users.id')->where('users.nip', $nip)->groupBy('f.status')->pluck('f.status')->toArray();
+        $getFamilieStatus   = User::select('f.status')->join('families as f', 'f.userId', '=', 'users.id')->where('users.nip', $nip)->groupBy('f.status')->pluck('f.status')->toArray();
+        $userId             = User::where('nip', $nip)->first()->id;
         
         $data = MasterTypeReimburse::selectRaw(
             "MAX(CASE WHEN master_type_reimburses.is_employee IS TRUE THEN 1 ELSE 0 END) AS is_employee,
@@ -52,8 +53,19 @@ class ReimbuseController extends Controller
             ->leftJoin('master_type_reimburse_grades as mtrg', 'mtrg.reimburse_type_id', '=', 'master_type_reimburses.id')
             ->leftJoin('business_trip_grades as btg', 'btg.id', '=', 'mtrg.grade_id')
             ->leftJoin('business_trip_grade_users as btgu', 'btgu.grade_id', '=', 'btg.id')
-            ->leftJoin('master_type_reimburse_user_assign as mtrua', 'mtrua.user_id', '=', 'btgu.user_id')
-            ->leftJoin('users as u', 'u.id', '=', 'mtrua.user_id')
+            ->leftJoin('master_type_reimburse_user_assign as mtrua_grade_relation_exist', function($join) {
+                $join->on('mtrua_grade_relation_exist.user_id', '=', 'btgu.user_id')
+                ->where('mtrua_grade_relation_exist.is_assign', '=', true);
+            })
+            ->leftJoin('master_type_reimburse_user_assign as mtrua_grade_relation_not_exist', function($join) use ($userId) {
+                $join->on('mtrua_grade_relation_not_exist.reimburse_type_id', '=', 'master_type_reimburses.id')
+                ->where('mtrua_grade_relation_not_exist.user_id', '=', $userId)
+                ->where('mtrua_grade_relation_not_exist.is_assign', '=', true);
+            })
+            ->leftJoin('users as u', function($join) {
+                $join->on('u.id', '=', 'mtrua_grade_relation_exist.user_id')
+                ->orOn('u.id', '=', 'mtrua_grade_relation_not_exist.user_id');
+            })
             ->leftJoinSub("
                 SELECT
                     MAX(mtr.interval_claim_period) AS max_interval_claim_period,
@@ -91,7 +103,11 @@ class ReimbuseController extends Controller
                     $query->where('master_type_reimburses.grade_option', 'all')
                     ->where(function($query) {
                         $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
-                    })->where('master_type_reimburses.is_employee', true);
+                    })
+                    ->where(function($query) {
+                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
+                    })
+                    ->where('master_type_reimburses.is_employee', true);
                 });
         } else {
             $data = 
@@ -100,12 +116,19 @@ class ReimbuseController extends Controller
                     ->where(function($query) {
                         $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
                     })
+                    ->where(function($query) {
+                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
+                    })
                     ->whereIn('master_type_reimburses.family_status', $getFamilieStatus);
                 })->orWhere(function($query) use ($getFamilieStatus) {
                     $query->where('master_type_reimburses.grade_option', 'all')
                     ->where(function($query) {
                         $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
-                    })->where(function($query) use ($getFamilieStatus) {
+                    })
+                    ->where(function($query) {
+                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
+                    })
+                    ->where(function($query) use ($getFamilieStatus) {
                         $query->whereIn('master_type_reimburses.family_status', $getFamilieStatus)
                         ->orWhere('master_type_reimburses.is_employee', true);
                     });
