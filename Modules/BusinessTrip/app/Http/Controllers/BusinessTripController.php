@@ -545,6 +545,7 @@ class BusinessTripController extends Controller
                 'request_no' => $map->request_no,
                 'remarks' => $map->remarks,
                 'request_for' => $map->requestFor->name,
+                'created_by' => $map->requestedBy->name,
                 'status' => [
                     'name' => $status,
                     'classname' => $map->status->classname,
@@ -704,6 +705,7 @@ class BusinessTripController extends Controller
             $data['business_trip_destination'][] = [
                 'id' => $destination->id,
                 'destination' => $destination->destination,
+                'restricted_area' => $destination->restricted_area,
                 'business_trip_start_date' => $destination->business_trip_start_date,
                 'business_trip_end_date' => $destination->business_trip_end_date,
                 'other_allowance' => $destination->other_allowance,
@@ -818,6 +820,7 @@ class BusinessTripController extends Controller
                 'destination' => $destination->destination,
                 'business_trip_start_date' => $destination->business_trip_start_date,
                 'business_trip_end_date' => $destination->business_trip_end_date,
+                'restricted_area' => $destination->restricted_area,
                 'other_allowance' => $destination->other_allowance,
                 'business_trip_detail_attendance' => $detail_attendance,
                 'standar_detail_allowance' => $standar_detail_allowance,
@@ -835,13 +838,14 @@ class BusinessTripController extends Controller
     function getDateByUser($user_id) {
         $data = BusinessTripDestination::whereHas('businessTrip', function ($query) use ($user_id) {
             $query->where('request_for', $user_id)
-                ->where('type', 'request');
+                ->where('type', 'request')
+                ->where('status_id',1);
         })->get();
         $destination = [];
         $offset = 10;
         foreach ($data as $key => $value) {
              // Pastikan status approval bukan 'Cancel' atau 'Reject'
-            $hasValidApproval = Approval::where('document_id', $value->business_trip_id)->whereIn('status',['Rejected','Cancel'])->exists();
+            $hasValidApproval = Approval::where('document_id', $value->business_trip_id)->whereIn('status',['Rejected','Revise'])->exists();
 
             if (!$hasValidApproval) {
                 $destination[$key + $offset] = [

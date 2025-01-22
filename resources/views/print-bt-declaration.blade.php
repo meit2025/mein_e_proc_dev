@@ -409,7 +409,7 @@
                     <tr style="border-bottom: 1px solid #000">
                         <th style="text-align: left;padding: 5px;">Total Declaration Value</th>
                         <td>:</td>
-                        <td>{{number_format($total_declaration_value + $row['other_allowance'],0,',','.')}} +</td>
+                        <td>{{number_format($total_declaration_value + $row['other_allowance'],0,',','.')}} -</td>
                     </tr>
                     <tr>
                         <th>Deviation Value</th>

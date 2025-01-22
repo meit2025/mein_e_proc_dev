@@ -42,7 +42,7 @@ class AllowanceItem extends Model
         'material_number',
         'material_group'
     ];
-    protected $appends = ['grade_price'];
+    // protected $appends = ['grade_price'];
 
     // protected static function newFactory(): AllowanceItemFactory
     // {
@@ -70,16 +70,16 @@ class AllowanceItem extends Model
         return $this->hasOne(BusinessTripGradeAllowance::class, 'allowance_item_id', 'id');
     }
 
-    public function getGradePriceAttribute()
-    {
-        // Cek nilai grade_option
-        if ($this->grade_option === 'all') {
-            return $this->grade_all_price;
-        } elseif ($this->grade_option === 'grade') {
-            // Ambil dari relasi gradeAllowances
-            return $this->gradeAllowance->plafon; // Contoh: jumlah total allowance
-        }
+    // public function getGradePriceAttribute()
+    // {
+    //     // Cek nilai grade_option
+    //     if ($this->grade_option === 'all') {
+    //         return $this->grade_all_price;
+    //     } elseif ($this->grade_option === 'grade') {
+    //         // Ambil dari relasi gradeAllowances
+    //         return $this->gradeAllowance->plafon; // Contoh: jumlah total allowance
+    //     }
 
-        return null; // Jika tidak ada yang cocok
-    }
+    //     return null; // Jika tidak ada yang cocok
+    // }
 }

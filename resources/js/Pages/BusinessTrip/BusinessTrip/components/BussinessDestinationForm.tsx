@@ -133,7 +133,7 @@ export function BussinessDestinationForm({
       }
       return detailAllowance;
     }
-console.log(listAllowances, 'listAllowances');
+
     const allowancesForm = listAllowances.map((item: any) => {
       return {
         name: item.name,
@@ -272,9 +272,8 @@ console.log(listAllowances, 'listAllowances');
           </tr>
           <tr>
             <td width={200}>
-            Restricted Area
             </td>
-            <td>
+            <td className='flex gap-2'>
             <FormField
                 control={form.control}
                 name={`destinations.${index}.restricted_area`}
@@ -295,6 +294,7 @@ console.log(listAllowances, 'listAllowances');
                   </FormItem>
                 )}
               />
+            Restricted Area
             </td>
           </tr>
           <tr>

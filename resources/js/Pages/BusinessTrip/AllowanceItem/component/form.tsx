@@ -264,6 +264,7 @@ export default function AllowanceItemForm({
         id: 'material_group',
         tabel: 'material_groups',
         idType: 'string',
+        isMapping: true,
     });
   }, [type]);
 
@@ -276,6 +277,7 @@ export default function AllowanceItemForm({
       tabel: 'master_materials',
       attribut: value,
       isMapping: true,
+      hiddenZero: true,
       where: {
         key: 'material_group',
         parameter: value,
@@ -307,6 +309,7 @@ export default function AllowanceItemForm({
                           {...field}
                           value={field.value || ''}
                           onChange={(e) => field.onChange(e.target.value)}
+                          className='w-11/12'
                         />
                       </FormControl>
                       <FormMessage />
@@ -330,6 +333,7 @@ export default function AllowanceItemForm({
                           {...field}
                           value={field.value || ''}
                           onChange={(e) => field.onChange(e.target.value)}
+                          className='w-11/12'
                         />
                       </FormControl>
                       <FormMessage />
@@ -374,35 +378,6 @@ export default function AllowanceItemForm({
             <tr>
               <td width={200}>Material Group</td>
               <td>
-                {/* <FormField
-                  control={form.control}
-                  name='material_group'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <AsyncDropdownComponent
-                          onSelectChange={(value) => {
-                            field.onChange(value);
-
-                            setMaterialURL(
-                              'api/master/master-material/get-dropdown-master-material-number/by-material-group/' +
-                                value,
-                            );
-
-                            form.setValue('material_number', '');
-                          }}
-                          value={field.value}
-                          placeholder='Select material group'
-                          filter={['material_group']}
-                          id='material_group'
-                          label='material_group'
-                          url='api/master/master-material/get-dropdown-master-material-group'
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
 
                 <FormAutocomplete<any>
                     fieldLabel=''
@@ -411,7 +386,7 @@ export default function AllowanceItemForm({
                     isRequired={true}
                     disabled={false}
                     placeholder={'Select Material Group'}
-                    classNames='mt-2 w-full'
+                    classNames='mt-2 w-11/12'
                     onChangeOutside={async (value: string, data: any) => {
                         await handelGetMaterialNumber(value);
                     }}
@@ -428,7 +403,7 @@ export default function AllowanceItemForm({
                 isRequired={false}
                 disabled={false}
                 placeholder={'Material number'}
-                classNames='mt-2 w-full'
+                classNames='mt-2 w-11/12'
                 />
               </td>
             </tr>
@@ -547,28 +522,6 @@ export default function AllowanceItemForm({
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                    // <FormItem>
-                    //   <FormControl>
-                    //     <RadioGroup
-                    //       onValueChange={field.onChange}
-                    //       defaultValue={field.value}
-                    //       className='flex flex space-x-1'
-                    //     >
-                    //       <FormItem className='flex text-xs items-center space-x-3 space-y-0'>
-                    //         <FormControl>
-                    //           <RadioGroupItem value='all' />
-                    //         </FormControl>
-                    //         <FormLabel className='text-xs'>All</FormLabel>
-                    //       </FormItem>
-                    //       <FormItem className='flex items-center space-x-3 space-y-0'>
-                    //         <FormControl>
-                    //           <RadioGroupItem value='grade' />
-                    //         </FormControl>
-                    //         <FormLabel className='text-xs'>Grade</FormLabel>
-                    //       </FormItem>
-                    //     </RadioGroup>
-                    //   </FormControl>
-                    // </FormItem>
                   )}
                 />
                 {form.getValues('grade_option') === 'all' ? (
@@ -579,7 +532,7 @@ export default function AllowanceItemForm({
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input {...field} />
+                            <Input {...field} className='w-11/12'/>
                           </FormControl>
                         </FormItem>
                       )}
@@ -626,7 +579,7 @@ export default function AllowanceItemForm({
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormControl>
-                                    <Input {...field}/>
+                                    <Input {...field} className='w-11/12'/>
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
