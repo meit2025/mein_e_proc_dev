@@ -112,12 +112,13 @@ const dummyPrice = 25000;
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
 const ACCEPTED_FILE_TYPES = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/heic',
-  'image/heif',
-  'application/pdf',
+    'heic',
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/heic',
+    'image/heif',
+    'application/pdf',
 ];
 
 export const BussinessTripFormV1 = ({
@@ -373,10 +374,15 @@ export const BussinessTripFormV1 = ({
     }
   }
 
+    const [selectedDates, setSelectedDates] = React.useState<
+    { start: Date | undefined; end: Date | undefined }[]
+    >([]);
+
   const totalDestinationHandler = (value: string) => {
     form.setValue('total_destination', parseInt(value, 10));
     setTotalDestination(value);
     setAllowancesProperty();
+    setSelectedDates([]);
     // let valueToInt = parseInt(value);
   };
 
@@ -495,7 +501,7 @@ export const BussinessTripFormV1 = ({
         detail_attedances: [],
       });
     }
-
+    // console.log(dateBusinessTripByUser,'dateBusinessTripByUser')
     form.setValue('destinations', destinationForm);
   }
 
@@ -949,6 +955,8 @@ export const BussinessTripFormV1 = ({
             type={type}
             btClone={BusinessTripType.clone}
             dateBusinessTripByUser={dateBusinessTripByUser}
+            setSelectedDates={setSelectedDates}
+            selectedDates={selectedDates}
           />
           <Separator className='my-4' />
 
