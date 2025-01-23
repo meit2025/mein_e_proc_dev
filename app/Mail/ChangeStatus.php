@@ -35,7 +35,7 @@ class ChangeStatus extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Change Status Dokument',
+            subject: 'Change Status Document',
         );
     }
 
