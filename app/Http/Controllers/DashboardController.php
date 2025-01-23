@@ -49,6 +49,9 @@ class DashboardController extends Controller
             $categories = $this->countStatuses($query, $statusTypes);
         }
 
+        $dec = BusinessTrip::query()->where('type', 'declaration')->count();
+        $req = BusinessTrip::query()->whereNot('type', 'declaration')->count();
+
         // Total counts for each category
         $dataTotal = [
             'request' => [
@@ -58,6 +61,10 @@ class DashboardController extends Controller
                 'vendorSelection' => $this->getTotalCount(Purchase::query(), $user, 'user_id'),
             ],
             'categories' => $categories,
+            'chart' => [
+                'dec' => $dec,
+                'req' => $req,
+            ]
         ];
 
         return Inertia::render('Dashboard/index', [
@@ -105,6 +112,9 @@ class DashboardController extends Controller
             $categories = $this->countStatuses($query, $statusTypes);
         }
 
+        $dec = BusinessTrip::query()->where('type', 'declaration')->count();
+        $req = BusinessTrip::query()->whereNot('type', 'declaration')->count();
+
         // Total counts for each category
         $dataTotal = [
             'request' => [
@@ -114,6 +124,10 @@ class DashboardController extends Controller
                 'vendorSelection' => $this->getTotalCount(Purchase::query(), $user, 'user_id'),
             ],
             'categories' => $categories,
+            'chart' => [
+                'dec' => $dec,
+                'req' => $req,
+            ]
         ];
 
 

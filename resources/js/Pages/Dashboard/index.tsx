@@ -9,6 +9,7 @@ function Index(dataTotal: any) {
     const [selectedTime, setSelectedTime] = useState('1year');
     const [categories, setCategories] = useState(dataTotal.dataTotal.categories);
     const [requestData, setRequestData] = useState(dataTotal.dataTotal.request);
+    const [chartData, setChart] = useState(dataTotal.dataTotal.chart);
 
 
     const statusNames: { [key: string]: string } = {
@@ -25,6 +26,9 @@ function Index(dataTotal: any) {
 
             setRequestData(response.data.dataTotal.request);
             setCategories(response.data.dataTotal.categories);
+            console.log(response.data.dataTotal);
+
+            setChart(response.data.dataTotal.chart);
         };
 
         fetchFilteredData();
@@ -49,8 +53,8 @@ function Index(dataTotal: any) {
     const approvedPercent = total ? ((categories.approved ?? 0) / total) * 100 : 0;
     const rejectedPercent = total ? ((categories.rejected ?? 0) / total) * 100 : 0;
 
-    const declaration = categories.approved ?? 0;
-    const notDeclaration = (categories.process ?? 0) + (categories.waiting ?? 0) + (categories.rejected ?? 0)
+    const declaration = chartData.dec ?? 0;
+    const notDeclaration = chartData.req ?? 0;
 
     return (
         <>
