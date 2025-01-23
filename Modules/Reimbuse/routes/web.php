@@ -33,6 +33,7 @@ Route::group(['prefix' => 'reimburse'], function () {
     Route::group(['prefix' => 'my-reimburse'], function () {
         Route::get('/', [MyReimburseController::class, 'index'])->name('reimburse.myReimburse.index');    
         Route::get('/{isEmployee}', [MyReimburseController::class, 'list'])->name('reimburse.myReimburse.list');    
+        Route::get('/balance-family-reimburse/{id}/{relation}', [MyReimburseController::class, 'listBalanceFamily'])->name('reimburse.myReimburse.balanceFamily');    
     });
 });
 
