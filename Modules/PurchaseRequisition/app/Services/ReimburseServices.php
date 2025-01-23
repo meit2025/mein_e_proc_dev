@@ -188,7 +188,7 @@ class ReimburseServices
             'purchase_id' => $reim->id,
             'code_transaction' => 'REIM', // code_transaction
             'purchase_requisition_number' => $reqno, //banfn
-            'item_number' => $index,  // bnfpo
+            'item_number' => $value->item_number,  // bnfpo
             'requisitioner_name' => $businessPartner ? $businessPartner->partner_number : '', // afnam
             'requisition_date' => $formattedDate,  // badat
             'requirement_tracking_number' => '', // bednr
