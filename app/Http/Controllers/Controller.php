@@ -111,7 +111,7 @@ abstract class Controller
                     return $document->document_id;
                 }, $documents);
 
-                $query = $query->whereIn('id', (array) $documentIds);
+                $query = $query->whereIn('id', (array) $documentIds)->where('status_id', '!=', 2);
             } else {
                 $query->where(function ($q) use ($request, $filterableColumns) {
                     $q->orWhere('user_id', Auth::user()->id)
