@@ -261,7 +261,7 @@
                 <h3>Detail {{$row['destination']}}</h3>
                 @if ($row['restricted_area'] === 1)
                     <div style="background-color: #fd0000; display: inline-block; color: white; margin: 0.3rem 0; padding: 0.5rem 1rem; border-radius: 0.375rem;">
-                        <span style="font-size: 0.75rem;">Restrict Area</span>
+                        <span style="font-size: 0.75rem;">Restricted Area</span>
                     </div>
                 @endif
             </div>
