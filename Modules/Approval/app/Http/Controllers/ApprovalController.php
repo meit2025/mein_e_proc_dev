@@ -199,8 +199,20 @@ class ApprovalController extends Controller
                     ->update([
                         'status' => $request->status,
                         'message' => $request->note,
-                        'is_status' => true
+                        'is_status' => true,
+                        'is_approval' => false
                     ]);
+
+                $dataNext = Approval::where('id', $request->approvalId)->where('document_id',  $request->id)
+                    ->where('document_name', $dokumentApproval)->first();
+
+                if ($dataNext) {
+                    Approval::where('document_id',  $request->id)
+                        ->where('number_approval', $dataNext->number_approval + 1)
+                        ->where('document_name', $dokumentApproval)->update([
+                            'is_approval' => true
+                        ]);
+                }
             }
             $message = $dokumentName .  ' Document ' . $request->status . '  ' .  ' by ' . Auth::user()->name . ' At ' . $this->DateTimeNow();
 
