@@ -129,6 +129,7 @@ class MyReimburseController extends Controller
                 // Total Balance Requested
                 $getBalanceOnPr = Reimburse::selectRaw("
                     reimburses.balance as balance, 
+                    mtr.interval_claim_period as has_interval_claim, 
                     pr.is_closed as status_closed,
                     CASE 
                         WHEN 
@@ -159,8 +160,8 @@ class MyReimburseController extends Controller
                         ->whereIn('rg.status_id', [1, 3, 5]);
                 })->get()->toArray();
 
-                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return $value['status_closed'] != 'S' && $value['on_interval'] == 1; }), 'balance'));
-                $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return $value['status_closed'] == 'S' && $value['on_interval'] == 1; }), 'balance'));
+                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return $value['status_closed'] != 'S' && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
+                $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return $value['status_closed'] == 'S' && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
 
                 // Remaining Balance
                 $remainingBalance = (int)$maximumBalance - ($paidBalance + $unpaidBalance);
