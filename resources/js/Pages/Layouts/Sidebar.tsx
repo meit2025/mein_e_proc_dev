@@ -42,7 +42,7 @@ import { LIST_PAGE_SETTING_APPROVAL_PR } from '@/endpoint/settingApprovalPr/page
 import { LIST_PAGE_TRACKING_NUMBER_AUTO } from '@/endpoint/approvalTrackingNumberAuto/page';
 import { LIST_PAGE_TRACKING_NUMBER_CHOOSE } from '@/endpoint/approvalTrackingNumberChoose/page';
 import { LIST_PAGE_APPROVAL_CONDITIONAL_USER } from '@/endpoint/settingApprovalPrConditionalUser/page';
-import { PAGE_REPORT, PAGE_REPORT_BT_DEC, PAGE_REPORT_BT_REQ, PAGE_REPORT_PURCHASE } from '@/endpoint/report/page';
+import { PAGE_REPORT, PAGE_REPORT_BT_DEC, PAGE_REPORT_BT_REQ, PAGE_REPORT_BT_OVERALL, PAGE_REPORT_PURCHASE } from '@/endpoint/report/page';
 
 export const RuteTitle = (title: string) => {
     return (
@@ -949,6 +949,14 @@ const sidebar = [
                         role: [
                             'report business trip declaration view',
                             'report business trip declaration export',
+                        ],
+                    },
+                    {
+                        name: 'Business Trip Overall',
+                        route: PAGE_REPORT_BT_OVERALL,
+                        role: [
+                            'report business trip overall view',
+                            'report business trip overall export',
                         ],
                     },
                 ],
