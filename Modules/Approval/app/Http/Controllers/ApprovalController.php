@@ -55,6 +55,7 @@ class ApprovalController extends Controller
         try {
             //code...
             $approvalRouteData = $request->only(['group_id', 'is_hr', 'hr_approval', 'user_hr_id', 'is_conditional', 'nominal']);
+            $approvalRouteData['nominal'] = $request->is_conditional ? $request->nominal : 0;
             $approvalRoute = ApprovalRoute::create($approvalRouteData);
 
             // Ambil array user_id dari request
@@ -108,6 +109,7 @@ class ApprovalController extends Controller
 
         // Update data approval_routes
         $approvalRouteData = $request->only(['group_id', 'is_hr', 'hr_approval', 'user_hr_id', 'is_conditional', 'nominal']);
+        $approvalRouteData['nominal'] = $request->is_conditional ? $request->nominal : 0;
         $approvalRoute->update($approvalRouteData);
 
         // Ambil array user_id dari request

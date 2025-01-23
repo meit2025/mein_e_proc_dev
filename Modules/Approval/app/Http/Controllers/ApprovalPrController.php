@@ -60,6 +60,7 @@ class ApprovalPrController extends Controller
             ]);
 
             $approvalRouteData['value'] = $request->value ?? 0;
+            $approvalRouteData['min_value'] = $request->min_value ?? 0;
             $approvalRoute = ApprovalPr::create($approvalRouteData);
 
             // Ambil array user_id dari request
