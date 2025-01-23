@@ -101,7 +101,7 @@ class BusinessTripDeclarationController extends Controller
                 // Tambahkan detail allowance
                 $allowances[$allowanceId]['detail'][] = [
                     'date' => $row->date, // Sesuaikan dengan nama kolom tanggal di detailDestinationDay
-                    'request_price' => $row->price // Sesuaikan dengan kolom request_price di detailDestinationDay
+                    'request_price' => (int)$row->price // Sesuaikan dengan kolom request_price di detailDestinationDay
                 ];
 
                 $allowances[$allowanceId]['subtotal'] += $row->price;
@@ -127,7 +127,7 @@ class BusinessTripDeclarationController extends Controller
                 // Tambahkan detail allowance
                 $allowances[$allowanceId]['detail'][] = [
                     'date' => '', // Sesuaikan dengan nama kolom tanggal di detailDestinationTotal
-                    'request_price' => $row->price // Sesuaikan dengan kolom request_price di detailDestinationTotal
+                    'request_price' => (int)$row->price // Sesuaikan dengan kolom request_price di detailDestinationTotal
                 ];
 
                 $allowances[$allowanceId]['subtotal'] += $row->price;
@@ -320,6 +320,7 @@ class BusinessTripDeclarationController extends Controller
                 'total_standard' => $total_standard,
                 'total_request' => $total_request,
                 'total_declaration' => $total_declaration + $destination->other_allowance,
+                'total_deviation' => $total_request - ($total_declaration + $destination->other_allowance)
             ];
         }
         return $this->successResponse($data);
@@ -360,7 +361,7 @@ class BusinessTripDeclarationController extends Controller
             $businessTrip->remarks = $request->remark;
             $businessTrip->save();
 
-            if($request->file_existing != null){
+            if ($request->file_existing != null) {
                 // DELETE ATTACHMENT DULU JIKA ADA YANG DI HAPUS
                 $array_id_exist = [];
                 foreach ($request->file_existing as $key => $attachment) {
@@ -368,7 +369,7 @@ class BusinessTripDeclarationController extends Controller
                     $array_id_exist[] = $decode->id;
                 }
                 $businessTrip->attachment()->whereNotIn('id', $array_id_exist)->delete();
-            }else{
+            } else {
                 $businessTrip->attachment()->delete();
             }
 
@@ -418,7 +419,7 @@ class BusinessTripDeclarationController extends Controller
         // $query->orderBy($sortBy, $sortDirection);
         if ($request->approval == "1") {
             $data = Approval::where('user_id', Auth::user()->id)
-            ->where('document_name', 'TRIP_DECLARATION')->get();
+                ->where('document_name', 'TRIP_DECLARATION')->get();
             $arr = $data->filter(function ($value) {
                 $previousApproval = Approval::where('id', '<', $value->id)
                     ->where('document_id', $value->document_id)
@@ -433,11 +434,11 @@ class BusinessTripDeclarationController extends Controller
                     ->where('is_status', true)
                     ->exists();
             })->pluck('document_id');
-            $query = $query->whereIn('id', $arr)->where('status_id',1);
-        }else{
-            $query = $query->where(function($query) {
+            $query = $query->whereIn('id', $arr)->where('status_id', 1);
+        } else {
+            $query = $query->where(function ($query) {
                 $query->where('created_by', Auth::user()->id)
-                      ->orWhere('request_for', Auth::user()->id);
+                    ->orWhere('request_for', Auth::user()->id);
             });
         }
 
@@ -455,10 +456,11 @@ class BusinessTripDeclarationController extends Controller
                 'request_no' => $requestNo,
                 'request_for' => $requestFor,
                 'remarks' => $map->remarks,
+                'status_id' => $map->status_id,
                 'status' => [
-                    'name' => $map->status->name,
-                    'classname' => $map->status->classname,
-                    'code' => $map->status->code
+                    'name' => $map->status?->name,
+                    'classname' => $map->status?->classname,
+                    'code' => $map->status?->code
                 ],
                 'created_at' => date('d/m/Y', strtotime($map->created_at)),
                 // 'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array

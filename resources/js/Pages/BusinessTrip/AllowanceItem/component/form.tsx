@@ -98,8 +98,8 @@ export default function AllowanceItemForm({
     // formula: z.string().min(1, 'Formula is required'),
     allowance_category_id: z.string().min(1, 'Allowance Category is required'),
     request_value: z.string().min(1, 'Required'),
-    grade_option: z.string().min(1, 'Grade must be selected'),
     grade_all_price: z.string().optional(),
+    grade_option: z.string().min(1, 'Grade must be selected'),
     grades: z.array(
       z.object({
         grade: z.string(),
@@ -107,6 +107,37 @@ export default function AllowanceItemForm({
         plafon: z.string(),
       }),
     ),
+  })
+  .superRefine((data, ctx) => {
+    // Validasi jika grade_option adalah 'grade'
+    if (data.grade_option === 'grade') {
+      if (data.grades.length === 0) {
+        // Jika array grades kosong
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['grades'],
+          message: 'At least one grade is required when grade_option is "grade".',
+        });
+      } else {
+        // Validasi setiap elemen dalam array grades
+        data.grades.forEach((grade, index) => {
+          if (!grade.grade || grade.grade.trim() === '') {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+              path: ['grades', index, 'grade'],
+              message: 'Grade is required.',
+            });
+          }
+          if (type == FormType.create && (!grade.plafon || grade.plafon.trim() === '')) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['grades', index, 'plafon'],
+                message: 'Plafon is required.',
+            });
+        }
+        });
+      }
+    }
   });
 
   const [materials, setMaterials] = React.useState([]);
@@ -139,7 +170,7 @@ export default function AllowanceItemForm({
       const response = await axiosInstance.get(detailUrl ?? '');
 
       const allowance = response.data.data.allowance;
-      console.log(allowance);
+    //   console.log(response);
     //   getMaterials(allowance.material_group);
         getMaterialNumber('', {
             name: 'material_description',
@@ -154,7 +185,7 @@ export default function AllowanceItemForm({
         });
 
       const grades = response.data.data.grades;
-
+        console.log(grades)
       form.reset({
         code: allowance.code,
         name: allowance.name,
@@ -233,6 +264,7 @@ export default function AllowanceItemForm({
         id: 'material_group',
         tabel: 'material_groups',
         idType: 'string',
+        isMapping: true,
     });
   }, [type]);
 
@@ -245,6 +277,7 @@ export default function AllowanceItemForm({
       tabel: 'master_materials',
       attribut: value,
       isMapping: true,
+      hiddenZero: true,
       where: {
         key: 'material_group',
         parameter: value,
@@ -276,6 +309,7 @@ export default function AllowanceItemForm({
                           {...field}
                           value={field.value || ''}
                           onChange={(e) => field.onChange(e.target.value)}
+                          className='w-11/12'
                         />
                       </FormControl>
                       <FormMessage />
@@ -299,6 +333,7 @@ export default function AllowanceItemForm({
                           {...field}
                           value={field.value || ''}
                           onChange={(e) => field.onChange(e.target.value)}
+                          className='w-11/12'
                         />
                       </FormControl>
                       <FormMessage />
@@ -343,35 +378,6 @@ export default function AllowanceItemForm({
             <tr>
               <td width={200}>Material Group</td>
               <td>
-                {/* <FormField
-                  control={form.control}
-                  name='material_group'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <AsyncDropdownComponent
-                          onSelectChange={(value) => {
-                            field.onChange(value);
-
-                            setMaterialURL(
-                              'api/master/master-material/get-dropdown-master-material-number/by-material-group/' +
-                                value,
-                            );
-
-                            form.setValue('material_number', '');
-                          }}
-                          value={field.value}
-                          placeholder='Select material group'
-                          filter={['material_group']}
-                          id='material_group'
-                          label='material_group'
-                          url='api/master/master-material/get-dropdown-master-material-group'
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
 
                 <FormAutocomplete<any>
                     fieldLabel=''
@@ -380,7 +386,7 @@ export default function AllowanceItemForm({
                     isRequired={true}
                     disabled={false}
                     placeholder={'Select Material Group'}
-                    classNames='mt-2 w-full'
+                    classNames='mt-2 w-11/12'
                     onChangeOutside={async (value: string, data: any) => {
                         await handelGetMaterialNumber(value);
                     }}
@@ -397,7 +403,7 @@ export default function AllowanceItemForm({
                 isRequired={false}
                 disabled={false}
                 placeholder={'Material number'}
-                classNames='mt-2 w-full'
+                classNames='mt-2 w-11/12'
                 />
               </td>
             </tr>
@@ -501,7 +507,7 @@ export default function AllowanceItemForm({
                           onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
                           value={field.value} // Set the current value from React Hook Form
                         >
-                          <SelectTrigger className='w-[200px]'>
+                          <SelectTrigger className='w-[200px] mb-3'>
                             <SelectValue placeholder='Select Request Value' />
                           </SelectTrigger>
                           <SelectContent>
@@ -516,28 +522,6 @@ export default function AllowanceItemForm({
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                    // <FormItem>
-                    //   <FormControl>
-                    //     <RadioGroup
-                    //       onValueChange={field.onChange}
-                    //       defaultValue={field.value}
-                    //       className='flex flex space-x-1'
-                    //     >
-                    //       <FormItem className='flex text-xs items-center space-x-3 space-y-0'>
-                    //         <FormControl>
-                    //           <RadioGroupItem value='all' />
-                    //         </FormControl>
-                    //         <FormLabel className='text-xs'>All</FormLabel>
-                    //       </FormItem>
-                    //       <FormItem className='flex items-center space-x-3 space-y-0'>
-                    //         <FormControl>
-                    //           <RadioGroupItem value='grade' />
-                    //         </FormControl>
-                    //         <FormLabel className='text-xs'>Grade</FormLabel>
-                    //       </FormItem>
-                    //     </RadioGroup>
-                    //   </FormControl>
-                    // </FormItem>
                   )}
                 />
                 {form.getValues('grade_option') === 'all' ? (
@@ -548,7 +532,7 @@ export default function AllowanceItemForm({
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input {...field} />
+                            <Input {...field} className='w-11/12'/>
                           </FormControl>
                         </FormItem>
                       )}
@@ -561,14 +545,17 @@ export default function AllowanceItemForm({
                       id='id'
                       options={listGrade}
                       value={form.getValues('grades').map((item) => item.id)}
+                      isHidden='hidden'
                       onSelect={(value) => {
+                        const currentGrades = form.getValues('grades');
                         form.setValue(
                           'grades',
                           value.map((item) => {
+                            const existingGrade = currentGrades.find((grade) => grade.id === item.id);
                             return {
-                              id: item.id,
-                              grade: item.grade,
-                              plafon: '',
+                                id: item.id,
+                                grade: item.grade,
+                                plafon: existingGrade ? existingGrade.plafon : '', // Pertahankan plafon jika ada
                             };
                           }),
                         );
@@ -581,7 +568,7 @@ export default function AllowanceItemForm({
                   <div className='mt-4'>
                     <table>
                       {gradeFields.map((grade, gradeIndex) => (
-                        <tr key={grade}>
+                        <tr key={gradeIndex}>
                           <td>Grade {grade.grade}</td>
                           <td>:</td>
                           <td>
@@ -592,8 +579,9 @@ export default function AllowanceItemForm({
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormControl>
-                                      <Input {...field} />
+                                    <Input {...field} className='w-11/12'/>
                                     </FormControl>
+                                    <FormMessage />
                                   </FormItem>
                                 )}
                               />

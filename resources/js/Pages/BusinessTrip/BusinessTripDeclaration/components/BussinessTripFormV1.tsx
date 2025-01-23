@@ -64,11 +64,12 @@ interface BusinessTripAttachement {
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
 const ACCEPTED_FILE_TYPES = [
+  'heic',
+  'image/heic',
+  'image/heif',
   'image/jpeg',
   'image/jpg',
   'image/png',
-  'image/heic',
-  'image/heif',
   'application/pdf',
 ];
 
@@ -82,16 +83,18 @@ export const BussinessTripFormV1 = ({
   const formSchema = z.object({
     request_no: z.string().nonempty('Request for required'),
     remark: z.string().nonempty('Remark is required'),
-    attachment: z.array(
+    attachment: z
+      .array(
         z
-        .instanceof(File)
-        .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
+          .instanceof(File)
+          .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
             message: 'File type must be JPG, JPEG, PNG, HEIC or PDF',
-        })
-        .refine((file) => file.size <= MAX_FILE_SIZE, {
+          })
+          .refine((file) => file.size <= MAX_FILE_SIZE, {
             message: 'File size must be less than 1MB',
-        }),
-    ).min(1, 'Attachment is required'),
+          }),
+      )
+      .min(1, 'Attachment is required'),
     total_destination: z.number().int('Total Destinantion Required'),
     cash_advance: z.boolean().nullable().optional(),
     reference_number: z.string().nullable().optional(),
@@ -125,7 +128,7 @@ export const BussinessTripFormV1 = ({
             detail: z.array(
               z.object({
                 date: z.string().nullish(),
-                request_price: z.string().optional(),
+                request_price: z.number().optional(),
               }),
             ),
           }),
@@ -176,6 +179,8 @@ export const BussinessTripFormV1 = ({
 
   const getTotalDes = () => {
     const alldestinations = form.getValues('destinations');
+    const other = form.getValues('destinations.0.other');
+
     const totalAll = alldestinations.reduce(
       (destinationSum: number, destination: any, destinationIndex: number) => {
         const allowances = destination.allowances || [];
@@ -197,14 +202,36 @@ export const BussinessTripFormV1 = ({
       0,
     );
 
-    return totalAll;
+    let totalOther = 0; // Hanya dideklarasikan sekali
+
+    try {
+      totalOther = alldestinations.reduce(
+        (otrSum: number, destination: any, destinationIndex: number) => {
+          const other = destination.other || [];
+
+          const othTotal = other.reduce((otherSum: number, allowance: any, index: number) => {
+            const details = form.getValues(`destinations.${destinationIndex}.other.${index}.value`);
+
+            return otherSum + (details === undefined ? 0 : details);
+          }, 0);
+
+          return otrSum + othTotal;
+        },
+        0,
+      );
+    } catch (error) {
+      console.log(error);
+      totalOther = 0;
+    }
+
+    return totalAll + totalOther;
   };
   const [otherAllowance, setOtherAllowance] = React.useState<boolean>(false);
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     // console.log(otherAllowance, ' valuesnya');
     try {
-      if (type == BusinessTripType.create) {
+      if (type === BusinessTripType.create) {
         const totalAll = getTotalDes();
         const formData = new FormData();
         formData.append('user_id', businessTripDetail.request_for?.id.toString() ?? '');
@@ -266,13 +293,14 @@ export const BussinessTripFormV1 = ({
     try {
       const response = await axiosInstance.get(url);
       const businessTripData = response.data.data;
+      console.log(businessTripData, 'businessTripData');
       setIsCashAdvance(businessTripData.cash_advance == 1 ? true : false);
       form.setValue('remark', businessTripData.remarks || '');
       form.setValue('total_destination', businessTripData.total_destination || 1);
       form.setValue('cash_advance', businessTripData.cash_advance == 1 ? true : false);
       form.setValue('reference_number', businessTripData.reference_number);
-      form.setValue('total_percent', businessTripData.total_percent);
-      form.setValue('total_cash_advance', businessTripData.total_cash_advance);
+      form.setValue('total_percent', `${businessTripData.total_percent} %`);
+      form.setValue('total_cash_advance', formatRupiah(businessTripData.total_cash_advance, false));
       setBusinessTripDetail(response.data.data as BusinessTripModel);
       setListDestination(businessTripData.destinations);
       setTotalDestination(businessTripData.total_destination);
@@ -380,10 +408,10 @@ export const BussinessTripFormV1 = ({
     useDropdownOptions();
 
   React.useEffect(() => {
-    const totalAll = getTotalDes();
-    if (totalAll > 0) {
-      fetchDataValue();
-    }
+    // const totalAll = getTotalDes();
+    // if (totalAll > 0) {
+    //   fetchDataValue();
+    // }
 
     getdataRequestNo('', {
       name: 'request_no',
@@ -513,6 +541,7 @@ export const BussinessTripFormV1 = ({
                           className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
                           type='file'
                           multiple // Menambahkan atribut multiple
+                          accept='.jpg,.jpeg,.png,.pdf,.heic,.heif'
                           onChange={(e) => {
                             const files = e.target.files; // Ambil file yang dipilih
                             if (files) {
@@ -525,14 +554,14 @@ export const BussinessTripFormV1 = ({
                         />
                       </FormControl>
                       {form.formState.errors.attachment && (
-                        <p className="text-[0.8rem] font-medium text-destructive">
-                            {Array.isArray(form.formState.errors.attachment)
+                        <p className='text-[0.8rem] font-medium text-destructive'>
+                          {Array.isArray(form.formState.errors.attachment)
                             ? form.formState.errors.attachment.map((error, index) => (
                                 <span key={index}>{error.message}</span>
-                                ))
+                              ))
                             : form.formState.errors.attachment.message}
                         </p>
-                        )}
+                      )}
                     </FormItem>
                   )}
                 />
@@ -869,10 +898,10 @@ export function BussinessDestinationForm({
 
   // Calculate total based on totalPercent and allowance
   React.useEffect(() => {
-    const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
-    const total = (percentValue / 100) * allowance; // Multiply percent with allowance
-    setValue('total_cash_advance', total.toFixed(2)); // Save the total in total_cash_advance field
-  }, [totalPercent, allowance, setValue]); // Recalculate when totalPercent or allowance changes
+    // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
+    // const total = (percentValue / 100) * allowance; // Multiply percent with allowance
+    // setValue('total_cash_advance', total.toFixed(2)); // Save the total in total_cash_advance field
+  }, [allowance]); // Recalculate when totalPercent or allowance changes
   //   console.log(destination, 'destinationxxxx');
   return (
     <TabsContent value={`destination${index + 1}`}>
@@ -991,20 +1020,14 @@ export function BussinessDestinationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Select
-                          value={field.value || undefined}
-                          disabled={true}
-                          onValueChange={(value) => field.onChange(value)}
-                        >
-                          <SelectTrigger className='w-[50%] mb-2'>
-                            <SelectValue placeholder='-- Select Total Percent --' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value='10'>10%</SelectItem>
-                            <SelectItem value='25'>25%</SelectItem>
-                            <SelectItem value='50'>50%</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Input
+                          {...field}
+                          value={field.value || ''}
+                          readOnly={true}
+                          className='w-[50%]'
+                          min='1'
+                          max='100'
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1016,7 +1039,7 @@ export function BussinessDestinationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Input value={field.value || ''} readOnly={true} className='w-[50%]' />
+                        <Input value={field.value || ''} readOnly={true} className='w-[50%] mt-2' />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1347,7 +1370,7 @@ export function DetailAllowance({
                         min='0'
                         value={field.value ?? ''} // Gunakan string kosong jika nilai null/undefined
                         onChange={(e) => {
-                          let value = e.target.value;
+                          const value = e.target.value;
 
                           // Izinkan input kosong
                           if (value === '') {

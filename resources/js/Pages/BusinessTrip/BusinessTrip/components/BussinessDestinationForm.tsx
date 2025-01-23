@@ -272,9 +272,8 @@ export function BussinessDestinationForm({
           </tr>
           <tr>
             <td width={200}>
-            Restricted Area
             </td>
-            <td>
+            <td className='flex gap-2'>
             <FormField
                 control={form.control}
                 name={`destinations.${index}.restricted_area`}
@@ -295,6 +294,7 @@ export function BussinessDestinationForm({
                   </FormItem>
                 )}
               />
+            Restricted Area
             </td>
           </tr>
           <tr>

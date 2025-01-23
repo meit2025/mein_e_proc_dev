@@ -397,7 +397,7 @@ class BusinessTripController extends Controller
             // Gabungkan prefix dan nomor urut
             $requestNo = $prefix . $sequence;
 
-            $getCostCenter = MasterCostCenter::where('cost_center', $request->cost_center_id)->first();
+            $getCostCenter = MasterCostCenter::where('cost_center', '0000000'.$request->cost_center_id)->first();
 
             $businessTrip = BusinessTrip::create([
                 'request_no' => $requestNo,
@@ -489,7 +489,7 @@ class BusinessTripController extends Controller
             // return $this->successResponse("All data has been processed successfully");
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->errorResponse($e->getMessage());
+            return $this->errorResponse($e->getMessage().'-'.$e->getLine());
         }
     }
 
@@ -545,6 +545,7 @@ class BusinessTripController extends Controller
                 'request_no' => $map->request_no,
                 'remarks' => $map->remarks,
                 'request_for' => $map->requestFor->name,
+                'created_by' => $map->requestedBy->name,
                 'status' => [
                     'name' => $status,
                     'classname' => $map->status->classname,
@@ -656,24 +657,24 @@ class BusinessTripController extends Controller
             $standar_detail_allowance = [];
             foreach ($destination->detailDestinationDay as $detailDay) {
                 $standar_detail_allowance[] = [
-                    'item_name' => $detailDay->allowance->name,
-                    'type' => $detailDay->allowance->type,
-                    'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)$detailDay->standard_value,
-                    'total_day' => $detailDay->total,
-                    'total' => $detailDay->standard_value * $detailDay->total,
+                    'item_name' => $detailDay?->allowance->name,
+                    'type' => $detailDay?->allowance->type,
+                    'currency_code' => $detailDay?->allowance->currency_id,
+                    'value' => (int)$detailDay?->standard_value,
+                    'total_day' => $detailDay?->total,
+                    'total' => $detailDay?->standard_value * $detailDay?->total,
                 ];
             }
 
 
             foreach ($destination->detailDestinationTotal as $detailTotal) {
                 $standar_detail_allowance[] = [
-                    'item_name' => $detailTotal->allowance->name,
-                    'type' => $detailTotal->allowance->type,
-                    'currency_code' => $detailTotal->allowance->currency_id,
-                    'value' => (int)$detailTotal->standard_value,
+                    'item_name' => $detailTotal?->allowance?->name,
+                    'type' => $detailTotal?->allowance?->type,
+                    'currency_code' => $detailTotal?->allowance?->currency_id,
+                    'value' => (int)$detailTotal?->standard_value,
                     'total_day' => '-',
-                    'total' => (int)$detailTotal->standard_value,
+                    'total' => (int)$detailTotal?->standard_value,
                 ];
             }
 
@@ -681,29 +682,30 @@ class BusinessTripController extends Controller
             $request_detail_allowance = [];
             foreach ($destination->detailDestinationDay as $detailDay) {
                 $request_detail_allowance[] = [
-                    'item_name' => $detailDay->allowance->name,
-                    'type' => $detailDay->allowance->type,
-                    'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)$detailDay->price / $detailDay->total,
-                    'total_day' => $detailDay->total,
-                    'total' => $detailDay->price,
+                    'item_name' => $detailDay?->allowance?->name,
+                    'type' => $detailDay?->allowance?->type,
+                    'currency_code' => $detailDay?->allowance?->currency_id,
+                    'value' => (int)$detailDay?->price / $detailDay?->total,
+                    'total_day' => $detailDay?->total,
+                    'total' => $detailDay?->price,
                 ];
             }
 
             foreach ($destination->detailDestinationTotal as $detailTotal) {
                 $request_detail_allowance[] = [
-                    'item_name' => $detailTotal->allowance->name,
-                    'type' => $detailTotal->allowance->type,
-                    'currency_code' => $detailTotal->allowance->currency_id,
-                    'value' => (int)$detailTotal->price,
+                    'item_name' => $detailTotal?->allowance?->name,
+                    'type' => $detailTotal?->allowance?->type,
+                    'currency_code' => $detailTotal?->allowance?->currency_id,
+                    'value' => (int)$detailTotal?->price,
                     'total_day' => '-',
-                    'total' => (int)$detailTotal->price,
+                    'total' => (int)$detailTotal?->price,
                 ];
             }
 
             $data['business_trip_destination'][] = [
                 'id' => $destination->id,
                 'destination' => $destination->destination,
+                'restricted_area' => $destination->restricted_area,
                 'business_trip_start_date' => $destination->business_trip_start_date,
                 'business_trip_end_date' => $destination->business_trip_end_date,
                 'other_allowance' => $destination->other_allowance,
@@ -764,14 +766,14 @@ class BusinessTripController extends Controller
             $total_standard = 0;
             foreach ($destination->detailDestinationDay as $detailDay) {
                 $standar_detail_allowance[] = [
-                    'item_name' => $detailDay->allowance->name,
-                    'type' => $detailDay->allowance->type,
-                    'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => number_format($detailDay->standard_value,0, ',', '.'),
-                    'total_day' => $detailDay->total,
-                    'total' => number_format($detailDay->standard_value * $detailDay->total, 0, ',', '.'),
+                    'item_name' => $detailDay?->allowance->name,
+                    'type' => $detailDay?->allowance->type,
+                    'currency_code' => $detailDay?->allowance->currency_id,
+                    'value' => number_format($detailDay?->standard_value,0, ',', '.'),
+                    'total_day' => $detailDay?->total,
+                    'total' => number_format($detailDay?->standard_value * $detailDay?->total, 0, ',', '.'),
                 ];
-                $total_standard += $detailDay->standard_value * $detailDay->total;
+                $total_standard += $detailDay?->standard_value * $detailDay?->total;
             }
 
 
@@ -818,6 +820,7 @@ class BusinessTripController extends Controller
                 'destination' => $destination->destination,
                 'business_trip_start_date' => $destination->business_trip_start_date,
                 'business_trip_end_date' => $destination->business_trip_end_date,
+                'restricted_area' => $destination->restricted_area,
                 'other_allowance' => $destination->other_allowance,
                 'business_trip_detail_attendance' => $detail_attendance,
                 'standar_detail_allowance' => $standar_detail_allowance,
@@ -835,13 +838,14 @@ class BusinessTripController extends Controller
     function getDateByUser($user_id) {
         $data = BusinessTripDestination::whereHas('businessTrip', function ($query) use ($user_id) {
             $query->where('request_for', $user_id)
-                ->where('type', 'request');
+                ->where('type', 'request')
+                ->where('status_id',1);
         })->get();
         $destination = [];
         $offset = 10;
         foreach ($data as $key => $value) {
              // Pastikan status approval bukan 'Cancel' atau 'Reject'
-            $hasValidApproval = Approval::where('document_id', $value->business_trip_id)->whereIn('status',['Rejected','Cancel'])->exists();
+            $hasValidApproval = Approval::where('document_id', $value->business_trip_id)->whereIn('status',['Rejected','Revise'])->exists();
 
             if (!$hasValidApproval) {
                 $destination[$key + $offset] = [

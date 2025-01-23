@@ -10,7 +10,8 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void {
+    public function up(): void
+    {
         Schema::dropIfExists('master_quota_reimburses');
         Schema::dropIfExists('master_period_reimburses');
     }
@@ -18,8 +19,5 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
-
-    }
+    public function down(): void {}
 };
