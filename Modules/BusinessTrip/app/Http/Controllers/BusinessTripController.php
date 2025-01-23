@@ -839,7 +839,7 @@ class BusinessTripController extends Controller
         $data = BusinessTripDestination::whereHas('businessTrip', function ($query) use ($user_id) {
             $query->where('request_for', $user_id)
                 ->where('type', 'request')
-                ->where('status_id',1);
+                ->whereIn('status_id',[1,3,5]);
         })->get();
         $destination = [];
         $offset = 10;

@@ -309,6 +309,7 @@ class BusinessTripDeclarationController extends Controller
 
             $data['business_trip_destination'][] = [
                 'destination' => $destination->destination,
+                'restricted_area' => $destination->restricted_area,
                 'business_trip_start_date' => $destination->business_trip_start_date,
                 'business_trip_end_date' => $destination->business_trip_end_date,
                 // 'other_allowance' => $destination->other_allowance,
@@ -567,7 +568,6 @@ class BusinessTripDeclarationController extends Controller
                         'end_time' => $destination['request_end_time'],
                     ]);
                 }
-
                 foreach ($data_destination['allowances'] as $key => $allowance) {
                     if (strtolower($allowance['type']) == 'total') {
                         foreach ($allowance['detail'] as $detail) {
@@ -575,7 +575,7 @@ class BusinessTripDeclarationController extends Controller
                                 'business_trip_destination_id' => $businessTripDestination->id,
                                 'business_trip_id' => $businessTrip->id,
                                 'price' => $detail['request_price'],
-                                'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
+                                'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->withTrashed()->first()?->id,
                                 'standard_value' => $allowance['subtotal'],
                             ]);
                         }
@@ -586,7 +586,7 @@ class BusinessTripDeclarationController extends Controller
                                 'date' => $detail['date'],
                                 'business_trip_id' => $businessTrip->id,
                                 'price' => $detail['request_price'],
-                                'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
+                                'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->withTrashed()->first()?->id,
                                 'standard_value' => $allowance['subtotal'],
                             ]);
                         }
@@ -731,6 +731,7 @@ class BusinessTripDeclarationController extends Controller
 
             $data['business_trip_destination'][] = [
                 'destination' => $destination->destination,
+                'restricted_area' => $destination->restricted_area,
                 'business_trip_start_date' => $destination->business_trip_start_date,
                 'business_trip_end_date' => $destination->business_trip_end_date,
                 // 'other_allowance' => $destination->other_allowance,

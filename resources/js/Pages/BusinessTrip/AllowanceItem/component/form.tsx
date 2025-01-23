@@ -132,7 +132,7 @@ export default function AllowanceItemForm({
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 path: ['grades', index, 'plafon'],
-                message: 'Plafon is required.',
+                message: 'Balance is required.',
             });
         }
         });

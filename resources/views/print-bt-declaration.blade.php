@@ -255,7 +255,7 @@
         </tr>
         <tr>
             <td><strong>Total Cash Advance</strong></td>
-            <td>{{$data['total_cash_advance']}}</td>
+            <td>{{number_format($data['total_cash_advance'],0,',','.')}}</td>
         </tr>
         @endif
     </table>
@@ -270,6 +270,11 @@
     @foreach ($data['business_trip_destination'] as $idx => $row)
         <div id="{{$row['destination']}}" class="tab-content {{$key == 0 ? 'active' : ''}}">
             <h3>Detail {{$row['destination']}}</h3>
+            @if ($row['restricted_area'] === 1)
+                <div style="background-color: #fd0000; display: inline-block; color: white; margin: 0.3rem 0; padding: 0.5rem 1rem; border-radius: 0.375rem;">
+                    <span style="font-size: 0.75rem;">Restricted Area</span>
+                </div>
+            @endif
             <table class="detail-table">
                 <tr>
                     <th>Request Date</th>
