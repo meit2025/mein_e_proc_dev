@@ -55,6 +55,7 @@ class ApprovalController extends Controller
         try {
             //code...
             $approvalRouteData = $request->only(['group_id', 'is_hr', 'hr_approval', 'user_hr_id', 'is_conditional', 'nominal']);
+            $approvalRouteData['nominal'] = $request->is_conditional ? $request->nominal : 0;
             $approvalRoute = ApprovalRoute::create($approvalRouteData);
 
             // Ambil array user_id dari request
@@ -108,6 +109,7 @@ class ApprovalController extends Controller
 
         // Update data approval_routes
         $approvalRouteData = $request->only(['group_id', 'is_hr', 'hr_approval', 'user_hr_id', 'is_conditional', 'nominal']);
+        $approvalRouteData['nominal'] = $request->is_conditional ? $request->nominal : 0;
         $approvalRoute->update($approvalRouteData);
 
         // Ambil array user_id dari request
@@ -167,6 +169,7 @@ class ApprovalController extends Controller
         try {
             $dokumnetType = 'PR';
             $dokumentApproval = 'PR';
+            $dokumentName = 'Purchase Requisition';
             switch ($request->function_name) {
                 case 'procurement':
                     $dokumnetType = 'PR';
@@ -175,14 +178,17 @@ class ApprovalController extends Controller
                 case 'reim':
                     $dokumnetType = 'REIM';
                     $dokumentApproval = 'REIM';
+                    $dokumentName = 'Reimburse';
                     break;
                 case 'trip':
                     $dokumnetType = 'BT';
                     $dokumentApproval = 'TRIP';
+                    $dokumentName = 'Business Trip';
                     break;
                 case 'trip_declaration':
                     $dokumnetType = 'BTPO';
                     $dokumentApproval = 'TRIP_DECLARATION';
+                    $dokumentName = 'Business Trip Declaration';
                     break;
             }
 
@@ -195,7 +201,7 @@ class ApprovalController extends Controller
                         'is_status' => true
                     ]);
             }
-            $message = $request->status . ' Dokument ' . Auth::user()->name . ' Pada Tanggal ' . $this->DateTimeNow();
+            $message = $dokumentName .  ' Document ' . $request->status . '  ' .  ' by ' . Auth::user()->name . ' At ' . $this->DateTimeNow();
 
             $this->logToDatabase(
                 $request->id,
@@ -274,7 +280,7 @@ class ApprovalController extends Controller
                             Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimburse', $message));
 
 
-                            if ($findUser->user_id !== $model->request_created_by) {
+                            if ($findUser->id !== $model->request_created_by) {
                                 $findcreatedBy = User::find($model->request_created_by);
                                 Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Reimburse', $message));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
@@ -288,7 +294,7 @@ class ApprovalController extends Controller
 
                             Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip', $message));
 
-                            if ($findUser->user_id !== $model->created_by) {
+                            if ($findUser->id !== $model->created_by) {
                                 $findcreatedBy = User::find($model->created_by);
                                 Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip', $message));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
@@ -296,8 +302,6 @@ class ApprovalController extends Controller
                             break;
                     }
                 } catch (\Throwable $th) {
-                    //throw $th;
-                    dd($th);
                 }
             }
 

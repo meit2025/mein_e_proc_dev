@@ -101,10 +101,10 @@ const CashAdvance = ({ disable }: { disable: boolean }) => {
           <FormInput
             fieldLabel={'Persantase DP Number'}
             fieldName={'cash_advance_purchases.dp'}
-            isRequired={false}
+            isRequired={true}
             disabled={disable}
             type={'number'}
-            placeholder={'Enter reference'}
+            placeholder={'Persantase DP Number'}
             maxLength={100}
             minLength={1}
             onChanges={(data) => dataAmaout(data.target.value)}
