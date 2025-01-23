@@ -126,7 +126,7 @@ class ReportController extends Controller
 
             if ($department) {
                 $query->whereHas('user', function ($q) use ($department) {
-                    $q->where('department_id', $department);
+                    $q->where('departement_id', $department);
                 });
             }
 
@@ -224,7 +224,7 @@ class ReportController extends Controller
             }
             if ($department) {
                 $query->whereHas('user', function ($q) use ($department) {
-                    $q->where('department_id', $department);
+                    $q->where('departement_id', $department);
                 });
             }
 
@@ -323,7 +323,7 @@ class ReportController extends Controller
 
         if ($department) {
             $query->whereHas('requestFor', function ($q) use ($department) {
-                $q->where('department_id', $department);
+                $q->where('departement_id', $department);
             });
         }
 
@@ -400,7 +400,7 @@ class ReportController extends Controller
 
         if ($department) {
             $query->whereHas('requestFor', function ($q) use ($department) {
-                $q->where('department_id', $department);
+                $q->where('departement_id', $department);
             });
         }
 
@@ -504,7 +504,7 @@ class ReportController extends Controller
 
         if ($department) {
             $query->whereHas('requestFor', function ($q) use ($department) {
-                $q->where('department_id', $department);
+                $q->where('departement_id', $department);
             });
         }
 
@@ -587,7 +587,7 @@ class ReportController extends Controller
 
         if ($department) {
             $query->whereHas('requestFor', function ($q) use ($department) {
-                $q->where('department_id', $department);
+                $q->where('departement_id', $department);
             });
         }
 
@@ -691,7 +691,7 @@ class ReportController extends Controller
 
         if ($department) {
             $query->whereHas('requestFor', function ($q) use ($department) {
-                $q->where('department_id', $department);
+                $q->where('departement_id', $department);
             });
         }
 
@@ -773,7 +773,7 @@ class ReportController extends Controller
 
         if ($department) {
             $query->whereHas('requestFor', function ($q) use ($department) {
-                $q->where('department_id', $department);
+                $q->where('departement_id', $department);
             });
         }
 
@@ -858,7 +858,7 @@ class ReportController extends Controller
         }
         if ($department) {
             $data->whereHas('user', function ($q) use ($department) {
-                $q->where('department_id', $department);
+                $q->where('departement_id', $department);
             });
         }
 
