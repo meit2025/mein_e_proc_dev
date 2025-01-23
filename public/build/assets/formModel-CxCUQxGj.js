@@ -1,1 +1,0 @@
-const e=[{type:"input",name:"mwszkz",label:"Code Tax",placeholder:"Enter your Code Tax",required:!0},{type:"input",name:"description",label:"description",placeholder:"Enter your description",required:!0},{type:"input",name:"desimal",label:"desimal",placeholder:"Enter your desimal",required:!0}];export{e as formModel};
