@@ -167,6 +167,7 @@ class ApprovalController extends Controller
         try {
             $dokumnetType = 'PR';
             $dokumentApproval = 'PR';
+            $dokumentName = 'Purchase Requisition';
             switch ($request->function_name) {
                 case 'procurement':
                     $dokumnetType = 'PR';
@@ -175,14 +176,17 @@ class ApprovalController extends Controller
                 case 'reim':
                     $dokumnetType = 'REIM';
                     $dokumentApproval = 'REIM';
+                    $dokumentName = 'Reimburse';
                     break;
                 case 'trip':
                     $dokumnetType = 'BT';
                     $dokumentApproval = 'TRIP';
+                    $dokumentName = 'Business Trip';
                     break;
                 case 'trip_declaration':
                     $dokumnetType = 'BTPO';
                     $dokumentApproval = 'TRIP_DECLARATION';
+                    $dokumentName = 'Business Trip Declaration';
                     break;
             }
 
@@ -195,7 +199,7 @@ class ApprovalController extends Controller
                         'is_status' => true
                     ]);
             }
-            $message = $request->status . ' Dokument ' . Auth::user()->name . ' Pada Tanggal ' . $this->DateTimeNow();
+            $message = $request->status . ' Dokument ' . $dokumentName . ' Oleh ' . Auth::user()->name . ' Pada Tanggal ' . $this->DateTimeNow();
 
             $this->logToDatabase(
                 $request->id,
@@ -296,8 +300,6 @@ class ApprovalController extends Controller
                             break;
                     }
                 } catch (\Throwable $th) {
-                    //throw $th;
-                    dd($th);
                 }
             }
 

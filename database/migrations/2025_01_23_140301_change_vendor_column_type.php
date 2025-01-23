@@ -12,12 +12,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::dropIfExists('master_quota_reimburses');
-        Schema::dropIfExists('master_period_reimburses');
+        //
+        DB::statement("ALTER TABLE vendors ALTER COLUMN vendor TYPE BIGINT USING vendor::bigint");
     }
 
     /**
      * Reverse the migrations.
      */
-    public function down(): void {}
+    public function down(): void
+    {
+        //
+    }
 };

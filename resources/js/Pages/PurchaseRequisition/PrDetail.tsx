@@ -132,7 +132,7 @@ const PrDetail = ({ id }: { id: number }) => {
               >
                 APPROVE
               </Button>
-              <Button
+              {/* <Button
                 onClick={() => handleOpen('Revise')}
                 style={{
                   marginLeft: '1rem',
@@ -142,7 +142,7 @@ const PrDetail = ({ id }: { id: number }) => {
                 type='button'
               >
                 Revise
-              </Button>
+              </Button> */}
               <Button
                 onClick={() => handleOpen('Rejected')}
                 style={{

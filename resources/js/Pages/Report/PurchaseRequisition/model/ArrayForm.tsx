@@ -461,38 +461,15 @@ const ArrayForm = ({
             {watchIsCashAdvance && (
               <>
                 <hr></hr>
-                <FormAutocomplete<any>
-                  options={[
-                    {
-                      label: '50%',
-                      value: '50',
-                    },
-                    {
-                      label: '40%',
-                      value: '40',
-                    },
-                    {
-                      label: '30%',
-                      value: '30',
-                    },
-                    {
-                      label: '20%',
-                      value: '20',
-                    },
-                    {
-                      label: '10%',
-                      value: '10',
-                    },
-                  ]}
-                  fieldLabel={'Persantase DP'}
-                  fieldName={'item_dp'}
-                  isRequired={false}
+                <FormInput
+                  fieldLabel={'Persantase DP Number'}
+                  fieldName={'cash_advance_purchases.dp'}
+                  isRequired={true}
                   disabled={disable}
-                  style={{
-                    width: '56.5rem',
-                  }}
+                  type={'number'}
                   placeholder={'Persantase DP Number'}
-                  classNames='mt-2'
+                  maxLength={100}
+                  minLength={1}
                 />
                 <FormInput
                   fieldLabel={'reference'}

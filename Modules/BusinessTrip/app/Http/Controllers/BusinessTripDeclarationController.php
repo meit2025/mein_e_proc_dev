@@ -360,7 +360,7 @@ class BusinessTripDeclarationController extends Controller
             $businessTrip->remarks = $request->remark;
             $businessTrip->save();
 
-            if($request->file_existing != null){
+            if ($request->file_existing != null) {
                 // DELETE ATTACHMENT DULU JIKA ADA YANG DI HAPUS
                 $array_id_exist = [];
                 foreach ($request->file_existing as $key => $attachment) {
@@ -368,7 +368,7 @@ class BusinessTripDeclarationController extends Controller
                     $array_id_exist[] = $decode->id;
                 }
                 $businessTrip->attachment()->whereNotIn('id', $array_id_exist)->delete();
-            }else{
+            } else {
                 $businessTrip->attachment()->delete();
             }
 
@@ -418,7 +418,7 @@ class BusinessTripDeclarationController extends Controller
         // $query->orderBy($sortBy, $sortDirection);
         if ($request->approval == "1") {
             $data = Approval::where('user_id', Auth::user()->id)
-            ->where('document_name', 'TRIP_DECLARATION')->get();
+                ->where('document_name', 'TRIP_DECLARATION')->get();
             $arr = $data->filter(function ($value) {
                 $previousApproval = Approval::where('id', '<', $value->id)
                     ->where('document_id', $value->document_id)
@@ -433,11 +433,11 @@ class BusinessTripDeclarationController extends Controller
                     ->where('is_status', true)
                     ->exists();
             })->pluck('document_id');
-            $query = $query->whereIn('id', $arr)->where('status_id',1);
-        }else{
-            $query = $query->where(function($query) {
+            $query = $query->whereIn('id', $arr)->where('status_id', 1);
+        } else {
+            $query = $query->where(function ($query) {
                 $query->where('created_by', Auth::user()->id)
-                      ->orWhere('request_for', Auth::user()->id);
+                    ->orWhere('request_for', Auth::user()->id);
             });
         }
 
@@ -455,6 +455,7 @@ class BusinessTripDeclarationController extends Controller
                 'request_no' => $requestNo,
                 'request_for' => $requestFor,
                 'remarks' => $map->remarks,
+                'status_id' => $map->status_id,
                 'status' => [
                     'name' => $map->status->name,
                     'classname' => $map->status->classname,
