@@ -110,7 +110,8 @@ class ReportController extends Controller
             }
 
             if ($startDate && $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
+                $query->whereDate('created_at', '>=', $startDate)
+                    ->whereDate('created_at', '<=', $endDate);
             }
             if ($status) {
                 $query->whereHas('status', function ($q) use ($status) {
@@ -208,7 +209,8 @@ class ReportController extends Controller
             }
 
             if ($startDate && $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
+                $query->whereDate('created_at', '>=', $startDate)
+                    ->whereDate('created_at', '<=', $endDate);
             }
             if ($status) {
                 $query->whereHas('status', function ($q) use ($status) {
@@ -299,7 +301,8 @@ class ReportController extends Controller
         }
 
         if ($startDate && $endDate) {
-            $query->whereBetween('created_at', [$startDate, $endDate]);
+            $query->whereDate('created_at', '>=', $startDate)
+                ->whereDate('created_at', '<=', $endDate);
         }
         if ($status) {
             $query->whereHas('status', function ($q) use ($status) {
@@ -364,7 +367,8 @@ class ReportController extends Controller
 
 
         if ($startDate && $endDate) {
-            $query->whereBetween('created_at', [$startDate, $endDate]);
+            $query->whereDate('created_at', '>=', $startDate)
+                ->whereDate('created_at', '<=', $endDate);
         }
         if ($status) {
             $query->whereHas('status', function ($q) use ($status) {
@@ -408,10 +412,11 @@ class ReportController extends Controller
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
             $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
-                $allowanceItems = $destination->detailDestinationTotal->map(function ($allowanceItem) {
+                $allowanceItems = $destination->detailDestinationDay->map(function ($allowanceItem) {
                     return [
-                        'item_name' => $allowanceItem->allowance->name,
-                        'amount' => $allowanceItem->price,
+                        'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
+                        'amount' =>  (int) $allowanceItem->price,
+                        'currency_id' => $allowanceItem->allowance->currency_id,
                     ];
                 });
 
@@ -478,7 +483,8 @@ class ReportController extends Controller
                 ->orWhere('request_for', Auth::user()->id);
         }
         if ($startDate && $endDate) {
-            $query->whereBetween('created_at', [$startDate, $endDate]);
+            $query->whereDate('created_at', '>=', $startDate)
+                ->whereDate('created_at', '<=', $endDate);
         }
         if ($status) {
             $query->whereHas('status', function ($q) use ($status) {
@@ -559,7 +565,8 @@ class ReportController extends Controller
                 ->orWhere('request_for', Auth::user()->id);
         }
         if ($startDate && $endDate) {
-            $query->whereBetween('created_at', [$startDate, $endDate]);
+            $query->whereDate('created_at', '>=', $startDate)
+                ->whereDate('created_at', '<=', $endDate);
         }
         if ($status) {
             $query->whereHas('status', function ($q) use ($status) {
@@ -590,10 +597,11 @@ class ReportController extends Controller
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
             $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
-                $allowanceItems = $destination->detailDestinationTotal->map(function ($allowanceItem) {
+                $allowanceItems = $destination->detailDestinationDay->map(function ($allowanceItem) {
                     return [
-                        'item_name' => $allowanceItem->allowance->name,
-                        'amount' => $allowanceItem->price,
+                        'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
+                        'amount' =>  (int) $allowanceItem->price,
+                        'currency_id' => $allowanceItem->allowance->currency_id,
                     ];
                 });
 
@@ -661,7 +669,8 @@ class ReportController extends Controller
         }
 
         if ($startDate && $endDate) {
-            $query->whereBetween('created_at', [$startDate, $endDate]);
+            $query->whereDate('created_at', '>=', $startDate)
+                ->whereDate('created_at', '<=', $endDate);
         }
         if ($status) {
             $query->whereHas('status', function ($q) use ($status) {
@@ -731,7 +740,8 @@ class ReportController extends Controller
 
 
         if ($startDate && $endDate) {
-            $query->whereBetween('created_at', [$startDate, $endDate]);
+            $query->whereDate('created_at', '>=', $startDate)
+                ->whereDate('created_at', '<=', $endDate);
         }
         if ($status) {
             $query->whereHas('status', function ($q) use ($status) {
@@ -829,7 +839,8 @@ class ReportController extends Controller
 
         $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user', 'vendors');
         if ($startDate && $endDate) {
-            $data->whereBetween('created_at', [$startDate, $endDate]);
+            $data->whereDate('created_at', '>=', $startDate)
+                ->whereDate('created_at', '<=', $endDate);
         }
         if ($status) {
             $data->whereHas('status', function ($q) use ($status) {
@@ -876,7 +887,8 @@ class ReportController extends Controller
 
         $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user', 'vendors');
         if ($startDate && $endDate) {
-            $data->whereBetween('created_at', [$startDate, $endDate]);
+            $data->whereDate('created_at', '>=', $startDate)
+                ->whereDate('created_at', '<=', $endDate);
         }
         if ($status) {
             $data->whereHas('status', function ($q) use ($status) {

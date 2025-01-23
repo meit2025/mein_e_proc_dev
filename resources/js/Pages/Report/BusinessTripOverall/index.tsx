@@ -203,7 +203,7 @@ export const Index = ({
             </div>
             <DataGridComponent
                 isHistory={false}
-                onExportXls={async (x: string) => await exporter(x)}
+                // onExportXls={async (x: string) => await exporter(x)}
                 defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&destination=${destination || ''}&department=${department || ''}&`}
                 columns={columns}
                 url={{
