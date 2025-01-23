@@ -280,7 +280,7 @@ class ApprovalController extends Controller
                             Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimburse', $message));
 
 
-                            if ($findUser->user_id !== $model->request_created_by) {
+                            if ($findUser->id !== $model->request_created_by) {
                                 $findcreatedBy = User::find($model->request_created_by);
                                 Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Reimburse', $message));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
@@ -294,7 +294,7 @@ class ApprovalController extends Controller
 
                             Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip', $message));
 
-                            if ($findUser->user_id !== $model->created_by) {
+                            if ($findUser->id !== $model->created_by) {
                                 $findcreatedBy = User::find($model->created_by);
                                 Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip', $message));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
