@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Modules\BusinessTrip\Models\AllowanceCategory;
+use Modules\BusinessTrip\Models\AllowanceItem;
 
 class AllowanceCategoryController extends Controller
 {
@@ -126,6 +127,14 @@ class AllowanceCategoryController extends Controller
     public function deleteAPI($id)
     {
         $allowanceCategory =  AllowanceCategory::find($id);
+
+        $item = AllowanceItem::where('allowance_category_id', $id)->first();
+
+        if ($item) {
+            return $this->errorResponse('Please Check Your Allowance Item Data and Edit With New Allowance Category To Make Sure it Clear When Submitted On SAP');
+        }
+
+
         $allowanceCategory->delete();
 
         return $this->successResponse([], 'Successfully deleted data');

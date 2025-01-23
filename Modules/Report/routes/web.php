@@ -19,6 +19,7 @@ Route::group(['prefix' => 'report'], function () {
     Route::get('/', [ReportController::class, 'index'])->name('report.index');
     Route::get('/bt-request', [ReportController::class, 'businessTrip'])->name('report.btRequest');
     Route::get('/bt-dec', [ReportController::class, 'businessTripDec'])->name('report.btDec');
+    Route::get('/bt-overall', [ReportController::class, 'businessTripOverall'])->name('report.btRequest');
     Route::inertia('/purchase',  'Report/PurchaseRequisition/Index')->middleware(PermissionMiddleware::class . ':report purchase requisition view');
 });
 
@@ -34,6 +35,10 @@ Route::group(['prefix' => 'api/report', 'middleware' => 'auth'], function () {
     Route::group(['prefix' => 'business-trip-dec'], function () {
         Route::get('/list', [ReportController::class, 'listBTDec'])->name('report.businessDec.index')->middleware(PermissionMiddleware::class . ':report business trip declaration view');
         Route::get('/export', [ReportController::class, 'exportBTDec'])->name('report.businessDec.export')->middleware(PermissionMiddleware::class . ':report business trip declaration export');
+    });
+    Route::group(['prefix' => 'business-trip-overall'], function () {
+        Route::get('/list', [ReportController::class, 'listBTOverall'])->name('report.businessOverall.index')->middleware(PermissionMiddleware::class . ':report business trip overall view');
+        Route::get('/export', [ReportController::class, 'exportBTOverall'])->name('report.businessOverall.export')->middleware(PermissionMiddleware::class . ':report business trip overall export');
     });
     Route::group(['prefix' => 'purchase'], function () {
         Route::get('/list', [ReportController::class, 'purchase'])->name('report.purchase.index')->middleware(PermissionMiddleware::class . ':report purchase requisition view');

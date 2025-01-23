@@ -54,7 +54,7 @@ class BusinessTrip extends Model
 
     function purposeType()
     {
-        return $this->belongsTo(PurposeType::class);
+        return $this->belongsTo(PurposeType::class)->withTrashed();
     }
 
     function attachment()

@@ -226,26 +226,62 @@ class PurposeTypeController extends Controller
     {
         $listPurposeType = PurposeTypeAllowance::where('purpose_type_id', $id)->get()->pluck('allowance_items_id')->toArray();
         $listAllowances =  AllowanceItem::whereIn('id', $listPurposeType)->get();
-        foreach ($listAllowances as $allowance) {
+        $mapAllowances = $listAllowances->map(function ($allowance)use($userid) {
+            $grade_price = 0;
+
             if ($allowance->grade_option === 'all') {
                 $grade_price = $allowance->grade_all_price;
             } elseif ($allowance->grade_option === 'grade') {
                 $grade_user = BusinessTripGradeUser::where('user_id', $userid)->first();
-                if ($grade_user) {
-                    $grade_allowance = BusinessTripGradeAllowance::where('grade_id', $grade_user->grade_id)->where('allowance_item_id', $allowance->id)->first();
-                    if ($grade_allowance) {
+
+                if (!is_null($grade_user)) {
+                    $grade_allowance = BusinessTripGradeAllowance::where('grade_id', $grade_user->grade_id)
+                                                                ->where('allowance_item_id', $allowance->id)
+                                                                ->first();
+
+                    if (!is_null($grade_allowance)) {
                         $grade_price = $grade_allowance->plafon;
-                    } else {
-                        $grade_price = 0;
                     }
-                } else {
-                    $grade_price = 0;
                 }
             }
-            $allowance->grade_price = $grade_price;
-        }
 
-        return $this->successResponse($listAllowances);
+            return [
+                'id' => $allowance->id,
+                'type' => $allowance->type,
+                'fixed_value' => $allowance->fixed_value,
+                'max_value' => $allowance->max_value,
+                'request_value' => $allowance->request_value,
+                'formula' => $allowance->formula,
+                'currency_id' => $allowance->currency_id,
+                'allowance_category_id' => $allowance->allowance_category_id,
+                'code' => $allowance->code,
+                'name' => $allowance->name,
+                'grade_option' => $allowance->grade_option,
+                'grade_all_price' => $allowance->grade_all_price,
+                'material_number' => $allowance->material_number,
+                'material_group' => $allowance->material_group,
+                'grade_price' => $grade_price,
+            ];
+        });
+        // foreach ($listAllowances as $allowance) {
+        //     if ($allowance->grade_option === 'all') {
+        //         $grade_price = $allowance->grade_all_price;
+        //     } elseif ($allowance->grade_option === 'grade') {
+        //         $grade_user = BusinessTripGradeUser::where('user_id', $userid)->first();
+        //         if (!is_null($grade_user)) {
+        //             $grade_allowance = BusinessTripGradeAllowance::where('grade_id', $grade_user->grade_id)->where('allowance_item_id', $allowance->id)->first();
+        //             if (!is_null($grade_allowance)) {
+        //                 $grade_price = $grade_allowance->plafon;
+        //             } else {
+        //                 $grade_price = 0;
+        //             }
+        //         } else {
+        //             $grade_price = 0;
+        //         }
+        //     }
+        //     $allowance->grade_price = $grade_price;
+        // }
+        return $this->successResponse($mapAllowances);
     }
 
     public function deleteAPI($id)

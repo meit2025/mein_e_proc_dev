@@ -33,9 +33,9 @@ class BusinessTripExport implements FromArray, WithHeadings, WithEvents, WithCus
                         'No' => $firstRow ? $index + 1 : '',
                         'Employee No' => $firstRow ? $businessTrip['requestedBy']->nip : '',
                         'Employee Name' => $firstRow ? $businessTrip['requestedBy']->name : '',
-                        'Position' => $firstRow ? $businessTrip['requestedBy']->positions->name : '',
-                        'Dept' => $firstRow ? $businessTrip['requestedBy']->departements->name : '',
-                        'Division' => $firstRow ? $businessTrip['requestedBy']->divisions->name : '',
+                        'Position' => $firstRow && $businessTrip['requestedBy']->positions ? $businessTrip['requestedBy']->positions->name : '',
+                        'Dept' => $firstRow && $businessTrip['requestedBy']->departements ? $businessTrip['requestedBy']->departements->name : '',
+                        'Division' => $firstRow && $businessTrip['requestedBy']->divisions ? $businessTrip['requestedBy']->divisions->name : '',
                         'Requested By' => $firstRow ? $businessTrip['requestFor']->name : '',
                         'Request Date' => $firstRow ? $businessTrip['requestedBy']->created_at->format('d/m/Y') : '',
                         'Request Number' => $firstRow ? $businessTrip['requestNo'] : '',
@@ -46,7 +46,7 @@ class BusinessTripExport implements FromArray, WithHeadings, WithEvents, WithCus
                         'Start Date' => $firstRow ? date('d/m/Y', strtotime($destination['start_date'])) : '',
                         'End Date' => $firstRow ? date('d/m/Y', strtotime($destination['end_date'])) : '',
                         'Allowance Item' => $allowanceItem['item_name'],
-                        'Allowance Value' => 'IDR ' . number_format($allowanceItem['amount'], 0, ',', '.'),
+                        'Allowance Value' => $allowanceItem['currency_id'] . ' ' . number_format($allowanceItem['amount'], 0, ',', '.'),
                         'Total Allowance' => '',
                     ];
 
@@ -66,14 +66,14 @@ class BusinessTripExport implements FromArray, WithHeadings, WithEvents, WithCus
                     'Request Date' => '',
                     'Request Number' => '',
                     'Request Status' => '',
-                    'Purpose Type' => '',
+                    'Purpose Type'  => '',
                     'Remarks' => '',
                     'Destination' => '',
                     'Start Date' => '',
                     'End Date' => '',
                     'Allowance Item' => '',
                     'Allowance Value' => '',
-                    'Total Allowance' => 'IDR ' . number_format($destination['total_allowance'], 0, ',', '.'),
+                    'Total Allowance' => $allowanceItem['currency_id'] . ' ' . number_format($destination['total_allowance'], 0, ',', '.'),
                 ];
             }
         }

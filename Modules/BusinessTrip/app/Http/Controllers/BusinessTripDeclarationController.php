@@ -101,7 +101,7 @@ class BusinessTripDeclarationController extends Controller
                 // Tambahkan detail allowance
                 $allowances[$allowanceId]['detail'][] = [
                     'date' => $row->date, // Sesuaikan dengan nama kolom tanggal di detailDestinationDay
-                    'request_price' => $row->price // Sesuaikan dengan kolom request_price di detailDestinationDay
+                    'request_price' => (int)$row->price // Sesuaikan dengan kolom request_price di detailDestinationDay
                 ];
 
                 $allowances[$allowanceId]['subtotal'] += $row->price;
@@ -127,7 +127,7 @@ class BusinessTripDeclarationController extends Controller
                 // Tambahkan detail allowance
                 $allowances[$allowanceId]['detail'][] = [
                     'date' => '', // Sesuaikan dengan nama kolom tanggal di detailDestinationTotal
-                    'request_price' => $row->price // Sesuaikan dengan kolom request_price di detailDestinationTotal
+                    'request_price' => (int)$row->price // Sesuaikan dengan kolom request_price di detailDestinationTotal
                 ];
 
                 $allowances[$allowanceId]['subtotal'] += $row->price;
@@ -320,6 +320,7 @@ class BusinessTripDeclarationController extends Controller
                 'total_standard' => $total_standard,
                 'total_request' => $total_request,
                 'total_declaration' => $total_declaration + $destination->other_allowance,
+                'total_deviation' => $total_request - ($total_declaration + $destination->other_allowance)
             ];
         }
         return $this->successResponse($data);
@@ -457,9 +458,9 @@ class BusinessTripDeclarationController extends Controller
                 'remarks' => $map->remarks,
                 'status_id' => $map->status_id,
                 'status' => [
-                    'name' => $map->status->name,
-                    'classname' => $map->status->classname,
-                    'code' => $map->status->code
+                    'name' => $map->status?->name,
+                    'classname' => $map->status?->classname,
+                    'code' => $map->status?->code
                 ],
                 'created_at' => date('d/m/Y', strtotime($map->created_at)),
                 // 'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array

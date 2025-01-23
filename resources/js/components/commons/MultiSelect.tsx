@@ -19,13 +19,14 @@ export function MultiSelectItem({
 }
 
 export interface multiSelectInterface {
-  options: any[];
-  label: string;
-  id: string;
-  value: any[];
-  onSelect: (value: any) => void;
+    isHidden?: string;
+    options: any[];
+    label: string;
+    id: string;
+    value: any[];
+    onSelect: (value: any) => void;
 }
-export function MultiSelect({ options, label, id, onSelect, value = [] }: multiSelectInterface) {
+export function MultiSelect({ isHidden ,options, label, id, onSelect, value = [] }: multiSelectInterface) {
   const [itemSelect, setItemSelect] = React.useState([]);
   const [rightSelect, setRightSelect] = React.useState([]);
 
@@ -33,7 +34,6 @@ export function MultiSelect({ options, label, id, onSelect, value = [] }: multiS
   const [leftValues, setLeftValues] = React.useState<any[]>([]);
 
   const [all, setAll] = React.useState<boolean>(false);
-
 
   function selectItemHandler(e: any, item: any) {
 
@@ -156,8 +156,8 @@ export function MultiSelect({ options, label, id, onSelect, value = [] }: multiS
             </div>
           </li>
 
-          <li onClick={() => setToRightValue()}>{'>>'}</li>
-          <li onClick={() => setToLeftValue()}>{'<<'}</li>
+          <li onClick={() => setToRightValue()} className={isHidden}>{'>>'}</li>
+          <li onClick={() => setToLeftValue()} className={isHidden}>{'<<'}</li>
         </ul>
       </div>
 

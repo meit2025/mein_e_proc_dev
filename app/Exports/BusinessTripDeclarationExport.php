@@ -34,9 +34,9 @@ class BusinessTripDeclarationExport implements FromArray, WithHeadings, WithEven
                         'No' => $firstRow ? $index + 1 : '',
                         'Employee No' => $firstRow ? $businessTrip['requestedBy']->nip : '',
                         'Employee Name' => $firstRow ? $businessTrip['requestedBy']->name : '',
-                        'Position' => $firstRow ? $businessTrip['requestedBy']->positions->name : '',
-                        'Dept' => $firstRow ? $businessTrip['requestedBy']->departements->name : '',
-                        'Division' => $firstRow ? $businessTrip['requestedBy']->divisions->name : '',
+                        'Position' => $firstRow && $businessTrip['requestedBy']->positions ? $businessTrip['requestedBy']->positions->name : '',
+                        'Dept' => $firstRow && $businessTrip['requestedBy']->departements ? $businessTrip['requestedBy']->departements->name : '',
+                        'Division' => $firstRow && $businessTrip['requestedBy']->divisions ? $businessTrip['requestedBy']->divisions->name : '',
                         'Requested By' => $firstRow ? $businessTrip['requestFor']->name : '',
                         'Request Date' => $firstRow ? $businessTrip['requestedBy']->created_at->format('d/m/Y') : '',
                         'Request Number' => $firstRow ? $businessTrip['requestedBy']->request_no : '',
@@ -47,7 +47,7 @@ class BusinessTripDeclarationExport implements FromArray, WithHeadings, WithEven
                         'Start Date' => $firstRow ? date('d/m/Y', strtotime($destination['start_date'])) : '',
                         'End Date' => $firstRow ? date('d/m/Y', strtotime($destination['end_date'])) : '',
                         'Allowance Item' => $allowanceItem['item_name'],
-                        'Allowance Value' => 'IDR ' . number_format($allowanceItem['amount'], 0, ',', '.'),
+                        'Allowance Value' => $allowanceItem['currency_id'] . ' ' . number_format($allowanceItem['amount'], 0, ',', '.'),
                         'Total Allowance' => '',
                     ];
 
@@ -74,7 +74,7 @@ class BusinessTripDeclarationExport implements FromArray, WithHeadings, WithEven
                     'End Date' => '',
                     'Allowance Item' => 'Total Allowance',
                     'Allowance Value' => '',
-                    'Total Allowance' => 'IDR ' . number_format($destination['total_allowance'], 0, ',', '.'),
+                    'Total Allowance' => $allowanceItem['currency_id'] . ' ' . number_format($destination['total_allowance'], 0, ',', '.'),
                 ];
             }
         }

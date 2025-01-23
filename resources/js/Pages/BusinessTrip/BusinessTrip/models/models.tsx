@@ -17,9 +17,10 @@ export const columns: GridColDef[] = [
     ),
   },
   { field: 'request_for', headerName: 'Request For', width: 200, filterable: true },
+  { field: 'created_at', headerName: 'Created At', width: 200, filterable: true },
+  { field: 'created_by', headerName: 'Requested By', width: 200, filterable: true },
   { field: 'purpose_type', headerName: 'Purpose Type', width: 200, filterable: true },
   { field: 'remarks', headerName: 'Remarks', width: 200, filterable: true },
-  { field: 'created_at', headerName: 'Request Date', width: 200, filterable: true },
   {
     field: 'status',
     headerName: 'Status',
