@@ -259,7 +259,7 @@ export const BussinessTripFormV1 = ({
   const [listDestination, setListDestination] = React.useState<[]>([]);
 
   const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
-  console.log(otherAllowance);
+//   console.log(otherAllowance);
   async function handleGetBusinessTrip(value: string) {
     form.setValue('request_no', value || '');
     const url = GET_DETAIL_BUSINESS_TRIP_DECLARATION(value);
@@ -327,7 +327,6 @@ export const BussinessTripFormV1 = ({
     acknowledgeFrom: [],
     approvalFromStatusRoute: [],
   });
-
   const fetchDataValue = async () => {
     try {
       const totalAll = getTotalDes();
@@ -924,12 +923,12 @@ export function BussinessDestinationForm({
         />
       </div>
       {/* disini */}
-      {/* <ResultTotalItem
+      <ResultTotalItem
         allowanceField={allowancesField}
         destinationIndex={index}
         form={form}
         setTotalAllowance={setTotalAllowance}
-      /> */}
+      />
 
       {/* <table className='w-full text-sm mt-10'>
         <tr>
@@ -1049,7 +1048,7 @@ export function ResultTotalItem({
               <td>{allowance.name}</td>
               <td className='flex justify-between pr-4'>
                 <span>IDR</span>
-                <span>{allowance.subtotal}</span>
+                <span>{formatRupiah(allowance.subtotal)}</span>
               </td>
             </tr>
           ))}
@@ -1061,7 +1060,7 @@ export function ResultTotalItem({
             </td>
             <td className='flex justify-between pr-4'>
               <span>IDR</span>
-              <span>{totalItem}</span>
+              <span>{formatRupiah(totalItem)}</span>
             </td>
           </tr>
         </tfoot>

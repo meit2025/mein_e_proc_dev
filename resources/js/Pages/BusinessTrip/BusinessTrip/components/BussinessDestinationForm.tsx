@@ -133,7 +133,7 @@ export function BussinessDestinationForm({
       }
       return detailAllowance;
     }
-
+    // console.log(listAllowances, 'list allowances');
     const allowancesForm = listAllowances.map((item: any) => {
       return {
         name: item.name,

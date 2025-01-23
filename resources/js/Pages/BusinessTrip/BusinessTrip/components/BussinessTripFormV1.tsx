@@ -353,6 +353,7 @@ export const BussinessTripFormV1 = ({
     const getPurposeType = GET_DETAIL_PURPOSE_TYPE(value);
     try {
       const response = await axiosInstance.get(url);
+      console.log(response,'response');
       const responsePurposeType = await axiosInstance.get(getPurposeType);
       //   const typePurpose = responsePurposeType.data.data.purpose.type;
       //   if (typePurpose == 'international') {
@@ -984,7 +985,29 @@ export const BussinessTripFormV1 = ({
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input type="number" {...field} value={field.value || ''} className='w-[50%]' min="1" max="100" />
+                            <Input
+                            type="number"
+                            {...field}
+                            value={field.value || ''}
+                            className='w-[50%]'
+                            // min="1"
+                            // max="100"
+                            onChange={(e) => {
+                                const inputValue = e.target.value;
+
+                                // Pastikan input hanya angka
+                                if (!/^\d*$/.test(inputValue)) return;
+
+                                const number = parseInt(inputValue, 10);
+
+                                // Batasi nilai antara 1 dan 100
+                                if (number >= 1 && number <= 100) {
+                                  field.onChange(number); // Update nilai valid
+                                } else if (inputValue === '') {
+                                  field.onChange(''); // Izinkan kosong
+                                }
+                              }}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
