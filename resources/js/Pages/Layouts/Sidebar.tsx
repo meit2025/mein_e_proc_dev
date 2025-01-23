@@ -124,7 +124,6 @@ export default function Sidebar() {
 
   useEffect(() => {
     if (cookies['menu-site']) {
-      console.log(props.auth?.user?.is_admin);
       if (props.auth?.user?.is_admin === '1') {
         setSidebar(sidebarAdmin);
       } else if (cookies['menu-site'] === 'business-trip') {

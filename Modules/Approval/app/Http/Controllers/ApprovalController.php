@@ -199,7 +199,7 @@ class ApprovalController extends Controller
                         'is_status' => true
                     ]);
             }
-            $message = $request->status . ' Dokument ' . $dokumentName . ' Oleh ' . Auth::user()->name . ' Pada Tanggal ' . $this->DateTimeNow();
+            $message = $dokumentName .  ' ' . $request->status . ' Document ' .  ' by ' . Auth::user()->name . ' At ' . $this->DateTimeNow();
 
             $this->logToDatabase(
                 $request->id,

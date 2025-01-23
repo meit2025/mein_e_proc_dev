@@ -64,7 +64,7 @@ const LayoutApproval = ({
         if (
           status_id !== 4 &&
           status_id !== 2 &&
-          status_id === 6 &&
+          status_id !== 6 &&
           firstFalseStatus?.user_id === auth?.user?.id
         ) {
           setIsApproval(true);

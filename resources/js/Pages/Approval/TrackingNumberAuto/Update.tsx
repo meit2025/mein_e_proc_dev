@@ -13,6 +13,11 @@ import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { formModel } from './model/formModel';
 import { modelDropdowns } from './model/modelDropdowns';
+import {
+  DETAIL_TRACKING_NUMBER_AUTO,
+  GET_TRACKING_NUMBER_AUTO,
+} from '@/endpoint/approvalTrackingNumberAuto/api';
+import { LIST_PAGE_TRACKING_NUMBER_AUTO } from '@/endpoint/approvalTrackingNumberAuto/page';
 
 const Update = ({ id }: { id: number }) => {
   const { props } = usePage();
@@ -30,7 +35,7 @@ const Update = ({ id }: { id: number }) => {
     async () => {
       setIsLoading(true);
       try {
-        const response = await axiosInstance.get(DETAIL_SETTING_APPROVAL_PR(props.id));
+        const response = await axiosInstance.get(DETAIL_TRACKING_NUMBER_AUTO(props.id));
         const data = response.data;
         methods.reset(data.data);
         setDataApproval(data.data.approval_route ?? []);
@@ -60,8 +65,8 @@ const Update = ({ id }: { id: number }) => {
             isLoading={isLoading}
             methods={methods}
             formModel={dataModel}
-            url={`${EDIT_SETTING_APPROVAL_PR}/${props.id}`}
-            redirectUrl={LIST_PAGE_SETTING_APPROVAL_PR}
+            url={`${GET_TRACKING_NUMBER_AUTO}/${props.id}`}
+            redirectUrl={LIST_PAGE_TRACKING_NUMBER_AUTO}
           />
         </div>
       </div>
