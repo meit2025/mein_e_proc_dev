@@ -170,6 +170,7 @@ class ApprovalController extends Controller
             $dokumnetType = 'PR';
             $dokumentApproval = 'PR';
             $dokumentName = 'Purchase Requisition';
+            $idSap = $request->id;
             switch ($request->function_name) {
                 case 'procurement':
                     $dokumnetType = 'PR';
@@ -202,15 +203,6 @@ class ApprovalController extends Controller
                     ]);
             }
             $message = $dokumentName .  ' Document ' . $request->status . '  ' .  ' by ' . Auth::user()->name . ' At ' . $this->DateTimeNow();
-
-            $this->logToDatabase(
-                $request->id,
-                $request->function_name,
-                'INFO',
-                $message,
-                $request->note
-            );
-
 
             $ceksedSap = Approval::where('is_status', false)->where('document_id', $request->id)
                 ->where('id', '!=', $request->approvalId)
@@ -252,6 +244,13 @@ class ApprovalController extends Controller
             if (isset($modelMap[$request->type]) && $statusId != 0) {
                 $modelMap[$request->type]::where('id', $request->id)->update(['status_id' => $statusId]);
             }
+            $this->logToDatabase(
+                $request->id,
+                $request->function_name,
+                'INFO',
+                $message,
+                $request->note
+            );
 
             // send notifikasi
             if (isset($modelMap[$request->type])) {
@@ -313,12 +312,13 @@ class ApprovalController extends Controller
                     'Generate PR TO SAP',
                     'SEND SAP SUCCESS'
                 );
-                SapJobs::dispatch($request->id, $dokumnetType);
+
+                if ($request->function_name == 'trip_declaration') {
+                    $pr = BusinessTrip::find($request->id);
+                    $idSap = $pr->parent_id;
+                }
+                SapJobs::dispatch($idSap, $dokumnetType);
             }
-
-
-
-
 
             DB::commit();
             return $this->successResponse($request->all());
