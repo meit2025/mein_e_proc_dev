@@ -40,6 +40,11 @@ class MasterTypeReimburse extends Model
         return $this->hasMany(MasterTypeReimburseUserAssign::class, 'reimburse_type_id', 'id');
     }
 
+    public function reimburseTypeOneUserAssign()
+    {
+        return $this->hasOne(MasterTypeReimburseUserAssign::class, 'reimburse_type_id', 'id');
+    }
+
     public function masterMaterial()
     {
         return $this->belongsTo(MasterMaterial::class, 'material_number', 'id');
