@@ -192,6 +192,11 @@
                 $color = 'waiting';
                 $icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>';
             @endphp
+        @elseif ($data['status']['code'] == 'revise')
+            @php
+                $color = 'reject';
+                $icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ban"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg>';
+            @endphp
         @endif
         <button class="waiting-approve {{$color}}">
             <span class="icon">
@@ -267,7 +272,8 @@
             <h3>Detail {{$row['destination']}}</h3>
             <table class="detail-table">
                 <tr>
-                    <th>Date</th>
+                    <th>Request Date</th>
+                    <th>Declaration Date</th>
                     <th>Shift</th>
                     <th>Shift Start</th>
                     <th>Shift End</th>
@@ -276,6 +282,7 @@
                 </tr>
                 @foreach ($row['business_trip_detail_attendance'] as $detail)
                     <tr>
+                        <td>{{date('d/m/Y',strtotime($detail['date']))}}</td>
                         <td>{{date('d/m/Y',strtotime($detail['date']))}}</td>
                         <td>{{$detail['shift_code']}}</td>
                         <td>{{$detail['shift_start']}}</td>
@@ -402,7 +409,7 @@
                     <tr style="border-bottom: 1px solid #000">
                         <th style="text-align: left;padding: 5px;">Total Declaration Value</th>
                         <td>:</td>
-                        <td>{{number_format($total_declaration_value + $row['other_allowance'],0,',','.')}} +</td>
+                        <td>{{number_format($total_declaration_value + $row['other_allowance'],0,',','.')}} -</td>
                     </tr>
                     <tr>
                         <th>Deviation Value</th>
@@ -429,7 +436,8 @@
                         <td>{{$item['user']['name']}}</td>
                         <td>{{isset($item['user']['division']) ? $item['user']['division']['name'] : '-'}}</td>
                         <td>{{$item['status']}}</td>
-                        <td>{{$item['is_status'] ? $carbon::parse($item['updated_at'])->format('d M Y (H:i)') : '-'}}</td>
+                        <td>{{$item['is_status'] ? date('d M Y (H:i)', strtotime($item['updated_at'])) : '-'}}</td>
+                        {{-- <td>{{$item['is_status'] ? $carbon::parse($item['updated_at'])->format('d M Y (H:i)') : '-'}}</td> --}}
                     </tr>
                 @endforeach
             </tbody>

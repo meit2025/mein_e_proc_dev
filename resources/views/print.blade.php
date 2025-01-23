@@ -196,7 +196,7 @@
         @endif
         <button class="waiting-approve {{$color}}">
             <span class="icon">
-                {!!$icon!!}    
+                {!!$icon!!}
             </span> {{$data['status']['name']}}
         </button>
     </div>
@@ -232,7 +232,7 @@
                 @endforeach
             </td>
         </tr>
-        @if ($data['cash_advance'] == 1) 
+        @if ($data['cash_advance'] == 1)
         <tr>
             <td><strong>Ref Number</strong></td>
             <td>{{$data['reference_number']}}</td>
@@ -257,7 +257,14 @@
 
     @foreach ($data['business_trip_destination'] as $idx => $row)
         <div id="{{$row['destination'].'-'.$row['id']}}" class="tab-content {{$idx == 0 ? 'active' : ''}}">
-            <h3>Detail {{$row['destination']}}</h3>
+            <div style="">
+                <h3>Detail {{$row['destination']}}</h3>
+                @if ($row['restricted_area'] === 1)
+                    <div style="background-color: #fd0000; display: inline-block; color: white; margin: 0.3rem 0; padding: 0.5rem 1rem; border-radius: 0.375rem;">
+                        <span style="font-size: 0.75rem;">Restrict Area</span>
+                    </div>
+                @endif
+            </div>
             <table class="detail-table">
                 <tr>
                     <th>Date</th>

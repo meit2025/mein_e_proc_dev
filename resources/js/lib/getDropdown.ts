@@ -20,6 +20,7 @@ interface StructDropdown {
   hiddenZero?: boolean;
   idType?: 'number' | 'string';
   declaration?: string;
+  softDelete?: boolean;
 }
 
 function removeLeadingZeros(input: string): string {
@@ -54,6 +55,7 @@ const useDropdownOptions = (urls: string = 'api/master/dropdown') => {
           groupBy: struct.where?.groupBy ?? '',
           attribut: struct.attribut ?? '',
           join: struct.join ?? '',
+          softDelete: struct.softDelete ?? '',
         },
         headers: {
           'Content-Type': 'application/json',

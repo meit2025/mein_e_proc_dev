@@ -64,12 +64,13 @@ interface BusinessTripAttachement {
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
 const ACCEPTED_FILE_TYPES = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/heic',
-  'image/heif',
-  'application/pdf',
+    'heic',
+    'image/heic',
+    'image/heif',
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'application/pdf',
 ];
 
 export const BussinessTripFormV1 = ({
@@ -125,7 +126,7 @@ export const BussinessTripFormV1 = ({
             detail: z.array(
               z.object({
                 date: z.string().nullish(),
-                request_price: z.string().optional(),
+                request_price: z.number().optional(),
               }),
             ),
           }),
@@ -266,13 +267,14 @@ export const BussinessTripFormV1 = ({
     try {
       const response = await axiosInstance.get(url);
       const businessTripData = response.data.data;
+      console.log(businessTripData,'businessTripData')
       setIsCashAdvance(businessTripData.cash_advance == 1 ? true : false);
       form.setValue('remark', businessTripData.remarks || '');
       form.setValue('total_destination', businessTripData.total_destination || 1);
       form.setValue('cash_advance', businessTripData.cash_advance == 1 ? true : false);
       form.setValue('reference_number', businessTripData.reference_number);
-      form.setValue('total_percent', businessTripData.total_percent);
-      form.setValue('total_cash_advance', businessTripData.total_cash_advance);
+      form.setValue('total_percent', `${businessTripData.total_percent} %`);
+      form.setValue('total_cash_advance', formatRupiah(businessTripData.total_cash_advance,false));
       setBusinessTripDetail(response.data.data as BusinessTripModel);
       setListDestination(businessTripData.destinations);
       setTotalDestination(businessTripData.total_destination);
@@ -380,10 +382,10 @@ export const BussinessTripFormV1 = ({
     useDropdownOptions();
 
   React.useEffect(() => {
-    const totalAll = getTotalDes();
-    if (totalAll > 0) {
-      fetchDataValue();
-    }
+    // const totalAll = getTotalDes();
+    // if (totalAll > 0) {
+    //   fetchDataValue();
+    // }
 
     getdataRequestNo('', {
       name: 'request_no',
@@ -513,6 +515,7 @@ export const BussinessTripFormV1 = ({
                           className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
                           type='file'
                           multiple // Menambahkan atribut multiple
+                          accept='.jpg,.jpeg,.png,.pdf,.heic,.heif'
                           onChange={(e) => {
                             const files = e.target.files; // Ambil file yang dipilih
                             if (files) {
@@ -869,10 +872,10 @@ export function BussinessDestinationForm({
 
   // Calculate total based on totalPercent and allowance
   React.useEffect(() => {
-    const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
-    const total = (percentValue / 100) * allowance; // Multiply percent with allowance
-    setValue('total_cash_advance', total.toFixed(2)); // Save the total in total_cash_advance field
-  }, [totalPercent, allowance, setValue]); // Recalculate when totalPercent or allowance changes
+    // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
+    // const total = (percentValue / 100) * allowance; // Multiply percent with allowance
+    // setValue('total_cash_advance', total.toFixed(2)); // Save the total in total_cash_advance field
+  }, [allowance]); // Recalculate when totalPercent or allowance changes
   //   console.log(destination, 'destinationxxxx');
   return (
     <TabsContent value={`destination${index + 1}`}>
@@ -991,20 +994,7 @@ export function BussinessDestinationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Select
-                          value={field.value || undefined}
-                          disabled={true}
-                          onValueChange={(value) => field.onChange(value)}
-                        >
-                          <SelectTrigger className='w-[50%] mb-2'>
-                            <SelectValue placeholder='-- Select Total Percent --' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value='10'>10%</SelectItem>
-                            <SelectItem value='25'>25%</SelectItem>
-                            <SelectItem value='50'>50%</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Input {...field} value={field.value || ''} readOnly={true} className='w-[50%]' min="1" max="100" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1016,7 +1006,7 @@ export function BussinessDestinationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Input value={field.value || ''} readOnly={true} className='w-[50%]' />
+                        <Input value={field.value || ''} readOnly={true} className='w-[50%] mt-2' />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

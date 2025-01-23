@@ -238,7 +238,16 @@ const BusinessTripDetail = () => {
           {data?.business_trip_destination.map((destination: any, index: number) => (
             <TabsContent key={index} value={`destination${index + 1}`}>
               <div key={index}>
-                <h3>Detail {destination.destination}</h3>
+                <div className="">
+                    <h3>Detail {destination.destination}</h3>
+                    {destination.restricted_area === 1 ? (
+                        <div className="bg-red-500 inline-block text-white my-2 py-2 px-4 rounded-md">
+                            <span className='text-xs'>Restrict Area</span>
+                        </div>
+                        ) : (
+                        <div className="hidden"></div> // atau sesuatu yang sesuai jika tidak ada elemen
+                    )}
+                </div>
                 <table className='detail-table'>
                   <tr>
                     <th>Date</th>

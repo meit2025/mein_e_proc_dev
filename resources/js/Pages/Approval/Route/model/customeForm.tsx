@@ -1,31 +1,16 @@
-import { useFormContext } from 'react-hook-form';
-import FormInput from '@/components/Input/formInput';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useFieldArray, useFormContext } from 'react-hook-form';
 import FormAutocomplete from '@/components/Input/formDropdown';
 import useDropdownOptions from '@/lib/getDropdown';
 
-interface ApprovalProps {
-  user_id: string;
-}
-
 export const CustomeForm = ({ data }: { data: any[] }) => {
-  const { getValues, setValue } = useFormContext();
-  const [inputs, setInputs] = useState<ApprovalProps[]>(data);
+  const { control, setValue, watch } = useFormContext();
 
-  const handleAddInput = () => {
-    setInputs([
-      ...inputs,
-      {
-        user_id: '',
-      },
-    ]);
-  };
-
-  const handleRemoveInput = (index: any) => {
-    const newInputs = inputs.filter((_, i) => i !== index);
-    setInputs(newInputs);
-    setValue('user_approvals', newInputs);
-  };
+  // 🔹 Gunakan useFieldArray agar React Hook Form tetap sinkron
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'user_approvals',
+  });
 
   const { dataDropdown, getDropdown } = useDropdownOptions();
 
@@ -41,42 +26,44 @@ export const CustomeForm = ({ data }: { data: any[] }) => {
     });
   }, []);
 
+  // 🔹 Jika data belum diisi, set nilai default dari props
   useEffect(() => {
-    if (inputs.length === 0) {
-      setInputs(data);
+    if (fields.length === 0 && data.length > 0) {
+      data.forEach((item) => append({ user_id: item.user_id }));
     }
-  }, [data]);
+  }, [data, fields]);
 
   return (
     <>
       <div className='w-full mt-8 border rounded-md shadow-md'>
         <div className='p-4'>User Approval</div>
-        {inputs.map((input, index) => (
-          <div key={index} className='p-4 mb-2'>
+
+        {fields.map((field, index) => (
+          <div key={field.id} className='p-4 mb-2'>
             <div className='flex items-center gap-4'>
-              {/* Use flexbox here */}
               <FormAutocomplete<any[]>
                 options={dataDropdown ?? []}
                 fieldLabel={`Approval L${index + 1}`}
-                fieldName={`user_approvals[${index}].user_id`}
+                fieldName={`user_approvals.${index}.user_id`}
                 isRequired={true}
                 placeholder={'Select User Approval'}
                 style={{
                   width: '64.5rem',
                 }}
               />
-              <span onClick={() => handleRemoveInput(index)} style={{ cursor: 'pointer' }}>
+              <span onClick={() => remove(index)} style={{ cursor: 'pointer' }}>
                 <i className='ki-duotone ki-trash-square text-danger text-2xl'></i>
               </span>
             </div>
           </div>
         ))}
+
         <button
           type='button'
-          onClick={handleAddInput}
+          onClick={() => append({ user_id: '' })}
           className='mt-4 bg-blue-500 text-white p-2 m-4 rounded-md'
         >
-          add Form
+          Add Form
         </button>
       </div>
     </>

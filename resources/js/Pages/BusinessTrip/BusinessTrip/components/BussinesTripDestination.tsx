@@ -26,6 +26,8 @@ export function BussinesTripDestination({
   type,
   btClone,
   dateBusinessTripByUser,
+  selectedDates,
+  setSelectedDates,
 }: {
   updateDestination: any;
   destinationField: any;
@@ -41,10 +43,9 @@ export function BussinesTripDestination({
   type: any;
   btClone: any;
   dateBusinessTripByUser: DateObject[];
+  selectedDates: any;
+  setSelectedDates: any;
 }) {
-    const [selectedDates, setSelectedDates] = React.useState<
-        { start: Date | undefined; end: Date | undefined }[]
-    >([]);
 
       React.useEffect(() => {
         const fetchAndSetDates = async () => {
@@ -72,7 +73,6 @@ export function BussinesTripDestination({
         fetchAndSetDates();
       }, [dateBusinessTripByUser]);
 
-    //   console.log(selectedDates, 'selectedDatesxxx');
 
     return (
     <Tabs defaultValue='destination1' className='w-full'>
