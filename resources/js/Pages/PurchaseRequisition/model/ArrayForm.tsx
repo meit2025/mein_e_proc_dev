@@ -223,13 +223,13 @@ const ArrayForm = ({
   };
 
   const handelCopy = (data: any, rowIndex: any) => {
-    const id = data.id ?? `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
+    const id = `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
 
     const newItem = {
       id: id,
       qty: data.qty ?? '0',
       unit_price: data.unit_price ?? '0',
-      total_amount: data.item_qty * data.unit_price,
+      total_amount: parseInt(data.qty) * parseInt(data.unit_price),
       account_assignment_categories: data.account_assignment_categories,
       cost_center: data.cost_center ?? '',
       material_group: data.material_group ?? '',
@@ -243,7 +243,6 @@ const ArrayForm = ({
     };
 
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
-    console.log('updatedItems', currentItems);
 
     const updatedItems = [...currentItems, newItem];
     setValue(`vendors[${dataIndex}].units`, updatedItems);
@@ -271,6 +270,17 @@ const ArrayForm = ({
     console.log('currentItems', currentItems);
     const updatedItems = currentItems.filter((item: any, index: number) => item.id !== data.id);
     setValue(`vendors[${dataIndex}].units`, updatedItems);
+  };
+
+  const totalVendor = useWatch({ name: 'total_vendor' });
+
+  // Determine tabCount, default to 1 if total_vendor is 0 or not set
+  const tabCount = totalVendor > 0 ? totalVendor : 1;
+
+  const dataCopyToVendor = (x: number) => {
+    const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
+
+    setValue(`vendors[${x}].units`, currentItems);
   };
 
   const action = [
@@ -590,6 +600,26 @@ const ArrayForm = ({
           </div>
         </div>
       </Box>
+
+      {/* {Array.from({ length: tabCount }, (_, index) => (
+        <>
+          {index !== dataIndex && (
+            <Button
+              key={index}
+              type='button'
+              variant='contained'
+              style={{
+                marginTop: '1rem',
+                marginRight: '1rem',
+              }}
+              className='bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-all'
+              onClick={async () => await dataCopyToVendor(index)}
+            >
+              Copy To Vendor {index + 1}
+            </Button>
+          )}
+        </>
+      ))} */}
     </div>
   );
 };
