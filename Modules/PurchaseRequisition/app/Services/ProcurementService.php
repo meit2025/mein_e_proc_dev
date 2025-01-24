@@ -195,7 +195,7 @@ class ProcurementService
             'code_transaction' => 'VEN',  // code_transaction
             'belnr' =>  $procurement->id, // belnr
             'company_code' => $settings['companyCode'],
-            'gjahr' => $year, // gjahr
+            'gjahr' => '', // gjahr ini year
             'currency' => 'IDR', // waers
             'document_date' => $formattedDate, // bldat
             'budat' => $formattedDate, // budat
