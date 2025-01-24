@@ -170,6 +170,7 @@ class ApprovalController extends Controller
             $dokumnetType = 'PR';
             $dokumentApproval = 'PR';
             $dokumentName = 'Purchase Requisition';
+            $idSap = $request->id;
             switch ($request->function_name) {
                 case 'procurement':
                     $dokumnetType = 'PR';
@@ -198,19 +199,22 @@ class ApprovalController extends Controller
                     ->update([
                         'status' => $request->status,
                         'message' => $request->note,
-                        'is_status' => true
+                        'is_status' => true,
+                        'is_approval' => false
                     ]);
+
+                $dataNext = Approval::where('id', $request->approvalId)->where('document_id',  $request->id)
+                    ->where('document_name', $dokumentApproval)->first();
+
+                if ($dataNext) {
+                    Approval::where('document_id',  $request->id)
+                        ->where('number_approval', $dataNext->number_approval + 1)
+                        ->where('document_name', $dokumentApproval)->update([
+                            'is_approval' => true
+                        ]);
+                }
             }
             $message = $dokumentName .  ' Document ' . $request->status . '  ' .  ' by ' . Auth::user()->name . ' At ' . $this->DateTimeNow();
-
-            $this->logToDatabase(
-                $request->id,
-                $request->function_name,
-                'INFO',
-                $message,
-                $request->note
-            );
-
 
             $ceksedSap = Approval::where('is_status', false)->where('document_id', $request->id)
                 ->where('id', '!=', $request->approvalId)
@@ -252,6 +256,13 @@ class ApprovalController extends Controller
             if (isset($modelMap[$request->type]) && $statusId != 0) {
                 $modelMap[$request->type]::where('id', $request->id)->update(['status_id' => $statusId]);
             }
+            $this->logToDatabase(
+                $request->id,
+                $request->function_name,
+                'INFO',
+                $message,
+                $request->note
+            );
 
             // send notifikasi
             if (isset($modelMap[$request->type])) {
@@ -313,12 +324,13 @@ class ApprovalController extends Controller
                     'Generate PR TO SAP',
                     'SEND SAP SUCCESS'
                 );
-                SapJobs::dispatch($request->id, $dokumnetType);
+
+                if ($request->function_name == 'trip_declaration') {
+                    $pr = BusinessTrip::find($request->id);
+                    $idSap = $pr->parent_id;
+                }
+                SapJobs::dispatch($idSap, $dokumnetType);
             }
-
-
-
-
 
             DB::commit();
             return $this->successResponse($request->all());

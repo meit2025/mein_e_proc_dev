@@ -69,7 +69,6 @@ const LayoutApproval = ({
         ) {
           setIsApproval(true);
         }
-        console.log('data', data.data);
         const approvalFromStatusRoute = (data.data ?? []).map((route: any) => {
           return {
             status: route.status,

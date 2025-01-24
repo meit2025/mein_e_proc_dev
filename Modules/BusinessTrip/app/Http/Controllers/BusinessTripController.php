@@ -506,18 +506,24 @@ class BusinessTripController extends Controller
             $data = Approval::where('user_id', Auth::user()->id)
             ->where('document_name', 'TRIP')->get();
             $arr = $data->filter(function ($value) {
+                // Cari approval sebelumnya berdasarkan document_id
                 $previousApproval = Approval::where('id', '<', $value->id)
                     ->where('document_id', $value->document_id)
-                    ->orderBy('id', 'asc')
+                    ->orderBy('id', 'desc')
                     ->first();
 
+                // Jika tidak ada approval sebelumnya, hanya tampilkan jika is_status = false
                 if (is_null($previousApproval)) {
                     return !$value->is_status;
                 }
 
-                return Approval::where('id', $previousApproval->id)
-                    ->where('is_status', true)
-                    ->exists();
+                // Jika approval sebelumnya is_status = true, maka data ini boleh muncul
+                if ($previousApproval->is_status) {
+                    return true;
+                }
+
+                // Selain itu, tidak tampilkan
+                return false;
             })->pluck('document_id');
             $query = $query->whereIn('id', $arr)->where('status_id',1);
         }else{
@@ -839,7 +845,7 @@ class BusinessTripController extends Controller
         $data = BusinessTripDestination::whereHas('businessTrip', function ($query) use ($user_id) {
             $query->where('request_for', $user_id)
                 ->where('type', 'request')
-                ->where('status_id',1);
+                ->whereIn('status_id',[1,3,5]);
         })->get();
         $destination = [];
         $offset = 10;

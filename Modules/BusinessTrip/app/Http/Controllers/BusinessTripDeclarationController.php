@@ -208,7 +208,7 @@ class BusinessTripDeclarationController extends Controller
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)$detailDay->price,
+                    'value' => (int)$detailDay->price / $detailDay->total,
                     'total_day' => $detailDay->total,
                     'total' => $detailDay->price * $detailDay->total,
                 ];
@@ -281,7 +281,7 @@ class BusinessTripDeclarationController extends Controller
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)$detailDay->price,
+                    'value' => (int)$detailDay->price / $detailDay->total,
                     'total_day' => $detailDay->total,
                     'total' => $detailDay->price * $detailDay->total,
                 ];
@@ -309,6 +309,7 @@ class BusinessTripDeclarationController extends Controller
 
             $data['business_trip_destination'][] = [
                 'destination' => $destination->destination,
+                'restricted_area' => $destination->restricted_area,
                 'business_trip_start_date' => $destination->business_trip_start_date,
                 'business_trip_end_date' => $destination->business_trip_end_date,
                 // 'other_allowance' => $destination->other_allowance,
@@ -567,7 +568,6 @@ class BusinessTripDeclarationController extends Controller
                         'end_time' => $destination['request_end_time'],
                     ]);
                 }
-
                 foreach ($data_destination['allowances'] as $key => $allowance) {
                     if (strtolower($allowance['type']) == 'total') {
                         foreach ($allowance['detail'] as $detail) {
@@ -575,8 +575,8 @@ class BusinessTripDeclarationController extends Controller
                                 'business_trip_destination_id' => $businessTripDestination->id,
                                 'business_trip_id' => $businessTrip->id,
                                 'price' => $detail['request_price'],
-                                'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
-                                'standard_value' => $allowance['subtotal'],
+                                'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->withTrashed()->first()?->id,
+                                'standard_value' => $allowance['default_price'],
                             ]);
                         }
                     } else {
@@ -586,8 +586,8 @@ class BusinessTripDeclarationController extends Controller
                                 'date' => $detail['date'],
                                 'business_trip_id' => $businessTrip->id,
                                 'price' => $detail['request_price'],
-                                'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->first()?->id,
-                                'standard_value' => $allowance['subtotal'],
+                                'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->withTrashed()->first()?->id,
+                                'standard_value' => $allowance['default_price'],
                             ]);
                         }
                     }
@@ -636,12 +636,13 @@ class BusinessTripDeclarationController extends Controller
         $request_detail_allowance_from_parent = [];
         foreach ($findData->parentBusinessTrip->businessTripDestination as $parent) {
             $request_detail_allowance = [];
+            // dd($parent->detailDestinationDay);
             foreach ($parent->detailDestinationDay as $detailDay) {
                 $request_detail_allowance[] = [
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)$detailDay->price,
+                    'value' => (int)$detailDay->price / $detailDay->total,
                     'total_day' => $detailDay->total,
                     'total' => $detailDay->price * $detailDay->total,
                 ];
@@ -684,7 +685,7 @@ class BusinessTripDeclarationController extends Controller
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)$detailDay->standard_value,
+                    'value' => (int)$detailDay->standar_value,
                     'total_day' => $detailDay->total,
                     'total' => $detailDay->standard_value * $detailDay->total,
                 ];
@@ -696,7 +697,7 @@ class BusinessTripDeclarationController extends Controller
                     'item_name' => $detailTotal->allowance->name,
                     'type' => $detailTotal->allowance->type,
                     'currency_code' => $detailTotal->allowance->currency_id,
-                    'value' => (int)$detailTotal->standard_value,
+                    'value' => (int)$detailTotal->standar_value,
                     'total_day' => '-',
                     'total' => (int)$detailTotal->standard_value,
                 ];
@@ -709,7 +710,7 @@ class BusinessTripDeclarationController extends Controller
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)$detailDay->price,
+                    'value' => (int)$detailDay->price / $detailDay->total,
                     'total_day' => $detailDay->total,
                     'total' => $detailDay->price * $detailDay->total,
                 ];
@@ -731,6 +732,7 @@ class BusinessTripDeclarationController extends Controller
 
             $data['business_trip_destination'][] = [
                 'destination' => $destination->destination,
+                'restricted_area' => $destination->restricted_area,
                 'business_trip_start_date' => $destination->business_trip_start_date,
                 'business_trip_end_date' => $destination->business_trip_end_date,
                 // 'other_allowance' => $destination->other_allowance,

@@ -110,11 +110,13 @@ class CheckApproval
             }
 
             if ($save) {
-                foreach ($result->approvalRoute as $approvalRoute) {
+                foreach ($result->approvalRoute as $key => $approvalRoute) {
                     Approval::create(
                         [
                             'user_id' => $approvalRoute->user_id,
                             'is_status' => false,
+                            'is_approval' => $key == 0 ? true : false,
+                            'number_approval' => $key + 1,
                             'message' => '',
                             'document_id' => $idDocument,
                             'document_name' => 'PR',

@@ -242,7 +242,7 @@ const BusinessTripDetail = () => {
                     <h3>Detail {destination.destination}</h3>
                     {destination.restricted_area === 1 ? (
                         <div className="bg-red-500 inline-block text-white my-2 py-2 px-4 rounded-md">
-                            <span className='text-xs'>Restrict Area</span>
+                            <span className='text-xs'>Restricted Area</span>
                         </div>
                         ) : (
                         <div className="hidden"></div> // atau sesuatu yang sesuai jika tidak ada elemen
