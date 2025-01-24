@@ -201,8 +201,9 @@ const ArrayForm = ({
     setValue('item_uom', '');
   };
 
-  const handelEdit = (data: any, rowIndex: any) => {
+  const handelEdit = async (data: any, rowIndex: any) => {
     const id = data.id || `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
+    await handelGetMaterialNumber(data.material_group);
 
     setValue('indexEdit', id);
     setValue('action', 'edit');
@@ -223,8 +224,9 @@ const ArrayForm = ({
     setValue('item_uom', data.uom ?? '');
   };
 
-  const handelCopy = (data: any, rowIndex: any) => {
+  const handelCopy = async (data: any, rowIndex: any) => {
     const id = `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
+    await handelGetMaterialNumber(data.material_group);
     const newItem = {
       id: id,
       qty: data.qty ?? '0',
