@@ -23,7 +23,7 @@ export const columns = (isEmployee: any) : GridColDef[] => {
       field: 'maximumBalance',
       headerName: 'Maximum Balance',
       width: 200,
-      filterable: true,
+      filterable: false,
       renderCell: (params: any) => {
         return formatRupiah(params.row.maximumBalance);
       },
@@ -33,7 +33,7 @@ export const columns = (isEmployee: any) : GridColDef[] => {
         field: 'totalPaid',
         headerName: 'Total Rembursement Paid',
         width: 200,
-        filterable: true,
+        filterable: false,
         renderCell: (params: any) => {
           return formatRupiah(params.row.totalPaid);
         },
@@ -42,7 +42,7 @@ export const columns = (isEmployee: any) : GridColDef[] => {
         field: 'totalUnpaid',
         headerName: 'Total Rembursement Unpaid',
         width: 200,
-        filterable: true,
+        filterable: false,
         renderCell: (params: any) => {
           return formatRupiah(params.row.totalUnpaid);
         },
@@ -51,7 +51,7 @@ export const columns = (isEmployee: any) : GridColDef[] => {
         field: 'remainingBalance',
         headerName: 'Remaining Balance',
         width: 200,
-        filterable: true,
+        filterable: false,
         renderCell: (params: any) => {
           return formatRupiah(params.row.remainingBalance);
         },
@@ -60,7 +60,7 @@ export const columns = (isEmployee: any) : GridColDef[] => {
         field: 'lastClaimDate',
         headerName: 'Last Claim Date',
         width: 200,
-        filterable: true,
+        filterable: false,
         renderCell: (params: any) => {
           if (params.row.lastClaimDate !== null) {
             const date = new Date(params.row.lastClaimDate);
@@ -74,7 +74,7 @@ export const columns = (isEmployee: any) : GridColDef[] => {
         field: 'availableClaimDate',
         headerName: 'Available Claim Date',
         width: 200,
-        filterable: true,
+        filterable: false,
         renderCell: (params: any) => {
           if (params.row.availableClaimDate !== null) {
             const date = new Date(params.row.availableClaimDate);
@@ -89,6 +89,7 @@ export const columns = (isEmployee: any) : GridColDef[] => {
 }
 
 export const familyBalanceColumns : GridColDef[] = [
+  { field: 'familyName', headerName: 'Name', width: 200, filterable: true },
   {
     field: 'totalPaid',
     headerName: 'Total Rembursement Paid',
@@ -102,7 +103,7 @@ export const familyBalanceColumns : GridColDef[] = [
     field: 'totalUnpaid',
     headerName: 'Total Rembursement Unpaid',
     width: 200,
-    filterable: true,
+    filterable: false,
     renderCell: (params: any) => {
       return formatRupiah(params.row.totalUnpaid);
     },
@@ -111,7 +112,7 @@ export const familyBalanceColumns : GridColDef[] = [
     field: 'remainingBalance',
     headerName: 'Remaining Balance',
     width: 200,
-    filterable: true,
+    filterable: false,
     renderCell: (params: any) => {
       return formatRupiah(params.row.remainingBalance);
     },
@@ -120,7 +121,7 @@ export const familyBalanceColumns : GridColDef[] = [
     field: 'lastClaimDate',
     headerName: 'Last Claim Date',
     width: 200,
-    filterable: true,
+    filterable: false,
     renderCell: (params: any) => {
       if (params.row.lastClaimDate !== null) {
         const date = new Date(params.row.lastClaimDate);
@@ -134,7 +135,7 @@ export const familyBalanceColumns : GridColDef[] = [
     field: 'availableClaimDate',
     headerName: 'Available Claim Date',
     width: 200,
-    filterable: true,
+    filterable: false,
     renderCell: (params: any) => {
       if (params.row.availableClaimDate !== null) {
         const date = new Date(params.row.availableClaimDate);

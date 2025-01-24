@@ -174,13 +174,13 @@ class ReimbuseController extends Controller
                 ])
                 ->whereColumn('approvalQueueUser.user_id', 'approvals.user_id')
                 ->pluck('approvals.document_id')->toArray();
-                $query = $query->whereIn('id', $approval);
+                $query = $query->whereIn('id', $approval)->where('status_id', 1);
             } else {
                 $data = $query->where('requester', Auth::user()->nip)->orWhere('request_created_by', Auth::user()->id);
             }
 
             if ($request->search) {
-                $query = $query->orWhere('code', 'ILIKE', '%' . $request->search . '%')
+                $query = $query->where('code', 'ILIKE', '%' . $request->search . '%')
                 ->orWhere('remark', 'ILIKE', '%' . $request->search . '%')
                 ->orWhere('requester', 'ILIKE', '%' . $request->search . '%');
 

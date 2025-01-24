@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 
 export const ListLayout = ({ isEmployee }: { isEmployee: number }) => {
-  const [openFamilyRelation, setOpenFamilyRelation] = React.useState<Array<any>>([]);
+  const [openFamilyRelation, setOpenFamilyRelation] = React.useState<any>([]);
   const roleAkses = 'reimburse';
   const roleConfig = {
     detail: `${roleAkses} view`,
@@ -42,7 +42,7 @@ export const ListLayout = ({ isEmployee }: { isEmployee: number }) => {
       }
     ] : [])
   ];
-
+  
   return (
     <>
       <DataGridComponent
@@ -57,19 +57,21 @@ export const ListLayout = ({ isEmployee }: { isEmployee: number }) => {
       {/* modal balance family */}
       <CustomDialog
         onClose={() => setOpenFamilyRelation([])}
-        open={openFamilyRelation.length !== 0}
+        open={openFamilyRelation.length !== 0 && typeof openFamilyRelation === 'object'}
         className='md:max-w-[1200px]'
       >
         <h2>Reimburse Type : {openFamilyRelation?.reimburseType}</h2>
         <h2>Relation : {openFamilyRelation?.relation}</h2>
         <h2>Maximum Balance : {formatRupiah(openFamilyRelation?.maximumBalance ?? 0)}</h2>
-        <DataGridComponent
-          columns={familyBalanceColumns}
-          url={{
-            url: FAMILY_BALANCE_REIMBURSE_LIST(openFamilyRelation?.id, openFamilyRelation?.relation),
-          }}
-          labelFilter='search'
-        />
+        {openFamilyRelation.length !== 0 && typeof openFamilyRelation === 'object' && (
+          <DataGridComponent
+            columns={familyBalanceColumns}
+            url={{
+              url: FAMILY_BALANCE_REIMBURSE_LIST(openFamilyRelation?.id, openFamilyRelation?.relation?.toLowerCase(), openFamilyRelation?.maximumBalance),
+            }}
+            labelFilter='search'
+          />
+        )}
       </CustomDialog>
     </>
   );
