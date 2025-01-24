@@ -98,7 +98,7 @@ export const BussinessTripFormV1 = ({
     total_destination: z.number().int('Total Destinantion Required'),
     cash_advance: z.boolean().nullable().optional(),
     reference_number: z.string().nullable().optional(),
-    total_percent: z.string().nullable().optional(),
+    total_percent: z.number().nullable().optional(),
     total_cash_advance: z.string().nullable().optional(),
     destinations: z.array(
       z.object({
