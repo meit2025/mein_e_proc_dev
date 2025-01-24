@@ -601,7 +601,7 @@ const ArrayForm = ({
         </div>
       </Box>
 
-      {/* {Array.from({ length: tabCount }, (_, index) => (
+      {Array.from({ length: tabCount }, (_, index) => (
         <>
           {index !== dataIndex && (
             <Button
@@ -619,7 +619,7 @@ const ArrayForm = ({
             </Button>
           )}
         </>
-      ))} */}
+      ))}
     </div>
   );
 };
