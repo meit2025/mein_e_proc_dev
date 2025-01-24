@@ -49,7 +49,7 @@ const useDropdownOptionsArray = () => {
           return {
             ...items,
             label: !item.struct.isMapping ? label : `${label} - ${value}`,
-            value: value,
+            value: items.value,
           };
         });
 
