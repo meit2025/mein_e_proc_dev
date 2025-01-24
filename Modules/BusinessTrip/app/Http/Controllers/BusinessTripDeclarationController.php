@@ -204,11 +204,12 @@ class BusinessTripDeclarationController extends Controller
         foreach ($findData->parentBusinessTrip->businessTripDestination as $parent) {
             $request_detail_allowance = [];
             foreach ($parent->detailDestinationDay as $detailDay) {
+                dd($detailDay->price,$detailDay->total);
                 $request_detail_allowance[] = [
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)$detailDay->price / $detailDay->total,
+                    'value' => (int)($detailDay->price * $detailDay->total) / $detailDay->total,
                     'total_day' => $detailDay->total,
                     'total' => $detailDay->price * $detailDay->total,
                 ];
@@ -253,7 +254,7 @@ class BusinessTripDeclarationController extends Controller
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)$detailDay->standard_value,
+                    'value' => (int)$detailDay->standard_value / $detailDay->total,
                     'total_day' => $detailDay->total,
                     'total' => $detailDay->standard_value * $detailDay->total,
                 ];
@@ -281,7 +282,7 @@ class BusinessTripDeclarationController extends Controller
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)$detailDay->price / $detailDay->total,
+                    'value' => ((int)$detailDay->price * $detailDay->total) / $detailDay->total,
                     'total_day' => $detailDay->total,
                     'total' => $detailDay->price * $detailDay->total,
                 ];

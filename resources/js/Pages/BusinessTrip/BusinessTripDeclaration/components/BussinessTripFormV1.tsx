@@ -98,7 +98,7 @@ export const BussinessTripFormV1 = ({
     total_destination: z.number().int('Total Destinantion Required'),
     cash_advance: z.boolean().nullable().optional(),
     reference_number: z.string().nullable().optional(),
-    total_percent: z.number().nullable().optional(),
+    // total_percent: z.number().nullable().optional(),
     total_cash_advance: z.string().nullable().optional(),
     destinations: z.array(
       z.object({
@@ -150,7 +150,7 @@ export const BussinessTripFormV1 = ({
       total_destination: 1,
       cash_advance: false,
       reference_number: '',
-      total_percent: '',
+      total_percent: 0,
       total_cash_advance: '0',
       destinations: [
         {
@@ -299,7 +299,7 @@ export const BussinessTripFormV1 = ({
       form.setValue('total_destination', businessTripData.total_destination || 1);
       form.setValue('cash_advance', businessTripData.cash_advance == 1 ? true : false);
       form.setValue('reference_number', businessTripData.reference_number);
-      form.setValue('total_percent', `${businessTripData.total_percent} %`);
+      form.setValue('total_percent', businessTripData.total_percent);
       form.setValue('total_cash_advance', formatRupiah(businessTripData.total_cash_advance, false));
       setBusinessTripDetail(response.data.data as BusinessTripModel);
       setListDestination(businessTripData.destinations);
