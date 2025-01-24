@@ -201,9 +201,7 @@ const ArrayForm = ({
   };
 
   const handelEdit = (data: any, rowIndex: any) => {
-    console.log(rowIndex, data.id);
-
-    const id = data.id ?? `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
+    const id = `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
 
     setValue('indexEdit', id);
     setValue('action', 'edit');
@@ -224,8 +222,53 @@ const ArrayForm = ({
     setValue('item_uom', data.uom ?? '');
   };
 
+  const handelCopy = (data: any, rowIndex: any) => {
+    const id = data.id ?? `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
+
+    const newItem = {
+      id: id,
+      qty: data.qty ?? '0',
+      unit_price: data.unit_price ?? '0',
+      total_amount: data.item_qty * data.unit_price,
+      account_assignment_categories: data.account_assignment_categories,
+      cost_center: data.cost_center ?? '',
+      material_group: data.material_group ?? '',
+      material_number: data.material_number ?? '',
+      uom: data.uom ?? '',
+      tax: data.tax ?? '',
+      short_text: data.short_text ?? '',
+      order_number: data.order_number ?? '',
+      asset_number: data.cost_center ?? '',
+      sub_asset_number: data.asset_number ?? '',
+    };
+
+    const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
+    console.log('updatedItems', currentItems);
+
+    const updatedItems = [...currentItems, newItem];
+    setValue(`vendors[${dataIndex}].units`, updatedItems);
+
+    const dataVendorArray = getValues('vendors').filter(
+      (item: any) => (item.winner || false) === true,
+    );
+
+    const dataVendor = dataVendorArray.length > 0 ? dataVendorArray[0] : null;
+
+    if (dataVendor !== null) {
+      const winnerUnit = dataVendor.units || [];
+
+      const totalSum = winnerUnit.reduce((sum: number, item: any) => sum + item.total_amount, 0);
+      setValue('total_all_amount', totalSum);
+      const data = (parseInt(watch('cash_advance_purchases.dp')) / 100) * parseInt(totalSum);
+      setValue('cash_advance_purchases.nominal', data);
+    }
+
+    resetindex();
+  };
+
   const handleDelete = (data: any, rowIndex: any) => {
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
+    console.log('currentItems', currentItems);
     const updatedItems = currentItems.filter((item: any, index: number) => item.id !== data.id);
     setValue(`vendors[${dataIndex}].units`, updatedItems);
   };
@@ -245,6 +288,16 @@ const ArrayForm = ({
             gap: '10px', // Add consistent spacing between elements
           }}
         >
+          <Link
+            type='button'
+            onClick={(event) => {
+              event.preventDefault();
+              handelCopy(params.row, params);
+            }}
+            href='#'
+          >
+            <i className='ki-filled ki-copy text-warning text-2xl'></i>
+          </Link>
           <Link
             type='button'
             onClick={(event) => {
