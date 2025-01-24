@@ -186,7 +186,6 @@ class ProcurementService
         $taxAmount = ($tax->desimal / $desimalPlus) * $totalAmount;
 
         $formattedDate = Carbon::parse($cashData->document_date)->format('Y-m-d');
-        $year = Carbon::parse($cashData->document_date)->format('Y');
         $month = Carbon::parse($cashData->document_date)->format('m');
 
         return [
