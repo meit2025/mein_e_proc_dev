@@ -383,6 +383,17 @@ const ArrayForm = ({
         </>
       )}
 
+      {watch(`vendors[${dataIndex}].winner`) && (
+        <FormInput
+          fieldLabel={'Number Quotation'}
+          fieldName={`vendors[${dataIndex}].quotation`}
+          isRequired={false}
+          type={'text'}
+          placeholder={'Number Quotation'}
+          disabled={disable}
+        />
+      )}
+
       {watch(`vendors[${dataIndex}].type_vendor`) === 'new' && (
         <>
           <FormInput
