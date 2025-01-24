@@ -146,7 +146,8 @@ const ArrayForm = ({
       asset_number: dataobj.item_asset_number,
       sub_asset_number: dataobj.item_sub_asset_number,
     };
-
+    console.log(dataobj.action, newItem);
+    console.log(dataobj.id, newItem);
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
     let updatedItems = [];
     if (dataobj.action === 'edit') {
@@ -201,7 +202,7 @@ const ArrayForm = ({
   };
 
   const handelEdit = (data: any, rowIndex: any) => {
-    const id = `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
+    const id = data.id || `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
 
     setValue('indexEdit', id);
     setValue('action', 'edit');
@@ -224,7 +225,6 @@ const ArrayForm = ({
 
   const handelCopy = (data: any, rowIndex: any) => {
     const id = `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
-
     const newItem = {
       id: id,
       qty: data.qty ?? '0',
