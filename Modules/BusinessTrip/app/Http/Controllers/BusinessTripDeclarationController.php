@@ -204,7 +204,6 @@ class BusinessTripDeclarationController extends Controller
         foreach ($findData->parentBusinessTrip->businessTripDestination as $parent) {
             $request_detail_allowance = [];
             foreach ($parent->detailDestinationDay as $detailDay) {
-                dd($detailDay->price,$detailDay->total);
                 $request_detail_allowance[] = [
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,

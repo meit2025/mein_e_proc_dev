@@ -38,18 +38,13 @@ const useDropdownOptionsArray = () => {
           },
         );
 
-        // const fetchedData = response.data.data.map((item: any) => ({
-        //   label: `${item.label} - ${item.value}`,
-        //   value: item.value,
-        // }));
-
         const fetchedData = response.data.data.map((items: any) => {
           const label = item.struct.hiddenZero ? removeLeadingZeros(items.label) : items.label;
           const value = item.struct.hiddenZero ? removeLeadingZeros(items.value) : items.value;
           return {
             ...items,
             label: !item.struct.isMapping ? label : `${label} - ${value}`,
-            value: value,
+            value: items.value,
           };
         });
 
