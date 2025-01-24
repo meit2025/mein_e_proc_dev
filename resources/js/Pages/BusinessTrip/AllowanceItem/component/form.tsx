@@ -495,7 +495,7 @@ export default function AllowanceItemForm({
               </td>
             </tr> */}
             <tr>
-              <td width={200}>Grade</td>
+              <td width={200}>Balance</td>
               <td className='gap-4'>
                 <FormField
                   control={form.control}
