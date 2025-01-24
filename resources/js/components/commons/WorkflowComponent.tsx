@@ -70,26 +70,7 @@ export interface WorkflowApprovalStepInterfaceStatus {
 }
 
 export function WorkflowApprovalStep({
-  workflowApprovalDiagram = [
-    {
-      status: 'Approved',
-      name: 'dono',
-      dateApproved: '2022-01-01',
-      note: 'note',
-    },
-    {
-      status: 'Approved',
-      name: 'kasino',
-      dateApproved: '2022-01-01',
-      note: 'note',
-    },
-    {
-      status: 'Approved',
-      name: 'indro',
-      dateApproved: '2022-01-01',
-      note: 'note',
-    },
-  ],
+  workflowApprovalDiagram = [],
 }: WorkflowApprovalStepInterface) {
   return (
     <div>
