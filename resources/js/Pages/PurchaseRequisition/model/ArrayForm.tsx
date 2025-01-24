@@ -238,8 +238,8 @@ const ArrayForm = ({
       tax: data.tax ?? '',
       short_text: data.short_text ?? '',
       order_number: data.order_number ?? '',
-      asset_number: data.cost_center ?? '',
-      sub_asset_number: data.asset_number ?? '',
+      asset_number: data.asset_number ?? '',
+      sub_asset_number: data.sub_asset_number ?? '',
     };
 
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
