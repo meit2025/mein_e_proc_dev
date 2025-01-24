@@ -20,7 +20,9 @@ class Approval extends Model
         'message',
         'document_id',
         'document_name',
-        'status'
+        'status',
+        'is_approval',
+        'number_approval',
     ];
     public function user()
     {
