@@ -949,12 +949,12 @@ export function BussinessDestinationForm({
         />
       </div>
       {/* disini */}
-      <ResultTotalItem
+      {/* <ResultTotalItem
         allowanceField={allowancesField}
         destinationIndex={index}
         form={form}
         setTotalAllowance={setTotalAllowance}
-      />
+      /> */}
 
       {/* <table className='w-full text-sm mt-10'>
         <tr>
@@ -1535,7 +1535,7 @@ export function AllowanceRowInput({
           ) : (
             <span className='text-sm'>
               {' '}
-              {allowance.detail.length} Days * {formatRupiah(allowance.subtotal, false)} * 100%
+              {allowance.detail.length} Days * {formatRupiah(allowance.default_price, false)} * 100%
             </span>
           )}
         </td>
