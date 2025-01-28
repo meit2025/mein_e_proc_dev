@@ -13,7 +13,7 @@ deploy:
     - ssh mein@server.majapahit.id "
         cd /home/mein/public_html/mein &&
         git pull origin develop &&
-        composer install --optimize-autoloader --no-scripts &&
+        composer install --optimize-autoloader --no-dev &&
         php artisan migrate &&
         php artisan cache:clear &&
         php artisan config:clear &&
