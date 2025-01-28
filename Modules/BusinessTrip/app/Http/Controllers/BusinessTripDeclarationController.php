@@ -636,7 +636,6 @@ class BusinessTripDeclarationController extends Controller
         $request_detail_allowance_from_parent = [];
         foreach ($findData->parentBusinessTrip->businessTripDestination as $parent) {
             $request_detail_allowance = [];
-            // dd($parent->detailDestinationDay);
             foreach ($parent->detailDestinationDay as $detailDay) {
                 $request_detail_allowance[] = [
                     'item_name' => $detailDay->allowance->name,
@@ -681,7 +680,6 @@ class BusinessTripDeclarationController extends Controller
             // STANDARD
             $standar_detail_allowance = [];
             foreach ($destination->detailDestinationDay as $detailDay) {
-                dd($detailDay);
                 $standar_detail_allowance[] = [
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
