@@ -29,6 +29,7 @@ use Modules\Master\Models\PurchasingGroup;
 use Modules\PurchaseRequisition\Models\Purchase;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
 use Modules\PurchaseRequisition\Models\Vendor;
+use Modules\Reimbuse\Models\Reimburse;
 use Modules\Reimbuse\Models\ReimburseGroup;
 
 class ReportController extends Controller
@@ -174,7 +175,7 @@ class ReportController extends Controller
             $department = $request->get('department');
 
             // Start the query with relationships
-            $query = ReimburseGroup::query()->with(['reimburses', 'status', 'user']);
+            $query = ReimburseGroup::query()->with(['reimburses', 'status', 'user', 'reimburses.reimburseType.gradeReimburseTypes', 'reimburses.purchasingGroupModel.approvalPr']);
 
             // Handle approval-specific filtering
             if ($request->approval == 1) {
@@ -243,16 +244,27 @@ class ReportController extends Controller
 
                 return [
                     'code' => $item->code,
+                    'employee_no' => $item->userCreateRequest->nip,
+                    'employee_name' => $item->userCreateRequest->name,
+                    'type_of_reimbursement' => $item->reimburses->first()->reimburseType->name,
+                    'type_of_expense' => '-',
+                    'additional_field' => '-',
+                    'paid_status' => '',
+                    'paid_date' => '',
+                    'source' => '',
+                    'cancels' => '',
+                    'claim' => $item->reimburses->first()->claim_date,
+                    'curency' => $item->reimburses->first()->currency,
+                    'reimburses' => $item->reimburses,
                     'request_for' => $item->user->name,
                     'remark' => $item->remark,
                     'balance' => $balance,
                     'form_count' => $item->reimburses->count(),
                     'status' => $item->status->name,
-                    'createdDate' => $item->created_at->format('Y-m-d H:i:s'),
+                    'request_date' => $item->created_at->format('d/m/Y'),
                 ];
             });
 
-            // dd($transformedData);
             $filename = 'Reimburse.xlsx';
             return Excel::download(new ReimburseExport($transformedData), $filename);
         } catch (\Exception $e) {
