@@ -146,7 +146,8 @@ const ArrayForm = ({
       asset_number: dataobj.item_asset_number,
       sub_asset_number: dataobj.item_sub_asset_number,
     };
-
+    console.log(dataobj.action, newItem);
+    console.log(dataobj.id, newItem);
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
     let updatedItems = [];
     if (dataobj.action === 'edit') {
@@ -200,8 +201,9 @@ const ArrayForm = ({
     setValue('item_uom', '');
   };
 
-  const handelEdit = (data: any, rowIndex: any) => {
-    const id = `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
+  const handelEdit = async (data: any, rowIndex: any) => {
+    const id = data.id || `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
+    await handelGetMaterialNumber(data.material_group);
 
     setValue('indexEdit', id);
     setValue('action', 'edit');
@@ -222,9 +224,9 @@ const ArrayForm = ({
     setValue('item_uom', data.uom ?? '');
   };
 
-  const handelCopy = (data: any, rowIndex: any) => {
+  const handelCopy = async (data: any, rowIndex: any) => {
     const id = `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
-
+    await handelGetMaterialNumber(data.material_group);
     const newItem = {
       id: id,
       qty: data.qty ?? '0',
@@ -238,8 +240,8 @@ const ArrayForm = ({
       tax: data.tax ?? '',
       short_text: data.short_text ?? '',
       order_number: data.order_number ?? '',
-      asset_number: data.cost_center ?? '',
-      sub_asset_number: data.asset_number ?? '',
+      asset_number: data.asset_number ?? '',
+      sub_asset_number: data.sub_asset_number ?? '',
     };
 
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
@@ -379,6 +381,17 @@ const ArrayForm = ({
             disabled={disable}
           />
         </>
+      )}
+
+      {watch(`vendors[${dataIndex}].winner`) && (
+        <FormInput
+          fieldLabel={'Number Quotation'}
+          fieldName={`vendors[${dataIndex}].quotation`}
+          isRequired={false}
+          type={'text'}
+          placeholder={'Number Quotation'}
+          disabled={disable}
+        />
       )}
 
       {watch(`vendors[${dataIndex}].type_vendor`) === 'new' && (

@@ -320,7 +320,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                         )}
                       </>
                     )}
-                    {/* {(onClone || url.clone) && (
+                    {(onClone || url.clone) && (
                       <>
                         {(!role || permissions.includes(role?.create ?? '')) && value === 0 && (
                           <Link
@@ -337,7 +337,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                           </Link>
                         )}
                       </>
-                    )} */}
+                    )}
 
                     {(onEdit || url.editUrl) && value === 0 && (
                       <>

@@ -1,0 +1,22 @@
+deploy:
+  stage: deploy
+  tags:
+    - majapahit-server-runner
+  before_script:
+    # Konfigurasi SSH
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H server.majapahit.id >> ~/.ssh/known_hosts
+  script:
+    # Jalankan perintah deployment di server via SSH
+    - ssh mein@server.majapahit.id "
+        cd /home/mein/public_html/mein &&
+        git pull origin develop &&
+        composer install --optimize-autoloader --no-dev &&
+        php artisan migrate &&
+        php artisan cache:clear &&
+        php artisan config:clear &&
+        php artisan optimize:clear "
+  only:
+    - develop

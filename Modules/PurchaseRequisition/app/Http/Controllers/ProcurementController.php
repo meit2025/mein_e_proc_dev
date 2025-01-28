@@ -83,6 +83,7 @@ class ProcurementController extends Controller
                         'winner' => $vendorData['winner'] ?? false,
                         'vendor_name_text' => $vendorData['vendor_name_text'] ?? null,
                         'type_vendor' => $vendorData['type_vendor'] ?? null,
+                        'quotation' => $vendorData['quotation'] ?? null,
                     ]
                 );
                 foreach ($vendorData['units'] as $unitData) {
