@@ -10,7 +10,7 @@ deploy:
     - ssh-keyscan -H server.majapahit.id >> ~/.ssh/known_hosts
   script:
     # Jalankan perintah deployment di server via SSH
-    - ssh pixelpay@server.majapahit.id "
+    - ssh mein@server.majapahit.id "
         cd /home/mein/public_html/mein &&
         git pull origin develop &&
         composer install --optimize-autoloader --no-scripts &&
