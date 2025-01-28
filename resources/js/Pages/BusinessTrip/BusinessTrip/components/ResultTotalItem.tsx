@@ -6,24 +6,24 @@ import {
     FormLabel,
     FormMessage,
   } from '@/components/shacdn/form';
-  
+
   import { z } from 'zod';
-  
+
   import { Inertia } from '@inertiajs/inertia';
-  
+
   import { Button } from '@/components/shacdn/button';
   import { ChevronsUpDown } from 'lucide-react';
-  
+
   import { Textarea } from '@/components/shacdn/textarea';
   import { zodResolver } from '@hookform/resolvers/zod';
   import { useFieldArray, useForm, useWatch } from 'react-hook-form';
-  
+
   import { ScrollArea } from '@/components/shacdn/scroll-area';
   import { Separator } from '@/components/shacdn/separator';
   import '../css/index.scss';
-  
+
   import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
-  
+
   import axiosInstance from '@/axiosInstance';
   import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
   import {
@@ -74,30 +74,30 @@ import {
   import FormAutocomplete from '@/components/Input/formDropdown';
   import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
   import { Combobox } from '@/components/shacdn/combobox';
-  
+
   interface User {
     id: string;
     nip: string;
     name: string;
   }
-  
+
   interface Type {
     id: string;
     code: string;
     name: string;
   }
-  
+
   interface CurrencyModel {
     id: string;
     code: string;
   }
-  
+
   interface BusinessTripAttachement {
     id: number;
     url: string;
     file_name: string;
   }
-  
+
   interface Props {
     users: User[];
     listPurposeType: PurposeTypeModel[];
@@ -115,39 +115,39 @@ export function ResultTotalItem({
     setTotalAllowance: any;
   }) {
     const [grandTotal, setGrandTotal] = React.useState(0);
-  
+
     React.useEffect(() => {
       // Hitung ulang total allowance setiap kali allowanceField atau form berubah
       const newTotal = allowanceField.reduce((totalSum: number, allowance: any, index: number) => {
         const details = form.getValues(`destinations.${destinationIndex}.allowances.${index}.detail`);
-  
+
         const itemTotal = calculateTotal(allowance, details);
         return totalSum + itemTotal;
       }, 0);
-  
+
       const alldestinations = form.getValues('destinations');
-  
+
       const totalAll = alldestinations.reduce(
         (destinationSum: number, destination: any, destinationIndex: number) => {
           const allowances = destination.allowances || [];
-  
+
           const allowanceTotal = allowances.reduce(
             (allowanceSum: number, allowance: any, index: number) => {
               const details = form.getValues(
                 `destinations.${destinationIndex}.allowances.${index}.detail`,
               );
-  
+
               const itemTotal = calculateTotal(allowance, details);
               return allowanceSum + itemTotal;
             },
             0,
           );
-  
+
           return destinationSum + allowanceTotal;
         },
         0,
       );
-  
+
       setGrandTotal(newTotal);
       setTotalAllowance(totalAll);
     }, [allowanceField, form.watch()]); // Menggunakan form.watch() agar memantau perubahan input
@@ -163,7 +163,7 @@ export function ResultTotalItem({
         );
       }
     };
-  
+
     return (
       <>
         <table className='w-full text-sm mt-10'>
@@ -201,9 +201,9 @@ export function ResultTotalItem({
         </table>
       </>
     );
-  }
+}
 
-  export function ResultPerItem({
+export function ResultPerItem({
     allowance,
     destinationIndex,
     form,
@@ -223,7 +223,7 @@ export function ResultTotalItem({
       control: form.control,
       name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail`,
     });
-  
+
     const calculateTotal = () => {
       if (allowance.type === 'total') {
         // Pastikan basePrice tidak NaN atau undefined
@@ -238,7 +238,7 @@ export function ResultTotalItem({
         return total;
       }
     };
-  
+
     return (
       <tr key={allowance.id}>
         <td>{allowance.name}</td>
@@ -248,4 +248,4 @@ export function ResultTotalItem({
         </td>
       </tr>
     );
-  }
+}

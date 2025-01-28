@@ -21,3 +21,6 @@ yarn-error.log
 /.vscode
 /.zed
 /postgresql
+/bootstrap/cache/
+/public/purchaserequisition/
+/public/storage/
