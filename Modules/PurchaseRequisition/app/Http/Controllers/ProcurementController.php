@@ -43,9 +43,36 @@ class ProcurementController extends Controller
             'purchases_number',
         ];
 
-        $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user');
+        $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user', 'purchaseRequisitions');
 
-        $data = $this->filterAndPaginate($request, $data, $filterableColumns, true);
+        $hasColumns =  [
+            [
+                "join" => "user",
+                "column" => "name",
+            ],
+            [
+                "join" => "createdBy",
+                "column" => "name",
+            ],
+            [
+                "join" => "updatedBy",
+                "column" => "name",
+            ],
+            [
+                "join" => "status",
+                "column" => "name",
+            ],
+            [
+                "join" => "purchaseRequisitions",
+                "column" => "purchase_requisition_number",
+            ],
+            [
+                "join" => "purchaseRequisitions",
+                "column" => "no_po",
+            ],
+        ];
+
+        $data = $this->filterAndPaginateHasJoin($request, $data, $filterableColumns,  $hasColumns, true);
         return $this->successResponse($data);
     }
 
