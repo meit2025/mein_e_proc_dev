@@ -912,6 +912,8 @@ const sidebar = [
             'report business trip declaration export',
             'report purchase requisition view',
             'report purchase requisition export',
+            'report business trip overall view',
+            'report business trip overall export',
         ],
         menu: [
             {
@@ -933,6 +935,8 @@ const sidebar = [
                     'report business trip request export',
                     'report business trip declaration view',
                     'report business trip declaration export',
+                    'report business trip overall view',
+                    'report business trip overall export',
                 ],
                 sub: [
                     {
