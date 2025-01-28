@@ -14,9 +14,9 @@ deploy:
         cd /home/mein/public_html/mein &&
         git pull origin develop &&
         composer install --optimize-autoloader --no-dev &&
-        php artisan migrate &&
-        php artisan cache:clear &&
-        php artisan config:clear &&
-        php artisan optimize:clear "
+        /usr/bin/php8.2 artisan migrate &&
+        /usr/bin/php8.2 artisan cache:clear &&
+        /usr/bin/php8.2 artisan config:clear &&
+        /usr/bin/php8.2 artisan optimize:clear "
   only:
     - develop
