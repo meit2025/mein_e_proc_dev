@@ -10,7 +10,7 @@ export const columns: GridColDef[] = [
   { field: 'grade_option', headerName: 'Grade Option', width: 200, filterable: true },
   { field: 'material_group', headerName: 'Material Group', width: 200, filterable: true },
   { field: 'material_number', headerName: 'Material Number', width: 200, filterable: true },
-  { field: 'plafon', headerName: 'Plafon', width: 200, filterable: true },
+  { field: 'plafon', headerName: 'Balance', width: 200, filterable: true },
 
   { field: 'currency', headerName: 'Currency', width: 200, filterable: true },
 ];

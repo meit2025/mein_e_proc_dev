@@ -473,13 +473,14 @@ export const ReimburseForm: React.FC<Props> = ({
             idx !== index && formItem.reimburse_type === data.reimburse_type
         );
         const totalBalance = sameTypeForms.reduce((acc, curr) => acc + parseInt(curr.balance) || 0, 0);
-
+        
         const newData = [...prev];
         newData[index] = {
           ...response.data.data,
           balance: response.data.data.balance - totalBalance,
-          limit: response.data.data.type_limit == 'Unlimited' ? response.data.data.type_limit : Math.max(0, response.data.data.limit - (index > 0 ? 1 : 0)),
+          limit: response.data.data.type_limit == 'Unlimited' ? response.data.data.type_limit : Math.max(0, response.data.data.limit - sameTypeForms.length),
         };
+        
         return newData;
       });
     } catch (e) {

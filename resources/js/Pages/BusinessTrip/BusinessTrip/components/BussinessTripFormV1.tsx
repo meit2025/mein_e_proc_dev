@@ -159,7 +159,7 @@ export const BussinessTripFormV1 = ({
     ).min(1, 'Attachment is required'),
     total_destination: z.number().min(1, 'Total Destinantion Required'),
     cash_advance: z.boolean().nullable().optional(),
-    total_percent: z.string().nullable().optional(),
+    total_percent: z.number().nullable().optional(),
     total_cash_advance: z.string().nullable().optional(),
     destinations: z.array(
       z.object({
@@ -201,7 +201,7 @@ export const BussinessTripFormV1 = ({
   .superRefine(({ cash_advance, total_percent }, refinementContext) => {
     if (cash_advance === true) {
         // Validasi jika total_percent kosong
-        if (!total_percent || total_percent.trim() === '') {
+        if (!total_percent || total_percent.toString().trim() === '') {
           refinementContext.addIssue({
             code: z.ZodIssueCode.custom,
             path: ['total_percent'],
@@ -340,12 +340,12 @@ export const BussinessTripFormV1 = ({
     const [dateBusinessTripByUser, setDateBusinessTripByUser] = React.useState<[]>([]);
 
     async function getDateBusinessTrip() {
-        const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
+        const userid = isAdmin == '0' ? idUser || 0 : selectedUserId || 0;
         const url = GET_DATE_BUSINESS_TRIP_BY_USER(userid);
         const response = await axiosInstance.get(url);
         setDateBusinessTripByUser(response.data.data);
     }
-
+console.log(dateBusinessTripByUser,'dateBusinessTripByUser')
   async function handlePurposeType(value: string) {
     form.setValue('purpose_type_id', value || '');
     const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
@@ -353,6 +353,7 @@ export const BussinessTripFormV1 = ({
     const getPurposeType = GET_DETAIL_PURPOSE_TYPE(value);
     try {
       const response = await axiosInstance.get(url);
+      console.log(response,'response');
       const responsePurposeType = await axiosInstance.get(getPurposeType);
       //   const typePurpose = responsePurposeType.data.data.purpose.type;
       //   if (typePurpose == 'international') {
@@ -984,7 +985,29 @@ export const BussinessTripFormV1 = ({
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input type="number" {...field} value={field.value || ''} className='w-[50%]' min="1" max="100" />
+                            <Input
+                            type="number"
+                            {...field}
+                            value={field.value || ''}
+                            className='w-[50%]'
+                            // min="1"
+                            // max="100"
+                            onChange={(e) => {
+                                const inputValue = e.target.value;
+
+                                // Pastikan input hanya angka
+                                if (!/^\d*$/.test(inputValue)) return;
+
+                                const number = parseInt(inputValue, 10);
+
+                                // Batasi nilai antara 1 dan 100
+                                if (number >= 1 && number <= 100) {
+                                  field.onChange(number); // Update nilai valid
+                                } else if (inputValue === '') {
+                                  field.onChange(''); // Izinkan kosong
+                                }
+                              }}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

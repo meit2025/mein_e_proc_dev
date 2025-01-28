@@ -87,6 +87,30 @@ export const columns: GridColDef[] = [
       return moment(params.row.created_at).format('DD-MM-YYYY');
     },
   },
+  {
+    field: 'purchase_requisitions',
+    headerName: 'Number PO',
+    width: 200,
+    filterable: false,
+    renderCell: (params: any) => {
+      const firstNonNullPo = params.row.purchase_requisitions.find(
+        (data: any) => data?.no_po !== null,
+      );
+      return firstNonNullPo ? firstNonNullPo.no_po : '-';
+    },
+  },
+  {
+    field: 'purchase_requisition_number',
+    headerName: 'Number PR',
+    width: 200,
+    filterable: false,
+    renderCell: (params: any) => {
+      const firstNonNullPo = params.row.purchase_requisitions.find(
+        (data: any) => data?.purchase_requisition_number !== null,
+      );
+      return firstNonNullPo ? firstNonNullPo.purchase_requisition_number : '-';
+    },
+  },
 ];
 
 export const columnsItem: GridColDef[] = [
@@ -174,6 +198,7 @@ export const columnsAttachment: GridColDef[] = [
     headerName: 'Name',
     width: 400,
     filterable: false,
+    editable: true,
   },
   {
     field: 'file_path',

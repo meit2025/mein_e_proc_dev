@@ -55,6 +55,7 @@ class ApprovalController extends Controller
         try {
             //code...
             $approvalRouteData = $request->only(['group_id', 'is_hr', 'hr_approval', 'user_hr_id', 'is_conditional', 'nominal']);
+            $approvalRouteData['nominal'] = $request->is_conditional ? $request->nominal : 0;
             $approvalRoute = ApprovalRoute::create($approvalRouteData);
 
             // Ambil array user_id dari request
@@ -108,6 +109,7 @@ class ApprovalController extends Controller
 
         // Update data approval_routes
         $approvalRouteData = $request->only(['group_id', 'is_hr', 'hr_approval', 'user_hr_id', 'is_conditional', 'nominal']);
+        $approvalRouteData['nominal'] = $request->is_conditional ? $request->nominal : 0;
         $approvalRoute->update($approvalRouteData);
 
         // Ambil array user_id dari request
@@ -167,6 +169,8 @@ class ApprovalController extends Controller
         try {
             $dokumnetType = 'PR';
             $dokumentApproval = 'PR';
+            $dokumentName = 'Purchase Requisition';
+            $idSap = $request->id;
             switch ($request->function_name) {
                 case 'procurement':
                     $dokumnetType = 'PR';
@@ -175,14 +179,17 @@ class ApprovalController extends Controller
                 case 'reim':
                     $dokumnetType = 'REIM';
                     $dokumentApproval = 'REIM';
+                    $dokumentName = 'Reimburse';
                     break;
                 case 'trip':
                     $dokumnetType = 'BT';
                     $dokumentApproval = 'TRIP';
+                    $dokumentName = 'Business Trip';
                     break;
                 case 'trip_declaration':
                     $dokumnetType = 'BTPO';
                     $dokumentApproval = 'TRIP_DECLARATION';
+                    $dokumentName = 'Business Trip Declaration';
                     break;
             }
 
@@ -192,19 +199,22 @@ class ApprovalController extends Controller
                     ->update([
                         'status' => $request->status,
                         'message' => $request->note,
-                        'is_status' => true
+                        'is_status' => true,
+                        'is_approval' => false
                     ]);
+
+                $dataNext = Approval::where('id', $request->approvalId)->where('document_id',  $request->id)
+                    ->where('document_name', $dokumentApproval)->first();
+
+                if ($dataNext) {
+                    Approval::where('document_id',  $request->id)
+                        ->where('number_approval', $dataNext->number_approval + 1)
+                        ->where('document_name', $dokumentApproval)->update([
+                            'is_approval' => true
+                        ]);
+                }
             }
-            $message = $request->status . ' Dokument ' . Auth::user()->name . ' Pada Tanggal ' . $this->DateTimeNow();
-
-            $this->logToDatabase(
-                $request->id,
-                $request->function_name,
-                'INFO',
-                $message,
-                $request->note
-            );
-
+            $message = $dokumentName .  ' Document ' . $request->status . '  ' .  ' by ' . Auth::user()->name . ' At ' . $this->DateTimeNow();
 
             $ceksedSap = Approval::where('is_status', false)->where('document_id', $request->id)
                 ->where('id', '!=', $request->approvalId)
@@ -246,6 +256,13 @@ class ApprovalController extends Controller
             if (isset($modelMap[$request->type]) && $statusId != 0) {
                 $modelMap[$request->type]::where('id', $request->id)->update(['status_id' => $statusId]);
             }
+            $this->logToDatabase(
+                $request->id,
+                $request->function_name,
+                'INFO',
+                $message,
+                $request->note
+            );
 
             // send notifikasi
             if (isset($modelMap[$request->type])) {
@@ -274,7 +291,7 @@ class ApprovalController extends Controller
                             Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimburse', $message));
 
 
-                            if ($findUser->user_id !== $model->request_created_by) {
+                            if ($findUser->id !== $model->request_created_by) {
                                 $findcreatedBy = User::find($model->request_created_by);
                                 Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Reimburse', $message));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
@@ -288,7 +305,7 @@ class ApprovalController extends Controller
 
                             Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip', $message));
 
-                            if ($findUser->user_id !== $model->created_by) {
+                            if ($findUser->id !== $model->created_by) {
                                 $findcreatedBy = User::find($model->created_by);
                                 Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip', $message));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
@@ -296,8 +313,6 @@ class ApprovalController extends Controller
                             break;
                     }
                 } catch (\Throwable $th) {
-                    //throw $th;
-                    dd($th);
                 }
             }
 
@@ -309,12 +324,13 @@ class ApprovalController extends Controller
                     'Generate PR TO SAP',
                     'SEND SAP SUCCESS'
                 );
-                SapJobs::dispatch($request->id, $dokumnetType);
+
+                if ($request->function_name == 'trip_declaration') {
+                    $pr = BusinessTrip::find($request->id);
+                    $idSap = $pr->parent_id;
+                }
+                SapJobs::dispatch($idSap, $dokumnetType);
             }
-
-
-
-
 
             DB::commit();
             return $this->successResponse($request->all());

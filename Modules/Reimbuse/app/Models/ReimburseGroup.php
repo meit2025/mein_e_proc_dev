@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Master\Models\MasterCostCenter;
 use Modules\Master\Models\MasterStatus;
+use Modules\PurchaseRequisition\Models\PurchaseRequisition;
 
 // use Modules\Reimbuse\Database\Factories\ReimburseGroupFactory;
 
@@ -54,5 +55,10 @@ class ReimburseGroup extends Model
     public function status()
     {
         return $this->belongsTo(MasterStatus::class, 'status_id', 'id');
+    }
+
+    public function purchaseRequisition()
+    {
+        return $this->hasMany(PurchaseRequisition::class, 'purchase_id', 'id');
     }
 }

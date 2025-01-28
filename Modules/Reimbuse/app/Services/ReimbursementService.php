@@ -72,7 +72,7 @@ class ReimbursementService
             $group = ReimburseGroup::create($validatedDataGroup);
 
             $balance = 0;
-            foreach ($forms as $form) {
+            foreach ($forms as $key => $form) {
                 if (!isset($form['for'])) $form['for'] = $groupData['requester'];
                 $form['desired_vendor'] = $groupData['requester'];
                 $validator = Validator::make($form, $this->validator_rule_reimburse);
@@ -83,6 +83,7 @@ class ReimbursementService
                 $validatedData = $validator->validated();
                 $validatedData['group'] = $group->code;
                 $validatedData['purchase_requisition_unit_of_measure']   = $form['purchase_requisition_unit_of_measure'];
+                $validatedData['item_number'] = $key + 1;
                 $validatedData['item_delivery_data'] = Carbon::parse($form['item_delivery_data'])->format('Y-m-d');
                 $validatedData['claim_date'] = Carbon::parse($form['claim_date'])->format('Y-m-d');
                 $validatedData['requester'] = $groupData['requester'];

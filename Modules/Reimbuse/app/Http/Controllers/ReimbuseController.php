@@ -82,8 +82,11 @@ class ReimbuseController extends Controller
                     master_type_reimburses AS mtr
                 JOIN reimburses AS r ON
                     r.reimburse_type = mtr.code
+                JOIN reimburse_groups  AS rg ON
+                    rg.code = r.group
                 WHERE
                     r.requester = '". $nip ."'
+                    AND rg.status_id in (1,3,5)
                 GROUP BY
                     mtr.code
             ",
@@ -171,13 +174,13 @@ class ReimbuseController extends Controller
                 ])
                 ->whereColumn('approvalQueueUser.user_id', 'approvals.user_id')
                 ->pluck('approvals.document_id')->toArray();
-                $query = $query->whereIn('id', $approval);
+                $query = $query->whereIn('id', $approval)->where('status_id', 1);
             } else {
                 $data = $query->where('requester', Auth::user()->nip)->orWhere('request_created_by', Auth::user()->id);
             }
 
             if ($request->search) {
-                $query = $query->orWhere('code', 'ILIKE', '%' . $request->search . '%')
+                $query = $query->where('code', 'ILIKE', '%' . $request->search . '%')
                 ->orWhere('remark', 'ILIKE', '%' . $request->search . '%')
                 ->orWhere('requester', 'ILIKE', '%' . $request->search . '%');
 
@@ -329,13 +332,13 @@ class ReimbuseController extends Controller
             $reimbuseTypeID = $request->reimbuse_type;
 
             $getCurrentBalance = Reimburse::join('reimburse_groups as rb', 'rb.code', '=', 'reimburses.group' )
-                ->whereIn('rb.status_id', [1])
+                ->whereIn('rb.status_id', [1, 3, 5])
                 ->where('reimburses.requester', $user)
                 ->where('reimburses.reimburse_type', $reimbuseTypeID)
                 ->sum('balance');
             
             $getCurrentLimit = Reimburse::join('reimburse_groups as rb', 'rb.code', '=', 'reimburses.group' )
-                ->whereIn('rb.status_id', [1])
+                ->whereIn('rb.status_id', [1, 3, 5])
                 ->where('reimburses.requester', $user)
                 ->where('reimburses.reimburse_type', $reimbuseTypeID)
                 ->count();

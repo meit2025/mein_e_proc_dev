@@ -46,9 +46,9 @@ const useDropdownOptions = (urls: string = 'api/master/dropdown') => {
         params: {
           name: struct.name,
           id: struct.id,
-          search: struct.search || '', // Ensure search defaults to empty string
+          search: struct.search || '',
           tabelname: struct.tabel,
-          isNotNull: struct.where?.isNotNull ?? '', // Handle optional values
+          isNotNull: struct.where?.isNotNull ?? '',
           key: struct.where?.key ?? '',
           parameter: struct.where?.parameter ?? '',
           declaration: struct.declaration ?? '',

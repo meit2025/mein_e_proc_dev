@@ -99,7 +99,7 @@ class TextPrServices
             'code_transaction' => $ca->code_transaction,
             'belnr' => $ca->belnr, // belnr
             'company_code' => $ca->company_code, // bukrs
-            'gjahr' =>  $ca->gjahr, // gjahr
+            'gjahr' =>  '', // gjahr ini year
             'currency' => 'IDR', // waers
             'document_date' => $ca->document_date, // bldat
             'budat' => $ca->budat, // budat

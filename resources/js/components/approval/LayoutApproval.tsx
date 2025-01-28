@@ -61,10 +61,14 @@ const LayoutApproval = ({
         const approvalFrom = (data.data ?? []).map((route: any) => route.user.name);
         const firstFalseStatus = (data.data ?? []).find((item: any) => item.is_status === false);
 
-        if (status_id !== 4 && status_id !== 6 && firstFalseStatus?.user_id === auth?.user?.id) {
+        if (
+          status_id !== 4 &&
+          status_id !== 2 &&
+          status_id !== 6 &&
+          firstFalseStatus?.user_id === auth?.user?.id
+        ) {
           setIsApproval(true);
         }
-        console.log('data', data.data);
         const approvalFromStatusRoute = (data.data ?? []).map((route: any) => {
           return {
             status: route.status,
@@ -95,7 +99,7 @@ const LayoutApproval = ({
   }, [getdetail, status_id]);
 
   useEffect(() => {
-    if (status_id === 4 || status_id === 6) {
+    if (status_id === 4 || status_id === 6 || status_id === 2) {
       setIsApproval(false);
     }
   }, [status_id]);
@@ -127,7 +131,7 @@ const LayoutApproval = ({
               >
                 APPROVE
               </Button>
-              <Button
+              {/* <Button
                 onClick={() => handleOpen('Revise')}
                 style={{
                   marginLeft: '1rem',
@@ -137,7 +141,7 @@ const LayoutApproval = ({
                 type='button'
               >
                 Revise
-              </Button>
+              </Button> */}
               <Button
                 onClick={() => handleOpen('Rejected')}
                 style={{

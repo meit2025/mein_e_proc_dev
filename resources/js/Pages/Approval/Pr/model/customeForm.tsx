@@ -1,4 +1,4 @@
-import { useFormContext } from 'react-hook-form';
+import { useFieldArray, useFormContext } from 'react-hook-form';
 import FormInput from '@/components/Input/formInput';
 import { useEffect, useState } from 'react';
 import FormAutocomplete from '@/components/Input/formDropdown';
@@ -9,23 +9,12 @@ interface ApprovalProps {
 }
 
 export const CustomeForm = ({ data }: { data: any[] }) => {
-  const { getValues, setValue } = useFormContext();
-  const [inputs, setInputs] = useState<ApprovalProps[]>(data);
+  const { getValues, setValue, control } = useFormContext();
 
-  const handleAddInput = () => {
-    setInputs([
-      ...inputs,
-      {
-        user_id: '',
-      },
-    ]);
-  };
-
-  const handleRemoveInput = (index: any) => {
-    const newInputs = inputs.filter((_, i) => i !== index);
-    setInputs(newInputs);
-    setValue('approval_route', newInputs);
-  };
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'approval_route',
+  });
 
   const { dataDropdown, getDropdown } = useDropdownOptions();
 
@@ -42,19 +31,18 @@ export const CustomeForm = ({ data }: { data: any[] }) => {
   }, []);
 
   useEffect(() => {
-    if (inputs.length === 0) {
-      setInputs(data);
+    if (fields.length === 0 && data.length > 0) {
+      data.forEach((item) => append({ user_id: item.user_id }));
     }
-  }, [data]);
+  }, [data, fields]);
 
   return (
     <>
       <div className='w-full mt-8 border rounded-md shadow-md'>
         <div className='p-4'>User Approval</div>
-        {inputs.map((input, index) => (
+        {fields.map((input, index) => (
           <div key={index} className='p-4 mb-2'>
             <div className='flex items-center gap-4'>
-              {/* Use flexbox here */}
               <FormAutocomplete<any[]>
                 options={dataDropdown ?? []}
                 fieldLabel={`Approval ${index + 1}`}
@@ -65,7 +53,7 @@ export const CustomeForm = ({ data }: { data: any[] }) => {
                   width: '64.5rem',
                 }}
               />
-              <span onClick={() => handleRemoveInput(index)} style={{ cursor: 'pointer' }}>
+              <span onClick={() => remove(index)} style={{ cursor: 'pointer' }}>
                 <i className='ki-duotone ki-trash-square text-danger text-2xl'></i>
               </span>
             </div>
@@ -73,7 +61,7 @@ export const CustomeForm = ({ data }: { data: any[] }) => {
         ))}
         <button
           type='button'
-          onClick={handleAddInput}
+          onClick={() => append({ user_id: '' })}
           className='mt-4 bg-blue-500 text-white p-2 m-4 rounded-md'
         >
           add Form
