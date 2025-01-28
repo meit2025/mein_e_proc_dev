@@ -2,7 +2,7 @@ import MainLayout from '@/Pages/Layouts/MainLayout';
 import axiosInstance from '@/axiosInstance';
 import FormMapping from '@/components/form/FormMapping';
 import { DETAIL_MASTER_DIVISION } from '@/endpoint/masterDivision/api';
-import { EDIT_MASTER_POSITION } from '@/endpoint/masterPosition/api';
+import { DETAIL_MASTER_POSITION, EDIT_MASTER_POSITION } from '@/endpoint/masterPosition/api';
 import { LIST_PAGE_MASTER_POSITION } from '@/endpoint/masterPosition/page';
 import { usePage } from '@inertiajs/react';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
@@ -22,7 +22,7 @@ const Update = ({ id }: { id: number }) => {
     async () => {
       setIsLoading(true);
       try {
-        const response = await axiosInstance.get(DETAIL_MASTER_DIVISION(props.id));
+        const response = await axiosInstance.get(DETAIL_MASTER_POSITION(props.id));
         const data = response.data;
         methods.reset(data.data);
       } catch (error) {

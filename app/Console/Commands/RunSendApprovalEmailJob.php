@@ -70,6 +70,7 @@ class RunSendApprovalEmailJob extends Command
                         ->where('document_id', $item->id)
                         ->where('document_name', $documentApproval)
                         ->where('is_status', false)
+                        ->where('is_approval', true)
                         ->latest('id')
                         ->first();
 

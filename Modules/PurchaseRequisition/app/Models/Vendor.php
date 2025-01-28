@@ -21,6 +21,7 @@ class Vendor extends Model
         'winner',
         'vendor_name_text',
         'type_vendor',
+        'quotation'
     ];
 
     public function units()
