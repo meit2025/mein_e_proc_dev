@@ -39,7 +39,8 @@
         @foreach($data as $key => $item)
         @foreach ($item['reimburses'] as $reim )
         @php
-        $statusPaid =  $reim['purchasingGroupModel'] ? $reim['purchasingGroupModel']['approvalPr'] ? "Paid" : "Unpaid" : "Unpaid";
+        $statusPaid =  $item['pr'] ? $item['pr'][$key]['is_closed'] == 'S' ? "Paid" : "Unpaid" : "Unpaid";
+        $totalBalance = $reim['reimburseType']['grade_option'] == 'all' ? $reim['reimburseType']['grade_all_price'] : $reim['reimburseType']['gradeReimburseTypes']['plafon'];
         @endphp
         <tr>
             <td rowspan="{{$item['form_count']}}">{{ $key + 1 }}</td>
@@ -62,9 +63,8 @@
             <td>{{ $item['source'] }}</td>
             <td>{{ $item['cancels'] }}</td>
             <td>{{ $item['status'] }}</td>
-            <td>{{ number_format($reim['reimburseType']['grade_option'] == 'all' ? $reim['reimburseType']['grade_all_price'] : $reim['reimburseType']['gradeReimburseTypes']['plafon'], 0, ',', '.') }}</td>
-            {{-- <td>{{ number_format($item['outstanding_balance, 0, ',', '.')'] }}</td> --}}
-            <td></td>
+            <td>{{ number_format($totalBalance, 0, ',', '.') }}</td>
+            <td>{{ number_format(($totalBalance - $data->sum('balance')), 0, ',', '.') }}</td>
         </tr>
         @endforeach
         @endforeach

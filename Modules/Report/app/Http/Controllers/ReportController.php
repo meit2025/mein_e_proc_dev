@@ -175,7 +175,7 @@ class ReportController extends Controller
             $department = $request->get('department');
 
             // Start the query with relationships
-            $query = ReimburseGroup::query()->with(['reimburses', 'status', 'user', 'reimburses.reimburseType.gradeReimburseTypes', 'reimburses.purchasingGroupModel.approvalPr']);
+            $query = ReimburseGroup::query()->with(['reimburses', 'status', 'user', 'reimburses.reimburseType.gradeReimburseTypes', 'reimburses.purchasingGroupModel.approvalPr', 'PurchaseRequisition']);
 
             // Handle approval-specific filtering
             if ($request->approval == 1) {
@@ -256,6 +256,7 @@ class ReportController extends Controller
                     'claim' => $item->reimburses->first()->claim_date,
                     'curency' => $item->reimburses->first()->currency,
                     'reimburses' => $item->reimburses,
+                    'pr' => $item->PurchaseRequisition,
                     'request_for' => $item->user->name,
                     'remark' => $item->remark,
                     'balance' => $balance,
