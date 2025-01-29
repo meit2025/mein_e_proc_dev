@@ -496,7 +496,8 @@ class BusinessTripController extends Controller
     public function listAPI(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType', 'status']);
+        $query =  BusinessTrip::query()->with(['purposeType', 'status'])
+        ->search(request(['search']));
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
@@ -535,7 +536,7 @@ class BusinessTripController extends Controller
 
         $query = $query->where('type','=','request');
 
-        $query = $query->latest()->search(request(['search']))->paginate($perPage);
+        $query = $query->latest()->paginate($perPage);
 
         $query->getCollection()->transform(function ($map) {
 
@@ -1008,27 +1009,5 @@ class BusinessTripController extends Controller
             DB::rollBack();
             return $this->errorResponse($th->getMessage());
         }
-    }
-
-    public function saveImageFromUrl($url)
-    {
-        // Membuat instance Guzzle client
-        $client = new Client();
-
-        // Mengambil gambar dari URL
-        $response = $client->get($url);
-        dd($response);
-
-        // Mendapatkan konten gambar
-        $imageContent = $response->getBody()->getContents();
-
-        // Menentukan nama file dan path penyimpanan
-        $fileName = basename($url); // Mengambil nama file dari URL
-        $path = 'business_trip/' . $fileName; // Menentukan path penyimpanan
-
-        // Menyimpan gambar ke storage
-        Storage::disk('public')->put($path, $imageContent);
-
-        return 'Gambar berhasil disimpan di: ' . $path;
     }
 }
