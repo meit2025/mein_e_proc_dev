@@ -36,12 +36,12 @@ import { DetailAllowance } from './DetailAllowance';
 import { ResultTotalItem } from './ResultTotalItem';
 import { DayPickerProps } from 'react-day-picker';
 import { Checkbox } from '@/components/shacdn/checkbox';
+import { useAlert } from '@/contexts/AlertContext';
 
-interface User {
-  id: string;
-  nip: string;
-  name: string;
-}
+interface DateObject {
+    from: string;
+    to: string;
+  }
 
 export function BussinessDestinationForm({
     key,
@@ -60,6 +60,7 @@ export function BussinessDestinationForm({
   btClone,
   setSelectedDates,
   selectedDates,
+  dateBusinessTripByUser,
 }: {
   key: any;
   form: any;
@@ -77,6 +78,7 @@ export function BussinessDestinationForm({
   btClone: any;
   setSelectedDates: any;
   selectedDates: any;
+  dateBusinessTripByUser: any;
 }) {
   const {
     fields: detailAttedanceFields,
@@ -99,11 +101,41 @@ export function BussinessDestinationForm({
     name: `destinations.${index}.allowances`,
   });
 
+  const { showToast } = useAlert();
+
   function detailAttedancesGenerate() {
     let momentStart = moment(destination.business_trip_start_date).startOf('day');
-    const momentEnd = moment(destination.business_trip_end_date).startOf('day');
+    let momentEnd = moment(destination.business_trip_end_date).startOf('day');
     removeAttendace();
     removeAllowance();
+    if (momentStart.isAfter(momentEnd)) {
+        showToast('Start date must be before end date', 'error');
+        return;
+    }
+
+    // Validate against existing dates
+    let isConflict = false;
+
+    for (let key in dateBusinessTripByUser) {
+        let existingStart = moment(dateBusinessTripByUser[key].from).startOf('day');
+        let existingEnd = moment(dateBusinessTripByUser[key].to).startOf('day');
+
+        // Check if the selected date range overlaps with any existing date range
+        if (
+            (momentStart.isBetween(existingStart, existingEnd, null, '[)') || momentEnd.isBetween(existingStart, existingEnd, null, '(]')) ||
+            (momentStart.isBefore(existingStart) && momentEnd.isAfter(existingEnd))
+        ) {
+            isConflict = true;
+            break;
+        }
+    }
+
+    if (isConflict) {
+        showToast('Your Selected Range is Unavailable. Please Select Other Days', 'error');
+        return;
+    }
+
+    // console.log(dateBusinessTripByUser,'dateBusinessTripByUser');
 
     while (momentStart.isBefore(momentEnd) || momentStart.isSame(momentEnd)) {
       const object = {
@@ -121,8 +153,8 @@ export function BussinessDestinationForm({
 
     function generateDetailAllowanceByDate(price: string): any[] {
       let momentStart = moment(destination.business_trip_start_date).startOf('day');
-      const momentEnd = moment(destination.business_trip_end_date).startOf('day');
-      const detailAllowance = [];
+      let momentEnd = moment(destination.business_trip_end_date).startOf('day');
+      let detailAllowance = [];
 
       while (momentStart.isBefore(momentEnd) || momentStart.isSame(momentEnd)) {
         detailAllowance.push({
@@ -159,12 +191,16 @@ export function BussinessDestinationForm({
   }
 
     const handleDateStartChange = (value: Date | undefined, index: number) => {
+        updateDestination(index, {
+            ...destination,
+            business_trip_start_date: value,
+        });
         setSelectedDates((prev: any) => {
             const updated = [...prev];
             // Jika nilai ada, perbarui elemen target
             updated[index] = {
-            ...updated[index],
-            from: value,
+                ...updated[index],
+                from: value,
             };
             return updated;
         });
@@ -172,8 +208,8 @@ export function BussinessDestinationForm({
 
     const handleDateEndChange = (value: Date | undefined, index: number) => {
         updateDestination(index, {
-        ...destination,
-        business_trip_end_date: value,
+            ...destination,
+            business_trip_end_date: value,
         });
         setSelectedDates((prev: any) => {
             const updated = [...prev];
@@ -243,7 +279,7 @@ export function BussinessDestinationForm({
         </>
     );
 
-//   console.log(selectedDates, 'selectedDatesxwerewferge');
+//   console.log(selectedDates, 'ini log');
   return (
     <TabsContent key={key} value={`destination${index + 1}`}>
       <div key={index}>
@@ -377,7 +413,7 @@ export function BussinessDestinationForm({
                                 });
                             }
                         }}
-                        disabled={false}
+                        // disabled={false}
                         disabledDays={selectedDates}
                         footer={footerStart}
                       />

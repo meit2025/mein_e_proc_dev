@@ -228,9 +228,11 @@ export const BussinessTripFormV1 = ({
   };
   const [otherAllowance, setOtherAllowance] = React.useState<boolean>(false);
   const { showToast } = useAlert();
+  const [loading, setLoading] = React.useState(false);
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     // console.log(otherAllowance, ' valuesnya');
     try {
+        setLoading(true);
       if (type === BusinessTripType.create) {
         const totalAll = getTotalDes();
         const formData = new FormData();
@@ -273,6 +275,10 @@ export const BussinessTripFormV1 = ({
         });
         showToast('succesfully updated data', 'success');
       }
+
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
     } catch (e) {
       const error = e as AxiosError;
       console.log(error);
@@ -679,7 +685,7 @@ export const BussinessTripFormV1 = ({
             )}
           </div>
 
-          <Button type='submit'>submit</Button>
+          <Button type='submit' loading={loading}>submit</Button>
         </form>
       </Form>
     </ScrollArea>
@@ -1580,7 +1586,6 @@ export function ResultTotalItem({
     React.useEffect(() => {
         const newTotal = resultItem.reduce((totalSum: number, allowance: any, index: number) => {
             const details = form.getValues(`destinations.${destinationIndex}.allowances.${index}.detail`);
-                console.log(details,'okkkk')
             const itemTotal = calculateTotal(allowance, details);
             return totalSum + itemTotal;
         }, 0);
