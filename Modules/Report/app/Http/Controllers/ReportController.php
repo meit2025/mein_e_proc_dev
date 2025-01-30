@@ -285,8 +285,9 @@ class ReportController extends Controller
 
         $listDestination = Destination::get();
         $departments = MasterDepartment::select('id', 'name')->get();
+        $statuses = MasterStatus::select('code', 'name')->get();
 
-        return Inertia::render('Report/BusinessTrip/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup', 'listDestination', 'departments'));
+        return Inertia::render('Report/BusinessTrip/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup', 'listDestination', 'departments', 'statuses'));
     }
 
     public function listBT(Request $request)
@@ -467,8 +468,9 @@ class ReportController extends Controller
         $listPurposeType = PurposeType::select('name', 'id')->get();
         $listDestination = Destination::get();
         $departments = MasterDepartment::select('id', 'name')->get();
+        $statuses = MasterStatus::select('code', 'name')->get();
 
-        return Inertia::render('Report/BusinessTripDeclaration/index', compact('users', 'listPurposeType', 'listBusinessTrip', 'listDestination', 'departments'));
+        return Inertia::render('Report/BusinessTripDeclaration/index', compact('users', 'listPurposeType', 'listBusinessTrip', 'listDestination', 'departments', 'statuses'));
     }
 
     public function listBTDec(Request $request)
@@ -582,9 +584,10 @@ class ReportController extends Controller
                 ->whereDate('created_at', '<=', $endDate);
         }
         if ($status) {
-            $query->whereHas('status', function ($q) use ($status) {
-                $q->where('code', $status);
-            });
+            $query->where('status_id', $status);
+            // $query->whereHas('status', function ($q) use ($status) {
+            //     $q->where('code', $status);
+            // });
         }
         if ($type) {
             $query->whereHas('purposeType', function ($q) use ($type) {
@@ -653,8 +656,9 @@ class ReportController extends Controller
 
         $listDestination = Destination::get();
         $departments = MasterDepartment::select('id', 'name')->get();
+        $statuses = MasterStatus::select('code', 'name')->get();
 
-        return Inertia::render('Report/BusinessTripOverall/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup', 'listDestination', 'departments'));
+        return Inertia::render('Report/BusinessTripOverall/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup', 'listDestination', 'departments', 'statuses'));
     }
 
     public function listBTOverall(Request $request)
@@ -932,6 +936,12 @@ class ReportController extends Controller
     public function departments(Request $request)
     {
         $data = MasterDepartment::select('id', 'name')->get();
+        return $this->successResponse($data);
+    }
+
+    public function statuses(Request $request)
+    {
+        $data = MasterStatus::select('code', 'name')->get();
         return $this->successResponse($data);
     }
 

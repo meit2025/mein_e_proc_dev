@@ -8,7 +8,7 @@ import { CREATE_PAGE_PR, DETAIL_PAGE_PR, EDIT_PAGE_PR } from '@/endpoint/purchas
 import { useAlert } from '@/contexts/AlertContext';
 import axiosInstance from '@/axiosInstance';
 import { PAGE_REPORT_PURCHASE } from '@/endpoint/report/page';
-import { REPORT_PURCHASE_EXPORT, REPORT_PURCHASE_LIST, REPORT_PURCHASE_TYPES, REPORT_PURCHASE_VENDORS, REPORT_PURCHASE_DEPARTMENTS } from '@/endpoint/report/api';
+import { REPORT_PURCHASE_EXPORT, REPORT_PURCHASE_LIST, REPORT_PURCHASE_TYPES, REPORT_PURCHASE_VENDORS, REPORT_PURCHASE_DEPARTMENTS, REPORT_PURCHASE_STATUSES } from '@/endpoint/report/api';
 interface ReportType {
     id: string;
     purchasing_doc: string;
@@ -23,6 +23,12 @@ interface ReportDepartment {
     id: string;
     name: string;
 }
+
+interface ReportStatus {
+    code: string;
+    name: string;
+}
+
 
 
 const roleAkses = 'report purchase requisition';
@@ -63,9 +69,20 @@ export const Index = () => {
             }
         };
 
+        const loadReportStatuses = async () => {
+            try {
+                const reportStatuses = await fetchReportStatuses();
+                setStatuses(reportStatuses);
+
+            } catch (error) {
+                showToast('Failed to load report types', 'error');
+            }
+        };
+
         loadReportTypes();
         loadReportVendors();
         loadReportDepartments();
+        loadReportStatuses();
     }, []);
 
     const { showToast } = useAlert();
@@ -73,6 +90,7 @@ export const Index = () => {
     const [startDate, setStartDate] = React.useState<string | null>(null);
     const [endDate, setEndDate] = React.useState<string | null>(null);
     const [status, setStatus] = React.useState<string>('');
+    const [statuses, setStatuses] = React.useState<ReportStatus[]>([]);
     const [type, setType] = React.useState<string>('');
     const [types, setTypes] = React.useState<ReportType[]>([]);
     const [vendor, setVendor] = React.useState<string>('');
@@ -103,6 +121,16 @@ export const Index = () => {
     const fetchReportDepartments = async (): Promise<ReportDepartment[]> => {
         try {
             const response = await axiosInstance.get(REPORT_PURCHASE_DEPARTMENTS);
+            return response.data.data;
+        } catch (error) {
+            console.error('Error fetching report types:', error);
+            return []; // Return an empty array to prevent errors
+        }
+    };
+
+    const fetchReportStatuses = async (): Promise<ReportStatus[]> => {
+        try {
+            const response = await axiosInstance.get(REPORT_PURCHASE_STATUSES);
             return response.data.data;
         } catch (error) {
             console.error('Error fetching report types:', error);
@@ -169,14 +197,21 @@ export const Index = () => {
                     </div>
                     <div>
                         <label htmlFor='end-date' className='block mb-1'>Status</label>
-                        <select value={status} onChange={(e) => setStatus(e.target.value)} className='select-class'>
-                            <option value=''>All Status</option>
-                            <option value='waiting_approve'>Waiting Approve</option>
-                            <option value='cancel'>Cancel</option>
-                            <option value='approve_to'>Approved</option>
-                            <option value='reject_to'>Rejected</option>
-                            <option value='fully_approve'>Fully Approved</option>
-                            <option value='revise'>Revise</option>
+                        <select
+                            value={status}
+                            onChange={(e) => setStatus(e.target.value)}
+                            className="select-class"
+                            id="status"
+                        >
+                            <option value="">All Status</option>
+                            {statuses.map((typeOption) => (
+                                <option
+                                    key={typeOption.code}
+                                    value={typeOption.code}
+                                >
+                                    {typeOption.name}
+                                </option>
+                            ))}
                         </select>
                     </div>
                     <div>
