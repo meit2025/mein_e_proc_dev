@@ -20,9 +20,10 @@ interface propsType {
     listDestination: any[];
     users: UserModel[];
     departments: any[];
+    statuses: any[];
 }
 const roleAkses = 'business trip declaration';
-export const Index = ({ listPurposeType, listDestination, users, departments }: propsType) => {
+export const Index = ({ listPurposeType, listDestination, users, departments, statuses }: propsType) => {
     const [openForm, setOpenForm] = React.useState<boolean>(false);
 
     const [businessTripForm, setBusinessTripForm] = React.useState({
@@ -96,14 +97,21 @@ export const Index = ({ listPurposeType, listDestination, users, departments }: 
                     </div>
                     <div>
                         <label htmlFor='end-date' className='block mb-1'>Status</label>
-                        <select value={status} onChange={(e) => setStatus(e.target.value)} className='select-class'>
-                            <option value=''>All Status</option>
-                            <option value='waiting_approve'>Waiting Approve</option>
-                            <option value='cancel'>Cancel</option>
-                            <option value='approve_to'>Approved</option>
-                            <option value='reject_to'>Rejected</option>
-                            <option value='fully_approve'>Fully Approved</option>
-                            <option value='revise'>Revise</option>
+                        <select
+                            value={status}
+                            onChange={(e) => setStatus(e.target.value)}
+                            className="select-class"
+                            id="status"
+                        >
+                            <option value="">All Status</option>
+                            {statuses.map((typeOption) => (
+                                <option
+                                    key={typeOption.code}
+                                    value={typeOption.code}
+                                >
+                                    {typeOption.name}
+                                </option>
+                            ))}
                         </select>
                     </div>
                     <div>
