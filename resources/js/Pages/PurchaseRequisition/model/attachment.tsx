@@ -14,6 +14,11 @@ const Attachment = ({ isDisabled }: { isDisabled?: boolean }) => {
       getValues('attachment').filter((item: any) => item.id !== data.row.id),
     );
   };
+  const handleSaveEdit = (data: any) => {
+    const existingFiles = getValues('attachment') || [];
+    const updatedFiles = existingFiles.map((item: any) => (item.id === data.id ? data : item));
+    setValue('attachment', updatedFiles);
+  };
 
   const action = [
     {
@@ -82,12 +87,18 @@ const Attachment = ({ isDisabled }: { isDisabled?: boolean }) => {
                   <div data-datatable='true'>
                     <div className='scrollable-x-auto'>
                       <DataGrid
-                        columns={[
-                          ...(isDisabled ? [] : action), // Spread an empty array if disabled, or the action array if not
-                          ...columnsAttachment,
-                        ]}
+                        onCellKeyDown={(params, event) => {
+                          if (event.key === 'Enter') {
+                            event.preventDefault();
+                          }
+                        }}
+                        processRowUpdate={handleSaveEdit}
+                        columns={[...(isDisabled ? [] : action), ...columnsAttachment]}
                         rows={watch('attachment') ?? []}
                         hideFooterPagination={true}
+                        getRowClassName={
+                          (params) => (params.row.isEditing ? 'bg-yellow-50' : '') // Tambahkan highlight untuk baris yang sedang diedit
+                        }
                       />
                     </div>
                   </div>

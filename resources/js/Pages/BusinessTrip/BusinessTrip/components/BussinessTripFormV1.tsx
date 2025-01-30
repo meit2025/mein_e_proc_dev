@@ -198,7 +198,7 @@ export const BussinessTripFormV1 = ({
       }),
     ),
   })
-  .superRefine(({ cash_advance, total_percent }, refinementContext) => {
+  .superRefine(({ cash_advance, total_percent}, refinementContext) => {
     if (cash_advance === true) {
         // Validasi jika total_percent kosong
         if (!total_percent || total_percent.toString().trim() === '') {
@@ -232,7 +232,7 @@ export const BussinessTripFormV1 = ({
       attachment: [],
       total_destination: 1,
       cash_advance: false,
-      total_percent: '',
+      total_percent: 0,
       total_cash_advance: '0',
       destinations: [
         {
@@ -345,7 +345,7 @@ export const BussinessTripFormV1 = ({
         const response = await axiosInstance.get(url);
         setDateBusinessTripByUser(response.data.data);
     }
-console.log(dateBusinessTripByUser,'dateBusinessTripByUser')
+
   async function handlePurposeType(value: string) {
     form.setValue('purpose_type_id', value || '');
     const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
@@ -387,13 +387,26 @@ console.log(dateBusinessTripByUser,'dateBusinessTripByUser')
     // let valueToInt = parseInt(value);
   };
 
+  const [activeTab, setActiveTab] = React.useState('destination1');
+
+    React.useEffect(() => {
+        if (parseInt(totalDestination, 10) < 1) {
+        setTotalDestination('1');
+        } else {
+        setActiveTab(`destination${totalDestination}`);
+        }
+    }, [totalDestination]);
+
   const { showToast } = useAlert();
+  const [loading, setLoading] = React.useState(false);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
   console.log(form.formState.errors.attachment)
 
     console.log(values, ' valuesss');
     try {
+      setLoading(true);
+
       const formData = new FormData();
       const totalAll = getTotalDes();
       // Append group data
@@ -467,7 +480,9 @@ console.log(dateBusinessTripByUser,'dateBusinessTripByUser')
         });
         showToast('succesfully updated data', 'success');
       }
-
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
       // console.log(response);
       //   onSuccess?.(true);
     } catch (e) {
@@ -495,14 +510,10 @@ console.log(dateBusinessTripByUser,'dateBusinessTripByUser')
         pajak_id: '',
         purchasing_group_id: '',
         restricted_area: false,
-        // cash_advance: false,
-        // total_percent: '',
-        // total_cash_advance: '0',
         allowances: [],
         detail_attedances: [],
       });
     }
-    // console.log(dateBusinessTripByUser,'dateBusinessTripByUser')
     form.setValue('destinations', destinationForm);
   }
 
@@ -958,6 +969,8 @@ console.log(dateBusinessTripByUser,'dateBusinessTripByUser')
             dateBusinessTripByUser={dateBusinessTripByUser}
             setSelectedDates={setSelectedDates}
             selectedDates={selectedDates}
+            setActiveTab={setActiveTab}
+            activeTab={activeTab}
           />
           <Separator className='my-4' />
 
@@ -1065,7 +1078,7 @@ console.log(dateBusinessTripByUser,'dateBusinessTripByUser')
               />
             )}
           </div>
-          <Button type='submit'>submit</Button>
+          <Button type='submit' loading={loading}>submit</Button>
         </form>
       </Form>
     </ScrollArea>
