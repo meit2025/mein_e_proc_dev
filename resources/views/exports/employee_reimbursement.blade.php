@@ -39,7 +39,7 @@
         @foreach($data as $key => $item)
         @foreach ($item['reimburses'] as $reim )
         @php
-        $statusPaid =  $item['pr'] ? $item['pr'][$key]['is_closed'] == 'S' ? "Paid" : "Unpaid" : "Unpaid";
+        $statusPaid =  $item['pr']->isNotEmpty() ? $item['pr'][$key]['is_closed'] == 'S' ? "Paid" : "Unpaid" : "Unpaid";
         $totalBalance = $reim['reimburseType']['grade_option'] == 'all' ? $reim['reimburseType']['grade_all_price'] : $reim['reimburseType']['gradeReimburseTypes']['plafon'];
         @endphp
         <tr>
