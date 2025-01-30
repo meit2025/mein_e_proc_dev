@@ -28,6 +28,8 @@ export function BussinesTripDestination({
   dateBusinessTripByUser,
   selectedDates,
   setSelectedDates,
+  setActiveTab,
+  activeTab,
 }: {
   updateDestination: any;
   destinationField: any;
@@ -45,6 +47,8 @@ export function BussinesTripDestination({
   dateBusinessTripByUser: DateObject[];
   selectedDates: any;
   setSelectedDates: any;
+  setActiveTab: any;
+  activeTab: any;
 }) {
 
       React.useEffect(() => {
@@ -75,7 +79,7 @@ export function BussinesTripDestination({
 
 
     return (
-    <Tabs defaultValue='destination1' className='w-full'>
+    <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
       <TabsList className={'flex items-center justify-start space-x-4'}>
         {destinationField.map((field: any, index: number) => (
           <TabsTrigger key={`trigger-${index}`} value={`destination${index + 1}`}>Destination {index + 1}</TabsTrigger>
@@ -100,6 +104,7 @@ export function BussinesTripDestination({
           btClone={btClone}
           setSelectedDates={setSelectedDates}
           selectedDates={selectedDates}
+          dateBusinessTripByUser={dateBusinessTripByUser}
         />
       ))}
     </Tabs>

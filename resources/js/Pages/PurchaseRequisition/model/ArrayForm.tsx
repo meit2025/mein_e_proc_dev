@@ -37,7 +37,6 @@ const ArrayForm = ({
 
   // Watch the 'total_vendor' value
   const dataArrayItem = watch(`vendors[${dataIndex}].units`);
-  console.log('dataArrayItems', dataArrayItem);
 
   const watchAccountAssigment = useWatch({ name: 'item_account_assignment_categories' });
 

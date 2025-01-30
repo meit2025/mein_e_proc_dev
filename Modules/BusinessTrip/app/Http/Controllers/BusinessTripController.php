@@ -496,8 +496,7 @@ class BusinessTripController extends Controller
     public function listAPI(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType', 'status'])
-        ->search(request(['search']));
+        $query =  BusinessTrip::query()->with(['purposeType', 'status']);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
@@ -535,6 +534,8 @@ class BusinessTripController extends Controller
         }
 
         $query = $query->where('type','=','request');
+
+        $query->search(request(['search']));
 
         $query = $query->latest()->paginate($perPage);
 
