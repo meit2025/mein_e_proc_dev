@@ -43,10 +43,12 @@
         $totalBalance = $reim['reimburseType']['grade_option'] == 'all' ? $reim['reimburseType']['grade_all_price'] : $reim['reimburseType']['gradeReimburseTypes']['plafon'];
         @endphp
         <tr>
+            @if ($key == 0)
             <td rowspan="{{$item['form_count']}}">{{ $key + 1 }}</td>
             <td rowspan="{{$item['form_count']}}">{{ $item['code'] }}</td>
             <td rowspan="{{$item['form_count']}}">{{ $item['employee_no'] }}</td>
             <td rowspan="{{$item['form_count']}}">{{ $item['employee_name'] }}</td>
+            @endif
             <td>{{ $reim['reimburseType']['name'] }}</td>
             <td>{{ $item['request_date'] }}</td>
             <td>{{ $item['claim'] }}</td>
