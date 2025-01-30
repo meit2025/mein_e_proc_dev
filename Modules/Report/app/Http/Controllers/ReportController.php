@@ -175,7 +175,7 @@ class ReportController extends Controller
             $department = $request->get('department');
 
             // Start the query with relationships
-            $query = ReimburseGroup::query()->with(['reimburses', 'status', 'user', 'reimburses.reimburseType.gradeReimburseTypes', 'reimburses.purchasingGroupModel.approvalPr']);
+            $query = ReimburseGroup::query()->with(['reimburses', 'status', 'user', 'reimburses.reimburseType.gradeReimburseTypes', 'reimburses.purchasingGroupModel.approvalPr', 'PurchaseRequisition']);
 
             // Handle approval-specific filtering
             if ($request->approval == 1) {
@@ -256,6 +256,7 @@ class ReportController extends Controller
                     'claim' => $item->reimburses->first()->claim_date,
                     'curency' => $item->reimburses->first()->currency,
                     'reimburses' => $item->reimburses,
+                    'pr' => $item->PurchaseRequisition,
                     'request_for' => $item->user->name,
                     'remark' => $item->remark,
                     'balance' => $balance,
@@ -789,41 +790,35 @@ class ReportController extends Controller
             });
         }
 
-        $data = $query->where('type', 'request')
-            ->latest()
-            ->search(request(['search']))
-            ->get();
+        $data = $query->latest()->search(request(['search']))->get();
 
-        // Transform the data for export
+        // Transform data
         $transformedData = $data->map(function ($businessTrip) {
-            $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
-                $allowanceItems = $destination->detailDestinationTotal->map(function ($allowanceItem) {
-                    return [
-                        'item_name' => $allowanceItem->allowance->name,
-                        'amount' => $allowanceItem->price,
-                    ];
-                });
-
-                return [
-                    'destination' => $destination->destination,
-                    'start_date' => $destination->business_trip_start_date,
-                    'end_date' => $destination->business_trip_end_date,
-                    'allowance_items' => $allowanceItems,
-                    'total_allowance' => $allowanceItems->sum('amount'),
-                ];
-            });
+            $isDeclaration = $businessTrip->type === 'declaration';
 
             return [
-                'requestedBy' => $businessTrip->requestedBy,
-                'requestFor' => $businessTrip->requestFor,
-                'requestNo' => $businessTrip->request_no,
+                'type' => $businessTrip->type,
+                'employee' => $businessTrip->requestFor,
+                'requested_by' => $businessTrip->requestedBy,
+                'request_no' => $businessTrip->request_no,
                 'status' => $businessTrip->status,
-                'purposeType' => $businessTrip->purposeType,
+                'purpose' => $businessTrip->purposeType,
                 'remarks' => $businessTrip->remarks,
-                'destinations' => $destinations,
+                'destinations' => $businessTrip->businessTripDestination->map(function ($destination) use ($isDeclaration) {
+                    return [
+                        'destination' => $destination->destination,
+                        'date' => $isDeclaration ? $destination->created_at : $destination->business_trip_start_date,
+                        'allowances' => $destination->detailDestinationTotal->map(function ($item) {
+                            return [
+                                'item_name' => $item->allowance->name,
+                                'amount' => $item->price
+                            ];
+                        }),
+                        'total' => $destination->detailDestinationTotal->sum('price')
+                    ];
+                })
             ];
         });
-
 
         // Return the exported file
         $filename = 'BusinessTrips.xlsx';
