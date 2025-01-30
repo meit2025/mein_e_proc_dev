@@ -64,7 +64,7 @@ class ReimbuseController extends Controller
             })
             ->leftJoin('users as u', function($join) {
                 $join->on('u.id', '=', 'mtrua_grade_relation_exist.user_id')
-                ->orOn('u.id', '=', 'mtrua_grade_relation_not_exist.user_id');
+                ->on('u.id', '=', 'mtrua_grade_relation_not_exist.user_id');
             })
             ->leftJoinSub("
                 SELECT
@@ -176,20 +176,16 @@ class ReimbuseController extends Controller
                 ->pluck('approvals.document_id')->toArray();
                 $query = $query->whereIn('id', $approval)->where('status_id', 1);
             } else {
-                $data = $query->where('requester', Auth::user()->nip)->orWhere('request_created_by', Auth::user()->id);
+                $query = $query->where(function ($query) {
+                    $query->where('requester', Auth::user()->nip)->orWhere('request_created_by', Auth::user()->id);
+                });
             }
 
             if ($request->search) {
-                $query = $query->where('code', 'ILIKE', '%' . $request->search . '%')
-                ->orWhere('remark', 'ILIKE', '%' . $request->search . '%')
-                ->orWhere('requester', 'ILIKE', '%' . $request->search . '%');
-
-                $query = $query->orWhereHas('reimburses', function ($q) use ($request) {
-                    $q->where('remark', 'ILIKE', '%' . $request->search . '%');
-                });
-
-                $query = $query->orWhereHas('status', function ($q) use ($request) {
-                    $q->where('name', 'ILIKE', '%' . $request->search . '%');
+                $query = $query->where(function ($query) use ($request) {
+                    $query->where('code', 'ILIKE', '%' . $request->search . '%')
+                    ->orWhere('remark', 'ILIKE', '%' . $request->search . '%')
+                    ->orWhere('requester', 'ILIKE', '%' . $request->search . '%');
                 });
             }
 
