@@ -160,7 +160,7 @@ export default function ReimburseTypeForm({
       showToast(response?.data?.message, 'success');
     } catch (e: any) {
       onSuccess && onSuccess(false);
-      const errorMessage = e.response?.data?.message || e.message;
+      const errorMessage = e.response?.data?.message ?? e.message;
       showToast(errorMessage, 'error');
     }
     setIsLoading(false);
