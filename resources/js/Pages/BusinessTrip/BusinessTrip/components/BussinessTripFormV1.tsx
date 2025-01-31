@@ -194,7 +194,7 @@ export const BussinessTripFormV1 = ({
               }),
             ),
           }),
-        ),
+        ).min(1, "Allowances tidak boleh kosong"),
       }),
     ),
   })
