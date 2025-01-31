@@ -82,8 +82,8 @@ export default function ReimburseTypeForm({
   });
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const { dataDropdown: dataMaterialGroup, getDropdown: getMaterialGroup } = useDropdownOptions();
-  const { dataDropdown: dataMaterialNumber, getDropdown: getMaterialNumber } = useDropdownOptions();
+  const { dataDropdown: dataMaterialGroup, getDropdown: getMaterialGroup } = useDropdownOptions('api/master-pr/material-group/dropdown-list');
+  const { dataDropdown: dataMaterialNumber, getDropdown: getMaterialNumber } = useDropdownOptions('api/master/master-material/get-dropdown-master-material-number');
   const dayOnYear = 365;
   const dataIntervalClaimPeriod = [
     {
@@ -160,7 +160,7 @@ export default function ReimburseTypeForm({
       showToast(response?.data?.message, 'success');
     } catch (e: any) {
       onSuccess && onSuccess(false);
-      const errorMessage = e.response?.data?.message || e.message;
+      const errorMessage = e.response?.data?.message ?? e.message;
       showToast(errorMessage, 'error');
     }
     setIsLoading(false);

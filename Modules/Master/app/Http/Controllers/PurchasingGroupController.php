@@ -83,7 +83,7 @@ class PurchasingGroupController extends Controller
 
     public function dropdownList(Request $request)
     {
-        $data = PurchasingGroup::selectRaw("purchasing_group || ' - ' || purchasing_group_desc as label, id as value");
+        $data = PurchasingGroup::selectRaw("purchasing_group_desc || ' - ' || purchasing_group as label, id as value");
         if ($request->search) $data = $data->where('purchasing_group', 'ilike', '%' . $request->search . '%')->orWhere('purchasing_group_desc', 'ilike', '%' . $request->search . '%');
         $data = $data->limit(50)->get();
         return $this->successResponse($data);

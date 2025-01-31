@@ -29,6 +29,7 @@ class MasterTypeReimburseController extends Controller
 
             if ($request->search) $query = $query->where('code', 'ilike', '%' . $request->search . '%')
                                     ->orWhere('name', 'ilike', '%' . $request->search . '%')
+                                    ->orWhere('grade_option', 'ilike', '%' . $request->search . '%')
                                     ->orWhere('family_status', 'ilike', '%' . $request->search . '%');
 
             $data = $query->paginate($perPage);

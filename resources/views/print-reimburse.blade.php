@@ -100,16 +100,9 @@
     <p><strong>Requested By:</strong> {{$data['group']['userCreateRequest']['name']}}</p>
     <p><strong>Status: <span class='{{$data['group']['reimbursementStatus']['classname']}}'>{{$data['group']['reimbursementStatus']['name']}}</span></strong></p>
 
-    @php
-        // dd($data);
-        $index = 0;
-    @endphp
-    @foreach ($data['forms'] as $formItems)
-        @php
-            $index++;
-        @endphp
+    @foreach ($data['forms'] as $index => $formItems)
         <div class="info">
-            <p>Form {{ $index }}</p>
+            <p>Form {{ $index + 1 }}</p>
             <table class="info-table">
                 <tr>
                     <td><strong>Type Of Reimbursement</strong></td>
