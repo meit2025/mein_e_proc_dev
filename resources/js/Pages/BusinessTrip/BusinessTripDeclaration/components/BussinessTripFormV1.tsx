@@ -98,7 +98,7 @@ export const BussinessTripFormV1 = ({
     total_destination: z.number().int('Total Destinantion Required'),
     cash_advance: z.boolean().nullable().optional(),
     reference_number: z.string().nullable().optional(),
-    total_percent: z.string().nullable().optional(),
+    // total_percent: z.number().nullable().optional(),
     total_cash_advance: z.string().nullable().optional(),
     destinations: z.array(
       z.object({
@@ -150,7 +150,7 @@ export const BussinessTripFormV1 = ({
       total_destination: 1,
       cash_advance: false,
       reference_number: '',
-      total_percent: '',
+      total_percent: 0,
       total_cash_advance: '0',
       destinations: [
         {
@@ -228,9 +228,11 @@ export const BussinessTripFormV1 = ({
   };
   const [otherAllowance, setOtherAllowance] = React.useState<boolean>(false);
   const { showToast } = useAlert();
+  const [loading, setLoading] = React.useState(false);
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     // console.log(otherAllowance, ' valuesnya');
     try {
+        setLoading(true);
       if (type === BusinessTripType.create) {
         const totalAll = getTotalDes();
         const formData = new FormData();
@@ -273,6 +275,10 @@ export const BussinessTripFormV1 = ({
         });
         showToast('succesfully updated data', 'success');
       }
+
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
     } catch (e) {
       const error = e as AxiosError;
       console.log(error);
@@ -299,7 +305,7 @@ export const BussinessTripFormV1 = ({
       form.setValue('total_destination', businessTripData.total_destination || 1);
       form.setValue('cash_advance', businessTripData.cash_advance == 1 ? true : false);
       form.setValue('reference_number', businessTripData.reference_number);
-      form.setValue('total_percent', `${businessTripData.total_percent} %`);
+      form.setValue('total_percent', businessTripData.total_percent);
       form.setValue('total_cash_advance', formatRupiah(businessTripData.total_cash_advance, false));
       setBusinessTripDetail(response.data.data as BusinessTripModel);
       setListDestination(businessTripData.destinations);
@@ -679,7 +685,7 @@ export const BussinessTripFormV1 = ({
             )}
           </div>
 
-          <Button type='submit'>submit</Button>
+          <Button type='submit' loading={loading}>submit</Button>
         </form>
       </Form>
     </ScrollArea>
@@ -949,12 +955,12 @@ export function BussinessDestinationForm({
         />
       </div>
       {/* disini */}
-      {/* <ResultTotalItem
+       <ResultTotalItem
         allowanceField={allowancesField}
         destinationIndex={index}
         form={form}
         setTotalAllowance={setTotalAllowance}
-      /> */}
+      />
 
       {/* <table className='w-full text-sm mt-10'>
         <tr>
@@ -1050,55 +1056,6 @@ export function BussinessDestinationForm({
         )}
       </table>
     </TabsContent>
-  );
-}
-
-export function ResultTotalItem({
-  allowanceField,
-  destinationIndex,
-  form,
-  setTotalAllowance,
-}: {
-  allowanceField: any;
-  destinationIndex: number;
-  form: any;
-  setTotalAllowance: any;
-}) {
-  const resultItem = form.watch(`destinations[${destinationIndex}].allowances`);
-  const totalItem = form.watch(`destinations[${destinationIndex}].total_allowance`);
-  return (
-    <>
-      <table className='w-full text-sm mt-10'>
-        <thead>
-          <tr>
-            <th className='w-[50%]'>Item</th>
-            <th className='w-[50%]'>Sub Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {resultItem.map((allowance: any, index: number) => (
-            <tr key={allowance.id}>
-              <td>{allowance.name}</td>
-              <td className='flex justify-between pr-4'>
-                <span>IDR</span>
-                <span>{formatRupiah(allowance.subtotal)}</span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-        <tfoot className='mt-4'>
-          <tr>
-            <td>
-              <i>Total Allowance</i>
-            </td>
-            <td className='flex justify-between pr-4'>
-              <span>IDR</span>
-              <span>{formatRupiah(totalItem)}</span>
-            </td>
-          </tr>
-        </tfoot>
-      </table>
-    </>
   );
 }
 
@@ -1365,7 +1322,6 @@ export function DetailAllowance({
                   <FormItem>
                     <FormControl>
                       <Input
-                        type='number'
                         min='0'
                         value={field.value ?? ''} // Gunakan string kosong jika nilai null/undefined
                         onChange={(e) => {
@@ -1453,18 +1409,13 @@ export function AllowanceRowInput({
   const handleChange = (index: number, value: string) => {
     // Parsing the input value to a float
     const parsedValue = parseFloat(value);
-
     // Ensure the value is a number or 0
     const requestPrice = isNaN(parsedValue) ? 0 : parsedValue;
-
     // Get the allowance type to apply validation logic
     const allowanceType = allowance.request_value; // Assuming `allowance` has a property 'type'
-
     // Define the validation logic based on the allowance type
     let isValid = true;
-
     // console.log(allowanceType);
-
     switch (allowanceType) {
       case 'unlimited':
         // No restrictions, any input is valid
@@ -1498,6 +1449,21 @@ export function AllowanceRowInput({
       form.setValue(
         `destinations[${destinationIndex}].allowances[${allowanceIndex}].detail[${index}].request_price`,
         requestPrice,
+      );
+
+      // Hitung subtotal allowance ini
+    const details = form.getValues(
+        `destinations[${destinationIndex}].allowances[${allowanceIndex}].detail`
+      );
+      console.log(details,'details')
+      const subtotal = details.reduce((total: number, detail: any) => {
+        return total + (parseFloat(detail.request_price) || 0);
+      }, 0);
+    //   console.log(details,'detailsdetailsdetails')
+      // Update subtotal di form
+      form.setValue(
+        `destinations[${destinationIndex}].allowances[${allowanceIndex}].subtotal`,
+        subtotal
       );
     }
   };
@@ -1601,41 +1567,79 @@ export function AllowanceRowInput({
   );
 }
 
-export function AllowanceInputForm({
-  form,
-  type,
-  allowanceIndex,
-  destinationIndex,
-}: {
-  form: any;
-  allowanceIndex: number;
-  destinationIndex: number;
-  type: string;
-}) {
-  const { fields: allowanceInput } = useFieldArray({
-    control: form.control,
-    name: `destinations.${destinationIndex}.allowances.${allowanceIndex}.detail`,
-  });
-  // console.log(allowanceInput,' allowance input nih');
-  //   console.log(destinationIndex, allowanceIndex);
-  return (
-    <>
-      {allowanceInput.map((item, index) => {
-        return (
-          <FormField
-            control={form.control}
-            name={`destinations.${destinationIndex}.allowances.${index}.detail.${index}.request_price`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input value={field.value} onChange={field.onChange} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        );
-      })}
-    </>
-  );
-}
+export function ResultTotalItem({
+    allowanceField,
+    destinationIndex,
+    form,
+    setTotalAllowance,
+  }: {
+    allowanceField: any;
+    destinationIndex: number;
+    form: any;
+    setTotalAllowance: any;
+  }) {
+    const [grandTotal, setGrandTotal] = React.useState(0);
+    const resultItem = form.watch(`destinations[${destinationIndex}].allowances`);
+    // const totalItem = form.watch(`destinations[${destinationIndex}].total_allowance`);
+    // const total = form.watch(`destinations[${destinationIndex}].allowances[${allowanceIndex}].detail`)
+      // console.log(allowanceField,' lorem isum')
+    React.useEffect(() => {
+        const newTotal = resultItem.reduce((totalSum: number, allowance: any, index: number) => {
+            const details = form.getValues(`destinations.${destinationIndex}.allowances.${index}.detail`);
+            const itemTotal = calculateTotal(allowance, details);
+            return totalSum + itemTotal;
+        }, 0);
+
+        setGrandTotal(newTotal);
+    //       // Update nilai total allowance di form
+    //       form.setValue(`destinations[${destinationIndex}].total_allowance`, total);
+
+    //       // Panggil fungsi setTotalAllowance jika diperlukan di luar
+    //       // setTotalAllowance(total);
+        }, [resultItem, form.watch()]);
+        const calculateTotal = (allowance: any, details: any) => {
+            if (allowance.type === 'total') {
+              const basePrice = parseFloat(details?.[0]?.request_price || 0);
+              return basePrice;
+            } else {
+              return details?.reduce(
+                (sum: number, item: any) => sum + parseFloat(item.request_price || 0),
+                0,
+              );
+            }
+          };
+    return (
+      <>
+        <table className='w-full text-sm mt-10'>
+          <thead>
+            <tr>
+              <th className='w-[50%]'>Item</th>
+              <th className='w-[50%]'>Sub Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {resultItem.map((allowance: any, index: number) => (
+              <tr key={allowance.id}>
+                <td>{allowance.name}</td>
+                <td className='flex justify-between pr-4'>
+                  <span>IDR</span>
+                  <span>{formatRupiah(allowance.subtotal)}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot className='mt-4'>
+            <tr>
+              <td>
+                <i>Total Allowance</i>
+              </td>
+              <td className='flex justify-between pr-4'>
+                <span>IDR</span>
+                <span>{formatRupiah(grandTotal)}</span>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </>
+    );
+  }

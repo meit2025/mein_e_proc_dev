@@ -159,7 +159,7 @@ export const BussinessTripFormV1 = ({
     ).min(1, 'Attachment is required'),
     total_destination: z.number().min(1, 'Total Destinantion Required'),
     cash_advance: z.boolean().nullable().optional(),
-    total_percent: z.string().nullable().optional(),
+    total_percent: z.number().nullable().optional(),
     total_cash_advance: z.string().nullable().optional(),
     destinations: z.array(
       z.object({
@@ -198,10 +198,10 @@ export const BussinessTripFormV1 = ({
       }),
     ),
   })
-  .superRefine(({ cash_advance, total_percent }, refinementContext) => {
+  .superRefine(({ cash_advance, total_percent}, refinementContext) => {
     if (cash_advance === true) {
         // Validasi jika total_percent kosong
-        if (!total_percent || total_percent.trim() === '') {
+        if (!total_percent || total_percent.toString().trim() === '') {
           refinementContext.addIssue({
             code: z.ZodIssueCode.custom,
             path: ['total_percent'],
@@ -232,7 +232,7 @@ export const BussinessTripFormV1 = ({
       attachment: [],
       total_destination: 1,
       cash_advance: false,
-      total_percent: '',
+      total_percent: 0,
       total_cash_advance: '0',
       destinations: [
         {
@@ -340,7 +340,7 @@ export const BussinessTripFormV1 = ({
     const [dateBusinessTripByUser, setDateBusinessTripByUser] = React.useState<[]>([]);
 
     async function getDateBusinessTrip() {
-        const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
+        const userid = isAdmin == '0' ? idUser || 0 : selectedUserId || 0;
         const url = GET_DATE_BUSINESS_TRIP_BY_USER(userid);
         const response = await axiosInstance.get(url);
         setDateBusinessTripByUser(response.data.data);
@@ -387,13 +387,26 @@ export const BussinessTripFormV1 = ({
     // let valueToInt = parseInt(value);
   };
 
+  const [activeTab, setActiveTab] = React.useState('destination1');
+
+    React.useEffect(() => {
+        if (parseInt(totalDestination, 10) < 1) {
+        setTotalDestination('1');
+        } else {
+        setActiveTab(`destination${totalDestination}`);
+        }
+    }, [totalDestination]);
+
   const { showToast } = useAlert();
+  const [loading, setLoading] = React.useState(false);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
   console.log(form.formState.errors.attachment)
 
     console.log(values, ' valuesss');
     try {
+      setLoading(true);
+
       const formData = new FormData();
       const totalAll = getTotalDes();
       // Append group data
@@ -467,7 +480,9 @@ export const BussinessTripFormV1 = ({
         });
         showToast('succesfully updated data', 'success');
       }
-
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
       // console.log(response);
       //   onSuccess?.(true);
     } catch (e) {
@@ -495,14 +510,10 @@ export const BussinessTripFormV1 = ({
         pajak_id: '',
         purchasing_group_id: '',
         restricted_area: false,
-        // cash_advance: false,
-        // total_percent: '',
-        // total_cash_advance: '0',
         allowances: [],
         detail_attedances: [],
       });
     }
-    // console.log(dateBusinessTripByUser,'dateBusinessTripByUser')
     form.setValue('destinations', destinationForm);
   }
 
@@ -958,6 +969,8 @@ export const BussinessTripFormV1 = ({
             dateBusinessTripByUser={dateBusinessTripByUser}
             setSelectedDates={setSelectedDates}
             selectedDates={selectedDates}
+            setActiveTab={setActiveTab}
+            activeTab={activeTab}
           />
           <Separator className='my-4' />
 
@@ -1065,7 +1078,7 @@ export const BussinessTripFormV1 = ({
               />
             )}
           </div>
-          <Button type='submit'>submit</Button>
+          <Button type='submit' loading={loading}>submit</Button>
         </form>
       </Form>
     </ScrollArea>

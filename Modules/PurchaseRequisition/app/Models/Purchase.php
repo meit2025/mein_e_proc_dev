@@ -50,7 +50,8 @@ class Purchase extends Model
     }
     public function purchaseRequisitions()
     {
-        return $this->hasMany(PurchaseRequisition::class);
+        return $this->hasMany(PurchaseRequisition::class)
+            ->where('code_transaction', 'VEN');
     }
 
     public function attachment()

@@ -248,7 +248,7 @@ class BtService
             'code_transaction' => 'BTRE',
             'belnr' => $BusinessTrip->id, // belnr
             'company_code' => $settings['companyCode'], // bukrs
-            'gjahr' =>  $year, // gjahr
+            'gjahr' =>  '', // gjahr
             'currency' => 'IDR', // waers
             'document_date' => $formattedDate,
             'budat' => $formattedDate, // budat

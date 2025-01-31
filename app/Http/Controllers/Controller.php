@@ -98,20 +98,14 @@ abstract class Controller
         if ($userData) {
             if ($request->approval == 1) {
 
-                // $data = Approval::where('user_id', Auth::user()->id)
-                //     ->where('document_name', 'PR')
-                //     ->where('status', 'Waiting')
-                //     ->where('is_approval', true)
-                //     ->pluck('document_id')
-                //     ->toArray();
+                $data = Approval::where('user_id', Auth::user()->id)
+                    ->where('document_name', 'PR')
+                    ->where('status', 'Waiting')
+                    ->where('is_approval', true)
+                    ->pluck('document_id')
+                    ->toArray();
 
-                $documents = DB::select("SELECT * FROM get_approval_documents(?, 'PR', 'Waiting')", [Auth::user()->id]);
-
-                $documentIds = array_map(function ($document) {
-                    return $document->document_id;
-                }, $documents);
-
-                $query = $query->whereIn('id', (array) $documentIds)->where('status_id', '!=', 2);
+                $query = $query->whereIn('id', $data);
             } else {
                 $query->where(function ($q) use ($request, $filterableColumns) {
                     $q->orWhere('user_id', Auth::user()->id)

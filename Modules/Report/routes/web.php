@@ -45,6 +45,7 @@ Route::group(['prefix' => 'api/report', 'middleware' => 'auth'], function () {
         Route::get('/export', [ReportController::class, 'purchaseExport'])->name('report.purchase.export')->middleware(PermissionMiddleware::class . ':report purchase requisition export');
         Route::get('/types', [ReportController::class, 'purchaseTypes'])->name('report.purchase.types')->middleware(PermissionMiddleware::class . ':report purchase requisition view');
         Route::get('/departments', [ReportController::class, 'departments'])->name('report.purchase.departments')->middleware(PermissionMiddleware::class . ':report purchase requisition view');
+        Route::get('/statuses', [ReportController::class, 'statuses'])->name('report.purchase.statuses')->middleware(PermissionMiddleware::class . ':report purchase requisition view');
         Route::get('/vendors', [ReportController::class, 'purchaseVendors'])->name('report.purchase.vendors')->middleware(PermissionMiddleware::class . ':report purchase requisition view');
     });
 });
