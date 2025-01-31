@@ -97,7 +97,7 @@ class BusinessTripGradeController extends Controller
 
 
             $userRelations = collect($map->gradeUsers)->map(function ($relation) {
-                return $relation->user->name;
+                return $relation->user?->name;
             })->toArray();
 
 
