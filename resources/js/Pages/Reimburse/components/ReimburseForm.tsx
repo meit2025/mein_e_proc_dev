@@ -914,7 +914,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                               key={tax.value}
                                               value={tax.value.toString()}
                                             >
-                                              {tax.label}
+                                              {tax.description} - {tax.label}
                                             </SelectItem>
                                           ))}
                                         </SelectContent>
@@ -954,7 +954,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                               key={uom.value}
                                               value={uom.value.toString()}
                                             >
-                                              {uom.label}
+                                              {`${uom.label} - ${uom.iso_code}`}
                                             </SelectItem>
                                           ))}
                                         </SelectContent>
