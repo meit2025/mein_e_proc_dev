@@ -164,7 +164,7 @@ class FamilyController extends Controller
 
     public function listReimburseHistory(Request $request, $familyId)  {
         try {
-            $query          = Reimburse::query()->with(['reimburseGroup.costCenter', 'uomModel', 'purchasingGroupModel', 'reimburseType', 'taxOnSalesModel', 'status'])->where('for', $familyId);
+            $query          = Reimburse::query()->with(['reimburseGroup.costCenter', 'reimburseGroup.status', 'uomModel', 'purchasingGroupModel', 'reimburseType', 'taxOnSalesModel', 'status'])->where('for', $familyId);
             $perPage        = $request->get('per_page', 10);
             $sortBy         = $request->get('sort_by', 'id');
             $sortDirection  = $request->get('sort_direction', 'desc');
@@ -183,9 +183,9 @@ class FamilyController extends Controller
                     'uom'               => $map->uom_model->unit_of_measurement_text,
                     'tax'               => $map->tax_on_sales_model->description,
                     'status'            => [
-                        'name'              => $map->status->name,
-                        'classname'         => $map->status->classname,
-                        'code'              => $map->status->code
+                        'name'              => $map->reimburse_group->status->name,
+                        'classname'         => $map->reimburse_group->status->classname,
+                        'code'              => $map->reimburse_group->status->code
                     ],
                 ];
             });
