@@ -11,6 +11,13 @@ use Illuminate\Support\Facades\DB;
 use Modules\Approval\Models\Approval;
 use Modules\Gateway\Models\Log;
 use Illuminate\Support\Facades\File;
+use Modules\PurchaseRequisition\Models\PurchaseRequisition;
+use Modules\PurchaseRequisition\Services\BtPOService;
+use Modules\PurchaseRequisition\Services\BtService;
+use Modules\PurchaseRequisition\Services\ProcurementService;
+use Modules\PurchaseRequisition\Services\ReimburseServices;
+use Modules\PurchaseRequisition\Services\TextPoServices;
+use Modules\PurchaseRequisition\Services\TextPrServices;
 
 abstract class Controller
 {
@@ -385,5 +392,45 @@ abstract class Controller
         $newValue = str_pad($totalRows + 1, 8, '0', STR_PAD_LEFT);
 
         return $newValue;
+    }
+
+    function handlesendText($id, $type)
+    {
+        // Instantiate services within the job
+        $reim = new ReimburseServices();
+        $bt = new BtService();
+        $btpo = new BtPOService();
+        $procurement = new ProcurementService();
+        $txtpr = new TextPrServices();
+        $txtpo = new TextPoServices();
+
+        // Switch case to handle different types
+        switch ($type) {
+            case 'REIM':
+                // $reim->processTextData($id);
+                $txtpr->processTextData($id, 'REIM');
+
+                break;
+
+            case 'BT':
+                // $bt->processTextData($id);
+                $txtpr->processTextData($id, 'BTRE');
+                break;
+
+            case 'BTPO':
+                // $btpo->processTextData($id);
+                $txtpo->processTextData($id, 'BTRDE');
+
+                break;
+
+            case 'PR':
+                // $procurement->processTextData($id);
+                $txtpr->processTextData($id, 'VEN');
+                break;
+
+            default:
+                // Handle unknown type case
+                break;
+        }
     }
 }

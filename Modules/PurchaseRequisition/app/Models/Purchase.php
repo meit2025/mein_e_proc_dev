@@ -48,6 +48,10 @@ class Purchase extends Model
     {
         return $this->hasMany(Vendor::class);
     }
+    public function vendorsWinner()
+    {
+        return $this->hasOne(Vendor::class)->where('winner', true);
+    }
     public function purchaseRequisitions()
     {
         return $this->hasMany(PurchaseRequisition::class)

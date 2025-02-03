@@ -41,15 +41,25 @@ class SendApprovalEmailJob implements ShouldQueue
 
         // Proses untuk setiap jenis dokumen
         foreach ($documents as $documentName => [$documentApproval, $model]) {
+
+            $dataQuery = $model::where('status_id', 1);
+
+            if ($documentApproval == 'TRIP') {
+                $dataQuery->where('type', 'request');
+            }
+
+            if ($documentApproval == 'TRIP_DECLARATION') {
+                $dataQuery->where('type', 'declaration');
+            }
             // Ambil semua entri dengan status_id = 1
-            $model::where('status_id', 1)->chunk(100, function ($items) use ($documentName, $documentApproval) {
+            $dataQuery::chunk(100, function ($items) use ($documentName, $documentApproval) {
                 Log::channel('notification_email')->info('SendApprovalEmailJob started ' . $documentApproval);
                 foreach ($items as $item) {
                     // Ambil approval terakhir untuk dokumen ini
                     $approval = Approval::with('user.divisions')
                         ->where('document_id', $item->id)
                         ->where('document_name', $documentApproval)
-                        ->latest('id')
+                        ->where('is_approval', true)
                         ->first();
 
                     // Pastikan approval ada dan belum diproses
