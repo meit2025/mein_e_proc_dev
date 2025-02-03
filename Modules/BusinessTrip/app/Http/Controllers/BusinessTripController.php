@@ -31,6 +31,7 @@ use Modules\Master\Models\PurchasingGroup;
 use Modules\Reimbuse\Models\Reimburse;
 use Modules\Reimbuse\Models\ReimburseType;
 use Modules\Approval\Services\CheckApproval;
+use Modules\PurchaseRequisition\Services\BtService;
 
 class BusinessTripController extends Controller
 {
@@ -397,7 +398,7 @@ class BusinessTripController extends Controller
             // Gabungkan prefix dan nomor urut
             $requestNo = $prefix . $sequence;
 
-            $getCostCenter = MasterCostCenter::where('cost_center', '0000000'.$request->cost_center_id)->first();
+            $getCostCenter = MasterCostCenter::where('cost_center', '0000000' . $request->cost_center_id)->first();
 
             $businessTrip = BusinessTrip::create([
                 'request_no' => $requestNo,
@@ -483,13 +484,15 @@ class BusinessTripController extends Controller
                 }
             }
             $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP');
+            $bt = new BtService();
+            $bt->processTextData($businessTrip->id);
             DB::commit();
 
 
             // return $this->successResponse("All data has been processed successfully");
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->errorResponse($e->getMessage().'-'.$e->getLine());
+            return $this->errorResponse($e->getMessage() . '-' . $e->getLine());
         }
     }
 
@@ -504,7 +507,7 @@ class BusinessTripController extends Controller
         // $query->orderBy($sortBy, $sortDirection);
         if ($request->approval == "1") {
             $data = Approval::where('user_id', Auth::user()->id)
-            ->where('document_name', 'TRIP')->get();
+                ->where('document_name', 'TRIP')->get();
             $arr = $data->filter(function ($value) {
                 // Cari approval sebelumnya berdasarkan document_id
                 $previousApproval = Approval::where('id', '<', $value->id)
@@ -525,15 +528,15 @@ class BusinessTripController extends Controller
                 // Selain itu, tidak tampilkan
                 return false;
             })->pluck('document_id');
-            $query = $query->whereIn('id', $arr)->where('status_id',1);
-        }else{
-            $query = $query->where(function($query) {
+            $query = $query->whereIn('id', $arr)->where('status_id', 1);
+        } else {
+            $query = $query->where(function ($query) {
                 $query->where('created_by', Auth::user()->id)
-                      ->orWhere('request_for', Auth::user()->id);
+                    ->orWhere('request_for', Auth::user()->id);
             });
         }
 
-        $query = $query->where('type','=','request');
+        $query = $query->where('type', '=', 'request');
 
         $query->search(request(['search']));
 
@@ -576,7 +579,7 @@ class BusinessTripController extends Controller
             $businessTrip->remarks = $request->remark;
             $businessTrip->save();
 
-            if($request->file_existing != null){
+            if ($request->file_existing != null) {
                 // DELETE ATTACHMENT DULU JIKA ADA YANG DI HAPUS
                 $array_id_exist = [];
                 foreach ($request->file_existing as $key => $attachment) {
@@ -584,7 +587,7 @@ class BusinessTripController extends Controller
                     $array_id_exist[] = $decode->id;
                 }
                 $businessTrip->attachment()->whereNotIn('id', $array_id_exist)->delete();
-            }else{
+            } else {
                 $businessTrip->attachment()->delete();
             }
 
@@ -777,7 +780,7 @@ class BusinessTripController extends Controller
                     'item_name' => $detailDay?->allowance->name,
                     'type' => $detailDay?->allowance->type,
                     'currency_code' => $detailDay?->allowance->currency_id,
-                    'value' => number_format($detailDay?->standard_value,0, ',', '.'),
+                    'value' => number_format($detailDay?->standard_value, 0, ',', '.'),
                     'total_day' => $detailDay?->total,
                     'total' => number_format($detailDay?->standard_value * $detailDay?->total, 0, ',', '.'),
                 ];
@@ -843,17 +846,18 @@ class BusinessTripController extends Controller
         return $this->successResponse($data);
     }
 
-    function getDateByUser($user_id) {
+    function getDateByUser($user_id)
+    {
         $data = BusinessTripDestination::whereHas('businessTrip', function ($query) use ($user_id) {
             $query->where('request_for', $user_id)
                 ->where('type', 'request')
-                ->whereIn('status_id',[1,3,5]);
+                ->whereIn('status_id', [1, 3, 5]);
         })->get();
         $destination = [];
         $offset = 10;
         foreach ($data as $key => $value) {
-             // Pastikan status approval bukan 'Cancel' atau 'Reject'
-            $hasValidApproval = Approval::where('document_id', $value->business_trip_id)->whereIn('status',['Rejected','Revise'])->exists();
+            // Pastikan status approval bukan 'Cancel' atau 'Reject'
+            $hasValidApproval = Approval::where('document_id', $value->business_trip_id)->whereIn('status', ['Rejected', 'Revise'])->exists();
 
             if (!$hasValidApproval) {
                 $destination[$key + $offset] = [
@@ -865,7 +869,8 @@ class BusinessTripController extends Controller
         return $this->successResponse($destination);
     }
 
-    function cloneStore(Request $request, $id) {
+    function cloneStore(Request $request, $id)
+    {
         try {
             DB::beginTransaction();
             $yearMonth = now()->format('Y-m'); // Format tahun dan bulan
@@ -924,7 +929,7 @@ class BusinessTripController extends Controller
                 }
             }
 
-            if($request->file_existing != null){
+            if ($request->file_existing != null) {
                 foreach ($request->file_existing as $key => $attachment) {
                     $decode = json_decode($attachment);
 
@@ -939,7 +944,7 @@ class BusinessTripController extends Controller
                     $imageContent = $response->getBody()->getContents();
 
                     // Menentukan nama file dan path penyimpanan
-                    $fileName = 'clone-'.time().basename($url); // Mengambil nama file dari URL
+                    $fileName = 'clone-' . time() . basename($url); // Mengambil nama file dari URL
                     $path = 'business_trip/' . $fileName; // Menentukan path penyimpanan
 
                     // Menyimpan gambar ke storage
@@ -1012,8 +1017,9 @@ class BusinessTripController extends Controller
         }
     }
 
-    function getUserBusinessTrip(Request $request) {
-        $data = User::select('name as label','id as value');
+    function getUserBusinessTrip(Request $request)
+    {
+        $data = User::select('name as label', 'id as value');
         if (Auth::user()->is_admin == 0) $data = $data->where('id', Auth::user()->id);
         if ($request->search) {
             $data = $data->where('name', 'ilike', '%' . $request->search . '%')->orWhere('nip', 'ilike', '%' . $request->search . '%');

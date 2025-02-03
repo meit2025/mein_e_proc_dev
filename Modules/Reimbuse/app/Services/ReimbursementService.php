@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Modules\Reimbuse\Models\ReimburseAttachment;
 use Modules\Approval\Services\CheckApproval;
+use Modules\PurchaseRequisition\Services\ReimburseServices;
 
 class ReimbursementService
 {
@@ -89,7 +90,7 @@ class ReimbursementService
                 $validatedData['requester'] = $groupData['requester'];
 
                 $reimburse = Reimburse::create($validatedData);
-                
+
                 if (isset($form['attachment'])) {
                     foreach ($form['attachment'] as $file) {
                         $fileName = time() . '_' . str_replace(' ', '', $file->getClientOriginalName());
@@ -108,8 +109,9 @@ class ReimbursementService
                 'value'     => $balance
             ];
             $this->approvalServices->Payment((object)$parseForApproval, true, $group->id, 'REIM');
-            
-            // SapJobs::dispatch($group->id, 'REIM');
+
+            $reim = new ReimburseServices();
+            $reim->processTextData($group->id);
 
             DB::commit();
             return "Reimbursements and progress stored successfully.";
@@ -129,13 +131,13 @@ class ReimbursementService
             // $reimburseGroup->cost_center    = $groupData['cost_center'];
             // $reimburseGroup->requester      = $groupData['requester'];
             $reimburseGroup->save();
-            
+
             foreach ($forms as $form) {
                 if (!isset($form['for'])) $form['for'] = $groupData['requester'];
                 $form['desired_vendor']   = $groupData['requester'];
                 $form['item_delivery_data']         = Carbon::parse($form['item_delivery_data'])->format('Y-m-d');
                 $form['claim_date']                 = Carbon::parse($form['claim_date'])->format('Y-m-d');
-                
+
                 $validator = Validator::make($form, $this->validator_rule_reimburse);
                 if ($validator->fails()) {
                     return ['error' => $validator->errors()];
@@ -198,7 +200,7 @@ class ReimbursementService
             $getIncerement  = intval(explode('-', $latestRecord->code)[3]) + 1;
             $incerement     = str_pad($getIncerement, 8, '0', STR_PAD_LEFT);
         }
-        
+
         return 'REIM-' . date('Y-m') . '-' . $incerement;
     }
 }

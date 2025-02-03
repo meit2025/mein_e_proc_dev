@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Mail\Attachment;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -24,10 +25,11 @@ class ChangeStatus extends Mailable
     public $purchase;
     public $reimburseGroup;
     public $businessTrip;
+    public $url;
     /**
      * Create a new message instance.
      */
-    public function __construct($user, $type, $status, $pr, $purchase = null, $reimburseGroup = null, $businessTrip = null)
+    public function __construct($user, $type, $status, $pr, $purchase = null, $reimburseGroup = null, $businessTrip = null, $url = null)
     {
         //
         $this->user = $user;
@@ -37,6 +39,7 @@ class ChangeStatus extends Mailable
         $this->purchase = $purchase;
         $this->reimburseGroup = $reimburseGroup;
         $this->businessTrip = $businessTrip;
+        $this->url = $url;
     }
 
 
@@ -65,6 +68,8 @@ class ChangeStatus extends Mailable
                 'purchase' => $this->purchase,
                 'reimburseGroup' => $this->reimburseGroup,
                 'businessTrip' => $this->businessTrip,
+                'url' => $this->url,
+                'icon_cid' => 'icon.png',
             ],
         );
     }
@@ -76,6 +81,8 @@ class ChangeStatus extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        return [Attachment::fromPath(public_path('images/icon.png'))
+            ->as('icon.png') // Nama file dalam email
+            ->withMime('image/png')];
     }
 }

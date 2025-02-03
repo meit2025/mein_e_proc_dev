@@ -21,6 +21,7 @@ use Modules\BusinessTrip\Models\BusinessTripDetailDestinationTotal;
 use Modules\BusinessTrip\Models\PurposeType;
 use Modules\BusinessTrip\Models\PurposeTypeAllowance;
 use Modules\Approval\Services\CheckApproval;
+use Modules\PurchaseRequisition\Services\BtPOService;
 
 class BusinessTripDeclarationController extends Controller
 {
@@ -595,6 +596,8 @@ class BusinessTripDeclarationController extends Controller
             }
 
             $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP_DECLARATION');
+            $bt = new BtPOService();
+            $bt->processTextData($request->request_no);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

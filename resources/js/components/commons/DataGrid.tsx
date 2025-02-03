@@ -148,7 +148,14 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   );
 
   useEffect(() => {
-    fetchRows(paginationModel.page, paginationModel.pageSize, search, sortModel, filterModel, 0);
+    fetchRows(
+      paginationModel.page,
+      paginationModel.pageSize,
+      search,
+      sortModel,
+      filterModel,
+      value,
+    );
   }, [fetchRows, filterModel, paginationModel, search, sortModel]); // Tidak lagi menyebabkan looping tak terbatas
 
   const handleDelete = async (id: number) => {
