@@ -40,6 +40,6 @@ class SendNotification implements ShouldQueue
             'url_redirect' => $this->url,
             'is_read' => false,
         ]);
-        event(new NotifikasiUsers($create));
+        // event(new NotifikasiUsers($create));
     }
 }
