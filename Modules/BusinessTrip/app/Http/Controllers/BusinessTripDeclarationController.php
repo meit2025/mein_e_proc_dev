@@ -596,8 +596,8 @@ class BusinessTripDeclarationController extends Controller
             }
 
             $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP_DECLARATION');
-            $bt = new BtPOService();
-            $bt->processTextData($request->request_no);
+            // $bt = new BtPOService();
+            // $bt->processTextData($request->request_no);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
