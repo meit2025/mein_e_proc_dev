@@ -396,11 +396,19 @@ class ReimbuseController extends Controller
             unset($reimburseGroup->status);
         }
 
+        $gradeId = User::select('btg.id as grade_id')
+        ->join('business_trip_grade_users as btgu', 'btgu.user_id', '=', 'users.id')
+        ->join('business_trip_grades as btg', 'btg.id', '=', 'btgu.grade_id')
+        ->where('nip', $reimburseGroup->requester)
+        ->first()->grade_id ?? null;
+        
         $reimburseForms = Reimburse::where('group', $reimburseGroup->code)->with([
             'uomModel',
             'purchasingGroupModel',
             'taxOnSalesModel',
-            'reimburseType',
+            'reimburseType.gradeReimburseTypes' => function ($query) use ($gradeId) {
+                $query->where('grade_id', $gradeId);
+            },
             'reimburseAttachment'
         ])->get();
 
@@ -423,12 +431,20 @@ class ReimbuseController extends Controller
             $reimburseGroup->reimbursementStatus = $reimburseGroup->status;
             unset($reimburseGroup->status);
         }
+
+        $gradeId = User::select('btg.id as grade_id')
+        ->join('business_trip_grade_users as btgu', 'btgu.user_id', '=', 'users.id')
+        ->join('business_trip_grades as btg', 'btg.id', '=', 'btgu.grade_id')
+        ->where('nip', $reimburseGroup->requester)
+        ->first()->grade_id ?? null;
         
         $reimburseForms = Reimburse::where('group', $reimburseGroup->code)->with([
             'uomModel',
             'purchasingGroupModel',
             'taxOnSalesModel',
-            'reimburseType',
+            'reimburseType.gradeReimburseTypes' => function ($query) use ($gradeId) {
+                $query->where('grade_id', $gradeId);
+            },
             'reimburseAttachment'
         ])->get();
 
