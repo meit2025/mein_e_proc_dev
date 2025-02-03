@@ -5,12 +5,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{{asset('images/mitsubishi_icon.png')}}" rel="apple-touch-icon" sizes="180x180"/>
-    <link href="{{asset('images/mitsubishi_icon.png')}}" rel="icon" sizes="32x32" type="image/png"/>
-    <link href="{{asset('images/mitsubishi_icon.png')}}" rel="icon" sizes="32x32" type="image/png"/>
-    <link href="{{asset('images/mitsubishi_icon.png')}}" rel="icon" sizes="16x16" type="image/png"/>
-    <link href="{{asset('images/mitsubishi_icon.png')}}" rel="icon" sizes="16x16" type="image/png"/>
-    <link href="{{asset('images/mitsubishi_icon.png')}}" rel="shortcut icon"/>
+    <link href="{{asset('images/icon.png')}}" rel="apple-touch-icon" sizes="180x180"/>
+    <link href="{{asset('images/icon.png')}}" rel="icon" sizes="32x32" type="image/png"/>
+    <link href="{{asset('images/icon.png')}}" rel="icon" sizes="32x32" type="image/png"/>
+    <link href="{{asset('images/icon.png')}}" rel="icon" sizes="16x16" type="image/png"/>
+    <link href="{{asset('images/icon.png')}}" rel="icon" sizes="16x16" type="image/png"/>
+    <link href="{{asset('images/icon.png')}}" rel="shortcut icon"/>
     <title>Reimbursement Request</title>
     <style>
         * {
@@ -98,6 +98,7 @@
     <p><strong>Company:</strong> PT. Mitsubishi Electric Indonesia</p>
     <p><strong>Request For:</strong> {{$data['group']['user']['name']}}</p>
     <p><strong>Requested By:</strong> {{$data['group']['userCreateRequest']['name']}}</p>
+    <p><strong>Remark:</strong> {{$data['group']['remark']}}</p>
     <p><strong>Status: <span class='{{$data['group']['reimbursementStatus']['classname']}}'>{{$data['group']['reimbursementStatus']['name']}}</span></strong></p>
 
     @foreach ($data['forms'] as $index => $formItems)
