@@ -402,14 +402,16 @@ export const BussinessTripFormV1 = ({
   const [loading, setLoading] = React.useState(false);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-  console.log(form.formState.errors.attachment)
+    const totalAll = getTotalDes();
+    if (totalAll === 0) {
+        showToast('Please add at least one destination', 'error');
+        return;
+      }
 
-    console.log(values, ' valuesss');
     try {
       setLoading(true);
 
       const formData = new FormData();
-      const totalAll = getTotalDes();
       // Append group data
       formData.append('user_id', values.request_for ?? '');
       formData.append('value', totalAll.toString());
