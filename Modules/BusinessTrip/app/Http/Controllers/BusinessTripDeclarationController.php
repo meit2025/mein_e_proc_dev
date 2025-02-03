@@ -181,6 +181,7 @@ class BusinessTripDeclarationController extends Controller
         $data['total_percent'] = $findData->total_percent;
         $data['total_cash_advance'] = $findData->total_cash_advance;
         $data['reference_number'] = $findData->reference_number;
+        // dd($findData->parentBusinessTrip->businessTripDestination);
         $data['parent_business_trip_request_no'] = $findData->parentBusinessTrip->request_no;
         $data['purpose_type_name'] = $findData->purposeType->name;
         $data['cost_center'] = $findData->costCenter?->cost_center;
@@ -202,15 +203,16 @@ class BusinessTripDeclarationController extends Controller
         $parentDestination = [];
         $request_detail_allowance_from_parent = [];
         foreach ($findData->parentBusinessTrip->businessTripDestination as $parent) {
+            // dd($parent);
             $request_detail_allowance = [];
             foreach ($parent->detailDestinationDay as $detailDay) {
                 $request_detail_allowance[] = [
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => (int)($detailDay->price * $detailDay->total) / $detailDay->total,
+                    'value' => (int)$detailDay->price / $detailDay->total,
                     'total_day' => $detailDay->total,
-                    'total' => $detailDay->price * $detailDay->total,
+                    'total' => ($detailDay->price / $detailDay->total) * $detailDay->total,
                 ];
             }
 
@@ -281,11 +283,11 @@ class BusinessTripDeclarationController extends Controller
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => ((int)$detailDay->price * $detailDay->total) / $detailDay->total,
+                    'value' => $detailDay->price / $detailDay->total,
                     'total_day' => $detailDay->total,
-                    'total' => $detailDay->price * $detailDay->total,
+                    'total' => ((int)$detailDay->price * $detailDay->total) / $detailDay->total,
                 ];
-                $total_declaration += $detailDay->price * $detailDay->total;
+                $total_declaration += ((int)$detailDay->price * $detailDay->total) / $detailDay->total;
             }
 
 
@@ -601,7 +603,7 @@ class BusinessTripDeclarationController extends Controller
         }
     }
 
-    function printAPI($id)
+    public function printAPI($id)
     {
         $findData  = BusinessTrip::find($id);
         $data = [];
@@ -641,9 +643,9 @@ class BusinessTripDeclarationController extends Controller
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => ((int)$detailDay->price * $detailDay->total) / $detailDay->total,
+                    'value' => (int)$detailDay->price / $detailDay->total,
                     'total_day' => $detailDay->total,
-                    'total' => $detailDay->price * $detailDay->total,
+                    'total' => ($detailDay->price / $detailDay->total) * $detailDay->total,
                 ];
             }
 
@@ -709,9 +711,9 @@ class BusinessTripDeclarationController extends Controller
                     'item_name' => $detailDay->allowance->name,
                     'type' => $detailDay->allowance->type,
                     'currency_code' => $detailDay->allowance->currency_id,
-                    'value' => ((int)$detailDay->price * $detailDay->total)  / $detailDay->total,
+                    'value' => $detailDay->price / $detailDay->total,
                     'total_day' => $detailDay->total,
-                    'total' => $detailDay->price * $detailDay->total,
+                    'total' => ((int)$detailDay->price * $detailDay->total) / $detailDay->total,
                 ];
             }
 
