@@ -100,21 +100,21 @@ export default function Header() {
     }
   };
 
-  useEffect(() => {
-    const channel = `App.Models.User.${auth?.user?.id}`;
-    const handlePodcastPublished = async (event: any) => {
-      showToast(event.message.message);
-      await fetchNotifications();
-    };
-    window.Echo.private(channel).listen('NotifikasiUsers', handlePodcastPublished);
-    return () => {
-      window.Echo.leave(channel);
-    };
-  }, [auth?.user?.id]);
+  //   useEffect(() => {
+  //     const channel = `App.Models.User.${auth?.user?.id}`;
+  //     const handlePodcastPublished = async (event: any) => {
+  //       showToast(event.message.message);
+  //       await fetchNotifications();
+  //     };
+  //     window.Echo.private(channel).listen('NotifikasiUsers', handlePodcastPublished);
+  //     return () => {
+  //       window.Echo.leave(channel);
+  //     };
+  //   }, [auth?.user?.id]);
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
+  //   useEffect(() => {
+  //     fetchNotifications();
+  //   }, []);
 
   return (
     <>

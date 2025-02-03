@@ -4,10 +4,14 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Mail\Attachment;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Modules\BusinessTrip\Models\BusinessTrip;
+use Modules\PurchaseRequisition\Models\Purchase;
+use Modules\Reimbuse\Models\ReimburseGroup;
 
 class ChangeStatus extends Mailable
 {
@@ -17,15 +21,25 @@ class ChangeStatus extends Mailable
     public $user;
     public $type;
     public $status;
+    public $pr;
+    public $purchase;
+    public $reimburseGroup;
+    public $businessTrip;
+    public $url;
     /**
      * Create a new message instance.
      */
-    public function __construct($user, $type, $status)
+    public function __construct($user, $type, $status, $pr, $purchase = null, $reimburseGroup = null, $businessTrip = null, $url = null)
     {
         //
         $this->user = $user;
         $this->type = $type;
         $this->status = $status;
+        $this->pr = $pr;
+        $this->purchase = $purchase;
+        $this->reimburseGroup = $reimburseGroup;
+        $this->businessTrip = $businessTrip;
+        $this->url = $url;
     }
 
 
@@ -35,7 +49,7 @@ class ChangeStatus extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Change Status Document',
+            subject: $this->status . ' Request : Purchase Requisition ' . $this->pr,
         );
     }
 
@@ -47,9 +61,15 @@ class ChangeStatus extends Mailable
         return new Content(
             view: 'emails.change_status_notification',
             with: [
-                'user' => $this->user,  // Mengirim data user ke view
-                'type' => $this->type,  // Mengirim data type ke view
-                'status' => $this->status,  // Mengirim data type ke view
+                'user' => $this->user,
+                'type' => $this->type,
+                'status' => $this->status,
+                'pr' => $this->pr,
+                'purchase' => $this->purchase,
+                'reimburseGroup' => $this->reimburseGroup,
+                'businessTrip' => $this->businessTrip,
+                'url' => $this->url,
+                'icon_cid' => 'icon.png',
             ],
         );
     }
@@ -61,6 +81,8 @@ class ChangeStatus extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        return [Attachment::fromPath(public_path('images/icon.png'))
+            ->as('icon.png') // Nama file dalam email
+            ->withMime('image/png')];
     }
 }
