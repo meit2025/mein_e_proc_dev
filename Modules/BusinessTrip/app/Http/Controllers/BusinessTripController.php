@@ -1011,4 +1011,15 @@ class BusinessTripController extends Controller
             return $this->errorResponse($th->getMessage());
         }
     }
+
+    function getUserBusinessTrip(Request $request) {
+        $data = User::select('name as label','id as value');
+        if (Auth::user()->is_admin == 0) $data = $data->where('id', Auth::user()->id);
+        if ($request->search) {
+            $data = $data->where('name', 'ilike', '%' . $request->search . '%')->orWhere('nip', 'ilike', '%' . $request->search . '%');
+        }
+
+        $data = $data->limit(50)->get();
+        return $this->successResponse($data);
+    }
 }

@@ -299,7 +299,7 @@ export const BussinessTripFormV1 = ({
     try {
       const response = await axiosInstance.get(url);
       const businessTripData = response.data.data;
-      console.log(businessTripData, 'businessTripData');
+    //   console.log(businessTripData, 'businessTripData');
       setIsCashAdvance(businessTripData.cash_advance == 1 ? true : false);
       form.setValue('remark', businessTripData.remarks || '');
       form.setValue('total_destination', businessTripData.total_destination || 1);
@@ -961,21 +961,6 @@ export function BussinessDestinationForm({
         form={form}
         setTotalAllowance={setTotalAllowance}
       />
-
-      {/* <table className='w-full text-sm mt-10'>
-        <tr>
-          <td className='w-[20%]'>Ref Number</td>
-          <td className='w-[80%] flex'>{allowance}</td>
-        </tr>
-        <tr>
-          <td className='w-[20%]'>Total Percent Cash Advance</td>
-          <td className='w-[80%] flex'>{allowance}</td>
-        </tr>
-        <tr>
-          <td className='w-[20%]'>Total Cash Advance</td>
-          <td className='w-[80%] flex'>{allowance}</td>
-        </tr>
-      </table> */}
       <table className='w-full text-sm mt-10'>
         <tr>
           <td className='w-[50%]'>Cash Advance</td>
@@ -1275,11 +1260,16 @@ export function DetailAllowance({
 
   const calculateTotalOther = () => {
     return (watchedAllowances || []).reduce((total: number, allowance: any) => {
-      const allowanceValue = Number(allowance?.value || 0);
+      const allowanceValue = Number(allowance?.value) || 0;
+
+      // Pastikan allowanceValue adalah angka yang valid
+      if (isNaN(allowanceValue)) {
+        return total;
+      }
+
       return total + allowanceValue;
     }, 0);
   };
-
   const addOtherAllowance = () => {
     append({ value: 0 }); // Tambahkan field baru ke array
   };
@@ -1325,17 +1315,19 @@ export function DetailAllowance({
                         min='0'
                         value={field.value ?? ''} // Gunakan string kosong jika nilai null/undefined
                         onChange={(e) => {
-                          const value = e.target.value;
+                            const value = e.target.value.trim(); // Hilangkan spasi ekstra
 
-                          // Izinkan input kosong
-                          if (value === '') {
-                            field.onChange(undefined);
-                            return;
-                          }
-
-                          // Pastikan nilai tidak negatif
-                          const parsedValue = Math.max(0, Number(value));
-                          field.onChange(parsedValue);
+                            // Izinkan input kosong
+                            if (value === '') {
+                              field.onChange(undefined);
+                              return;
+                            }
+                            console.log(value,'value')
+                            // Pastikan hanya angka yang diterima
+                            const parsedValue = Number(value);
+                            if (!isNaN(parsedValue) && parsedValue >= 0) {
+                              field.onChange(parsedValue);
+                            }
                         }}
                       />
                     </FormControl>
@@ -1424,7 +1416,7 @@ export function AllowanceRowInput({
 
       case 'fixed value':
         // Fixed nominal, you can set a predefined fixed value
-        const fixedValue = allowance.subtotal; // Example fixed value, change as needed
+        const fixedValue = allowance.default_price; // Example fixed value, change as needed
         if (requestPrice !== fixedValue) {
           alert(`Please enter the fixed value of IDR ${fixedValue}`);
           isValid = false;
@@ -1433,7 +1425,7 @@ export function AllowanceRowInput({
 
       case 'up to max value':
         // Set a maximum value limit
-        const maxValue = allowance.subtotal; // Example max value, change as needed
+        const maxValue = allowance.default_price; // Example max value, change as needed
         if (requestPrice > maxValue) {
           alert(`The value should not exceed IDR ${maxValue}`);
           isValid = false;
@@ -1455,7 +1447,7 @@ export function AllowanceRowInput({
     const details = form.getValues(
         `destinations[${destinationIndex}].allowances[${allowanceIndex}].detail`
       );
-      console.log(details,'details')
+    //   console.log(details,'details')
       const subtotal = details.reduce((total: number, detail: any) => {
         return total + (parseFloat(detail.request_price) || 0);
       }, 0);
@@ -1579,6 +1571,7 @@ export function ResultTotalItem({
     setTotalAllowance: any;
   }) {
     const [grandTotal, setGrandTotal] = React.useState(0);
+    const other = form.watch(`destinations.${destinationIndex}.other`);
     const resultItem = form.watch(`destinations[${destinationIndex}].allowances`);
     // const totalItem = form.watch(`destinations[${destinationIndex}].total_allowance`);
     // const total = form.watch(`destinations[${destinationIndex}].allowances[${allowanceIndex}].detail`)
@@ -1589,8 +1582,12 @@ export function ResultTotalItem({
             const itemTotal = calculateTotal(allowance, details);
             return totalSum + itemTotal;
         }, 0);
-
-        setGrandTotal(newTotal);
+        const totalSubtotal = (other || []).reduce((total: number, allowance: any) => {
+            const allowanceValue = Number(allowance?.value) || 0; // Pastikan nilai adalah angka atau default ke 0
+            return total + allowanceValue;
+        }, 0);
+        console.log(other,'other')
+        setGrandTotal(newTotal + totalSubtotal);
     //       // Update nilai total allowance di form
     //       form.setValue(`destinations[${destinationIndex}].total_allowance`, total);
 
@@ -1627,6 +1624,19 @@ export function ResultTotalItem({
                 </td>
               </tr>
             ))}
+            {other.length > 0 && (
+                <>
+                    {other.map((allowance: any, index: number) => (
+                        <tr key={index}>
+                            <td>Other Allowance</td>
+                            <td className='flex justify-between pr-4'>
+                                <span>IDR</span>
+                                <span>{allowance?.value ? formatRupiah(allowance.value) : '0'}</span>
+                            </td>
+                        </tr>
+                    ))}
+                </>
+            )}
           </tbody>
           <tfoot className='mt-4'>
             <tr>
