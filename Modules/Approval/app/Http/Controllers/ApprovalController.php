@@ -17,6 +17,7 @@ use Modules\Approval\Models\ApprovalRouteUsers;
 use Modules\Approval\Services\CheckApproval;
 use Modules\BusinessTrip\Models\BusinessTrip;
 use Modules\PurchaseRequisition\Models\Purchase;
+use Modules\PurchaseRequisition\Models\PurchaseRequisition;
 use Modules\Reimbuse\Models\ReimburseGroup;
 
 class ApprovalController extends Controller
@@ -275,12 +276,14 @@ class ApprovalController extends Controller
 
                             $findUser = User::find($model->user_id);
                             SendNotification::dispatch($findUser,  $message, $baseurl);
+                            $purchase = $modelMap[$request->type]::with('vendorsWinner.units', 'vendorsWinner.masterBusinesPartnerss', 'createdBy', 'user')->find($request->id);
+                            // find pr number
 
-                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Purchase Requisition', $message));
+                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Purchase Requisition', $request->status, '', $purchase, null, null));
 
                             if ($model->user_id !== $model->createdBy) {
                                 $findcreatedBy = User::find($model->createdBy);
-                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Purchase Requisition', $message));
+                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Purchase Requisition', $request->status, '', null, null, null));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
                             }
                             break;
@@ -288,12 +291,12 @@ class ApprovalController extends Controller
                             $baseurl = env('APP_URL') .  '/reimburse/detail/' .  $request->id;
                             $findUser = User::where('nip', $model->requester)->first();
                             SendNotification::dispatch($findUser,  $message, $baseurl);;
-                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimburse', $message));
+                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimburse', $message, '', null, null, null));
 
 
                             if ($findUser->id !== $model->request_created_by) {
                                 $findcreatedBy = User::find($model->request_created_by);
-                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Reimburse', $message));
+                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Reimburse',  $message, '', null, null, null));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
                             }
                             break;
@@ -303,11 +306,11 @@ class ApprovalController extends Controller
                             $findUser = User::where('id', $model->request_for)->first();
                             SendNotification::dispatch($findUser,  $message, $baseurl);
 
-                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip', $message));
+                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip',  $message, '', null, null, null));
 
                             if ($findUser->id !== $model->created_by) {
                                 $findcreatedBy = User::find($model->created_by);
-                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip', $message));
+                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip',  $message, '', null, null, null));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
                             }
                             break;
