@@ -484,8 +484,8 @@ class BusinessTripController extends Controller
                 }
             }
             $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP');
-            $bt = new BtService();
-            $bt->processTextData($businessTrip->id);
+            // $bt = new BtService();
+            // $bt->processTextData($businessTrip->id);
             DB::commit();
 
 

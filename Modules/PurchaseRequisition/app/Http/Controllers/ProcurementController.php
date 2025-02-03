@@ -148,8 +148,8 @@ class ProcurementController extends Controller
             }
 
             $this->approvalServices->PR($request, true, $purchase->id);
-            $procurement = new ProcurementService();
-            $procurement->processTextData($purchase->id);
+            // $procurement = new ProcurementService();
+            // $procurement->processTextData($purchase->id);
 
             DB::commit();
             $this->logToDatabase(
