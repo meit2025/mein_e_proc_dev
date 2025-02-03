@@ -4,6 +4,7 @@ namespace Modules\PurchaseRequisition\Services;
 
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Modules\PurchaseRequisition\Models\CashAdvance;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
@@ -130,6 +131,7 @@ class TextPrServices
             // Generate Purchase Requisition File
             $filename = 'INB_PRCRT_' . $nopr . '_' . $timestamp . '.txt';
             $fileContent = $this->convertArrayToFileContent($array);
+            Log::channel('send_txt')->info('Send txt name ' . $filename . ' storage upload ' . env('STORAGE_UPLOAD', 'local'));
             Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
             Storage::disk('local')->put($filename, $fileContent);
 
@@ -138,6 +140,8 @@ class TextPrServices
             if (!empty($arrayCash)) {
                 $filenameAc = 'INB_DPCRT_' . $nopr . '_' . $timestamp . '.txt';
                 $fileContentAc = $this->convertArrayToFileContent($arrayCash);
+
+                Log::channel('send_txt')->info('Send txt name ' . $filenameAc . ' storage upload ' . env('STORAGE_UPLOAD', 'local'));
                 Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filenameAc, $fileContentAc);
                 Storage::disk('local')->put($filenameAc, $fileContentAc);
             }
