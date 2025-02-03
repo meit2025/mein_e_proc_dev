@@ -48,6 +48,7 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
           onClose={() => setOpenForm(false)}
           open={openForm}
           onOpenChange={openFormHandler}
+          className='md:max-w-[879px]'
         >
           <BussinessTripFormV1 type={businessTripForm.type} id={businessTripForm.id} />
         </CustomDialog>

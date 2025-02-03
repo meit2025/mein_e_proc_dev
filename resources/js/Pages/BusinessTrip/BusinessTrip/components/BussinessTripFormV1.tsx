@@ -47,6 +47,7 @@ import {
   EDIT_API_BUSINESS_TRIP,
   GET_DATE_BUSINESS_TRIP_BY_USER,
   GET_DETAIL_BUSINESS_TRIP,
+  GET_LIST_USER_BUSINESS_TRIP,
 } from '@/endpoint/business-trip/api';
 import {
   GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE,
@@ -194,7 +195,7 @@ export const BussinessTripFormV1 = ({
               }),
             ),
           }),
-        ),
+        ).min(1, "Allowances tidak boleh kosong"),
       }),
     ),
   })
@@ -679,7 +680,7 @@ export const BussinessTripFormV1 = ({
     form.setValue('total_cash_advance', formatRupiah(total.toFixed(0), false)); // Save the total in total_cash_advance field
   }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance cha
 
-  const { dataDropdown: dataEmployee, getDropdown: getEmployee } = useDropdownOptions();
+  const { dataDropdown: dataEmployee, getDropdown: getEmployee } = useDropdownOptions(GET_LIST_USER_BUSINESS_TRIP);
   const { dataDropdown: dataPurposeType, getDropdown: getPurposeType } = useDropdownOptions();
   const { dataDropdown: dataCostCenter, getDropdown: getCostCenter } = useDropdownOptions();
   const { dataDropdown: dataTax, getDropdown: getTax } = useDropdownOptions();
