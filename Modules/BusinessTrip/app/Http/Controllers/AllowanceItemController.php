@@ -80,7 +80,7 @@ class AllowanceItemController extends Controller
                 'purpose_type' => join(' , ', $purposeTypeRelations),
                 'grade_option' => $map->grade_option,
                 'plafon' => ($map->grade_option == 'all') ? $map->grade_all_price : join(" , ", $gradeRelations),
-                'material_number' => $map->material_number,
+                'material_number' => ltrim($map->material_number, '0'),
                 'material_group' => $map->material_group,
             ];
         });

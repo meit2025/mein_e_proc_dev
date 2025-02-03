@@ -110,8 +110,8 @@ class ReimbursementService
             ];
             $this->approvalServices->Payment((object)$parseForApproval, true, $group->id, 'REIM');
 
-            $reim = new ReimburseServices();
-            $reim->processTextData($group->id);
+            // $reim = new ReimburseServices();
+            // $reim->processTextData($group->id);
 
             DB::commit();
             return "Reimbursements and progress stored successfully.";

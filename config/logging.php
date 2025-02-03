@@ -104,6 +104,11 @@ return [
             'path' => storage_path('logs/notification_email ' . date('Y-m-d') . '.log'),
             'days' => 14,
         ],
+        'send_txt' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/send_txt ' . date('Y-m-d') . '.log'),
+            'days' => 14,
+        ],
         'papertrail' => [
             'driver' => 'monolog',
             'level' => env('LOG_LEVEL', 'debug'),
