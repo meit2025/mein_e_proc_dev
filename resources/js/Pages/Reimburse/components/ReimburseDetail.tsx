@@ -53,7 +53,11 @@ const ReimburseDetail = () => {
         </p>
         <p className='text-sm'>
           <strong>Requested By:</strong> {data?.user_create_request?.name}
-          </p>
+        </p>
+        <p className='text-sm'>
+          <strong>Remark:</strong> {data?.remark}
+        </p>
+        <br />
         <p className='text-sm flex items-center gap-2'>
           <strong>Status:</strong>{' '}
           <CustomStatus
@@ -123,7 +127,7 @@ const ReimburseDetail = () => {
                     <td>
                       <strong>Balance</strong>
                     </td>
-                    <td>{reimburse?.currency} {formatRupiah(reimburse?.reimburse_type?.grade_option == 'all' ? reimburse?.reimburse_type?.grade_all_price : reimburse?.reimburse_type?.gradeReimburseTypes?.plafon ?? 0, false)}</td>
+                    <td>{reimburse?.currency} {formatRupiah(reimburse?.reimburse_type?.grade_option == 'all' ? reimburse?.reimburse_type?.grade_all_price : reimburse?.reimburse_type?.grade_reimburse_types?.plafon ?? 0, false)}</td>
                   </tr>
                   <tr>
                     <td>
@@ -201,6 +205,12 @@ const ReimburseDetail = () => {
                         </>
                       ))}
                     </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Remark</strong>
+                    </td>
+                    <td>{reimburse?.short_text}</td>
                   </tr>
                 </table>
               </div>

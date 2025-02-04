@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/shacdn/button';
 import { Button as ButtonMui } from '@mui/material';
 import { Inertia } from '@inertiajs/inertia';
+import moment from 'moment';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
@@ -431,6 +432,12 @@ export const ReimburseForm: React.FC<Props> = ({
           );
           return;
         }
+        // update format date
+        values.forms = values.forms.map(form => ({
+          ...form,
+          claim_date: moment(form.claim_date).format('YYYY-MM-DD'),
+          item_delivery_data: moment(form.item_delivery_data).format('YYYY-MM-DD'),
+        }));
       }
     }
     const totalNominal = values.forms.reduce((acc, item) => acc + parseInt(item.balance) || 0, 0);
@@ -1024,7 +1031,13 @@ export const ReimburseForm: React.FC<Props> = ({
                                             ? field.value
                                             : new Date(field.value)
                                         }
-                                        onDateChange={(date) => field.onChange(date)}
+                                        onDateChange={(date) => {
+                                          field.onChange(date)
+                                          updateForm(index, {
+                                            ...formValue,
+                                            item_delivery_data: date,
+                                          });
+                                        }}
                                       />
                                     </FormControl>
                                     <FormMessage />
@@ -1050,7 +1063,13 @@ export const ReimburseForm: React.FC<Props> = ({
                                             ? field.value
                                             : new Date(field.value)
                                         }
-                                        onDateChange={(date) => field.onChange(date)}
+                                        onDateChange={(date) => {
+                                          field.onChange(date)
+                                          updateForm(index, {
+                                            ...formValue,
+                                            claim_date: date,
+                                          });
+                                        }}
                                       />
                                     </FormControl>
                                     <FormMessage />

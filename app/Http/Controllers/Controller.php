@@ -407,24 +407,24 @@ abstract class Controller
         // Switch case to handle different types
         switch ($type) {
             case 'REIM':
-                // $reim->processTextData($id);
+                $reim->processTextData($id);
                 $txtpr->processTextData($id, 'REIM');
 
                 break;
 
             case 'BT':
-                // $bt->processTextData($id);
+                $bt->processTextData($id);
                 $txtpr->processTextData($id, 'BTRE');
                 break;
 
             case 'BTPO':
-                // $btpo->processTextData($id);
+                $btpo->processTextData($id);
                 $txtpo->processTextData($id, 'BTRDE');
 
                 break;
 
             case 'PR':
-                // $procurement->processTextData($id);
+                $procurement->processTextData($id);
                 $txtpr->processTextData($id, 'VEN');
                 break;
 
