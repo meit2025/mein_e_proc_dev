@@ -55,6 +55,7 @@ class NotifikasiController extends Controller
             $mail->Username = null; // Ganti dengan username SMTP Anda
             $mail->Password = null; // Ganti dengan password SMTP Anda
             $mail->Port = 25; // Port SMTP
+            $mail->SMTPSecure = '';
 
             // Pengaturan email
             $mail->setFrom('mein-it-support_dl@asia.meap.com', 'IT Support'); // Alamat pengirim
