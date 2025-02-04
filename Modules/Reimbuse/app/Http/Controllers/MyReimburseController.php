@@ -101,8 +101,10 @@ class MyReimburseController extends Controller
                 }
             });
             
+            $orderBy = $request->sort_by == 'id' ? 'master_type_reimburses.name' : $request->sort_by;
+            $sortBy = $request->sort_by == 'id' ? 'asc' : $request->sort_direction;
             $query->groupBy('master_type_reimburses.id');
-            $query->orderBy('master_type_reimburses.name', 'asc');
+            $query->orderBy($orderBy, $sortBy);
             $perPage = $request->get('per_page', 10);
             $queryResult = $query->paginate($perPage);
             
@@ -194,8 +196,8 @@ class MyReimburseController extends Controller
             
                 $return = [
                     'id'                            => $map->id,
-                    'reimburseType'                 => $map->name .' ('.$map->code.')',
-                    'intervalClaim'                 => $map->interval_claim_period ?  $map->interval_claim_period / 365 . ' Year' : '-',
+                    'name'                          => $map->name .' ('.$map->code.')',
+                    'interval_claim_period'         => $map->interval_claim_period ?  $map->interval_claim_period / 365 . ' Year' : '-',
                     'currency'                      => 'IDR',
                     'maximumBalance'                => $maximumBalance,
                     'remainingBalance'              => $remainingBalance,
@@ -205,7 +207,7 @@ class MyReimburseController extends Controller
                     'totalUnpaid'                   => $unpaidBalance
                 ];
             
-                if ($isEmployee == false) $return['relation'] = ucwords($map->family_status);
+                if ($isEmployee == false) $return['family_status'] = ucwords($map->family_status);
             
                 return $return;
             });

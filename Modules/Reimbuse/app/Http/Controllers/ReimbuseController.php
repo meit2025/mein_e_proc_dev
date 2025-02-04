@@ -96,17 +96,18 @@ class ReimbuseController extends Controller
             })
             ->where('u.nip', $nip)
             ->whereNull('master_type_reimburses.family_status')
-            ->where(function($query) {
-                $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
-            });
+            // ->where(function($query) {
+            //     $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
+            // })
+            ;
         
         if (count($getFamilieStatus) == 0) {
             $data = 
                 $data->orWhere(function($query) use ($getFamilieStatus) {
                     $query->where('master_type_reimburses.grade_option', 'all')
-                    ->where(function($query) {
-                        $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
-                    })
+                    // ->where(function($query) {
+                    //     $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
+                    // })
                     ->where(function($query) {
                         $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
                     })
@@ -116,18 +117,18 @@ class ReimbuseController extends Controller
             $data = 
                 $data->orWhere(function($query) use ($nip, $getFamilieStatus) {
                     $query->where('u.nip', $nip)
-                    ->where(function($query) {
-                        $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
-                    })
+                    // ->where(function($query) {
+                    //     $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
+                    // })
                     ->where(function($query) {
                         $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
                     })
                     ->whereIn('master_type_reimburses.family_status', $getFamilieStatus);
                 })->orWhere(function($query) use ($getFamilieStatus) {
                     $query->where('master_type_reimburses.grade_option', 'all')
-                    ->where(function($query) {
-                        $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
-                    })
+                    // ->where(function($query) {
+                    //     $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
+                    // })
                     ->where(function($query) {
                         $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
                     })
@@ -137,7 +138,7 @@ class ReimbuseController extends Controller
                     });
                 });
         }
-        if ($hasValue !== null) $data = $data->orWhere('checkInterval.codes', $hasValue);
+        // if ($hasValue !== null) $data = $data->orWhere('checkInterval.codes', $hasValue);
         if ($request->search) $data = $data->where('master_type_reimburses.name', 'ilike', '%' . $request->search . '%')
                                     ->orWhere('master_type_reimburses.code', 'ilike', '%' . $request->search . '%')
                                     ->orWhere('master_type_reimburses.family_status', 'ilike', '%' . $request->search . '%');
@@ -396,11 +397,19 @@ class ReimbuseController extends Controller
             unset($reimburseGroup->status);
         }
 
+        $gradeId = User::select('btg.id as grade_id')
+        ->join('business_trip_grade_users as btgu', 'btgu.user_id', '=', 'users.id')
+        ->join('business_trip_grades as btg', 'btg.id', '=', 'btgu.grade_id')
+        ->where('nip', $reimburseGroup->requester)
+        ->first()->grade_id ?? null;
+        
         $reimburseForms = Reimburse::where('group', $reimburseGroup->code)->with([
             'uomModel',
             'purchasingGroupModel',
             'taxOnSalesModel',
-            'reimburseType',
+            'reimburseType.gradeReimburseTypes' => function ($query) use ($gradeId) {
+                $query->where('grade_id', $gradeId);
+            },
             'reimburseAttachment'
         ])->get();
 
@@ -423,12 +432,20 @@ class ReimbuseController extends Controller
             $reimburseGroup->reimbursementStatus = $reimburseGroup->status;
             unset($reimburseGroup->status);
         }
+
+        $gradeId = User::select('btg.id as grade_id')
+        ->join('business_trip_grade_users as btgu', 'btgu.user_id', '=', 'users.id')
+        ->join('business_trip_grades as btg', 'btg.id', '=', 'btgu.grade_id')
+        ->where('nip', $reimburseGroup->requester)
+        ->first()->grade_id ?? null;
         
         $reimburseForms = Reimburse::where('group', $reimburseGroup->code)->with([
             'uomModel',
             'purchasingGroupModel',
             'taxOnSalesModel',
-            'reimburseType',
+            'reimburseType.gradeReimburseTypes' => function ($query) use ($gradeId) {
+                $query->where('grade_id', $gradeId);
+            },
             'reimburseAttachment'
         ])->get();
 
