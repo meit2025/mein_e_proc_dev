@@ -485,6 +485,7 @@ Route::group(['middleware' => 'auth'], function () {
                 ->middleware(PermissionMiddleware::class . ':master pr material group view');
             Route::delete('/delete/{id}', [MaterialGroupController::class, 'destroy'])->name('master.material-group.destroy')
                 ->middleware(PermissionMiddleware::class . ':master pr material group delete');
+            Route::get('/dropdown-list', [MaterialGroupController::class, 'dropdownList'])->name('master.material-group.dropdownList');
         });
 
         // UOM API

@@ -4,6 +4,7 @@ namespace Modules\PurchaseRequisition\Services;
 
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Modules\PurchaseRequisition\Models\CashAdvance;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
@@ -123,27 +124,36 @@ class TextPrServices
 
     private function generateFiles($array, $arrayCash, $nopr)
     {
-        $timestamp = date('Ymd_His');
+        try {
+            //code...
+            $timestamp = date('Ymd_His');
 
-        // Generate Purchase Requisition File
-        $filename = 'INB_PRCRT_' . $nopr . '_' . $timestamp . '.txt';
-        $fileContent = $this->convertArrayToFileContent($array);
-        Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
-        Storage::disk('local')->put($filename, $fileContent);
+            // Generate Purchase Requisition File
+            $filename = 'INB_PRCRT_' . $nopr . '_' . $timestamp . '.txt';
+            $fileContent = $this->convertArrayToFileContent($array);
+            Log::channel('send_txt')->info('Send txt name ' . $filename . ' storage upload ' . env('STORAGE_UPLOAD', 'local'));
+            Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filename, $fileContent);
+            Storage::disk('local')->put($filename, $fileContent);
 
-        $filenameAc = '';
-        // Generate Cash Advance File (if applicable)
-        if (!empty($arrayCash)) {
-            $filenameAc = 'INB_DPCRT_' . $nopr . '_' . $timestamp . '.txt';
-            $fileContentAc = $this->convertArrayToFileContent($arrayCash);
-            Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filenameAc, $fileContentAc);
-            Storage::disk('local')->put($filenameAc, $fileContentAc);
+            $filenameAc = '';
+            // Generate Cash Advance File (if applicable)
+            if (!empty($arrayCash)) {
+                $filenameAc = 'INB_DPCRT_' . $nopr . '_' . $timestamp . '.txt';
+                $fileContentAc = $this->convertArrayToFileContent($arrayCash);
+
+                Log::channel('send_txt')->info('Send txt name ' . $filenameAc . ' storage upload ' . env('STORAGE_UPLOAD', 'local'));
+                Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($filenameAc, $fileContentAc);
+                Storage::disk('local')->put($filenameAc, $fileContentAc);
+            }
+
+            return [
+                'filename' => $filename,
+                'filenameAc' => $filenameAc,
+            ];
+        } catch (\Throwable $th) {
+            //throw $th;
+            dd($th);
         }
-
-        return [
-            'filename' => $filename,
-            'filenameAc' => $filenameAc,
-        ];
     }
 
     private function convertArrayToFileContent($array)

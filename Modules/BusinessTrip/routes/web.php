@@ -103,6 +103,7 @@ Route::group(['prefix' => 'api/'], function () {
             Route::get('/clone/{id}', [BusinessTripController::class, 'clone'])->name('business-trip.clone');
             Route::get('/get-date-byuser/{id}', [BusinessTripController::class, 'getDateByUser'])->name('business-trip.get-date-byuser');
             Route::post('/clone-store/{id}', [BusinessTripController::class, 'cloneStore'])->name('business-trip.clonse-store');
+            Route::get('/get-user-business-trip', [BusinessTripController::class, 'getUserBusinessTrip'])->name('business-trip.get-user-business-trip');
         });
 
         Route::group(['prefix' => 'business-trip-declaration'], function () {

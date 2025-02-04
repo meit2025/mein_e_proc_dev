@@ -92,28 +92,10 @@ class MasterMaterialController extends Controller
 
     public function getListMasterMaterialNumberAPI(Request $request)
     {
-
-        $data = MasterMaterial::query();
-
-
-
-
-        // $data = $data->where('material_number', 'like', '%' . 'm' . '%');
-        if ($request->filter && ($request->search && $request->search != '')) {
-            foreach ($request->filter as $f) {
-                $data = $data->where($f, 'ilike', '%' . $request->search . '%');
-            }
-        } else {
-            return $this->successResponse([]);
-        }
-
-
-
-
-
-        $data =  $data->limit(100)->get();
-
-
+        $data = MasterMaterial::selectRaw("material_description || ' - ' || \"material_number\" as label, id as value");
+        if ($request->key) $data = $data->where($request->key, $request->parameter);
+        if ($request->search) $data = $data->where('material_description', 'ilike', '%' . $request->search . '%')->orWhere('material_number', 'ilike', '%' . $request->search . '%');
+        $data = $data->limit(50)->get();
         return $this->successResponse($data);
     }
 

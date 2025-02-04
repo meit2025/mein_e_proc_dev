@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/ta
 import { WorkflowComponent } from '@/components/commons/WorkflowComponent';
 import LayoutApproval from '@/components/approval/LayoutApproval';
 import { CustomStatus } from '@/components/commons/CustomStatus';
+import { formatDateIndonesian } from '@/lib/indonesianFormatDate';
 
 const ReimburseDetail = () => {
   const pathname = window.location.pathname;
@@ -52,7 +53,11 @@ const ReimburseDetail = () => {
         </p>
         <p className='text-sm'>
           <strong>Requested By:</strong> {data?.user_create_request?.name}
-          </p>
+        </p>
+        <p className='text-sm'>
+          <strong>Remark:</strong> {data?.remark}
+        </p>
+        <br />
         <p className='text-sm flex items-center gap-2'>
           <strong>Status:</strong>{' '}
           <CustomStatus
@@ -78,7 +83,19 @@ const ReimburseDetail = () => {
                 <table className='info-table text-sm mt-4'>
                   <tr>
                     <td>
-                      <strong>Type</strong>
+                      <strong>Reimburse Type</strong>
+                    </td>
+                    <td>{reimburse?.reimburse_type?.name}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Reimbursement Balance Date</strong>
+                    </td>
+                    <td>{formatDateIndonesian(reimburse?.created_at)}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Reimbursement For</strong>
                     </td>
                     <td>{reimburse?.type}</td>
                   </tr>
@@ -100,15 +117,47 @@ const ReimburseDetail = () => {
                   }
                   <tr>
                     <td>
-                      <strong>Reimburse Type</strong>
+                      <strong>Cost Center</strong>
                     </td>
-                    <td>{reimburse?.reimburse_type?.name}</td>
+                    <td>
+                      {data?.cost_center?.desc}
+                    </td>
                   </tr>
                   <tr>
                     <td>
-                      <strong>Purchasing Group</strong>
+                      <strong>Balance</strong>
                     </td>
-                    <td>{reimburse?.purchasing_group_model?.purchasing_group}</td>
+                    <td>{reimburse?.currency} {formatRupiah(reimburse?.reimburse_type?.grade_option == 'all' ? reimburse?.reimburse_type?.grade_all_price : reimburse?.reimburse_type?.grade_reimburse_types?.plafon ?? 0, false)}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Receipt Date</strong>
+                    </td>
+                    <td>{formatDateIndonesian(reimburse.item_delivery_data)}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Request Date</strong>
+                    </td>
+                    <td>{formatDateIndonesian(reimburse.created_at)}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Claim Date</strong>
+                    </td>
+                    <td>{formatDateIndonesian(reimburse.claim_date)}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Currency</strong>
+                    </td>
+                    <td>{reimburse?.currency}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Reimburse Cost</strong>
+                    </td>
+                    <td>{reimburse?.currency} {formatRupiah(reimburse?.balance || 0, false)}</td>
                   </tr>
                   <tr>
                     <td>
@@ -120,11 +169,9 @@ const ReimburseDetail = () => {
                   </tr>
                   <tr>
                     <td>
-                      <strong>Cost Center</strong>
+                      <strong>Purchasing Group</strong>
                     </td>
-                    <td>
-                      {data?.cost_center?.desc}
-                    </td>
+                    <td>{reimburse?.purchasing_group_model?.purchasing_group}</td>
                   </tr>
                   <tr>
                     <td>
@@ -137,27 +184,6 @@ const ReimburseDetail = () => {
                       <strong>Uom</strong>
                     </td>
                     <td>{reimburse?.uom_model?.unit_of_measurement_text}</td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <strong>Claim Date</strong>
-                    </td>
-                    <td>{reimburse.claim_date}</td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <strong>Currency</strong>
-                    </td>
-                    <td>{reimburse?.currency}</td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <strong>Reimburse Cost</strong>
-                    </td>
-                    <td>{reimburse?.currency} {formatRupiah(reimburse?.balance || 0).replace('Rp', '')}</td>
                   </tr>
                   <tr>
                     <td>
@@ -179,6 +205,12 @@ const ReimburseDetail = () => {
                         </>
                       ))}
                     </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Remark</strong>
+                    </td>
+                    <td>{reimburse?.short_text}</td>
                   </tr>
                 </table>
               </div>

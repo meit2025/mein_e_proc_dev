@@ -80,4 +80,12 @@ class MaterialGroupController extends Controller
         $data = MaterialGroup::find($id)->delete();
         return $this->successResponse($data);
     }
+
+    public function dropdownList(Request $request)
+    {
+        $data = MaterialGroup::selectRaw("material_group_desc || ' - ' || \"material_group\" as label, id as value");
+        if ($request->search) $data = $data->where('material_group_desc', 'ilike', '%' . $request->search . '%')->orWhere('material_group', 'ilike', '%' . $request->search . '%');
+        $data = $data->limit(200)->get();
+        return $this->successResponse($data);
+    }
 }

@@ -47,6 +47,7 @@ import {
   EDIT_API_BUSINESS_TRIP,
   GET_DATE_BUSINESS_TRIP_BY_USER,
   GET_DETAIL_BUSINESS_TRIP,
+  GET_LIST_USER_BUSINESS_TRIP,
 } from '@/endpoint/business-trip/api';
 import {
   GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE,
@@ -194,7 +195,7 @@ export const BussinessTripFormV1 = ({
               }),
             ),
           }),
-        ),
+        ).min(1, "Allowances tidak boleh kosong"),
       }),
     ),
   })
@@ -401,14 +402,16 @@ export const BussinessTripFormV1 = ({
   const [loading, setLoading] = React.useState(false);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-  console.log(form.formState.errors.attachment)
+    const totalAll = getTotalDes();
+    if (totalAll === 0) {
+        showToast('Please add at least one destination', 'error');
+        return;
+      }
 
-    console.log(values, ' valuesss');
     try {
       setLoading(true);
 
       const formData = new FormData();
-      const totalAll = getTotalDes();
       // Append group data
       formData.append('user_id', values.request_for ?? '');
       formData.append('value', totalAll.toString());
@@ -679,7 +682,7 @@ export const BussinessTripFormV1 = ({
     form.setValue('total_cash_advance', formatRupiah(total.toFixed(0), false)); // Save the total in total_cash_advance field
   }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance cha
 
-  const { dataDropdown: dataEmployee, getDropdown: getEmployee } = useDropdownOptions();
+  const { dataDropdown: dataEmployee, getDropdown: getEmployee } = useDropdownOptions(GET_LIST_USER_BUSINESS_TRIP);
   const { dataDropdown: dataPurposeType, getDropdown: getPurposeType } = useDropdownOptions();
   const { dataDropdown: dataCostCenter, getDropdown: getCostCenter } = useDropdownOptions();
   const { dataDropdown: dataTax, getDropdown: getTax } = useDropdownOptions();

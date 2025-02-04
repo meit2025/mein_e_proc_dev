@@ -18,6 +18,8 @@ use Modules\PurchaseRequisition\Models\Purchase;
 use Modules\PurchaseRequisition\Models\Vendor;
 use Modules\PurchaseRequisition\Models\VendorUnit;
 use Modules\Approval\Services\CheckApproval;
+use Modules\PurchaseRequisition\Services\ProcurementService;
+use Modules\PurchaseRequisition\Services\TextPrServices;
 
 class ProcurementController extends Controller
 {
@@ -146,12 +148,15 @@ class ProcurementController extends Controller
             }
 
             $this->approvalServices->PR($request, true, $purchase->id);
+            // $procurement = new ProcurementService();
+            // $procurement->processTextData($purchase->id);
+
             DB::commit();
             $this->logToDatabase(
                 $purchase->id,
                 'procurement',
                 'INFO',
-                'Create Procurement Di Create Oleh User ' . Auth::user()->name . ' Pada Tanggal ' . $this->DateTimeNow(),
+                'Create Procurement by ' . Auth::user()->name . ' from date ' . $this->DateTimeNow(),
                 $request->all()
             );
 

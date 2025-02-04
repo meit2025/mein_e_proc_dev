@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/shacdn/button';
 import { Button as ButtonMui } from '@mui/material';
 import { Inertia } from '@inertiajs/inertia';
+import moment from 'moment';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
@@ -123,7 +124,7 @@ export const ReimburseForm: React.FC<Props> = ({
         group: z.string().optional(),
         reimburse_type: z.string().min(1, 'reimburse type is required'),
         short_text: z.string().min(1, 'remarks is required'),
-        balance: z.string().min(1, 'balance required'),
+        balance: z.string(),
         currency: z.string().min(1, 'currency required'),
         tax_on_sales: z.string().min(1, 'tax required'),
         purchase_requisition_unit_of_measure: z.string().min(1, 'uom required'),
@@ -418,6 +419,11 @@ export const ReimburseForm: React.FC<Props> = ({
           showToast('Claim Limit for form '+ (index + 1) +' is Empty, Please Contact the Admin', 'error');
           return;
         }
+        
+        if (values.forms[index].balance == '' || parseInt(values.forms[index].balance) == 0) {
+          showToast('Claim Balance for form '+ (index + 1) +' cannot be 0', 'error');
+          return;
+        }
 
         if (parseInt(detailLimit[index]?.balance ?? 0) < parseInt(values.forms[index].balance ?? 0)) {
           showToast(
@@ -426,6 +432,12 @@ export const ReimburseForm: React.FC<Props> = ({
           );
           return;
         }
+        // update format date
+        values.forms = values.forms.map(form => ({
+          ...form,
+          claim_date: moment(form.claim_date).format('YYYY-MM-DD'),
+          item_delivery_data: moment(form.item_delivery_data).format('YYYY-MM-DD'),
+        }));
       }
     }
     const totalNominal = values.forms.reduce((acc, item) => acc + parseInt(item.balance) || 0, 0);
@@ -909,7 +921,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                               key={tax.value}
                                               value={tax.value.toString()}
                                             >
-                                              {tax.label}
+                                              {tax.description} - {tax.label}
                                             </SelectItem>
                                           ))}
                                         </SelectContent>
@@ -949,7 +961,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                               key={uom.value}
                                               value={uom.value.toString()}
                                             >
-                                              {uom.label}
+                                              {`${uom.label} - ${uom.iso_code}`}
                                             </SelectItem>
                                           ))}
                                         </SelectContent>
@@ -1019,7 +1031,13 @@ export const ReimburseForm: React.FC<Props> = ({
                                             ? field.value
                                             : new Date(field.value)
                                         }
-                                        onDateChange={(date) => field.onChange(date)}
+                                        onDateChange={(date) => {
+                                          field.onChange(date)
+                                          updateForm(index, {
+                                            ...formValue,
+                                            item_delivery_data: date,
+                                          });
+                                        }}
                                       />
                                     </FormControl>
                                     <FormMessage />
@@ -1045,7 +1063,13 @@ export const ReimburseForm: React.FC<Props> = ({
                                             ? field.value
                                             : new Date(field.value)
                                         }
-                                        onDateChange={(date) => field.onChange(date)}
+                                        onDateChange={(date) => {
+                                          field.onChange(date)
+                                          updateForm(index, {
+                                            ...formValue,
+                                            claim_date: date,
+                                          });
+                                        }}
                                       />
                                     </FormControl>
                                     <FormMessage />

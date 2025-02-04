@@ -1,84 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status Update Notification</title>
-    <style>
-        /* Styling untuk email */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-        }
-        .email-container {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        .header {
-            background-color: #003366;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        .header img {
-            max-width: 120px;
-            height: auto;
-        }
-        .content {
-            padding: 20px;
-            line-height: 1.6;
-        }
-        .content h1 {
-            color: #333;
-        }
-        .footer {
-            background-color: #f4f4f4;
-            padding: 10px;
-            text-align: center;
-            font-size: 12px;
-            color: #888;
-        }
-        .footer a {
-            color: #003366;
-            text-decoration: none;
-        }
-        .footer p {
-            margin: 5px 0;
-        }
-    </style>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700,800,900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+        integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
 </head>
-<body>
-    <div class="email-container">
-        <!-- Header with Logo -->
-        <div class="header">
-            {{-- <img src="https://www.mitsubishielectric.co.id/assets_gws_template_responsive/img/mein-logo-header1.png" alt="Company Logo"> --}}
-            <h2>Status Update Notification: {{ ucfirst(strtolower($type)) }}</h2>
-        </div>
 
-        <!-- Email Content -->
-        <div class="content">
-            <h1>Dear {{ $user->name }},</h1>
-            <p>The status of your <strong>{{ ucfirst(strtolower($type)) }}</strong> document has been updated.</p>
-            <p><strong>{{ strtoupper($status) }}</strong></p>
-            <p>You can log in to the website to review the latest changes.</p>
-            <p>If you have any questions or concerns, please feel free to contact us.</p>
-            <p>Thank you!</p>
+<body style="font-family: Nunito, sans-serif;">
+    <div style=" width: 100%; height: 200px; border-radius: 0 0 100% 100%; background-color: #D6D6D6;">
+        <div
+            style="display:-webkit-flex; flex-direction: row; align-items: center; justify-content: center;text-align:center;">
+            <div style="margin:auto; padding-top:50px">
+                <img style="width:200px;height:80px;margin-right:20px" src="public_path('images/icon.png')" alt="
+                    Icon" />
+            </div>
         </div>
+    </div>
+    <div style="padding: 0px 10px 0px 10px">
+        <div style="display: flex;justify-content: center;">
+            <div
+                style="width:100%;border: 2px solid #D7E1EA; border-radius:10px; padding:10px 30px 10px 30px; margin-top:20px">
+                <br>
 
-        <!-- Footer -->
-        <div class="footer">
-            <p>Best regards,</p>
-            <p><strong>Mitsubishi Electric</strong></p>
-            <p>If you have any questions, please <a href="mailto:support@example.com">contact us</a>.</p>
-            <p><small>&copy; {{ date('Y') }} Mitsubishi Electric. All rights reserved.</small></p>
+                <p>
+                    Dear, <span class="font-weight-bold" style="font-weight: bold;">{{$user->name}}</span>
+
+                    {{-- body --}}
+                    @if($type == 'Purchase Requisition')
+                    <br>
+                    We would like to inform you that your Purchase Requisition (PR) request has been processed. Below
+                    are the details:
+                    <br>
+                    Status: {{ $status }}
+                    <br>
+                    Please review the details accordingly. If any action is required, kindly proceed as necessary.
+                    <br>
+                    PR Number : {{$pr}}
+                    <br>
+                    Requester : {{$purchase->user->name}}
+                    <br>
+                    Proposed Vendor: {{
+                    $purchase->vendorsWinner->masterBusinesPartnerss->name_one
+                    }}
+                    <br>
+                    Quotation Number: {{$purchase->vendorsWinner->quotation}}
+                    <br>
+                    Item Details:
+                    <hr>
+                    @foreach ($purchase->vendorsWinner->units as $item)
+                    Material Number: {{ $item->material_number }}
+                    <br>
+                    Quantity (QTY): {{ $item->qty }}
+                    <br>
+                    Unit Price: {{ $item->unit_price }}
+                    <br>
+                    Total Amount: {{ $item->total_amount }}
+                    <br>
+                    Remark: {{ $item->short_text }}
+                    <hr>
+                    @endforeach
+
+                    <br>
+                    <br>
+                    Kindly review and provide your approval decision through the system
+                <p style="font-weight: 700;font-family: 'Rubik', sans-serif;font-size: 20px">
+                    <a href="{{$url}}"> View Detail </a>
+                </p>
+                @endif
+                {{-- end body --}}
+
+                @if ($type == 'Reimbursement')
+                <br>
+                We would like to inform you that your Reimbursement request has been processed. Below
+                are the details:
+                <br>
+                Status: {{ $status }}
+                @endif
+
+                @if ($type == 'Business Trip')
+                <br>
+                We would like to inform you that your Business Trip request has been processed. Below
+                are the details:
+                <br>
+                Status: {{ $status }}
+                @endif
+                </p>
+
+                <div>
+                    <p style="font-weight: 500; font-size: 14px; color: #1f1f1f;">Thank you,
+                        <br>
+                        Best regards,
+                        <br> MEIN Information System Portal
+                    </p>
+                </div>
+                <div style="background-color: #D7E1EA;height:2px"></div>
+                <div style="display:flex;margin-top:20px">
+                    <div>
+                        <div style="display: flex">
+                            <img style="width:200px;height:80px;margin-right:20px;margin-top: 20px"
+                                src="{{public_path('images/icon.png')}}" alt=" Icon">
+                        </div>
+
+                    </div>
+
+                    <div style="margin-left: 20px">
+                        <div style="margin-top: 5px">
+                            <b style="font-weight: 700;font-size: 20px;color: #1f1f1f;"><strong> PT Mitsubishi Electric
+                                    Indonesia</strong></b>
+                        </div>
+                        <div style="margin-top: 5px">
+                            <b style="  font-size: 16px;margin-top:10px;
+		font-weight: 500;
+		color: #6C6C6C">Gedung Jaya 8th Floor, Jl MH.Thamrin No 12 Jakarta Pusat 10340 Indonesia</b>
+                        </div>
+                        <div>
+                            <b style="  font-size: 16px;margin-top:10px;
+		font-weight: 500;
+		color: #6C6C6C">+62-21-31926461</b>
+                        </div>
+                        <div>
+                            <b style="  font-size: 16px;margin-top:10px;
+		font-weight: 500;
+		color: #6C6C6C">marcomm.mein@asia.meap.com</b>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </body>
+
 </html>

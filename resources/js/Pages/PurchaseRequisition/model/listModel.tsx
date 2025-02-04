@@ -88,7 +88,7 @@ export const columns: GridColDef[] = [
     },
   },
   {
-    field: 'purchase_requisitions',
+    field: 'purchase_requisitions.no_po',
     headerName: 'Number PO',
     width: 200,
     filterable: false,
@@ -100,7 +100,19 @@ export const columns: GridColDef[] = [
     },
   },
   {
-    field: 'purchase_requisition_number',
+    field: 'purchase_requisitions.is_closed',
+    headerName: 'Status PO',
+    width: 200,
+    filterable: false,
+    renderCell: (params: any) => {
+      const firstNonNullPo = params.row.purchase_requisitions.find(
+        (data: any) => data?.is_closed !== null,
+      );
+      return firstNonNullPo ? firstNonNullPo.is_closed : '-';
+    },
+  },
+  {
+    field: 'purchase_requisitions.purchase_requisition_number',
     headerName: 'Number PR',
     width: 200,
     filterable: false,
@@ -109,6 +121,18 @@ export const columns: GridColDef[] = [
         (data: any) => data?.purchase_requisition_number !== null,
       );
       return firstNonNullPo ? firstNonNullPo.purchase_requisition_number : '-';
+    },
+  },
+  {
+    field: 'purchase_requisitions.status',
+    headerName: 'Status PR',
+    width: 200,
+    filterable: false,
+    renderCell: (params: any) => {
+      const firstNonNullPo = params.row.purchase_requisitions.find(
+        (data: any) => data?.status !== null,
+      );
+      return firstNonNullPo ? firstNonNullPo.status : '-';
     },
   },
 ];

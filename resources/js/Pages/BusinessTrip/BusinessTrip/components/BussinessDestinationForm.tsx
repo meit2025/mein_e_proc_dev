@@ -335,7 +335,7 @@ export function BussinessDestinationForm({
           </tr>
           <tr>
             <td width={200}>
-              Pajak<span className='text-red-600'>*</span>
+              Tax<span className='text-red-600'>*</span>
             </td>
             <td>
               <FormAutocomplete<any>
@@ -344,7 +344,7 @@ export function BussinessDestinationForm({
                 fieldName={`destinations.${index}.pajak_id`}
                 isRequired={true}
                 disabled={false}
-                placeholder={'Select Pajak'}
+                placeholder={'Select Tax'}
                 classNames='mt-2 w-full'
                 onChangeOutside={(value) => {
                   updateDestination(index, {

@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Storage;
 // Route::post('/login', [AuthController::class, 'store'])->name('login.store');
 
 Route::get('/test-upload-file', function () {
-    $fileName = 'example.txt';
+    $fileName = 'example' . date('Ymd_His') . '.txt';
     $content = "example txt";
 
     Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($fileName, $content);
@@ -29,22 +29,22 @@ Route::get('/test-email', [NotifikasiController::class, 'sendTestEmail']);
 
 Route::get('/test', function () {
     // $fileContents = file_get_contents('http://127.0.0.1:8008/storage/business_trip/dummy_1736238179.pdf');
-// dd($fileContents);
-$url = 'http://127.0.0.1:8008/storage/business_trip/dummy_1736238179.pdf';
-// return saveImageFromUrl($url);
-// Membuat instance Guzzle client
-$client = new Client();
+    // dd($fileContents);
+    $url = 'http://127.0.0.1:8008/storage/business_trip/dummy_1736238179.pdf';
+    // return saveImageFromUrl($url);
+    // Membuat instance Guzzle client
+    $client = new Client();
 
-// Mengambil gambar dari URL
-$response = $client->get($url);
-// Mendapatkan konten gambar
-$imageContent = $response->getBody()->getContents();
+    // Mengambil gambar dari URL
+    $response = $client->get($url);
+    // Mendapatkan konten gambar
+    $imageContent = $response->getBody()->getContents();
 
-// Menentukan nama file dan path penyimpanan
-$fileName = basename($url); // Mengambil nama file dari URL
-$path = 'business_trip/' . 'clone-' . time() . $fileName; // Menentukan path penyimpanan
+    // Menentukan nama file dan path penyimpanan
+    $fileName = basename($url); // Mengambil nama file dari URL
+    $path = 'business_trip/' . 'clone-' . time() . $fileName; // Menentukan path penyimpanan
 
-// Menyimpan gambar ke storage
+    // Menyimpan gambar ke storage
     Storage::disk('public')->put($path, $imageContent);
 
     return 'Gambar berhasil disimpan di: ' . $path;
