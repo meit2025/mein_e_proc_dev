@@ -602,7 +602,7 @@ export const ReimburseForm: React.FC<Props> = ({
                 </tr>
 
                 <tr>
-                  <td className='w-1/4'>Cost Center</td>
+                  <td className='w-1/4'>Cost Center<span className='text-red-600'>*</span></td>
                   <td>
                     <FormAutocomplete<any>
                       fieldLabel={''}
@@ -627,7 +627,7 @@ export const ReimburseForm: React.FC<Props> = ({
                 </tr>
 
                 <tr>
-                  <td className='w-1/4'>Employee</td>
+                  <td className='w-1/4'>Employee<span className='text-red-600'>*</span></td>
                   <td>
                     <FormAutocomplete<any>
                       options={dataEmployee}
@@ -728,7 +728,7 @@ export const ReimburseForm: React.FC<Props> = ({
                       <table className='text-xs mt-4 reimburse-form-detail font-thin'>
                         <tbody>
                           <tr>
-                            <td className='w-1/4'>Type of Reimbursement </td>
+                            <td className='w-1/4'>Type of Reimbursement<span className='text-red-600'>*</span></td>
                             <td>
                               <FormAutocomplete<any>
                                 options={dataReimburseType[index]}
@@ -865,7 +865,7 @@ export const ReimburseForm: React.FC<Props> = ({
                           </tr>
 
                           <tr>
-                            <td className='w-1/4'>Purchasing Group</td>
+                            <td className='w-1/4'>Purchasing Group<span className='text-red-600'>*</span></td>
                             <td>
                               <FormAutocomplete<any>
                                 fieldLabel={''}
@@ -1187,7 +1187,7 @@ export const ReimburseForm: React.FC<Props> = ({
                           </tr>
 
                           <tr>
-                            <td className='w-1/4'>File Attachment</td>
+                            <td className='w-1/4'>File Attachment<span className='text-red-600'>*</span></td>
                             <td>
                               <FormField
                                 control={form.control}
