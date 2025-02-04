@@ -29,12 +29,13 @@
         <div style="display: flex;justify-content: center;">
             <div
                 style="width:100%;border: 2px solid #D7E1EA; border-radius:10px; padding:10px 30px 10px 30px; margin-top:20px">
-
-                {{-- body --}}
-                @if($type == 'Purchase Requisition')
                 <br>
+
                 <p>
                     Dear, <span class="font-weight-bold" style="font-weight: bold;">{{$user->name}}</span>
+
+                    {{-- body --}}
+                    @if($type == 'Purchase Requisition')
                     <br>
                     We would like to inform you that your Purchase Requisition (PR) request has been processed. Below
                     are the details:
@@ -74,17 +75,25 @@
                 <p style="font-weight: 700;font-family: 'Rubik', sans-serif;font-size: 20px">
                     <a href="{{$url}}"> View Detail </a>
                 </p>
-                </p>
                 @endif
                 {{-- end body --}}
 
                 @if ($type == 'Reimbursement')
-
+                <br>
+                We would like to inform you that your Reimbursement request has been processed. Below
+                are the details:
+                <br>
+                Status: {{ $status }}
                 @endif
 
                 @if ($type == 'Business Trip')
-
+                <br>
+                We would like to inform you that your Business Trip request has been processed. Below
+                are the details:
+                <br>
+                Status: {{ $status }}
                 @endif
+                </p>
 
                 <div>
                     <p style="font-weight: 500; font-size: 14px; color: #1f1f1f;">Thank you,
