@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/shacdn/button';
-import { Button as ButtonMui } from '@mui/material';
+import { Button as ButtonMui, FormHelperText } from '@mui/material';
 import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
 import { z } from 'zod';
@@ -632,7 +632,6 @@ export const ReimburseForm: React.FC<Props> = ({
                     <FormAutocomplete<any>
                       options={dataEmployee}
                       fieldName='requester'
-                      isRequired={true}
                       disabled={String(currentUser?.is_admin) === '0' || type === ReimburseFormType.edit}
                       placeholder={'Select Employee'}
                       onSearch={handleSearchEmployee}
@@ -730,11 +729,10 @@ export const ReimburseForm: React.FC<Props> = ({
                         <tbody>
                           <tr>
                             <td className='w-1/4'>Type of Reimbursement </td>
-                            <td className='flex items-center space-x-3'>
+                            <td>
                               <FormAutocomplete<any>
                                 options={dataReimburseType[index]}
                                 fieldName={`forms.${index}.reimburse_type`}
-                                isRequired={true}
                                 disabled={form.getValues('requester') == '' || type === ReimburseFormType.edit}
                                 placeholder={'Select Reimburse Type'}
                                 onChangeOutside={(query: string, data: any) => {
@@ -812,6 +810,11 @@ export const ReimburseForm: React.FC<Props> = ({
                                 }}
                                 classNames='mt-2 w-full'
                               />
+                              {form.formState.errors?.forms?.[index]?.reimburse_type && (
+                                <FormHelperText error>
+                                  {form.formState.errors?.forms?.[index]?.reimburse_type?.message}
+                                </FormHelperText>
+                              )}
                             </td>
                           </tr>
 
@@ -890,6 +893,11 @@ export const ReimburseForm: React.FC<Props> = ({
                                   }
                                 }}
                               />
+                              {form.formState.errors?.forms?.[index]?.purchasing_group && (
+                                <FormHelperText error>
+                                  {form.formState.errors?.forms?.[index]?.purchasing_group?.message}
+                                </FormHelperText>
+                              )}
                             </td>
                           </tr>
 
@@ -1276,7 +1284,7 @@ export const ReimburseForm: React.FC<Props> = ({
             <Separator className='my-4' />
             <div className='mt-4 flex justify-end'>
               <Button type='submit' className='w-32'>
-                Save
+                Submit
               </Button>
             </div>
           </form>
