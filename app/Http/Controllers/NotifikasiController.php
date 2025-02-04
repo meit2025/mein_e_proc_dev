@@ -67,7 +67,7 @@ class NotifikasiController extends Controller
             $mail->send();
             echo 'Email berhasil dikirim.';
         } catch (Exception $e) {
-            echo "Gagal mengirim email. Error: {$mail->ErrorInfo}";
+            echo "Gagal mengirim email. Error: {$mail->ErrorInfo} {$e->getMessage()}";
         }
 
         return $this->successResponse('Email sent');
