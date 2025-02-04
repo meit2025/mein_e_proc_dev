@@ -195,7 +195,7 @@ export const ReimburseForm: React.FC<Props> = ({
 
   const defaultValues = {
     formCount: '1',
-    remark_group: 'test',
+    remark_group: '',
     cost_center: '',
     requester: String(currentUser?.is_admin) === '1' ? '' : currentUser?.nip,
     forms: [
@@ -584,7 +584,7 @@ export const ReimburseForm: React.FC<Props> = ({
                   </td>
                 </tr>
                 <tr>
-                  <td className='w-1/4'>Remark</td>
+                  <td className='w-1/4'>Remark<span className='text-red-600'>*</span></td>
                   <td>
                     <FormField
                       control={form.control}
@@ -983,7 +983,7 @@ export const ReimburseForm: React.FC<Props> = ({
                           </tr>
 
                           <tr>
-                            <td className='w-1/4'>Remark</td>
+                            <td className='w-1/4'>Remark<span className='text-red-600'>*</span></td>
                             <td>
                               <FormField
                                 control={form.control}
