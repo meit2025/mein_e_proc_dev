@@ -59,13 +59,14 @@ return [
             'timeout' => 10,
             'auth_mode' => null, // Tidak perlu autentikasi
             'local_domain' => env('MAIL_EHLO_DOMAIN', null),
-            'stream' => [
-                'ssl' => [
-                    'verify_peer' => false,
-                    'verify_peer_name' => false,
-                    'allow_self_signed' => true,
-                ],
-            ],
+            'stream' => [],
+            // 'stream' => [
+            //     'ssl' => [
+            //         'verify_peer' => false,
+            //         'verify_peer_name' => false,
+            //         'allow_self_signed' => true,
+            //     ],
+            // ],
         ],
 
 
