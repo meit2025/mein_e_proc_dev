@@ -53,12 +53,11 @@ return [
             'transport' => 'smtp',
             'host' => env('MAIL_HOST', '10.236.112.162'), // Gunakan IP atau domain SMTP server
             'port' => env('MAIL_PORT', 25), // Gunakan port yang sesuai
-            'encryption' => '', // Tidak pakai SSL/TLS
-            'username' => env('MAIL_USERNAME', null), // Tidak pakai autentikasi
-            'password' => env('MAIL_PASSWORD', null),
+            'encryption' => false, // Tidak pakai SSL/TLS
+            'username' => '', // Tidak pakai autentikasi
+            'password' => '',
             'timeout' => 10,
             'auth_mode' => null, // Tidak perlu autentikasi
-            'local_domain' => env('MAIL_EHLO_DOMAIN', null),
             'stream' => [],
             // 'stream' => [
             //     'ssl' => [
