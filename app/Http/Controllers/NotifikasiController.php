@@ -50,7 +50,8 @@ class NotifikasiController extends Controller
         try {
             // Pengaturan server SMTP
             $mail->isSMTP();
-            $mail->Host = '10.236.112.162'; // Alamat server SMTP Anda
+            // $mail->Host = '10.236.112.162'; // Alamat server SMTP Anda
+            $mail->Host = 'hybrid.asia.meap.com'; // Alamat server SMTP Anda
             $mail->SMTPAuth = false; // Jika server SMTP memerlukan otentikasi
             $mail->Username = null; // Ganti dengan username SMTP Anda
             $mail->Password = null; // Ganti dengan password SMTP Anda
