@@ -74,7 +74,9 @@ class BusinessTripDeclarationExport implements FromArray, WithHeadings, WithEven
                     'End Date' => '',
                     'Allowance Item' => 'Total Allowance',
                     'Allowance Value' => '',
-                    'Total Allowance' => $allowanceItem['currency_id'] . ' ' . number_format($destination['total_allowance'], 0, ',', '.'),
+                    'Total Allowance' => isset($destination['total_allowance'], $allowanceItem['currency_id'])
+                        ? $allowanceItem['currency_id'] . ' ' . number_format($destination['total_allowance'], 0, ',', '.')
+                        : '',
                 ];
             }
         }
