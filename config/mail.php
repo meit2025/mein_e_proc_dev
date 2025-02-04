@@ -53,7 +53,7 @@ return [
             'transport' => 'smtp',
             'host' => env('MAIL_HOST', '10.236.112.162'), // Gunakan IP atau domain SMTP server
             'port' => env('MAIL_PORT', 25), // Gunakan port yang sesuai
-            'encryption' => env('MAIL_ENCRYPTION', null), // Tidak pakai SSL/TLS
+            'encryption' => '', // Tidak pakai SSL/TLS
             'username' => env('MAIL_USERNAME', null), // Tidak pakai autentikasi
             'password' => env('MAIL_PASSWORD', null),
             'timeout' => 10,
