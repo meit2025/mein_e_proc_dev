@@ -229,7 +229,7 @@ class CheckApproval
             }
 
             if ($save) {
-                foreach ($getApproval as $approvalRoute) {
+                foreach ($getApproval as $key =>  $approvalRoute) {
                     Approval::create(
                         [
                             'user_id' => $approvalRoute['id'],
@@ -237,6 +237,8 @@ class CheckApproval
                             'message' => '',
                             'document_id' => $idDocument,
                             'document_name' => $type,
+                            'is_approval' => $key == 0 ? true : false,
+                            'number_approval' => $key + 1,
                         ]
                     );
                 }
