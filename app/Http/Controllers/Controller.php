@@ -189,6 +189,70 @@ abstract class Controller
         return $query->paginate($perPage);
     }
 
+    public function filterAndNotPaginateHasJoin($request, $model, array $filterableColumns, array $hasFilters, $userData = false)
+    {
+        $perPage = $request->get('per_page', 10);
+        $sortBy = $request->get('sort_by', 'id');
+        $sortDirection = $request->get('sort_direction', 'desc');
+
+        $query = $model instanceof \Illuminate\Database\Eloquent\Builder ? $model : $model::query();
+
+        foreach ($request->all() as $key => $value) {
+            if (in_array($key, $filterableColumns)) {
+                list($operator, $filterValue) = array_pad(explode(',', $value, 2), 2, null);
+                $query = $this->applyColumnFilter($query, $key, $operator, $filterValue); // Menggunakan fungsi helper
+            }
+
+            // Check if the key matches a relationship column in $hasColumns
+            foreach ($hasFilters as $relation) {
+                $relationshipKey = "{$relation['join']}_{$relation['column']}";
+
+                if ($key === $relationshipKey) {
+                    list($operator, $filterValue) = array_pad(explode(',', $value, 2), 2, null);
+
+                    $query->whereHas($relation['join'], function ($q) use ($relation, $operator, $filterValue) {
+                        $this->applyColumnFilter($q, $relation['column'], $operator, $filterValue);
+                    });
+                    break;
+                }
+            }
+        }
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request, $filterableColumns, $hasFilters) {
+                foreach ($filterableColumns as $column) {
+                    $q->orWhere($column, 'ILIKE', '%' . $request->search . '%');
+                }
+
+                foreach ($hasFilters as $hasFilter) {
+                    $q->orWhereHas($hasFilter['join'], function ($q) use ($request, $hasFilter) {
+                        $q->where($hasFilter['column'], 'ILIKE', '%' . $request->search . '%');
+                    });
+                }
+            });
+        }
+
+        if ($userData) {
+            if ($request->approval == 1) {
+
+                $data = Approval::where('user_id', Auth::user()->id)
+                    ->where('document_name', 'PR')
+                    ->where('status', 'Waiting')
+                    ->pluck('document_id')
+                    ->toArray();
+                $query = $query->whereIn('id', $data);
+            } else {
+                $query->where(function ($q) use ($request, $filterableColumns) {
+                    $q->orWhere('user_id', Auth::user()->id)
+                        ->orWhere('createdBy', Auth::user()->id);
+                });
+            }
+        }
+
+        $query->orderBy($sortBy, $sortDirection);
+        return $query->get();
+    }
+
     /**
      * Fungsi untuk filtering model tanpa menggunakan pagination.
      *
