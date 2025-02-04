@@ -62,6 +62,14 @@ class NotifikasiController extends Controller
             $mail->Subject = 'Test Email';
             $mail->Body = '<p>This is a test email sent via PHPMailer.</p>';
             $mail->isHTML(true); // Kirim email dalam format HTML
+            $mail->SMTPOptions = [
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true
+                ]
+            ];
+
 
             // Kirim email
             $mail->send();
