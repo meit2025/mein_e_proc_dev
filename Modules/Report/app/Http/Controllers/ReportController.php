@@ -846,9 +846,38 @@ class ReportController extends Controller
             'storage_locations',
             'total_vendor',
             'total_item',
+            'purchases_number',
         ];
 
-        $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user', 'vendors');
+        $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user', 'vendors', 'purchaseRequisitions');
+
+        $hasColumns =  [
+            [
+                "join" => "user",
+                "column" => "name",
+            ],
+            [
+                "join" => "createdBy",
+                "column" => "name",
+            ],
+            [
+                "join" => "updatedBy",
+                "column" => "name",
+            ],
+            [
+                "join" => "status",
+                "column" => "name",
+            ],
+            [
+                "join" => "purchaseRequisitions",
+                "column" => "purchase_requisition_number",
+            ],
+            [
+                "join" => "purchaseRequisitions",
+                "column" => "no_po",
+            ],
+        ];
+
         if ($startDate && $endDate) {
             $data->whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $endDate);
@@ -873,7 +902,7 @@ class ReportController extends Controller
             });
         }
 
-        $data = $this->filterAndPaginate($request, $data, $filterableColumns, true);
+        $data = $this->filterAndPaginateHasJoin($request, $data, $filterableColumns,  $hasColumns, true);
         return $this->successResponse($data);
     }
 
@@ -894,9 +923,38 @@ class ReportController extends Controller
             'storage_locations',
             'total_vendor',
             'total_item',
+            'purchases_number',
         ];
 
-        $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user', 'vendors');
+        $hasColumns =  [
+            [
+                "join" => "user",
+                "column" => "name",
+            ],
+            [
+                "join" => "createdBy",
+                "column" => "name",
+            ],
+            [
+                "join" => "updatedBy",
+                "column" => "name",
+            ],
+            [
+                "join" => "status",
+                "column" => "name",
+            ],
+            [
+                "join" => "purchaseRequisitions",
+                "column" => "purchase_requisition_number",
+            ],
+            [
+                "join" => "purchaseRequisitions",
+                "column" => "no_po",
+            ],
+        ];
+
+
+        $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user', 'vendors', 'purchaseRequisitions');
         if ($startDate && $endDate) {
             $data->whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $endDate);
@@ -920,10 +978,29 @@ class ReportController extends Controller
             });
         }
 
-        $data = $this->filterNotPaggination($request, $data, $filterableColumns, true);
+        $data = $this->filterAndNotPaginateHasJoin($request, $data, $filterableColumns, $hasColumns, true);
+
+        $transformedData = $data->map(function ($pr) {
+            return [
+                'purchases_number' => $pr->purchases_number,
+                'user' => $pr->user->name ?? '',
+                'document_type' => $pr->document_type,
+                'purchasing_groups' => $pr->purchasing_groups,
+                'delivery_date' => $pr->delivery_date,
+                'storage_locations' => $pr->storage_locations,
+                'total_vendor' => $pr->total_vendor,
+                'total_item' => $pr->total_item,
+                'status' => $pr->status->name,
+                'created_by' => $pr->createdBy->name ?? '',
+                'created_at' => $pr->created_at,
+                'no_po' => $pr->purchaseRequisitions->first()->no_po ?? '',
+                'no_pr' => $pr->purchaseRequisitions->first()->purchase_requisition_number ?? '',
+            ];
+        });
+
 
         $filename = 'Purchase.xlsx';
-        return Excel::download(new PurchaseRequisitionExport($data), $filename);
+        return Excel::download(new PurchaseRequisitionExport($transformedData), $filename);
         return $this->successResponse($data);
     }
 
