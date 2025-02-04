@@ -282,7 +282,7 @@ class MyReimburseController extends Controller
                     $reimburses['claim_date'] : null;
                 
                 // Available Claim Date
-                if ((empty($reimburses) && $reimburses['interval_claim_period'] == null) || $lastClaimDate == null) {
+                if ((empty($reimburses) && (isset($reimburses['interval_claim_period']) && $reimburses['interval_claim_period'] == null)) || $lastClaimDate == null) {
                     $availableClaimDate = null;
                 } else {
                     $createDate         = Carbon::createFromFormat('Y-m-d', $lastClaimDate);
