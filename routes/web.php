@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\Storage;
 Route::get('/test-upload-file', function () {
     $fileName = 'example' . date('Ymd_His') . '.txt';
     $content = "example txt";
-    dd(env('STORAGE_UPLOAD', 'local'));
 
     Storage::disk(env('STORAGE_UPLOAD', 'local'))->put($fileName, $content);
     return response()->json([
