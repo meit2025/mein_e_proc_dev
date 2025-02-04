@@ -35,7 +35,8 @@ class PurchaseRequisitionExport implements FromCollection, WithHeadings
     {
         return [
             'No',
-            'Requisition',
+            'Purchase Number',
+            'Request For',
             'Document type',
             'Purchasing groups',
             'Delivery date',
@@ -44,6 +45,9 @@ class PurchaseRequisitionExport implements FromCollection, WithHeadings
             'Total Item',
             'Status',
             'Requester By',
+            'Created At',
+            'Number PO',
+            'Number PR',
         ];
     }
 }
