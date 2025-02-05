@@ -296,12 +296,12 @@ class ApprovalController extends Controller
                             $reimburseGroup->notes = isset($request->note) ? $request->note : '';
 
                             SendNotification::dispatch($findUser,  $message, $baseurl);
-                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimburse', $request->status, '', null, $reimburseGroup, null, $baseurl));
+                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimbursement', $request->status, '', null, $reimburseGroup, null, $baseurl));
 
 
                             if ($findUser->id !== $model->request_created_by) {
                                 $findcreatedBy = User::find($model->request_created_by);
-                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Reimburse', $request->status, '', null, $reimburseGroup, null, $baseurl));
+                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Reimbursement', $request->status, '', null, $reimburseGroup, null, $baseurl));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
                             }
                             break;
