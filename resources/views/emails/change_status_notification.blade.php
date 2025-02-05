@@ -79,11 +79,38 @@
                 {{-- end body --}}
 
                 @if ($type == 'Reimbursement')
-                <br>
-                We would like to inform you that your Reimbursement request has been processed. Below
-                are the details:
-                <br>
-                Status: {{ $status }}
+                    <br><br>
+                        @if ($status == 'Rejected')
+                            We regret to inform you that your reimbursement request has been rejected. Below are the details:
+                            <br><br>
+
+                            Reimbursement Number: {{$reimburseGroup->code}}
+                            <br>
+                            Requester: {{$user->name}}
+                            <br>
+                            Reimbursement Details:
+                            <br><br>
+
+                            @foreach ($reimburseGroup->reimburses as $key  => $item)
+                            Form {{$key + 1}} :
+                            <ul>
+                                <li>
+                                    Reimbursement Type: {{$item->reimburseType->name}}
+                                </li>
+                                <li>
+                                    Claim Date: {{ date('F j, Y', strtotime($item->claim_date)) }}
+                                </li>
+                                <li>
+                                    Reimbursement Cost: Rp. {{ number_format($item->balance, 0, ',', '.') }}
+                                </li>
+                            </ul>
+                            @endforeach
+                            
+                            Rejection Reason: {{ $reimburseGroup->notes }}
+                            <br>
+                            Please review the request and make necessary adjustments if required.
+                        @endif
+                    <br>
                 @endif
 
                 @if ($type == 'Business Trip')
