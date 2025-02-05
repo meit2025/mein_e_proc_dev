@@ -292,13 +292,16 @@ class ApprovalController extends Controller
                         case 'reim':
                             $baseurl = env('APP_URL') .  '/reimburse/detail/' .  $request->id;
                             $findUser = User::where('nip', $model->requester)->first();
+                            $reimburseGroup = ReimburseGroup::with(['reimburses.reimburseType'])->find($request->id);
+                            $reimburseGroup->notes = isset($request->note) ? $request->note : '';
+
                             SendNotification::dispatch($findUser,  $message, $baseurl);
-                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimburse', $request->status, '', null, null, null, $baseurl));
+                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimburse', $request->status, '', null, $reimburseGroup, null, $baseurl));
 
 
                             if ($findUser->id !== $model->request_created_by) {
                                 $findcreatedBy = User::find($model->request_created_by);
-                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Reimburse', $request->status, '', null, null, null, $baseurl));
+                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Reimburse', $request->status, '', null, $reimburseGroup, null, $baseurl));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
                             }
                             break;
