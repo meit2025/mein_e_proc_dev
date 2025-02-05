@@ -45,10 +45,10 @@
                     <td>{{ $reim['reimburseType']['name'] }}</td>
                     <td>{{ $item['request_date'] }}</td>
                     <td>{{ $item['claim'] }}</td>
-                    <td>{{ $item['claim'] }}</td>
+                    <td>{{ $item['status'] == 'Fully Approve' ? $item['claim'] : "-" }}</td>
                     <td>{{ $item['curency'] }}</td>
-                    <td>{{ number_format($reim['balance'], 0, ',', '.') }}</td>
-                    <td>{{ number_format($reim['balance'], 0, ',', '.') }}</td>
+                    <td>{{ $reim['balance'] }}</td>
+                    <td>{{ $item['status'] == 'Fully Approve' ? $reim['balance'] : "-" }}</td>
                     <td>{{ $item['type_of_expense'] }}</td>
                     <td>{{ $item['remark'] }}</td>
                     <td>{{ $item['additional_field'] }}</td>
@@ -58,16 +58,16 @@
                     <td>{{ $item['source'] }}</td>
                     <td>{{ $item['cancels'] }}</td>
                     <td>{{ $item['status'] }}</td>
-                    <td>{{ number_format($totalBalance, 0, ',', '.') }}</td>
-                    <td>{{ number_format(($totalBalance - $data->sum('balance')), 0, ',', '.') }}</td>
+                    <td>{{ $totalBalance }}</td>
+                    <td>{{ ($totalBalance - $data->sum('balance')) }}</td>
                 </tr>
             @endforeach
         @endforeach
         <tr>
             <td colspan="8">Grand Total</td>
             <td></td>
-            <td>{{ number_format($data->sum('balance'), 0, ',', '.') }}</td>
-            <td>{{ number_format($data->sum('balance'), 0, ',', '.') }}</td>
+            <td>{{ $data->sum('balance') }}</td>
+            <td>{{ $data->sum('balance') }}</td>
             <td colspan="9"></td>
         </tr>
     </tbody>

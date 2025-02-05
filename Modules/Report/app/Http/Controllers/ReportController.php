@@ -62,7 +62,7 @@ class ReportController extends Controller
             $cost_center = MasterCostCenter::select('id', 'cost_center')->get();
             $taxes = Pajak::select('id', 'mwszkz')->get();
 
-            $types = MasterTypeReimburse::select('code', 'name')->get();
+            $types = MasterTypeReimburse::select('id', 'name')->get();
             $statuses = MasterStatus::select('code', 'name')->get();
             $departments = MasterDepartment::select('id', 'name')->get();
 

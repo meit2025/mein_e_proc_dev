@@ -972,6 +972,14 @@ export const sidebarAdmin = () => [
                 ],
                 sub: [
                     {
+                        name: 'Business Trip Overall',
+                        route: PAGE_REPORT_BT_OVERALL,
+                        role: [
+                            'report business trip overall view',
+                            'report business trip overall export',
+                        ],
+                    },
+                    {
                         name: 'Business Trip Request',
                         route: PAGE_REPORT_BT_REQ,
                         role: ['report business trip request view', 'report business trip request export'],
@@ -982,14 +990,6 @@ export const sidebarAdmin = () => [
                         role: [
                             'report business trip declaration view',
                             'report business trip declaration export',
-                        ],
-                    },
-                    {
-                        name: 'Business Trip Overall',
-                        route: PAGE_REPORT_BT_OVERALL,
-                        role: [
-                            'report business trip overall view',
-                            'report business trip overall export',
                         ],
                     },
                 ],

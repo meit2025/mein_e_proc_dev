@@ -7,10 +7,13 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Modules\Reimbuse\Models\ReimburseGroup;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ReimburseExport implements FromView, WithStyles
+class ReimburseExport implements FromView, WithStyles, WithColumnFormatting, ShouldAutoSize
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -28,29 +31,6 @@ class ReimburseExport implements FromView, WithStyles
             'data' => $this->data
         ]);
     }
-
-    // public function collection()
-    // {
-    //     $numberedData = $this->data->map(function ($item, $index) {
-    //         return array_merge(['Nomor' => $index + 1], $item);
-    //     });
-
-    //     return collect($numberedData);
-    // }
-
-    // public function headings(): array
-    // {
-    //     return [
-    //         'No',
-    //         'Request No',
-    //         'Reimburse For',
-    //         'Remark',
-    //         'Total Balance',
-    //         'Reimburse Form',
-    //         'Status',
-    //         'Date',
-    //     ];
-    // }
 
     public function styles(Worksheet $sheet)
     {
@@ -71,5 +51,15 @@ class ReimburseExport implements FromView, WithStyles
         ]);
 
         return [];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'J' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
+            'K' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
+            'U' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
+            'V' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
+        ];
     }
 }
