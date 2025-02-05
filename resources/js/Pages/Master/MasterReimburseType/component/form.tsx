@@ -494,7 +494,7 @@ export default function ReimburseTypeForm({
                   placeholder={'Material Group'}
                   classNames='mt-2 w-full'
                   onChangeOutside={async (x: any, data: any) => {
-                    await handleChangeMaterialGroup(data?.label);
+                    await handleChangeMaterialGroup(data?.label.split(' - ')[1]);
                   }}
                   fieldLabel={''}
                 />
@@ -512,7 +512,7 @@ export default function ReimburseTypeForm({
                   disabled={false}
                   placeholder={'Material Number'}
                   classNames='mt-2 w-full'
-                  onChangeOutside={async (search) => await handleSearchMaterialNumber(search, String(form.getValues('material_group')))}
+                  onChangeOutside={async (search) => await handleSearchMaterialNumber(search, String(form.getValues('material_group').split(' - ')[1]))}
                 />
               </td>
             </tr>

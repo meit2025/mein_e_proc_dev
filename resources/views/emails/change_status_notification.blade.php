@@ -20,7 +20,7 @@
         <div
             style="display:-webkit-flex; flex-direction: row; align-items: center; justify-content: center;text-align:center;">
             <div style="margin:auto; padding-top:50px">
-                <img style="width:200px;height:80px;margin-right:20px" src="public_path('images/icon.png')" alt="
+                <img style="width:200px;height:80px;margin-right:20px" src="{{public_path('images/icon.png')}}" alt="
                     Icon" />
             </div>
         </div>
