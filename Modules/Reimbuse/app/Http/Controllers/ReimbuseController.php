@@ -37,7 +37,7 @@ class ReimbuseController extends Controller
     {
         $nip = $request->user;
         $hasValue = $request->hasValue;
-
+        
         $getFamilieStatus   = User::select('f.status')->join('families as f', 'f.userId', '=', 'users.id')->where('users.nip', $nip)->groupBy('f.status')->pluck('f.status')->toArray();
         $userId             = User::where('nip', $nip)->first()->id;
         
@@ -138,7 +138,7 @@ class ReimbuseController extends Controller
                     });
                 });
         }
-        // if ($hasValue !== null) $data = $data->orWhere('checkInterval.codes', $hasValue);
+        if ($hasValue !== null) $data = $data->orWhere('master_type_reimburses.code', $hasValue);
         if ($request->search) $data = $data->where('master_type_reimburses.name', 'ilike', '%' . $request->search . '%')
                                     ->orWhere('master_type_reimburses.code', 'ilike', '%' . $request->search . '%')
                                     ->orWhere('master_type_reimburses.family_status', 'ilike', '%' . $request->search . '%');
