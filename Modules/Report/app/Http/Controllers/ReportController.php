@@ -423,6 +423,7 @@ class ReportController extends Controller
             ->search(request(['search']))
             ->get();
 
+        dd($data);
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
             $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
