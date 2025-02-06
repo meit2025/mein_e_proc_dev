@@ -47,8 +47,16 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
       }
 
       const winnerUnit = dataVendor?.units || [];
-      const totalSum = winnerUnit.reduce((sum: number, item: any) => sum + item.total_amount, 0);
+      const totalSum = winnerUnit.reduce(
+        (sum: number, item: any) => sum + parseInt(item.total_amount),
+        0,
+      );
       setValue('total_all_amount', totalSum);
+
+      const highestAmount = winnerUnit.reduce((max: number, item: any) => {
+        return item.total_amount > max ? item.total_amount : max;
+      }, 0);
+      setValue('amount_max', highestAmount);
 
       if (getData.document_type === null || getData.document_type === undefined) {
         setLoading(false);
@@ -98,7 +106,7 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
         params: {
           document_type_id: getData.document_type,
           purchasing_group_id: getData.purchasing_groups,
-          value: totalSum,
+          value: getData.document_type === 'ZENT' ? highestAmount : totalSum,
           user_id: getData.user_id,
           type: 'PR',
           metode_approval: getData.metode_approval,

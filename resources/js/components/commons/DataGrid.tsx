@@ -368,7 +368,21 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                     {(url.deleteUrl || onDelete) && value === 0 && (
                       <>
                         {(!role || permissions.includes(role?.delete ?? '')) && (
-                          <Link href={''} onClick={() => handleDelete(params.row.id)} alt='delete'>
+                          <Link
+                            href={''}
+                            onClick={(e) => {
+                              e.preventDefault(); // Mencegah perilaku default
+                              setAlertProps({
+                                isOpen: true,
+                                labelConfirmButton: 'Delete',
+                                message: 'Are you sure you want to delete this record?',
+                                onConfirm: async () => {
+                                  handleDelete(params.row.id);
+                                },
+                              });
+                            }}
+                            alt='delete'
+                          >
                             <i className=' ki-duotone ki-trash-square text-danger text-2xl'></i>
                           </Link>
                         )}

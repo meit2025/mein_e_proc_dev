@@ -31,7 +31,7 @@ class ApprovalNotificationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Approval Notification Mail',
+            subject: 'Approval Reminder',
         );
     }
 
