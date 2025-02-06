@@ -51,14 +51,21 @@ return [
 
         'mein' => [
             'transport' => 'smtp',
-            'url' => env('MAIL_URL'),
-            'host' => env('MAIL_HOST', '127.0.0.1'),
-            'port' => env('MAIL_PORT', 2525),
-            'encryption' => 'starttls',
-            'username' => null,
-            'password' => null,
+            'host' => env('MAIL_HOST', '10.236.112.162'), // Gunakan IP atau domain SMTP server
+            'port' => env('MAIL_PORT', 25), // Gunakan port yang sesuai
+            'encryption' => false, // Tidak pakai SSL/TLS
+            'username' => '', // Tidak pakai autentikasi
+            'password' => '',
             'timeout' => 10,
-            'local_domain' => env('MAIL_EHLO_DOMAIN', null),
+            'auth_mode' => null, // Tidak perlu autentikasi
+            'stream' => [],
+            // 'stream' => [
+            //     'ssl' => [
+            //         'verify_peer' => false,
+            //         'verify_peer_name' => false,
+            //         'allow_self_signed' => true,
+            //     ],
+            // ],
         ],
 
 

@@ -149,6 +149,11 @@ const ArrayForm = ({
 
     const totalSum = updatedItems.reduce((sum: number, item: any) => sum + item.total_amount, 0);
 
+    const highestAmount = updatedItems.reduce((max: number, item: any) => {
+      return item.total_amount > max ? item.total_amount : max;
+    }, 0);
+    setValue('amount_max', highestAmount);
+
     // Simpan array baru ke React Hook Form state
     setValue(`vendors[${dataIndex}].units`, updatedItems);
     setValue('total_all_amount', totalSum);
