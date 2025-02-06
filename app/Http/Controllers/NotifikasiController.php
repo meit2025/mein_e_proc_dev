@@ -48,26 +48,36 @@ class NotifikasiController extends Controller
         $mail = new PHPMailer(true);
 
         try {
+            Mail::mailer('mein')->to('mein-it-support_dl@asia.meap.com')->send(new TestEmail());
             // Pengaturan server SMTP
-            $mail->isSMTP();
-            $mail->Host = '10.236.112.162'; // Alamat server SMTP Anda
-            $mail->SMTPAuth = true; // Jika server SMTP memerlukan otentikasi
-            $mail->Username = null; // Ganti dengan username SMTP Anda
-            $mail->Password = null; // Ganti dengan password SMTP Anda
-            $mail->Port = 25; // Port SMTP
+            // $mail->isSMTP();
+            // $mail->Host = '10.236.112.162'; // Alamat server SMTP Anda
+            // $mail->SMTPAuth = false; // Jika server SMTP memerlukan otentikasi
+            // $mail->Username = null; // Ganti dengan username SMTP Anda
+            // $mail->Password = null; // Ganti dengan password SMTP Anda
+            // $mail->Port = 25; // Port SMTP
+            // $mail->SMTPSecure = '';
 
-            // Pengaturan email
-            $mail->setFrom('mein-it-support_dl@asia.meap.com', 'IT Support'); // Alamat pengirim
-            $mail->addAddress('mein-it-support_dl@asia.meap.com'); // Alamat penerima
-            $mail->Subject = 'Test Email';
-            $mail->Body = '<p>This is a test email sent via PHPMailer.</p>';
-            $mail->isHTML(true); // Kirim email dalam format HTML
+            // // Pengaturan email
+            // $mail->setFrom('mein-it-support_dl@asia.meap.com', 'IT Support'); // Alamat pengirim
+            // $mail->addAddress('mein-it-support_dl@asia.meap.com'); // Alamat penerima
+            // $mail->Subject = 'Test Email';
+            // $mail->Body = '<p>This is a test email sent via PHPMailer.</p>';
+            // $mail->isHTML(true); // Kirim email dalam format HTML
+            // $mail->SMTPOptions = [
+            //     'ssl' => [
+            //         'verify_peer' => false,
+            //         'verify_peer_name' => false,
+            //         'allow_self_signed' => true
+            //     ]
+            // ];
 
-            // Kirim email
-            $mail->send();
+
+            // // Kirim email
+            // $mail->send();
             echo 'Email berhasil dikirim.';
         } catch (Exception $e) {
-            echo "Gagal mengirim email. Error: {$mail->ErrorInfo}";
+            echo "Gagal mengirim email. Error: {$mail->ErrorInfo} {$e->getMessage()}";
         }
 
         return $this->successResponse('Email sent');

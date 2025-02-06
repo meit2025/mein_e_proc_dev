@@ -20,7 +20,7 @@ export const ListLayout = ({ isEmployee }: { isEmployee: number }) => {
   };
 
   const openFamilyRelationHandler = (item:any) => {
-    setOpenFamilyRelation({id: item.id, reimburseType: item.reimburseType, relation: item.relation, maximumBalance: item.maximumBalance});
+    setOpenFamilyRelation({id: item.id, name: item.name, family_status: item.family_status, maximumBalance: item.maximumBalance});
   }
 
   const columns = [
@@ -33,7 +33,7 @@ export const ListLayout = ({ isEmployee }: { isEmployee: number }) => {
         filterable: true,
         renderCell: (params:any) => 
           <Button
-            onClick={() => openFamilyRelationHandler({ id: params.id, reimburseType: params.row.reimburseType, relation: params.row.relation, maximumBalance: params.row.maximumBalance })}
+            onClick={() => openFamilyRelationHandler({ id: params.id, name: params.row.name, family_status: params.row.family_status, maximumBalance: params.row.maximumBalance })}
             className='bg-slate-400 items-baseline'
             style={{ marginRight: '10px', marginBottom: '10px' }}
           >
@@ -60,14 +60,14 @@ export const ListLayout = ({ isEmployee }: { isEmployee: number }) => {
         open={openFamilyRelation.length !== 0 && typeof openFamilyRelation === 'object'}
         className='md:max-w-[1200px]'
       >
-        <h2>Reimburse Type : {openFamilyRelation?.reimburseType}</h2>
-        <h2>Relation : {openFamilyRelation?.relation}</h2>
+        <h2>Reimburse Type : {openFamilyRelation?.name}</h2>
+        <h2>Relation : {openFamilyRelation?.family_status}</h2>
         <h2>Maximum Balance : {formatRupiah(openFamilyRelation?.maximumBalance ?? 0)}</h2>
         {openFamilyRelation.length !== 0 && typeof openFamilyRelation === 'object' && (
           <DataGridComponent
             columns={familyBalanceColumns}
             url={{
-              url: FAMILY_BALANCE_REIMBURSE_LIST(openFamilyRelation?.id, openFamilyRelation?.relation?.toLowerCase(), openFamilyRelation?.maximumBalance),
+              url: FAMILY_BALANCE_REIMBURSE_LIST(openFamilyRelation?.id, openFamilyRelation?.family_status?.toLowerCase(), openFamilyRelation?.maximumBalance),
             }}
             labelFilter='search'
           />

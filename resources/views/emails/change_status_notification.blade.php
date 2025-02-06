@@ -20,7 +20,7 @@
         <div
             style="display:-webkit-flex; flex-direction: row; align-items: center; justify-content: center;text-align:center;">
             <div style="margin:auto; padding-top:50px">
-                <img style="width:200px;height:80px;margin-right:20px" src="public_path('images/icon.png')" alt="
+                <img style="width:200px;height:80px;margin-right:20px" src="{{public_path('images/icon.png')}}" alt="
                     Icon" />
             </div>
         </div>
@@ -29,12 +29,13 @@
         <div style="display: flex;justify-content: center;">
             <div
                 style="width:100%;border: 2px solid #D7E1EA; border-radius:10px; padding:10px 30px 10px 30px; margin-top:20px">
-
-                {{-- body --}}
-                @if($type == 'Purchase Requisition')
                 <br>
+
                 <p>
                     Dear, <span class="font-weight-bold" style="font-weight: bold;">{{$user->name}}</span>
+
+                    {{-- body --}}
+                    @if($type == 'Purchase Requisition')
                     <br>
                     We would like to inform you that your Purchase Requisition (PR) request has been processed. Below
                     are the details:
@@ -74,17 +75,52 @@
                 <p style="font-weight: 700;font-family: 'Rubik', sans-serif;font-size: 20px">
                     <a href="{{$url}}"> View Detail </a>
                 </p>
-                </p>
                 @endif
                 {{-- end body --}}
 
                 @if ($type == 'Reimbursement')
+                    <br><br>
+                        @if ($status == 'Rejected')
+                            We regret to inform you that your reimbursement request has been rejected. Below are the details:
+                            <br><br>
 
+                            Reimbursement Number: {{$reimburseGroup->code}}
+                            <br>
+                            Requester: {{$user->name}}
+                            <br>
+                            Reimbursement Details:
+                            <br><br>
+
+                            @foreach ($reimburseGroup->reimburses as $key  => $item)
+                            Form {{$key + 1}} :
+                            <ul>
+                                <li>
+                                    Reimbursement Type: {{$item->reimburseType->name}}
+                                </li>
+                                <li>
+                                    Claim Date: {{ date('F j, Y', strtotime($item->claim_date)) }}
+                                </li>
+                                <li>
+                                    Reimbursement Cost: Rp. {{ number_format($item->balance, 0, ',', '.') }}
+                                </li>
+                            </ul>
+                            @endforeach
+                            
+                            Rejection Reason: {{ $reimburseGroup->notes }}
+                            <br>
+                            Please review the request and make necessary adjustments if required.
+                        @endif
+                    <br>
                 @endif
 
                 @if ($type == 'Business Trip')
-
+                <br>
+                We would like to inform you that your Business Trip request has been processed. Below
+                are the details:
+                <br>
+                Status: {{ $status }}
                 @endif
+                </p>
 
                 <div>
                     <p style="font-weight: 500; font-size: 14px; color: #1f1f1f;">Thank you,
