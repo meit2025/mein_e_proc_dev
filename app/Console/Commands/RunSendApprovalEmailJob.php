@@ -64,7 +64,7 @@ class RunSendApprovalEmailJob extends Command
                     $name = $pr->user->name ?? "";
                     $type = "Purchase Requistion";
                 } elseif ($approval->document_name == 'REIM') {
-                    $url = env('APP_URL') .  '/reimbursement/detail/' .  $approval->document_id;
+                    $url = env('APP_URL') .  '/reimburse/detail/' .  $approval->document_id;
                     $reim = ReimburseGroup::with('user')->where('id', $approval->document_id)->first();
                     $name = $reim->user->name ?? "";
                     $nopr = $reim->code ?? "";
