@@ -42,6 +42,11 @@ const CashAdvance = ({ disable }: { disable: boolean }) => {
     const totalSum = winnerUnit.reduce((sum: number, item: any) => sum + item.total_amount, 0);
     setValue('total_all_amount', totalSum);
 
+    const highestAmount = winnerUnit.reduce((max: number, item: any) => {
+      return item.total_amount > max ? item.total_amount : max;
+    }, 0);
+    setValue('amount_max', highestAmount);
+
     const data = (parseInt(value) / 100) * parseInt(total);
     setValue('cash_advance_purchases.nominal', data);
   };
