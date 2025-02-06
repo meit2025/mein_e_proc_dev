@@ -140,7 +140,7 @@ export function BussinessDestinationForm({
     while (momentStart.isBefore(momentEnd) || momentStart.isSame(momentEnd)) {
       const object = {
         date: momentStart.toDate(),
-        shift_code: 'SHIFTREGULAR',
+        shift_code: 'REGULERSHIFT',
         shift_start: '08:00',
         shift_end: '17:00',
         end_time: '17:00',
