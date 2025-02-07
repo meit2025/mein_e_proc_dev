@@ -42,9 +42,9 @@ class BusinessTripExport implements FromArray, WithHeadings, WithEvents, WithCus
                         'Request Status' => $firstRow ? ($businessTrip['status']->name ?? '') : '',
                         'Purpose Type' => $firstRow ? ($businessTrip['purposeType']->name ?? '') : '',
                         'Remarks' => $firstRow ? ($businessTrip['remarks'] ?? '') : '',
-                        'Destination' => $firstRow ? ($destination['destination'] ?? '') : '',
-                        'Start Date' => $firstRow ? (isset($destination['start_date']) ? date('d/m/Y', strtotime($destination['start_date'])) : '') : '',
-                        'End Date' => $firstRow ? (isset($destination['end_date']) ? date('d/m/Y', strtotime($destination['end_date'])) : '') : '',
+                        'Destination' => ($destination['destination'] ?? ''),
+                        'Start Date' => (isset($destination['start_date']) ? date('d/m/Y', strtotime($destination['start_date'])) : ''),
+                        'End Date' => (isset($destination['end_date']) ? date('d/m/Y', strtotime($destination['end_date'])) : ''),
                         'Allowance Item' => $allowanceItem['item_name'] ?? '',
                         'Allowance Value' => isset($allowanceItem['currency_id'], $allowanceItem['amount'])
                             ? $allowanceItem['currency_id'] . ' ' . number_format($allowanceItem['amount'], 0, ',', '.')

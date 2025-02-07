@@ -423,6 +423,7 @@ class ReportController extends Controller
             ->search(request(['search']))
             ->get();
 
+        dd($data);
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
             $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
@@ -951,10 +952,18 @@ class ReportController extends Controller
                 "join" => "purchaseRequisitions",
                 "column" => "no_po",
             ],
+            [
+                "join" => "vendorsWinner",
+                "column" => "name",
+            ],
+            [
+                "join" => "cashAdvancePurchases",
+                "column" => "reference",
+            ],
         ];
 
 
-        $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user', 'vendors', 'purchaseRequisitions');
+        $data = Purchase::with('status', 'updatedBy', 'createdBy', 'user', 'vendors', 'purchaseRequisitions', 'vendorsWinner', 'cashAdvancePurchases');
         if ($startDate && $endDate) {
             $data->whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $endDate);
@@ -974,7 +983,7 @@ class ReportController extends Controller
         }
         if ($department) {
             $data->whereHas('user', function ($q) use ($department) {
-                $q->where('department_id', $department);
+                $q->where('departement_id', $department);
             });
         }
 
@@ -982,19 +991,37 @@ class ReportController extends Controller
 
         $transformedData = $data->map(function ($pr) {
             return [
-                'purchases_number' => $pr->purchases_number,
-                'user' => $pr->user->name ?? '',
+                'po_no' => $pr->purchaseRequisitions->first()->no_po ?? '',
+                'pr_no' => $pr->purchaseRequisitions->first()->purchase_requisition_number ?? '',
+                'quatation_no' => $pr->purchases_number,
+                'requested_by' => $pr->user->name ?? '',
+                'requester' => $pr->createdBy->name ?? '',
                 'document_type' => $pr->document_type,
                 'purchasing_groups' => $pr->purchasing_groups,
+                'cost_center' => $pr->purchaseRequisitions->first()->cost_center ?? '',
                 'delivery_date' => $pr->delivery_date,
                 'storage_locations' => $pr->storage_locations,
                 'total_vendor' => $pr->total_vendor,
-                'total_item' => $pr->total_item,
-                'status' => $pr->status->name,
-                'created_by' => $pr->createdBy->name ?? '',
+                'attachment' => $pr->purchaseRequisitions->first()->attachment,
+                'propose_vendor' => $pr->vendorsWinner->name,
+                'status_pr' => $pr->purchaseRequisitions->first()->status,
+                'status_po' => $pr->status->name,
+                'po_date' => $pr->created_at,
+                'currency' => '',
+                'request_date' => $pr->purchaseRequisitions->first()->requisition_date,
                 'created_at' => $pr->created_at,
-                'no_po' => $pr->purchaseRequisitions->first()->no_po ?? '',
-                'no_pr' => $pr->purchaseRequisitions->first()->purchase_requisition_number ?? '',
+                'is_cashAdvance' => $pr->is_cashAdvance,
+                'amount' => $pr->cashAdvancePurchases->nominal ?? '',
+                'percentage' => 1,
+                'reference' => $pr->cashAdvancePurchases->reference ?? '',
+                'qty' => $pr->cashAdvancePurchases->unit->qty,
+                'unit_price' => $pr->cashAdvancePurchases->unit->unit_price,
+                'account_assignment' => $pr->cashAdvancePurchases->unit->account_assignment_categories,
+                'material_group' => $pr->cashAdvancePurchases->unit->material_group,
+                'material_number' => $pr->cashAdvancePurchases->unit->material_number,
+                'uom' => $pr->cashAdvancePurchases->unit->uom,
+                'tax' => $pr->cashAdvancePurchases->unit->tax,
+                'short_text' => $pr->cashAdvancePurchases->unit->short_text,
             ];
         });
 
@@ -1026,13 +1053,13 @@ class ReportController extends Controller
     {
         $data = Vendor::with('masterBusinesPartnerss') // Eager load the relationship
             ->where('winner', true) // Filter winners
-            ->get(['id', 'winner']); // Select columns only from the `vendors` table
+            ->get(); // Select columns only from the `vendors` table
 
         // Map related data to the result
         $data = $data->map(function ($vendor) {
             return [
                 'id' => $vendor->id,
-                'vendor' => $vendor->masterBusinesPartnerss->name_one ?? null, // Access related column
+                'vendor' => $vendor->masterBusinesPartnerss->name_one ?? '', // Access related column
             ];
         });
 
