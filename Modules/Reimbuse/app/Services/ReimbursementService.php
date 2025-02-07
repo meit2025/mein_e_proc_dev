@@ -3,9 +3,13 @@
 namespace Modules\Reimbuse\Services;
 
 use App\Jobs\SapJobs;
+use App\Jobs\SendNotification;
+use App\Mail\ChangeStatus;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Modules\Approval\Models\Approval as ApprovalModels;
 use Modules\Reimbuse\Models\Reimburse;
 use Modules\Reimbuse\Models\ReimburseGroup;
 use Modules\Reimbuse\Models\ReimburseProgress;
@@ -22,6 +26,7 @@ class ReimbursementService
 
     public function __construct(CheckApproval $approvalServices)
     {
+        date_default_timezone_set('Asia/Jakarta');
         $this->approvalServices = $approvalServices;
     }
     protected $validator_rule_group = [
@@ -109,6 +114,15 @@ class ReimbursementService
                 'value'     => $balance
             ];
             $this->approvalServices->Payment((object)$parseForApproval, true, $group->id, 'REIM');
+
+            // send notif email to approver
+            $baseurl = env('APP_URL') .  '/reimburse/detail/' .  $group->id;
+            $getApproval = ApprovalModels::where('document_id', $group->id)->where('document_name', 'REIM')->orderBy('id', 'ASC')->first();
+            $getUserApproval = User::where('id', $getApproval->user_id)->first();
+            $reimburseGroup = ReimburseGroup::with(['reimburses.reimburseType'])->find($group->id);
+            $reimburseGroup->notes = '';
+
+            Mail::to($getUserApproval->email)->send(new ChangeStatus($getUserApproval->id, 'Reimbursement', 'Approver', '', null, $reimburseGroup, null, $baseurl));
 
             // $reim = new ReimburseServices();
             // $reim->processTextData($group->id);

@@ -294,14 +294,14 @@ class ApprovalController extends Controller
                             $findUser = User::where('nip', $model->requester)->first();
                             $reimburseGroup = ReimburseGroup::with(['reimburses.reimburseType'])->find($request->id);
                             $reimburseGroup->notes = isset($request->note) ? $request->note : '';
+                            $getApproval = Approval::where(['document_id' => $request->id, 'document_name' => 'REIM', 'status_id' => 'Waiting'])->orderBy('id', 'ASC')->first();
 
-                            SendNotification::dispatch($findUser,  $message, $baseurl);
-                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimbursement', $request->status, '', null, $reimburseGroup, null, $baseurl));
-
-
-                            if ($findUser->id !== $model->request_created_by) {
-                                $findcreatedBy = User::find($model->request_created_by);
-                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Reimbursement', $request->status, '', null, $reimburseGroup, null, $baseurl));
+                            if (in_array($statusId, [3,4,6])) {
+                                SendNotification::dispatch($findUser,  $message, $baseurl);
+                                Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimbursement', $request->status, '', null, $reimburseGroup, null, $baseurl));
+                            }else if ($statusId == 1 && !empty($getApproval)) {
+                                $findcreatedBy = User::find($getApproval->user_id);
+                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Reimbursement', 'Approver', '', null, $reimburseGroup, null, $baseurl));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
                             }
                             break;
