@@ -278,7 +278,7 @@ class ApprovalController extends Controller
                             SendNotification::dispatch($findUser,  $message, $baseurl);
                             $purchase = $modelMap[$request->type]::with('vendorsWinner.units', 'vendorsWinner.masterBusinesPartnerss', 'createdBy', 'user', 'purchaseRequisitions')->find($request->id);
                             // find pr number
-                            $pr = !empty($purchase->purchaseRequisitions) ? $purchase->purchaseRequisitions[0]->purchase_requisition_number : $purchase->purchases_number;
+                            $pr = $purchase->purchases_number;
 
 
                             Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Purchase Requisition', $request->status, $pr, $purchase, null, null, $baseurl));
