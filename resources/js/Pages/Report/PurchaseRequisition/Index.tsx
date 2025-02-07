@@ -225,8 +225,8 @@ export const Index = () => {
                             <option value="">All Types</option>
                             {types.map((typeOption) => (
                                 <option
-                                    key={typeOption.id}
-                                    value={typeOption.id}
+                                    key={typeOption.purchasing_doc}
+                                    value={typeOption.purchasing_doc}
                                 >
                                     {typeOption.purchasing_doc}
                                 </option>
