@@ -113,6 +113,7 @@ const FormFileUpload: React.FC<FormFileUploadProps> = ({
           <span style={{ marginLeft: '6rem', marginTop: '0.5rem', fontSize: '0.75rem' }}>
             {allowedExtensions.length > 0 && <>Allowed types: {allowedExtensions.join(', ')}</>}
             <br></br>
+            <p>Please Upload Your Quotation Here</p>
             {errors[fieldName] && (
               <FormHelperText error>{String(errors[fieldName]?.message)}</FormHelperText>
             )}
