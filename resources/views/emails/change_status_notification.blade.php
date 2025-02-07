@@ -105,7 +105,7 @@
                                 </li>
                             </ul>
                             @endforeach
-                            
+
                             Rejection Reason: {{ $reimburseGroup->notes }}
                             <br>
                             Please review the request and make necessary adjustments if required.
