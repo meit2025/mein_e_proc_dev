@@ -192,8 +192,8 @@ class ReimbuseController extends Controller
 
             $perPage = $request->get('per_page', 10);
             $sortBy = $request->get('sort_by', 'id');
-            $sortDirection = $request->get('sort_direction', 'asc');
-            $query->orderBy($sortBy, 'desc');
+            $sortDirection = $request->get('sort_direction', 'desc');
+            $query->orderBy($sortBy, $sortDirection);
             $data = $query->paginate($perPage);
             $data->getCollection()->transform(function ($map) {
                 $balance = 0;
@@ -217,7 +217,7 @@ class ReimbuseController extends Controller
                         'code' =>
                         $map->status->code
                     ],
-                    'createdDate' => $map->created_at,
+                    'created_at' => $map->created_at,
 
                 ];
             });
