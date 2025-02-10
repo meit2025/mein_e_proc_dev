@@ -45,6 +45,7 @@ class TextPrServices
 
     private function preparePurchaseRequisitionData($pr)
     {
+        $pg =  explode("-", $pr->purchasing_group);
         return [
             'code_transaction' => $pr->code_transaction, // code_transaction
             'purchase_requisition_number' => $pr->purchase_requisition_number, // banfn
@@ -55,8 +56,8 @@ class TextPrServices
             'document_type' => $pr->document_type, //bsart
             'valuation_type' => $pr->valuation_type, //bwtar
             'is_closed' => $pr->is_closed, // ebakz
-            'purchasing_group' => $pr->purchasing_group, // perlu input // ekgrp
-            'purchasing_organization' => $pr->purchasing_organization, // ekorg
+            'purchasing_group' => count($pg) > 0 ? $pg[0] : '', // perlu input // ekgrp
+            'purchasing_organization' => count($pg) > 0 ? $pg[0] : '', // ekorg
             'account_assignment_category' => $pr->account_assignment_category, // knttp
             'item_delivery_date' => $pr->item_delivery_date, // lfdat
             'storage_location' => $pr->storage_location, // lgort
