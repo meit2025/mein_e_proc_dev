@@ -15,8 +15,8 @@ interface ReportType {
 };
 
 interface ReportVendor {
-    id: string;
     vendor: string;
+    vendor_name: string;
 }
 
 interface ReportDepartment {
@@ -245,10 +245,10 @@ export const Index = () => {
                             <option value="">All Vendor</option>
                             {vendors.map((vendorOption) => (
                                 <option
-                                    key={vendorOption.id}
-                                    value={vendorOption.id}
+                                    key={vendorOption.vendor}
+                                    value={vendorOption.vendor}
                                 >
-                                    {vendorOption.vendor}
+                                    {vendorOption.vendor_name}
                                 </option>
                             ))}
                         </select>
