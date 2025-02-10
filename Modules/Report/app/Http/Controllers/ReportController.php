@@ -62,7 +62,7 @@ class ReportController extends Controller
             $cost_center = MasterCostCenter::select('id', 'cost_center')->get();
             $taxes = Pajak::select('id', 'mwszkz')->get();
 
-            $types = MasterTypeReimburse::select('id', 'name')->get();
+            $types = MasterTypeReimburse::select('code', 'name')->get();
             $statuses = MasterStatus::select('code', 'name')->get();
             $departments = MasterDepartment::select('id', 'name')->get();
 
@@ -121,7 +121,7 @@ class ReportController extends Controller
             }
             if ($type) {
                 $query->whereHas('reimburses', function ($q) use ($type) {
-                    $q->where('type', $type);
+                    $q->where('reimburse_type', $type);
                 });
             }
 
