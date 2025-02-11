@@ -839,6 +839,7 @@ class ReportController extends Controller
         $type = $request->get('type');
         $vendor = $request->get('vendor');
         $department = $request->get('department');
+        $userData = false;
         $filterableColumns = [
             'user_id',
             'document_type',
@@ -902,8 +903,11 @@ class ReportController extends Controller
                 $q->where('departement_id', $department);
             });
         }
+        if (Auth::user()->is_admin != '1') {
+            $userData = true;
+        }
 
-        $data = $this->filterAndPaginateHasJoin($request, $data, $filterableColumns,  $hasColumns, true);
+        $data = $this->filterAndPaginateHasJoin($request, $data, $filterableColumns,  $hasColumns, $userData);
         return $this->successResponse($data);
     }
 
@@ -915,6 +919,7 @@ class ReportController extends Controller
         $type = $request->get('type');
         $vendor = $request->get('vendor');
         $department = $request->get('department');
+        $userData = false;
 
         $filterableColumns = [
             'user_id',
@@ -978,7 +983,7 @@ class ReportController extends Controller
         }
         if ($vendor) {
             $data->whereHas('vendors', function ($q) use ($vendor) {
-                $q->where('id', $vendor);
+                $q->where('vendor', $vendor);
             });
         }
         if ($department) {
@@ -987,7 +992,11 @@ class ReportController extends Controller
             });
         }
 
-        $data = $this->filterAndNotPaginateHasJoin($request, $data, $filterableColumns, $hasColumns, true);
+        if (Auth::user()->is_admin != '1') {
+            $userData = true;
+        }
+
+        $data = $this->filterAndNotPaginateHasJoin($request, $data, $filterableColumns, $hasColumns, $userData);
 
         $transformedData = $data->map(function ($pr) {
             return [
@@ -1053,15 +1062,16 @@ class ReportController extends Controller
     {
         $data = Vendor::with('masterBusinesPartnerss') // Eager load the relationship
             ->where('winner', true) // Filter winners
-            ->get(); // Select columns only from the `vendors` table
+            ->get();
 
         // Map related data to the result
         $data = $data->map(function ($vendor) {
             return [
-                'id' => $vendor->id,
-                'vendor' => $vendor->masterBusinesPartnerss->name_one ?? '', // Access related column
+                'vendor' => $vendor->vendor,
+                'vendor_name' => $vendor->masterBusinesPartnerss->name_one ?? '', // Access related column
             ];
-        });
+        })->unique('vendor') // Ensure uniqueness based on 'vendor' column
+            ->values(); // Reset collection keys
 
         return $this->successResponse($data);
     }
