@@ -22,6 +22,7 @@ use Modules\Master\Http\Controllers\MasterTypeReimburseController;
 use Modules\Master\Http\Controllers\MasterTypeReimburseUserAssignController;
 use Modules\Master\Http\Controllers\OrderController;
 use Modules\Master\Http\Controllers\PajakController;
+use Modules\Master\Http\Controllers\CurrencyController;
 use Modules\Master\Http\Controllers\PurchasingGroupController;
 use Modules\Master\Http\Controllers\ReconController;
 use Modules\Master\Http\Controllers\StorageLocationController;
@@ -384,6 +385,36 @@ Route::group(['middleware' => 'auth'], function () {
                 return inertia('MasterPr/Pajak/Update', ['id' => $id]);
             })->middleware(PermissionMiddleware::class . ':master pr tax update');
         });
+
+        Route::group(['prefix' => 'currency', 'middleware' => 'auth'], function () {
+            Route::get('/', function () {
+                return inertia('MasterPr/Currency/Index');
+            })->middleware(PermissionMiddleware::class . ':master pr currency view');
+
+            Route::get('/create', function () {
+                return inertia('MasterPr/Currency/Create');
+            })->middleware(PermissionMiddleware::class . ':master pr currency create');
+
+            Route::get('/update/{id}', function ($id) {
+                return inertia('MasterPr/Currency/Update', ['id' => $id]);
+            })->middleware(PermissionMiddleware::class . ':master pr currency update');
+        });
+
+        // Route::group(['prefix' => 'pajak', 'middleware' => 'auth'], function () {
+        //     Route::get('/', function () {
+        //         return inertia('MasterPr/Pajak/Index');
+        //     })->middleware(PermissionMiddleware::class . ':master pr tax view');
+
+        //     Route::get('/create', function () {
+        //         return inertia('MasterPr/Pajak/Create');
+        //     })->middleware(PermissionMiddleware::class . ':master pr tax create');
+
+        //     Route::get('/update/{id}', function ($id) {
+        //         return inertia('MasterPr/Pajak/Update', ['id' => $id]);
+        //     })->middleware(PermissionMiddleware::class . ':master pr tax update');
+        // });
+
+
     });
 
 
@@ -515,6 +546,33 @@ Route::group(['middleware' => 'auth'], function () {
             Route::delete('/delete/{id}', [PajakController::class, 'destroy'])->name('master.pajak.destroy')
                 ->middleware(PermissionMiddleware::class . ':master pr tax delete');
         });
+
+        Route::group(['prefix' => 'currency'], function () {
+            Route::get('/list', [CurrencyController::class, 'index'])->name('master.currency.index')
+                ->middleware(PermissionMiddleware::class . ':master pr currency view');
+            Route::post('/create', [CurrencyController::class, 'store'])->name('master.currency.store')
+                ->middleware(PermissionMiddleware::class . ':master pr currency create');
+            Route::post('/update/{id}', [CurrencyController::class, 'update'])->name('master.currency.update')
+                ->middleware(PermissionMiddleware::class . ':master pr currency update');
+            Route::get('/detail/{id}', [CurrencyController::class, 'show'])->name('master.currency.show')
+                ->middleware(PermissionMiddleware::class . ':master pr currency view');
+            Route::delete('/delete/{id}', [CurrencyController::class, 'destroy'])->name('master.currency.destroy')
+                ->middleware(PermissionMiddleware::class . ':master pr currency delete');
+        });
+
+        Route::group(['prefix' => 'exhcange_rate'], function () {
+            Route::get('/list', [PajakController::class, 'index'])->name('master.exchangeRate.index')
+                ->middleware(PermissionMiddleware::class . ':master pr exchange rate view');
+            Route::post('/create', [PajakController::class, 'store'])->name('master.exchangeRate.store')
+                ->middleware(PermissionMiddleware::class . ':master pr exchange rate create');
+            Route::post('/update/{id}', [PajakController::class, 'update'])->name('master.exchangeRate.update')
+                ->middleware(PermissionMiddleware::class . ':master pr exchange rate update');
+            Route::get('/detail/{id}', [PajakController::class, 'show'])->name('master.exchangeRate.show')
+                ->middleware(PermissionMiddleware::class . ':master pr exchange rate view');
+            Route::delete('/delete/{id}', [PajakController::class, 'destroy'])->name('master.exchangeRate.destroy')
+                ->middleware(PermissionMiddleware::class . ':master pr exchange rate delete');
+        });
+
         Route::group(['prefix' => 'data-dropdown'], function () {
             Route::get('/list', [DataDropdownController::class, 'index'])->name('master.data-dropdown.index');
             Route::post('/create', [DataDropdownController::class, 'store'])->name('master.data-dropdown.store');

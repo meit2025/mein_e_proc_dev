@@ -21,7 +21,7 @@ export const columns: GridColDef[] = [
   { field: 'request_by', headerName: 'Requested by', width: 200, filterable: true, sortable: false },
   {
     field: 'balance',
-    headerName: 'Total Balance',
+    headerName: 'Reimburse Cost',
     width: 200,
     filterable: true,
     sortable: false,
@@ -29,11 +29,11 @@ export const columns: GridColDef[] = [
       return formatRupiah(params.row.balance);
     },
   },
-  { field: 'remark', headerName: 'Remark', width: 200, filterable: true, sortable: false },
+  { field: 'remark', headerName: 'Header Remark', width: 200, filterable: true, sortable: false },
   { field: 'form', headerName: 'Reimburse Form', width: 200, filterable: true, sortable: false },
   {
     field: 'status',
-    headerName: 'Status',
+    headerName: 'Status',   
     width: 200,
     filterable: true,
     sortable: false,
