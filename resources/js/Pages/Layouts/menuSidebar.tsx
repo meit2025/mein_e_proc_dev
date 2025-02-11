@@ -27,6 +27,7 @@ import { LIST_PAGE_MASTER_MATERIAL_GROUP } from '@/endpoint/materialGroup/page';
 import { LIST_PAGE_MASTER_UOM } from '@/endpoint/uom/page';
 import { LIST_PAGE_MASTER_PAJAK } from '@/endpoint/pajak/page';
 import { LIST_PAGE_MASTER_CURRENCY } from '@/endpoint/currency/page';
+import { LIST_PAGE_MASTER_EXCHANGERATE } from '@/endpoint/exchangeRate/page';
 import { LIST_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
 import { PAGE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/page';
 import { PAGE_REIMBURSE, PAGE_MY_REIMBURSE } from '@/endpoint/reimburse/page';
@@ -840,7 +841,7 @@ export const sidebarAdmin = () => [
                     },
                     {
                         name: 'Exhange Rate',
-                        route: LIST_PAGE_MASTER_BUSINESS_PARTNER,
+                        route: LIST_PAGE_MASTER_EXCHANGERATE,
                         role: [
                             'master pr exchange rate create',
                             'master pr exchange rate view',

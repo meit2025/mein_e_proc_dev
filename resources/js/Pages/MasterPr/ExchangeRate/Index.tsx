@@ -1,11 +1,11 @@
 import DataGridComponent from '@/components/commons/DataGrid';
-import { DELET_MASTER_CURRENCY, GET_MASTER_CURRENCY } from '@/endpoint/currency/api';
-import { CREATE_PAGE_MASTER_CURRENCY, EDIT_PAGE_MASTER_CURRENCY } from '@/endpoint/currency/page';
+import { DELET_MASTER_EXCHANGERATE, GET_MASTER_EXCHANGERATE } from '@/endpoint/exchangeRate/api';
+import { CREATE_PAGE_MASTER_EXCHANGERATE, EDIT_PAGE_MASTER_EXCHANGERATE } from '@/endpoint/exchangeRate/page';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import { ReactNode } from 'react';
 import { columns } from './model/listModel';
 
-const roleAkses = 'master pr currency';
+const roleAkses = 'master pr exchange rate';
 const roleConfig = {
   detail: `${roleAkses} view`,
   create: `${roleAkses} create`,
@@ -18,10 +18,10 @@ export const Index = () => {
       role={roleConfig}
       columns={columns}
       url={{
-        url: GET_MASTER_CURRENCY,
-        addUrl: CREATE_PAGE_MASTER_CURRENCY,
-        editUrl: EDIT_PAGE_MASTER_CURRENCY,
-        deleteUrl: DELET_MASTER_CURRENCY,
+        url: GET_MASTER_EXCHANGERATE,
+        addUrl: CREATE_PAGE_MASTER_EXCHANGERATE,
+        editUrl: EDIT_PAGE_MASTER_EXCHANGERATE,
+        deleteUrl: DELET_MASTER_EXCHANGERATE,
       }}
       labelFilter='search'
     />
@@ -30,7 +30,7 @@ export const Index = () => {
 
 // Assign layout to the page
 Index.layout = (page: ReactNode) => (
-  <MainLayout title='Currency' description='Currency List'>
+  <MainLayout title='Exchange Rate' description='Exchange Rate List'>
     {page}
   </MainLayout>
 );

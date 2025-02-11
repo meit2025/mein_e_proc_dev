@@ -8,12 +8,6 @@ use App\Models\Currency;
 
 class CurrencyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    // 'desimal',
-    // 'mwszkz',
-    // 'description'
     public function index(Request $request)
     {
         $query =  Currency::query();
