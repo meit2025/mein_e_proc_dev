@@ -809,8 +809,11 @@ class ReportController extends Controller
                 'status' => $businessTrip->status,
                 'purpose' => $businessTrip->purposeType,
                 'remarks' => $businessTrip->remarks,
+                'is_declaration' => $isDeclaration,
                 'destinations' => $businessTrip->businessTripDestination->map(function ($destination) use ($isDeclaration) {
                     return [
+                        'start_date' => $destination->business_trip_start_date,
+                        'end_date' => $destination->business_trip_end_date,
                         'destination' => $destination->destination,
                         'date' => $isDeclaration ? $destination->created_at : $destination->business_trip_start_date,
                         'allowances' => $destination->detailDestinationTotal->map(function ($item) {
