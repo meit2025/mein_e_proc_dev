@@ -165,6 +165,8 @@ class MyReimburseController extends Controller
                     reimburses.balance as balance, 
                     mtr.interval_claim_period as has_interval_claim, 
                     pr.is_closed as status_closed,
+                    pr.clearing_status as clearing_status,
+                    pr.status as pr_status,
                     CASE 
                         WHEN 
                             mtr.interval_claim_period is not null
@@ -194,8 +196,8 @@ class MyReimburseController extends Controller
                         ->whereIn('rg.status_id', [1, 3, 5]);
                 })->get()->toArray();
 
-                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return $value['status_closed'] != 'S' && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
-                $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return $value['status_closed'] == 'S' && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
+                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] != 'S' && $value['status_closed'] != 'X' && $value['pr_status'] != 'X') && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
+                $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] == 'S' && $value['status_closed'] == 'S' && $value['pr_status'] != 'X') && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
 
                 // Remaining Balance
                 $remainingBalance = $map->unassign_but_has_reimburse == 1 ? 0 : (int)$maximumBalance - ($paidBalance + $unpaidBalance);
@@ -287,8 +289,8 @@ class MyReimburseController extends Controller
                         ->whereIn('rg.status_id', [1, 3, 5]);
                 })->orderByDesc('reimburses.id')->get()->toArray();
 
-                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return $value['status_closed'] != 'S' && (($value['interval_claim_period'] !== null && $value['on_interval'] == 1) || $value['interval_claim_period'] == null); }), 'balance'));
-                $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return $value['status_closed'] == 'S' && (($value['interval_claim_period'] !== null && $value['on_interval'] == 1) || $value['interval_claim_period'] == null); }), 'balance'));
+                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] != 'S' && $value['status_closed'] != 'X' && $value['pr_status'] != 'X') && (($value['interval_claim_period'] !== null && $value['on_interval'] == 1) || $value['interval_claim_period'] == null); }), 'balance'));
+                $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] == 'S' && $value['status_closed'] == 'S' && $value['pr_status'] != 'X') && (($value['interval_claim_period'] !== null && $value['on_interval'] == 1) || $value['interval_claim_period'] == null); }), 'balance'));
 
                 // Remaining Balance
                 $remainingBalance   = (int)$maximumBalance - ($paidBalance + $unpaidBalance);
