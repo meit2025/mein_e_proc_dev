@@ -17,24 +17,26 @@ export const columns: GridColDef[] = [
       </span>
     ),
   },
-  { field: 'request_for', headerName: 'Reimburse for', width: 200, filterable: true },
-  { field: 'request_by', headerName: 'Requested by', width: 200, filterable: true },
+  { field: 'request_for', headerName: 'Reimburse for', width: 200, filterable: true, sortable: false },
+  { field: 'request_by', headerName: 'Requested by', width: 200, filterable: true, sortable: false },
   {
     field: 'balance',
-    headerName: 'Total Balance',
+    headerName: 'Reimburse Cost',
     width: 200,
     filterable: true,
+    sortable: false,
     renderCell: (params: any) => {
       return formatRupiah(params.row.balance);
     },
   },
-  { field: 'remark', headerName: 'Remark', width: 200, filterable: true },
-  { field: 'form', headerName: 'Reimburse Form', width: 200, filterable: true },
+  { field: 'remark', headerName: 'Header Remark', width: 200, filterable: true, sortable: false },
+  { field: 'form', headerName: 'Reimburse Form', width: 200, filterable: true, sortable: false },
   {
     field: 'status',
-    headerName: 'Status',
+    headerName: 'Status',   
     width: 200,
     filterable: true,
+    sortable: false,
     renderCell: (params: any) => {
       return (
         <CustomStatus
@@ -46,12 +48,12 @@ export const columns: GridColDef[] = [
     },
   },
   {
-    field: 'createdDate',
+    field: 'created_at',
     headerName: 'Created Date',
     width: 200,
     filterable: true,
     renderCell: (params: any) => {
-      const date = new Date(params.row.createdDate);
+      const date = new Date(params.row.created_at);
       const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
       return formattedDate;
     },

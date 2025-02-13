@@ -178,7 +178,7 @@ export const Index = ({ listPurposeType, listDestination, users, departments, st
                 isHistory={false}
                 // onCreate={openFormHandler}
                 onExportXls={async (x: string) => await exporter(x)}
-                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&destination=${destination || ''}&`}
+                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&destination=${destination || ''}&department=${department || ''}&`}
                 columns={columns}
                 url={{
                     url: REPORT_BT_DEC_LIST,
