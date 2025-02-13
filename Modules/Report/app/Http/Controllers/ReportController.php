@@ -423,7 +423,6 @@ class ReportController extends Controller
             ->search(request(['search']))
             ->get();
 
-        dd($data);
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
             $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
@@ -585,10 +584,9 @@ class ReportController extends Controller
                 ->whereDate('created_at', '<=', $endDate);
         }
         if ($status) {
-            $query->where('status_id', $status);
-            // $query->whereHas('status', function ($q) use ($status) {
-            //     $q->where('code', $status);
-            // });
+            $query->whereHas('status', function ($q) use ($status) {
+                $q->where('code', $status);
+            });
         }
         if ($type) {
             $query->whereHas('purposeType', function ($q) use ($type) {
