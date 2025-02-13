@@ -1,0 +1,1 @@
+const e=[{type:"input",name:"code",label:"Country Code",placeholder:"Enter currency",required:!0},{type:"input",name:"name",label:"Country",placeholder:"Enter country",required:!0}];export{e as formModel};

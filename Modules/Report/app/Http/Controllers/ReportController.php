@@ -423,7 +423,6 @@ class ReportController extends Controller
             ->search(request(['search']))
             ->get();
 
-        dd($data);
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
             $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
@@ -585,10 +584,9 @@ class ReportController extends Controller
                 ->whereDate('created_at', '<=', $endDate);
         }
         if ($status) {
-            $query->where('status_id', $status);
-            // $query->whereHas('status', function ($q) use ($status) {
-            //     $q->where('code', $status);
-            // });
+            $query->whereHas('status', function ($q) use ($status) {
+                $q->where('code', $status);
+            });
         }
         if ($type) {
             $query->whereHas('purposeType', function ($q) use ($type) {
@@ -809,8 +807,11 @@ class ReportController extends Controller
                 'status' => $businessTrip->status,
                 'purpose' => $businessTrip->purposeType,
                 'remarks' => $businessTrip->remarks,
+                'is_declaration' => $isDeclaration,
                 'destinations' => $businessTrip->businessTripDestination->map(function ($destination) use ($isDeclaration) {
                     return [
+                        'start_date' => $destination->business_trip_start_date,
+                        'end_date' => $destination->business_trip_end_date,
                         'destination' => $destination->destination,
                         'date' => $isDeclaration ? $destination->created_at : $destination->business_trip_start_date,
                         'allowances' => $destination->detailDestinationTotal->map(function ($item) {
@@ -839,6 +840,7 @@ class ReportController extends Controller
         $type = $request->get('type');
         $vendor = $request->get('vendor');
         $department = $request->get('department');
+        $userData = false;
         $filterableColumns = [
             'user_id',
             'document_type',
@@ -902,8 +904,11 @@ class ReportController extends Controller
                 $q->where('departement_id', $department);
             });
         }
+        if (Auth::user()->is_admin != '1') {
+            $userData = true;
+        }
 
-        $data = $this->filterAndPaginateHasJoin($request, $data, $filterableColumns,  $hasColumns, true);
+        $data = $this->filterAndPaginateHasJoin($request, $data, $filterableColumns,  $hasColumns, $userData);
         return $this->successResponse($data);
     }
 
@@ -915,6 +920,7 @@ class ReportController extends Controller
         $type = $request->get('type');
         $vendor = $request->get('vendor');
         $department = $request->get('department');
+        $userData = false;
 
         $filterableColumns = [
             'user_id',
@@ -978,7 +984,7 @@ class ReportController extends Controller
         }
         if ($vendor) {
             $data->whereHas('vendors', function ($q) use ($vendor) {
-                $q->where('id', $vendor);
+                $q->where('vendor', $vendor);
             });
         }
         if ($department) {
@@ -987,7 +993,11 @@ class ReportController extends Controller
             });
         }
 
-        $data = $this->filterAndNotPaginateHasJoin($request, $data, $filterableColumns, $hasColumns, true);
+        if (Auth::user()->is_admin != '1') {
+            $userData = true;
+        }
+
+        $data = $this->filterAndNotPaginateHasJoin($request, $data, $filterableColumns, $hasColumns, $userData);
 
         $transformedData = $data->map(function ($pr) {
             return [
@@ -1053,15 +1063,16 @@ class ReportController extends Controller
     {
         $data = Vendor::with('masterBusinesPartnerss') // Eager load the relationship
             ->where('winner', true) // Filter winners
-            ->get(); // Select columns only from the `vendors` table
+            ->get();
 
         // Map related data to the result
         $data = $data->map(function ($vendor) {
             return [
-                'id' => $vendor->id,
-                'vendor' => $vendor->masterBusinesPartnerss->name_one ?? '', // Access related column
+                'vendor' => $vendor->vendor,
+                'vendor_name' => $vendor->masterBusinesPartnerss->name_one ?? '', // Access related column
             ];
-        });
+        })->unique('vendor') // Ensure uniqueness based on 'vendor' column
+            ->values(); // Reset collection keys
 
         return $this->successResponse($data);
     }

@@ -79,8 +79,15 @@
 
                 @if ($type == 'Reimbursement')
                 <br><br>
-                @if ($status == 'Rejected')
+                @if ($status == 'Approved')
+                There are some Request Fully Approved. Kindly find the details below :
+                @elseif ($status == 'Rejected')
                 We regret to inform you that your reimbursement request has been rejected. Below are the details:
+                @elseif ($status == 'Revise')
+                Your reimbursement request requires revision. Below are the details:
+                @elseif ($status == 'Approver')
+                You have a pending approval request for the Reimbursement. Below are the details:
+                @endif
                 <br><br>
 
                 Reimbursement Number: {{$reimburseGroup->code}}
@@ -105,10 +112,24 @@
                 </ul>
                 @endforeach
 
-                Rejection Reason: {{ $reimburseGroup->notes }}
-                <br>
-                Please review the request and make necessary adjustments if required.
+                @if ($status == 'Approved')
+                Approve : {{ $reimburseGroup->notes }}
+                @elseif ($status == 'Rejected')
+                Rejection : {{ $reimburseGroup->notes }}
+                @elseif ($status == 'Revise')
+                Revision : {{ $reimburseGroup->notes }}
                 @endif
+                <br>
+                @if ($status == 'Rejected')
+                Please review the request and make necessary adjustments if required.
+                @elseif ($status == 'Revise')
+                Please review then resubmit the request and make necessary adjustments if required.
+                @elseif ($status == 'Approver')
+                Please review then resubmit the request and make necessary adjustments if required.
+                @endif
+                <br>
+                <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now'
+                    : 'View Detail'}}</a>
                 <br>
                 @endif
 
