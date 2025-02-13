@@ -57,7 +57,7 @@ class TextPrServices
             'valuation_type' => $pr->valuation_type, //bwtar
             'is_closed' => $pr->is_closed, // ebakz
             'purchasing_group' => count($pg) > 0 ? $pg[0] : '', // perlu input // ekgrp
-            'purchasing_organization' => count($pg) > 0 ? $pg[0] : '', // ekorg
+            'purchasing_organization' => $pr->purchasing_organization, // ekorg
             'account_assignment_category' => $pr->account_assignment_category, // knttp
             'item_delivery_date' => $pr->item_delivery_date, // lfdat
             'storage_location' => $pr->storage_location, // lgort
