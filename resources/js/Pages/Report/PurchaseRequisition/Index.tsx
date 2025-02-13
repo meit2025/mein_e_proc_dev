@@ -276,7 +276,7 @@ export const Index = () => {
             </div>
             <DataGridComponent
                 onExportXls={async (x: string) => await exporter(x)}
-                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&vendor=${vendor || ''}&`}
+                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&vendor=${vendor || ''}&department=${department || ''}&`}
                 columns={columns}
                 url={urlConfig}
                 labelFilter='search'
