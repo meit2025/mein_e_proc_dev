@@ -10,6 +10,8 @@ import { DataGrid } from '@mui/x-data-grid';
 import { columnsItem } from './listModel';
 import { Link } from '@inertiajs/react';
 import { useAlert } from '@/contexts/AlertContext';
+import axiosInstance from '@/axiosInstance';
+import axios from 'axios';
 
 const ArrayForm = ({
   dataIndex,
@@ -123,70 +125,95 @@ const ArrayForm = ({
     });
   };
   const handleClick = async () => {
-    const dataobj = getValues();
-    const id =
-      dataobj.item_id !== undefined && dataobj.item_id !== null && dataobj.item_id !== ''
-        ? dataobj.item_id
-        : `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
+    try {
+      const dataobj = getValues();
+      const id =
+        dataobj.item_id !== undefined && dataobj.item_id !== null && dataobj.item_id !== ''
+          ? dataobj.item_id
+          : `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
 
-    const newItem = {
-      id: id,
-      qty: dataobj.item_qty,
-      unit_price: dataobj.item_unit_price,
-      total_amount: dataobj.item_qty * dataobj.item_unit_price,
-      account_assignment_categories: dataobj.item_account_assignment_categories,
-      cost_center: dataobj.item_cost_center,
-      material_group: dataobj.item_material_group,
-      material_number: dataobj.item_material_number,
-      uom: dataobj.item_uom,
-      tax: dataobj.item_tax,
-      short_text: dataobj.item_short_text,
-      order_number: dataobj.item_order_number,
-      asset_number: dataobj.item_asset_number,
-      sub_asset_number: dataobj.item_sub_asset_number,
-    };
-    console.log(dataobj.action, newItem);
-    console.log(dataobj.id, newItem);
-    const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
-    let updatedItems = [];
-    if (dataobj.action === 'edit') {
-      updatedItems = currentItems.map((item: any, index: any) =>
-        item.id === dataobj.indexEdit ? newItem : item,
-      );
-    } else {
-      updatedItems = [...currentItems, newItem];
+      // fetch currancy
+      let currency_total = 0;
+      if (dataobj.is_conversion_currency) {
+        const response = await axiosInstance.post(
+          '/currency-conversion',
+          {
+            from: dataobj.currency_from, // Mata uang asal
+            to: dataobj.currency_to, // Mata uang tujuan
+            amount: parseInt(dataobj.item_qty) * parseInt(dataobj.item_unit_price), // Jumlah yang dikonversi
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+        currency_total = response.data.data;
+      }
+
+      const newItem = {
+        id: id,
+        qty: dataobj.item_qty,
+        unit_price: dataobj.item_unit_price,
+        total_amount: dataobj.item_qty * dataobj.item_unit_price,
+        account_assignment_categories: dataobj.item_account_assignment_categories,
+        cost_center: dataobj.item_cost_center,
+        material_group: dataobj.item_material_group,
+        material_number: dataobj.item_material_number,
+        uom: dataobj.item_uom,
+        tax: dataobj.item_tax,
+        short_text: dataobj.item_short_text,
+        order_number: dataobj.item_order_number,
+        asset_number: dataobj.item_asset_number,
+        sub_asset_number: dataobj.item_sub_asset_number,
+        total_amount_conversion: currency_total,
+      };
+
+      const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
+      let updatedItems = [];
+      if (dataobj.action === 'edit') {
+        updatedItems = currentItems.map((item: any, index: any) =>
+          item.id === dataobj.indexEdit ? newItem : item,
+        );
+      } else {
+        updatedItems = [...currentItems, newItem];
+      }
+
+      // Simpan array baru ke React Hook Form state
+      setValue(`vendors[${dataIndex}].units`, updatedItems);
+      setValue('indexEdit', 0);
+      setValue('item_id', null);
+
+      const dataVendorArray = getValues('vendors').filter(
+        (item: any) => (item.winner || false) === true,
+      ); // get the vendor data
+
+      const dataVendor = dataVendorArray.length > 0 ? dataVendorArray[0] : null;
+
+      if (dataVendor !== null) {
+        const winnerUnit = dataVendor.units || [];
+
+        const totalSum = winnerUnit.reduce(
+          (sum: number, item: any) => sum + parseInt(item.total_amount),
+          0,
+        );
+        setValue('total_all_amount', totalSum);
+
+        const highestAmount = winnerUnit.reduce((max: number, item: any) => {
+          return item.unit_price > max ? parseInt(item.unit_price) : max;
+        }, 0);
+        setValue('amount_max', highestAmount);
+
+        const data = (parseInt(watch('cash_advance_purchases.dp')) / 100) * parseInt(totalSum);
+        setValue('cash_advance_purchases.nominal', data);
+      }
+
+      resetindex();
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        showToast(error.response.data.message, 'error');
+      }
     }
-
-    // Simpan array baru ke React Hook Form state
-    setValue(`vendors[${dataIndex}].units`, updatedItems);
-    setValue('indexEdit', 0);
-    setValue('item_id', null);
-
-    const dataVendorArray = getValues('vendors').filter(
-      (item: any) => (item.winner || false) === true,
-    ); // get the vendor data
-
-    const dataVendor = dataVendorArray.length > 0 ? dataVendorArray[0] : null;
-
-    if (dataVendor !== null) {
-      const winnerUnit = dataVendor.units || [];
-
-      const totalSum = winnerUnit.reduce(
-        (sum: number, item: any) => sum + parseInt(item.total_amount),
-        0,
-      );
-      setValue('total_all_amount', totalSum);
-
-      const highestAmount = winnerUnit.reduce((max: number, item: any) => {
-        return item.unit_price > max ? parseInt(item.unit_price) : max;
-      }, 0);
-      setValue('amount_max', highestAmount);
-
-      const data = (parseInt(watch('cash_advance_purchases.dp')) / 100) * parseInt(totalSum);
-      setValue('cash_advance_purchases.nominal', data);
-    }
-
-    resetindex();
   };
 
   const resetindex = () => {

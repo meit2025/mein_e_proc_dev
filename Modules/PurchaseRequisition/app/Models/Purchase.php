@@ -32,7 +32,10 @@ class Purchase extends Model
         'metode_approval',
         'chooses_approval_id',
         'total_all_amount',
-        'purchases_number'
+        'purchases_number',
+        'currency_from',
+        'currency_to',
+        'is_conversion_currency',
     ];
 
     public function getCreatedAtFormattedAttribute()

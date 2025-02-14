@@ -47,6 +47,7 @@ class PurchaseRequisition extends Model
         'purchase_id', // Foreign key for relation
 
         'code_transaction',
+        'currency',
 
         'header_not',
         'tanggal_entertainment',
