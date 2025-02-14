@@ -67,7 +67,7 @@ class TextPrServices
             'unit_of_measure' => $pr->unit_of_measure, // meins
             'quantity' => $pr->quantity, // menge
             'balance' => $pr->balance, // NILAI NYA//netpr
-            'waers' => 'IDR', // MATA UANG
+            'waers' => $pr->currency ?? 'IDR', // MATA UANG
             'tax_code' => $pr->tax_code, // mwskz
             'item_category' => $pr->item_category, // pstyp
             'short_text' => $pr->short_text, // txz01
@@ -101,7 +101,7 @@ class TextPrServices
             'code_transaction' => $ca->code_transaction,
             'belnr' => $ca->belnr, // belnr
             'company_code' => $ca->company_code, // bukrs
-            'gjahr' =>  '', // gjahr ini year
+            'gjahr' =>  $ca->gjahr, // gjahr ini year
             'currency' => 'IDR', // waers
             'document_date' => $ca->document_date, // bldat
             'budat' => $ca->budat, // budat

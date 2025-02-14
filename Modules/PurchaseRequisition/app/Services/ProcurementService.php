@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use DateTime;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Modules\Approval\Models\SettingApproval;
@@ -151,7 +152,7 @@ class ProcurementService
             'unit_of_measure' => $item->uom,
             'quantity' => $item->qty,
             'balance' => round($item->total_amount, 0),
-            'waers' => 'IDR',
+            'currency' => $procurement->currency_from ?? 'IDR', // waers
             'tax_code' => $item->tax, // mwskz
             'item_category' => '', // pstyp
             'short_text' => $item->short_text,  // txz01
@@ -188,13 +189,16 @@ class ProcurementService
         $formattedDate = Carbon::parse($cashData->document_date)->format('Y-m-d');
         $month = Carbon::parse($cashData->document_date)->format('m');
 
+        $year = $this->getFiscalYear($formattedDate);
+
+
         return [
             'extdoc' => $procurement->id,
             'purchase_id' => $procurement->id,
             'code_transaction' => 'VEN',  // code_transaction
             'belnr' =>  $procurement->id, // belnr
             'company_code' => $settings['companyCode'],
-            'gjahr' => '', // gjahr ini year
+            'gjahr' => $year, // gjahr ini year
             'currency' => 'IDR', // waers
             'document_date' => $formattedDate, // bldat
             'budat' => $formattedDate, // budat
@@ -214,5 +218,21 @@ class ProcurementService
             'amount' => $totalAmount,
             'dp' => $cashData->dp,
         ];
+    }
+
+    function getFiscalYear($date = null)
+    {
+        // Gunakan tanggal sekarang jika tidak ada input
+        $date = $date ? new DateTime($date) : new DateTime();
+
+        $year = (int) $date->format('Y');
+        $month = (int) $date->format('m');
+
+        // Jika bulan Januari - Maret, gunakan tahun sebelumnya
+        if ($month <= 3) {
+            return $year - 1;
+        } else {
+            return $year;
+        }
     }
 }

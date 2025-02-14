@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { Button, Input, FormHelperText } from '@mui/material';
 import { Controller, useFormContext } from 'react-hook-form';
-import { ChangeEvent, useState, CSSProperties } from 'react';
+import { ChangeEvent, useState, CSSProperties, ReactNode } from 'react';
 
 interface FormFileUploadProps {
   fieldLabel: string;
@@ -13,6 +13,7 @@ interface FormFileUploadProps {
   allowedExtensions?: string[];
   classNames?: string;
   onFileChangeOutside?: (file: string | null, fileName: string) => void;
+  note?: ReactNode;
 }
 
 const FormFileUpload: React.FC<FormFileUploadProps> = ({
@@ -25,6 +26,7 @@ const FormFileUpload: React.FC<FormFileUploadProps> = ({
   allowedExtensions = [],
   classNames,
   onFileChangeOutside,
+  note,
 }) => {
   const [fileName, setFileName] = useState<string | null>(null);
   const {
@@ -113,7 +115,7 @@ const FormFileUpload: React.FC<FormFileUploadProps> = ({
           <span style={{ marginLeft: '6rem', marginTop: '0.5rem', fontSize: '0.75rem' }}>
             {allowedExtensions.length > 0 && <>Allowed types: {allowedExtensions.join(', ')}</>}
             <br></br>
-            <p>Please Upload Your Quotation Here</p>
+            {note && note}
             {errors[fieldName] && (
               <FormHelperText error>{String(errors[fieldName]?.message)}</FormHelperText>
             )}
