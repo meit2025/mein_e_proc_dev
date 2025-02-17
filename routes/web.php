@@ -15,6 +15,10 @@ use Illuminate\Support\Facades\Storage;
 
 // Route::get('/login', [AuthController::class, 'login'])->name('login');
 // Route::post('/login', [AuthController::class, 'store'])->name('login.store');
+Route::get('/oke',function() {
+    $data = BusinessTrip::find(42);
+    dd($data->purchaseRequisitions);
+});
 
 Route::get('/test-upload-file', function () {
     $fileName = 'example' . date('Ymd_His') . '.txt';

@@ -145,6 +145,8 @@ export function BussinessDestinationForm({
         shift_end: '17:00',
         end_time: '17:00',
         start_time: '08:00',
+        start_date: momentStart.toDate(),
+        end_date: momentStart.toDate(),
       };
 
       detailAttedanceAppend(object);

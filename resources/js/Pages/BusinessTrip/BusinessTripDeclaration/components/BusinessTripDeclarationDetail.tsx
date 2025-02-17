@@ -247,6 +247,34 @@ const BusinessTripDeclarationDetail = () => {
                     ) : (
                     <div className="hidden"></div> // atau sesuatu yang sesuai jika tidak ada elemen
                 )}
+                <div className='mt-4'>
+                    <h1>Detail Attendace Request: </h1>
+                </div>
+                <table className='detail-table'>
+                  <tr>
+                    <th>Date</th>
+                    <th>Shift Code</th>
+                    <th>Shift Start</th>
+                    <th>Shift End</th>
+                    <th>Actual Start</th>
+                    <th>Actual End</th>
+                  </tr>
+                  {destination.business_trip_request_detail_attendance.map(
+                    (attendance: any, index: number) => (
+                      <tr key={index}>
+                        <td>{attendance.date}</td>
+                        <td>{attendance.shift_code}</td>
+                        <td>{attendance.shift_start}</td>
+                        <td>{attendance.shift_end}</td>
+                        <td>{attendance.start_date} {attendance.start_time}</td>
+                        <td>{attendance.end_date} {attendance.end_time}</td>
+                      </tr>
+                    ),
+                  )}
+                </table>
+                <div className='mt-4'>
+                    <h1>Detail Attendace Declaration: </h1>
+                </div>
                 <table className='detail-table'>
                   <tr>
                     <th>Date</th>
@@ -263,8 +291,8 @@ const BusinessTripDeclarationDetail = () => {
                         <td>{attendance.shift_code}</td>
                         <td>{attendance.shift_start}</td>
                         <td>{attendance.shift_end}</td>
-                        <td>{attendance.start_time}</td>
-                        <td>{attendance.end_time}</td>
+                        <td>{attendance.start_date} {attendance.start_time}</td>
+                        <td>{attendance.end_date} {attendance.end_time}</td>
                       </tr>
                     ),
                   )}

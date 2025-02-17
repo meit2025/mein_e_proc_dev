@@ -474,6 +474,16 @@ export const sidebarAdmin = () => [
                             'department delete',
                         ],
                     },
+                    {
+                        name: 'User Grade',
+                        route: LIST_PAGE_BUSINESS_GRADE,
+                        role: [
+                            'master business trip grade create',
+                            'master business trip grade view',
+                            'master business trip grade update',
+                            'master business trip grade delete',
+                        ],
+                    },
                 ],
             },
         ],
@@ -876,16 +886,6 @@ export const sidebarAdmin = () => [
                             'master business trip purpose type view',
                             'master business trip purpose type update',
                             'master business trip purpose type delete',
-                        ],
-                    },
-                    {
-                        name: 'Business Trip Grade',
-                        route: LIST_PAGE_BUSINESS_GRADE,
-                        role: [
-                            'master business trip grade create',
-                            'master business trip grade view',
-                            'master business trip grade update',
-                            'master business trip grade delete',
                         ],
                     },
                     {
