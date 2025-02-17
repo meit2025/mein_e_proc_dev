@@ -59,7 +59,7 @@
                     <td>{{ $item['cancels'] }}</td>
                     <td>{{ $item['status'] }}</td>
                     <td>{{ $totalBalance }}</td>
-                    <td>{{ ($totalBalance - $data->sum('balance')) }}</td>
+                    <td>{{ $item['remaining_balance'] }}</td>
                 </tr>
             @endforeach
         @endforeach

@@ -39,11 +39,14 @@ const CashAdvance = ({ disable }: { disable: boolean }) => {
     );
     const dataVendor = dataVendorArray.length > 0 ? dataVendorArray[0] : null;
     const winnerUnit = dataVendor.units || [];
-    const totalSum = winnerUnit.reduce((sum: number, item: any) => sum + item.total_amount, 0);
+    const totalSum = winnerUnit.reduce(
+      (sum: number, item: any) => sum + parseInt(item.total_amount),
+      0,
+    );
     setValue('total_all_amount', totalSum);
 
     const highestAmount = winnerUnit.reduce((max: number, item: any) => {
-      return item.total_amount > max ? item.total_amount : max;
+      return item.unit_price > max ? parseInt(item.unit_price) : max;
     }, 0);
     setValue('amount_max', highestAmount);
 

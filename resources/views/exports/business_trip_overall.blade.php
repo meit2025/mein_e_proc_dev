@@ -18,30 +18,31 @@
     </style>
 </head>
 <body>
-    <h2 style="text-align: center;">Business Trip Request Detail Report</h2>
-
     <table>
         <thead>
             <tr>
-                <th>No.</th>
-                <th>Employee No</th>
-                <th>Name</th>
-                <th>Position</th>
-                <th>Department</th>
-                <th>Division</th>
-                <th>Requested By</th>
-                <th>Date</th>
-                <th>Request No</th>
-                <th>Status</th>
-                <th>Purpose</th>
-                <th>Remarks</th>
+                <th rowspan="2">No.</th>
+                <th rowspan="2">Employee No</th>
+                <th rowspan="2">Employee Name</th>
+                <th rowspan="2">Position</th>
+                <th rowspan="2">Dept</th>
+                <th rowspan="2">Division</th>
+                <th rowspan="2">Requested By</th>
+                <th rowspan="2">Request Date</th>
+                <th colspan="6">Business Trip</th>
+                <th colspan="3">Business Trip Declaration</th>
+            </tr>
+            <tr>
+                <th>Request Number</th>
+                <th>Request Status</th>
+                <th>Purpose Type</th>
                 <th>Destination</th>
                 <th>Start Date</th>
                 <th>End Date</th>
-                <th>Allowance Item</th>
-                <th>Currency</th>
-                <th>Amount</th>
-                <th>Total</th>
+
+                <th>Request Number</th>
+                <th>Request Status</th>
+                <th>Date</th>
             </tr>
         </thead>
         <tbody>
@@ -56,17 +57,22 @@
                         <td>{{ $trip['employee']->divisions->name ?? '' }}</td>
                         <td>{{ $trip['requested_by']->name ?? '' }}</td>
                         <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
+
+                        @if ($trip['is_declaration'])
+                        <td colspan="6">N/A</td>
+                        <td>{{ $trip['request_no'] ?? '' }}</td>
+                        <td>{{ $trip['status']->name ?? 'Pending' }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
+                        @else
                         <td>{{ $trip['request_no'] ?? '' }}</td>
                         <td>{{ $trip['status']->name ?? 'Pending' }}</td>
                         <td>{{ $trip['purpose']->name ?? '' }}</td>
-                        <td>{{ $trip['remarks'] ?? '' }}</td>
+                        {{-- <td>{{ $trip['remarks'] ?? '' }}</td> --}}
                         <td>{{ $destination['destination'] ?? '' }}</td>
-                        <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
-                        <td>Gasoline Total</td>
-                        <td>IDR</td>
-                        <td>{{ $destination['total'] ?? 0 }}</td>
-                        <td>{{ $destination['total'] ?? 0 }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
+                        <td colspan="3">N/A</td>
+                        @endif
                     </tr>
                 @endforeach
             @endforeach

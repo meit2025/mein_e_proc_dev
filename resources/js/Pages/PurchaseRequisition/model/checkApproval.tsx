@@ -54,7 +54,7 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
       setValue('total_all_amount', totalSum);
 
       const highestAmount = winnerUnit.reduce((max: number, item: any) => {
-        return item.total_amount > max ? item.total_amount : max;
+        return item.unit_price > max ? parseInt(item.unit_price) : max;
       }, 0);
       setValue('amount_max', highestAmount);
 
@@ -108,6 +108,7 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
           purchasing_group_id: getData.purchasing_groups,
           value: getData.document_type === 'ZENT' ? highestAmount : totalSum,
           user_id: getData.user_id,
+          currency_from: getData.currency_from,
           type: 'PR',
           metode_approval: getData.metode_approval,
           chooses_approval_id: getData.chooses_approval_id,

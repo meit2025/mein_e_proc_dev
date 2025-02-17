@@ -112,7 +112,7 @@ export const ReimburseForm: React.FC<Props> = ({
 
   const formSchema = z.object({
     formCount: z.string().min(1, 'total form must be have value'),
-    remark_group: z.string().optional(),
+    remark_group: z.string().min(1, 'header remark is required'),
     cost_center: z.string().min(1, 'cost center required'),
     requester: z.string().min(1, 'requester required'),
     value: z.number().optional(),

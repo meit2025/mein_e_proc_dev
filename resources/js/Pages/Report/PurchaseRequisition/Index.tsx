@@ -15,8 +15,8 @@ interface ReportType {
 };
 
 interface ReportVendor {
-    id: string;
     vendor: string;
+    vendor_name: string;
 }
 
 interface ReportDepartment {
@@ -225,8 +225,8 @@ export const Index = () => {
                             <option value="">All Types</option>
                             {types.map((typeOption) => (
                                 <option
-                                    key={typeOption.id}
-                                    value={typeOption.id}
+                                    key={typeOption.purchasing_doc}
+                                    value={typeOption.purchasing_doc}
                                 >
                                     {typeOption.purchasing_doc}
                                 </option>
@@ -245,10 +245,10 @@ export const Index = () => {
                             <option value="">All Vendor</option>
                             {vendors.map((vendorOption) => (
                                 <option
-                                    key={vendorOption.id}
-                                    value={vendorOption.id}
+                                    key={vendorOption.vendor}
+                                    value={vendorOption.vendor}
                                 >
-                                    {vendorOption.vendor}
+                                    {vendorOption.vendor_name}
                                 </option>
                             ))}
                         </select>
@@ -276,7 +276,7 @@ export const Index = () => {
             </div>
             <DataGridComponent
                 onExportXls={async (x: string) => await exporter(x)}
-                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&vendor=${vendor || ''}&`}
+                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&vendor=${vendor || ''}&department=${department || ''}&`}
                 columns={columns}
                 url={urlConfig}
                 labelFilter='search'
