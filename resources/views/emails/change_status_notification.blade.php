@@ -20,8 +20,7 @@
         <div
             style="display:-webkit-flex; flex-direction: row; align-items: center; justify-content: center;text-align:center;">
             <div style="margin:auto; padding-top:50px">
-                <img style="width:200px;height:80px;margin-right:20px" src="{{public_path('images/icon.png')}}" alt="
-                    Icon" />
+                <h1>PT Mitsubishi Electric Indonesia</h1>
             </div>
         </div>
     </div>
@@ -79,58 +78,59 @@
                 {{-- end body --}}
 
                 @if ($type == 'Reimbursement')
-                    <br><br>
-                        @if ($status == 'Approved')
-                            There are some Request Fully Approved. Kindly find the details below :
-                        @elseif ($status == 'Rejected')
-                            We regret to inform you that your reimbursement request has been rejected. Below are the details:
-                        @elseif ($status == 'Revise')
-                            Your reimbursement request requires revision. Below are the details:
-                        @elseif ($status == 'Approver')
-                            You have a pending approval request for the Reimbursement. Below are the details:
-                        @endif
-                        <br><br>
+                <br><br>
+                @if ($status == 'Approved')
+                There are some Request Fully Approved. Kindly find the details below :
+                @elseif ($status == 'Rejected')
+                We regret to inform you that your reimbursement request has been rejected. Below are the details:
+                @elseif ($status == 'Revise')
+                Your reimbursement request requires revision. Below are the details:
+                @elseif ($status == 'Approver')
+                You have a pending approval request for the Reimbursement. Below are the details:
+                @endif
+                <br><br>
 
-                        Reimbursement Number: {{$reimburseGroup->code}}
-                        <br>
-                        Requester: {{$user->name}}
-                        <br>
-                        Reimbursement Details:
-                        <br><br>
+                Reimbursement Number: {{$reimburseGroup->code}}
+                <br>
+                Requester: {{$user->name}}
+                <br>
+                Reimbursement Details:
+                <br><br>
 
-                        @foreach ($reimburseGroup->reimburses as $key  => $item)
-                        Form {{$key + 1}} :
-                        <ul>
-                            <li>
-                                Reimbursement Type: {{$item->reimburseType->name}}
-                            </li>
-                            <li>
-                                Claim Date: {{ date('F j, Y', strtotime($item->claim_date)) }}
-                            </li>
-                            <li>
-                                Reimbursement Cost: Rp. {{ number_format($item->balance, 0, ',', '.') }}
-                            </li>
-                        </ul>
-                        @endforeach
-                        
-                        @if ($status == 'Approved')
-                            Approve : {{ $reimburseGroup->notes }}
-                        @elseif ($status == 'Rejected')
-                            Rejection : {{ $reimburseGroup->notes }}
-                        @elseif ($status == 'Revise')
-                            Revision : {{ $reimburseGroup->notes }}
-                        @endif 
-                        <br>
-                        @if ($status == 'Rejected')
-                            Please review the request and make necessary adjustments if required.
-                        @elseif ($status == 'Revise')
-                            Please review then resubmit the request and make necessary adjustments if required.
-                        @elseif ($status == 'Approver')
-                            Please review then resubmit the request and make necessary adjustments if required.
-                        @endif
-                        <br>
-                        <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now' : 'View Detail'}}</a>
-                    <br>
+                @foreach ($reimburseGroup->reimburses as $key => $item)
+                Form {{$key + 1}} :
+                <ul>
+                    <li>
+                        Reimbursement Type: {{$item->reimburseType->name}}
+                    </li>
+                    <li>
+                        Claim Date: {{ date('F j, Y', strtotime($item->claim_date)) }}
+                    </li>
+                    <li>
+                        Reimbursement Cost: Rp. {{ number_format($item->balance, 0, ',', '.') }}
+                    </li>
+                </ul>
+                @endforeach
+
+                @if ($status == 'Approved')
+                Approve : {{ $reimburseGroup->notes }}
+                @elseif ($status == 'Rejected')
+                Rejection : {{ $reimburseGroup->notes }}
+                @elseif ($status == 'Revise')
+                Revision : {{ $reimburseGroup->notes }}
+                @endif
+                <br>
+                @if ($status == 'Rejected')
+                Please review the request and make necessary adjustments if required.
+                @elseif ($status == 'Revise')
+                Please review then resubmit the request and make necessary adjustments if required.
+                @elseif ($status == 'Approver')
+                Please review then resubmit the request and make necessary adjustments if required.
+                @endif
+                <br>
+                <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now'
+                    : 'View Detail'}}</a>
+                <br>
                 @endif
 
                 @if ($type == 'Business Trip')
@@ -151,15 +151,9 @@
                 </div>
                 <div style="background-color: #D7E1EA;height:2px"></div>
                 <div style="display:flex;margin-top:20px">
-                    <div>
-                        <div style="display: flex">
-                            <img style="width:200px;height:80px;margin-right:20px;margin-top: 20px"
-                                src="{{public_path('images/icon.png')}}" alt=" Icon">
-                        </div>
 
-                    </div>
 
-                    <div style="margin-left: 20px">
+                    <div style="margin-left: 1px">
                         <div style="margin-top: 5px">
                             <b style="font-weight: 700;font-size: 20px;color: #1f1f1f;"><strong> PT Mitsubishi Electric
                                     Indonesia</strong></b>

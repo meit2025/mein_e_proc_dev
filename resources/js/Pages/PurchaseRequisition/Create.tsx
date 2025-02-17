@@ -32,6 +32,7 @@ function Create() {
         field.name === 'user_id' ? { ...field, disabled: true } : field,
       );
       methods.setValue('user_id', auth?.user?.id);
+      methods.setValue('currency_from', 'IDR');
       setDataModel(updatedObject);
     } else {
       setDataModel(dropdownOptions as FormFieldModel<any>[]);

@@ -398,7 +398,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                             setAlertProps({
                               isOpen: true,
                               labelConfirmButton: 'Cancel Approval',
-                              message: 'Are you sure you want to cancel this record?',
+                              message: 'Are you sure want to cancel this request?',
                               onConfirm: async () => {
                                 handleCancel(params.row.id);
                               },

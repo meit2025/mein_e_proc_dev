@@ -151,7 +151,16 @@ export const columnsItem: GridColDef[] = [
     width: 200,
     filterable: false,
     renderCell: (params) => {
-      return formatRupiah(params.row.total_amount);
+      return formatRupiah(params.row.total_amount, false);
+    },
+  },
+  {
+    field: 'total_amount_conversion',
+    headerName: 'Total Amount conversion ',
+    width: 200,
+    filterable: false,
+    renderCell: (params) => {
+      return formatRupiah(params.row.total_amount_conversion, false);
     },
   },
   {

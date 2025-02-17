@@ -38,6 +38,7 @@ class BusinessTripExport implements FromArray, WithHeadings, WithEvents, WithCus
                         'Division' => $firstRow ? ($businessTrip['requestedBy']->divisions->name ?? '') : '',
                         'Requested By' => $firstRow ? ($businessTrip['requestFor']->name ?? '') : '',
                         'Request Date' => $firstRow ? ($businessTrip['requestedBy']->created_at?->format('d/m/Y') ?? '') : '',
+                        'Request Date' => $firstRow ? $businessTrip['requestDate']?->format('d/m/Y') : '',
                         'Request Number' => $firstRow ? ($businessTrip['requestNo'] ?? '') : '',
                         'Request Status' => $firstRow ? ($businessTrip['status']->name ?? '') : '',
                         'Purpose Type' => $firstRow ? ($businessTrip['purposeType']->name ?? '') : '',

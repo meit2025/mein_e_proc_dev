@@ -27,7 +27,8 @@ class Unit extends Model
         'order_number',
         'asset_number',
         'sub_asset_number',
-        'account_assignment_categories'
+        'account_assignment_categories',
+        'total_amount_conversion'
     ];
 
     public function vendor()

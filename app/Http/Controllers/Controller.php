@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Approval\Models\Approval;
 use Modules\Gateway\Models\Log;
 use Illuminate\Support\Facades\File;
+use Modules\Master\Models\ExchangeRate;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
 use Modules\PurchaseRequisition\Services\BtPOService;
 use Modules\PurchaseRequisition\Services\BtService;
@@ -495,6 +496,18 @@ abstract class Controller
             default:
                 // Handle unknown type case
                 break;
+        }
+    }
+
+    public function convert(string $from, string $to, float $amount)
+    {
+        try {
+            //code...
+            $exchangeRate = ExchangeRate::getExchangeRate($from, $to, $amount);
+            return $exchangeRate;
+        } catch (\Throwable $th) {
+            //throw $th;
+            dd($th);
         }
     }
 }

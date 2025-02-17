@@ -3,6 +3,7 @@
 use App\Events\GotMessage;
 use App\Events\NotifikasiUsers;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PortalController;
@@ -67,4 +68,5 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('index.notifikasi');
     Route::get('/notifikasi/read', [NotifikasiController::class, 'read'])->name('read.notifikasi');
     Route::get('/notifikasi/delete', [NotifikasiController::class, 'destory'])->name('destory.notifikasi');
+    Route::post('/currency-conversion', [CurrencyController::class, 'ConversionCurrency'])->name('currency.conversion');
 });

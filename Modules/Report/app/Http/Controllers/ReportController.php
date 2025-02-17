@@ -242,6 +242,41 @@ class ReportController extends Controller
             $transformedData = $data->map(function ($item) {
                 $balance = $item->reimburses->sum('balance');
 
+                // Menentukan Total Balance berdasarkan Grade
+                $totalBalance = $item->reimburses->map(function ($reim) {
+                    return $reim->reimburseType->grade_option == 'all'
+                        ? $reim->reimburseType->grade_all_price
+                        : ($reim->reimburseType->gradeReimburseTypes->plafon ?? 0);
+                })->sum();
+
+                // Ambil data yang berkaitan dengan balance dari PR
+                $getBalanceOnPr = $item->PurchaseRequisition->map(function ($pr) {
+                    return [
+                        'clearing_status' => $pr->is_closed,  // Status pembayaran
+                        'status_closed' => $pr->status_closed,
+                        'pr_status' => $pr->pr_status,
+                        'has_interval_claim' => $pr->has_interval_claim,
+                        'on_interval' => $pr->on_interval,
+                        'balance' => $pr->balance
+                    ];
+                })->toArray();
+
+                // Hitung Unpaid Balance
+                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) {
+                    return ($value['clearing_status'] != 'S' && $value['status_closed'] != 'X' && $value['pr_status'] != 'X') &&
+                        (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null);
+                }), 'balance'));
+
+                // Hitung Paid Balance
+                $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) {
+                    return ($value['clearing_status'] == 'S' && $value['status_closed'] == 'S' && $value['pr_status'] != 'X') &&
+                        (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null);
+                }), 'balance'));
+
+                // Hitung Remaining Balance
+                $maximumBalance = $totalBalance;
+                $remainingBalance = $item->unassign_but_has_reimburse == 1 ? 0 : (int)$maximumBalance - ($paidBalance + $unpaidBalance);
+
                 return [
                     'code' => $item->code,
                     'employee_no' => $item->userCreateRequest->nip,
@@ -260,6 +295,8 @@ class ReportController extends Controller
                     'request_for' => $item->user->name,
                     'remark' => $item->remark,
                     'balance' => $balance,
+                    'total_balance' => $totalBalance,
+                    'remaining_balance' => $remainingBalance,
                     'form_count' => $item->reimburses->count(),
                     'status' => $item->status->name,
                     'request_date' => $item->created_at->format('d/m/Y'),
@@ -426,24 +463,35 @@ class ReportController extends Controller
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
             $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
-                $allowanceItems = $destination->detailDestinationDay->map(function ($allowanceItem) {
+                $allowanceItemsDay = $destination->detailDestinationDay->map(function ($allowanceItem) {
                     return [
                         'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
-                        'amount' =>  (int) $allowanceItem->price,
+                        'amount' => (int) $allowanceItem->price,
                         'currency_id' => $allowanceItem->allowance->currency_id,
                     ];
                 });
+
+                $allowanceItemsTotal = $destination->detailDestinationTotal->map(function ($allowanceItem) {
+                    return [
+                        'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
+                        'amount' => (int) $allowanceItem->price,
+                        'currency_id' => $allowanceItem->allowance->currency_id,
+                    ];
+                });
+
+                $allAllowanceItems = $allowanceItemsDay->merge($allowanceItemsTotal);
 
                 return [
                     'destination' => $destination->destination,
                     'start_date' => $destination->business_trip_start_date,
                     'end_date' => $destination->business_trip_end_date,
-                    'allowance_items' => $allowanceItems,
-                    'total_allowance' => $allowanceItems->sum('amount'),
+                    'allowance_items' => $allAllowanceItems,
+                    'total_allowance' => $allAllowanceItems->sum('amount'),
                 ];
             });
 
             return [
+                'requestDate' => $businessTrip->created_at,
                 'requestedBy' => $businessTrip->requestedBy,
                 'requestFor' => $businessTrip->requestFor,
                 'requestNo' => $businessTrip->request_no,
@@ -612,24 +660,35 @@ class ReportController extends Controller
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
             $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
-                $allowanceItems = $destination->detailDestinationDay->map(function ($allowanceItem) {
+                $allowanceItemsDay = $destination->detailDestinationDay->map(function ($allowanceItem) {
                     return [
                         'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
-                        'amount' =>  (int) $allowanceItem->price,
+                        'amount' => (int) $allowanceItem->price,
                         'currency_id' => $allowanceItem->allowance->currency_id,
                     ];
                 });
+
+                $allowanceItemsTotal = $destination->detailDestinationTotal->map(function ($allowanceItem) {
+                    return [
+                        'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
+                        'amount' => (int) $allowanceItem->price,
+                        'currency_id' => $allowanceItem->allowance->currency_id,
+                    ];
+                });
+
+                $allAllowanceItems = $allowanceItemsDay->merge($allowanceItemsTotal);
 
                 return [
                     'destination' => $destination->destination,
                     'start_date' => $destination->business_trip_start_date,
                     'end_date' => $destination->business_trip_end_date,
-                    'allowance_items' => $allowanceItems,
-                    'total_allowance' => $allowanceItems->sum('amount'),
+                    'allowance_items' => $allAllowanceItems,
+                    'total_allowance' => $allAllowanceItems->sum('amount'),
                 ];
             });
 
             return [
+                'requestDate' => $businessTrip->created_at,
                 'requestedBy' => $businessTrip->requestedBy,
                 'requestFor' => $businessTrip->requestFor,
                 'requestNo' => $businessTrip->request_no,
