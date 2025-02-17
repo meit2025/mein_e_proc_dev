@@ -14,6 +14,7 @@ use Modules\Approval\Models\ApprovalTrackingNumberChoose;
 use Modules\Approval\Models\ApprovalTrackingNumberChooseRoute;
 use Modules\Approval\Models\SettingApproval;
 use Modules\Master\Models\DocumentType;
+use Modules\Master\Models\ExchangeRate;
 use Modules\Master\Models\PurchasingGroup;
 
 class CheckApproval
@@ -66,6 +67,10 @@ class CheckApproval
 
             // Define the conditions
             $total = (int)$request->value == 0 ? (int)$request->total_all_amount : (int)$request->value;
+            if ($request->currency_from != 'IDR') {
+                $exchangeRate = ExchangeRate::getExchangeRate($request->currency_from, 'IDR', $total);
+                $total = (int)$exchangeRate;
+            }
             $conditions = [
                 fn($query) => $query->where('condition_type', '=', '>')
                     ->whereRaw('? > value', [$total]),

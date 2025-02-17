@@ -41,4 +41,22 @@ export const modelDropdowns = [
       isMapping: true,
     },
   },
+  {
+    dropdown: 'currency_from',
+    struct: {
+      name: 'name',
+      id: 'code',
+      tabel: 'currencies',
+      isMapping: true,
+    },
+  },
+  {
+    dropdown: 'currency_to',
+    struct: {
+      name: 'name',
+      id: 'code',
+      tabel: 'currencies',
+      isMapping: true,
+    },
+  },
 ];

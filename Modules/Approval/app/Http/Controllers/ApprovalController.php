@@ -294,12 +294,12 @@ class ApprovalController extends Controller
                             $findUser = User::where('nip', $model->requester)->first();
                             $reimburseGroup = ReimburseGroup::with(['reimburses.reimburseType'])->find($request->id);
                             $reimburseGroup->notes = isset($request->note) ? $request->note : '';
-                            $getApproval = Approval::where(['document_id' => $request->id, 'document_name' => 'REIM', 'status_id' => 'Waiting'])->orderBy('id', 'ASC')->first();
+                            $getApproval = Approval::where(['document_id' => $request->id, 'document_name' => 'REIM', 'status' => 'Waiting'])->orderBy('id', 'ASC')->first();
 
-                            if (in_array($statusId, [3,4,6])) {
+                            if (in_array($statusId, [3, 4, 6])) {
                                 SendNotification::dispatch($findUser,  $message, $baseurl);
                                 Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimbursement', $request->status, '', null, $reimburseGroup, null, $baseurl));
-                            }else if ($statusId == 1 && !empty($getApproval)) {
+                            } else if ($statusId == 1 && !empty($getApproval)) {
                                 $findcreatedBy = User::find($getApproval->user_id);
                                 Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Reimbursement', 'Approver', '', null, $reimburseGroup, null, $baseurl));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
@@ -321,7 +321,8 @@ class ApprovalController extends Controller
                             break;
                     }
                 } catch (\Throwable $th) {
-                    dd($th);
+                    DB::rollBack();
+                    return $this->errorResponse($th->getMessage());
                 }
             }
 
