@@ -463,24 +463,35 @@ class ReportController extends Controller
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
             $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
-                $allowanceItems = $destination->detailDestinationDay->map(function ($allowanceItem) {
+                $allowanceItemsDay = $destination->detailDestinationDay->map(function ($allowanceItem) {
                     return [
                         'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
-                        'amount' =>  (int) $allowanceItem->price,
+                        'amount' => (int) $allowanceItem->price,
                         'currency_id' => $allowanceItem->allowance->currency_id,
                     ];
                 });
+
+                $allowanceItemsTotal = $destination->detailDestinationTotal->map(function ($allowanceItem) {
+                    return [
+                        'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
+                        'amount' => (int) $allowanceItem->price,
+                        'currency_id' => $allowanceItem->allowance->currency_id,
+                    ];
+                });
+
+                $allAllowanceItems = $allowanceItemsDay->merge($allowanceItemsTotal);
 
                 return [
                     'destination' => $destination->destination,
                     'start_date' => $destination->business_trip_start_date,
                     'end_date' => $destination->business_trip_end_date,
-                    'allowance_items' => $allowanceItems,
-                    'total_allowance' => $allowanceItems->sum('amount'),
+                    'allowance_items' => $allAllowanceItems,
+                    'total_allowance' => $allAllowanceItems->sum('amount'),
                 ];
             });
 
             return [
+                'requestDate' => $businessTrip->created_at,
                 'requestedBy' => $businessTrip->requestedBy,
                 'requestFor' => $businessTrip->requestFor,
                 'requestNo' => $businessTrip->request_no,
@@ -649,24 +660,35 @@ class ReportController extends Controller
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
             $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
-                $allowanceItems = $destination->detailDestinationDay->map(function ($allowanceItem) {
+                $allowanceItemsDay = $destination->detailDestinationDay->map(function ($allowanceItem) {
                     return [
                         'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
-                        'amount' =>  (int) $allowanceItem->price,
+                        'amount' => (int) $allowanceItem->price,
                         'currency_id' => $allowanceItem->allowance->currency_id,
                     ];
                 });
+
+                $allowanceItemsTotal = $destination->detailDestinationTotal->map(function ($allowanceItem) {
+                    return [
+                        'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
+                        'amount' => (int) $allowanceItem->price,
+                        'currency_id' => $allowanceItem->allowance->currency_id,
+                    ];
+                });
+
+                $allAllowanceItems = $allowanceItemsDay->merge($allowanceItemsTotal);
 
                 return [
                     'destination' => $destination->destination,
                     'start_date' => $destination->business_trip_start_date,
                     'end_date' => $destination->business_trip_end_date,
-                    'allowance_items' => $allowanceItems,
-                    'total_allowance' => $allowanceItems->sum('amount'),
+                    'allowance_items' => $allAllowanceItems,
+                    'total_allowance' => $allAllowanceItems->sum('amount'),
                 ];
             });
 
             return [
+                'requestDate' => $businessTrip->created_at,
                 'requestedBy' => $businessTrip->requestedBy,
                 'requestFor' => $businessTrip->requestFor,
                 'requestNo' => $businessTrip->request_no,
