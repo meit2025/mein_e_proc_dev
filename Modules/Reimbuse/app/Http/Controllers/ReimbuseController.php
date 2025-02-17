@@ -151,7 +151,7 @@ class ReimbuseController extends Controller
     public function list(Request $request)
     {
         try {
-            $query =  ReimburseGroup::query()->with(['user.families', 'reimburses', 'status', 'userCreateRequest']);
+            $query =  ReimburseGroup::query()->with(['user.families', 'reimburses', 'status', 'userCreateRequest', 'purchaseRequisition']);
             if ($request->approval == 1) {
                 $approval = Approval::leftJoinSub("
                     SELECT
@@ -218,6 +218,10 @@ class ReimbuseController extends Controller
                         $map->status->code
                     ],
                     'created_at' => $map->created_at,
+                    'pr_number' => isset($map->purchase_requisition[0]) ? $map->purchase_requisition[0]->purchase_requisition_number : '',
+                    'pr_status' => isset($map->purchase_requisition[0]) ? $map->purchase_requisition[0]->status : '',
+                    'po_number' => isset($map->purchase_requisition[0]) ? $map->purchase_requisition[0]->no_po : '',
+                    'po_status' => isset($map->purchase_requisition[0]) ? $map->purchase_requisition[0]->is_closed : '',
 
                 ];
             });
@@ -340,7 +344,7 @@ class ReimbuseController extends Controller
                 ->where('reimburses.reimburse_type', $reimbuseTypeID)
                 ->count();
             
-            $getLastreimburse = Reimburse::join('reimburse_groups as rb', 'rb.code', '=', 'reimburses.group' )
+            $getLastReimburse = Reimburse::join('reimburse_groups as rb', 'rb.code', '=', 'reimburses.group' )
                             ->whereIn('rb.status_id', [1, 3, 5])
                             ->where('reimburses.requester', $user)
                             ->where('reimburses.reimburse_type', $reimbuseTypeID)
@@ -349,8 +353,8 @@ class ReimbuseController extends Controller
 
             $reimbuseType   = MasterTypeReimburse::where('code', $reimbuseTypeID)->first();
             $user           = User::where('nip', $user)->first();
-            if (!empty($getLastreimburse)) {
-                $createDate         = Carbon::createFromFormat('Y-m-d', $getLastreimburse->claim_date);
+            if (!empty($getLastReimburse)) {
+                $createDate         = Carbon::createFromFormat('Y-m-d', $getLastReimburse->claim_date);
                 $availableClaimDate = $createDate->addDays((int)$reimbuseType->interval_claim_period);
                 if (Carbon::now()->format('Y-m-d') > $availableClaimDate) {
                     $getCurrentBalance = 0;    
