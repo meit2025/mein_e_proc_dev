@@ -116,15 +116,15 @@ class ReimbursementService
             $this->approvalServices->Payment((object)$parseForApproval, true, $group->id, 'REIM');
 
             // send notif email to approver
-            $baseurl = env('APP_URL') .  '/reimburse/detail/' .  $group->id;
-            $getApproval = ApprovalModels::where('document_id', $group->id)->where('document_name', 'REIM')->orderBy('id', 'ASC')->first();
-            $getUserApproval = User::where('id', $getApproval->user_id)->first();
-            if (!empty($getUserApproval)) {
-                $reimburseGroup = ReimburseGroup::with(['reimburses.reimburseType'])->find($group->id);
-                $reimburseGroup->notes = '';
+            // $baseurl = env('APP_URL') .  '/reimburse/detail/' .  $group->id;
+            // $getApproval = ApprovalModels::where('document_id', $group->id)->where('document_name', 'REIM')->orderBy('id', 'ASC')->first();
+            // $getUserApproval = User::where('id', $getApproval->user_id)->first();
+            // if (!empty($getUserApproval)) {
+            //     $reimburseGroup = ReimburseGroup::with(['reimburses.reimburseType'])->find($group->id);
+            //     $reimburseGroup->notes = '';
     
-                Mail::to($getUserApproval->email)->send(new ChangeStatus($getUserApproval, 'Reimbursement', 'Approver', '', null, $reimburseGroup, null, $baseurl));
-            }
+            //     Mail::to($getUserApproval->email)->send(new ChangeStatus($getUserApproval, 'Reimbursement', 'Approver', '', null, $reimburseGroup, null, $baseurl));
+            // }
 
             // $reim = new ReimburseServices();
             // $reim->processTextData($group->id);
