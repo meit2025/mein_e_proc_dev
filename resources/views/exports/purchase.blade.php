@@ -61,36 +61,36 @@
         <tbody>
             @foreach($data as $row)
                 <tr>
-                    <td>{{ $row['po_no'] }}</td>
-                    <td>{{ $row['pr_no'] }}</td>
-                    <td>{{ $row['quatation_no'] }}</td>
-                    <td>{{ $row['requested_by'] }}</td>
-                    <td>{{ $row['requester'] }}</td>
-                    <td>{{ $row['document_type'] }}</td>
-                    <td>{{ $row['purchasing_groups'] }}</td>
-                    <td>{{ $row['cost_center'] }}</td>
-                    <td>{{ \Carbon\Carbon::parse($row['delivery_date'])->format('d-m-Y') }}</td>
-                    <td>{{ $row['storage_locations'] }}</td>
-                    <td>{{ $row['total_vendor'] }}</td>
-                    <td>{{ $row['attachment'] }}</td>
-                    <td>{{ $row['propose_vendor'] }}</td>
-                    <td>{{ $row['status_pr'] }}</td>
-                    <td>{{ $row['status_po'] }}</td>
-                    <td>{{ \Carbon\Carbon::parse($row['po_date'])->format('d-m-Y') }}</td>
-                    <td>{{ $row['currency'] }}</td>
-                    <td>{{ \Carbon\Carbon::parse($row['request_date'])->format('d-m-Y') }}</td>
-                    <td>{{ \Carbon\Carbon::parse($row['created_at'])->format('d-m-Y') }}</td>
-                    <td>{{ number_format($row['amount'], 2, ',', '.') }}</td>
-                    <td>{{ number_format($row['percentage'], 2, ',', '.') }}%</td>
-                    <td>{{ $row['reference'] }}</td>
-                    <td>{{ $row['qty'] }}</td>
-                    <td>{{ number_format($row['unit_price'], 2, ',', '.') }}</td>
-                    <td>{{ $row['account_assignment'] }}</td>
-                    <td>{{ $row['material_group'] }}</td>
-                    <td>{{ $row['material_number'] }}</td>
-                    <td>{{ $row['uom'] }}</td>
-                    <td>{{ number_format($row['tax'], 2, ',', '.') }}</td>
-                    <td>{{ $row['short_text'] }}</td>
+                    <td>{{ $row['po_no'] ?? '-' }}</td>
+                    <td>{{ $row['pr_no'] ?? '-' }}</td>
+                    <td>{{ $row['quatation_no'] ?? '-' }}</td>
+                    <td>{{ $row['requested_by'] ?? '-' }}</td>
+                    <td>{{ $row['requester'] ?? '-' }}</td>
+                    <td>{{ $row['document_type'] ?? '-' }}</td>
+                    <td>{{ $row['purchasing_groups'] ?? '-' }}</td>
+                    <td>{{ $row['cost_center'] ?? '-' }}</td>
+                    <td>{{ $row['delivery_date'] ? \Carbon\Carbon::parse($row['delivery_date'])->format('d-m-Y') : '-' }}</td>
+                    <td>{{ $row['storage_locations'] ?? '-' }}</td>
+                    <td>{{ $row['total_vendor'] ?? '-' }}</td>
+                    <td>{{ $row['attachment'] ?? '-' }}</td>
+                    <td>{{ $row['propose_vendor'] ?? '-' }}</td>
+                    <td>{{ $row['status_pr'] ?? '-' }}</td>
+                    <td>{{ $row['status_po'] ?? '-' }}</td>
+                    <td>{{ $row['po_date'] ? \Carbon\Carbon::parse($row['po_date'])->format('d-m-Y') : '-' }}</td>
+                    <td>{{ $row['currency'] ?? '-' }}</td>
+                    <td>{{ $row['request_date'] ? \Carbon\Carbon::parse($row['request_date'])->format('d-m-Y') : '-' }}</td>
+                    <td>{{ $row['created_at'] ? \Carbon\Carbon::parse($row['created_at'])->format('d-m-Y') : '-' }}</td>
+                    <td>{{ $row['amount'] !== null ? number_format($row['amount'], 2, ',', '.') : '0,00' }}</td>
+                    <td>{{ $row['percentage'] !== null ? number_format($row['percentage'], 2, ',', '.') . '%' : '0,00%' }}</td>
+                    <td>{{ $row['reference'] ?? '-' }}</td>
+                    <td>{{ $row['qty'] ?? '0' }}</td>
+                    <td>{{ $row['unit_price'] !== null ? number_format($row['unit_price'], 2, ',', '.') : '0,00' }}</td>
+                    <td>{{ $row['account_assignment'] ?? '-' }}</td>
+                    <td>{{ $row['material_group'] ?? '-' }}</td>
+                    <td>{{ $row['material_number'] ?? '-' }}</td>
+                    <td>{{ $row['uom'] ?? '-' }}</td>
+                    <td>{{ $row['tax'] !== null ? number_format($row['tax'], 2, ',', '.') : '0,00' }}</td>
+                    <td>{{ $row['short_text'] ?? '-' }}</td>
                 </tr>
             @endforeach
         </tbody>
