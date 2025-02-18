@@ -58,6 +58,10 @@ export const columns: GridColDef[] = [
       return formattedDate;
     },
   },
+  { field: 'pr_number', headerName: 'PR Number', width: 200, filterable: true, sortable: false },
+  { field: 'pr_status', headerName: 'PR Status', width: 100, filterable: true, sortable: false },
+  { field: 'po_number', headerName: 'PO Number', width: 200, filterable: true, sortable: false },
+  { field: 'po_status', headerName: 'PO Status', width: 100, filterable: true, sortable: false },
 ];
 
 const handlePrintDetail = (id: string) => {
