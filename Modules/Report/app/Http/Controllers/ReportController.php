@@ -463,7 +463,7 @@ class ReportController extends Controller
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
             $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
-                $allowanceItemsDay = $destination->detailDestinationDay->map(function ($allowanceItem) {
+                $allowanceItemsDay = collect($destination->detailDestinationDay)->map(function ($allowanceItem) {
                     return [
                         'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
                         'amount' => (int) $allowanceItem->price,
@@ -471,7 +471,7 @@ class ReportController extends Controller
                     ];
                 });
 
-                $allowanceItemsTotal = $destination->detailDestinationTotal->map(function ($allowanceItem) {
+                $allowanceItemsTotal = collect($destination->detailDestinationTotal)->map(function ($allowanceItem) {
                     return [
                         'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
                         'amount' => (int) $allowanceItem->price,
