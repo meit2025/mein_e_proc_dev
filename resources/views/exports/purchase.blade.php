@@ -80,16 +80,16 @@
                     <td>{{ $row['currency'] ?? '-' }}</td>
                     <td>{{ $row['request_date'] ? \Carbon\Carbon::parse($row['request_date'])->format('d-m-Y') : '-' }}</td>
                     <td>{{ $row['created_at'] ? \Carbon\Carbon::parse($row['created_at'])->format('d-m-Y') : '-' }}</td>
-                    <td>{{ $row['amount'] !== null ? number_format($row['amount'], 2, ',', '.') : '0,00' }}</td>
-                    <td>{{ $row['percentage'] !== null ? number_format($row['percentage'], 2, ',', '.') . '%' : '0,00%' }}</td>
+                    <td>{{ is_numeric($row['amount']) ? number_format((float) $row['amount'], 2, ',', '.') : '0,00' }}</td>
+                    <td>{{ is_numeric($row['percentage']) ? number_format((float) $row['percentage'], 2, ',', '.') . '%' : '0,00%' }}</td>
                     <td>{{ $row['reference'] ?? '-' }}</td>
                     <td>{{ $row['qty'] ?? '0' }}</td>
-                    <td>{{ $row['unit_price'] !== null ? number_format($row['unit_price'], 2, ',', '.') : '0,00' }}</td>
+                    <td>{{ is_numeric($row['unit_price']) ? number_format((float) $row['unit_price'], 2, ',', '.') : '0,00' }}</td>
                     <td>{{ $row['account_assignment'] ?? '-' }}</td>
                     <td>{{ $row['material_group'] ?? '-' }}</td>
                     <td>{{ $row['material_number'] ?? '-' }}</td>
                     <td>{{ $row['uom'] ?? '-' }}</td>
-                    <td>{{ $row['tax'] !== null ? number_format($row['tax'], 2, ',', '.') : '0,00' }}</td>
+                    <td>{{ is_numeric($row['tax']) ? number_format((float) $row['tax'], 2, ',', '.') : '0,00' }}</td>
                     <td>{{ $row['short_text'] ?? '-' }}</td>
                 </tr>
             @endforeach
