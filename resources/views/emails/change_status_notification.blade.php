@@ -151,24 +151,22 @@
                     <ul>
                         <li>Propose Type: {{$businessTrip->purposeType->name}}</li>
                     </ul>
-                    <br/><br/>
                     @foreach ($businessTrip->businessTripDestination as $key => $item)
-                        Destination {{$key + 1}} :<br />
+                        Destination {{$key + 1}} :
                         <ul>
                             <li>Destination: {{$item->destination}}</li>
-                            <li>Start Date: {{$item->business_trip_start_date}}</li>
-                            <li>End Date: {{$item->business_trip_end_date}}</li>
-                            <li>Total Request: </li>
+                            <li>Start Date: {{date('d-m-Y',strtotime($item->business_trip_start_date))}}</li>
+                            <li>End Date: {{date('d-m-Y',strtotime($item->business_trip_end_date))}}</li>
+                            <li>Total Request: {{number_format($item->getDetailDestinationDay->sum('price') + $item->detailDestinationTotal->sum('price'),0,',','.')}}</li>
                         </ul>
                     @endforeach
-                    <br/><br/>
                     @if ($status == 'Approved')
-                    Notes:
+                    Notes: {{$businessTrip->notes}}
                     @elseif ($status == 'Rejected')
-                    Rejection Reason:  <br/>
+                    Rejection Reason: {{$businessTrip->notes}} <br/>
                     Please review the request and make necessary adjustments if required.
                     @elseif ($status == 'Revise')
-                    Revision Notes:    </br>
+                    Revision Notes: {{$businessTrip->notes}} </br>
                     Please review then resubmit the request and make necessary adjustments if required.
                     @elseif ($status == 'Approver')
                     Kindly review and provide your approval decision through the system.
