@@ -134,11 +134,49 @@
                 @endif
 
                 @if ($type == 'Business Trip')
-                <br>
-                We would like to inform you that your Business Trip request has been processed. Below
-                are the details:
-                <br>
-                Status: {{ $status }}
+                    <br><br>
+                    @if ($status == 'Approved')
+                    There are some Request Fully Approved. Kindly find the details below :
+                    @elseif ($status == 'Rejected')
+                    We regret to inform you that your business trip request has been rejected. Below are the details:
+                    @elseif ($status == 'Revise')
+                    Your reimbursement request requires revision. Below are the details:
+                    @elseif ($status == 'Approver')
+                    You have a pending approval request for the Reimbursement. Below are the details:
+                    @endif
+                    <br><br>
+                    Business Trip Request Number: {{$businessTrip->request_no}} <br/>
+                    Requester: {{$businessTrip->requestFor->name}} <br/>
+                    Business Trip Request Details: <br/>
+                    <ul>
+                        <li>Propose Type: {{$businessTrip->purposeType->name}}</li>
+                    </ul>
+                    <br/><br/>
+                    @foreach ($businessTrip->businessTripDestination as $key => $item)
+                        Destination {{$key + 1}} :<br />
+                        <ul>
+                            <li>Destination: {{$item->destination}}</li>
+                            <li>Start Date: {{$item->business_trip_start_date}}</li>
+                            <li>End Date: {{$item->business_trip_end_date}}</li>
+                            <li>Total Request: </li>
+                        </ul>
+                    @endforeach
+                    <br/><br/>
+                    @if ($status == 'Approved')
+                    Notes:
+                    @elseif ($status == 'Rejected')
+                    Rejection Reason:  <br/>
+                    Please review the request and make necessary adjustments if required.
+                    @elseif ($status == 'Revise')
+                    Revision Notes:    </br>
+                    Please review then resubmit the request and make necessary adjustments if required.
+                    @elseif ($status == 'Approver')
+                    Kindly review and provide your approval decision through the system.
+                    @endif
+                    <br>
+                    <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now'
+                        : 'View Detail'}}</a>
+                    <br>
                 @endif
                 </p>
 
