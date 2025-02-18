@@ -77,6 +77,7 @@ Route::group(['prefix' => 'api/'], function () {
         Route::get('/detail/{id}', [AllowanceItemController::class, 'detailAPI'])->name('allowance-item.detail');
         Route::put('/update/{id}', [AllowanceItemController::class, 'updateAPI'])->name('allowance-item.update');
         Route::delete('/delete/{id}', [AllowanceItemController::class, 'deleteAPI'])->name('allowance-item.delete');
+        Route::get('/check-unique-code/{id}', [AllowanceItemController::class, 'checkUniqueCode'])->name('allowance-item.check-unique');
     });
 
     Route::group(['prefix' => 'purpose-type'], function () {

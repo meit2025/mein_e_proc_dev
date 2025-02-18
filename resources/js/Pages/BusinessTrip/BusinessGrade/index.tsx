@@ -68,7 +68,7 @@ export const Index = ({ listUser }: { listUser: UserModel[] }) => {
         onCreate={openFormHandler}
         columns={columns}
         actionType='dropdown'
-        deleteConfirmationText='Are you sure delete this business grade?'
+        deleteConfirmationText='Are you sure delete this user grade?'
         onEdit={(value) => {
           setFormType({
             type: FormType.edit,
@@ -88,7 +88,7 @@ export const Index = ({ listUser }: { listUser: UserModel[] }) => {
 
 // Assign layout to the page
 Index.layout = (page: ReactNode) => (
-  <MainLayout title='Business Grade' description='Business Grade'>
+  <MainLayout title='User Grade' description='User Grade'>
     {page}
   </MainLayout>
 );

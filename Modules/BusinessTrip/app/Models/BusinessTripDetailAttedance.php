@@ -21,6 +21,8 @@ class BusinessTripDetailAttedance extends Model
         'shift_start',
         'start_time',
         'end_time',
+        'start_date',
+        'end_date',
         'date',
     ];
 

@@ -178,6 +178,8 @@ export const BussinessTripFormV1 = ({
             shift_end: z.string().optional(),
             start_time: z.string().optional(),
             end_time: z.string().optional(),
+            start_date: z.date().optional(),
+            end_date: z.date().optional(),
           }),
         ),
         allowances: z.array(
@@ -241,7 +243,7 @@ export const BussinessTripFormV1 = ({
           allowances: [],
           destination: '',
           restricted_area: false,
-          pajak_id: '',
+          pajak_id: 'V0',
           purchasing_group_id: '',
           business_trip_start_date: new Date(),
           business_trip_end_date: new Date(),
@@ -309,6 +311,8 @@ export const BussinessTripFormV1 = ({
             return {
               ...detail,
               date: new Date(detail.date),
+              start_date: new Date(detail.start_date),
+              end_date: new Date(detail.end_date),
             };
           }),
           allowances: destination.allowances.map((allowance: any) => {
@@ -462,7 +466,7 @@ export const BussinessTripFormV1 = ({
             'Content-Type': 'multipart/form-data',
           },
         });
-        showToast('succesfully created data', 'success');
+        // showToast('succesfully created data', 'success');
       } else {
         // const formDataEdit = new FormData();
         // formDataEdit.append('remark', values.remark ?? '');
@@ -481,7 +485,7 @@ export const BussinessTripFormV1 = ({
             'Content-Type': 'multipart/form-data',
           },
         });
-        showToast('succesfully updated data', 'success');
+        // showToast('succesfully updated data', 'success');
       }
       setTimeout(() => {
         setLoading(false);
@@ -510,7 +514,7 @@ export const BussinessTripFormV1 = ({
         // business_trip_end_date: new Date(),
         business_trip_start_date: '',
         business_trip_end_date: '',
-        pajak_id: '',
+        pajak_id: 'V0',
         purchasing_group_id: '',
         restricted_area: false,
         allowances: [],
