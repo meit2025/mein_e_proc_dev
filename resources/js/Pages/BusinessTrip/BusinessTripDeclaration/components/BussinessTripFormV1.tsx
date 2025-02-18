@@ -113,6 +113,8 @@ export const BussinessTripFormV1 = ({
             shift_end: z.string().optional(),
             start_time: z.string().optional(),
             end_time: z.string().optional(),
+            start_date: z.string().optional(),
+            end_date: z.string().optional(),
             request_start_time: z.string().optional(),
             request_end_time: z.string().optional(),
           }),
