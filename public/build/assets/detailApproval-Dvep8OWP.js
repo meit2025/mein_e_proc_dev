@@ -1,5 +1,0 @@
-<<<<<<<< HEAD:public/build/assets/detailApproval-nT7wwbmm.js
-import{j as a}from"./app-Dl3mC2VQ.js";import{W as r}from"./WorkflowComponent-CM4FzCYh.js";const e=({methods:o})=>a.jsx("div",{style:{marginTop:"20px"},children:a.jsx(r,{workflowApproval:{approvalRequest:o.getValues("approvalRequest")??[],approvalFrom:o.getValues("approvalFrom")??[],acknowledgeFrom:o.getValues("acknowledgeFrom")??[]},workflowApprovalStep:o.getValues("approvalFromStatusRoute"),workflowApprovalDiagram:o.getValues("approvalFrom")})});export{e as D};
-========
-import{j as a}from"./app-CRZSyU7y.js";import{W as r}from"./WorkflowComponent-DojHJNmt.js";const e=({methods:o})=>a.jsx("div",{style:{marginTop:"20px"},children:a.jsx(r,{workflowApproval:{approvalRequest:o.getValues("approvalRequest")??[],approvalFrom:o.getValues("approvalFrom")??[],acknowledgeFrom:o.getValues("acknowledgeFrom")??[]},workflowApprovalStep:o.getValues("approvalFromStatusRoute"),workflowApprovalDiagram:o.getValues("approvalFrom")})});export{e as D};
->>>>>>>> 0f7230853e2892350d74393568329de8e68d7f73:public/build/assets/detailApproval-Dvep8OWP.js

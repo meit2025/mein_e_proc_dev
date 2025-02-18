@@ -1,5 +1,0 @@
-<<<<<<<< HEAD:public/build/assets/index-C-C0eISU.js
-import{r}from"./app-Dl3mC2VQ.js";import{a as f}from"./index-DPl2CAmI.js";function b({prop:t,defaultProp:l,onChange:s=()=>{}}){const[e,o]=v({defaultProp:l,onChange:s}),n=t!==void 0,i=n?t:e,a=f(s),d=r.useCallback(c=>{if(n){const u=typeof c=="function"?c(t):c;u!==t&&a(u)}else o(c)},[n,t,o,a]);return[i,d]}function v({defaultProp:t,onChange:l}){const s=r.useState(t),[e]=s,o=r.useRef(e),n=f(l);return r.useEffect(()=>{o.current!==e&&(n(e),o.current=e)},[e,o,n]),s}export{b as u};
-========
-import{r}from"./app-CRZSyU7y.js";import{a as f}from"./index-CkkkpsvQ.js";function b({prop:t,defaultProp:l,onChange:s=()=>{}}){const[e,o]=v({defaultProp:l,onChange:s}),n=t!==void 0,i=n?t:e,a=f(s),d=r.useCallback(c=>{if(n){const u=typeof c=="function"?c(t):c;u!==t&&a(u)}else o(c)},[n,t,o,a]);return[i,d]}function v({defaultProp:t,onChange:l}){const s=r.useState(t),[e]=s,o=r.useRef(e),n=f(l);return r.useEffect(()=>{o.current!==e&&(n(e),o.current=e)},[e,o,n]),s}export{b as u};
->>>>>>>> 0f7230853e2892350d74393568329de8e68d7f73:public/build/assets/index-vo1TCWAI.js

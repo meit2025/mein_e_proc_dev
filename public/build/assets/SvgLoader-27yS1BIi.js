@@ -1,5 +1,0 @@
-<<<<<<<< HEAD:public/build/assets/SvgLoader-27yS1BIi.js
-import{j as n}from"./app-Dl3mC2VQ.js";import{P as r}from"./index-CizCU-ay.js";const p=({src:e="",width:s="24px",height:i="24px",className:o="",alt:t=""})=>e?n.jsx("img",{src:e,width:s,height:i,className:o,alt:t||"SVG icon"}):(console.error("SVGLoader: 'src' is required."),null);p.propTypes={src:r.string.isRequired,width:r.oneOfType([r.string,r.number]),height:r.oneOfType([r.string,r.number]),className:r.string,alt:r.string};export{p as S};
-========
-import{j as n}from"./app-CRZSyU7y.js";import{P as r}from"./index-DyyLuzrz.js";const p=({src:e="",width:s="24px",height:i="24px",className:o="",alt:t=""})=>e?n.jsx("img",{src:e,width:s,height:i,className:o,alt:t||"SVG icon"}):(console.error("SVGLoader: 'src' is required."),null);p.propTypes={src:r.string.isRequired,width:r.oneOfType([r.string,r.number]),height:r.oneOfType([r.string,r.number]),className:r.string,alt:r.string};export{p as S};
->>>>>>>> 0f7230853e2892350d74393568329de8e68d7f73:public/build/assets/SvgLoader-DtgEZAiT.js

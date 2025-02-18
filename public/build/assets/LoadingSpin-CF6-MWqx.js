@@ -1,5 +1,0 @@
-<<<<<<<< HEAD:public/build/assets/LoadingSpin-B_uoB33b.js
-import{j as t}from"./app-Dl3mC2VQ.js";import{c as r}from"./utils-DhHKPClG.js";function i({className:o}){return t.jsx("svg",{xmlns:"http://www.w3.org/2000/svg",width:"24",height:"24",viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:"2",strokeLinecap:"round",strokeLinejoin:"round",className:r("animate-spin text-red-500",o),children:t.jsx("path",{d:"M21 12a9 9 0 1 1-6.219-8.56"})})}export{i as L};
-========
-import{j as t}from"./app-CRZSyU7y.js";import{c as r}from"./utils-8lrDxaQM.js";function i({className:o}){return t.jsx("svg",{xmlns:"http://www.w3.org/2000/svg",width:"24",height:"24",viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:"2",strokeLinecap:"round",strokeLinejoin:"round",className:r("animate-spin text-red-500",o),children:t.jsx("path",{d:"M21 12a9 9 0 1 1-6.219-8.56"})})}export{i as L};
->>>>>>>> 0f7230853e2892350d74393568329de8e68d7f73:public/build/assets/LoadingSpin-CF6-MWqx.js
