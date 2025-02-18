@@ -78,59 +78,59 @@
                 {{-- end body --}}
 
                 @if ($type == 'Reimbursement')
-                <br><br>
-                @if ($status == 'Approved')
-                There are some Request Fully Approved. Kindly find the details below :
-                @elseif ($status == 'Rejected')
-                We regret to inform you that your reimbursement request has been rejected. Below are the details:
-                @elseif ($status == 'Revise')
-                Your reimbursement request requires revision. Below are the details:
-                @elseif ($status == 'Approver')
-                You have a pending approval request for the Reimbursement. Below are the details:
-                @endif
-                <br><br>
+                    <br><br>
+                    @if ($status == 'Approved')
+                    There are some Request Fully Approved. Kindly find the details below :
+                    @elseif ($status == 'Rejected')
+                    We regret to inform you that your reimbursement request has been rejected. Below are the details:
+                    @elseif ($status == 'Revise')
+                    Your reimbursement request requires revision. Below are the details:
+                    @elseif ($status == 'Approver')
+                    You have a pending approval request for the Reimbursement. Below are the details:
+                    @endif
+                    <br><br>
 
-                Reimbursement Number: {{$reimburseGroup->code}}
-                <br>
-                Requester: {{$user->name}}
-                <br>
-                Reimbursement Details:
-                <br><br>
+                    Reimbursement Number: {{$reimburseGroup->code}}
+                    <br>
+                    Requester: {{$user->name}}
+                    <br>
+                    Reimbursement Details:
+                    <br><br>
 
-                @foreach ($reimburseGroup->reimburses as $key => $item)
-                Form {{$key + 1}} :
-                <ul>
-                    <li>
-                        Reimbursement Type: {{$item->reimburseType->name}}
-                    </li>
-                    <li>
-                        Claim Date: {{ date('F j, Y', strtotime($item->claim_date)) }}
-                    </li>
-                    <li>
-                        Reimbursement Cost: Rp. {{ number_format($item->balance, 0, ',', '.') }}
-                    </li>
-                </ul>
-                @endforeach
+                    @foreach ($reimburseGroup->reimburses as $key => $item)
+                    Form {{$key + 1}} :
+                    <ul>
+                        <li>
+                            Reimbursement Type: {{$item->reimburseType->name}}
+                        </li>
+                        <li>
+                            Claim Date: {{ date('F j, Y', strtotime($item->claim_date)) }}
+                        </li>
+                        <li>
+                            Reimbursement Cost: Rp. {{ number_format($item->balance, 0, ',', '.') }}
+                        </li>
+                    </ul>
+                    @endforeach
 
-                @if ($status == 'Approved')
-                Approve : {{ $reimburseGroup->notes }}
-                @elseif ($status == 'Rejected')
-                Rejection : {{ $reimburseGroup->notes }}
-                @elseif ($status == 'Revise')
-                Revision : {{ $reimburseGroup->notes }}
-                @endif
-                <br>
-                @if ($status == 'Rejected')
-                Please review the request and make necessary adjustments if required.
-                @elseif ($status == 'Revise')
-                Please review then resubmit the request and make necessary adjustments if required.
-                @elseif ($status == 'Approver')
-                Please review then resubmit the request and make necessary adjustments if required.
-                @endif
-                <br>
-                <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now'
-                    : 'View Detail'}}</a>
-                <br>
+                    @if ($status == 'Approved')
+                    Approve : {{ $reimburseGroup->notes }}
+                    @elseif ($status == 'Rejected')
+                    Rejection : {{ $reimburseGroup->notes }}
+                    @elseif ($status == 'Revise')
+                    Revision : {{ $reimburseGroup->notes }}
+                    @endif
+                    <br>
+                    @if ($status == 'Rejected')
+                    Please review the request and make necessary adjustments if required.
+                    @elseif ($status == 'Revise')
+                    Please review then resubmit the request and make necessary adjustments if required.
+                    @elseif ($status == 'Approver')
+                    Please review then resubmit the request and make necessary adjustments if required.
+                    @endif
+                    <br>
+                    <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now'
+                        : 'View Detail'}}</a>
+                    <br>
                 @endif
 
                 @if ($type == 'Business Trip')

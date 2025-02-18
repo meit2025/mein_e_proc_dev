@@ -199,6 +199,8 @@ class BusinessTripController extends Controller
                     'date' => $row->date,
                     'start_time' => $row->start_time,
                     'end_time' => $row->end_time,
+                    'start_date' => date('d-m-Y',strtotime($row->start_date)),
+                    'end_date' => date('d-m-Y',strtotime($row->end_date)),
                     'shift_code' => $row->shift_code,
                     'shift_start' => $row->shift_start,
                     'shift_end' => $row->shift_end,
@@ -456,6 +458,8 @@ class BusinessTripController extends Controller
                         'shift_end' => $destination['shift_end'],
                         'start_time' => $destination['start_time'],
                         'end_time' => $destination['end_time'],
+                        'start_date' => date('Y-m-d',strtotime($destination['start_date'])),
+                        'end_date' => date('Y-m-d',strtotime($destination['end_date'])),
                     ]);
                 }
                 foreach ($data_destination['allowances'] as $key => $allowance) {
@@ -546,6 +550,7 @@ class BusinessTripController extends Controller
 
             $purposeRelations = $map->purposeType ? $map->purposeType->name : ''; // Assuming 'name' is the field
             $status = $map->status->name;
+            // dd($map->purchaseRequisitions()?->first()?->purchase_requisition_number);
             // if ($map->status->name == 'Reject To :name') {
             //     $name_reject = $map->approval->where('status','Rejected')->first()?->user?->name;
             //     $status = str_replace(':name',$name_reject,$status);
@@ -565,6 +570,8 @@ class BusinessTripController extends Controller
                 'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array
                 'total_destination' => $map->total_destination, // You can join multiple relations here if it's an array
                 'created_at' => date('d/m/Y', strtotime($map->created_at)),
+                'pr_number' => $map->purchaseRequisitions()?->first()?->purchase_requisition_number ?? '-',
+                'status_pr_number' => $map->purchaseRequisitions()?->first()?->status ?? '-',
             ];
         });
 
@@ -657,6 +664,8 @@ class BusinessTripController extends Controller
                     'date' => $detail->date,
                     'start_time' => $detail->start_time,
                     'end_time' => $detail->end_time,
+                    'start_date' => $detail->start_date,
+                    'end_date' => $detail->end_date,
                     'shift_code' => $detail->shift_code,
                     'shift_start' => $detail->shift_start,
                     'shift_end' => $detail->shift_end,
@@ -766,6 +775,8 @@ class BusinessTripController extends Controller
                     'date' => date('d-m-Y', strtotime($detail->date)),
                     'start_time' => $detail->start_time,
                     'end_time' => $detail->end_time,
+                    'start_date' => date('d/m/Y',strtotime($detail->start_date)),
+                    'end_date' => date('d/m/Y',strtotime($detail->end_date)),
                     'shift_code' => $detail->shift_code,
                     'shift_start' => $detail->shift_start,
                     'shift_end' => $detail->shift_end,

@@ -264,8 +264,8 @@ const BusinessTripDetail = () => {
                         <td>{attendance.shift_code}</td>
                         <td>{attendance.shift_start}</td>
                         <td>{attendance.shift_end}</td>
-                        <td>{attendance.start_time}</td>
-                        <td>{attendance.end_time}</td>
+                        <td>{attendance.start_date} {attendance.start_time}</td>
+                        <td>{attendance.end_date} {attendance.end_time}</td>
                       </tr>
                     ),
                   )}
