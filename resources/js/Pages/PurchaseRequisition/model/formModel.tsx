@@ -195,6 +195,10 @@ export const formModel: Array<FormFieldModel<any>> = [
     placeholder: 'enter your Total Vendor Comparison',
   },
   {
+    conditional: true,
+    valueConditional: 'ZENT',
+    parameterConditional: 'document_type',
+    conditionalType: '!==',
     type: 'select',
     name: 'currency_from',
     label: 'Currency',
@@ -205,6 +209,10 @@ export const formModel: Array<FormFieldModel<any>> = [
     },
   },
   {
+    conditional: true,
+    conditionalType: '!==',
+    valueConditional: 'ZENT',
+    parameterConditional: 'document_type',
     type: 'switch',
     name: 'is_conversion_currency',
     label: 'Currency Conversion',

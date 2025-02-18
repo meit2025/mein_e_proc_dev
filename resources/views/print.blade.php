@@ -280,8 +280,12 @@
                         <td>{{$detail['shift_code']}}</td>
                         <td>{{$detail['shift_start']}}</td>
                         <td>{{$detail['shift_end']}}</td>
-                        <td>{{$detail['start_time']}}</td>
-                        <td>{{$detail['end_time']}}</td>
+                        <td>
+                            {{date('d/m/Y',strtotime($detail['start_date']))}} {{$detail['start_time']}}
+                        </td>
+                        <td>
+                            {{date('d/m/Y',strtotime($detail['end_date']))}} {{$detail['end_time']}}
+                        </td>
                     </tr>
                 @endforeach
             </table>
