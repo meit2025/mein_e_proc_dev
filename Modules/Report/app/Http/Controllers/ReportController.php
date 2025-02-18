@@ -463,7 +463,7 @@ class ReportController extends Controller
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
             $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
-                $allowanceItemsDay = $destination->detailDestinationDay->map(function ($allowanceItem) {
+                $allowanceItemsDay = collect($destination->detailDestinationDay)->map(function ($allowanceItem) {
                     return [
                         'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
                         'amount' => (int) $allowanceItem->price,
@@ -471,7 +471,7 @@ class ReportController extends Controller
                     ];
                 });
 
-                $allowanceItemsTotal = $destination->detailDestinationTotal->map(function ($allowanceItem) {
+                $allowanceItemsTotal = collect($destination->detailDestinationTotal)->map(function ($allowanceItem) {
                     return [
                         'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
                         'amount' => (int) $allowanceItem->price,
@@ -1060,37 +1060,37 @@ class ReportController extends Controller
 
         $transformedData = $data->map(function ($pr) {
             return [
-                'po_no' => $pr->purchaseRequisitions->first()->no_po ?? '',
-                'pr_no' => $pr->purchaseRequisitions->first()->purchase_requisition_number ?? '',
-                'quatation_no' => $pr->purchases_number,
-                'requested_by' => $pr->user->name ?? '',
-                'requester' => $pr->createdBy->name ?? '',
-                'document_type' => $pr->document_type,
-                'purchasing_groups' => $pr->purchasing_groups,
-                'cost_center' => $pr->purchaseRequisitions->first()->cost_center ?? '',
-                'delivery_date' => $pr->delivery_date,
-                'storage_locations' => $pr->storage_locations,
-                'total_vendor' => $pr->total_vendor,
-                'attachment' => $pr->purchaseRequisitions->first()->attachment,
-                'propose_vendor' => $pr->vendorsWinner->name,
-                'status_pr' => $pr->purchaseRequisitions->first()->status,
-                'status_po' => $pr->status->name,
-                'po_date' => $pr->created_at,
+                'po_no' => optional($pr->purchaseRequisitions->first())->no_po ?? '',
+                'pr_no' => optional($pr->purchaseRequisitions->first())->purchase_requisition_number ?? '',
+                'quatation_no' => $pr->purchases_number ?? '',
+                'requested_by' => optional($pr->user)->name ?? '',
+                'requester' => optional($pr->createdBy)->name ?? '',
+                'document_type' => $pr->document_type ?? '',
+                'purchasing_groups' => $pr->purchasing_groups ?? '',
+                'cost_center' => optional($pr->purchaseRequisitions->first())->cost_center ?? '',
+                'delivery_date' => $pr->delivery_date ?? '',
+                'storage_locations' => $pr->storage_locations ?? '',
+                'total_vendor' => $pr->total_vendor ?? '',
+                'attachment' => optional($pr->purchaseRequisitions->first())->attachment ?? '',
+                'propose_vendor' => optional($pr->vendorsWinner)->name ?? '',
+                'status_pr' => optional($pr->purchaseRequisitions->first())->status ?? '',
+                'status_po' => optional($pr->status)->name ?? '',
+                'po_date' => $pr->created_at ?? '',
                 'currency' => '',
-                'request_date' => $pr->purchaseRequisitions->first()->requisition_date,
-                'created_at' => $pr->created_at,
-                'is_cashAdvance' => $pr->is_cashAdvance,
-                'amount' => $pr->cashAdvancePurchases->nominal ?? '',
+                'request_date' => optional($pr->purchaseRequisitions->first())->requisition_date ?? '',
+                'created_at' => $pr->created_at ?? '',
+                'is_cashAdvance' => $pr->is_cashAdvance ?? '',
+                'amount' => optional($pr->cashAdvancePurchases)->nominal ?? '',
                 'percentage' => 1,
-                'reference' => $pr->cashAdvancePurchases->reference ?? '',
-                'qty' => $pr->cashAdvancePurchases->unit->qty,
-                'unit_price' => $pr->cashAdvancePurchases->unit->unit_price,
-                'account_assignment' => $pr->cashAdvancePurchases->unit->account_assignment_categories,
-                'material_group' => $pr->cashAdvancePurchases->unit->material_group,
-                'material_number' => $pr->cashAdvancePurchases->unit->material_number,
-                'uom' => $pr->cashAdvancePurchases->unit->uom,
-                'tax' => $pr->cashAdvancePurchases->unit->tax,
-                'short_text' => $pr->cashAdvancePurchases->unit->short_text,
+                'reference' => optional($pr->cashAdvancePurchases)->reference ?? '',
+                'qty' => optional(optional($pr->cashAdvancePurchases)->unit)->qty ?? '',
+                'unit_price' => optional(optional($pr->cashAdvancePurchases)->unit)->unit_price ?? '',
+                'account_assignment' => optional(optional($pr->cashAdvancePurchases)->unit)->account_assignment_categories ?? '',
+                'material_group' => optional(optional($pr->cashAdvancePurchases)->unit)->material_group ?? '',
+                'material_number' => optional(optional($pr->cashAdvancePurchases)->unit)->material_number ?? '',
+                'uom' => optional(optional($pr->cashAdvancePurchases)->unit)->uom ?? '',
+                'tax' => optional(optional($pr->cashAdvancePurchases)->unit)->tax ?? '',
+                'short_text' => optional(optional($pr->cashAdvancePurchases)->unit)->short_text ?? '',
             ];
         });
 
