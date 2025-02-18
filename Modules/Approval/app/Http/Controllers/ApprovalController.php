@@ -312,7 +312,7 @@ class ApprovalController extends Controller
                             $findUser = User::where('id', $model->request_for)->first();
                             SendNotification::dispatch($findUser,  $message, $baseurl);
                             $businessTrip = BusinessTrip::find($request->id);
-
+                            $businessTrip->notes = isset($request->note) ? $request->note : '';
                             Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip',  $request->status, '', null, null, $businessTrip, $baseurl));
 
                             if ($findUser->id !== $model->created_by) {

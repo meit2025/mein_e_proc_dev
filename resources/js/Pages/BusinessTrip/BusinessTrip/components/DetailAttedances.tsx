@@ -151,7 +151,7 @@ export function DetailAttedances({
                           <FormControl>
                             <Input
                               defaultValue={moment(field.value).format('YYYY-MM-DD')}
-                              onChange={field.onChange}
+                              onChange={(e) => field.onChange(new Date(e.target.value))}
                               type='date'
                               style={{marginBottom: '5px'}}
                             />
@@ -187,7 +187,7 @@ export function DetailAttedances({
                           <FormControl>
                             <Input
                               defaultValue={moment(field.value).format('YYYY-MM-DD')}
-                              onChange={field.onChange}
+                              onChange={(e) => field.onChange(new Date(e.target.value))}
                               type='date'
                               style={{marginBottom: '5px'}}
                             />
