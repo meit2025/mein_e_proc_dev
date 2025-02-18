@@ -203,10 +203,10 @@ class ApprovalController extends Controller
                     'is_status' => true,
                     'is_approval' => false
                 ]);
-                
+
                 $dataNext = Approval::where('id', $request->approvalId)->where('document_id',  $request->id)
                 ->where('document_name', $dokumentApproval)->first();
-                
+
                 if ($dataNext) {
                     Approval::where('document_id',  $request->id)
                     ->where('number_approval', $dataNext->number_approval + 1)
@@ -299,7 +299,7 @@ class ApprovalController extends Controller
                             if (in_array($statusId, [3, 4, 6])) {
                                 SendNotification::dispatch($findUser,  $message, $baseurl);
                                 Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimbursement', $request->status, '', null, $reimburseGroup, null, $baseurl));
-                            } 
+                            }
                             // else if ($statusId == 1 && !empty($getApproval)) {
                             //     $findcreatedBy = User::find($getApproval->user_id);
                             //     Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Reimbursement', 'Approver', '', null, $reimburseGroup, null, $baseurl));
@@ -311,12 +311,13 @@ class ApprovalController extends Controller
                             $baseurl = env('APP_URL') .  '/business-trip/detail-page/' .  $request->id;
                             $findUser = User::where('id', $model->request_for)->first();
                             SendNotification::dispatch($findUser,  $message, $baseurl);
+                            $businessTrip = BusinessTrip::find($request->id);
 
-                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip',  $request->status, '', null, null, null, $baseurl));
+                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip',  $request->status, '', null, null, $businessTrip, $baseurl));
 
                             if ($findUser->id !== $model->created_by) {
                                 $findcreatedBy = User::find($model->created_by);
-                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip',  $request->status, '', null, null, null, $baseurl));
+                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip',  $request->status, '', null, null, $businessTrip, $baseurl));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
                             }
                             break;
