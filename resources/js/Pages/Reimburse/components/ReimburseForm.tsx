@@ -503,21 +503,22 @@ export const ReimburseForm: React.FC<Props> = ({
   const fetchDataValue = async () => {
     try {
       const values = form.getValues('forms');
-      const totalNominal = values.map((item, index) => ({
+      const reimburseCostFormList = values.map((item, index) => ({
         index,
         value: item.balance ? parseInt(item.balance) : 0,
       }));
       
-      const hasZeroValue = totalNominal.some(item => item.value === 0);
+      const hasZeroValue = reimburseCostFormList.some(item => item.value === 0);
       if (hasZeroValue) {
-        const index = totalNominal.findIndex(item => item.value === 0);
+        const index = reimburseCostFormList.findIndex(item => item.value === 0);
         showToast(`Please fill the balance for form ${index + 1}`, 'error');
         return;
       }
 
+      const totalNominal = values.reduce((acc, item) => acc + (parseInt(item.balance) || 0), 0);
       const response = await axiosInstance.get('/check-approval', {
         params: {
-          value: totalNominal?.[0].value,
+          value: totalNominal,
           requester: form.getValues('requester'),
           type: 'REIM',
         },
