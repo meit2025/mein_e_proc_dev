@@ -351,9 +351,9 @@ class ReimbuseController extends Controller
                             ->orderBy('reimburses.id', 'desc')
                             ->first();
 
-            $reimbuseType   = MasterTypeReimburse::where('code', $reimbuseTypeID)->whereNotNull('interval_claim_period')->first();
+            $reimbuseType   = MasterTypeReimburse::where('code', $reimbuseTypeID)->first();
             $user           = User::where('nip', $user)->first();
-            if (!empty($getLastReimburse)) {
+            if (!empty($getLastReimburse) && $reimbuseType->interval_claim_period !== null) {
                 $createDate         = Carbon::createFromFormat('Y-m-d', $getLastReimburse->claim_date);
                 $availableClaimDate = $createDate->addDays((int)$reimbuseType->interval_claim_period);
                 if (Carbon::now()->format('Y-m-d') > $availableClaimDate) {
