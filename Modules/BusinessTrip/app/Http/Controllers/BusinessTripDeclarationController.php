@@ -628,6 +628,7 @@ class BusinessTripDeclarationController extends Controller
             // $bt->processTextData($request->request_no);
             DB::commit();
         } catch (\Exception $e) {
+            dd($e->getMessage());
             DB::rollBack();
         }
     }
