@@ -302,4 +302,12 @@ class AllowanceItemController extends Controller
             DB::rollBack();
         }
     }
+
+    function checkUniqueCode($code) {
+        $data = AllowanceItem::where('code', $code)->first();
+        if (!is_null($data)) {
+            return response()->json(['msg'=>'already']);
+        }
+        return response()->json(['msg'=>'ready']);
+    }
 }

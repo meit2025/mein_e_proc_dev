@@ -113,6 +113,8 @@ export const BussinessTripFormV1 = ({
             shift_end: z.string().optional(),
             start_time: z.string().optional(),
             end_time: z.string().optional(),
+            start_date: z.string().optional(),
+            end_date: z.string().optional(),
             request_start_time: z.string().optional(),
             request_end_time: z.string().optional(),
           }),
@@ -531,7 +533,7 @@ export const BussinessTripFormV1 = ({
               </td>
             </tr>
             <tr>
-              <td width={200}>File Attachment</td>
+              <td width={200}>File Attachment<span className='text-red-600'>*</span></td>
               <td>
                 <FormField
                   control={form.control}
@@ -1065,7 +1067,7 @@ export function DetailAttedances({
     <table className='text-xs mt-4 reimburse-form-detail font-thin'>
       <tr>
         <td colSpan={2}>
-          <div className='mb-4 text-sm'>Detail Attedance: </div>
+          <div className='mb-4 text-sm'>Detail Attedance Business Trip Request: </div>
         </td>
       </tr>
       <tr>
@@ -1078,13 +1080,11 @@ export function DetailAttedances({
               <th>Shift End</th>
               <th>Request Start Time</th>
               <th>Request End Time</th>
-              <th>Start Time</th>
-              <th>End Time</th>
             </thead>
             <tbody>
               {detailAttedanceWatch.map((attedance: any, index: any) => (
                 <tr key={attedance.index}>
-                  <td>
+                  <td style={{verticalAlign: 'middle'}}>
                     {moment(attedance.date).format('DD/MM/YYYY')}
 
                     <FormField
@@ -1104,7 +1104,7 @@ export function DetailAttedances({
                       )}
                     />
                   </td>
-                  <td>
+                  <td style={{verticalAlign: 'middle'}}>
                     {attedance.shift_code}
                     <FormField
                       control={form.control}
@@ -1123,7 +1123,7 @@ export function DetailAttedances({
                       )}
                     />
                   </td>
-                  <td>
+                  <td style={{verticalAlign: 'middle'}}>
                     {attedance.shift_start}
                     <FormField
                       control={form.control}
@@ -1142,7 +1142,7 @@ export function DetailAttedances({
                       )}
                     />
                   </td>
-                  <td>
+                  <td style={{verticalAlign: 'middle'}}>
                     {attedance.shift_end}
                     <FormField
                       control={form.control}
@@ -1161,56 +1161,228 @@ export function DetailAttedances({
                       )}
                     />
                   </td>
-                  <td>
+                  <td style={{verticalAlign: 'middle'}}>
                     <FormField
-                      control={form.control}
-                      name={`destinations.${destinationIndex}.detail_attedances.${index}.start_time`}
-                      render={({ field }) => (
+                        control={form.control}
+                        name={`destinations.${destinationIndex}.detail_attedances.${index}.request_start_date`}
+                        render={({ field }) => (
                         <FormItem>
-                          <FormControl>
-                            <Input defaultValue={field.value} onChange={field.onChange} />
-                          </FormControl>
-                          <FormMessage />
+                            <FormControl>
+                            <Input
+                                defaultValue={moment(field.value).format('YYYY-MM-DD')}
+                                onChange={field.onChange}
+                                type='date'
+                                readOnly={true}
+                                style={{marginBottom: '5px'}}
+                            />
+                            </FormControl>
+                            <FormMessage />
                         </FormItem>
-                      )}
+                        )}
                     />
-                  </td>
-                  <td>
-                    <FormField
-                      control={form.control}
-                      name={`destinations.${destinationIndex}.detail_attedances.${index}.end_time`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input defaultValue={field.value} onChange={field.onChange} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </td>
-                  <td>
                     <FormField
                       control={form.control}
                       name={`destinations.${destinationIndex}.detail_attedances.${index}.request_start_time`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input defaultValue={field.value} onChange={field.onChange} />
+                            <Input defaultValue={field.value} onChange={field.onChange} readOnly={true}/>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </td>
-                  <td>
+                  <td style={{verticalAlign: 'middle'}}>
+                    <FormField
+                        control={form.control}
+                        name={`destinations.${destinationIndex}.detail_attedances.${index}.request_end_date`}
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormControl>
+                            <Input
+                                defaultValue={moment(field.value).format('YYYY-MM-DD')}
+                                onChange={field.onChange}
+                                type='date'
+                                readOnly={true}
+                                style={{marginBottom: '5px'}}
+                            />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
                     <FormField
                       control={form.control}
                       name={`destinations.${destinationIndex}.detail_attedances.${index}.request_end_time`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input defaultValue={field.value} onChange={field.onChange} />
+                            <Input defaultValue={field.value} onChange={field.onChange} readOnly={true} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td colSpan={2}>
+          <div className='mb-4 text-sm'>Detail Attedance Business Trip Declaration: </div>
+        </td>
+      </tr>
+      <tr>
+        <td className='overflow-x'>
+          <table className='detail-attedance text-xs table-auto overflow-scroll w-full'>
+            <thead>
+              <th>Date</th>
+              <th>Shift code</th>
+              <th>Shift Start</th>
+              <th>Shift End</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+            </thead>
+            <tbody>
+              {detailAttedanceWatch.map((attedance: any, index: any) => (
+                <tr key={attedance.index}>
+                  <td style={{verticalAlign: 'middle'}}>
+                    {moment(attedance.date).format('DD/MM/YYYY')}
+
+                    <FormField
+                      control={form.control}
+                      name={`destinations.${destinationIndex}.detail_attedances.${index}.date`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              defaultValue={moment(field.value).format('YYYY-MM-DD')}
+                              onChange={field.onChange}
+                              type='hidden'
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </td>
+                  <td style={{verticalAlign: 'middle'}}>
+                    {attedance.shift_code}
+                    <FormField
+                      control={form.control}
+                      name={`destinations.${destinationIndex}.detail_attedances.${index}.shift_code`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              defaultValue={moment(field.value).format('YYYY-MM-DD')}
+                              onChange={field.onChange}
+                              type='hidden'
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </td>
+                  <td style={{verticalAlign: 'middle'}}>
+                    {attedance.shift_start}
+                    <FormField
+                      control={form.control}
+                      name={`destinations.${destinationIndex}.detail_attedances.${index}.shift_start`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              defaultValue={moment(field.value).format('YYYY-MM-DD')}
+                              onChange={field.onChange}
+                              type='hidden'
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </td>
+                  <td style={{verticalAlign: 'middle'}}>
+                    {attedance.shift_end}
+                    <FormField
+                      control={form.control}
+                      name={`destinations.${destinationIndex}.detail_attedances.${index}.shift_end`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              defaultValue={moment(field.value).format('YYYY-MM-DD')}
+                              onChange={field.onChange}
+                              type='hidden'
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </td>
+                  <td style={{verticalAlign: 'middle'}}>
+                    <FormField
+                        control={form.control}
+                        name={`destinations.${destinationIndex}.detail_attedances.${index}.start_date`}
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormControl>
+                            <Input
+                                defaultValue={moment(field.value).format('YYYY-MM-DD')}
+                                onChange={field.onChange}
+                                type='date'
+                                style={{marginBottom: '5px'}}
+                            />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`destinations.${destinationIndex}.detail_attedances.${index}.start_time`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input defaultValue={field.value} onChange={field.onChange} type='time'/>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </td>
+                  <td style={{verticalAlign: 'middle'}}>
+                    <FormField
+                        control={form.control}
+                        name={`destinations.${destinationIndex}.detail_attedances.${index}.end_date`}
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormControl>
+                            <Input
+                                defaultValue={moment(field.value).format('YYYY-MM-DD')}
+                                onChange={field.onChange}
+                                type='date'
+                                style={{marginBottom: '5px'}}
+                            />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`destinations.${destinationIndex}.detail_attedances.${index}.end_time`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input defaultValue={field.value} onChange={field.onChange} type='time'/>
                           </FormControl>
                           <FormMessage />
                         </FormItem>

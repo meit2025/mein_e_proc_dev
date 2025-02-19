@@ -36,6 +36,8 @@ export const columns: GridColDef[] = [
       );
     },
   },
+  { field: 'pr_number', headerName: 'PR Number', width: 200, filterable: true },
+  { field: 'status_pr_number', headerName: 'Status PR Number', width: 200, filterable: true },
   { field: 'total_destination', headerName: 'Total Destinations', width: 200, filterable: true },
 ];
 
