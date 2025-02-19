@@ -331,25 +331,28 @@ class ReimbuseController extends Controller
         try {
             $user = $request->user;
             $reimbuseTypeID = $request->reimbuse_type;
+            $for = $request->for;
+            
+            $queryBalanceLimit = Reimburse::query()
+            ->join('reimburse_groups as rg', 'rg.code', '=', 'reimburses.group' )
+            ->leftJoin('purchase_requisitions as pr', 'pr.purchase_id', '=', 'rg.id')
+            ->whereIn('rg.status_id', [1, 3, 5])
+            ->where('reimburses.reimburse_type', $reimbuseTypeID);
+            
+            if ($for !== null) {
+                $queryBalanceLimit = $queryBalanceLimit->where('reimburses.for', $for);
+            } else {
+                $queryBalanceLimit = $queryBalanceLimit->where('reimburses.requester', $user);
+            }
+            $queryBalanceLimit = $queryBalanceLimit->where(function ($query) {
+                $query->whereNot('pr.status', 'X')->orWhereNull('pr.status');
+            });
 
-            $getCurrentBalance = Reimburse::join('reimburse_groups as rb', 'rb.code', '=', 'reimburses.group' )
-                ->whereIn('rb.status_id', [1, 3, 5])
-                ->where('reimburses.requester', $user)
-                ->where('reimburses.reimburse_type', $reimbuseTypeID)
-                ->sum('balance');
+            $getCurrentBalance = $queryBalanceLimit->sum('reimburses.balance');
             
-            $getCurrentLimit = Reimburse::join('reimburse_groups as rb', 'rb.code', '=', 'reimburses.group' )
-                ->whereIn('rb.status_id', [1, 3, 5])
-                ->where('reimburses.requester', $user)
-                ->where('reimburses.reimburse_type', $reimbuseTypeID)
-                ->count();
+            $getCurrentLimit = $queryBalanceLimit->count();
             
-            $getLastReimburse = Reimburse::join('reimburse_groups as rb', 'rb.code', '=', 'reimburses.group' )
-                            ->whereIn('rb.status_id', [1, 3, 5])
-                            ->where('reimburses.requester', $user)
-                            ->where('reimburses.reimburse_type', $reimbuseTypeID)
-                            ->orderBy('reimburses.id', 'desc')
-                            ->first();
+            $getLastReimburse = $queryBalanceLimit->orderBy('reimburses.id', 'desc')->first();
 
             $reimbuseType   = MasterTypeReimburse::where('code', $reimbuseTypeID)->first();
             $user           = User::where('nip', $user)->first();

@@ -48,8 +48,11 @@ class ChangeStatus extends Mailable
      */
     public function envelope(): Envelope
     {
+        $subject = $this->status . ' Request : Purchase Requisition ' . $this->pr;
+        if($this->type == 'Reimbursement') $subject = $this->status . ' Request : Reimbursement ' . $this->reimburseGroup->code;
+
         return new Envelope(
-            subject: $this->status . ' Request : Purchase Requisition ' . $this->pr,
+            subject: $subject,
         );
     }
 

@@ -55,7 +55,7 @@ const ReimburseDetail = () => {
           <strong>Requested By:</strong> {data?.user_create_request?.name}
         </p>
         <p className='text-sm'>
-          <strong>Remark:</strong> {data?.remark}
+          <strong>Remark Header:</strong> {data?.remark}
         </p>
         <br />
         <p className='text-sm flex items-center gap-2'>
@@ -208,7 +208,7 @@ const ReimburseDetail = () => {
                   </tr>
                   <tr>
                     <td>
-                      <strong>Remark</strong>
+                      <strong>Remark Item</strong>
                     </td>
                     <td>{reimburse?.short_text}</td>
                   </tr>
