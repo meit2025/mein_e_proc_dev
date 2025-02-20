@@ -32,7 +32,7 @@
             @endphp
             @foreach ($item['reimburses'] as $index => $reim)
                 @php
-                    $statusPaid = isset($item['pr'][$key]) && $item['pr'][$key]['is_closed'] == 'S' ? "Paid" : "Unpaid";
+                    $statusPaid = isset($item['pr'][$key]) && $item['pr'][$key]['clearing_status'] == 'S' ? "Paid" : "Unpaid";
                     $totalBalance = $reim['reimburseType']['grade_option'] == 'all' ? $reim['reimburseType']['grade_all_price'] : $reim['reimburseType']['gradeReimburseTypes']['plafon'];
                 @endphp
                 <tr>
