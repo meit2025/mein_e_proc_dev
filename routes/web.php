@@ -17,8 +17,12 @@ use Illuminate\Support\Facades\Storage;
 // Route::get('/login', [AuthController::class, 'login'])->name('login');
 // Route::post('/login', [AuthController::class, 'store'])->name('login.store');
 Route::get('/oke',function() {
-    $data = BusinessTrip::find(42);
-    dd($data->purchaseRequisitions);
+    $data = BusinessTrip::find(49);
+    foreach ($data->businessTripDestination as $key => $value) {
+        $day = $value->getDetailDestinationDay->sum('price');
+        $total = $value->detailDestinationTotal->sum('price');
+        dd($day, $total);
+    }
 });
 
 Route::get('/test-upload-file', function () {
@@ -31,6 +35,7 @@ Route::get('/test-upload-file', function () {
     ]);
 });
 Route::get('/test-email', [NotifikasiController::class, 'sendTestEmail']);
+Route::get('/test-conntect-access', [CurrencyController::class, 'ConntectAccess']);
 
 Route::get('/test', function () {
     // $fileContents = file_get_contents('http://127.0.0.1:8008/storage/business_trip/dummy_1736238179.pdf');

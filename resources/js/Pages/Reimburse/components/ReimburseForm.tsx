@@ -275,7 +275,8 @@ export const ReimburseForm: React.FC<Props> = ({
           reimburse_type: map.reimburse_type.code
         });
         await getDataByLimit(formCounter, {
-          reimburse_type: map.reimburse_type.code
+          reimburse_type: map.reimburse_type.code,
+          for: map.reimburse_type.is_employee === 1 ? null : map.for
         });
         formCounter++;
       }
@@ -472,6 +473,7 @@ export const ReimburseForm: React.FC<Props> = ({
     const params = {
       user: form.getValues('requester'),
       reimbuse_type: param != null ? param.reimburse_type : data.reimburse_type,
+      for: param != null ? param.for : data.for,
     };
     
     try {
@@ -585,7 +587,7 @@ export const ReimburseForm: React.FC<Props> = ({
                   </td>
                 </tr>
                 <tr>
-                  <td className='w-1/4'>Remark<span className='text-red-600'>*</span></td>
+                  <td className='w-1/4'>Remark Header<span className='text-red-600'>*</span></td>
                   <td>
                     <FormField
                       control={form.control}
@@ -753,7 +755,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                     });
                                     
                                     if (selectedValue.is_employee === 1) {
-                                      getDataByLimit(index);
+                                      getDataByLimit(index, {reimburse_type: data?.value, for: null});
                                     } else {
                                       setDetailLimit((prev) => {
                                         const newDetailLimit = [...prev];
@@ -837,7 +839,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                               for: value,
                                             });
 
-                                            getDataByLimit(index, {reimburse_type: form.getValues(`forms.${index}.reimburse_type`)});
+                                            getDataByLimit(index, {reimburse_type: form.getValues(`forms.${index}.reimburse_type`), for: value});
                                           }
                                         }
                                         defaultValue={formValue?.for}
@@ -984,7 +986,7 @@ export const ReimburseForm: React.FC<Props> = ({
                           </tr>
 
                           <tr>
-                            <td className='w-1/4'>Remark<span className='text-red-600'>*</span></td>
+                            <td className='w-1/4'>Remark Item<span className='text-red-600'>*</span></td>
                             <td>
                               <FormField
                                 control={form.control}

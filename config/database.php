@@ -41,6 +41,14 @@ return [
             'journal_mode' => null,
             'synchronous' => null,
         ],
+        'odbc_access' => [
+            'driver'   => 'odbc',
+            'dsn'      => 'Driver={Microsoft Access Driver (*.mdb)};DBQ=/Users/fajarsetiawan/Kerjaan/kerjaan/ubuntu/majapahit/mitsubishi/mitsubishi-web/att2000.mdb;',
+            'database' => '/Users/fajarsetiawan/Kerjaan/kerjaan/ubuntu/majapahit/mitsubishi/mitsubishi-web/att2000.mdb',  // tambahkan database sebagai path ke file .mdb
+            'username' => env('DB_ODBC_USERNAME', ''),
+            'password' => env('DB_ODBC_PASSWORD', ''),
+            'charset'  => 'utf8',
+        ],
 
         'mysql' => [
             'driver' => 'mysql',
@@ -147,7 +155,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
         ],
 
         'default' => [

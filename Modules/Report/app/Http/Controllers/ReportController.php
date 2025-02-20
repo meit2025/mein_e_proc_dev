@@ -660,7 +660,7 @@ class ReportController extends Controller
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
             $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
-                $allowanceItemsDay = $destination->detailDestinationDay->map(function ($allowanceItem) {
+                $allowanceItemsDay = collect($destination->detailDestinationDay)->map(function ($allowanceItem) {
                     return [
                         'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
                         'amount' => (int) $allowanceItem->price,
@@ -668,7 +668,7 @@ class ReportController extends Controller
                     ];
                 });
 
-                $allowanceItemsTotal = $destination->detailDestinationTotal->map(function ($allowanceItem) {
+                $allowanceItemsTotal = collect($destination->detailDestinationTotal)->map(function ($allowanceItem) {
                     return [
                         'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
                         'amount' => (int) $allowanceItem->price,
@@ -1060,40 +1060,64 @@ class ReportController extends Controller
 
         $transformedData = $data->map(function ($pr) {
             return [
-                'po_no' => optional($pr->purchaseRequisitions->first())->no_po ?? '',
-                'pr_no' => optional($pr->purchaseRequisitions->first())->purchase_requisition_number ?? '',
+                'po_no' => collect($pr->purchaseRequisitions)->firstWhere('no_po', '!=', null)->no_po ?? '-',
+                'pr_no' => collect($pr->purchaseRequisitions)->firstWhere('purchase_requisition_number', '!=', null)->purchase_requisition_number ?? '-',
                 'quatation_no' => $pr->purchases_number ?? '',
                 'requested_by' => optional($pr->user)->name ?? '',
                 'requester' => optional($pr->createdBy)->name ?? '',
                 'document_type' => $pr->document_type ?? '',
                 'purchasing_groups' => $pr->purchasing_groups ?? '',
-                'cost_center' => optional($pr->purchaseRequisitions->first())->cost_center ?? '',
+                'cost_center' => collect($pr->purchaseRequisitions)->firstWhere('cost_center', '!=', null)->cost_center ?? '-',
                 'delivery_date' => $pr->delivery_date ?? '',
                 'storage_locations' => $pr->storage_locations ?? '',
-                'total_vendor' => $pr->total_vendor ?? '',
-                'attachment' => optional($pr->purchaseRequisitions->first())->attachment ?? '',
-                'propose_vendor' => optional($pr->vendorsWinner)->name ?? '',
-                'status_pr' => optional($pr->purchaseRequisitions->first())->status ?? '',
-                'status_po' => optional($pr->status)->name ?? '',
-                'po_date' => $pr->created_at ?? '',
-                'currency' => '',
-                'request_date' => optional($pr->purchaseRequisitions->first())->requisition_date ?? '',
+                'header_note' => collect($pr->purchaseRequisitions)->firstWhere('header_not', '!=', null)->header_not ?? '-',
+
+                // Entertainment
+                'tanggal_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('tanggal_entertainment', '!=', null)->tanggal_entertainment ?? '-',
+                'tempat_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('tempat_entertainment', '!=', null)->tempat_entertainment ?? '-',
+                'alamat_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('alamat_entertainment', '!=', null)->alamat_entertainment ?? '-',
+                'jenis_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('jenis_entertainment', '!=', null)->jenis_entertainment ?? '-',
+                'nama_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('nama_entertainment', '!=', null)->nama_entertainment ?? '-',
+                'posisi_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('posisi_entertainment', '!=', null)->posisi_entertainment ?? '-',
+                'nama_perusahaan' => collect($pr->purchaseRequisitions)->firstWhere('nama_perusahaan', '!=', null)->nama_perusahaan ?? '-',
+                'jenis_usaha_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('jenis_usaha_entertainment', '!=', null)->jenis_usaha_entertainment ?? '-',
+                'jenis_kegiatan_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('jenis_kegiatan_entertainment', '!=', null)->jenis_kegiatan_entertainment ?? '-',
+
+                'status' => optional($pr->status)->name ?? '',
+                'number_pr' => collect($pr->purchaseRequisitions)->firstWhere('purchase_requisition_number', '!=', null)->purchase_requisition_number ?? '-',
+                'status_pr' => collect($pr->purchaseRequisitions)->firstWhere('status', '!=', null)->status ?? '-',
+                'status_po' => collect($pr->purchaseRequisitions)->firstWhere('is_closed', '!=', null)->is_closed ?? '-',
+                'currency' => collect($pr->purchaseRequisitions)->firstWhere('currency', '!=', null)->currency ?? '-',
+                'attachment' => collect($pr->purchaseRequisitions)->pluck('attachment')->filter()->implode(','),
                 'created_at' => $pr->created_at ?? '',
+                'total_vendor' => $pr->total_vendor ?? '',
+                'propose_vendor' => optional($pr->vendorsWinner)->name ?? '',
+
+                // Item detail dari relasi vendorsWinner.units (hasMany)
+                'items' => optional($pr->vendorsWinner)->units->map(function ($unit) {
+                    $qty = $unit->qty ?? 0;
+                    $unit_price = $unit->unit_price ?? 0;
+                    return [
+                        'request_date' => $unit->requisition_date ?? '',
+                        'qty' => $qty,
+                        'unit_price' => $unit_price,
+                        'total_amount' => $qty * $unit_price, // Menghitung total amount
+                        'account_assignment' => $unit->account_assignment_categories ?? '',
+                        'material_group' => $unit->material_group ?? '',
+                        'material_number' => $unit->material_number ?? '',
+                        'uom' => $unit->uom ?? '',
+                        'tax' => $unit->tax ?? '',
+                        'short_text' => $unit->short_text ?? '',
+                    ];
+                })->toArray(),
+
+                // Cash advanced
                 'is_cashAdvance' => $pr->is_cashAdvance ?? '',
-                'amount' => optional($pr->cashAdvancePurchases)->nominal ?? '',
-                'percentage' => 1,
+                'amount' => optional($pr->cashAdvancePurchases)->nominal ?? '0',
+                'percentage' => '',
                 'reference' => optional($pr->cashAdvancePurchases)->reference ?? '',
-                'qty' => optional(optional($pr->cashAdvancePurchases)->unit)->qty ?? '',
-                'unit_price' => optional(optional($pr->cashAdvancePurchases)->unit)->unit_price ?? '',
-                'account_assignment' => optional(optional($pr->cashAdvancePurchases)->unit)->account_assignment_categories ?? '',
-                'material_group' => optional(optional($pr->cashAdvancePurchases)->unit)->material_group ?? '',
-                'material_number' => optional(optional($pr->cashAdvancePurchases)->unit)->material_number ?? '',
-                'uom' => optional(optional($pr->cashAdvancePurchases)->unit)->uom ?? '',
-                'tax' => optional(optional($pr->cashAdvancePurchases)->unit)->tax ?? '',
-                'short_text' => optional(optional($pr->cashAdvancePurchases)->unit)->short_text ?? '',
             ];
         });
-
 
         $filename = 'Purchase.xlsx';
         return Excel::download(new PurchaseRequisitionExport($transformedData), $filename);
