@@ -45,6 +45,10 @@ class User extends Authenticatable
         'position_id',
         'departement_id',
         'is_approval',
+
+        'user_id_mein_attandace',
+        'sensor_id_mein_attadance',
+        'sn_mein_attandance',
     ];
 
     /**
