@@ -10,6 +10,11 @@ const CashAdvance = ({ disable }: { disable: boolean }) => {
   const watchIsCashAdvance = useWatch({
     name: 'is_cashAdvance',
   });
+  const currency_from = useWatch({
+    name: 'currency_from',
+  });
+
+  console.log(currency_from);
 
   const vendor = useWatch({
     name: 'vendors',
@@ -63,12 +68,15 @@ const CashAdvance = ({ disable }: { disable: boolean }) => {
 
   return (
     <div>
-      <FormSwitch
-        fieldLabel='cash Advance'
-        fieldName={'is_cashAdvance'}
-        isRequired={false}
-        disabled={disable}
-      />
+      {currency_from === 'IDR' && (
+        <FormSwitch
+          fieldLabel='cash Advance'
+          fieldName={'is_cashAdvance'}
+          isRequired={false}
+          disabled={disable}
+        />
+      )}
+
       {watchIsCashAdvance && (
         <>
           <hr></hr>
