@@ -6,11 +6,13 @@ use App\Models\Purchase;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\FromView;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class PurchaseRequisitionExport implements FromView
+class PurchaseRequisitionExport implements FromView, WithStyles, ShouldAutoSize
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -22,39 +24,6 @@ class PurchaseRequisitionExport implements FromView
         $this->data = $data;
     }
 
-    // public function collection()
-    // {
-    //     $numberedData = $this->data->map(function ($item, $index) {
-    //         // Ensure $item is an array
-    //         $itemArray = (array) $item;
-
-    //         // Merge the array with the numbering
-    //         return array_merge(['Nomor' => $index + 1], $itemArray);
-    //     });
-
-    //     return collect($numberedData);
-    // }
-
-    // public function headings(): array
-    // {
-    //     return [
-    //         'No',
-    //         'Purchase Number',
-    //         'Request For',
-    //         'Document type',
-    //         'Purchasing groups',
-    //         'Delivery date',
-    //         'Storage locations',
-    //         'Total Vendor',
-    //         'Total Item',
-    //         'Status',
-    //         'Requester By',
-    //         'Created At',
-    //         'Number PO',
-    //         'Number PR',
-    //     ];
-    // }
-
     public function view(): View
     {
         return view(
@@ -65,15 +34,8 @@ class PurchaseRequisitionExport implements FromView
 
     public function styles(Worksheet $sheet)
     {
-        // Style headers
-        $sheet->getStyle('A1:AD1')->applyFromArray([
-            'font' => ['bold' => true],
-        ]);
-        $sheet->getStyle('A2:AD2')->applyFromArray([
-            'font' => ['bold' => true],
-        ]);
-
-        $sheet->getStyle('A:AD')->getAlignment()->setHorizontal('center'); // Rata tengah seluruh kolom
+        $sheet->getStyle('A1:AO1')->getFont()->setBold(true); // Contoh: Header dengan font tebal
+        $sheet->getStyle('A:AO')->getAlignment()->setHorizontal('center'); // Rata tengah seluruh kolom
 
         // Tambahkan border untuk semua data
         $highestRow = $sheet->getHighestRow();
