@@ -770,7 +770,7 @@ class ReportController extends Controller
             });
         }
 
-        $data = $query->where('type', 'request')->latest()->search(request(['search']))->paginate($perPage);
+        $data = $query->latest()->search(request(['search']))->paginate($perPage);
 
         $data->getCollection()->transform(function ($map) {
 
@@ -803,7 +803,7 @@ class ReportController extends Controller
 
     public function exportBTOverall(Request $request)
     {
-        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'businessTripDestination', 'requestedBy', 'requestedBy.positions', 'requestedBy.divisions', 'requestedBy.departements']);
+        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'parentBusinessTrip', 'businessTripDestination', 'requestedBy', 'requestedBy.positions', 'requestedBy.divisions', 'requestedBy.departements']);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
         $startDate = $request->get('startDate');
@@ -867,6 +867,7 @@ class ReportController extends Controller
                 'purpose' => $businessTrip->purposeType,
                 'remarks' => $businessTrip->remarks,
                 'is_declaration' => $isDeclaration,
+                'request_no_parent' => $businessTrip->parentBusinessTrip?->request_no ?? '',
                 'destinations' => $businessTrip->businessTripDestination->map(function ($destination) use ($isDeclaration) {
                     return [
                         'start_date' => $destination->business_trip_start_date,
@@ -884,7 +885,6 @@ class ReportController extends Controller
                 })
             ];
         });
-
         // Return the exported file
         $filename = 'BusinessTrips.xlsx';
         return Excel::download(new BusinessTripOverallExport($transformedData), $filename);

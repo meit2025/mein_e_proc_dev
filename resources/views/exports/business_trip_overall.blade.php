@@ -50,7 +50,7 @@
                 @foreach ($trip['destinations'] as $destination)
                     <tr>
                         <td>{{ $index + 1 }}</td>
-                        <td>{{ $trip['employee']->employee_no ?? '' }}</td>
+                        <td>{{ $trip['employee']->nip ?? '' }}</td>
                         <td>{{ $trip['employee']->name ?? '' }}</td>
                         <td>{{ $trip['employee']->positions->name ?? '' }}</td>
                         <td>{{ $trip['employee']->departements->name ?? '' }}</td>
@@ -59,7 +59,13 @@
                         <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
 
                         @if ($trip['is_declaration'])
-                        <td colspan="6">N/A</td>
+                        <td>{{ $trip['request_no_parent'] ?? '' }}</td>
+                        <td>{{ $trip['status']->name ?? 'Pending' }}</td>
+                        <td>{{ $trip['purpose']->name ?? '' }}</td>
+                        <td>{{ $destination['destination'] ?? '' }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
+
                         <td>{{ $trip['request_no'] ?? '' }}</td>
                         <td>{{ $trip['status']->name ?? 'Pending' }}</td>
                         <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
