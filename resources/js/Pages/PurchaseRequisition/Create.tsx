@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useState } from 'react';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import FormMapping from '@/components/form/FormMapping';
-import { useForm } from 'react-hook-form';
+import { FieldValues, useForm } from 'react-hook-form';
 import { CREATE_PR } from '@/endpoint/purchaseRequisition/api';
 import { LIST_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
 import { formModel } from './model/formModel';
@@ -12,14 +12,18 @@ import { usePage, Link } from '@inertiajs/react';
 import { Auth } from '../Layouts/Header';
 
 function Create() {
-  const methods = useForm({
-    mode: 'onChange',
-    reValidateMode: 'onChange',
-  });
-
   const [dataModel, setDataModel] = useState(formModel);
   const { dropdownOptions, getDropdown } = useDropdownOptionsArray();
   const { auth } = usePage().props as unknown as { auth?: Auth };
+  const methods = useForm<FieldValues>({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      currency_from: 'IDR',
+      total_vendor: 1,
+      user_id: auth?.user?.id,
+    } as FieldValues,
+  });
 
   useEffect(() => {
     getDropdown(modelDropdowns, formModel);
@@ -38,6 +42,27 @@ function Create() {
       setDataModel(dropdownOptions as FormFieldModel<any>[]);
     }
   }, [dropdownOptions]);
+
+  useEffect(() => {
+    const subscription = methods.watch((value, { name }) => {
+      if (name === 'document_type') {
+        value.document_type === 'ZENT' ? methods.setValue('currency_from', 'IDR') : '';
+        if (value.document_type !== 'ZENT') {
+          methods.setValue('entertainment.tanggal', '');
+          methods.setValue('entertainment.tempat', '');
+          methods.setValue('entertainment.alamat', '');
+          methods.setValue('entertainment.jenis', '');
+          methods.setValue('entertainment.nama_perusahaan', '');
+          methods.setValue('entertainment.nama', '');
+          methods.setValue('entertainment.posisi', '');
+          methods.setValue('entertainment.jenis_usaha', '');
+          methods.setValue('entertainment.jenis_kegiatan', '');
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe(); // Cleanup to avoid memory leaks
+  }, [methods.watch]);
 
   return (
     <div className='card card-grid h-full min-w-full p-4'>

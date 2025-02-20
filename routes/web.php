@@ -35,6 +35,7 @@ Route::get('/test-upload-file', function () {
     ]);
 });
 Route::get('/test-email', [NotifikasiController::class, 'sendTestEmail']);
+Route::get('/test-conntect-access', [CurrencyController::class, 'ConntectAccess']);
 
 Route::get('/test', function () {
     // $fileContents = file_get_contents('http://127.0.0.1:8008/storage/business_trip/dummy_1736238179.pdf');
