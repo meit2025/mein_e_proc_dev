@@ -1114,7 +1114,7 @@ class ReportController extends Controller
                 // Cash advanced
                 'is_cashAdvance' => $pr->is_cashAdvance ?? '',
                 'amount' => optional($pr->cashAdvancePurchases)->nominal ?? '0',
-                'percentage' => '',
+                'percentage' => optional($pr->cashAdvancePurchases)->dp ?? '',
                 'reference' => optional($pr->cashAdvancePurchases)->reference ?? '',
             ];
         });
