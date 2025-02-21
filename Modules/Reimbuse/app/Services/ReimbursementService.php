@@ -36,17 +36,18 @@ class ReimbursementService
     ];
 
     protected $validator_rule_reimburse = [
-        'reimburse_type'        =>  'required|exists:master_type_reimburses,code',
-        'short_text'            =>  'nullable',
-        'balance'               =>  'required|numeric',
-        'item_delivery_data'    =>  'required|date',
-        'claim_date'            =>  'required|date',
-        'currency'              =>  'required|string|exists:currencies,code',
-        'for'                   =>  'required',
-        'desired_vendor'        =>  'required',
-        'type'                  =>  'required|in:Employee,Family',
-        'purchasing_group'      =>  'required|exists:purchasing_groups,id',
-        'tax_on_sales'          =>  'required|exists:pajaks,id',
+        'reimburse_type'                    =>  'required|exists:master_type_reimburses,code',
+        'short_text'                        =>  'nullable',
+        'balance'                           =>  'required|numeric',
+        'remaining_balance_when_request'    =>  'required|numeric',
+        'item_delivery_data'                =>  'required|date',
+        'claim_date'                        =>  'required|date',
+        'currency'                          =>  'required|string|exists:currencies,code',
+        'for'                               =>  'required',
+        'desired_vendor'                    =>  'required',
+        'type'                              =>  'required|in:Employee,Family',
+        'purchasing_group'                  =>  'required|exists:purchasing_groups,id',
+        'tax_on_sales'                      =>  'required|exists:pajaks,id',
     ];
 
     public function checkGroupStatus(string $groupCode): string
