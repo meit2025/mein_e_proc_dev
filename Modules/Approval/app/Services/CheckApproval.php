@@ -67,8 +67,8 @@ class CheckApproval
 
             // Define the conditions
             $total = (int)$request->value == 0 ? (int)$request->total_all_amount : (int)$request->value;
-            if ($request->currency_from != 'IDR') {
-                $exchangeRate = ExchangeRate::getExchangeRate($request->currency_from, 'IDR', $total);
+            if ($request->currency_from && $request->currency_from != 'IDR') {
+                $exchangeRate = ExchangeRate::getExchangeRate($request->currency_from ?? 'IDR', 'IDR', $total);
                 $total = (int)$exchangeRate;
             }
             $conditions = [

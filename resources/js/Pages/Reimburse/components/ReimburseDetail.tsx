@@ -55,7 +55,7 @@ const ReimburseDetail = () => {
           <strong>Requested By:</strong> {data?.user_create_request?.name}
         </p>
         <p className='text-sm'>
-          <strong>Remark:</strong> {data?.remark}
+          <strong>Remark Header:</strong> {data?.remark}
         </p>
         <br />
         <p className='text-sm flex items-center gap-2'>
@@ -128,6 +128,12 @@ const ReimburseDetail = () => {
                       <strong>Balance</strong>
                     </td>
                     <td>{reimburse?.currency} {formatRupiah(reimburse?.reimburse_type?.grade_option == 'all' ? reimburse?.reimburse_type?.grade_all_price : reimburse?.reimburse_type?.grade_reimburse_types?.plafon ?? 0, false)}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Remaining Balance</strong>
+                    </td>
+                    <td>{reimburse?.currency} {formatRupiah(reimburse?.remaining_balance_when_request, false)}</td>
                   </tr>
                   <tr>
                     <td>
@@ -208,7 +214,7 @@ const ReimburseDetail = () => {
                   </tr>
                   <tr>
                     <td>
-                      <strong>Remark</strong>
+                      <strong>Remark Item</strong>
                     </td>
                     <td>{reimburse?.short_text}</td>
                   </tr>

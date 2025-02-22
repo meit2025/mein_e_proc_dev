@@ -4,12 +4,13 @@ namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Events\AfterSheet;
 
-class BusinessTripDeclarationExport implements FromArray, WithHeadings, WithEvents, WithCustomStartCell
+class BusinessTripDeclarationExport implements FromArray, WithHeadings, WithEvents, WithCustomStartCell, ShouldAutoSize
 {
     protected $data;
 
@@ -119,6 +120,15 @@ class BusinessTripDeclarationExport implements FromArray, WithHeadings, WithEven
                 $sheet->getStyle('A1:R1')->applyFromArray([
                     'font' => ['bold' => true],
                 ]);
+
+                // Menambahkan border ke seluruh tabel
+                $highestRow = $sheet->getHighestRow();
+                $highestColumn = $sheet->getHighestColumn();
+                $tableRange = 'A1:' . $highestColumn . $highestRow;
+                $sheet->getDelegate()->getStyle($tableRange)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+                // Menjadikan semua teks rata tengah
+                $sheet->getDelegate()->getStyle($tableRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             },
         ];
     }

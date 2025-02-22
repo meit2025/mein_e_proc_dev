@@ -125,6 +125,7 @@ export const ReimburseForm: React.FC<Props> = ({
         reimburse_type: z.string().min(1, 'reimburse type is required'),
         short_text: z.string().min(1, 'remarks is required'),
         balance: z.string(),
+        remaining_balance_when_request: z.number(),
         currency: z.string().min(1, 'currency required'),
         tax_on_sales: z.string().min(1, 'tax required'),
         purchase_requisition_unit_of_measure: z.string().min(1, 'uom required'),
@@ -206,6 +207,7 @@ export const ReimburseForm: React.FC<Props> = ({
         reimburse_type: '',
         short_text: '',
         balance: '',
+        remaining_balance_when_request: 0,
         currency: 'IDR',
         tax_on_sales: taxDefaultValue,
         purchase_requisition_unit_of_measure: uomDefaultValue,
@@ -275,7 +277,8 @@ export const ReimburseForm: React.FC<Props> = ({
           reimburse_type: map.reimburse_type.code
         });
         await getDataByLimit(formCounter, {
-          reimburse_type: map.reimburse_type.code
+          reimburse_type: map.reimburse_type.code,
+          for: map.reimburse_type.is_employee === 1 ? null : map.for
         });
         formCounter++;
       }
@@ -388,6 +391,7 @@ export const ReimburseForm: React.FC<Props> = ({
           reimburse_type: '',
           short_text: '',
           balance: '',
+          remaining_balance_when_request: 0,
           currency: 'IDR',
           tax_on_sales: taxDefaultValue,
           purchase_requisition_unit_of_measure: uomDefaultValue,
@@ -432,11 +436,13 @@ export const ReimburseForm: React.FC<Props> = ({
           );
           return;
         }
+        
         // update format date
-        values.forms = values.forms.map(form => ({
+        values.forms = values.forms.map((form, formIndex) => ({
           ...form,
           claim_date: moment(form.claim_date).format('YYYY-MM-DD'),
           item_delivery_data: moment(form.item_delivery_data).format('YYYY-MM-DD'),
+          remaining_balance_when_request: parseInt(detailLimit[formIndex]?.balance ?? 0), // Ganti index dengan formIndex
         }));
       }
     }
@@ -472,6 +478,7 @@ export const ReimburseForm: React.FC<Props> = ({
     const params = {
       user: form.getValues('requester'),
       reimbuse_type: param != null ? param.reimburse_type : data.reimburse_type,
+      for: param != null ? param.for : data.for,
     };
     
     try {
@@ -585,7 +592,7 @@ export const ReimburseForm: React.FC<Props> = ({
                   </td>
                 </tr>
                 <tr>
-                  <td className='w-1/4'>Remark<span className='text-red-600'>*</span></td>
+                  <td className='w-1/4'>Remark Header<span className='text-red-600'>*</span></td>
                   <td>
                     <FormField
                       control={form.control}
@@ -753,7 +760,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                     });
                                     
                                     if (selectedValue.is_employee === 1) {
-                                      getDataByLimit(index);
+                                      getDataByLimit(index, {reimburse_type: data?.value, for: null});
                                     } else {
                                       setDetailLimit((prev) => {
                                         const newDetailLimit = [...prev];
@@ -837,7 +844,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                               for: value,
                                             });
 
-                                            getDataByLimit(index, {reimburse_type: form.getValues(`forms.${index}.reimburse_type`)});
+                                            getDataByLimit(index, {reimburse_type: form.getValues(`forms.${index}.reimburse_type`), for: value});
                                           }
                                         }
                                         defaultValue={formValue?.for}
@@ -984,7 +991,7 @@ export const ReimburseForm: React.FC<Props> = ({
                           </tr>
 
                           <tr>
-                            <td className='w-1/4'>Remark<span className='text-red-600'>*</span></td>
+                            <td className='w-1/4'>Remark Item<span className='text-red-600'>*</span></td>
                             <td>
                               <FormField
                                 control={form.control}

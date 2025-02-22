@@ -242,40 +242,6 @@ class ReportController extends Controller
             $transformedData = $data->map(function ($item) {
                 $balance = $item->reimburses->sum('balance');
 
-                // Menentukan Total Balance berdasarkan Grade
-                $totalBalance = $item->reimburses->map(function ($reim) {
-                    return $reim->reimburseType->grade_option == 'all'
-                        ? $reim->reimburseType->grade_all_price
-                        : ($reim->reimburseType->gradeReimburseTypes->plafon ?? 0);
-                })->sum();
-
-                // Ambil data yang berkaitan dengan balance dari PR
-                $getBalanceOnPr = $item->PurchaseRequisition->map(function ($pr) {
-                    return [
-                        'clearing_status' => $pr->is_closed,  // Status pembayaran
-                        'status_closed' => $pr->status_closed,
-                        'pr_status' => $pr->pr_status,
-                        'has_interval_claim' => $pr->has_interval_claim,
-                        'on_interval' => $pr->on_interval,
-                        'balance' => $pr->balance
-                    ];
-                })->toArray();
-
-                // Hitung Unpaid Balance
-                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) {
-                    return ($value['clearing_status'] != 'S' && $value['status_closed'] != 'X' && $value['pr_status'] != 'X') &&
-                        (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null);
-                }), 'balance'));
-
-                // Hitung Paid Balance
-                $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) {
-                    return ($value['clearing_status'] == 'S' && $value['status_closed'] == 'S' && $value['pr_status'] != 'X') &&
-                        (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null);
-                }), 'balance'));
-
-                // Hitung Remaining Balance
-                $maximumBalance = $totalBalance;
-                $remainingBalance = $item->unassign_but_has_reimburse == 1 ? 0 : (int)$maximumBalance - ($paidBalance + $unpaidBalance);
 
                 return [
                     'code' => $item->code,
@@ -295,8 +261,6 @@ class ReportController extends Controller
                     'request_for' => $item->user->name,
                     'remark' => $item->remark,
                     'balance' => $balance,
-                    'total_balance' => $totalBalance,
-                    'remaining_balance' => $remainingBalance,
                     'form_count' => $item->reimburses->count(),
                     'status' => $item->status->name,
                     'request_date' => $item->created_at->format('d/m/Y'),
@@ -462,42 +426,44 @@ class ReportController extends Controller
 
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
-            $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
-                $allowanceItemsDay = collect($destination->detailDestinationDay)->map(function ($allowanceItem) {
+            $destinations = collect($businessTrip->businessTripDestination ?? [])->map(function ($destination) {
+                $allowanceItemsDay = collect($destination->detailDestinationDay ?? [])->map(function ($allowanceItem) {
+                    $allowance = optional($allowanceItem->allowance);
                     return [
-                        'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
-                        'amount' => (int) $allowanceItem->price,
-                        'currency_id' => $allowanceItem->allowance->currency_id,
+                        'item_name' => $allowance->name ? $allowance->name . ' [DAY]' : 'Unknown [DAY]',
+                        'amount' => (int) ($allowanceItem->price ?? 0),
+                        'currency_id' => $allowance->currency_id ?? '',
                     ];
                 });
 
-                $allowanceItemsTotal = collect($destination->detailDestinationTotal)->map(function ($allowanceItem) {
+                $allowanceItemsTotal = collect($destination->detailDestinationTotal ?? [])->map(function ($allowanceItem) {
+                    $allowance = optional($allowanceItem->allowance);
                     return [
-                        'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
-                        'amount' => (int) $allowanceItem->price,
-                        'currency_id' => $allowanceItem->allowance->currency_id,
+                        'item_name' => $allowance->name ? $allowance->name . ' [TOTAL]' : 'Unknown [TOTAL]',
+                        'amount' => (int) ($allowanceItem->price ?? 0),
+                        'currency_id' => $allowance->currency_id ?? '',
                     ];
                 });
 
                 $allAllowanceItems = $allowanceItemsDay->merge($allowanceItemsTotal);
 
                 return [
-                    'destination' => $destination->destination,
-                    'start_date' => $destination->business_trip_start_date,
-                    'end_date' => $destination->business_trip_end_date,
+                    'destination' => $destination->destination ?? '',
+                    'start_date' => $destination->business_trip_start_date ?? '',
+                    'end_date' => $destination->business_trip_end_date ?? '',
                     'allowance_items' => $allAllowanceItems,
-                    'total_allowance' => $allAllowanceItems->sum('amount'),
+                    'total_allowance' => $allAllowanceItems->sum('amount') ?? 0,
                 ];
             });
 
             return [
-                'requestDate' => $businessTrip->created_at,
-                'requestedBy' => $businessTrip->requestedBy,
-                'requestFor' => $businessTrip->requestFor,
-                'requestNo' => $businessTrip->request_no,
-                'status' => $businessTrip->status,
-                'purposeType' => $businessTrip->purposeType,
-                'remarks' => $businessTrip->remarks,
+                'requestDate' => $businessTrip->created_at ?? '',
+                'requestedBy' => $businessTrip->requestedBy ?? '',
+                'requestFor' => $businessTrip->requestFor ?? '',
+                'requestNo' => $businessTrip->request_no ?? '',
+                'status' => $businessTrip->status ?? '',
+                'purposeType' => $businessTrip->purposeType ?? '',
+                'remarks' => $businessTrip->remarks ?? '',
                 'destinations' => $destinations,
             ];
         });
@@ -659,42 +625,44 @@ class ReportController extends Controller
 
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
-            $destinations = $businessTrip->businessTripDestination->map(function ($destination) {
-                $allowanceItemsDay = collect($destination->detailDestinationDay)->map(function ($allowanceItem) {
+            $destinations = collect($businessTrip->businessTripDestination ?? [])->map(function ($destination) {
+                $allowanceItemsDay = collect($destination->detailDestinationDay ?? [])->map(function ($allowanceItem) {
+                    $allowance = $allowanceItem->allowance ?? null;
                     return [
-                        'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
-                        'amount' => (int) $allowanceItem->price,
-                        'currency_id' => $allowanceItem->allowance->currency_id,
+                        'item_name' => $allowance ? ($allowance->name . ' [DAY]') : 'Unknown [DAY]',
+                        'amount' => (int) ($allowanceItem->price ?? 0),
+                        'currency_id' => $allowance->currency_id ?? '',
                     ];
                 });
 
-                $allowanceItemsTotal = collect($destination->detailDestinationTotal)->map(function ($allowanceItem) {
+                $allowanceItemsTotal = collect($destination->detailDestinationTotal ?? [])->map(function ($allowanceItem) {
+                    $allowance = $allowanceItem->allowance ?? null;
                     return [
-                        'item_name' => $allowanceItem->allowance->name . ' [TOTAL]',
-                        'amount' => (int) $allowanceItem->price,
-                        'currency_id' => $allowanceItem->allowance->currency_id,
+                        'item_name' => $allowance ? ($allowance->name . ' [TOTAL]') : 'Unknown [TOTAL]',
+                        'amount' => (int) ($allowanceItem->price ?? 0),
+                        'currency_id' => $allowance->currency_id ?? '',
                     ];
                 });
 
                 $allAllowanceItems = $allowanceItemsDay->merge($allowanceItemsTotal);
 
                 return [
-                    'destination' => $destination->destination,
-                    'start_date' => $destination->business_trip_start_date,
-                    'end_date' => $destination->business_trip_end_date,
+                    'destination' => $destination->destination ?? '',
+                    'start_date' => $destination->business_trip_start_date ?? '',
+                    'end_date' => $destination->business_trip_end_date ?? '',
                     'allowance_items' => $allAllowanceItems,
-                    'total_allowance' => $allAllowanceItems->sum('amount'),
+                    'total_allowance' => $allAllowanceItems->sum('amount') ?? 0,
                 ];
             });
 
             return [
-                'requestDate' => $businessTrip->created_at,
-                'requestedBy' => $businessTrip->requestedBy,
-                'requestFor' => $businessTrip->requestFor,
-                'requestNo' => $businessTrip->request_no,
-                'status' => $businessTrip->status,
-                'purposeType' => $businessTrip->purposeType,
-                'remarks' => $businessTrip->remarks,
+                'requestDate' => $businessTrip->created_at ?? '',
+                'requestedBy' => $businessTrip->requestedBy ?? '',
+                'requestFor' => $businessTrip->requestFor ?? '',
+                'requestNo' => $businessTrip->request_no ?? '',
+                'status' => $businessTrip->status ?? '',
+                'purposeType' => $businessTrip->purposeType ?? '',
+                'remarks' => $businessTrip->remarks ?? '',
                 'destinations' => $destinations,
             ];
         });
@@ -770,7 +738,7 @@ class ReportController extends Controller
             });
         }
 
-        $data = $query->where('type', 'request')->latest()->search(request(['search']))->paginate($perPage);
+        $data = $query->latest()->search(request(['search']))->paginate($perPage);
 
         $data->getCollection()->transform(function ($map) {
 
@@ -803,7 +771,7 @@ class ReportController extends Controller
 
     public function exportBTOverall(Request $request)
     {
-        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'businessTripDestination', 'requestedBy', 'requestedBy.positions', 'requestedBy.divisions', 'requestedBy.departements']);
+        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'parentBusinessTrip', 'businessTripDestination', 'requestedBy', 'requestedBy.positions', 'requestedBy.divisions', 'requestedBy.departements']);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
         $startDate = $request->get('startDate');
@@ -859,34 +827,34 @@ class ReportController extends Controller
             $isDeclaration = $businessTrip->type === 'declaration';
 
             return [
-                'type' => $businessTrip->type,
-                'employee' => $businessTrip->requestFor,
-                'requested_by' => $businessTrip->requestedBy,
-                'request_no' => $businessTrip->request_no,
-                'status' => $businessTrip->status,
-                'purpose' => $businessTrip->purposeType,
-                'remarks' => $businessTrip->remarks,
+                'type' => $businessTrip->type ?? '',
+                'employee' => $businessTrip->requestFor ?? '',
+                'requested_by' => $businessTrip->requestedBy ?? '',
+                'request_no' => $businessTrip->request_no ?? '',
+                'status' => $businessTrip->status ?? '',
+                'purpose' => $businessTrip->purposeType ?? '',
+                'remarks' => $businessTrip->remarks ?? '',
                 'is_declaration' => $isDeclaration,
-                'destinations' => $businessTrip->businessTripDestination->map(function ($destination) use ($isDeclaration) {
+                'request_no_parent' => optional($businessTrip->parentBusinessTrip)->request_no ?? '',
+                'destinations' => optional($businessTrip->businessTripDestination)->map(function ($destination) use ($isDeclaration) {
                     return [
-                        'start_date' => $destination->business_trip_start_date,
-                        'end_date' => $destination->business_trip_end_date,
-                        'destination' => $destination->destination,
-                        'date' => $isDeclaration ? $destination->created_at : $destination->business_trip_start_date,
-                        'allowances' => $destination->detailDestinationTotal->map(function ($item) {
+                        'start_date' => $destination->business_trip_start_date ?? '',
+                        'end_date' => $destination->business_trip_end_date ?? '',
+                        'destination' => $destination->destination ?? '',
+                        'date' => $isDeclaration ? ($destination->created_at ?? '') : ($destination->business_trip_start_date ?? ''),
+                        'allowances' => optional($destination->detailDestinationTotal)->map(function ($item) {
                             return [
-                                'item_name' => $item->allowance->name,
-                                'amount' => $item->price
+                                'item_name' => optional($item->allowance)->name ?? '',
+                                'amount' => $item->price ?? 0
                             ];
-                        }),
-                        'total' => $destination->detailDestinationTotal->sum('price')
+                        }) ?? [],
+                        'total' => optional($destination->detailDestinationTotal)->sum('price') ?? 0
                     ];
-                })
+                }) ?? []
             ];
         });
-
         // Return the exported file
-        $filename = 'BusinessTrips.xlsx';
+        $filename = 'BusinessTripOverall.xlsx';
         return Excel::download(new BusinessTripOverallExport($transformedData), $filename);
     }
 
@@ -1060,40 +1028,64 @@ class ReportController extends Controller
 
         $transformedData = $data->map(function ($pr) {
             return [
-                'po_no' => optional($pr->purchaseRequisitions->first())->no_po ?? '',
-                'pr_no' => optional($pr->purchaseRequisitions->first())->purchase_requisition_number ?? '',
+                'po_no' => collect($pr->purchaseRequisitions)->firstWhere('no_po', '!=', null)->no_po ?? '-',
+                'pr_no' => collect($pr->purchaseRequisitions)->firstWhere('purchase_requisition_number', '!=', null)->purchase_requisition_number ?? '-',
                 'quatation_no' => $pr->purchases_number ?? '',
                 'requested_by' => optional($pr->user)->name ?? '',
                 'requester' => optional($pr->createdBy)->name ?? '',
                 'document_type' => $pr->document_type ?? '',
                 'purchasing_groups' => $pr->purchasing_groups ?? '',
-                'cost_center' => optional($pr->purchaseRequisitions->first())->cost_center ?? '',
+                'cost_center' => collect($pr->purchaseRequisitions)->firstWhere('cost_center', '!=', null)->cost_center ?? '-',
                 'delivery_date' => $pr->delivery_date ?? '',
                 'storage_locations' => $pr->storage_locations ?? '',
-                'total_vendor' => $pr->total_vendor ?? '',
-                'attachment' => optional($pr->purchaseRequisitions->first())->attachment ?? '',
-                'propose_vendor' => optional($pr->vendorsWinner)->name ?? '',
-                'status_pr' => optional($pr->purchaseRequisitions->first())->status ?? '',
-                'status_po' => optional($pr->status)->name ?? '',
-                'po_date' => $pr->created_at ?? '',
-                'currency' => '',
-                'request_date' => optional($pr->purchaseRequisitions->first())->requisition_date ?? '',
+                'header_note' => collect($pr->purchaseRequisitions)->firstWhere('header_not', '!=', null)->header_not ?? '-',
+
+                // Entertainment
+                'tanggal_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('tanggal_entertainment', '!=', null)->tanggal_entertainment ?? '-',
+                'tempat_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('tempat_entertainment', '!=', null)->tempat_entertainment ?? '-',
+                'alamat_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('alamat_entertainment', '!=', null)->alamat_entertainment ?? '-',
+                'jenis_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('jenis_entertainment', '!=', null)->jenis_entertainment ?? '-',
+                'nama_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('nama_entertainment', '!=', null)->nama_entertainment ?? '-',
+                'posisi_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('posisi_entertainment', '!=', null)->posisi_entertainment ?? '-',
+                'nama_perusahaan' => collect($pr->purchaseRequisitions)->firstWhere('nama_perusahaan', '!=', null)->nama_perusahaan ?? '-',
+                'jenis_usaha_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('jenis_usaha_entertainment', '!=', null)->jenis_usaha_entertainment ?? '-',
+                'jenis_kegiatan_entertainment' => collect($pr->purchaseRequisitions)->firstWhere('jenis_kegiatan_entertainment', '!=', null)->jenis_kegiatan_entertainment ?? '-',
+
+                'status' => optional($pr->status)->name ?? '',
+                'number_pr' => collect($pr->purchaseRequisitions)->firstWhere('purchase_requisition_number', '!=', null)->purchase_requisition_number ?? '-',
+                'status_pr' => collect($pr->purchaseRequisitions)->firstWhere('status', '!=', null)->status ?? '-',
+                'status_po' => collect($pr->purchaseRequisitions)->firstWhere('is_closed', '!=', null)->is_closed ?? '-',
+                'currency' => collect($pr->purchaseRequisitions)->firstWhere('currency', '!=', null)->currency ?? '-',
+                'attachment' => collect($pr->purchaseRequisitions)->pluck('attachment')->filter()->implode(','),
                 'created_at' => $pr->created_at ?? '',
+                'total_vendor' => $pr->total_vendor ?? '',
+                'propose_vendor' => optional($pr->vendorsWinner)->name ?? '',
+
+                // Item detail dari relasi vendorsWinner.units (hasMany)
+                'items' => optional($pr->vendorsWinner)->units->map(function ($unit) {
+                    $qty = $unit->qty ?? 0;
+                    $unit_price = $unit->unit_price ?? 0;
+                    return [
+                        'request_date' => $unit->requisition_date ?? '',
+                        'qty' => $qty,
+                        'unit_price' => $unit_price,
+                        'total_amount' => $qty * $unit_price, // Menghitung total amount
+                        'account_assignment' => $unit->account_assignment_categories ?? '',
+                        'material_group' => $unit->material_group ?? '',
+                        'material_number' => $unit->material_number ?? '',
+                        'uom' => $unit->uom ?? '',
+                        'tax' => $unit->tax ?? '',
+                        'short_text' => $unit->short_text ?? '',
+                    ];
+                })->toArray(),
+
+                // Cash advanced
                 'is_cashAdvance' => $pr->is_cashAdvance ?? '',
-                'amount' => optional($pr->cashAdvancePurchases)->nominal ?? '',
-                'percentage' => 1,
+                'amount' => optional($pr->cashAdvancePurchases)->nominal ?? '0',
+                'percentage' => optional($pr->cashAdvancePurchases)->dp ?? '',
                 'reference' => optional($pr->cashAdvancePurchases)->reference ?? '',
-                'qty' => optional(optional($pr->cashAdvancePurchases)->unit)->qty ?? '',
-                'unit_price' => optional(optional($pr->cashAdvancePurchases)->unit)->unit_price ?? '',
-                'account_assignment' => optional(optional($pr->cashAdvancePurchases)->unit)->account_assignment_categories ?? '',
-                'material_group' => optional(optional($pr->cashAdvancePurchases)->unit)->material_group ?? '',
-                'material_number' => optional(optional($pr->cashAdvancePurchases)->unit)->material_number ?? '',
-                'uom' => optional(optional($pr->cashAdvancePurchases)->unit)->uom ?? '',
-                'tax' => optional(optional($pr->cashAdvancePurchases)->unit)->tax ?? '',
-                'short_text' => optional(optional($pr->cashAdvancePurchases)->unit)->short_text ?? '',
             ];
         });
-
 
         $filename = 'Purchase.xlsx';
         return Excel::download(new PurchaseRequisitionExport($transformedData), $filename);

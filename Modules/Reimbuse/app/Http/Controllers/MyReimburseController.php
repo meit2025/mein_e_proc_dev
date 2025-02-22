@@ -260,6 +260,9 @@ class MyReimburseController extends Controller
                     reimburses.claim_date,
                     mtr.interval_claim_period, 
                     pr.is_closed as status_closed,
+                    pr.is_closed as status_closed,
+                    pr.clearing_status as clearing_status,
+                    pr.status as pr_status,
                     CASE 
                         WHEN 
                             mtr.interval_claim_period is not null

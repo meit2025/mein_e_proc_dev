@@ -65,6 +65,7 @@ class Reimburse extends Model
         'tax_on_sales',
         'item_category_in_purchasing_document',
         'plant',
+        'remaining_balance_when_request'
     ];
 
 
