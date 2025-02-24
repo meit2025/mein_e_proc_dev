@@ -1031,9 +1031,9 @@ class ReportController extends Controller
             return [
                 'po_no' => collect($pr->purchaseRequisitions)->firstWhere('no_po', '!=', null)->no_po ?? '-',
                 'pr_no' => collect($pr->purchaseRequisitions)->firstWhere('purchase_requisition_number', '!=', null)->purchase_requisition_number ?? '-',
-                'quatation_no' => $pr->purchases_number ?? '',
+                'quatation_no' => optional($pr->vendorsWinner)->quotation ?? '',
                 'requested_by' => optional($pr->user)->name ?? '',
-                'requester' => optional($pr->createdBy)->name ?? '',
+                'requester' => optional($pr->getRelationValue('createdBy'))->name ?? '',
                 'document_type' => $pr->document_type ?? '',
                 'purchasing_groups' => $pr->purchasing_groups ?? '',
                 'cost_center' => collect($pr->purchaseRequisitions)->firstWhere('cost_center', '!=', null)->cost_center ?? '-',
@@ -1060,7 +1060,7 @@ class ReportController extends Controller
                 'attachment' => collect($pr->purchaseRequisitions)->pluck('attachment')->filter()->implode(','),
                 'created_at' => $pr->created_at ?? '',
                 'total_vendor' => $pr->total_vendor ?? '',
-                'propose_vendor' => optional($pr->vendorsWinner)->name ?? '',
+                'propose_vendor' => optional($pr->vendorsWinner?->masterBusinesPartnerss)->name_one ?? '',
 
                 // Item detail dari relasi vendorsWinner.units (hasMany)
                 'items' => optional($pr->vendorsWinner)->units->map(function ($unit) {
