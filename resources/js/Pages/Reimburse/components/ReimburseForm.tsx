@@ -125,6 +125,7 @@ export const ReimburseForm: React.FC<Props> = ({
         reimburse_type: z.string().min(1, 'reimburse type is required'),
         short_text: z.string().min(1, 'remarks is required'),
         balance: z.string(),
+        remaining_balance_when_request: z.number(),
         currency: z.string().min(1, 'currency required'),
         tax_on_sales: z.string().min(1, 'tax required'),
         purchase_requisition_unit_of_measure: z.string().min(1, 'uom required'),
@@ -206,6 +207,7 @@ export const ReimburseForm: React.FC<Props> = ({
         reimburse_type: '',
         short_text: '',
         balance: '',
+        remaining_balance_when_request: 0,
         currency: 'IDR',
         tax_on_sales: taxDefaultValue,
         purchase_requisition_unit_of_measure: uomDefaultValue,
@@ -389,6 +391,7 @@ export const ReimburseForm: React.FC<Props> = ({
           reimburse_type: '',
           short_text: '',
           balance: '',
+          remaining_balance_when_request: 0,
           currency: 'IDR',
           tax_on_sales: taxDefaultValue,
           purchase_requisition_unit_of_measure: uomDefaultValue,
@@ -433,11 +436,13 @@ export const ReimburseForm: React.FC<Props> = ({
           );
           return;
         }
+        
         // update format date
-        values.forms = values.forms.map(form => ({
+        values.forms = values.forms.map((form, formIndex) => ({
           ...form,
           claim_date: moment(form.claim_date).format('YYYY-MM-DD'),
           item_delivery_data: moment(form.item_delivery_data).format('YYYY-MM-DD'),
+          remaining_balance_when_request: parseInt(detailLimit[formIndex]?.balance ?? 0), // Ganti index dengan formIndex
         }));
       }
     }
