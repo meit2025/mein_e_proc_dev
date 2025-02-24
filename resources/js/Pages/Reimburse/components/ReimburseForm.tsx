@@ -1047,12 +1047,22 @@ export const ReimburseForm: React.FC<Props> = ({
                                             ? field.value
                                             : new Date(field.value)
                                         }
+                                        minDate={new Date()}
                                         onDateChange={(date) => {
-                                          field.onChange(date)
-                                          updateForm(index, {
-                                            ...formValue,
-                                            item_delivery_data: date,
-                                          });
+                                          if (date >= new Date()) {
+                                            field.onChange(date)
+                                            updateForm(index, {
+                                              ...formValue,
+                                              item_delivery_data: date,
+                                            });
+                                          } else {
+                                            field.onChange(field.value);
+                                            updateForm(index, {
+                                              ...formValue,
+                                              item_delivery_data: field.value,
+                                            });
+                                            showToast('Claim date cannot be less than today', 'error');
+                                          }
                                         }}
                                       />
                                     </FormControl>
@@ -1079,12 +1089,22 @@ export const ReimburseForm: React.FC<Props> = ({
                                             ? field.value
                                             : new Date(field.value)
                                         }
+                                        minDate={new Date()}
                                         onDateChange={(date) => {
-                                          field.onChange(date)
-                                          updateForm(index, {
-                                            ...formValue,
-                                            claim_date: date,
-                                          });
+                                          if (date >= new Date()) {
+                                            field.onChange(date)
+                                            updateForm(index, {
+                                              ...formValue,
+                                              claim_date: date,
+                                            });
+                                          } else {
+                                            field.onChange(field.value);
+                                            updateForm(index, {
+                                              ...formValue,
+                                              claim_date: field.value,
+                                            });
+                                            showToast('Claim date cannot be less than today', 'error');
+                                          }
                                         }}
                                       />
                                     </FormControl>
