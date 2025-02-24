@@ -79,7 +79,9 @@
 
                 @if ($type == 'Reimbursement')
                     <br><br>
-                    @if ($status == 'Approved')
+                    @if ($status == 'Approval')
+                    Your request has been approved by {{ $reimburseGroup->approverName }}, with the details:
+                    @elseif ($status == 'Approved')
                     There are some Request Fully Approved. Kindly find the details below :
                     @elseif ($status == 'Rejected')
                     We regret to inform you that your reimbursement request has been rejected. Below are the details:
@@ -112,20 +114,23 @@
                     </ul>
                     @endforeach
 
-                    @if ($status == 'Approved')
-                    Approve : {{ $reimburseGroup->notes }}
+                    @if ($status == 'Approval')
+                    Reason : 
+                    @elseif ($status == 'Approved')
+                    Notes : 
                     @elseif ($status == 'Rejected')
-                    Rejection : {{ $reimburseGroup->notes }}
+                    Rejection Reason : 
                     @elseif ($status == 'Revise')
-                    Revision : {{ $reimburseGroup->notes }}
+                    Revision Notes :  
                     @endif
+                    {{ $reimburseGroup->notes }}
                     <br>
                     @if ($status == 'Rejected')
                     Please review the request and make necessary adjustments if required.
                     @elseif ($status == 'Revise')
                     Please review then resubmit the request and make necessary adjustments if required.
-                    @elseif ($status == 'Approver')
-                    Please review then resubmit the request and make necessary adjustments if required.
+                    @elseif ($status == 'Approval')
+                    The next approval process will be processed.
                     @endif
                     <br>
                     <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now'
