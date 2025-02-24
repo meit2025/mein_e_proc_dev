@@ -144,6 +144,10 @@
                     <td>Rp {{ number_format($formItems['reimburseType']['grade_option'] == 'all' ? $formItems['reimburseType']['grade_all_price'] : $formItems['reimburseType']['gradeReimburseTypes']['plafon'], 0, ',', '.') }}</td>
                 </tr>
                 <tr>
+                    <td><strong>Balance</strong></td>
+                    <td>Rp {{ number_format($formItems['remaining_balance_when_request'], 0, ',', '.') }}</td>
+                </tr>
+                <tr>
                     <td><strong>Receipt Date</strong></td>
                     <td>{{$carbon::parse($formItems['item_delivery_data'])->format('d/m/Y')}}</td>
                 </tr>

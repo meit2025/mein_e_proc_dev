@@ -131,6 +131,12 @@ const ReimburseDetail = () => {
                   </tr>
                   <tr>
                     <td>
+                      <strong>Remaining Balance</strong>
+                    </td>
+                    <td>{reimburse?.currency} {formatRupiah(reimburse?.remaining_balance_when_request, false)}</td>
+                  </tr>
+                  <tr>
+                    <td>
                       <strong>Receipt Date</strong>
                     </td>
                     <td>{formatDateIndonesian(reimburse.item_delivery_data)}</td>
