@@ -151,7 +151,10 @@ class ReimbuseController extends Controller
     public function list(Request $request)
     {
         try {
-            $query =  ReimburseGroup::query()->with(['user.families', 'reimburses', 'status', 'userCreateRequest', 'purchaseRequisition']);
+            $query =  ReimburseGroup::query()->with(['user.families', 'reimburses', 'status', 'userCreateRequest', 
+                'purchaseRequisition' => function ($query) {
+                    $query->where('code_transaction', 'REIM');
+                }]);
             if ($request->approval == 1) {
                 $approval = Approval::leftJoinSub("
                     SELECT
@@ -335,7 +338,10 @@ class ReimbuseController extends Controller
             
             $queryBalanceLimit = Reimburse::query()
             ->join('reimburse_groups as rg', 'rg.code', '=', 'reimburses.group' )
-            ->leftJoin('purchase_requisitions as pr', 'pr.purchase_id', '=', 'rg.id')
+            ->leftJoin('purchase_requisitions as pr', function($join) {
+                $join->on('pr.purchase_id', '=', 'rg.id')
+                    ->where('pr.code_transaction', '=', 'REIM');
+            })
             ->whereIn('rg.status_id', [1, 3, 5])
             ->where('reimburses.reimburse_type', $reimbuseTypeID);
             
