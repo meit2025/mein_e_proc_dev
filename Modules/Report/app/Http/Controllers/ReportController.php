@@ -5,6 +5,7 @@ namespace Modules\Report\Http\Controllers;
 use App\Exports\BusinessTripDeclarationExport;
 use App\Exports\BusinessTripExport;
 use App\Exports\BusinessTripOverallExport;
+use App\Exports\BusinessTripAttendanceExport;
 use App\Exports\PurchaseRequisitionExport;
 use App\Exports\ReimburseExport;
 use App\Http\Controllers\Controller;
@@ -1030,9 +1031,9 @@ class ReportController extends Controller
             return [
                 'po_no' => collect($pr->purchaseRequisitions)->firstWhere('no_po', '!=', null)->no_po ?? '-',
                 'pr_no' => collect($pr->purchaseRequisitions)->firstWhere('purchase_requisition_number', '!=', null)->purchase_requisition_number ?? '-',
-                'quatation_no' => $pr->purchases_number ?? '',
+                'quatation_no' => optional($pr->vendorsWinner)->quotation ?? '',
                 'requested_by' => optional($pr->user)->name ?? '',
-                'requester' => optional($pr->createdBy)->name ?? '',
+                'requester' => optional($pr->getRelationValue('createdBy'))->name ?? '',
                 'document_type' => $pr->document_type ?? '',
                 'purchasing_groups' => $pr->purchasing_groups ?? '',
                 'cost_center' => collect($pr->purchaseRequisitions)->firstWhere('cost_center', '!=', null)->cost_center ?? '-',
@@ -1059,7 +1060,7 @@ class ReportController extends Controller
                 'attachment' => collect($pr->purchaseRequisitions)->pluck('attachment')->filter()->implode(','),
                 'created_at' => $pr->created_at ?? '',
                 'total_vendor' => $pr->total_vendor ?? '',
-                'propose_vendor' => optional($pr->vendorsWinner)->name ?? '',
+                'propose_vendor' => optional($pr->vendorsWinner?->masterBusinesPartnerss)->name_one ?? '',
 
                 // Item detail dari relasi vendorsWinner.units (hasMany)
                 'items' => optional($pr->vendorsWinner)->units->map(function ($unit) {
@@ -1126,5 +1127,192 @@ class ReportController extends Controller
             ->values(); // Reset collection keys
 
         return $this->successResponse($data);
+    }
+
+    public function businessTripAttendance()
+    {
+        $users = User::select('nip', 'name', 'id')->get();
+
+        $listPurposeType = PurposeType::select('name', 'id')->get();
+        $pajak = Pajak::select('id', 'mwszkz', 'desimal')->get();
+        $costcenter = MasterCostCenter::select('id', 'cost_center', 'controlling_name')->get();
+        $purchasingGroup = PurchasingGroup::select('id', 'purchasing_group')->get();
+
+        $listDestination = Destination::get();
+        $departments = MasterDepartment::select('id', 'name')->get();
+        $statuses = MasterStatus::select('code', 'name')->get();
+
+        return Inertia::render('Report/BusinessTripAttendance/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup', 'listDestination', 'departments', 'statuses'));
+    }
+
+    public function listBTAttendance(Request $request)
+    {
+        $query =  BusinessTrip::query()->with(['purposeType', 'status', 'requestFor']);
+        $perPage = $request->get('per_page', 10);
+        $sortBy = $request->get('sort_by', 'id');
+        $sortDirection = $request->get('sort_direction', 'asc');
+        $startDate = $request->get('startDate');
+        $endDate = $request->get('endDate');
+        $status = $request->get('status');
+        $type = $request->get('type');
+        $destination = $request->get('destination');
+        $department = $request->get('department');
+
+        // $query->orderBy($sortBy, $sortDirection);
+        if ($request->approval == "1") {
+            $data = Approval::where('user_id', Auth::user()->id)
+                ->where('document_name', 'TRIP_DECLARATION')->pluck('document_id')->toArray();
+            $query = $query->whereIn('id', $data);
+        }
+        if (Auth::user()->is_admin != '1') {
+            $query = $query->where('created_by', Auth::user()->id)
+                ->orWhere('request_for', Auth::user()->id);
+        }
+        if ($startDate && $endDate) {
+            $query->whereDate('created_at', '>=', $startDate)
+                ->whereDate('created_at', '<=', $endDate);
+        }
+        if ($status) {
+            $query->whereHas('status', function ($q) use ($status) {
+                $q->where('code', $status);
+            });
+        }
+        if ($type) {
+            $query->whereHas('purposeType', function ($q) use ($type) {
+                $q->where('id', $type);
+            });
+        }
+        if ($destination) {
+            $query->whereHas('businessTripDestination', function ($q) use ($destination) {
+                $q->where('destination', $destination);
+            });
+        }
+
+        if ($department) {
+            $query->whereHas('requestFor', function ($q) use ($department) {
+                $q->where('departement_id', $department);
+            });
+        }
+
+        $data = $query
+            ->whereIn('status_id', [3, 5])
+            ->latest()->paginate($perPage);
+
+        $data->getCollection()->transform(function ($map) {
+
+            $requestFor = $map->requestFor ? $map->requestFor->name : '';
+            $requestNo = $map->parentBusinessTrip ? $map->parentBusinessTrip->request_no : '';
+
+            return [
+                'id' => $map->id,
+                'employee_no' => $map->requestFor->nip,
+                'employee_name' => $map->requestFor->name,
+
+                'date' => date('d/m/Y', strtotime($map->created_at)),
+                'time' => date('h:i', strtotime($map->created_at)),
+
+                'declaration_no' => $map->request_no,
+                'request_no' => $requestNo,
+                'request_for' => $requestFor,
+                'remarks' => $map->remarks,
+                'status' => [
+                    'name' => $map->status->name,
+                    'classname' => $map->status->classname,
+                    'code' =>
+                    $map->status->code
+                ],
+            ];
+        });
+
+        return $this->successResponse($data);
+    }
+
+    public function exportBTAttendance(Request $request)
+    {
+        $query =  BusinessTrip::query()->with(['purposeType', 'status', 'requestFor']);
+        $perPage = $request->get('per_page', 10);
+        $sortBy = $request->get('sort_by', 'id');
+        $sortDirection = $request->get('sort_direction', 'asc');
+        $startDate = $request->get('startDate');
+        $endDate = $request->get('endDate');
+        $status = $request->get('status');
+        $type = $request->get('type');
+        $destination = $request->get('destination');
+        $department = $request->get('department');
+
+        // $query->orderBy($sortBy, $sortDirection);
+        if ($request->approval == "1") {
+            $data = Approval::where('user_id', Auth::user()->id)
+                ->where('document_name', 'TRIP_DECLARATION')->pluck('document_id')->toArray();
+            $query = $query->whereIn('id', $data);
+        }
+        if (Auth::user()->is_admin != '1') {
+            $query = $query->where('created_by', Auth::user()->id)
+                ->orWhere('request_for', Auth::user()->id);
+        }
+        if ($startDate && $endDate) {
+            $query->whereDate('created_at', '>=', $startDate)
+                ->whereDate('created_at', '<=', $endDate);
+        }
+        if ($status) {
+            $query->whereHas('status', function ($q) use ($status) {
+                $q->where('code', $status);
+            });
+        }
+        if ($type) {
+            $query->whereHas('purposeType', function ($q) use ($type) {
+                $q->where('id', $type);
+            });
+        }
+        if ($destination) {
+            $query->whereHas('businessTripDestination', function ($q) use ($destination) {
+                $q->where('destination', $destination);
+            });
+        }
+
+        if ($department) {
+            $query->whereHas('requestFor', function ($q) use ($department) {
+                $q->where('departement_id', $department);
+            });
+        }
+
+        $data = $query
+            ->whereIn('status_id', [3, 5])
+            ->latest()->paginate($perPage);
+
+        // Transform data
+        $transformedData = $data->map(function ($businessTrip) {
+            $isDeclaration = $businessTrip->type === 'declaration';
+
+            return [
+                'type' => $businessTrip->type,
+                'employee' => $businessTrip->requestFor,
+                'requested_by' => $businessTrip->requestedBy,
+                'request_no' => $businessTrip->request_no,
+                'status' => $businessTrip->status,
+                'purpose' => $businessTrip->purposeType,
+                'remarks' => $businessTrip->remarks,
+                'is_declaration' => $isDeclaration,
+                'request_no_parent' => $businessTrip->parentBusinessTrip?->request_no ?? '',
+                'destinations' => $businessTrip->businessTripDestination->map(function ($destination) use ($isDeclaration) {
+                    return [
+                        'start_date' => $destination->business_trip_start_date,
+                        'end_date' => $destination->business_trip_end_date,
+                        'destination' => $destination->destination,
+                        'date' => $isDeclaration ? $destination->created_at : $destination->business_trip_start_date,
+                        'allowances' => $destination->detailDestinationTotal->map(function ($item) {
+                            return [
+                                'item_name' => $item->allowance->name,
+                                'amount' => $item->price
+                            ];
+                        }),
+                        'total' => $destination->detailDestinationTotal->sum('price')
+                    ];
+                })
+            ];
+        });
+        // Return the exported file
+        $filename = 'BusinessTrips.xlsx';
+        return Excel::download(new BusinessTripAttendanceExport($transformedData), $filename);
     }
 }

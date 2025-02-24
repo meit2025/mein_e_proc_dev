@@ -46,6 +46,7 @@ import {
     PAGE_REPORT_BT_DEC,
     PAGE_REPORT_BT_OVERALL,
     PAGE_REPORT_BT_REQ,
+    PAGE_REPORT_BT_ATT,
     PAGE_REPORT_PURCHASE,
 } from '@/endpoint/report/page';
 
@@ -1020,6 +1021,14 @@ export const sidebarAdmin = () => [
                         role: [
                             'report business trip declaration view',
                             'report business trip declaration export',
+                        ],
+                    },
+                    {
+                        name: 'Business Trip Attendance',
+                        route: PAGE_REPORT_BT_ATT,
+                        role: [
+                            'report business trip attendance view',
+                            'report business trip attendance export',
                         ],
                     },
                 ],
