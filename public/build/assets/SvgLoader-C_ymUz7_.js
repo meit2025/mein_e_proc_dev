@@ -1,5 +1,0 @@
-<<<<<<<< HEAD:public/build/assets/SvgLoader-C_ymUz7_.js
-import{j as n}from"./app-9N5-VgK3.js";import{P as r}from"./index-sHORUZar.js";const p=({src:e="",width:s="24px",height:i="24px",className:o="",alt:t=""})=>e?n.jsx("img",{src:e,width:s,height:i,className:o,alt:t||"SVG icon"}):(console.error("SVGLoader: 'src' is required."),null);p.propTypes={src:r.string.isRequired,width:r.oneOfType([r.string,r.number]),height:r.oneOfType([r.string,r.number]),className:r.string,alt:r.string};export{p as S};
-========
-import{j as n}from"./app-C0UchQr_.js";import{P as r}from"./index-CtRl-EwA.js";const p=({src:e="",width:s="24px",height:i="24px",className:o="",alt:t=""})=>e?n.jsx("img",{src:e,width:s,height:i,className:o,alt:t||"SVG icon"}):(console.error("SVGLoader: 'src' is required."),null);p.propTypes={src:r.string.isRequired,width:r.oneOfType([r.string,r.number]),height:r.oneOfType([r.string,r.number]),className:r.string,alt:r.string};export{p as S};
->>>>>>>> 94b136c98e82665c5a2acb6f1f95ff70c0615629:public/build/assets/SvgLoader-C3rrPmkA.js

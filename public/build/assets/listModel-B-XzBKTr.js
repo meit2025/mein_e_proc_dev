@@ -1,5 +1,0 @@
-<<<<<<<< HEAD:public/build/assets/listModel-B-XzBKTr.js
-import{j as t}from"./app-9N5-VgK3.js";import{S as r}from"./StatusBolean-DQEedD4p.js";import"./app-DGQxOE2s.js";const s=[{field:"key",headerName:"Key",width:200,filterable:!0},{field:"secret_key",headerName:"Secret Key",width:200,filterable:!0},{field:"employee",headerName:"Employee",width:200,filterable:!0},{field:"desc",headerName:"Description",width:200,filterable:!0},{filterable:!1,field:"is_status",headerName:"Status",width:150,renderCell:e=>t.jsx(r,{status:e.value})}];export{s as columns};
-========
-import{j as t}from"./app-C0UchQr_.js";import{S as r}from"./StatusBolean-L-prL_kc.js";import"./app-DQK4SJPx.js";const s=[{field:"key",headerName:"Key",width:200,filterable:!0},{field:"secret_key",headerName:"Secret Key",width:200,filterable:!0},{field:"employee",headerName:"Employee",width:200,filterable:!0},{field:"desc",headerName:"Description",width:200,filterable:!0},{filterable:!1,field:"is_status",headerName:"Status",width:150,renderCell:e=>t.jsx(r,{status:e.value})}];export{s as columns};
->>>>>>>> 94b136c98e82665c5a2acb6f1f95ff70c0615629:public/build/assets/listModel-PSNyxH83.js
