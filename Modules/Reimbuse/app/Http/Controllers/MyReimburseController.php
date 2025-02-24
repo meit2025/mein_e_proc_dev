@@ -128,9 +128,12 @@ class MyReimburseController extends Controller
             
             $queryResult->getCollection()->each(function ($masterTypeReimburse) {
                 $masterTypeReimburse->load([
-                    'reimburseTypeGrades.grade.gradeOneUsers.reimburseTypeAssignUsers' => function ($assignQuery) use ($masterTypeReimburse) {
-                        $assignQuery->where('reimburse_type_id', $masterTypeReimburse->id)
-                            ->where('is_assign', true);
+                    'reimburseTypeGrades.grade.gradeUsers.reimburseTypeAssignUsers' => function ($assignQuery) use ($masterTypeReimburse) {
+                        $assignQuery->where([
+                            'reimburse_type_id' => $masterTypeReimburse->id,
+                            'user_id' => Auth::user()->id,
+                            'is_assign' => true
+                        ]);
                     },
                     'reimburseTypeUserAssign' => function ($assignQuery) use ($masterTypeReimburse) {
                         $assignQuery->where([
@@ -150,8 +153,8 @@ class MyReimburseController extends Controller
                     $maximumBalance = collect($map->reimburse_type_grades)
                         ->filter(function ($reimburseTypeGrade) {
                             return isset($reimburseTypeGrade->grade) &&
-                                !empty($reimburseTypeGrade->grade->grade_one_users) &&
-                                collect($reimburseTypeGrade->grade->grade_one_users)
+                                !empty($reimburseTypeGrade->grade->grade_users) &&
+                                collect($reimburseTypeGrade->grade->grade_users)
                                     ->contains('user_id', Auth::user()->id);
                         })
                         ->pluck('plafon')
