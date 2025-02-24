@@ -1147,7 +1147,6 @@ class ReportController extends Controller
 
     public function listBTAttendance(Request $request)
     {
-     
         $query =  BusinessTrip::query()->with(['purposeType', 'status', 'requestFor']);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
@@ -1197,8 +1196,7 @@ class ReportController extends Controller
 
         $data = $query
             ->whereIn('status_id', [3, 5])
-        // ->where('type', 'declaration')
-        ->latest()->paginate($perPage);
+            ->latest()->paginate($perPage);
 
         $data->getCollection()->transform(function ($map) {
 
@@ -1224,16 +1222,17 @@ class ReportController extends Controller
                     $map->status->code
                 ],
             ];
-        });   
+        });
 
         return $this->successResponse($data);
     }
 
     public function exportBTAttendance(Request $request)
     {
-        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'parentBusinessTrip', 'businessTripDestination', 'requestedBy', 'requestedBy.positions', 'requestedBy.divisions', 'requestedBy.departements']);
+        $query =  BusinessTrip::query()->with(['purposeType', 'status', 'requestFor']);
+        $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
-        $sortDirection = $request->get('sort_direction', 'desc');
+        $sortDirection = $request->get('sort_direction', 'asc');
         $startDate = $request->get('startDate');
         $endDate = $request->get('endDate');
         $status = $request->get('status');
@@ -1241,7 +1240,16 @@ class ReportController extends Controller
         $destination = $request->get('destination');
         $department = $request->get('department');
 
-
+        // $query->orderBy($sortBy, $sortDirection);
+        if ($request->approval == "1") {
+            $data = Approval::where('user_id', Auth::user()->id)
+                ->where('document_name', 'TRIP_DECLARATION')->pluck('document_id')->toArray();
+            $query = $query->whereIn('id', $data);
+        }
+        if (Auth::user()->is_admin != '1') {
+            $query = $query->where('created_by', Auth::user()->id)
+                ->orWhere('request_for', Auth::user()->id);
+        }
         if ($startDate && $endDate) {
             $query->whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $endDate);
@@ -1256,18 +1264,6 @@ class ReportController extends Controller
                 $q->where('id', $type);
             });
         }
-
-        if ($request->approval == "1") {
-            $data = Approval::where('user_id', Auth::user()->id)
-                ->where('document_name', 'TRIP')
-                ->pluck('document_id')
-                ->toArray();
-            $query = $query->whereIn('id', $data);
-        }
-        if (Auth::user()->is_admin != '1') {
-            $query = $query->where('created_by', Auth::user()->id)
-                ->orWhere('request_for', Auth::user()->id);
-        }
         if ($destination) {
             $query->whereHas('businessTripDestination', function ($q) use ($destination) {
                 $q->where('destination', $destination);
@@ -1280,7 +1276,9 @@ class ReportController extends Controller
             });
         }
 
-        $data = $query->latest()->search(request(['search']))->get();
+        $data = $query
+            ->whereIn('status_id', [3, 5])
+            ->latest()->paginate($perPage);
 
         // Transform data
         $transformedData = $data->map(function ($businessTrip) {
