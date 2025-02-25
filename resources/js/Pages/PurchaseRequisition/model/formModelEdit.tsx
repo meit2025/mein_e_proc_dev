@@ -62,10 +62,7 @@ export const formModelEdit: Array<FormFieldModel<any>> = [
   },
 
   {
-    conditional: true,
     disabled: true,
-    valueConditional: 'ZENT',
-    parameterConditional: 'document_type',
     type: 'textarea',
     name: 'entertainment.header_not',
     label: 'Header Note',

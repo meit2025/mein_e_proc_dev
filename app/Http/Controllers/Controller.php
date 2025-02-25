@@ -506,8 +506,7 @@ abstract class Controller
             $exchangeRate = ExchangeRate::getExchangeRate($from, $to, $amount);
             return $exchangeRate;
         } catch (\Throwable $th) {
-            //throw $th;
-            dd($th);
+            throw new \Exception($th->getMessage());
         }
     }
 }
