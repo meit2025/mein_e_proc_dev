@@ -1049,19 +1049,21 @@ export const ReimburseForm: React.FC<Props> = ({
                                         }
                                         minDate={new Date()}
                                         onDateChange={(date) => {
-                                          if (date >= new Date()) {
+                                          const selectedDate = moment(date).format('YYYY-MM-DD');
+                                          if (selectedDate >= moment(new Date()).format('YYYY-MM-DD')) {
                                             field.onChange(date)
                                             updateForm(index, {
                                               ...formValue,
                                               item_delivery_data: date,
                                             });
                                           } else {
-                                            field.onChange(field.value);
+                                            const dateValue = moment(field.value).format('YYYY-MM-DD');
+                                            field.onChange(dateValue);
                                             updateForm(index, {
                                               ...formValue,
-                                              item_delivery_data: field.value,
+                                              item_delivery_data: dateValue,
                                             });
-                                            showToast('Claim date cannot be less than today', 'error');
+                                            showToast('Receipt date cannot be less than today', 'error');
                                           }
                                         }}
                                       />
@@ -1091,17 +1093,19 @@ export const ReimburseForm: React.FC<Props> = ({
                                         }
                                         minDate={new Date()}
                                         onDateChange={(date) => {
-                                          if (date >= new Date()) {
+                                          const selectedDate = moment(date).format('YYYY-MM-DD');
+                                          if (selectedDate >= moment(new Date()).format('YYYY-MM-DD')) {
                                             field.onChange(date)
                                             updateForm(index, {
                                               ...formValue,
                                               claim_date: date,
                                             });
                                           } else {
-                                            field.onChange(field.value);
+                                            const dateValue = moment(field.value).format('YYYY-MM-DD');
+                                            field.onChange(dateValue);
                                             updateForm(index, {
                                               ...formValue,
-                                              claim_date: field.value,
+                                              claim_date: dateValue,
                                             });
                                             showToast('Claim date cannot be less than today', 'error');
                                           }
