@@ -76,8 +76,8 @@
                 @foreach($row['items'] as $index => $item)
                     <tr>
                         @if($index === 0)
-                            <td rowspan="{{ $itemCount }}">{{ $row['po_no'] ?? '-' }}</td>
                             <td rowspan="{{ $itemCount }}">{{ $row['pr_no'] ?? '-' }}</td>
+                            <td rowspan="{{ $itemCount }}">{{ $row['po_no'] ?? '-' }}</td>
                             <td rowspan="{{ $itemCount }}">{{ $row['quatation_no'] ?? '-' }}</td>
                             <td rowspan="{{ $itemCount }}">{{ $row['requested_by'] ?? '-' }}</td>
                             <td rowspan="{{ $itemCount }}">{{ $row['requester'] ?? '-' }}</td>
@@ -119,9 +119,13 @@
                         <td>{{ is_numeric($item['tax']) ? number_format((float) $item['tax'], 2, ',', '.') : '0,00' }}</td>
                         <td>{{ $item['short_text'] ?? '-' }}</td>
                         @if($index === 0)
+                            @if ($row['is_cashAdvance'] ?? false)
                             <td rowspan="{{ $itemCount }}">{{ $row['percentage'] ?? '-' }}</td>
                             <td rowspan="{{ $itemCount }}">{{is_numeric($row['amount']) ?  number_format((float) $row['amount'], 2, ',','.') : '0,00' }}</td>
                             <td rowspan="{{ $itemCount }}">{{ $row['reference'] ?? '-' }}</td>
+                            @else
+                            <td colspan="3" rowspan="{{ $itemCount }}">N/A</td>
+                            @endif
                         @endif
                     </tr>
                 @endforeach
