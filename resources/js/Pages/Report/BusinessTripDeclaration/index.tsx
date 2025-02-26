@@ -38,11 +38,13 @@ export const Index = ({ listPurposeType, listDestination, users, departments, st
     const [type, setType] = React.useState<string>('');
     const [destination, setDestination] = React.useState<string>('');
     const [department, setDepartment] = React.useState<string>('');
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
     const { showToast } = useAlert();
 
     const exporter = async (data: string) => {
         try {
+            setIsLoading(true); // Mulai loading
             console.log(data);
 
             // Kirim permintaan ke endpoint dengan filter
@@ -64,6 +66,8 @@ export const Index = ({ listPurposeType, listDestination, users, departments, st
                 error.response?.data?.message || 'Terjadi kesalahan saat ekspor.',
                 'error'
             );
+        } finally {
+            setIsLoading(false); // Selesai loading
         }
     };
 
@@ -178,6 +182,7 @@ export const Index = ({ listPurposeType, listDestination, users, departments, st
                 isHistory={false}
                 // onCreate={openFormHandler}
                 onExportXls={async (x: string) => await exporter(x)}
+                isLoading={isLoading}
                 defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&destination=${destination || ''}&department=${department || ''}&`}
                 columns={columns}
                 url={{

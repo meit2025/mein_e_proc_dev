@@ -97,6 +97,7 @@ export const Index = () => {
     const [vendors, setVendors] = React.useState<ReportVendor[]>([]);
     const [department, setDepartment] = React.useState<string>('');
     const [departments, setDepartments] = React.useState<ReportDepartment[]>([]);
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
     const fetchReportTypes = async (): Promise<ReportType[]> => {
         try {
@@ -140,6 +141,7 @@ export const Index = () => {
 
     const exporter = async (data: string) => {
         try {
+            setIsLoading(true);
 
             // Kirim permintaan ke endpoint dengan filter
             const response = await axiosInstance.get(REPORT_PURCHASE_EXPORT + data, {
@@ -160,6 +162,8 @@ export const Index = () => {
                 error.response?.data?.message || 'Terjadi kesalahan saat ekspor.',
                 'error'
             );
+        } finally {
+            setIsLoading(false); // Selesai loading
         }
     };
     const urlConfig = {
@@ -276,6 +280,7 @@ export const Index = () => {
             </div>
             <DataGridComponent
                 onExportXls={async (x: string) => await exporter(x)}
+                isLoading={isLoading}
                 defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&vendor=${vendor || ''}&department=${department || ''}&`}
                 columns={columns}
                 url={urlConfig}

@@ -1030,7 +1030,7 @@ class ReportController extends Controller
         $transformedData = $data->map(function ($pr) {
             return [
                 'po_no' => collect($pr->purchaseRequisitions)->firstWhere('no_po', '!=', null)->no_po ?? '-',
-                'pr_no' => collect($pr->purchaseRequisitions)->firstWhere('purchase_requisition_number', '!=', null)->purchase_requisition_number ?? '-',
+                'pr_no' => $pr->purchases_number ?? '',
                 'quatation_no' => optional($pr->vendorsWinner)->quotation ?? '',
                 'requested_by' => optional($pr->user)->name ?? '',
                 'requester' => optional($pr->getRelationValue('createdBy'))->name ?? '',
