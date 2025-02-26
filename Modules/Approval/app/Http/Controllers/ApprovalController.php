@@ -297,7 +297,7 @@ class ApprovalController extends Controller
                             $reimburseGroup->approverName = Auth::user()->name;
 
                             SendNotification::dispatch($findUser,  $message, $baseurl);
-                            $parseStatusToEmail = $statusId == 1 ? 'Approval' : $request->status;
+                            $parseStatusToEmail = $statusId == 0 ? 'Approval' : $request->status;
                             Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimbursement', $parseStatusToEmail, '', null, $reimburseGroup, null, $baseurl));
 
                             // $getApproval = Approval::where(['document_id' => $request->id, 'document_name' => 'REIM', 'status' => 'Waiting'])->orderBy('id', 'ASC')->first();
