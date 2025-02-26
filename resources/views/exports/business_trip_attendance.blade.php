@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Business Trip Report</title>
+    <title>Business Attendance Report</title>
     <style>
         table {
             width: 100%;
@@ -30,17 +30,15 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($data as $index => $trip)
-                @foreach ($trip['destinations'] as $destination)
+            @foreach ($data as $index => $attendance)
                     <tr>
                         <td>{{ $index + 1 }}</td>
-                        <td>{{ $trip['employee']->nip ?? '' }}</td>
-                        <td>{{ $trip['employee']->name ?? '' }}</td>
-                        <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('h:i') }}</td>
-                        <td>{{ $trip['status']->name ?? '-' }}</td>
+                        <td>{{ $attendance['employee_no'] ?? '' }}</td>
+                        <td>{{ $attendance['employee_name'] ?? '' }}</td>
+                        <td>{{ $attendance['date'] }}</td>
+                        <td>{{ $attendance['time'] }}</td>
+                        <td>{{ $attendance['status'] ?? '-' }}</td>
                     </tr>
-                @endforeach
             @endforeach
         </tbody>
     </table>
