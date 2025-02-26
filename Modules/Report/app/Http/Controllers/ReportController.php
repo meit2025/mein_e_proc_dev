@@ -1199,7 +1199,7 @@ class ReportController extends Controller
 
         $data = $query->whereHas('BusinessTrip', function ($query) {
             $query->whereHas('status', function ($query) {
-                $query->where('code', 'fully_approve');
+                $query->where('name',  'Fully Approve');
             });
         })
             ->paginate($perPage);
@@ -1282,9 +1282,9 @@ class ReportController extends Controller
 
         $data = $query
             ->whereHas('BusinessTrip', function ($query) {
-                    $query->whereHas('status', function ($query) {
-                        $query->where('code',  'fully_approve');
-                    });
+                $query->whereHas('status', function ($query) {
+                    $query->where('name',  'Fully Approve');
+                });
             });
 
 
