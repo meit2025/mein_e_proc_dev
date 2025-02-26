@@ -1197,12 +1197,13 @@ class ReportController extends Controller
             });
         }
 
-        $data = $query
-            // ->whereIn('status_id', [3, 5])
-            ->whereHas('BusinessTrip', function ($query) {
-                return $query->whereIn('status_id', [3, 5]);
-            })
+        $data = $query->whereHas('BusinessTrip', function ($query) {
+            $query->whereHas('status', function ($query) {
+                $query->where('code', 'fully_approve');
+            });
+        })
             ->paginate($perPage);
+
 
         $data->getCollection()->transform(function ($value) {
 
@@ -1281,7 +1282,9 @@ class ReportController extends Controller
 
         $data = $query
             ->whereHas('BusinessTrip', function ($query) {
-                return $query->whereIn('status_id', [3, 5]);
+                    $query->whereHas('status', function ($query) {
+                        $query->where('code',  'fully_approve');
+                    });
             });
 
 
