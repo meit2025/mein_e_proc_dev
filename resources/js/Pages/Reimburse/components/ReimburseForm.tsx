@@ -1057,11 +1057,10 @@ export const ReimburseForm: React.FC<Props> = ({
                                               item_delivery_data: date,
                                             });
                                           } else {
-                                            const dateValue = moment(field.value).format('YYYY-MM-DD');
-                                            field.onChange(dateValue);
+                                            field.onChange(field.value);
                                             updateForm(index, {
                                               ...formValue,
-                                              item_delivery_data: dateValue,
+                                              item_delivery_data: field.value,
                                             });
                                             showToast('Receipt date cannot be less than today', 'error');
                                           }
@@ -1101,11 +1100,10 @@ export const ReimburseForm: React.FC<Props> = ({
                                               claim_date: date,
                                             });
                                           } else {
-                                            const dateValue = moment(field.value).format('YYYY-MM-DD');
-                                            field.onChange(dateValue);
+                                            field.onChange(field.value);
                                             updateForm(index, {
                                               ...formValue,
-                                              claim_date: dateValue,
+                                              claim_date: field.value,
                                             });
                                             showToast('Claim date cannot be less than today', 'error');
                                           }
