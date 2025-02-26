@@ -1289,7 +1289,6 @@ class ReportController extends Controller
 
 
         $data = $this->filterAndNotPaginateHasJoin($request, $data, [], [], []);
-        // Transform data
         $transformedData = $data->map(function ($value) {
 
             $first = $value->BusinessTrip->detailAttendance->first();
