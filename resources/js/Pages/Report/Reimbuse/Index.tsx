@@ -49,12 +49,14 @@ export const Index = ({
     const [status, setStatus] = React.useState<string>('');
     const [type, setType] = React.useState<string>('');
     const [department, setDepartment] = React.useState<string>('');
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
     const { showToast } = useAlert();
 
     // Handle Exporter
     const exporter = async (data: string) => {
         try {
+            setIsLoading(true);
             // const params = new URLSearchParams({
             //     startDate: startDate || '',
             //     endDate: endDate || '',
@@ -84,6 +86,8 @@ export const Index = ({
                 error.response?.data?.message || 'Terjadi kesalahan saat ekspor.',
                 'error'
             );
+        } finally {
+            setIsLoading(false); // Selesai loading
         }
     };
 
@@ -175,9 +179,8 @@ export const Index = ({
             {/* Data Grid Component */}
             <DataGridComponent
                 isHistory={false}
-                // onExport={async () => await exporter(false)}
                 onExportXls={async (x: string) => await exporter(x)}
-                // onExportPdf={async () => await exporter(true)}
+                isLoading={isLoading}
                 defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&department=${department || ''}&`}
                 columns={columns}
                 url={{
