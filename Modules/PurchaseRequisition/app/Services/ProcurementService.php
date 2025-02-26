@@ -151,7 +151,7 @@ class ProcurementService
             'material_number' => $item->material_number, // matnr
             'unit_of_measure' => $item->uom,
             'quantity' => $item->qty,
-            'balance' => round($item->total_amount, 0),
+            'balance' => $item->unit_price,
             'currency' => $procurement->currency_from ?? 'IDR', // waers
             'tax_code' => $item->tax, // mwskz
             'item_category' => '', // pstyp

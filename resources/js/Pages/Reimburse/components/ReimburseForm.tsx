@@ -1049,7 +1049,8 @@ export const ReimburseForm: React.FC<Props> = ({
                                         }
                                         minDate={new Date()}
                                         onDateChange={(date) => {
-                                          if (date >= new Date()) {
+                                          const selectedDate = moment(date).format('YYYY-MM-DD');
+                                          if (selectedDate >= moment(new Date()).format('YYYY-MM-DD')) {
                                             field.onChange(date)
                                             updateForm(index, {
                                               ...formValue,
@@ -1061,7 +1062,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                               ...formValue,
                                               item_delivery_data: field.value,
                                             });
-                                            showToast('Claim date cannot be less than today', 'error');
+                                            showToast('Receipt date cannot be less than today', 'error');
                                           }
                                         }}
                                       />
@@ -1091,7 +1092,8 @@ export const ReimburseForm: React.FC<Props> = ({
                                         }
                                         minDate={new Date()}
                                         onDateChange={(date) => {
-                                          if (date >= new Date()) {
+                                          const selectedDate = moment(date).format('YYYY-MM-DD');
+                                          if (selectedDate >= moment(new Date()).format('YYYY-MM-DD')) {
                                             field.onChange(date)
                                             updateForm(index, {
                                               ...formValue,

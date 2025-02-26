@@ -69,6 +69,7 @@ export const Index = ({
     const [type, setType] = React.useState<string>('');
     const [destination, setDestination] = React.useState<string>('');
     const [department, setDepartment] = React.useState<string>('');
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
     function openFormHandler() {
         setOpenForm(!openForm);
@@ -80,15 +81,12 @@ export const Index = ({
 
     const exporter = async (data: string) => {
         try {
-            console.log(data);
+            setIsLoading(true);
 
             // Kirim permintaan ke endpoint dengan filter
             const response = await axiosInstance.get(REPORT_BT_EXPORT + data, {
                 responseType: "blob"
             });
-
-            console.log(response);
-
 
             // Membuat file dari respons
             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -104,6 +102,8 @@ export const Index = ({
                 error.response?.data?.message || 'Terjadi kesalahan saat ekspor.',
                 'error'
             );
+        } finally {
+            setIsLoading(false); // Selesai loading
         }
     };
 
@@ -213,6 +213,7 @@ export const Index = ({
             <DataGridComponent
                 isHistory={false}
                 onExportXls={async (x: string) => await exporter(x)}
+                isLoading={isLoading}
                 defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&destination=${destination || ''}&department=${department || ''}&`}
                 columns={columns}
                 url={{

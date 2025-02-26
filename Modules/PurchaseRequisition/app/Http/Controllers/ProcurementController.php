@@ -124,16 +124,18 @@ class ProcurementController extends Controller
             $formattedDate = $date->format('Y-m-d');
 
             if ($request->is_cashAdvance ?? false) {
-                $purchase->cashAdvancePurchases()->create([
-                    'unit_id' => $unitCrate->id,
-                    'reference' => $request['cash_advance_purchases']['reference'] ?? '',
-                    'document_header_text' => $request['entertainment']['header_not'] ?? '',
-                    'document_date' => $formattedDate,
-                    'due_on' => $request->delivery_date ?? '',
-                    'text' => $request['entertainment']['header_not'] ?? '',
-                    'dp' => $request['cash_advance_purchases']['dp'] ?? '',
-                    'nominal' => $request['cash_advance_purchases']['nominal'] ?? '0',
-                ]);
+                if ($request->currency_from == 'IDR') {
+                    $purchase->cashAdvancePurchases()->create([
+                        'unit_id' => $unitCrate->id,
+                        'reference' => $request['cash_advance_purchases']['reference'] ?? '',
+                        'document_header_text' => $request['entertainment']['header_not'] ?? '',
+                        'document_date' => $formattedDate,
+                        'due_on' => $request->delivery_date ?? '',
+                        'text' => $request['entertainment']['header_not'] ?? '',
+                        'dp' => $request['cash_advance_purchases']['dp'] ?? '',
+                        'nominal' => $request['cash_advance_purchases']['nominal'] ?? '0',
+                    ]);
+                }
             }
 
             if ($request->has('attachment') && is_array($request->attachment) && count($request->attachment) > 0) {

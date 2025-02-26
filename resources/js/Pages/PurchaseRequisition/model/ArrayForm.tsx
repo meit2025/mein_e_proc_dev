@@ -56,6 +56,10 @@ const ArrayForm = ({
       name: 'name_one',
       id: 'id',
       tabel: 'master_business_partners',
+      where: {
+        key: 'type',
+        parameter: 'employee',
+      },
       hiddenZero: true,
       isMapping: true,
     });
@@ -262,6 +266,8 @@ const ArrayForm = ({
   const handelCopy = async (data: any, rowIndex: any) => {
     const id = `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
     await handelGetMaterialNumber(data.material_group);
+    setValue(': currency_total,', data.uom ?? '');
+
     const newItem = {
       id: id,
       qty: data.qty ?? '0',
@@ -277,6 +283,7 @@ const ArrayForm = ({
       order_number: data.order_number ?? '',
       asset_number: data.asset_number ?? '',
       sub_asset_number: data.sub_asset_number ?? '',
+      total_amount_conversion: data.total_amount_conversion ?? '',
     };
 
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
