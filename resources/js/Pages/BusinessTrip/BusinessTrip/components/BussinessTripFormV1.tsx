@@ -351,48 +351,48 @@ export const BussinessTripFormV1 = ({
         setDateBusinessTripByUser(response.data.data);
     }
 
-  async function handlePurposeType(value: string) {
-    form.setValue('purpose_type_id', value || '');
-    const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
-    const url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
-    const getPurposeType = GET_DETAIL_PURPOSE_TYPE(value);
-    try {
-      const response = await axiosInstance.get(url);
-      console.log(response,'response');
-      const responsePurposeType = await axiosInstance.get(getPurposeType);
-      //   const typePurpose = responsePurposeType.data.data.purpose.type;
-      //   if (typePurpose == 'international') {
-      //     totalDestinationHandler('1');
-      //   }
-    //   setTypePurpose(typePurpose);
-      setListAllowances(response.data.data as AllowanceItemModel[]);
-      getDestination('', {
-        name: 'destination',
-        id: 'destination',
-        tabel: 'destinations',
-        where: {
-          key: 'type',
-          parameter: responsePurposeType.data.data.purpose.type,
-        },
-      });
-    } catch (e) {
-      console.log(e);
+    async function handlePurposeType(value: string) {
+        form.setValue('purpose_type_id', value || '');
+        const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
+        const url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
+        const getPurposeType = GET_DETAIL_PURPOSE_TYPE(value);
+        try {
+        const response = await axiosInstance.get(url);
+        console.log(response,'response');
+        const responsePurposeType = await axiosInstance.get(getPurposeType);
+        //   const typePurpose = responsePurposeType.data.data.purpose.type;
+        //   if (typePurpose == 'international') {
+        //     totalDestinationHandler('1');
+        //   }
+        //   setTypePurpose(typePurpose);
+        setListAllowances(response.data.data as AllowanceItemModel[]);
+        getDestination('', {
+            name: 'destination',
+            id: 'destination',
+            tabel: 'destinations',
+            where: {
+            key: 'type',
+            parameter: responsePurposeType.data.data.purpose.type,
+            },
+        });
+        } catch (e) {
+        console.log(e);
+        }
     }
-  }
 
     const [selectedDates, setSelectedDates] = React.useState<
     { start: Date | undefined; end: Date | undefined }[]
     >([]);
 
-  const totalDestinationHandler = (value: string) => {
-    form.setValue('total_destination', parseInt(value, 10));
-    setTotalDestination(value);
-    setAllowancesProperty();
-    setSelectedDates([]);
-    // let valueToInt = parseInt(value);
-  };
+    const totalDestinationHandler = (value: string) => {
+        form.setValue('total_destination', parseInt(value, 10));
+        setTotalDestination(value);
+        setAllowancesProperty();
+        setSelectedDates([]);
+        // let valueToInt = parseInt(value);
+    };
 
-  const [activeTab, setActiveTab] = React.useState('destination1');
+    const [activeTab, setActiveTab] = React.useState('destination1');
 
     React.useEffect(() => {
         if (parseInt(totalDestination, 10) < 1) {
@@ -402,105 +402,116 @@ export const BussinessTripFormV1 = ({
         }
     }, [totalDestination]);
 
-  const { showToast } = useAlert();
-  const [loading, setLoading] = React.useState(false);
+    const { showToast } = useAlert();
+    const [loading, setLoading] = React.useState(false);
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const totalAll = getTotalDes();
-    if (totalAll === 0) {
-        showToast('Please add at least one destination', 'error');
-        return;
-      }
+    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        const isValid = await form.trigger();
+        if (!isValid) {
+            // Dapatkan daftar field yang memiliki error
+            const errors = form.formState.errors;
 
-    try {
-      setLoading(true);
-
-      const formData = new FormData();
-      // Append group data
-      formData.append('user_id', values.request_for ?? '');
-      formData.append('value', totalAll.toString());
-
-      formData.append('purpose_type_id', values.purpose_type_id ?? '');
-      formData.append('request_for', values.request_for ?? '');
-      formData.append('cost_center_id', values.cost_center_id ?? '');
-      formData.append('remark', values.remark ?? '');
-      formData.append('cash_advance', `${values.cash_advance}`);
-      formData.append('total_percent', `${values.total_percent}`);
-      formData.append('total_cash_advance', `${values.total_cash_advance}`);
-
-      values.attachment.forEach((file: any, index: number) => {
-        if (file) {
-          formData.append(`attachment[${index}]`, file);
+            // Looping untuk menemukan tab yang memiliki error
+            for (let i = 0; i < destinationField.length; i++) {
+                if (errors?.destinations?.[i]) { // Pastikan ada error di tab tertentu
+                    setActiveTab(`destination${i + 1}`); // Pindah ke tab yang error
+                    break; // Hentikan loop setelah menemukan tab pertama yang error
+                }
+            }
+            return;
         }
-      });
-      formData.append('total_destination', `${values.total_destination}`);
-      values.destinations.forEach((item, index) => {
-        const itemCopy = {
-          ...item,
-          business_trip_start_date: moment(item.business_trip_start_date).format('YYYY-MM-DD'),
-          business_trip_end_date: moment(item.business_trip_end_date).format('YYYY-MM-DD'),
-          detail_attedances: item.detail_attedances.map((detail) => {
-            return {
-              ...detail,
-              date: moment(detail.date).format('YYYY-MM-DD'),
-            };
-          }),
-          allowances: item.allowances.map((allowance) => {
-            return {
-              ...allowance,
-              detail: allowance.detail.map((detail) => {
+
+        const totalAll = getTotalDes();
+        if (totalAll === 0) {
+            showToast('Please add at least one destination', 'error');
+            return;
+        }
+
+        try {
+        setLoading(true);
+        const formData = new FormData();
+        formData.append('user_id', values.request_for ?? '');
+        formData.append('value', totalAll.toString());
+        formData.append('purpose_type_id', values.purpose_type_id ?? '');
+        formData.append('request_for', values.request_for ?? '');
+        formData.append('cost_center_id', values.cost_center_id ?? '');
+        formData.append('remark', values.remark ?? '');
+        formData.append('cash_advance', `${values.cash_advance}`);
+        formData.append('total_percent', `${values.total_percent}`);
+        formData.append('total_cash_advance', `${values.total_cash_advance}`);
+        values.attachment.forEach((file: any, index: number) => {
+            if (file) {
+            formData.append(`attachment[${index}]`, file);
+            }
+        });
+        formData.append('total_destination', `${values.total_destination}`);
+        values.destinations.forEach((item, index) => {
+            const itemCopy = {
+            ...item,
+            business_trip_start_date: moment(item.business_trip_start_date).format('YYYY-MM-DD'),
+            business_trip_end_date: moment(item.business_trip_end_date).format('YYYY-MM-DD'),
+            detail_attedances: item.detail_attedances.map((detail) => {
                 return {
-                  ...detail,
-                  date: detail?.date != null ? moment(detail.date).format('YYYY-MM-DD') : null,
+                ...detail,
+                date: moment(detail.date).format('YYYY-MM-DD'),
                 };
-              }),
+            }),
+            allowances: item.allowances.map((allowance) => {
+                return {
+                ...allowance,
+                detail: allowance.detail.map((detail) => {
+                    return {
+                    ...detail,
+                    date: detail?.date != null ? moment(detail.date).format('YYYY-MM-DD') : null,
+                    };
+                }),
+                };
+            }),
             };
-          }),
-        };
-        formData.append(`destinations[${index}]`, JSON.stringify(itemCopy));
-      });
-
-      if (type == BusinessTripType.create) {
-        await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
+            formData.append(`destinations[${index}]`, JSON.stringify(itemCopy));
         });
-        showToast('succesfully created data', 'success');
-      } else {
-        // const formDataEdit = new FormData();
-        // formDataEdit.append('remark', values.remark ?? '');
-        // values.attachment.forEach((file: any, index: number) => {
-        //   if (file) {
-        //     formDataEdit.append(`attachment[${index}]`, file);
-        //   }
-        // });
-        fileAttachment.forEach((file: any, index: number) => {
-          if (file) {
-            formData.append(`file_existing[${index}]`, JSON.stringify(file));
-          }
-        });
-        await Inertia.post(`${CLONE_API_BUSINESS_TRIP}/${id}`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        showToast('succesfully updated data', 'success');
-      }
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
-      // console.log(response);
-      //   onSuccess?.(true);
-    } catch (e) {
-      const error = e as AxiosError;
 
-      //   onSuccess?.(false);
-      console.log(error);
-    }
+        if (type == BusinessTripType.create) {
+            await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+            });
+            showToast('succesfully created data', 'success');
+        } else {
+            // const formDataEdit = new FormData();
+            // formDataEdit.append('remark', values.remark ?? '');
+            // values.attachment.forEach((file: any, index: number) => {
+            //   if (file) {
+            //     formDataEdit.append(`attachment[${index}]`, file);
+            //   }
+            // });
+            fileAttachment.forEach((file: any, index: number) => {
+            if (file) {
+                formData.append(`file_existing[${index}]`, JSON.stringify(file));
+            }
+            });
+            await Inertia.post(`${CLONE_API_BUSINESS_TRIP}/${id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+            });
+            showToast('succesfully updated data', 'success');
+        }
+        setTimeout(() => {
+            setLoading(false);
+        }, 1000);
+        // console.log(response);
+        //   onSuccess?.(true);
+        } catch (e) {
+        const error = e as AxiosError;
 
-    // console.log('values bg', values);
-  };
+        //   onSuccess?.(false);
+        console.log(error);
+        }
+
+        // console.log('values bg', values);
+    };
 
   function setAllowancesProperty() {
     const destinationForm = [];

@@ -129,7 +129,7 @@ class PurposeTypeController extends Controller
     {
 
         $rules = [
-            'code' => 'required',
+            'code' => 'required:unique',
             'name' => 'required',
             'allowances.*' => 'required',
             'attedance_status' => 'required'

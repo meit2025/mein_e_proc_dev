@@ -20,6 +20,8 @@ function Create() {
     reValidateMode: 'onChange',
     defaultValues: {
       currency_from: 'IDR',
+      is_conversion_currency: true,
+      currency_to: 'IDR',
       total_vendor: 1,
       user_id: auth?.user?.id,
     } as FieldValues,

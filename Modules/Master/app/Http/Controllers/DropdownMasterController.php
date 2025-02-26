@@ -114,20 +114,20 @@ class DropdownMasterController extends Controller
 
         if ($request->declaration == 'true') {
             $inBusinessTripRequest = BusinessTrip::where('type', 'declaration')
-            ->where(function($query) {
-                $query->where('created_by', Auth::user()->id)
-                      ->orWhere('request_for', Auth::user()->id);
-            })
-            ->whereNotIn('status_id',[2,4])
-            ->pluck('parent_id')
-            ->toArray();
+                ->where(function ($query) {
+                    $query->where('created_by', Auth::user()->id)
+                        ->orWhere('request_for', Auth::user()->id);
+                })
+                ->whereNotIn('status_id', [2, 4])
+                ->pluck('parent_id')
+                ->toArray();
             $data = $data->whereNull('deleted_at')
-                        ->where(function($query) {
-                            $query->where('created_by', Auth::user()->id)
-                                ->orWhere('request_for', Auth::user()->id);
-                        })
-                        ->where('status_id', 3)
-                        ->whereNotIn('id', $inBusinessTripRequest);
+                ->where(function ($query) {
+                    $query->where('created_by', Auth::user()->id)
+                        ->orWhere('request_for', Auth::user()->id);
+                })
+                ->where('status_id', 3)
+                ->whereNotIn('id', $inBusinessTripRequest);
             // if (Auth::user()->is_admin == "0") {
             //     $data = $data->where('created_by', Auth::user()->id);
             // }
