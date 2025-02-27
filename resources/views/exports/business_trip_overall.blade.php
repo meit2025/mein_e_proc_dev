@@ -86,7 +86,7 @@
                             <td>{{ $destination['destination'] ?? '' }}</td>
                             <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
                             <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
-                            <td colspan="3">N/A</td>
+                            <td colspan="5">N/A</td>
                         @endif
                     </tr>
                 @endforeach
