@@ -1199,24 +1199,26 @@ class ReportController extends Controller
 
         $data->getCollection()->transform(function ($value) {
 
-            $first = $value->BusinessTrip->detailAttendance->first();
+            $first = $value->BusinessTrip->detailAttendance()->orderBy('date', 'asc')->first();
+            $last = $value->BusinessTrip->detailAttendance()->orderBy('date', 'desc')->first();
             $status = $value->id == $first->id ? 'In' : 'Out';
-            // $status = $value->id == $first->id ? 1 : 0;
 
-            return [
-                'id' =>  $value->id,
-                'employee_no' => $value->BusinessTrip->requestFor->nip,
-                'employee_name' => $value->BusinessTrip->requestFor->name,
+            if ($value->id == $first->id || $value->id == $last->id) {
+                return [
+                    'id' =>  $value->id,
+                    'employee_no' => $value->BusinessTrip->requestFor->nip,
+                    'employee_name' => $value->BusinessTrip->requestFor->name,
 
-                'date' => date('d/m/Y', strtotime($value->date)),
-                'time' => date('h:i', strtotime($value->start_time)),
+                    'date' => date('d/m/Y', strtotime($value->date)),
+                    'time' => date('h:i', strtotime($value->start_time)),
 
-                'status' => [
-                    'name' => $status,
-                    'classname' => 'bg-green-100 text-green-600 border-green-600',
-                    'code' => 'fully_approve'
-                ],
-            ];
+                    'status' => [
+                        'name' => $status,
+                        'classname' => 'bg-green-100 text-green-600 border-green-600',
+                        'code' => 'fully_approve'
+                    ],
+                ];
+            }
         });
 
         return $this->successResponse($data);
@@ -1272,22 +1274,26 @@ class ReportController extends Controller
             ->get();
 
 
-        // $data = $this->filterAndNotPaginateHasJoin($request, $data, [], [], []);
-        $transformedData = $data->map(function ($value) {
+        $transformedData = $data->transform(function ($value) {
 
-            $first = $value->BusinessTrip->detailAttendance->first();
+            $first = $value->BusinessTrip->detailAttendance()->orderBy('date', 'asc')->first();
+            $last = $value->BusinessTrip->detailAttendance()->orderBy('date', 'desc')->first();
+
             $status = $value->id == $first->id ? 1 : 0;
-            return [
 
-                'id' =>  $value->id,
-                'employee_no' => $value->BusinessTrip->requestFor->nip,
-                'employee_name' => $value->BusinessTrip->requestFor->name,
+            if ($value->id == $first->id || $value->id == $last->id) {
+                return [
 
-                'date' => date('d/m/Y', strtotime($value->date)),
-                'time' => date('h:i', strtotime($value->start_time)),
+                    'id' =>  $value->id,
+                    'employee_no' => $value->BusinessTrip->requestFor->nip,
+                    'employee_name' => $value->BusinessTrip->requestFor->name,
 
-                'status' => $status,
-            ];
+                    'date' => date('d/m/Y', strtotime($value->date)),
+                    'time' => date('h:i', strtotime($value->start_time)),
+
+                    'status' => $status,
+                ];
+            }
         });
 
         // Return the exported file
@@ -1345,19 +1351,23 @@ class ReportController extends Controller
 
         $data->transform(function ($value) {
 
-            $first = $value->BusinessTrip->detailAttendance->first();
+            $first = $value->BusinessTrip->detailAttendance()->orderBy('date', 'asc')->first();
+            $last = $value->BusinessTrip->detailAttendance()->orderBy('date', 'desc')->first();
+
             $status = $value->id == $first->id ? 1 : 0;
 
-            return [
-                'id' =>  $value->id,
-                'employee_no' => $value->BusinessTrip->requestFor->nip,
-                'employee_name' => $value->BusinessTrip->requestFor->name,
+            if ($value->id == $first->id || $value->id == $last->id) {
+                return [
+                    'id' =>  $value->id,
+                    'employee_no' => $value->BusinessTrip->requestFor->nip,
+                    'employee_name' => $value->BusinessTrip->requestFor->name,
 
-                'date' => date('d/m/Y', strtotime($value->date)),
-                'time' => date('h:i', strtotime($value->start_time)),
+                    'date' => date('d/m/Y', strtotime($value->date)),
+                    'time' => date('h:i', strtotime($value->start_time)),
 
-                'status' => $status,
-            ];
+                    'status' => $status,
+                ];
+            }
         });
 
         return $this->successResponse($data);
