@@ -314,7 +314,7 @@ class ApprovalController extends Controller
                             $businessTrip = BusinessTrip::find($request->id);
                             $businessTrip->notes = isset($request->note) ? $request->note : '';
                             $businessTrip->approverName = Auth::user()->name;
-                            $parseStatusToEmail = $statusId == 1 ? 'Approval' : $request->status;
+                            $parseStatusToEmail = $statusId == 0 ? 'Approval' : $request->status;
                             Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip Declaration',  $parseStatusToEmail, '', null, null, $businessTrip, $baseurl));
 
                             if ($findUser->id !== $model->created_by) {
@@ -330,7 +330,7 @@ class ApprovalController extends Controller
                             $businessTrip = BusinessTrip::find($request->id);
                             $businessTrip->notes = isset($request->note) ? $request->note : '';
                             $businessTrip->approverName = Auth::user()->name;
-                            $parseStatusToEmail = $statusId == 1 ? 'Approval' : $request->status;
+                            $parseStatusToEmail = $statusId == 0 ? 'Approval' : $request->status;
                             Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip',  $parseStatusToEmail, '', null, null, $businessTrip, $baseurl));
 
                             if ($findUser->id !== $model->created_by) {
