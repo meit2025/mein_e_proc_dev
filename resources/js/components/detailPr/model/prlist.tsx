@@ -110,7 +110,7 @@ export const columns: GridColDef[] = [
     width: 150,
     filterable: true,
     renderCell: (params) => {
-      return formatRupiah(params.row.balance, false);
+      return formatRupiah(params.row.balance, true);
     },
   },
   { field: 'attachment_link', headerName: 'Attachment Link', width: 250, filterable: true },
