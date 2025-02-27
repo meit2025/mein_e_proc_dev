@@ -1268,10 +1268,11 @@ class ReportController extends Controller
                 $query->whereHas('status', function ($query) {
                     $query->where('name',  'Fully Approve');
                 });
-            });
+            })
+            ->get();
 
 
-        $data = $this->filterAndNotPaginateHasJoin($request, $data, [], [], []);
+        // $data = $this->filterAndNotPaginateHasJoin($request, $data, [], [], []);
         $transformedData = $data->map(function ($value) {
 
             $first = $value->BusinessTrip->detailAttendance->first();
