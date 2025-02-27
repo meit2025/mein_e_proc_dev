@@ -308,7 +308,7 @@ class ApprovalController extends Controller
                             // }
                             break;
                         case 'trip_declaration':
-                            $baseurl = env('APP_URL') .  '/business-trip/detail-page/' .  $request->id;
+                            $baseurl = env('APP_URL') .  '/business-trip-declaration/detail-page/' .  $request->id;
                             $findUser = User::where('id', $model->request_for)->first();
                             SendNotification::dispatch($findUser,  $message, $baseurl);
                             $businessTrip = BusinessTrip::find($request->id);
@@ -319,7 +319,7 @@ class ApprovalController extends Controller
 
                             if ($findUser->id !== $model->created_by) {
                                 $findcreatedBy = User::find($model->created_by);
-                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip',  $request->status, '', null, null, $businessTrip, $baseurl));
+                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip Declaration',  $request->status, '', null, null, $businessTrip, $baseurl));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
                             }
                             break;
