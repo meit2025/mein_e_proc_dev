@@ -297,7 +297,7 @@ class ApprovalController extends Controller
                             $reimburseGroup->approverName = Auth::user()->name;
 
                             SendNotification::dispatch($findUser,  $message, $baseurl);
-                            $parseStatusToEmail = $statusId == 1 ? 'Approval' : $request->status;
+                            $parseStatusToEmail = $statusId == 0 ? 'Approval' : $request->status;
                             Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimbursement', $parseStatusToEmail, '', null, $reimburseGroup, null, $baseurl));
 
                             // $getApproval = Approval::where(['document_id' => $request->id, 'document_name' => 'REIM', 'status' => 'Waiting'])->orderBy('id', 'ASC')->first();
@@ -308,7 +308,7 @@ class ApprovalController extends Controller
                             // }
                             break;
                         case 'trip_declaration':
-                            $baseurl = env('APP_URL') .  '/business-trip/detail-page/' .  $request->id;
+                            $baseurl = env('APP_URL') .  '/business-trip-declaration/detail-page/' .  $request->id;
                             $findUser = User::where('id', $model->request_for)->first();
                             SendNotification::dispatch($findUser,  $message, $baseurl);
                             $businessTrip = BusinessTrip::find($request->id);
@@ -319,7 +319,7 @@ class ApprovalController extends Controller
 
                             if ($findUser->id !== $model->created_by) {
                                 $findcreatedBy = User::find($model->created_by);
-                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip',  $request->status, '', null, null, $businessTrip, $baseurl));
+                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip Declaration',  $request->status, '', null, null, $businessTrip, $baseurl));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
                             }
                             break;

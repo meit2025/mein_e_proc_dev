@@ -45,26 +45,25 @@ function Create() {
     }
   }, [dropdownOptions]);
 
-  useEffect(() => {
-    const subscription = methods.watch((value, { name }) => {
-      if (name === 'document_type') {
-        value.document_type === 'ZENT' ? methods.setValue('currency_from', 'IDR') : '';
-        if (value.document_type !== 'ZENT') {
-          methods.setValue('entertainment.tanggal', '');
-          methods.setValue('entertainment.tempat', '');
-          methods.setValue('entertainment.alamat', '');
-          methods.setValue('entertainment.jenis', '');
-          methods.setValue('entertainment.nama_perusahaan', '');
-          methods.setValue('entertainment.nama', '');
-          methods.setValue('entertainment.posisi', '');
-          methods.setValue('entertainment.jenis_usaha', '');
-          methods.setValue('entertainment.jenis_kegiatan', '');
-        }
-      }
-    });
+  const doctType = methods.watch('document_type');
 
-    return () => subscription.unsubscribe(); // Cleanup to avoid memory leaks
-  }, [methods.watch]);
+  useEffect(() => {
+    if (doctType === 'ZENT') {
+      methods.setValue('currency_from', 'IDR');
+    }
+
+    if (doctType !== 'ZENT') {
+      methods.setValue('entertainment.tanggal', '');
+      methods.setValue('entertainment.tempat', '');
+      methods.setValue('entertainment.alamat', '');
+      methods.setValue('entertainment.jenis', '');
+      methods.setValue('entertainment.nama_perusahaan', '');
+      methods.setValue('entertainment.nama', '');
+      methods.setValue('entertainment.posisi', '');
+      methods.setValue('entertainment.jenis_usaha', '');
+      methods.setValue('entertainment.jenis_kegiatan', '');
+    }
+  }, [doctType]);
 
   return (
     <div className='card card-grid h-full min-w-full p-4'>

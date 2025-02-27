@@ -17,6 +17,7 @@ use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Approval\Models\Approval;
 use Modules\BusinessTrip\Models\BusinessTrip;
+use Modules\BusinessTrip\Models\BusinessTripDetailAttedance;
 use Modules\BusinessTrip\Models\Destination;
 use Modules\BusinessTrip\Models\PurposeType;
 use Modules\Master\Models\DocumentType;
@@ -1147,41 +1148,34 @@ class ReportController extends Controller
 
     public function listBTAttendance(Request $request)
     {
-        $query =  BusinessTrip::query()->with(['purposeType', 'status', 'requestFor']);
-        $perPage = $request->get('per_page', 10);
+        $query =  BusinessTripDetailAttedance::query()->with(['BusinessTrip']);
         $sortBy = $request->get('sort_by', 'id');
-        $sortDirection = $request->get('sort_direction', 'asc');
+        $sortDirection = $request->get('sort_direction', 'desc');
+        $perPage = $request->get('per_page', 10);
         $startDate = $request->get('startDate');
         $endDate = $request->get('endDate');
-        $status = $request->get('status');
         $type = $request->get('type');
         $destination = $request->get('destination');
         $department = $request->get('department');
 
-        // $query->orderBy($sortBy, $sortDirection);
-        if ($request->approval == "1") {
-            $data = Approval::where('user_id', Auth::user()->id)
-                ->where('document_name', 'TRIP_DECLARATION')->pluck('document_id')->toArray();
-            $query = $query->whereIn('id', $data);
-        }
+        $query->orderBy($sortBy, $sortDirection);
+
         if (Auth::user()->is_admin != '1') {
             $query = $query->where('created_by', Auth::user()->id)
                 ->orWhere('request_for', Auth::user()->id);
         }
+
         if ($startDate && $endDate) {
             $query->whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $endDate);
         }
-        if ($status) {
-            $query->whereHas('status', function ($q) use ($status) {
-                $q->where('code', $status);
-            });
-        }
+
         if ($type) {
             $query->whereHas('purposeType', function ($q) use ($type) {
                 $q->where('id', $type);
             });
         }
+
         if ($destination) {
             $query->whereHas('businessTripDestination', function ($q) use ($destination) {
                 $q->where('destination', $destination);
@@ -1194,34 +1188,37 @@ class ReportController extends Controller
             });
         }
 
-        $data = $query
-            ->whereIn('status_id', [3, 5])
-            ->latest()->paginate($perPage);
+        $data = $query->whereHas('BusinessTrip', function ($query) {
+            $query->where('type', 'declaration')
+                ->whereHas('status', function ($query) {
+                    $query->where('name',  'Fully Approve');
+                });
+        })
+            ->paginate($perPage);
 
-        $data->getCollection()->transform(function ($map) {
 
-            $requestFor = $map->requestFor ? $map->requestFor->name : '';
-            $requestNo = $map->parentBusinessTrip ? $map->parentBusinessTrip->request_no : '';
+        $data->getCollection()->transform(function ($value) {
 
-            return [
-                'id' => $map->id,
-                'employee_no' => $map->requestFor->nip,
-                'employee_name' => $map->requestFor->name,
+            $first = $value->BusinessTrip->detailAttendance()->orderBy('date', 'asc')->first();
+            $last = $value->BusinessTrip->detailAttendance()->orderBy('date', 'desc')->first();
+            $status = $value->id == $first->id ? 'In' : 'Out';
 
-                'date' => date('d/m/Y', strtotime($map->created_at)),
-                'time' => date('h:i', strtotime($map->created_at)),
+            if ($value->id == $first->id || $value->id == $last->id) {
+                return [
+                    'id' =>  $value->id,
+                    'employee_no' => $value->BusinessTrip->requestFor->nip,
+                    'employee_name' => $value->BusinessTrip->requestFor->name,
 
-                'declaration_no' => $map->request_no,
-                'request_no' => $requestNo,
-                'request_for' => $requestFor,
-                'remarks' => $map->remarks,
-                'status' => [
-                    'name' => $map->status->name,
-                    'classname' => $map->status->classname,
-                    'code' =>
-                    $map->status->code
-                ],
-            ];
+                    'date' => date('d/m/Y', strtotime($value->date)),
+                    'time' => date('h:i', strtotime($value->start_time)),
+
+                    'status' => [
+                        'name' => $status,
+                        'classname' => 'bg-green-100 text-green-600 border-green-600',
+                        'code' => 'fully_approve'
+                    ],
+                ];
+            }
         });
 
         return $this->successResponse($data);
@@ -1229,41 +1226,33 @@ class ReportController extends Controller
 
     public function exportBTAttendance(Request $request)
     {
-        $query =  BusinessTrip::query()->with(['purposeType', 'status', 'requestFor']);
-        $perPage = $request->get('per_page', 10);
+        $query =  BusinessTripDetailAttedance::query()->with(['BusinessTrip']);
         $sortBy = $request->get('sort_by', 'id');
-        $sortDirection = $request->get('sort_direction', 'asc');
+        $sortDirection = $request->get('sort_direction', 'desc');
         $startDate = $request->get('startDate');
         $endDate = $request->get('endDate');
-        $status = $request->get('status');
         $type = $request->get('type');
         $destination = $request->get('destination');
         $department = $request->get('department');
 
-        // $query->orderBy($sortBy, $sortDirection);
-        if ($request->approval == "1") {
-            $data = Approval::where('user_id', Auth::user()->id)
-                ->where('document_name', 'TRIP_DECLARATION')->pluck('document_id')->toArray();
-            $query = $query->whereIn('id', $data);
-        }
+        $query->orderBy($sortBy, $sortDirection);
+
         if (Auth::user()->is_admin != '1') {
             $query = $query->where('created_by', Auth::user()->id)
                 ->orWhere('request_for', Auth::user()->id);
         }
+
         if ($startDate && $endDate) {
             $query->whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $endDate);
         }
-        if ($status) {
-            $query->whereHas('status', function ($q) use ($status) {
-                $q->where('code', $status);
-            });
-        }
+
         if ($type) {
             $query->whereHas('purposeType', function ($q) use ($type) {
                 $q->where('id', $type);
             });
         }
+
         if ($destination) {
             $query->whereHas('businessTripDestination', function ($q) use ($destination) {
                 $q->where('destination', $destination);
@@ -1277,42 +1266,111 @@ class ReportController extends Controller
         }
 
         $data = $query
-            ->whereIn('status_id', [3, 5])
-            ->latest()->paginate($perPage);
+            ->whereHas('BusinessTrip', function ($query) {
+                $query->whereHas('status', function ($query) {
+                    $query->where('name',  'Fully Approve');
+                });
+            })
+            ->get();
 
-        // Transform data
-        $transformedData = $data->map(function ($businessTrip) {
-            $isDeclaration = $businessTrip->type === 'declaration';
 
-            return [
-                'type' => $businessTrip->type,
-                'employee' => $businessTrip->requestFor,
-                'requested_by' => $businessTrip->requestedBy,
-                'request_no' => $businessTrip->request_no,
-                'status' => $businessTrip->status,
-                'purpose' => $businessTrip->purposeType,
-                'remarks' => $businessTrip->remarks,
-                'is_declaration' => $isDeclaration,
-                'request_no_parent' => $businessTrip->parentBusinessTrip?->request_no ?? '',
-                'destinations' => $businessTrip->businessTripDestination->map(function ($destination) use ($isDeclaration) {
-                    return [
-                        'start_date' => $destination->business_trip_start_date,
-                        'end_date' => $destination->business_trip_end_date,
-                        'destination' => $destination->destination,
-                        'date' => $isDeclaration ? $destination->created_at : $destination->business_trip_start_date,
-                        'allowances' => $destination->detailDestinationTotal->map(function ($item) {
-                            return [
-                                'item_name' => $item->allowance->name,
-                                'amount' => $item->price
-                            ];
-                        }),
-                        'total' => $destination->detailDestinationTotal->sum('price')
-                    ];
-                })
-            ];
+        $transformedData = $data->transform(function ($value) {
+
+            $first = $value->BusinessTrip->detailAttendance()->orderBy('date', 'asc')->first();
+            $last = $value->BusinessTrip->detailAttendance()->orderBy('date', 'desc')->first();
+
+            $status = $value->id == $first->id ? 1 : 0;
+
+            if ($value->id == $first->id || $value->id == $last->id) {
+                return [
+
+                    'id' =>  $value->id,
+                    'employee_no' => $value->BusinessTrip->requestFor->nip,
+                    'employee_name' => $value->BusinessTrip->requestFor->name,
+
+                    'date' => date('d/m/Y', strtotime($value->date)),
+                    'time' => date('h:i', strtotime($value->start_time)),
+
+                    'status' => $status,
+                ];
+            } else {
+            }
         });
+
         // Return the exported file
         $filename = 'BusinessTrips.xlsx';
         return Excel::download(new BusinessTripAttendanceExport($transformedData), $filename);
+    }
+
+    public function listBTAttendanceSunfish(Request $request)
+    {
+        $query =  BusinessTripDetailAttedance::query()->with(['BusinessTrip']);
+        $sortBy = $request->get('sort_by', 'id');
+        $sortDirection = $request->get('sort_direction', 'desc');
+        $perPage = $request->get('per_page', 10);
+        $startDate = $request->get('startDate');
+        $endDate = $request->get('endDate');
+        $type = $request->get('type');
+        $destination = $request->get('destination');
+        $department = $request->get('department');
+
+        $query->orderBy($sortBy, $sortDirection);
+
+        if ($startDate && $endDate) {
+            $query->whereDate('created_at', '>=', $startDate)
+                ->whereDate('created_at', '<=', $endDate);
+        }
+
+        if ($type) {
+            $query->whereHas('purposeType', function ($q) use ($type) {
+                $q->where('id', $type);
+            });
+        }
+
+        if ($destination) {
+            $query->whereHas('businessTripDestination', function ($q) use ($destination) {
+                $q->where('destination', $destination);
+            });
+        }
+
+        if ($department) {
+            $query->whereHas('requestFor', function ($q) use ($department) {
+                $q->where('departement_id', $department);
+            });
+        }
+
+        $data = $query->whereHas('BusinessTrip', function ($query) {
+            $query->where('type', 'declaration')
+                ->whereHas('status', function ($query) {
+                    $query->where('name',  'Fully Approve');
+                });
+        })
+            // ->paginate($perPage);
+            ->take($perPage)
+            ->get();
+
+
+        $data->transform(function ($value) {
+
+            $first = $value->BusinessTrip->detailAttendance()->orderBy('date', 'asc')->first();
+            $last = $value->BusinessTrip->detailAttendance()->orderBy('date', 'desc')->first();
+
+            $status = $value->id == $first->id ? 1 : 0;
+
+            if ($value->id == $first->id || $value->id == $last->id) {
+                return [
+                    'id' =>  $value->id,
+                    'employee_no' => $value->BusinessTrip->requestFor->nip,
+                    'employee_name' => $value->BusinessTrip->requestFor->name,
+
+                    'date' => date('d/m/Y', strtotime($value->date)),
+                    'time' => date('h:i', strtotime($value->start_time)),
+
+                    'status' => $status,
+                ];
+            }
+        });
+
+        return $this->successResponse($data);
     }
 }
