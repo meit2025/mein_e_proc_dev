@@ -1293,6 +1293,7 @@ class ReportController extends Controller
 
                     'status' => $status,
                 ];
+            } else {
             }
         });
 
