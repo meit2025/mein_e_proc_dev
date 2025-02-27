@@ -11,6 +11,7 @@ use Modules\Master\Models\MasterCostCenter;
 use Modules\Master\Models\MasterStatus;
 use Modules\Master\Models\Pajak;
 use Modules\Master\Models\PurchasingGroup;
+use Modules\PurchaseRequisition\Models\PurchaseOrder;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
 
 // use Modules\BusinessTrip\Database\Factories\BusinessTripFactory;
@@ -108,10 +109,9 @@ class BusinessTrip extends Model
             ->where('code_transaction', 'BTRE');
     }
 
-    public function purchaseRequisitionsDeclaration()
+    public function purchaseOrderDeclaration()
     {
-        return $this->hasMany(PurchaseRequisition::class,'purchase_id','id')
-            ->where('code_transaction', 'BTRED');
+        return $this->hasMany(PurchaseOrder::class,'purchase_id','parent_id');
     }
 
     function scopeSearch($query, array $filters) {

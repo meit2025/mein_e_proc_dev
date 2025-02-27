@@ -36,6 +36,8 @@ export const columns: GridColDef[] = [
       );
     },
   },
+  { field: 'po_number', headerName: 'PO Number', width: 200, filterable: true },
+  { field: 'status_po_number', headerName: 'Status PO Number', width: 200, filterable: true },
 ];
 
 // Fungsi untuk menangani aksi cetak detail
