@@ -65,17 +65,13 @@ const CashAdvance = ({ disable }: { disable: boolean }) => {
   }, [total]);
 
   useEffect(() => {
-    const subscription = watch((value, { name }) => {
-      if (currency_from !== 'IDR') {
-        setValue('is_cashAdvance', false);
-        setValue('entertainment.jenis_kegiatan', '');
-        setValue('cash_advance_purchases.dp', '');
-        setValue('cash_advance_purchases.reference', '');
-        setValue('cash_advance_purchases.nominal', '');
-      }
-    });
-
-    return () => subscription.unsubscribe(); // Cleanup to avoid memory leaks
+    if (currency_from !== 'IDR') {
+      setValue('is_cashAdvance', false);
+      setValue('entertainment.jenis_kegiatan', '');
+      setValue('cash_advance_purchases.dp', '');
+      setValue('cash_advance_purchases.reference', '');
+      setValue('cash_advance_purchases.nominal', '');
+    }
   }, [currency_from]);
 
   return (

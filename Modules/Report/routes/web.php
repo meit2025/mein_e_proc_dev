@@ -24,6 +24,16 @@ Route::group(['prefix' => 'report'], function () {
     Route::inertia('/purchase',  'Report/PurchaseRequisition/Index')->middleware(PermissionMiddleware::class . ':report purchase requisition view');
 });
 
+Route::group(['prefix' => 'api/sunfish'], function () {
+
+    Route::group(['prefix' => 'business-trip-attendance'], function () {
+
+        Route::get('/list', [ReportController::class, 'listBTAttendanceSunfish'])->name('report.BTAttendanceSunfish.index')
+            // ->middleware(PermissionMiddleware::class . ':report business trip attendance view')
+        ;
+    });
+});
+
 Route::group(['prefix' => 'api/report', 'middleware' => 'auth'], function () {
     Route::group(['prefix' => 'reimburse'], function () {
         Route::get('/list', [ReportController::class, 'list'])->name('report.reimburse.index')->middleware(PermissionMiddleware::class . ':report reimburse view');
