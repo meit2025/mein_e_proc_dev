@@ -35,9 +35,9 @@
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $attendance['employee_no'] ?? '' }}</td>
                         <td>{{ $attendance['employee_name'] ?? '' }}</td>
-                        <td>{{ $attendance['date'] }}</td>
-                        <td>{{ $attendance['time'] }}</td>
-                        <td>{{ $attendance['status'] ?? '-' }}</td>
+                        <td>{{ $attendance['date'] ?? '' }}</td>
+                        <td>{{ $attendance['time'] ?? '' }}</td>
+                        <td>{{ $attendance['status'] ?? '' }}</td>
                     </tr>
             @endforeach
         </tbody>
