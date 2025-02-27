@@ -1160,15 +1160,6 @@ class ReportController extends Controller
 
         $query->orderBy($sortBy, $sortDirection);
 
-        // $query = $query
-        //     ->whereHas('BusinessTrip', function ($query) {
-        //         $data = Approval::where('user_id', Auth::user()->id)
-        //             ->where('document_name', 'TRIP_DECLARATION')
-        //             ->pluck('document_id')
-        //             ->toArray();
-        //         return $query->whereIn('id', $data);
-        //     });
-
         if (Auth::user()->is_admin != '1') {
             $query = $query->where('created_by', Auth::user()->id)
                 ->orWhere('request_for', Auth::user()->id);
@@ -1243,15 +1234,6 @@ class ReportController extends Controller
         $department = $request->get('department');
 
         $query->orderBy($sortBy, $sortDirection);
-
-        $query = $query
-            ->whereHas('BusinessTrip', function ($query) {
-                $data = Approval::where('user_id', Auth::user()->id)
-                    ->where('document_name', 'TRIP_DECLARATION')
-                    ->pluck('document_id')
-                    ->toArray();
-                return $query->whereIn('id', $data);
-            });
 
         if (Auth::user()->is_admin != '1') {
             $query = $query->where('created_by', Auth::user()->id)
