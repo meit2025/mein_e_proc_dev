@@ -491,6 +491,8 @@ class BusinessTripDeclarationController extends Controller
                     'code' => $map->status?->code
                 ],
                 'created_at' => date('d/m/Y', strtotime($map->created_at)),
+                'po_number' => $map->purchaseOrderDeclaration()?->first()?->purchasing_document_number ?? '-',
+                'status_po_number' => $map->purchaseOrderDeclaration()?->first()?->status ?? '-',
                 // 'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array
                 // 'total_destination' => $map->total_destination, // You can join multiple relations here if it's an array
             ];
