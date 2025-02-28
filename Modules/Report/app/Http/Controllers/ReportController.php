@@ -1386,10 +1386,12 @@ class ReportController extends Controller
             ->orderBy('created_at', 'asc');
 
         $month = $request->get('month');
+        $year = $request->get('year');
 
-        if ($month) {
+        if ($month || $year) {
+            $year = $year ? $year : date("Y");
             $query->whereMonth('start_date', $month)
-                ->whereYear('start_date', '<=', date("Y"));
+                ->whereYear('start_date', '<=', $year);
 
             // $query->where("start_date","=","$month")->orWhere("tags","like","%".$term."%")->get();
 
