@@ -18,6 +18,7 @@ use Modules\PurchaseRequisition\Models\Purchase;
 use Modules\PurchaseRequisition\Models\Vendor;
 use Modules\PurchaseRequisition\Models\VendorUnit;
 use Modules\Approval\Services\CheckApproval;
+use Modules\PurchaseRequisition\Models\AttachmentPurchaseRequisition;
 use Modules\PurchaseRequisition\Services\ProcurementService;
 use Modules\PurchaseRequisition\Services\TextPrServices;
 
@@ -170,6 +171,8 @@ class ProcurementController extends Controller
             return $this->errorResponse("Error: contact your administrator," . " error : " . $th->getMessage());
         }
     }
+
+
 
     /**
      * Show the specified resource.

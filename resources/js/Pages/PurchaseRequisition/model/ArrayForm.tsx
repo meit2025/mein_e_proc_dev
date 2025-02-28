@@ -56,10 +56,6 @@ const ArrayForm = ({
       name: 'name_one',
       id: 'id',
       tabel: 'master_business_partners',
-      where: {
-        key: 'type',
-        parameter: 'employee',
-      },
       hiddenZero: true,
       isMapping: true,
     });
