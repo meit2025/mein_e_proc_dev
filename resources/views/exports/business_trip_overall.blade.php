@@ -29,8 +29,8 @@
                 <th rowspan="2">Division</th>
                 <th rowspan="2">Requested By</th>
                 <th rowspan="2">Request Date</th>
-                <th colspan="6">Business Trip</th>
-                <th colspan="3">Business Trip Declaration</th>
+                <th colspan="6">Business Trip Request</th>
+                <th colspan="5">Business Trip Declaration</th>
             </tr>
             <tr>
                 <th>Request Number</th>
@@ -42,7 +42,9 @@
 
                 <th>Request Number</th>
                 <th>Request Status</th>
-                <th>Date</th>
+                <th>Request Date</th>
+                <th>Start Date</th>
+                <th>End Date</th>
             </tr>
         </thead>
         <tbody>
@@ -60,7 +62,7 @@
 
                         @if ($trip['is_declaration'])
                         <td>{{ $trip['request_no_parent'] ?? '' }}</td>
-                        <td>{{ $trip['status']->name ?? 'Pending' }}</td>
+                        <td>{{ 'Fully Approve' }}</td>
                         <td>{{ $trip['purpose']->name ?? '' }}</td>
                         <td>{{ $destination['destination'] ?? '' }}</td>
                         <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
@@ -69,6 +71,8 @@
                         <td>{{ $trip['request_no'] ?? '' }}</td>
                         <td>{{ $trip['status']->name ?? 'Pending' }}</td>
                         <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
                         @else
                         <td>{{ $trip['request_no'] ?? '' }}</td>
                         <td>{{ $trip['status']->name ?? 'Pending' }}</td>
@@ -77,7 +81,7 @@
                         <td>{{ $destination['destination'] ?? '' }}</td>
                         <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
                         <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
-                        <td colspan="3">N/A</td>
+                        <td colspan="5">N/A</td>
                         @endif
                     </tr>
                 @endforeach

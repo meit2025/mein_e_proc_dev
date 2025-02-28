@@ -308,18 +308,18 @@ class ApprovalController extends Controller
                             // }
                             break;
                         case 'trip_declaration':
-                            $baseurl = env('APP_URL') .  '/business-trip/detail-page/' .  $request->id;
+                            $baseurl = env('APP_URL') .  '/business-trip-declaration/detail-page/' .  $request->id;
                             $findUser = User::where('id', $model->request_for)->first();
                             SendNotification::dispatch($findUser,  $message, $baseurl);
                             $businessTrip = BusinessTrip::find($request->id);
                             $businessTrip->notes = isset($request->note) ? $request->note : '';
                             $businessTrip->approverName = Auth::user()->name;
-                            $parseStatusToEmail = $statusId == 1 ? 'Approval' : $request->status;
+                            $parseStatusToEmail = $statusId == 0 ? 'Approval' : $request->status;
                             Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip Declaration',  $parseStatusToEmail, '', null, null, $businessTrip, $baseurl));
 
                             if ($findUser->id !== $model->created_by) {
                                 $findcreatedBy = User::find($model->created_by);
-                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip',  $request->status, '', null, null, $businessTrip, $baseurl));
+                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip Declaration',  $request->status, '', null, null, $businessTrip, $baseurl));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
                             }
                             break;
@@ -330,7 +330,7 @@ class ApprovalController extends Controller
                             $businessTrip = BusinessTrip::find($request->id);
                             $businessTrip->notes = isset($request->note) ? $request->note : '';
                             $businessTrip->approverName = Auth::user()->name;
-                            $parseStatusToEmail = $statusId == 1 ? 'Approval' : $request->status;
+                            $parseStatusToEmail = $statusId == 0 ? 'Approval' : $request->status;
                             Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip',  $parseStatusToEmail, '', null, null, $businessTrip, $baseurl));
 
                             if ($findUser->id !== $model->created_by) {

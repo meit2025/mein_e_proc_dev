@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Modules\Approval\Models\SettingApproval;
 use Modules\Master\Models\MasterBusinessPartner;
 use Modules\Master\Models\Pajak;
+use Modules\PurchaseRequisition\Models\AttachmentPurchaseRequisition;
 use Modules\PurchaseRequisition\Models\CashAdvance;
 use Modules\PurchaseRequisition\Models\CashAdvancePurchases;
 use Modules\PurchaseRequisition\Models\Entertainment;
@@ -48,7 +49,7 @@ class ProcurementService
             $reqno = (int) SettingApproval::where('key', 'dokumenType_' . $procurement->document_type)->lockForUpdate()->value('value') + 1;
 
             $entertainment = Entertainment::where('purchase_id', $id)->first();
-
+            $findAttachment = $this->findAttachment($id);
 
             foreach ($items as $key => $value) {
                 $datainsert = $this->preparePurchaseRequisitionData(
@@ -59,7 +60,8 @@ class ProcurementService
                     $reqno,
                     $entertainment,
                     $key + 1,
-                    $settings
+                    $settings,
+                    $findAttachment
                 );
                 $array[] = $datainsert;
                 PurchaseRequisition::create($datainsert);
@@ -125,10 +127,11 @@ class ProcurementService
         return null;
     }
 
-    private function preparePurchaseRequisitionData($procurement, $vendor, $item, $businessPartner, $reqno, $entertainment, $inx, $settings)
+    private function preparePurchaseRequisitionData($procurement, $vendor, $item, $businessPartner, $reqno, $entertainment, $inx, $settings, $attachmnet)
     {
         $formattedDate = Carbon::parse($procurement->created_at)->format('Y-m-d');
         $delivery_date = Carbon::parse($procurement->delivery_date)->format('Y-m-d');
+
 
         return [
             'purchase_id' => $procurement->id,
@@ -173,8 +176,20 @@ class ProcurementService
             'B01' => $item->short_text,
             'B03' => $item->short_text,
             'B04' => $item->short_text,
-            'attachment_link' => '',
+            'attachment_link' => $attachmnet,
         ];
+    }
+
+    private function findAttachment($id)
+    {
+        $items = AttachmentPurchaseRequisition::where('purchase_id', $id)->get();
+        $attachmentString = $items->map(function ($attachment, $index) {
+            $title = $attachment->file_name;
+            $url =   $attachment->file_path;
+
+            return "{$title};{$url}";
+        })->implode('$');
+        return $attachmentString;
     }
 
     private function prepareCashAdvanceData($procurement, $vendor, $item, $cashData, $reqno, $settings)
