@@ -301,14 +301,18 @@ export const BussinessTripFormV1 = ({
     try {
       const response = await axiosInstance.get(url);
       const businessTripData = response.data.data;
-    //   console.log(businessTripData, 'businessTripData');
       setIsCashAdvance(businessTripData.cash_advance == 1 ? true : false);
       form.setValue('remark', businessTripData.remarks || '');
       form.setValue('total_destination', businessTripData.total_destination || 1);
       form.setValue('cash_advance', businessTripData.cash_advance == 1 ? true : false);
       form.setValue('reference_number', businessTripData.reference_number);
       form.setValue('total_percent', businessTripData.total_percent);
-      form.setValue('total_cash_advance', formatRupiah(businessTripData.total_cash_advance, false));
+        form.setValue(
+            'total_cash_advance',
+            businessTripData?.total_cash_advance != null
+            ? formatRupiah(businessTripData.total_cash_advance, false)
+            : '0'
+        );
       setBusinessTripDetail(response.data.data as BusinessTripModel);
       setListDestination(businessTripData.destinations);
       setTotalDestination(businessTripData.total_destination);
@@ -324,9 +328,10 @@ export const BussinessTripFormV1 = ({
     const valueToInt = parseInt(value);
     setTotalDestination(value);
   };
-  //   console.log(businessTripDetail, 'businessTripDetail');
+    // console.log(businessTripDetail, 'businessTripDetail');
 
   function setAllowancesProperty(destinations: any[]) {
+    console.log(destinations, 'destinations');
     const destinationForm = destinations.map((destination) => ({
       destination: destination.destination || '', // Adjust field names as needed
       pajak: destination.pajak || '', // Adjust field names as needed
@@ -901,7 +906,7 @@ export function BussinessDestinationForm({
   });
 
   // Assuming allowance is calculated elsewhere, let's mock it for now
-  const allowance = businessTripDetail.total_cash_advance; // Example: allowance is 1,000,000
+  const allowance = businessTripDetail?.total_cash_advance; // Example: allowance is 1,000,000
 
   // Calculate total based on totalPercent and allowance
   React.useEffect(() => {
