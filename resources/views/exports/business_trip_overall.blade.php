@@ -49,44 +49,39 @@
         </thead>
         <tbody>
             @foreach ($data as $index => $trip)
-                @php
-                    $destinationCount = count($trip['destinations']);
-                @endphp
-
-                @foreach ($trip['destinations'] as $destinationIndex => $destination)
+                @foreach ($trip['destinations'] as $destination)
                     <tr>
-                        @if ($destinationIndex === 0) {{-- Tampilkan hanya di baris pertama perjalanan --}}
-                            <td rowspan="{{ $destinationCount }}">{{ $index + 1 }}</td>
-                            <td rowspan="{{ $destinationCount }}">{{ $trip['employee']->nip ?? '' }}</td>
-                            <td rowspan="{{ $destinationCount }}">{{ $trip['employee']->name ?? '' }}</td>
-                            <td rowspan="{{ $destinationCount }}">{{ $trip['employee']->positions->name ?? '' }}</td>
-                            <td rowspan="{{ $destinationCount }}">{{ $trip['employee']->departements->name ?? '' }}</td>
-                            <td rowspan="{{ $destinationCount }}">{{ $trip['employee']->divisions->name ?? '' }}</td>
-                            <td rowspan="{{ $destinationCount }}">{{ $trip['requested_by']->name ?? '' }}</td>
-                            <td rowspan="{{ $destinationCount }}">{{ \Carbon\Carbon::parse($trip['request_date'] ?? null)->format('d/m/Y') }}</td>
-                        @endif
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $trip['employee']->nip ?? '' }}</td>
+                        <td>{{ $trip['employee']->name ?? '' }}</td>
+                        <td>{{ $trip['employee']->positions->name ?? '' }}</td>
+                        <td>{{ $trip['employee']->departements->name ?? '' }}</td>
+                        <td>{{ $trip['employee']->divisions->name ?? '' }}</td>
+                        <td>{{ $trip['requested_by']->name ?? '' }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
 
                         @if ($trip['is_declaration'])
-                            <td rowspan="{{ $destinationCount }}">{{ $trip['request_no_parent'] ?? '' }}</td>
-                            <td rowspan="{{ $destinationCount }}">{{ 'Fully Approve' }}</td>
-                            <td rowspan="{{ $destinationCount }}">{{ $trip['purpose']->name ?? '' }}</td>
-                            <td>{{ $destination['destination'] ?? '' }}</td>
-                            <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
-                            <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
+                        <td>{{ $trip['request_no_parent'] ?? '' }}</td>
+                        <td>{{ 'Fully Approve' }}</td>
+                        <td>{{ $trip['purpose']->name ?? '' }}</td>
+                        <td>{{ $destination['destination'] ?? '' }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
 
-                            <td rowspan="{{ $destinationCount }}">{{ $trip['request_no'] ?? '' }}</td>
-                            <td rowspan="{{ $destinationCount }}">{{ $trip['status']->name ?? 'Pending' }}</td>
-                            <td rowspan="{{ $destinationCount }}">{{ \Carbon\Carbon::parse($trip['request_date'] ?? null)->format('d/m/Y') }}</td>
-                            <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
-                            <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
+                        <td>{{ $trip['request_no'] ?? '' }}</td>
+                        <td>{{ $trip['status']->name ?? 'Pending' }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
                         @else
-                            <td rowspan="{{ $destinationCount }}">{{ $trip['request_no'] ?? '' }}</td>
-                            <td rowspan="{{ $destinationCount }}">{{ $trip['status']->name ?? 'Pending' }}</td>
-                            <td rowspan="{{ $destinationCount }}">{{ $trip['purpose']->name ?? '' }}</td>
-                            <td>{{ $destination['destination'] ?? '' }}</td>
-                            <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
-                            <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
-                            <td colspan="3">N/A</td>
+                        <td>{{ $trip['request_no'] ?? '' }}</td>
+                        <td>{{ $trip['status']->name ?? 'Pending' }}</td>
+                        <td>{{ $trip['purpose']->name ?? '' }}</td>
+                        {{-- <td>{{ $trip['remarks'] ?? '' }}</td> --}}
+                        <td>{{ $destination['destination'] ?? '' }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
+                        <td colspan="5">N/A</td>
                         @endif
                     </tr>
                 @endforeach

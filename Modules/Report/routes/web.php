@@ -28,8 +28,11 @@ Route::group(['prefix' => 'api/sunfish'], function () {
 
     Route::group(['prefix' => 'business-trip-attendance'], function () {
 
-        Route::get('/list', [ReportController::class, 'listBTAttendanceSunfish'])->name('report.BTAttendanceSunfish.index')
+        Route::get('/list', [ReportController::class, 'listBTAttendanceSunfish'])->name('api.listBTAttendanceSunfish.index')
             // ->middleware(PermissionMiddleware::class . ':report business trip attendance view')
+        ;
+        
+        Route::get('/list-monthly', [ReportController::class, 'listBTAttendanceSunfishMothly'])->name('api.listBTAttendanceSunfishMothly.index')
         ;
     });
 });

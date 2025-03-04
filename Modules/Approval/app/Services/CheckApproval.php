@@ -24,9 +24,9 @@ class CheckApproval
     {
         $query = ApprovalPr::with('approvalRoute.user.divisions')
             ->where('document_type_id', $documentTypeId)
-            ->where('purchasing_group_id', $purchasingGroupId)
-            ->where('master_position_id', $positionId)
-            ->where('master_division_id', $divisionId);
+            ->where('purchasing_group_id', $purchasingGroupId);
+        // ->where('master_position_id', $positionId)
+        // ->where('master_division_id', $divisionId);
 
         if ($trackingNumberId) {
             $query->where('master_tracking_number_id', $trackingNumberId);

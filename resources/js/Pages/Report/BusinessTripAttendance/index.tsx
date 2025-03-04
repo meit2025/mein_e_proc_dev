@@ -124,25 +124,6 @@ export const Index = ({
                             placeholder='End Date'
                         />
                     </div>
-                    {/* <div>
-                        <label htmlFor='end-date' className='block mb-1'>Status</label>
-                        <select
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
-                            className="select-class"
-                            id="status"
-                        >
-                            <option value="">All Status</option>
-                            {statuses.map((typeOption) => (
-                                <option
-                                    key={typeOption.code}
-                                    value={typeOption.code}
-                                >
-                                    {typeOption.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div> */}
                     <div>
                         <label htmlFor='type' className='block mb-1'>Purpose Type</label>
                         <select

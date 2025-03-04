@@ -1,0 +1,1 @@
+import{f as a}from"./rupiahCurrencyFormat-C2HfaEL7.js";const l=[{field:"name",headerName:"Nama",width:200,filterable:!0},{field:"nip",headerName:"NIP",width:300,filterable:!0},{field:"grade",headerName:"Grade",width:100,filterable:!1},{field:"balancePlafon",headerName:"Maximum Balance",width:200,filterable:!0,renderCell:e=>a(e.row.balancePlafon)}];export{l as columns};

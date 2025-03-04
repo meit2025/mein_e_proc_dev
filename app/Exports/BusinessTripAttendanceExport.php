@@ -19,6 +19,7 @@ class BusinessTripAttendanceExport implements FromView, WithEvents, ShouldAutoSi
 
     public function view(): View
     {
+        // dd($this->data);
         return view('exports.business_trip_attendance', ['data' => $this->data]);
     }
 
