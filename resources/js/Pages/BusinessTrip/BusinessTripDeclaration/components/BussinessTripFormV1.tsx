@@ -98,7 +98,7 @@ export const BussinessTripFormV1 = ({
     total_destination: z.number().int('Total Destinantion Required'),
     cash_advance: z.boolean().nullable().optional(),
     reference_number: z.string().nullable().optional(),
-    // total_percent: z.number().nullable().optional(),
+    total_percent: z.number().nullable().optional(),
     total_cash_advance: z.string().nullable().optional(),
     destinations: z.array(
       z.object({
@@ -238,7 +238,7 @@ export const BussinessTripFormV1 = ({
       if (type === BusinessTripType.create) {
         const totalAll = getTotalDes();
         const formData = new FormData();
-        formData.append('user_id', businessTripDetail.request_for?.id.toString() ?? '');
+        formData.append('user_id', businessTripDetail?.request_for?.id.toString() ?? '');
         formData.append('value', totalAll.toString());
         formData.append('request_no', values.request_no ?? '');
         formData.append('remark', values.remark ?? '');
@@ -287,7 +287,7 @@ export const BussinessTripFormV1 = ({
     }
   };
 
-  const [businessTripDetail, setBusinessTripDetail] = React.useState<BusinessTripModel>([]);
+  const [businessTripDetail, setBusinessTripDetail] = React.useState<BusinessTripModel | null>(null);
 
   const [listAllowances, setListAllowances] = React.useState<AllowanceItemModel[]>([]);
   const [listDestination, setListDestination] = React.useState<[]>([]);
@@ -372,7 +372,7 @@ export const BussinessTripFormV1 = ({
       const response = await axiosInstance.get('/check-approval', {
         params: {
           value: totalAll,
-          user_id: businessTripDetail.request_for?.id ?? '',
+          user_id: businessTripDetail?.request_for?.id ?? '',
           type: 'TRIP_DECLARATION',
         },
       });
@@ -1744,6 +1744,7 @@ export function ResultTotalItem({
   }) {
     const [grandTotal, setGrandTotal] = React.useState(0);
     const other = form.watch(`destinations.${destinationIndex}.other`);
+
     const resultItem = form.watch(`destinations[${destinationIndex}].allowances`);
     // const totalItem = form.watch(`destinations[${destinationIndex}].total_allowance`);
     // const total = form.watch(`destinations[${destinationIndex}].allowances[${allowanceIndex}].detail`)
@@ -1758,7 +1759,7 @@ export function ResultTotalItem({
             const allowanceValue = Number(allowance?.value) || 0; // Pastikan nilai adalah angka atau default ke 0
             return total + allowanceValue;
         }, 0);
-        console.log(other,'other')
+
         setGrandTotal(newTotal + totalSubtotal);
     //       // Update nilai total allowance di form
     //       form.setValue(`destinations[${destinationIndex}].total_allowance`, total);
