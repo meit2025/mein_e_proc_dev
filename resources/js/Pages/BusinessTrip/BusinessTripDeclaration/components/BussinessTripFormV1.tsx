@@ -293,7 +293,6 @@ export const BussinessTripFormV1 = ({
   const [listDestination, setListDestination] = React.useState<[]>([]);
 
   const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
-//   console.log(otherAllowance);
   async function handleGetBusinessTrip(value: string) {
     form.setValue('request_no', value || '');
     const url = GET_DETAIL_BUSINESS_TRIP_DECLARATION(value);
@@ -328,10 +327,8 @@ export const BussinessTripFormV1 = ({
     const valueToInt = parseInt(value);
     setTotalDestination(value);
   };
-    // console.log(businessTripDetail, 'businessTripDetail');
 
   function setAllowancesProperty(destinations: any[]) {
-    console.log(destinations, 'destinations');
     const destinationForm = destinations.map((destination) => ({
       destination: destination.destination || '', // Adjust field names as needed
       pajak: destination.pajak || '', // Adjust field names as needed
@@ -851,14 +848,11 @@ export function BussinessDestinationForm({
           request_price: price,
         });
 
-        // console.log('date', momentStart.toDate());
       }
 
-      //   console.log(detailAllowance, 'detail allowance');
       return detailAllowance;
     }
 
-    // console.log(listAllowances, ' allowance');
     const allowancesForm = listAllowances.map((item: any) => {
       return {
         name: item.name,
