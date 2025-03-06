@@ -302,4 +302,12 @@ class PurposeTypeController extends Controller
             return $this->errorResponse($e);
         }
     }
+
+    function checkUniqueCode($code) {
+        $data = PurposeType::where('code', $code)->first();
+        if (!is_null($data)) {
+            return response()->json(['msg'=>'already']);
+        }
+        return response()->json(['msg'=>'ready']);
+    }
 }
