@@ -189,6 +189,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::put('/update/{id}', [MasterTypeReimburseController::class, 'update'])->name('master.reimburse-type.update')->middleware(PermissionMiddleware::class . ':master reimburse type update');
             Route::get('/edit/{id}', [MasterTypeReimburseController::class, 'edit'])->name('master.reimburse-type.edit')->middleware(PermissionMiddleware::class . ':master reimburse type update');
             Route::delete('/delete/{id}', [MasterTypeReimburseController::class, 'destroy'])->name('master.reimburse-type.destroy')->middleware(PermissionMiddleware::class . ':master reimburse type delete');
+            Route::get('/dropdown-list', [MasterTypeReimburseController::class, 'dropdownList'])->name('master.reimburse-type.dropdowwnList')->middleware(PermissionMiddleware::class . ':master reimburse type view');
         });
 
         Route::group(['prefix' => 'reimburse-type-user-assign'], function () {
