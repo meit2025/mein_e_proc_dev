@@ -43,6 +43,7 @@ import { LIST_PAGE_TRACKING_NUMBER_CHOOSE } from '@/endpoint/approvalTrackingNum
 import { LIST_PAGE_APPROVAL_CONDITIONAL_USER } from '@/endpoint/settingApprovalPrConditionalUser/page';
 import {
     PAGE_REPORT,
+    PAGE_REPORT_MY_REIMBURSE,
     PAGE_REPORT_BT_DEC,
     PAGE_REPORT_BT_OVERALL,
     PAGE_REPORT_BT_REQ,
@@ -983,9 +984,20 @@ export const sidebarAdmin = () => [
             {
                 title: 'Reimburse',
                 icon: 'ki-element-11',
-                route: PAGE_REPORT,
+                route: '/',
                 role: ['report reimburse view', 'report reimburse export'],
-                sub: [],
+                sub: [
+                    {
+                        name: 'Reimbursement Request',
+                        route: PAGE_REPORT,
+                        role: ['report reimburse view', 'report reimburse export'],
+                    },
+                    {
+                        name: 'My Reimbursement',
+                        route: PAGE_REPORT_MY_REIMBURSE,
+                        role: ['report reimburse view', 'report reimburse export'],
+                    },
+                ],
             },
 
             {

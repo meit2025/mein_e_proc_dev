@@ -257,4 +257,15 @@ class MasterTypeReimburseController extends Controller
             return $this->errorResponse($e);
         }
     }
+
+    public function dropdownList(Request $request)
+    {
+        $data = MasterTypeReimburse::selectRaw("name || ' (' || code || ')' as label, code as value");
+        if ($request->search) {
+            $data = $data->where('name', 'ilike', '%' . $request->search . '%')->orWhere('code', 'ilike', '%' . $request->search . '%');
+        }
+
+        $data = $data->limit(50)->get();
+        return $this->successResponse($data);
+    }
 }
