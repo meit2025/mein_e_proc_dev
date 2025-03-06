@@ -317,6 +317,7 @@ class ReportController extends Controller
             ->leftJoin('business_trip_grade_users as btgu', 'btgu.grade_id', '=', 'btg.id')
             ->leftJoin('master_type_reimburse_user_assign as mtrua_grade_relation_exist', function($join) {
                 $join->on('mtrua_grade_relation_exist.user_id', '=', 'btgu.user_id')
+                    ->whereColumn('mtrua_grade_relation_exist.reimburse_type_id', 'master_type_reimburses.id')
                     ->where('mtrua_grade_relation_exist.is_assign', true);
             })
             ->leftJoin('master_type_reimburse_user_assign as mtrua_grade_relation_not_exist', function($join) {
@@ -414,7 +415,7 @@ class ReportController extends Controller
             
             $queryResult->getCollection()->transform(function ($map, $key) {
                 $map = json_decode($map);
-                // return $map;
+
                 // Balance Plafon
                 if ($map->grade_option == 'grade' && count($map->reimburse_type_grades) > 0) {
                     $maximumBalance = collect($map->reimburse_type_grades)
@@ -546,6 +547,7 @@ class ReportController extends Controller
             ->leftJoin('business_trip_grade_users as btgu', 'btgu.grade_id', '=', 'btg.id')
             ->leftJoin('master_type_reimburse_user_assign as mtrua_grade_relation_exist', function($join) {
                 $join->on('mtrua_grade_relation_exist.user_id', '=', 'btgu.user_id')
+                    ->whereColumn('mtrua_grade_relation_exist.reimburse_type_id', 'master_type_reimburses.id')
                     ->where('mtrua_grade_relation_exist.is_assign', true);
             })
             ->leftJoin('master_type_reimburse_user_assign as mtrua_grade_relation_not_exist', function($join) {
@@ -592,23 +594,40 @@ class ReportController extends Controller
 
             $queryResult = $query->get();
 
+            $queryResult->each(function ($masterTypeReimburse) {
+                $masterTypeReimburse->load([
+                    'reimburseTypeGrades.grade.gradeUsers.reimburseTypeAssignUsers' => function ($assignQuery) use ($masterTypeReimburse) {
+                        $assignQuery->where([
+                            'reimburse_type_id' => $masterTypeReimburse->id,
+                            'is_assign' => true
+                        ]);
+                    },
+                    'reimburseTypeUserAssign' => function ($assignQuery) use ($masterTypeReimburse) {
+                        $assignQuery->where([
+                            'reimburse_type_id' => $masterTypeReimburse->id,
+                            'is_assign' => true
+                        ]);
+                    }
+                ]);
+            });
+            
             // Transform data for export
             $transformedData = $queryResult->map(function ($item) {
-                $maximumBalance = $item->grade_option == 'grade' && count($item->reimburse_type_grades) > 0
-                    ? collect($item->reimburse_type_grades)
+                $maximumBalance = $item->grade_option == 'grade' && count($item->reimburseTypeGrades) > 0
+                    ? collect($item->reimburseTypeGrades)
                         ->filter(function ($reimburseTypeGrade) use ($item) {
                             return isset($reimburseTypeGrade->grade) &&
-                                !empty($reimburseTypeGrade->grade->grade_users) &&
-                                collect($reimburseTypeGrade->grade->grade_users)
+                                !empty($reimburseTypeGrade->grade->gradeUsers) &&
+                                collect($reimburseTypeGrade->grade->gradeUsers)
                                     ->contains('user_id', $item->user_id);
                         })
                         ->pluck('plafon')
                         ->first()
                     : $item->grade_all_price;
-
+                
                 $for = $item->is_employee == true ? 'reimburses.requester' : 'reimburses.for';
                 $forValue = $item->is_employee == true ? $item->user_nip : $item->family_id;
-
+                
                 // Total Balance Requested
                 $getBalanceOnPr = Reimburse::selectRaw("
                     reimburses.balance as balance, 
@@ -678,7 +697,7 @@ class ReportController extends Controller
                     'maiximumBalance'       => (int)$maximumBalance,
                     'remainingBalance'      => $remainingBalance,
                     'lastClaimDate'         => $lastClaimDate,
-                    'available Claim Date'  => $availableClaimDate,
+                    'availableClaimDate'    => $availableClaimDate,
                     'totalPaid'             => $paidBalance,
                     'totalUnpaid'           => $unpaidBalance,
                 ];

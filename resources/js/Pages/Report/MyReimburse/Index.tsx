@@ -177,7 +177,7 @@ export const Index = ({}: Props) => {
                     tabel: 'families',
                     where: {
                       key: 'userId',
-                      parameter: get('employee'),
+                      parameter: methods.getValues('employee'),
                     }
                   });
                 }
