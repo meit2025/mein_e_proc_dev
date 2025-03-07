@@ -27,17 +27,17 @@ class MyReimburseExport implements FromView, WithStyles, WithColumnFormatting, S
 
     public function view(): View
     {
-        return view('exports.my_reimbursement.blade', [
+        return view('exports.my_reimbursement', [
             'data' => $this->data
         ]);
     }
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:V1')->getFont()->setBold(true); // Contoh: Header dengan font tebal
-        $sheet->getStyle('A:V')->getAlignment()->setHorizontal('center'); // Rata tengah seluruh kolom
+        $sheet->getStyle('A1:V1')->getFont()->setBold(true);
+        $sheet->getStyle('A:V')->getAlignment()->setHorizontal('center');
 
-        // Tambahkan border untuk semua data
+
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
 
@@ -45,7 +45,7 @@ class MyReimburseExport implements FromView, WithStyles, WithColumnFormatting, S
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => ['argb' => '000000'], // Hitam
+                    'color' => ['argb' => '000000'],
                 ],
             ],
         ]);
@@ -55,11 +55,6 @@ class MyReimburseExport implements FromView, WithStyles, WithColumnFormatting, S
 
     public function columnFormats(): array
     {
-        return [
-            'J' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
-            'K' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
-            'U' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
-            'V' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
-        ];
+        return [];
     }
 }

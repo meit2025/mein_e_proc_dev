@@ -17,18 +17,20 @@
     </thead>
     <tbody>
         @foreach($data as $key => $item)
-            <td>{{ $key + 1 }}</td>
-            <td>{{ $item->reimburseType }}</td>
-            <td>{{ $item->isEmployee == 1 ? 'Employee' : 'Family' }} {{ ($item->familyStatus) }}</td>
-            <td>{{ $item->employeeName }}</td>
-            <td>{{ $item->familyName }}</td>
-            <td>{{ $item->currency }}</td>
-            <td>{{ $item->maiximumBalance }}</td>
-            <td>{{ $item->remainingBalance }}</td>
-            <td>{{ $item->lastClaimDate }}</td>
-            <td>{{ $item->available }}</td>
-            <td>{{ $item->totalPaid }}</td>
-            <td>{{ $item->totalUnpaid }}</td>
+            <tr>
+                <td>{{ $key + 1 }}</td>
+                <td>{{ $item['reimburseType'] }}</td>
+                <td>{{ $item['isEmployee'] == 1 ? 'Employee' : 'Family' }} ({{ $item['familyStatus'] }})</td>
+                <td>{{ $item['employeeName'] }}</td>
+                <td>{{ $item['familyName'] }}</td>
+                <td>{{ $item['currency'] }}</td>
+                <td>{{ $item['maiximumBalance'] }}</td>
+                <td>{{ $item['totalPaid'] }}</td>
+                <td>{{ $item['totalUnpaid'] }}</td>
+                <td>{{ $item['remainingBalance'] }}</td>
+                <td>{{ $item['lastClaimDate'] }}</td>
+                <td>{{ $item['availableClaimDate'] }}</td>
+            </tr>
         @endforeach
     </tbody>
 </table>
