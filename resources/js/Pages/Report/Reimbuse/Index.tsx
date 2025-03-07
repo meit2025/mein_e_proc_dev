@@ -216,7 +216,7 @@ export const Index = ({
                 isHistory={false}
                 onExportXls={async (x: string) => await exporter(x)}
                 isLoading={isLoading}
-                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${statusFilter || ''}&type=${reimburseTypeFilter || ''}&department=${department || ''}&`}
+                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${statusFilter || ''}&type=${reimburseTypeFilter || ''}&department=${departmentFilter || ''}&`}
                 columns={columns}
                 url={{
                     url: `${REPORT_REIMBURSE_LIST}`,
