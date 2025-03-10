@@ -4,23 +4,9 @@ import { CustomStatus } from '@/components/commons/CustomStatus';
 export const columns: GridColDef[] = [
     { field: 'employee_no', headerName: 'Employee No', width: 200, filterable: true },
     { field: 'employee_name', headerName: 'Employee Name', width: 400, filterable: true },
-    { field: 'date', headerName: 'Date', width: 200, filterable: true },
-    { field: 'time', headerName: 'Time', width: 200, filterable: true },
-    {
-        field: 'status',
-        headerName: 'Status',
-        width: 200,
-        filterable: true,
-        renderCell: (params: any) => {
-            return (
-                <CustomStatus
-                    name={params.row.status?.name}
-                    className={params.row.status?.classname}
-                    code={params.row.status?.code}
-                />
-            );
-        },
-    },
+    { field: 'in', headerName: 'Attendance In', width: 400, filterable: true },
+    { field: 'out', headerName: 'Attendance Out', width: 400, filterable: true },
+
 ];
 
 // Fungsi untuk menangani aksi cetak detail

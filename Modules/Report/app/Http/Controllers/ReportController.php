@@ -8,11 +8,14 @@ use App\Exports\BusinessTripOverallExport;
 use App\Exports\BusinessTripAttendanceExport;
 use App\Exports\PurchaseRequisitionExport;
 use App\Exports\ReimburseExport;
+use App\Exports\MyReimburseExport;
 use App\Http\Controllers\Controller;
 use App\Models\Currency;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Approval\Models\Approval;
@@ -273,6 +276,436 @@ class ReportController extends Controller
             return Excel::download(new ReimburseExport($transformedData), $filename);
         } catch (\Exception $e) {
             // Return an error response with the exception message
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    public function myReimburse()
+    {
+        return Inertia::render('Report/MyReimburse/Index');
+    }
+
+    public function listMyReimburse(Request $request)
+    {
+        try {
+            $reimburseType  = isset($request->reimburse_type) && $request->reimburse_type !== "null" ? $request->reimburse_type : null;
+            $employee       = isset($request->employee) && $request->employee !== "null" ? $request->employee : null;
+            $family         = isset($request->family) && $request->family !== "null" ? $request->family : null;
+
+            $query = MasterTypeReimburse::with([
+                    'reimburses' => function ($reimburseQuery) {
+                        $reimburseQuery->join('reimburse_groups as rg', 'reimburses.group', '=', 'rg.code')
+                            ->whereIn('rg.status_id', [1, 3, 5])
+                            ->select('reimburses.*')
+                            ->with('reimburseGroup');
+                    }
+                ])
+                ->select('master_type_reimburses.*', 'u.id as user_id', 'f.id as family_id', 'u.nip as user_nip', 'u.name as user_name', 'f.name as family_name', 
+                DB::raw('
+                    CASE
+                        WHEN 
+                            MIN(mtrua_grade_relation_exist.id) IS NULL
+                            AND MIN(mtrua_grade_relation_not_exist.id) IS NULL
+                            AND MIN(rg.id) IS NOT NULL
+                        THEN 1
+                        ELSE 0
+                    END AS unassign_but_has_reimburse
+                ')
+            )
+            ->leftJoin('master_type_reimburse_grades as mtrg', 'mtrg.reimburse_type_id', '=', 'master_type_reimburses.id')
+            ->leftJoin('business_trip_grades as btg', 'btg.id', '=', 'mtrg.grade_id')
+            ->leftJoin('business_trip_grade_users as btgu', 'btgu.grade_id', '=', 'btg.id')
+            ->leftJoin('master_type_reimburse_user_assign as mtrua_grade_relation_exist', function($join) {
+                $join->on('mtrua_grade_relation_exist.user_id', '=', 'btgu.user_id')
+                    ->whereColumn('mtrua_grade_relation_exist.reimburse_type_id', 'master_type_reimburses.id')
+                    ->where('mtrua_grade_relation_exist.is_assign', true);
+            })
+            ->leftJoin('master_type_reimburse_user_assign as mtrua_grade_relation_not_exist', function($join) {
+                $join->on('mtrua_grade_relation_not_exist.reimburse_type_id', '=', 'master_type_reimburses.id')
+                    ->where('mtrua_grade_relation_not_exist.is_assign', true);
+            })
+            ->leftJoin('users as u', function($join) {
+                $join->on('u.id', '=', 'mtrua_grade_relation_exist.user_id')
+                    ->orOn('u.id', '=', 'mtrua_grade_relation_not_exist.user_id');
+            })
+            ->leftJoin('families as f', function($join) {
+                $join->on('u.id', '=', 'f.userId')
+                    ->where('master_type_reimburses.is_employee', false)
+                    ->whereColumn('master_type_reimburses.family_status', 'f.status');
+            })
+            ->leftJoin('reimburses as r', function($join) {
+                $join->on('r.reimburse_type', '=', 'master_type_reimburses.code');
+            })
+            ->leftJoin('reimburse_groups as rg', function($join) {
+                $join->on('rg.code', '=', 'r.group')
+                    ->whereIn('rg.status_id', [1, 3, 5]);
+            })
+            ->where(function($query) {
+                $query->whereNotNull('mtrua_grade_relation_exist.is_assign')
+                    ->orWhereNotNull('mtrua_grade_relation_not_exist.is_assign')
+                    ->orWhereNotNull('rg.id');
+            })
+            ->where(function($query) {
+                $query->where('master_type_reimburses.is_employee', true)
+                    ->orWhere(function($query) {
+                        $query->where('master_type_reimburses.is_employee', false)
+                            ->whereNotNull('f.id');
+                    });
+            });
+
+            if ($reimburseType !== null) $query = $query->where('master_type_reimburses.code', $reimburseType);
+            if ($employee !== null) $query = $query->where('u.id', $employee);
+            if ($family !== null) $query = $query->where('f.id', $family);
+            // if ($request->search) {
+            //     $query = $query->where(function($query) use ($request) {
+            //         $query->where('master_type_reimburses.code', 'ILIKE', '%' . $request->search . '%')
+            //         ->orWhere('master_type_reimburses.name', 'ILIKE', '%' . $request->search . '%');
+            //     }); 
+            // }
+
+            $query = $query->orWhere(function($query) use ($reimburseType, $employee, $family) {
+                $query->where('grade_option', 'all')
+                    ->where(function($query) {
+                        $query->whereNotNull('mtrua_grade_relation_exist.is_assign')
+                            ->orWhereNotNull('mtrua_grade_relation_not_exist.is_assign')
+                            ->orWhereNotNull('rg.id');
+                    })
+                    ->where(function($query) {
+                        $query->where('master_type_reimburses.is_employee', true)
+                            ->orWhere(function($query) {
+                                $query->where('master_type_reimburses.is_employee', false)
+                                    ->whereNotNull('f.id');
+                        });
+                    });
+
+                if ($reimburseType !== null) $query = $query->where('master_type_reimburses.code', $reimburseType);
+                if ($employee !== null) $query = $query->where('u.id', $employee);
+                if ($family !== null) $query = $query->where('f.id', $family);
+                // if ($request->search) {
+                //     $query = $query->where(function($query) use ($request) {
+                //         $query->where('master_type_reimburses.code', 'ILIKE', '%' . $request->search . '%')
+                //         ->orWhere('master_type_reimburses.name', 'ILIKE', '%' . $request->search . '%');
+                //     }); 
+                // }
+            });
+            
+            $orderBy = $request->sort_by == 'id' ? 'master_type_reimburses.name' : $request->sort_by;
+            $sortBy = $request->sort_by == 'id' ? 'asc' : $request->sort_direction;
+            $query->groupBy(['master_type_reimburses.id', 'u.id', 'f.id']);
+            $query->orderBy($orderBy, $sortBy);
+            $perPage = $request->get('per_page', 10);
+            $queryResult = $query->paginate($perPage);
+            
+            $queryResult->getCollection()->each(function ($masterTypeReimburse) {
+                $masterTypeReimburse->load([
+                    'reimburseTypeGrades.grade.gradeUsers.reimburseTypeAssignUsers' => function ($assignQuery) use ($masterTypeReimburse) {
+                        $assignQuery->where([
+                            'reimburse_type_id' => $masterTypeReimburse->id,
+                            'is_assign' => true
+                        ]);
+                    },
+                    'reimburseTypeUserAssign' => function ($assignQuery) use ($masterTypeReimburse) {
+                        $assignQuery->where([
+                            'reimburse_type_id' => $masterTypeReimburse->id,
+                            'is_assign' => true
+                        ]);
+                    }
+                ]);
+            });
+            
+            $queryResult->getCollection()->transform(function ($map, $key) {
+                $map = json_decode($map);
+
+                // Balance Plafon
+                if ($map->grade_option == 'grade' && count($map->reimburse_type_grades) > 0) {
+                    $maximumBalance = collect($map->reimburse_type_grades)
+                        ->filter(function ($reimburseTypeGrade) use ($map) {
+                            return isset($reimburseTypeGrade->grade) &&
+                                !empty($reimburseTypeGrade->grade->grade_users) &&
+                                collect($reimburseTypeGrade->grade->grade_users)
+                                    ->contains('user_id', $map->user_id);
+                        })
+                        ->pluck('plafon')
+                        ->first();
+                } else {
+                    $maximumBalance = $map->grade_all_price;
+                }
+                
+                $for        = $map->is_employee == true ? 'reimburses.requester' : 'reimburses.for';
+                $forValue   = $map->is_employee == true ? $map->user_nip : $map->family_id;
+                // Total Balance Requested
+                $getBalanceOnPr = Reimburse::selectRaw("
+                    reimburses.balance as balance, 
+                    mtr.interval_claim_period as has_interval_claim, 
+                    pr.is_closed as status_closed,
+                    pr.clearing_status as clearing_status,
+                    pr.status as pr_status,
+                    CASE 
+                        WHEN 
+                            mtr.interval_claim_period is not null
+                            AND CURRENT_DATE >= reimburses.claim_date 
+                            AND CURRENT_DATE <= reimburses.claim_date + (mtr.interval_claim_period || ' days')::interval 
+                        THEN 1
+                        ELSE 0
+                    END
+                    AS on_interval
+                ")
+                ->join('master_type_reimburses as mtr', 'mtr.code', '=', 'reimburses.reimburse_type')
+                ->join('reimburse_groups as rg', 'rg.code', '=', 'reimburses.group')
+                ->leftJoin('purchase_requisitions as pr', function ($join) {
+                    $join->on('rg.id', '=', DB::raw('CAST(pr.purchase_id AS BIGINT)'))
+                        ->where('reimburses.item_number', '=', DB::raw('CAST(pr.item_number AS BIGINT)'));
+                })
+                ->where(function ($query) use ($map, $for, $forValue) {
+                    $query->where($for, $forValue)
+                        ->where('reimburses.reimburse_type', $map->code)
+                        ->where('pr.code_transaction', 'REIM')
+                        ->whereIn('rg.status_id', [1, 3, 5]);
+                })
+                ->orWhere(function ($query) use ($map, $for, $forValue) {
+                    $query->where($for, $forValue)
+                        ->where('reimburses.reimburse_type', $map->code)
+                        ->whereNull('pr.code_transaction')
+                        ->whereIn('rg.status_id', [1, 3, 5]);
+                })->get()->toArray();
+
+                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] != 'S' && $value['status_closed'] != 'X' && $value['pr_status'] != 'X') && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
+                $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] == 'S' && $value['status_closed'] == 'S' && $value['pr_status'] != 'X') && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
+
+                // Remaining Balance
+                $remainingBalance = $map->unassign_but_has_reimburse == 1 ? 0 : (int)$maximumBalance - ($paidBalance + $unpaidBalance);
+            
+                // Last Claim Date
+                $lastClaimDate = collect($map->reimburses)->isNotEmpty() ? 
+                    collect($map->reimburses)->max('claim_date') : null;
+            
+                // Available Claim Date
+                if ($map->interval_claim_period == null || $lastClaimDate == null) {
+                    $availableClaimDate = null;
+                } else {
+                    $createDate         = Carbon::createFromFormat('Y-m-d', $lastClaimDate);
+                    $availableClaimDate = $createDate->addDays((int)$map->interval_claim_period);
+                }
+            
+                $return = [
+                    'id'                            => $key + 1,
+                    'reimburse_type_name'           => $map->name .' ('.$map->code.')',
+                    'user_name'                     => ucwords($map->user_name),
+                    'familiy_name'                  => ucwords($map->family_name),
+                    'is_employee'                   => $map->is_employee,
+                    'family_status'                 => ucwords($map->family_status),
+                    'interval_claim_period'         => $map->interval_claim_period ?  $map->interval_claim_period / 365 . ' Year' : '-',
+                    'currency'                      => 'IDR',
+                    'maximumBalance'                => (int)$maximumBalance,
+                    'remainingBalance'              => $remainingBalance,
+                    'lastClaimDate'                 => $lastClaimDate,
+                    'availableClaimDate'            => $availableClaimDate,
+                    'totalPaid'                     => $paidBalance,
+                    'totalUnpaid'                   => $unpaidBalance
+                ];
+            
+                // if ($isEmployee == false) $return['family_status'] = ucwords($map->family_status);
+            
+                return $return;
+            });
+
+            return $this->successResponse($queryResult);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    public function exportMyReimburse(Request $request)
+    {
+        try {
+            $reimburseType  = isset($request->reimburse_type) && $request->reimburse_type !== "null" ? $request->reimburse_type : null;
+            $employee       = isset($request->employee) && $request->employee !== "null" ? $request->employee : null;
+            $family         = isset($request->family) && $request->family !== "null" ? $request->family : null;
+
+            $query = MasterTypeReimburse::with([
+                    'reimburses' => function ($reimburseQuery) {
+                        $reimburseQuery->join('reimburse_groups as rg', 'reimburses.group', '=', 'rg.code')
+                            ->whereIn('rg.status_id', [1, 3, 5])
+                            ->select('reimburses.*')
+                            ->with('reimburseGroup');
+                    }
+                ])
+                ->select('master_type_reimburses.*', 'u.id as user_id', 'f.id as family_id', 'u.nip as user_nip', 'u.name as user_name', 'f.name as family_name', 
+                DB::raw('
+                    CASE
+                        WHEN 
+                            MIN(mtrua_grade_relation_exist.id) IS NULL
+                            AND MIN(mtrua_grade_relation_not_exist.id) IS NULL
+                            AND MIN(rg.id) IS NOT NULL
+                        THEN 1
+                        ELSE 0
+                    END AS unassign_but_has_reimburse
+                ')
+            )
+            ->leftJoin('master_type_reimburse_grades as mtrg', 'mtrg.reimburse_type_id', '=', 'master_type_reimburses.id')
+            ->leftJoin('business_trip_grades as btg', 'btg.id', '=', 'mtrg.grade_id')
+            ->leftJoin('business_trip_grade_users as btgu', 'btgu.grade_id', '=', 'btg.id')
+            ->leftJoin('master_type_reimburse_user_assign as mtrua_grade_relation_exist', function($join) {
+                $join->on('mtrua_grade_relation_exist.user_id', '=', 'btgu.user_id')
+                    ->whereColumn('mtrua_grade_relation_exist.reimburse_type_id', 'master_type_reimburses.id')
+                    ->where('mtrua_grade_relation_exist.is_assign', true);
+            })
+            ->leftJoin('master_type_reimburse_user_assign as mtrua_grade_relation_not_exist', function($join) {
+                $join->on('mtrua_grade_relation_not_exist.reimburse_type_id', '=', 'master_type_reimburses.id')
+                    ->where('mtrua_grade_relation_not_exist.is_assign', true);
+            })
+            ->leftJoin('users as u', function($join) {
+                $join->on('u.id', '=', 'mtrua_grade_relation_exist.user_id')
+                    ->orOn('u.id', '=', 'mtrua_grade_relation_not_exist.user_id');
+            })
+            ->leftJoin('families as f', function($join) {
+                $join->on('u.id', '=', 'f.userId')
+                    ->where('master_type_reimburses.is_employee', false)
+                    ->whereColumn('master_type_reimburses.family_status', 'f.status');
+            })
+            ->leftJoin('reimburses as r', function($join) {
+                $join->on('r.reimburse_type', '=', 'master_type_reimburses.code');
+            })
+            ->leftJoin('reimburse_groups as rg', function($join) {
+                $join->on('rg.code', '=', 'r.group')
+                    ->whereIn('rg.status_id', [1, 3, 5]);
+            })
+            ->where(function($query) {
+                $query->whereNotNull('mtrua_grade_relation_exist.is_assign')
+                    ->orWhereNotNull('mtrua_grade_relation_not_exist.is_assign')
+                    ->orWhereNotNull('rg.id');
+            })
+            ->where(function($query) {
+                $query->where('master_type_reimburses.is_employee', true)
+                    ->orWhere(function($query) {
+                        $query->where('master_type_reimburses.is_employee', false)
+                            ->whereNotNull('f.id');
+                    });
+            });
+
+            if ($reimburseType !== null) $query = $query->where('master_type_reimburses.code', $reimburseType);
+            if ($employee !== null) $query = $query->where('u.id', $employee);
+            if ($family !== null) $query = $query->where('f.id', $family);
+
+            $query->groupBy(['master_type_reimburses.id', 'u.id', 'f.id']);
+            $orderBy = $request->sort_by == 'id' ? 'master_type_reimburses.name' : $request->sort_by;
+            $sortBy = $request->sort_by == 'id' ? 'asc' : $request->sort_direction;
+            $query->orderBy($orderBy, $sortBy);
+
+            $queryResult = $query->get();
+
+            $queryResult->each(function ($masterTypeReimburse) {
+                $masterTypeReimburse->load([
+                    'reimburseTypeGrades.grade.gradeUsers.reimburseTypeAssignUsers' => function ($assignQuery) use ($masterTypeReimburse) {
+                        $assignQuery->where([
+                            'reimburse_type_id' => $masterTypeReimburse->id,
+                            'is_assign' => true
+                        ]);
+                    },
+                    'reimburseTypeUserAssign' => function ($assignQuery) use ($masterTypeReimburse) {
+                        $assignQuery->where([
+                            'reimburse_type_id' => $masterTypeReimburse->id,
+                            'is_assign' => true
+                        ]);
+                    }
+                ]);
+            });
+            
+            // Transform data for export
+            $transformedData = $queryResult->map(function ($item) {
+                $maximumBalance = $item->grade_option == 'grade' && count($item->reimburseTypeGrades) > 0
+                    ? collect($item->reimburseTypeGrades)
+                        ->filter(function ($reimburseTypeGrade) use ($item) {
+                            return isset($reimburseTypeGrade->grade) &&
+                                !empty($reimburseTypeGrade->grade->gradeUsers) &&
+                                collect($reimburseTypeGrade->grade->gradeUsers)
+                                    ->contains('user_id', $item->user_id);
+                        })
+                        ->pluck('plafon')
+                        ->first()
+                    : $item->grade_all_price;
+                
+                $for = $item->is_employee == true ? 'reimburses.requester' : 'reimburses.for';
+                $forValue = $item->is_employee == true ? $item->user_nip : $item->family_id;
+                
+                // Total Balance Requested
+                $getBalanceOnPr = Reimburse::selectRaw("
+                    reimburses.balance as balance, 
+                    mtr.interval_claim_period as has_interval_claim, 
+                    pr.is_closed as status_closed,
+                    pr.clearing_status as clearing_status,
+                    pr.status as pr_status,
+                    CASE 
+                        WHEN 
+                            mtr.interval_claim_period is not null
+                            AND CURRENT_DATE >= reimburses.claim_date 
+                            AND CURRENT_DATE <= reimburses.claim_date + (mtr.interval_claim_period || ' days')::interval 
+                        THEN 1
+                        ELSE 0
+                    END
+                    AS on_interval
+                ")
+                ->join('master_type_reimburses as mtr', 'mtr.code', '=', 'reimburses.reimburse_type')
+                ->join('reimburse_groups as rg', 'rg.code', '=', 'reimburses.group')
+                ->leftJoin('purchase_requisitions as pr', function ($join) {
+                    $join->on('rg.id', '=', DB::raw('CAST(pr.purchase_id AS BIGINT)'))
+                        ->where('reimburses.item_number', '=', DB::raw('CAST(pr.item_number AS BIGINT)'));
+                })
+                ->where(function ($query) use ($item, $for, $forValue) {
+                    $query->where($for, $forValue)
+                        ->where('reimburses.reimburse_type', $item->code)
+                        ->where('pr.code_transaction', 'REIM')
+                        ->whereIn('rg.status_id', [1, 3, 5]);
+                })
+                ->orWhere(function ($query) use ($item, $for, $forValue) {
+                    $query->where($for, $forValue)
+                        ->where('reimburses.reimburse_type', $item->code)
+                        ->whereNull('pr.code_transaction')
+                        ->whereIn('rg.status_id', [1, 3, 5]);
+                })->get()->toArray();
+
+                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) {
+                    return ($value['clearing_status'] != 'S' && $value['status_closed'] != 'X' && $value['pr_status'] != 'X') &&
+                        (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null);
+                }), 'balance'));
+
+                $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) {
+                    return ($value['clearing_status'] == 'S' && $value['status_closed'] == 'S' && $value['pr_status'] != 'X') &&
+                        (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null);
+                }), 'balance'));
+
+                // Remaining Balance
+                $remainingBalance = $item->unassign_but_has_reimburse == 1 ? 0 : (int)$maximumBalance - ($paidBalance + $unpaidBalance);
+
+                // Last Claim Date
+                $lastClaimDate = collect($item->reimburses)->isNotEmpty() ? 
+                    collect($item->reimburses)->max('claim_date') : null;
+
+                // Available Claim Date
+                $availableClaimDate = $item->interval_claim_period == null || $lastClaimDate == null
+                    ? null
+                    : Carbon::createFromFormat('Y-m-d', $lastClaimDate)->addDays((int)$item->interval_claim_period);
+
+                return [
+                    'reimburseType'         => $item->name,
+                    'employeeName'          => $item->user_name,
+                    'familyName'            => $item->family_name,
+                    'isEmployee'            => $item->is_employee,
+                    'familyStatus'          => ucwords($item->family_status),
+                    'intervalClaimPeriod'   => $item->interval_claim_period ?  $item->interval_claim_period / 365 . ' Year' : '-',
+                    'currency'              => 'IDR',
+                    'maiximumBalance'       => (int)$maximumBalance,
+                    'remainingBalance'      => $remainingBalance,
+                    'lastClaimDate'         => $lastClaimDate,
+                    'availableClaimDate'    => $availableClaimDate,
+                    'totalPaid'             => $paidBalance,
+                    'totalUnpaid'           => $unpaidBalance,
+                ];
+            });
+
+            $filename = 'MyReimburseReport.xlsx';
+            return Excel::download(new MyReimburseExport($transformedData), $filename);
+        } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }
     }
@@ -1161,65 +1594,66 @@ class ReportController extends Controller
         $query->orderBy($sortBy, $sortDirection);
 
         if (Auth::user()->is_admin != '1') {
-            $query = $query->where('created_by', Auth::user()->id)
-                ->orWhere('request_for', Auth::user()->id);
+
+            $query->whereHas('BusinessTrip', function ($q) {
+                $q->where('created_by', Auth::user()->id)
+                    ->orWhere('request_for', Auth::user()->id);
+            });
         }
 
         if ($startDate && $endDate) {
-            $query->whereDate('created_at', '>=', $startDate)
-                ->whereDate('created_at', '<=', $endDate);
+            $query->whereDate('start_date', '>=', $startDate)
+                ->whereDate('end_date', '<=', $endDate);
         }
 
         if ($type) {
-            $query->whereHas('purposeType', function ($q) use ($type) {
-                $q->where('id', $type);
+            $query->whereHas('BusinessTrip', function ($q) use ($type) {
+                $q->whereHas('purposeType', function ($q) use ($type) {
+                    $q->where('id', $type);
+                });
             });
         }
 
         if ($destination) {
-            $query->whereHas('businessTripDestination', function ($q) use ($destination) {
-                $q->where('destination', $destination);
+            $query->whereHas('BusinessTrip', function ($q) use ($destination) {
+                $q->whereHas('businessTripDestination', function ($q) use ($destination) {
+                    $q->where('destination', $destination);
+                });
             });
         }
 
         if ($department) {
-            $query->whereHas('requestFor', function ($q) use ($department) {
-                $q->where('departement_id', $department);
+            $query->whereHas('BusinessTrip', function ($q) use ($department) {
+                $q->whereHas('requestFor', function ($q) use ($department) {
+                    $q->where('departement_id', $department);
+                });
             });
         }
 
-        $data = $query->whereHas('BusinessTrip', function ($query) {
-            $query->where('type', 'declaration')
-                ->whereHas('status', function ($query) {
-                    $query->where('name',  'Fully Approve');
-                });
-        })
+        $data =
+            $query->whereHas('BusinessTrip', function ($query) {
+                $query->where('type', 'declaration')
+                    ->whereHas('status', function ($query) {
+                        $query->where('name',  'Fully Approve');
+                    });
+            })
             ->paginate($perPage);
-
 
         $data->getCollection()->transform(function ($value) {
 
-            $first = $value->BusinessTrip->detailAttendance()->orderBy('date', 'asc')->first();
-            $last = $value->BusinessTrip->detailAttendance()->orderBy('date', 'desc')->first();
-            $status = $value->id == $first->id ? 'In' : 'Out';
-
-            if ($value->id == $first->id || $value->id == $last->id) {
-                return [
+            return
+                [
                     'id' =>  $value->id,
                     'employee_no' => $value->BusinessTrip->requestFor->nip,
                     'employee_name' => $value->BusinessTrip->requestFor->name,
 
-                    'date' => date('d/m/Y', strtotime($value->date)),
-                    'time' => date('h:i', strtotime($value->start_time)),
+                    'in' => date('d/m/Y', strtotime($value->start_date)) . ' - ' . date('h:i', strtotime($value->start_time)),
 
-                    'status' => [
-                        'name' => $status,
-                        'classname' => 'bg-green-100 text-green-600 border-green-600',
-                        'code' => 'fully_approve'
-                    ],
+                    'out' => date('d/m/Y', strtotime($value->end_date)) . ' - ' . date('h:i', strtotime($value->end_time)),
+
                 ];
-            }
         });
+
 
         return $this->successResponse($data);
     }
@@ -1273,28 +1707,28 @@ class ReportController extends Controller
             })
             ->get();
 
-
         $transformedData = $data->transform(function ($value) {
 
-            $first = $value->BusinessTrip->detailAttendance()->orderBy('date', 'asc')->first();
-            $last = $value->BusinessTrip->detailAttendance()->orderBy('date', 'desc')->first();
-
-            $status = $value->id == $first->id ? 1 : 0;
-
-            if ($value->id == $first->id || $value->id == $last->id) {
-                return [
-
-                    'id' =>  $value->id,
+            return [
+                [
                     'employee_no' => $value->BusinessTrip->requestFor->nip,
                     'employee_name' => $value->BusinessTrip->requestFor->name,
 
-                    'date' => date('d/m/Y', strtotime($value->date)),
+                    'date' => date('d/m/Y', strtotime($value->start_date)),
                     'time' => date('h:i', strtotime($value->start_time)),
 
-                    'status' => $status,
-                ];
-            } else {
-            }
+                    'status' => 1,
+                ],
+                [
+                    'employee_no' => $value->BusinessTrip->requestFor->nip,
+                    'employee_name' => $value->BusinessTrip->requestFor->name,
+
+                    'date' => date('d/m/Y', strtotime($value->end_date)),
+                    'time' => date('h:i', strtotime($value->end_time)),
+
+                    'status' => 0,
+                ]
+            ];
         });
 
         // Return the exported file
@@ -1302,73 +1736,91 @@ class ReportController extends Controller
         return Excel::download(new BusinessTripAttendanceExport($transformedData), $filename);
     }
 
-    public function listBTAttendanceSunfish(Request $request)
+    public function listBTAttendanceSunfish(Request $request) // get all data with filter
     {
-        $query =  BusinessTripDetailAttedance::query()->with(['BusinessTrip']);
-        $sortBy = $request->get('sort_by', 'id');
-        $sortDirection = $request->get('sort_direction', 'desc');
-        $perPage = $request->get('per_page', 10);
-        $startDate = $request->get('startDate');
-        $endDate = $request->get('endDate');
-        $type = $request->get('type');
-        $destination = $request->get('destination');
-        $department = $request->get('department');
-
-        $query->orderBy($sortBy, $sortDirection);
-
-        if ($startDate && $endDate) {
-            $query->whereDate('created_at', '>=', $startDate)
-                ->whereDate('created_at', '<=', $endDate);
-        }
-
-        if ($type) {
-            $query->whereHas('purposeType', function ($q) use ($type) {
-                $q->where('id', $type);
-            });
-        }
-
-        if ($destination) {
-            $query->whereHas('businessTripDestination', function ($q) use ($destination) {
-                $q->where('destination', $destination);
-            });
-        }
-
-        if ($department) {
-            $query->whereHas('requestFor', function ($q) use ($department) {
-                $q->where('departement_id', $department);
-            });
-        }
+        $query =  BusinessTripDetailAttedance::query()
+            ->with(['BusinessTrip'])
+            ->orderBy('date', 'asc');
 
         $data = $query->whereHas('BusinessTrip', function ($query) {
             $query->where('type', 'declaration')
                 ->whereHas('status', function ($query) {
                     $query->where('name',  'Fully Approve');
                 });
-        })
-            // ->paginate($perPage);
-            ->take($perPage)
-            ->get();
+        })->get();
 
 
         $data->transform(function ($value) {
 
-            $first = $value->BusinessTrip->detailAttendance()->orderBy('date', 'asc')->first();
-            $last = $value->BusinessTrip->detailAttendance()->orderBy('date', 'desc')->first();
-
-            $status = $value->id == $first->id ? 1 : 0;
-
-            if ($value->id == $first->id || $value->id == $last->id) {
-                return [
-                    'id' =>  $value->id,
+            return [
+                [
                     'employee_no' => $value->BusinessTrip->requestFor->nip,
                     'employee_name' => $value->BusinessTrip->requestFor->name,
 
-                    'date' => date('d/m/Y', strtotime($value->date)),
+                    'date' => date('d/m/Y', strtotime($value->start_date)),
                     'time' => date('h:i', strtotime($value->start_time)),
 
-                    'status' => $status,
-                ];
-            }
+                    'status' => 1,
+                ],
+                [
+                    'employee_no' => $value->BusinessTrip->requestFor->nip,
+                    'employee_name' => $value->BusinessTrip->requestFor->name,
+
+                    'date' => date('d/m/Y', strtotime($value->end_date)),
+                    'time' => date('h:i', strtotime($value->end_time)),
+
+                    'status' => 0,
+                ]
+            ];
+        });
+
+        return $this->successResponse($data);
+    }
+
+    public function listBTAttendanceSunfishMothly(Request $request) // get all data with filter
+    {
+        $query =  BusinessTripDetailAttedance::query()
+            ->with(['BusinessTrip'])
+            ->orderBy('date', 'asc');
+
+        $month = $request->get('month');
+        $year = $request->get('year');
+
+        if ($month || $year) {
+            $year = $year ? $year : date("Y");
+            $query->whereMonth('start_date', $month)
+                ->whereYear('start_date', $year);
+        }
+        $data = $query->whereHas('BusinessTrip', function ($query) {
+            $query->where('type', 'declaration')
+                ->whereHas('status', function ($query) {
+                    $query->where('name',  'Fully Approve');
+                });
+        })->get();
+
+
+        $data->transform(function ($value) {
+
+            return [
+                [
+                    'employee_no' => $value->BusinessTrip->requestFor->nip,
+                    'employee_name' => $value->BusinessTrip->requestFor->name,
+
+                    'date' => date('d/m/Y', strtotime($value->start_date)),
+                    'time' => date('h:i', strtotime($value->start_time)),
+
+                    'status' => 1,
+                ],
+                [
+                    'employee_no' => $value->BusinessTrip->requestFor->nip,
+                    'employee_name' => $value->BusinessTrip->requestFor->name,
+
+                    'date' => date('d/m/Y', strtotime($value->end_date)),
+                    'time' => date('h:i', strtotime($value->end_time)),
+
+                    'status' => 0,
+                ]
+            ];
         });
 
         return $this->successResponse($data);

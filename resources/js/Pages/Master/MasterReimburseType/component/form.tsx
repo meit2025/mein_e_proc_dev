@@ -180,21 +180,6 @@ export default function ReimburseTypeForm({
     }
   };
 
-  const handleSearchMaterialNumber = async (query: string, materialGroup: string) => {
-    if (query.length > 0) {
-      getMaterialNumber(query, {
-        name: 'material_number',
-        id: 'id',
-        tabel: 'master_materials',
-        search: query,
-        where: {
-          key: 'material_group',
-          parameter: materialGroup,
-        },
-      });
-    }
-  };
-
   React.useEffect(() => {
     getMaterialGroup('', {
       name: 'material_group',
@@ -493,6 +478,15 @@ export default function ReimburseTypeForm({
                   disabled={false}
                   placeholder={'Material Group'}
                   classNames='mt-2 w-full'
+                  onSearch={(search) => {
+                    if (search.length > 0) {
+                      getMaterialGroup(search, {
+                        name: 'material_group',
+                        id: 'id',
+                        tabel: 'material_groups',
+                      });
+                    }
+                  }}
                   onChangeOutside={async (x: any, data: any) => {
                     await handleChangeMaterialGroup(data?.label.split(' - ')[1]);
                   }}
@@ -512,7 +506,21 @@ export default function ReimburseTypeForm({
                   disabled={false}
                   placeholder={'Material Number'}
                   classNames='mt-2 w-full'
-                  onChangeOutside={async (search) => await handleSearchMaterialNumber(search, String(form.getValues('material_group').split(' - ')[1]))}
+                  onSearch={(search) => {
+                    const selectedMaterialGroup = form.getValues('material_group');
+                    const selectedMaterialGroupLabel = dataMaterialGroup.find(item => item.value === selectedMaterialGroup)?.label;
+                    if (search.length > 0) {
+                      getMaterialNumber(search, {
+                        name: 'material_number',
+                        id: 'id',
+                        tabel: 'master_materials',
+                        where: {
+                          key: 'material_group',
+                          parameter: selectedMaterialGroupLabel?.split(' - ')[1],
+                        },
+                      });
+                    }
+                  }}
                 />
               </td>
             </tr>

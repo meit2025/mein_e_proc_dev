@@ -17,6 +17,7 @@ use Modules\Report\Http\Controllers\ReportController;
 
 Route::group(['prefix' => 'report'], function () {
     Route::get('/', [ReportController::class, 'index'])->name('report.index');
+    Route::get('/my-reimburse', [ReportController::class, 'myReimburse'])->name('report.my-reimburse');
     Route::get('/bt-request', [ReportController::class, 'businessTrip'])->name('report.btRequest');
     Route::get('/bt-dec', [ReportController::class, 'businessTripDec'])->name('report.btDec');
     Route::get('/bt-overall', [ReportController::class, 'businessTripOverall'])->name('report.btRequest');
@@ -28,8 +29,11 @@ Route::group(['prefix' => 'api/sunfish'], function () {
 
     Route::group(['prefix' => 'business-trip-attendance'], function () {
 
-        Route::get('/list', [ReportController::class, 'listBTAttendanceSunfish'])->name('report.BTAttendanceSunfish.index')
+        Route::get('/list', [ReportController::class, 'listBTAttendanceSunfish'])->name('api.listBTAttendanceSunfish.index')
             // ->middleware(PermissionMiddleware::class . ':report business trip attendance view')
+        ;
+        
+        Route::get('/list-monthly', [ReportController::class, 'listBTAttendanceSunfishMothly'])->name('api.listBTAttendanceSunfishMothly.index')
         ;
     });
 });
@@ -38,6 +42,10 @@ Route::group(['prefix' => 'api/report', 'middleware' => 'auth'], function () {
     Route::group(['prefix' => 'reimburse'], function () {
         Route::get('/list', [ReportController::class, 'list'])->name('report.reimburse.index')->middleware(PermissionMiddleware::class . ':report reimburse view');
         Route::get('/export', [ReportController::class, 'export'])->name('report.reimburse.export')->middleware(PermissionMiddleware::class . ':report reimburse export');
+    });
+    Route::group(['prefix' => 'my-reimburse'], function () {
+        Route::get('/list', [ReportController::class, 'listMyReimburse'])->name('report.my-reimburse.index')->middleware(PermissionMiddleware::class . ':report reimburse view');
+        Route::get('/export', [ReportController::class, 'exportMyReimburse'])->name('report.my-reimburse.export')->middleware(PermissionMiddleware::class . ':report reimburse export');
     });
     Route::group(['prefix' => 'business-trip'], function () {
         Route::get('/list', [ReportController::class, 'listBT'])->name('report.business.index')->middleware(PermissionMiddleware::class . ':report business trip request view');
