@@ -31,7 +31,7 @@
                 <br>
 
                 <p>
-                    Dear, <span class="font-weight-bold" style="font-weight: bold;">{{$user->name}}</span>
+                    Dear <span class="font-weight-bold" style="font-weight: bold;">{{$user->name}}</span> ,
 
                     {{-- body --}}
                     @if($type == 'Purchase Requisition')
@@ -78,158 +78,160 @@
                 {{-- end body --}}
 
                 @if ($type == 'Reimbursement')
-                    <br><br>
-                    @if ($status == 'Approval')
-                    Your request has been approved by {{ $reimburseGroup->approverName }}, with the details:
-                    @elseif ($status == 'Approved')
-                    There are some Request Fully Approved. Kindly find the details below :
-                    @elseif ($status == 'Rejected')
-                    We regret to inform you that your reimbursement request has been rejected. Below are the details:
-                    @elseif ($status == 'Revise')
-                    Your reimbursement request requires revision. Below are the details:
-                    @elseif ($status == 'Approver')
-                    You have a pending approval request for the Reimbursement. Below are the details:
-                    @endif
-                    <br><br>
+                <br><br>
+                @if ($status == 'Approval')
+                Your request has been approved by {{ $reimburseGroup->approverName }}, with the details:
+                @elseif ($status == 'Approved')
+                There are some Request Fully Approved. Kindly find the details below :
+                @elseif ($status == 'Rejected')
+                We regret to inform you that your reimbursement request has been rejected. Below are the details:
+                @elseif ($status == 'Revise')
+                Your reimbursement request requires revision. Below are the details:
+                @elseif ($status == 'Approver')
+                You have a pending approval request for the Reimbursement. Below are the details:
+                @endif
+                <br><br>
 
-                    Reimbursement Number: {{$reimburseGroup->code}}
-                    <br>
-                    Requester: {{$user->name}}
-                    <br>
-                    Reimbursement Details:
-                    <br><br>
+                Reimbursement Number: {{$reimburseGroup->code}}
+                <br>
+                Requester: {{$user->name}}
+                <br>
+                Reimbursement Details:
+                <br><br>
 
-                    @foreach ($reimburseGroup->reimburses as $key => $item)
-                    Form {{$key + 1}} :
-                    <ul>
-                        <li>
-                            Reimbursement Type: {{$item->reimburseType->name}}
-                        </li>
-                        <li>
-                            Claim Date: {{ date('F j, Y', strtotime($item->claim_date)) }}
-                        </li>
-                        <li>
-                            Reimbursement Cost: Rp. {{ number_format($item->balance, 0, ',', '.') }}
-                        </li>
-                    </ul>
-                    @endforeach
+                @foreach ($reimburseGroup->reimburses as $key => $item)
+                Form {{$key + 1}} :
+                <ul>
+                    <li>
+                        Reimbursement Type: {{$item->reimburseType->name}}
+                    </li>
+                    <li>
+                        Claim Date: {{ date('F j, Y', strtotime($item->claim_date)) }}
+                    </li>
+                    <li>
+                        Reimbursement Cost: Rp. {{ number_format($item->balance, 0, ',', '.') }}
+                    </li>
+                </ul>
+                @endforeach
 
-                    @if ($status == 'Approval')
-                    Reason :
-                    @elseif ($status == 'Approved')
-                    Notes :
-                    @elseif ($status == 'Rejected')
-                    Rejection Reason :
-                    @elseif ($status == 'Revise')
-                    Revision Notes :
-                    @endif
-                    {{ $reimburseGroup->notes }}
-                    <br>
-                    @if ($status == 'Rejected')
-                    Please review the request and make necessary adjustments if required.
-                    @elseif ($status == 'Revise')
-                    Please review then resubmit the request and make necessary adjustments if required.
-                    @elseif ($status == 'Approval')
-                    The next approval process will be processed.
-                    @endif
-                    <br>
-                    <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now'
-                        : 'View Detail'}}</a>
-                    <br>
+                @if ($status == 'Approval')
+                Reason :
+                @elseif ($status == 'Approved')
+                Notes :
+                @elseif ($status == 'Rejected')
+                Rejection Reason :
+                @elseif ($status == 'Revise')
+                Revision Notes :
+                @endif
+                {{ $reimburseGroup->notes }}
+                <br>
+                @if ($status == 'Rejected')
+                Please review the request and make necessary adjustments if required.
+                @elseif ($status == 'Revise')
+                Please review then resubmit the request and make necessary adjustments if required.
+                @elseif ($status == 'Approval')
+                The next approval process will be processed.
+                @endif
+                <br>
+                <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now'
+                    : 'View Detail'}}</a>
+                <br>
                 @endif
 
                 @if ($type == 'Business Trip')
-                    <br><br>
-                    @if ($status == 'Approval')
-                    Your request has been approved by {{$businessTrip->approverName}}, with the details:
-                    @elseif ($status == 'Approved')
-                    There are some Request Fully Approved. Kindly find the details below :
-                    @elseif ($status == 'Rejected')
-                    We regret to inform you that your business trip request has been rejected. Below are the details:
-                    @elseif ($status == 'Revise')
-                    Your business trip request requires revision. Below are the details:
-                    {{-- @elseif ($status == 'Approver')
-                    You have a pending approval request for the Reimbursement. Below are the details: --}}
-                    @endif
-                    <br><br>
-                    Business Trip Request Number: {{$businessTrip->request_no}} <br/>
-                    Requester: {{$businessTrip->requestFor->name}} <br/>
-                    Business Trip Request Details: <br/>
-                    <ul>
-                        <li>Propose Type: {{$businessTrip->purposeType->name}}</li>
-                    </ul>
-                    @foreach ($businessTrip->businessTripDestination as $key => $item)
-                        Destination {{$key + 1}} :
-                        <ul>
-                            <li>Destination: {{$item->destination}}</li>
-                            <li>Start Date: {{date('d-m-Y',strtotime($item->business_trip_start_date))}}</li>
-                            <li>End Date: {{date('d-m-Y',strtotime($item->business_trip_end_date))}}</li>
-                            <li>Total Request: {{number_format($item->getDetailDestinationDay->sum('price') + $item->detailDestinationTotal->sum('price'),0,',','.')}}</li>
-                        </ul>
-                    @endforeach
-                    @if ($status == 'Approved')
-                    Notes: {{$businessTrip->notes}}
-                    @elseif ($status == 'Rejected')
-                    Rejection Reason: {{$businessTrip->notes}} <br/>
-                    Please review the request and make necessary adjustments if required.
-                    @elseif ($status == 'Revise')
-                    Revision Notes: {{$businessTrip->notes}} </br>
-                    Please review then resubmit the request and make necessary adjustments if required.
-                    @elseif ($status == 'Approval')
-                    Reason: {{$businessTrip->notes}} <br>
-                    The next approval process will be processed.
-                    @endif
-                    <br>
-                    <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now'
-                        : 'View Detail'}}</a>
-                    <br>
+                <br><br>
+                @if ($status == 'Approval')
+                Your request has been approved by {{$businessTrip->approverName}}, with the details:
+                @elseif ($status == 'Approved')
+                There are some Request Fully Approved. Kindly find the details below :
+                @elseif ($status == 'Rejected')
+                We regret to inform you that your business trip request has been rejected. Below are the details:
+                @elseif ($status == 'Revise')
+                Your business trip request requires revision. Below are the details:
+                {{-- @elseif ($status == 'Approver')
+                You have a pending approval request for the Reimbursement. Below are the details: --}}
+                @endif
+                <br><br>
+                Business Trip Request Number: {{$businessTrip->request_no}} <br />
+                Requester: {{$businessTrip->requestFor->name}} <br />
+                Business Trip Request Details: <br />
+                <ul>
+                    <li>Propose Type: {{$businessTrip->purposeType->name}}</li>
+                </ul>
+                @foreach ($businessTrip->businessTripDestination as $key => $item)
+                Destination {{$key + 1}} :
+                <ul>
+                    <li>Destination: {{$item->destination}}</li>
+                    <li>Start Date: {{date('d-m-Y',strtotime($item->business_trip_start_date))}}</li>
+                    <li>End Date: {{date('d-m-Y',strtotime($item->business_trip_end_date))}}</li>
+                    <li>Total Request: {{number_format($item->getDetailDestinationDay->sum('price') +
+                        $item->detailDestinationTotal->sum('price'),0,',','.')}}</li>
+                </ul>
+                @endforeach
+                @if ($status == 'Approved')
+                Notes: {{$businessTrip->notes}}
+                @elseif ($status == 'Rejected')
+                Rejection Reason: {{$businessTrip->notes}} <br />
+                Please review the request and make necessary adjustments if required.
+                @elseif ($status == 'Revise')
+                Revision Notes: {{$businessTrip->notes}} </br>
+                Please review then resubmit the request and make necessary adjustments if required.
+                @elseif ($status == 'Approval')
+                Reason: {{$businessTrip->notes}} <br>
+                The next approval process will be processed.
+                @endif
+                <br>
+                <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now'
+                    : 'View Detail'}}</a>
+                <br>
                 @endif
 
                 @if ($type == 'Business Trip Declaration')
-                    <br><br>
-                    @if ($status == 'Approval')
-                    Your request has been approved by {{$businessTrip->approverName}}, with the details:
-                    @elseif ($status == 'Approved')
-                    There are some Request Fully Approved. Kindly find the details below :
-                    @elseif ($status == 'Rejected')
-                    We regret to inform you that your business trip declaration has been rejected. Below are the details:
-                    @elseif ($status == 'Revise')
-                    Your business trip declaration requires revision. Below are the details:
-                    {{-- @elseif ($status == 'Approver')
-                    You have a pending approval request for the Reimbursement. Below are the details: --}}
-                    @endif
-                    <br><br>
-                    Business Trip Declaration Number: {{$businessTrip->request_no}} <br/>
-                    Requester: {{$businessTrip->requestFor->name}} <br/>
-                    Business Trip Declaration Details: <br/>
-                    <ul>
-                        <li>Propose Type: {{$businessTrip->purposeType->name}}</li>
-                    </ul>
-                    @foreach ($businessTrip->businessTripDestination as $key => $item)
-                        Destination {{$key + 1}} :
-                        <ul>
-                            <li>Destination: {{$item->destination}}</li>
-                            <li>Start Date: {{date('d-m-Y',strtotime($item->business_trip_start_date))}}</li>
-                            <li>End Date: {{date('d-m-Y',strtotime($item->business_trip_end_date))}}</li>
-                            <li>Total Request: {{number_format($item->getDetailDestinationDay->sum('price') + $item->detailDestinationTotal->sum('price'),0,',','.')}}</li>
-                        </ul>
-                    @endforeach
-                    @if ($status == 'Approved')
-                    Notes: {{$businessTrip->notes}}
-                    @elseif ($status == 'Rejected')
-                    Rejection Reason: {{$businessTrip->notes}} <br/>
-                    Please review the request and make necessary adjustments if required.
-                    @elseif ($status == 'Revise')
-                    Revision Notes: {{$businessTrip->notes}} </br>
-                    Please review then resubmit the request and make necessary adjustments if required.
-                    @elseif ($status == 'Approval')
-                    Reason: {{$businessTrip->notes}} <br>
-                    The next approval process will be processed.
-                    @endif
-                    <br>
-                    <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now'
-                        : 'View Detail'}}</a>
-                    <br>
+                <br><br>
+                @if ($status == 'Approval')
+                Your request has been approved by {{$businessTrip->approverName}}, with the details:
+                @elseif ($status == 'Approved')
+                There are some Request Fully Approved. Kindly find the details below :
+                @elseif ($status == 'Rejected')
+                We regret to inform you that your business trip declaration has been rejected. Below are the details:
+                @elseif ($status == 'Revise')
+                Your business trip declaration requires revision. Below are the details:
+                {{-- @elseif ($status == 'Approver')
+                You have a pending approval request for the Reimbursement. Below are the details: --}}
+                @endif
+                <br><br>
+                Business Trip Declaration Number: {{$businessTrip->request_no}} <br />
+                Requester: {{$businessTrip->requestFor->name}} <br />
+                Business Trip Declaration Details: <br />
+                <ul>
+                    <li>Propose Type: {{$businessTrip->purposeType->name}}</li>
+                </ul>
+                @foreach ($businessTrip->businessTripDestination as $key => $item)
+                Destination {{$key + 1}} :
+                <ul>
+                    <li>Destination: {{$item->destination}}</li>
+                    <li>Start Date: {{date('d-m-Y',strtotime($item->business_trip_start_date))}}</li>
+                    <li>End Date: {{date('d-m-Y',strtotime($item->business_trip_end_date))}}</li>
+                    <li>Total Request: {{number_format($item->getDetailDestinationDay->sum('price') +
+                        $item->detailDestinationTotal->sum('price'),0,',','.')}}</li>
+                </ul>
+                @endforeach
+                @if ($status == 'Approved')
+                Notes: {{$businessTrip->notes}}
+                @elseif ($status == 'Rejected')
+                Rejection Reason: {{$businessTrip->notes}} <br />
+                Please review the request and make necessary adjustments if required.
+                @elseif ($status == 'Revise')
+                Revision Notes: {{$businessTrip->notes}} </br>
+                Please review then resubmit the request and make necessary adjustments if required.
+                @elseif ($status == 'Approval')
+                Reason: {{$businessTrip->notes}} <br>
+                The next approval process will be processed.
+                @endif
+                <br>
+                <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now'
+                    : 'View Detail'}}</a>
+                <br>
                 @endif
                 </p>
 

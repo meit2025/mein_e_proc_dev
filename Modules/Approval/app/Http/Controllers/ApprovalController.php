@@ -196,23 +196,23 @@ class ApprovalController extends Controller
 
             if ($request->status != 'Cancel') {
                 Approval::where('id', $request->approvalId)->where('document_id',  $request->id)
-                ->where('document_name', $dokumentApproval)
-                ->update([
-                    'status' => $request->status,
-                    'message' => $request->note,
-                    'is_status' => true,
-                    'is_approval' => false
-                ]);
+                    ->where('document_name', $dokumentApproval)
+                    ->update([
+                        'status' => $request->status,
+                        'message' => $request->note,
+                        'is_status' => true,
+                        'is_approval' => false
+                    ]);
 
                 $dataNext = Approval::where('id', $request->approvalId)->where('document_id',  $request->id)
-                ->where('document_name', $dokumentApproval)->first();
+                    ->where('document_name', $dokumentApproval)->first();
 
                 if ($dataNext) {
                     Approval::where('document_id',  $request->id)
-                    ->where('number_approval', $dataNext->number_approval + 1)
-                    ->where('document_name', $dokumentApproval)->update([
-                        'is_approval' => true
-                    ]);
+                        ->where('number_approval', $dataNext->number_approval + 1)
+                        ->where('document_name', $dokumentApproval)->update([
+                            'is_approval' => true
+                        ]);
                 }
             }
             $message = $dokumentName .  ' Document ' . $request->status . '  ' .  ' by ' . Auth::user()->name . ' At ' . $this->DateTimeNow();
@@ -279,13 +279,13 @@ class ApprovalController extends Controller
                             $purchase = $modelMap[$request->type]::with('vendorsWinner.units', 'vendorsWinner.masterBusinesPartnerss', 'createdBy', 'user', 'purchaseRequisitions')->find($request->id);
                             // find pr number
                             $pr = $purchase->purchases_number;
+                            $prStatus = $statusId == 3 ? 'Fully Approve' : $request->status;
 
-
-                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Purchase Requisition', $request->status, $pr, $purchase, null, null, $baseurl));
+                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Purchase Requisition', $prStatus, $pr, $purchase, null, null, $baseurl));
 
                             if ($model->user_id !== $model->createdBy) {
                                 $findcreatedBy = User::find($model->createdBy);
-                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Purchase Requisition', $request->status, $pr, $purchase, null, null, $baseurl));
+                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Purchase Requisition', $prStatus, $pr, $purchase, null, null, $baseurl));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
                             }
                             break;
