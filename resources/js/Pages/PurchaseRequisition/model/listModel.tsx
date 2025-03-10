@@ -2,6 +2,7 @@ import { CustomStatus } from '@/components/commons/CustomStatus';
 import { DETAIL_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
 import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 import { Link } from '@inertiajs/react';
+import { Box, Typography } from '@mui/material';
 import { GridColDef } from '@mui/x-data-grid';
 import moment from 'moment';
 export const columns: GridColDef[] = [
