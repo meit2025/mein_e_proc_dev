@@ -27,10 +27,11 @@ class ChangeStatus extends Mailable
     public $reimburseGroup;
     public $businessTrip;
     public $url;
+    public $request;
     /**
      * Create a new message instance.
      */
-    public function __construct($user, $type, $status, $pr, $purchase = null, $reimburseGroup = null, $businessTrip = null, $url = null)
+    public function __construct($user, $type, $status, $pr, $purchase = null, $reimburseGroup = null, $businessTrip = null, $url = null, $request = null)
     {
         //
         $this->user = $user;
@@ -41,6 +42,7 @@ class ChangeStatus extends Mailable
         $this->reimburseGroup = $reimburseGroup;
         $this->businessTrip = $businessTrip;
         $this->url = $url;
+        $this->request = $request;
     }
 
 
@@ -78,6 +80,7 @@ class ChangeStatus extends Mailable
                 'url' => $this->url,
                 'icon_cid' => 'icon.png',
                 'user_approve' => $userApprove,
+                'request' => $this->request,
             ],
         );
     }

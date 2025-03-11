@@ -281,11 +281,11 @@ class ApprovalController extends Controller
                             $pr = $purchase->purchases_number;
                             $prStatus = $statusId == 3 ? 'Fully Approve' : $request->status;
 
-                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Purchase Requisition', $prStatus, $pr, $purchase, null, null, $baseurl));
+                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Purchase Requisition', $prStatus, $pr, $purchase, null, null, $baseurl, $request));
 
                             if ($model->user_id !== $model->createdBy) {
                                 $findcreatedBy = User::find($model->createdBy);
-                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Purchase Requisition', $prStatus, $pr, $purchase, null, null, $baseurl));
+                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Purchase Requisition', $prStatus, $pr, $purchase, null, null, $baseurl, $request));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
                             }
                             break;
@@ -298,7 +298,7 @@ class ApprovalController extends Controller
 
                             SendNotification::dispatch($findUser,  $message, $baseurl);
                             $parseStatusToEmail = $statusId == 0 ? 'Approval' : $request->status;
-                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimbursement', $parseStatusToEmail, '', null, $reimburseGroup, null, $baseurl));
+                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Reimbursement', $parseStatusToEmail, '', null, $reimburseGroup, null, $baseurl, $request));
 
                             // $getApproval = Approval::where(['document_id' => $request->id, 'document_name' => 'REIM', 'status' => 'Waiting'])->orderBy('id', 'ASC')->first();
                             // if ($statusId == 1 && !empty($getApproval)) {
@@ -315,11 +315,11 @@ class ApprovalController extends Controller
                             $businessTrip->notes = isset($request->note) ? $request->note : '';
                             $businessTrip->approverName = Auth::user()->name;
                             $parseStatusToEmail = $statusId == 0 ? 'Approval' : $request->status;
-                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip Declaration',  $parseStatusToEmail, '', null, null, $businessTrip, $baseurl));
+                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip Declaration',  $parseStatusToEmail, '', null, null, $businessTrip, $baseurl, $request));
 
                             if ($findUser->id !== $model->created_by) {
                                 $findcreatedBy = User::find($model->created_by);
-                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip Declaration',  $request->status, '', null, null, $businessTrip, $baseurl));
+                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip Declaration',  $request->status, '', null, null, $businessTrip, $baseurl, $request));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
                             }
                             break;
@@ -331,11 +331,11 @@ class ApprovalController extends Controller
                             $businessTrip->notes = isset($request->note) ? $request->note : '';
                             $businessTrip->approverName = Auth::user()->name;
                             $parseStatusToEmail = $statusId == 0 ? 'Approval' : $request->status;
-                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip',  $parseStatusToEmail, '', null, null, $businessTrip, $baseurl));
+                            Mail::to($findUser->email)->send(new ChangeStatus($findUser, 'Business Trip',  $parseStatusToEmail, '', null, null, $businessTrip, $baseurl, $request));
 
                             if ($findUser->id !== $model->created_by) {
                                 $findcreatedBy = User::find($model->created_by);
-                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip',  $request->status, '', null, null, $businessTrip, $baseurl));
+                                Mail::to($findcreatedBy->email)->send(new ChangeStatus($findcreatedBy, 'Business Trip',  $request->status, '', null, null, $businessTrip, $baseurl, $request));
                                 SendNotification::dispatch($findcreatedBy,  $message, $baseurl);
                             }
                             break;

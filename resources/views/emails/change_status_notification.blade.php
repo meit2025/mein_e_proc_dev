@@ -36,12 +36,18 @@
                     {{-- body --}}
                     @if($type == 'Purchase Requisition')
                     <br>
-                    We would like to inform you that your Purchase Requisition (PR) request has been processed. Below
-                    are the details:
+                    @if ($status == 'Approved')
+                    Your request has been approved by {{ $user_approve }}, with the details:
+                    @elseif ($status == 'Fully Approved')
+                    There are some Request Fully Approved. Kindly find the details below :
+                    @elseif ($status == 'Rejected')
+                    We regret to inform you that your Purchase Requisition (PR) request has been rejected. Below are the
+                    details:
+                    @elseif ($status == 'Revise')
+                    Your Purchase Requisition (PR) request requires revision. Please find the details below:
+                    @endif
+
                     <br>
-                    Status: {{ $status }}
-                    <br>
-                    Please review the details accordingly. If any action is required, kindly proceed as necessary.
                     <br>
                     PR Number : {{$pr}}
                     <br>
@@ -54,6 +60,7 @@
                     Quotation Number: {{$purchase->vendorsWinner->quotation}}
                     <br>
                     Item Details:
+                    <br>
                     <hr>
                     @foreach ($purchase->vendorsWinner->units as $item)
                     Material Number: {{ $item->material_number }}
@@ -69,8 +76,16 @@
                     @endforeach
 
                     <br>
+                    Reason : {{$request->note ?? ''}}
                     <br>
-                    Kindly review and provide your approval decision through the system
+                    <br>
+                    @if ($status == 'Rejected')
+                    Please review the request and make necessary adjustments if required.
+                    @elseif ($status == 'Revise')
+                    Please review then resubmit the request and make necessary adjustments if required.
+                    @elseif($status == 'Approval')
+                    The next approval process will be processed.
+                    @endif
                 <p style="font-weight: 700;font-family: 'Rubik', sans-serif;font-size: 20px">
                     <a href="{{$url}}"> View Detail </a>
                 </p>

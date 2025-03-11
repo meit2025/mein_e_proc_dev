@@ -131,6 +131,30 @@ const ArrayForm = ({
   const handleClick = async () => {
     try {
       const dataobj = getValues();
+      const requiredFields = {
+        item_qty: 'Qty',
+        item_unit_price: 'Unit Price',
+        item_account_assignment_categories: 'Account Assignment',
+        item_material_group: 'Grup Material',
+        item_material_number: 'Number Material',
+        item_uom: 'UOM',
+        item_tax: 'Tax',
+        item_short_text: 'Short Text',
+      };
+
+      // Cek data yang kosong
+      const missingFields = Object.entries(requiredFields)
+        .filter(([key]) => !dataobj[key])
+        .map(([_, label]) => label);
+
+      if (missingFields.length > 0) {
+        showToast(
+          `Harap lengkapi data berikut sebelum menambahkan item:\n- ${missingFields.join('\n- ')}`,
+          'error',
+        );
+        return;
+      }
+
       const id =
         dataobj.item_id !== undefined && dataobj.item_id !== null && dataobj.item_id !== ''
           ? dataobj.item_id
@@ -343,6 +367,10 @@ const ArrayForm = ({
 
       const updatedItems = await Promise.all(
         currentItems.map(async (item: any) => {
+          let cleanUnitPrice = item.unit_price;
+          if (currency_from === 'IDR' || currency_from === 'JPY') {
+            cleanUnitPrice = item.unit_price.toString().split(/[.,]/)[0];
+          }
           try {
             const response = await axiosInstance.post(
               '/currency-conversion',
@@ -355,9 +383,20 @@ const ArrayForm = ({
                 headers: { 'Content-Type': 'application/json' },
               },
             );
-            return { ...item, total_amount_conversion: response.data.data }; // Tambahkan hasil konversi ke item
+
+            return {
+              ...item,
+              total_amount_conversion: response.data.data,
+              unit_price: cleanUnitPrice,
+              total_amount: parseInt(cleanUnitPrice) * parseInt(item.qty),
+            }; // Tambahkan hasil konversi ke item
           } catch (error) {
-            return { ...item, total_amount_conversion: 0 }; // Jika gagal, isi dengan 0
+            return {
+              ...item,
+              total_amount_conversion: 0,
+              unit_price: parseInt(cleanUnitPrice),
+              total_amount: parseInt(cleanUnitPrice) * parseInt(item.qty),
+            }; // Jika gagal, isi dengan 0
           }
         }),
       );
@@ -419,11 +458,11 @@ const ArrayForm = ({
   ];
 
   const CustomFooter = () => {
-    const totalAmount = dataArrayItem.reduce(
+    const totalAmount = (dataArrayItem ?? []).reduce(
       (sum: any, row: any) => parseInt(sum) + parseInt(row.total_amount),
       0,
     );
-    const totalAmountConversion = dataArrayItem.reduce(
+    const totalAmountConversion = (dataArrayItem ?? []).reduce(
       (sum: any, row: any) => parseInt(sum) + parseInt(row.total_amount_conversion),
       0,
     );
