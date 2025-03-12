@@ -44,42 +44,7 @@ class ReportController extends Controller
      */
     public function index()
     {
-        try {
-
-            $is_Admin = Auth::user()->is_admin;
-
-            $listFamily = [];
-            if (!$is_Admin) {
-                $users = User::where('id', Auth::id())->select('nip', 'name')->get();
-
-                // $listFamily = Family::where('userId', Auth::user()->id)->get();
-            } else {
-                $users = User::select('nip', 'name')->get();
-                // $listFamily = Family::where('userId', User::select('nip')->pluck('nip')->toArray())->get();
-            }
-
-            $currentUser = Auth::user();
-
-            $categories = ['Employee', 'Family'];
-            $purchasing_groups = PurchasingGroup::select('id', 'purchasing_group', 'purchasing_group_desc')->get();
-            $currencies = Currency::select('code', 'name')->where('code', 'IDR')->get();
-            // $periods = MasterPeriodReimburse::select('id', 'code', 'start', 'end')->get();
-            $cost_center = MasterCostCenter::select('id', 'cost_center')->get();
-            $taxes = Pajak::select('id', 'mwszkz')->get();
-
-            $types = MasterTypeReimburse::select('code', 'name')->get();
-            $statuses = MasterStatus::select('code', 'name')->get();
-            $departments = MasterDepartment::select('id', 'name')->get();
-
-            // $latestPeriod = MasterPeriodReimburse::orderBy('id', 'desc')->first();
-
-            return Inertia::render(
-                'Report/Reimbuse/Index',
-                compact('purchasing_groups', 'currentUser',  'users', 'categories', 'currencies', 'cost_center', 'taxes', 'types', 'statuses', 'departments')
-            );
-        } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage());
-        }
+        return Inertia::render('Report/Reimbuse/Index');
     }
 
     public function list(Request $request)
@@ -712,18 +677,7 @@ class ReportController extends Controller
 
     public function businessTrip()
     {
-        $users = User::select('nip', 'name', 'id')->get();
-
-        $listPurposeType = PurposeType::select('name', 'id')->get();
-        $pajak = Pajak::select('id', 'mwszkz', 'desimal')->get();
-        $costcenter = MasterCostCenter::select('id', 'cost_center', 'controlling_name')->get();
-        $purchasingGroup = PurchasingGroup::select('id', 'purchasing_group')->get();
-
-        $listDestination = Destination::get();
-        $departments = MasterDepartment::select('id', 'name')->get();
-        $statuses = MasterStatus::select('code', 'name')->get();
-
-        return Inertia::render('Report/BusinessTrip/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup', 'listDestination', 'departments', 'statuses'));
+        return Inertia::render('Report/BusinessTrip/index');
     }
 
     public function listBT(Request $request)
@@ -911,15 +865,7 @@ class ReportController extends Controller
 
     public function businessTripDec()
     {
-        $users = User::select('nip', 'name', 'id')->get();
-        $inBusinessTripRequest = BusinessTrip::where('type', 'declaration')->pluck('parent_id')->toArray();
-        $listBusinessTrip = BusinessTrip::where('type', 'request')->whereNotIn('id', $inBusinessTripRequest)->get();
-        $listPurposeType = PurposeType::select('name', 'id')->get();
-        $listDestination = Destination::get();
-        $departments = MasterDepartment::select('id', 'name')->get();
-        $statuses = MasterStatus::select('code', 'name')->get();
-
-        return Inertia::render('Report/BusinessTripDeclaration/index', compact('users', 'listPurposeType', 'listBusinessTrip', 'listDestination', 'departments', 'statuses'));
+        return Inertia::render('Report/BusinessTripDeclaration/index');
     }
 
     public function listBTDec(Request $request)
@@ -1108,18 +1054,7 @@ class ReportController extends Controller
 
     public function businessTripOverall()
     {
-        $users = User::select('nip', 'name', 'id')->get();
-
-        $listPurposeType = PurposeType::select('name', 'id')->get();
-        $pajak = Pajak::select('id', 'mwszkz', 'desimal')->get();
-        $costcenter = MasterCostCenter::select('id', 'cost_center', 'controlling_name')->get();
-        $purchasingGroup = PurchasingGroup::select('id', 'purchasing_group')->get();
-
-        $listDestination = Destination::get();
-        $departments = MasterDepartment::select('id', 'name')->get();
-        $statuses = MasterStatus::select('code', 'name')->get();
-
-        return Inertia::render('Report/BusinessTripOverall/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup', 'listDestination', 'departments', 'statuses'));
+        return Inertia::render('Report/BusinessTripOverall/index');
     }
 
     public function listBTOverall(Request $request)
@@ -1547,36 +1482,32 @@ class ReportController extends Controller
 
     public function purchaseVendors(Request $request)
     {
-        $data = Vendor::with('masterBusinesPartnerss') // Eager load the relationship
-            ->where('winner', true) // Filter winners
-            ->get();
+        $data = Vendor::with(['masterBusinesPartnerss' => function ($query) use ($request) {
+            if ($request->search) {
+                $query->where('name_one', 'ilike', '%' . $request->search . '%');
+            }
+        }])->where('winner', true);
 
-        // Map related data to the result
+        if ($request->search) {
+            $data = $data->orWhere('vendor', 'ilike', '%' . $request->search . '%');
+        }
+        
+        $data = $data->limit(50)->get();
+
         $data = $data->map(function ($vendor) {
             return [
-                'vendor' => $vendor->vendor,
-                'vendor_name' => $vendor->masterBusinesPartnerss->name_one ?? '', // Access related column
+                'value' => $vendor->vendor,
+                'label' => $vendor->masterBusinesPartnerss->name_one ?? '',
             ];
-        })->unique('vendor') // Ensure uniqueness based on 'vendor' column
-            ->values(); // Reset collection keys
+        })->unique('vendor')
+            ->values();
 
         return $this->successResponse($data);
     }
 
     public function businessTripAttendance()
     {
-        $users = User::select('nip', 'name', 'id')->get();
-
-        $listPurposeType = PurposeType::select('name', 'id')->get();
-        $pajak = Pajak::select('id', 'mwszkz', 'desimal')->get();
-        $costcenter = MasterCostCenter::select('id', 'cost_center', 'controlling_name')->get();
-        $purchasingGroup = PurchasingGroup::select('id', 'purchasing_group')->get();
-
-        $listDestination = Destination::get();
-        $departments = MasterDepartment::select('id', 'name')->get();
-        $statuses = MasterStatus::select('code', 'name')->get();
-
-        return Inertia::render('Report/BusinessTripAttendance/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup', 'listDestination', 'departments', 'statuses'));
+        return Inertia::render('Report/BusinessTripAttendance/index');
     }
 
     public function listBTAttendance(Request $request)
