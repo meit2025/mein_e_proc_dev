@@ -101,9 +101,17 @@ class ReimbuseController extends Controller
             // })
             ;
         
+            if ($request->search) {
+                $data = $data->where(function($query) use ($request) {
+                    $query->where('master_type_reimburses.name', 'ilike', '%' . $request->search . '%')
+                    ->orWhere('master_type_reimburses.code', 'ilike', '%' . $request->search . '%')
+                    ->orWhere('master_type_reimburses.family_status', 'ilike', '%' . $request->search . '%');
+            });
+        }
+        
         if (count($getFamilieStatus) == 0) {
             $data = 
-                $data->orWhere(function($query) use ($getFamilieStatus) {
+                $data->orWhere(function($query) use ($request) {
                     $query->where('master_type_reimburses.grade_option', 'all')
                     // ->where(function($query) {
                     //     $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
@@ -112,6 +120,14 @@ class ReimbuseController extends Controller
                         $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
                     })
                     ->where('master_type_reimburses.is_employee', true);
+
+                    if ($request->search) {
+                        $query = $query->where(function($query) use ($request) {
+                            $query->where('master_type_reimburses.name', 'ilike', '%' . $request->search . '%')
+                            ->orWhere('master_type_reimburses.code', 'ilike', '%' . $request->search . '%')
+                            ->orWhere('master_type_reimburses.family_status', 'ilike', '%' . $request->search . '%');
+                        });
+                    }
                 });
         } else {
             $data = 
@@ -124,7 +140,7 @@ class ReimbuseController extends Controller
                         $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
                     })
                     ->whereIn('master_type_reimburses.family_status', $getFamilieStatus);
-                })->orWhere(function($query) use ($getFamilieStatus) {
+                })->orWhere(function($query) use ($request,$getFamilieStatus) {
                     $query->where('master_type_reimburses.grade_option', 'all')
                     // ->where(function($query) {
                     //     $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
@@ -136,12 +152,17 @@ class ReimbuseController extends Controller
                         $query->whereIn('master_type_reimburses.family_status', $getFamilieStatus)
                         ->orWhere('master_type_reimburses.is_employee', true);
                     });
+
+                    if ($request->search) {
+                        $query = $query->where(function($query) use ($request) {
+                            $query->where('master_type_reimburses.name', 'ilike', '%' . $request->search . '%')
+                            ->orWhere('master_type_reimburses.code', 'ilike', '%' . $request->search . '%')
+                            ->orWhere('master_type_reimburses.family_status', 'ilike', '%' . $request->search . '%');
+                        });
+                    }
                 });
         }
         if ($hasValue !== null) $data = $data->orWhere('master_type_reimburses.code', $hasValue);
-        if ($request->search) $data = $data->where('master_type_reimburses.name', 'ilike', '%' . $request->search . '%')
-                                    ->orWhere('master_type_reimburses.code', 'ilike', '%' . $request->search . '%')
-                                    ->orWhere('master_type_reimburses.family_status', 'ilike', '%' . $request->search . '%');
         
         $data = $data->limit(50)->groupBy('master_type_reimburses.name', 'master_type_reimburses.code')->get();
     
