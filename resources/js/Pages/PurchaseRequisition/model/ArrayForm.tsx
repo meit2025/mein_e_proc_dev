@@ -1,7 +1,7 @@
 import FormAutocomplete from '@/components/Input/formDropdown';
 import FormInput from '@/components/Input/formInput';
 import useDropdownOptions from '@/lib/getDropdown';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import FormSwitch from '@/components/Input/formSwitch';
@@ -12,6 +12,7 @@ import { Link } from '@inertiajs/react';
 import { useAlert } from '@/contexts/AlertContext';
 import axiosInstance from '@/axiosInstance';
 import axios from 'axios';
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 
 const ArrayForm = ({
   dataIndex,
@@ -43,6 +44,8 @@ const ArrayForm = ({
   const watchAccountAssigment = useWatch({ name: 'item_account_assignment_categories' });
 
   const watchDocumentType = useWatch({ name: 'document_type' });
+  const item_material_group = useWatch({ name: 'item_material_group' });
+  const currency_from = useWatch({ name: 'currency_from' });
 
   useEffect(() => {
     getCostCenter('', {
@@ -97,6 +100,7 @@ const ArrayForm = ({
       hiddenZero: true,
       isMapping: true,
     });
+    handelGetMaterialNumber(item_material_group);
   }, []);
 
   useEffect(() => {
@@ -127,6 +131,30 @@ const ArrayForm = ({
   const handleClick = async () => {
     try {
       const dataobj = getValues();
+      const requiredFields = {
+        item_qty: 'Qty',
+        item_unit_price: 'Unit Price',
+        item_account_assignment_categories: 'Account Assignment',
+        item_material_group: 'Grup Material',
+        item_material_number: 'Number Material',
+        item_uom: 'UOM',
+        item_tax: 'Tax',
+        item_short_text: 'Short Text',
+      };
+
+      // Cek data yang kosong
+      const missingFields = Object.entries(requiredFields)
+        .filter(([key]) => !dataobj[key])
+        .map(([_, label]) => label);
+
+      if (missingFields.length > 0) {
+        showToast(
+          `Harap lengkapi data berikut sebelum menambahkan item:\n- ${missingFields.join('\n- ')}`,
+          'error',
+        );
+        return;
+      }
+
       const id =
         dataobj.item_id !== undefined && dataobj.item_id !== null && dataobj.item_id !== ''
           ? dataobj.item_id
@@ -222,18 +250,18 @@ const ArrayForm = ({
     setValue('item_account_assignment_categories', '');
     setValue('item_asset_number', '');
     setValue('item_cost_center', '');
-
     setValue('item_id', '');
     setValue('item_is_cashAdvance', '');
-    setValue('item_material_group', '');
+    setValue('item_material_group', 'NTSVC');
     setValue('item_material_number', '');
     setValue('item_order_number', '');
     setValue('item_qty', '');
     setValue('item_short_text', '');
     setValue('item_sub_asset_number', '');
-    setValue('item_tax', '');
+    setValue('item_tax', 'V0');
     setValue('item_unit_price', '');
-    setValue('item_uom', '');
+    setValue('item_uom', 'AU');
+    handelGetMaterialNumber('NTSVC');
   };
 
   const handelEdit = async (data: any, rowIndex: any) => {
@@ -316,7 +344,6 @@ const ArrayForm = ({
 
   const handleDelete = (data: any, rowIndex: any) => {
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
-    console.log('currentItems', currentItems);
     const updatedItems = currentItems.filter((item: any, index: number) => item.id !== data.id);
     setValue(`vendors[${dataIndex}].units`, updatedItems);
   };
@@ -331,6 +358,54 @@ const ArrayForm = ({
 
     setValue(`vendors[${x}].units`, currentItems);
   };
+  useEffect(() => {
+    const fetchCurrencyConversion = async () => {
+      const dataobj = getValues();
+      const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
+
+      if (!dataobj.is_conversion_currency) return; // Hanya eksekusi jika konversi diaktifkan
+
+      const updatedItems = await Promise.all(
+        currentItems.map(async (item: any) => {
+          let cleanUnitPrice = item.unit_price;
+          if (currency_from === 'IDR' || currency_from === 'JPY') {
+            cleanUnitPrice = item.unit_price.toString().split(/[.,]/)[0];
+          }
+          try {
+            const response = await axiosInstance.post(
+              '/currency-conversion',
+              {
+                from: dataobj.currency_from,
+                to: dataobj.currency_to,
+                amount: parseInt(item.qty) * parseInt(item.unit_price), // Hitung jumlah konversi
+              },
+              {
+                headers: { 'Content-Type': 'application/json' },
+              },
+            );
+
+            return {
+              ...item,
+              total_amount_conversion: response.data.data,
+              unit_price: cleanUnitPrice,
+              total_amount: parseInt(cleanUnitPrice) * parseInt(item.qty),
+            }; // Tambahkan hasil konversi ke item
+          } catch (error) {
+            return {
+              ...item,
+              total_amount_conversion: 0,
+              unit_price: parseInt(cleanUnitPrice),
+              total_amount: parseInt(cleanUnitPrice) * parseInt(item.qty),
+            }; // Jika gagal, isi dengan 0
+          }
+        }),
+      );
+
+      setValue(`vendors[${dataIndex}].units`, updatedItems); // Simpan kembali hasil konversi
+    };
+
+    fetchCurrencyConversion();
+  }, [currency_from]);
 
   const action = [
     {
@@ -382,6 +457,30 @@ const ArrayForm = ({
     },
   ];
 
+  const CustomFooter = () => {
+    const totalAmount = (dataArrayItem ?? []).reduce(
+      (sum: any, row: any) => parseInt(sum) + parseInt(row.total_amount),
+      0,
+    );
+    const totalAmountConversion = (dataArrayItem ?? []).reduce(
+      (sum: any, row: any) => parseInt(sum) + parseInt(row.total_amount_conversion),
+      0,
+    );
+
+    return (
+      <Box
+        sx={{ display: 'flex', justifyContent: 'flex-end', padding: '10px', background: '#f5f5f5' }}
+      >
+        <Typography sx={{ marginRight: '20px', fontWeight: 'bold' }}>
+          Total Amount: {formatRupiah(totalAmount, false)}
+        </Typography>
+        <Typography sx={{ fontWeight: 'bold' }}>
+          Total Amount Conversion: {formatRupiah(totalAmountConversion, false)}
+        </Typography>
+      </Box>
+    );
+  };
+
   return (
     <div>
       <FormAutocomplete<string>
@@ -405,7 +504,6 @@ const ArrayForm = ({
         classNames='mt-2'
         disabled={disable}
       />
-
       {watch(`vendors[${dataIndex}].type_vendor`) === 'existing' && (
         <>
           <FormAutocomplete<any[]>
@@ -429,7 +527,6 @@ const ArrayForm = ({
           />
         </>
       )}
-
       {watch(`vendors[${dataIndex}].winner`) && (
         <FormInput
           fieldLabel={'Number Quotation'}
@@ -440,7 +537,6 @@ const ArrayForm = ({
           disabled={disable}
         />
       )}
-
       {watch(`vendors[${dataIndex}].type_vendor`) === 'new' && (
         <>
           <FormInput
@@ -453,7 +549,6 @@ const ArrayForm = ({
           />
         </>
       )}
-
       {!disable && (
         <div className='card mt-2'>
           <div className='card-header'>
@@ -475,6 +570,8 @@ const ArrayForm = ({
             />
 
             <FormInput
+              removeDecimal={true}
+              nameDecimal='currency_from'
               fieldLabel={'Unit Price'}
               fieldName={'item_unit_price'}
               isRequired={false}
@@ -637,7 +734,6 @@ const ArrayForm = ({
           </div>
         </div>
       )}
-
       <Box sx={{ width: '100%', overflowX: 'auto', marginTop: '1rem' }}>
         <div className='lg:col-span-2'>
           <div className='grid'>
@@ -652,6 +748,9 @@ const ArrayForm = ({
                       ]}
                       rows={dataArrayItem}
                       hideFooterPagination={true}
+                      slots={{
+                        footer: CustomFooter,
+                      }}
                     />
                   </div>
                 </div>
@@ -660,7 +759,6 @@ const ArrayForm = ({
           </div>
         </div>
       </Box>
-
       {Array.from({ length: tabCount }, (_, index) => (
         <>
           {index !== dataIndex && (

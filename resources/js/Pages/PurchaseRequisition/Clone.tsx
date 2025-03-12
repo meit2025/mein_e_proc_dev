@@ -12,11 +12,17 @@ import { usePage, Link } from '@inertiajs/react';
 import { Auth } from '../Layouts/Header';
 import axiosInstance from '@/axiosInstance';
 import { Loading } from '@/components/commons/Loading';
+import { FieldValues } from 'react-hook-form';
 
 function Create({ id }: { id: number }) {
-  const methods = useForm({
+  const methods = useForm<FieldValues>({
     mode: 'onChange',
     reValidateMode: 'onChange',
+    defaultValues: {
+      item_material_group: 'NTSVC',
+      item_uom: 'AU',
+      item_tax: 'V0',
+    } as FieldValues,
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [dataModel, setDataModel] = useState(formModel);
@@ -33,6 +39,9 @@ function Create({ id }: { id: number }) {
         field.name === 'user_id' ? { ...field, disabled: true } : field,
       );
       methods.setValue('user_id', auth?.user?.id);
+      methods.setValue('item_material_group', 'NTSVC');
+      methods.setValue('item_uom', 'AU');
+      methods.setValue('item_tax', 'V0');
       setDataModel(updatedObject);
     } else {
       setDataModel(dropdownOptions as FormFieldModel<any>[]);
@@ -47,6 +56,9 @@ function Create({ id }: { id: number }) {
         const data = response.data;
         methods.reset(data.data.data);
         methods.setValue('status_id', 1);
+        methods.setValue('item_material_group', 'NTSVC');
+        methods.setValue('item_uom', 'AU');
+        methods.setValue('item_tax', 'V0');
       } catch (error) {
         setIsLoading(false);
         console.log(error);
@@ -59,6 +71,26 @@ function Create({ id }: { id: number }) {
   useEffect(() => {
     getdetail();
   }, [getdetail]);
+
+  const doctType = methods.watch('document_type');
+
+  useEffect(() => {
+    if (doctType === 'ZENT') {
+      methods.setValue('currency_from', 'IDR');
+    }
+
+    if (doctType !== 'ZENT') {
+      methods.setValue('entertainment.tanggal', '');
+      methods.setValue('entertainment.tempat', '');
+      methods.setValue('entertainment.alamat', '');
+      methods.setValue('entertainment.jenis', '');
+      methods.setValue('entertainment.nama_perusahaan', '');
+      methods.setValue('entertainment.nama', '');
+      methods.setValue('entertainment.posisi', '');
+      methods.setValue('entertainment.jenis_usaha', '');
+      methods.setValue('entertainment.jenis_kegiatan', '');
+    }
+  }, [doctType]);
 
   return (
     <div className='card card-grid h-full min-w-full p-4'>

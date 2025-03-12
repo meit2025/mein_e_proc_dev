@@ -24,6 +24,9 @@ function Create() {
       currency_to: 'IDR',
       total_vendor: 1,
       user_id: auth?.user?.id,
+      item_material_group: 'NTSVC',
+      item_uom: 'AU',
+      item_tax: 'V0',
     } as FieldValues,
   });
 
@@ -39,6 +42,9 @@ function Create() {
       );
       methods.setValue('user_id', auth?.user?.id);
       methods.setValue('currency_from', 'IDR');
+      methods.setValue('item_material_group', 'NTSVC');
+      methods.setValue('item_uom', 'AU');
+      methods.setValue('item_tax', 'V0');
       setDataModel(updatedObject);
     } else {
       setDataModel(dropdownOptions as FormFieldModel<any>[]);

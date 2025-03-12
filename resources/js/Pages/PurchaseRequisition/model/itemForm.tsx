@@ -1,6 +1,6 @@
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useEffect } from 'react';
 import { Tabs, Tab, Box, Typography, Button } from '@mui/material';
-import { useWatch } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import ArrayForm from './ArrayForm';
 import axiosInstance from '@/axiosInstance';
 
@@ -41,10 +41,11 @@ export const a11yProps = (index: any) => {
 };
 
 const ItemForm = ({ disable }: { disable: boolean }) => {
-  const [value, setValue] = useState(0);
+  const [value, setValues] = useState(0);
+  const { getValues, setValue, watch } = useFormContext();
 
   const handleChange = (event: any, newValue: number) => {
-    setValue(newValue);
+    setValues(newValue);
   };
 
   // Watch the 'total_vendor' value
@@ -81,6 +82,13 @@ const ItemForm = ({ disable }: { disable: boolean }) => {
       return newState;
     });
   };
+
+  useEffect(() => {
+    const vendors = watch('vendors') || []; // Ambil nilai saat ini
+    if (vendors.length > tabCount) {
+      setValue('vendors', vendors.slice(0, tabCount)); // Potong sesuai tabCount
+    }
+  }, [tabCount]);
 
   return (
     <div className='card card-grid h-full min-w-full p-4'>

@@ -1,8 +1,11 @@
 export const formatRupiah = (
-  value: string | number,
+  value: string | number | null | undefined,
   includeCurrencySymbol: boolean = true,
 ): string => {
-  const stringValue = value.toString();
+  // Jika value null/undefined, ubah jadi 0
+  const safeValue = value ?? 0;
+
+  const stringValue = safeValue.toString();
   const decimalPlaces = stringValue.includes('.') ? stringValue.split('.')[1].length : 0;
 
   const formattedValue = new Intl.NumberFormat('id-ID', {
@@ -11,7 +14,7 @@ export const formatRupiah = (
     minimumFractionDigits: decimalPlaces,
     maximumFractionDigits: decimalPlaces,
   })
-    .format(Number(value))
+    .format(Number(safeValue))
     .replace(',', '.');
 
   return includeCurrencySymbol ? formattedValue : formattedValue.replace(/^Rp\s*/, '');
