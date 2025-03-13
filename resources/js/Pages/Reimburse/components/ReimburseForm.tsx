@@ -50,6 +50,7 @@ import {
   WorkflowComponent,
 } from '@/components/commons/WorkflowComponent';
 import { CustomStatus } from '@/components/commons/CustomStatus';
+import { Search } from 'lucide-react';
 
 interface Props {
   onSuccess?: (value?: boolean) => void;
@@ -298,20 +299,21 @@ export const ReimburseForm: React.FC<Props> = ({
     }
   }, [type]);
 
-  const handleSearchEmployee = async (query: string) => {
-    if (query.length > 0) {
-      getEmployee('', {
-        name: 'name',
-        id: 'nip',
-        tabel: 'users',
-      });
-    }
-  };
-
   const fetchReimburseType = async (index:number, otherParams:any = null) => {
+    const requester = form.getValues('requester');
+
+    if (requester === null) {
+      setDataReimburseType((prev) => {
+        const newData = [...prev];
+        newData[index] = [];
+        return newData;
+      });
+      return;
+    }
+    
     const response = await axiosInstance.get(GET_LIST_MASTER_REIMBUSE_TYPE, {
       params: {
-        user      : form.getValues('requester'),
+        user      : requester,
         hasValue  : otherParams != null ? otherParams.reimburse_type : null
       },
       headers: {
@@ -326,12 +328,12 @@ export const ReimburseForm: React.FC<Props> = ({
     });
   };
 
-  const handleSearchReimburseType = async (query: string, index: number) => {
-    if (query && query.length > 0) {
+  const handleSearchReimburseType = async (search: string, index: number) => {
+    if (search && search.length > 0) {
       try {
         const response = await axiosInstance.get(GET_LIST_MASTER_REIMBUSE_TYPE, {
           params: {
-            search: query,
+            search: search,
             user: form.getValues('requester'),
           },
         });
@@ -619,14 +621,13 @@ export const ReimburseForm: React.FC<Props> = ({
                       disabled={type === ReimburseFormType.edit}
                       placeholder={'Cost Center'}
                       classNames='mt-2 w-full'
-                      onChangeOutside={async (search, data) => {
-                        if (search.length > 0 && search !== data?.value) {
-                          getCostCenter(search, {
+                      onSearch={async (search,) => {
+                        if (search.length > 0) {
+                          await getCostCenter(search, {
                             name: 'cost_center',
                             id: 'id',
                             tabel: 'master_cost_centers',
                             idType: 'string',
-                            search: search,
                           })
                         }
                       }}
@@ -642,7 +643,15 @@ export const ReimburseForm: React.FC<Props> = ({
                       fieldName='requester'
                       disabled={String(currentUser?.is_admin) === '0' || type === ReimburseFormType.edit}
                       placeholder={'Select Employee'}
-                      onSearch={handleSearchEmployee}
+                      onSearch={async (search,) => {
+                        if (search.length > 0) {
+                          await getEmployee(search, {
+                            name: 'name',
+                            id: 'nip',
+                            tabel: 'users',
+                          });
+                        }
+                      }}
                       onChangeOutside={(value) => onChangeEmployee(value)}
                       classNames='mt-2 w-full'
                     />
@@ -743,24 +752,25 @@ export const ReimburseForm: React.FC<Props> = ({
                                 fieldName={`forms.${index}.reimburse_type`}
                                 disabled={form.getValues('requester') == '' || type === ReimburseFormType.edit}
                                 placeholder={'Select Reimburse Type'}
-                                onChangeOutside={(query: string, data: any) => {
-                                  const currentRequester = form.getValues('requester');
-                                  if (
-                                    query !== data?.value &&
-                                    currentRequester !== ''
-                                  ) handleSearchReimburseType(query, index);
-
-                                  if (data?.value) {
-                                    let selectedValue = dataReimburseType[index].filter(reimburseType => reimburseType.value == data.value)[0];
-                                    
+                                onSearch={async (search: string) => {
+                                  const isLabelMatch = dataReimburseType[index]?.some(reimburseType => reimburseType.label === search);
+                                  if (!isLabelMatch) {
+                                    await handleSearchReimburseType(search, index);
+                                  }
+                                }}
+                                onChangeOutside={async (data: any) => {
+                                  await fetchReimburseType(index);
+                                  
+                                  if (data) {
+                                    let selectedValue = dataReimburseType[index].filter(reimburseType => reimburseType.value == data)[0];
                                     updateForm(index, {
                                       ...formValue,
-                                      reimburse_type: data?.value,
+                                      reimburse_type: data,
                                       type: selectedValue.is_employee === 1 ? 'Employee' : 'Family'
                                     });
                                     
                                     if (selectedValue.is_employee === 1) {
-                                      getDataByLimit(index, {reimburse_type: data?.value, for: null});
+                                      getDataByLimit(index, {reimburse_type: data, for: null});
                                     } else {
                                       setDetailLimit((prev) => {
                                         const newDetailLimit = [...prev];
@@ -768,7 +778,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                         return newDetailLimit;
                                       })
                                       form.setValue(`forms.${index}.balance`, '')
-                                      fetchFamily(index, {type: 'Family', reimburse_type: data?.value})
+                                      fetchFamily(index, {type: 'Family', reimburse_type: data})
                                     }
                                     
                                   } else {
@@ -882,21 +892,21 @@ export const ReimburseForm: React.FC<Props> = ({
                                 disabled={type === ReimburseFormType.edit}
                                 placeholder={'Puchasing Group'}
                                 classNames='mt-2 w-full'
-                                onChangeOutside={async (search, data) => {
-                                  if (search.length > 0 && search !== data?.value) {
+                                onSearch={async(search) => {
+                                  if (search.length > 0) {
                                     await getPurchasingGroup(search, {
                                       name: 'purchasing_group_desc',
                                       id: 'id',
                                       tabel: 'purchasing_groups',
                                       idType: 'string',
-                                      search: search,
                                     })
                                   }
-                                  
-                                  if (data?.value) {
+                                }}
+                                onChangeOutside={async (data) => {
+                                  if (data) {
                                     updateForm(index, {
                                       ...formValue,
-                                      purchasing_group: data?.value,
+                                      purchasing_group: data,
                                     });
                                   }
                                 }}

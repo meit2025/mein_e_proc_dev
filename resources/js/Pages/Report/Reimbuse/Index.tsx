@@ -1,57 +1,21 @@
 import React, { useState,useEffect } from 'react';
-import { CustomDialog } from '@/components/commons/CustomDialog';
 import DataGridComponent from '@/components/commons/DataGrid';
 import { REPORT_REIMBURSE_LIST, REPORT_REIMBURSE_EXPORT } from '@/endpoint/report/api';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import { useAlert } from '@/contexts/AlertContext';
 import axiosInstance from '@/axiosInstance';
-import { FormType } from '@/lib/utils';
 import { columns } from './model/listModel';
 import FormAutocomplete from '@/components/Input/formDropdown';
 import { FormProvider, get, useForm } from 'react-hook-form';
 import useDropdownOptions from '@/lib/getDropdown';
 
-interface Props {
-    users: any[];
-    categories: string;
-    periods: any[];
-    currencies: any[];
-    purchasing_groups: any[];
-    taxes: any[];
-    cost_center: any[];
-    currentUser: any;
-    latestPeriod: any;
-    types: any[];
-    departments: any[];
-    statuses: any[];
-}
+interface Props {}
 
-export const Index = ({
-    purchasing_groups,
-    users,
-    categories,
-    currencies,
-    taxes,
-    cost_center,
-    periods,
-    currentUser,
-    latestPeriod,
-    types,
-    departments,
-    statuses,
-}: Props) => {
-    const [openForm, setOpenForm] = React.useState<boolean>(false);
-    const [formType, setFormType] = React.useState({
-        type: FormType.create,
-        id: undefined,
-    });
+export const Index = ({}: Props) => {
 
     // Filter states
     const [startDate, setStartDate] = React.useState<string | null>(null);
     const [endDate, setEndDate] = React.useState<string | null>(null);
-    const [status, setStatus] = React.useState<string>('');
-    const [type, setType] = React.useState<string>('');
-    const [department, setDepartment] = React.useState<string>('');
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
     const { showToast } = useAlert();
