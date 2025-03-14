@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/shacdn/button';
 import { Button as ButtonMui, FormHelperText } from '@mui/material';
-import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -50,15 +49,12 @@ import {
   WorkflowComponent,
 } from '@/components/commons/WorkflowComponent';
 import { CustomStatus } from '@/components/commons/CustomStatus';
-import { Search } from 'lucide-react';
 
 interface Props {
   onSuccess?: (value?: boolean) => void;
   taxDefaultValue: string;
   uomDefaultValue: string;
   currencies: Currency[];
-  categories: string;
-  users: User[];
   edit_url?: string;
   update_url?: string;
   store_url?: string;
@@ -77,8 +73,6 @@ export const ReimburseForm: React.FC<Props> = ({
   currencies,
   taxDefaultValue,
   uomDefaultValue,
-  categories,
-  users,
   edit_url,
   update_url,
   store_url,
@@ -226,7 +220,7 @@ export const ReimburseForm: React.FC<Props> = ({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues
   });
-
+  
   const { fields: formFields, update: updateForm } = useFieldArray({
     control: form.control,
     name: 'forms',
@@ -301,8 +295,8 @@ export const ReimburseForm: React.FC<Props> = ({
 
   const fetchReimburseType = async (index:number, otherParams:any = null) => {
     const requester = form.getValues('requester');
-
-    if (requester === null) {
+    
+    if (requester === null || requester === '') {
       setDataReimburseType((prev) => {
         const newData = [...prev];
         newData[index] = [];
@@ -574,11 +568,37 @@ export const ReimburseForm: React.FC<Props> = ({
     }
   }, [form.watch('forms'), form.watch('requester')]);
 
+  const checkValidation = (error: any) => {
+    const checkError = error;
+    if (Object.keys(checkError).length > 0) {
+      let errorMessages = `
+        <h3 style="color: rgb(211, 47, 47);font-weight: bolder">Error</h3>       
+        <ul style="list-style-type: disc;margin-left: 1rem">
+      `;
+      Object.entries(checkError).forEach(([key, value]) => {
+        if (key === 'forms') {
+          value.forEach((item: any, index: number) => {
+            errorMessages += `</br><strong>Form ${index + 1}:</strong></br>`;
+            Object.values(item).forEach((subItem: any) => {
+              errorMessages += `<li>${subItem.message}</li>`;
+            });
+          })
+        } else {
+          errorMessages += `<li>${value.message}</li>`;
+        }
+      })
+      errorMessages += '</ul>';
+      showToast(<div dangerouslySetInnerHTML={{ __html: errorMessages }} />, 'error')
+    }
+  }
+
   return (
     <ScrollArea className='h-[600px] w-full'>
       <CustomFormWrapper isLoading={isLoading}>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={form.handleSubmit(onSubmit, (errors) => { 
+            checkValidation(errors);
+          })}>
             <table className='text-xs mt-4 reimburse-form-table font-thin w-full'>
               <tbody>
                 <tr>
@@ -713,7 +733,6 @@ export const ReimburseForm: React.FC<Props> = ({
             <Tabs value={activeTab} onValueChange={handleTabChange} className='w-full'>
               <TabsList className={'flex items-center justify-start space-x-4'}>
                 {' '}
-                {/* Flexbox for horizontal layout */}
                 {Array.from({ length: form.watch('formCount') || 1 }).map((_, index) => (
                   <TabsTrigger key={index} value={`form${index + 1}`}>
                     Form {index + 1}
@@ -1320,7 +1339,6 @@ export const ReimburseForm: React.FC<Props> = ({
                 />
               )}
             </div>
-            {/* <WorkflowComponent /> */}
             <Separator className='my-4' />
             <div className='mt-4 flex justify-end'>
               <Button type='submit' className='w-32'>

@@ -90,8 +90,6 @@ export const Index = ({
           <ReimburseForm
             taxDefaultValue={taxDefaultValue}
             uomDefaultValue={uomDefaultValue}
-            users={users}
-            categories={categories}
             currencies={currencies}
             currentUser={currentUser}
             edit_url={DETAIL_REIMBURSE(formType.id)}
