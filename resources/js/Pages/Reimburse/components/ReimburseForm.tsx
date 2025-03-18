@@ -154,15 +154,15 @@ export const ReimburseForm: React.FC<Props> = ({
       }
     });
 
-    getUom('', {
-      name: 'unit_of_measurement_text',
-      id: 'id',
-      tabel: 'uoms',
-      where:{
-        key       : 'iso_code',
-        parameter : 'PCE'
-      }
-    });
+    // getUom('', {
+    //   name: 'unit_of_measurement_text',
+    //   id: 'id',
+    //   tabel: 'uoms',
+    //   where:{
+    //     key       : 'iso_code',
+    //     parameter : 'PC'
+    //   }
+    // });
 
     getPurchasingGroup('', {
       name: 'purchasing_group_desc',
@@ -1002,14 +1002,14 @@ export const ReimburseForm: React.FC<Props> = ({
                                           <SelectValue placeholder='-' />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          {(dataUom ?? []).map((uom, index) => (
+                                          {/* {(dataUom ?? []).map((uom, index) => ( */}
                                             <SelectItem
-                                              key={uom.value}
-                                              value={uom.value.toString()}
+                                              key="2"
+                                              value="2"
                                             >
-                                              {`${uom.label} - ${uom.iso_code}`}
+                                              Piece - PC
                                             </SelectItem>
-                                          ))}
+                                          {/* ))} */}
                                         </SelectContent>
                                       </Select>
                                     </FormControl>
