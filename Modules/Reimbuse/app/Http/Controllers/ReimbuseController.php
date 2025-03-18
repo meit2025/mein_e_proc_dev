@@ -207,10 +207,20 @@ class ReimbuseController extends Controller
             }
 
             if ($request->search) {
-                $query = $query->where(function ($query) use ($request) {
-                    $query->where('code', 'ILIKE', '%' . $request->search . '%')
+                $query = $query->orWhere('code', 'ILIKE', '%' . $request->search . '%')
                     ->orWhere('remark', 'ILIKE', '%' . $request->search . '%')
                     ->orWhere('requester', 'ILIKE', '%' . $request->search . '%');
+
+                $query = $query->orWhereHas('reimburses', function ($q) use ($request) {
+                    $q->where('remark', 'ILIKE', '%' . $request->search . '%');
+                });
+
+                $query = $query->orWhereHas('status', function ($q) use ($request) {
+                    $q->where('name', 'ILIKE', '%' . $request->search . '%');
+                });
+
+                $query = $query->orWhereHas('user', function ($q) use ($request) {
+                    $q->where('name', 'ILIKE', '%' . $request->search . '%');
                 });
             }
 

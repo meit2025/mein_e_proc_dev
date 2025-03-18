@@ -778,8 +778,6 @@ export const ReimburseForm: React.FC<Props> = ({
                                   }
                                 }}
                                 onChangeOutside={async (data: any) => {
-                                  await fetchReimburseType(index);
-                                  
                                   if (data) {
                                     let selectedValue = dataReimburseType[index].filter(reimburseType => reimburseType.value == data)[0];
                                     updateForm(index, {
@@ -844,6 +842,9 @@ export const ReimburseForm: React.FC<Props> = ({
                                       }
                                     })
                                   }
+                                }}
+                                onFocus={() => {
+                                  fetchReimburseType(index);
                                 }}
                                 classNames='mt-2 w-full'
                               />
