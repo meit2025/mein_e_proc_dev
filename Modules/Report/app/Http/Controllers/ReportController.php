@@ -78,6 +78,10 @@ class ReportController extends Controller
                 $query = $query->orWhereHas('status', function ($q) use ($request) {
                     $q->where('name', 'ILIKE', '%' . $request->search . '%');
                 });
+
+                $query = $query->orWhereHas('user', function ($q) use ($request) {
+                    $q->where('name', 'ILIKE', '%' . $request->search . '%');
+                });
             }
 
             if ($startDate && $endDate) {
@@ -175,6 +179,9 @@ class ReportController extends Controller
                         })
                         ->orWhereHas('status', function ($q) use ($search) {
                             $q->where('name', 'ILIKE', '%' . $search . '%');
+                        })
+                        ->orWhereHas('user', function ($q) use ($search) {
+                            $q->where('name', 'ILIKE', '%' . $search . '%');
                         });
                 });
             }
@@ -190,7 +197,7 @@ class ReportController extends Controller
             }
             if ($type) {
                 $query->whereHas('reimburses', function ($q) use ($type) {
-                    $q->where('type', $type);
+                    $q->where('reimburse_type', $type);
                 });
             }
             if ($department) {
@@ -919,7 +926,7 @@ class ReportController extends Controller
         }
 
 
-        $data = $query->where('type', 'declaration')->latest()->paginate($perPage);
+        $data = $query->where('type', 'declaration')->latest()->search(request(['search']))->paginate($perPage);
 
         $data->getCollection()->transform(function ($map) {
 
@@ -1002,7 +1009,7 @@ class ReportController extends Controller
         }
 
         // Filter for type declaration
-        $data = $query->where('type', 'declaration')->latest()->get();
+        $data = $query->where('type', 'declaration')->latest()->search(request(['search']))->get();
 
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
@@ -1060,7 +1067,7 @@ class ReportController extends Controller
     public function listBTOverall(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType', 'status', 'businessTripDestination', 'requestFor']);
+        $query =  BusinessTrip::query()->with(['purposeType', 'status', 'businessTripDestination', 'requestFor', 'requestedBy']);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
@@ -1111,7 +1118,6 @@ class ReportController extends Controller
         $data = $query->latest()->search(request(['search']))->paginate($perPage);
 
         $data->getCollection()->transform(function ($map) {
-
             $purposeRelations = $map->purposeType ? $map->purposeType->name : ''; // Assuming 'name' is the field
 
             return [
@@ -1119,12 +1125,12 @@ class ReportController extends Controller
                 'status_id' => $map->status_id,
                 'request_no' => $map->request_no,
                 'remarks' => $map->remarks,
-                'request_for' => $map->requestFor->name,
+                'request_for' => $map->requestFor->name ?? '',
                 'employee_no' => $map->requestedBy->nip,
-                'employee_name' => $map->requestedBy->name,
-                'position' => $map->requestedBy->positions->name,
-                'dept' => $map->requestedBy->departements->name,
-                'division' => $map->requestedBy->divisions->name,
+                'employee_name' => $map->requestedBy->name ?? '',
+                'position' => $map->requestedBy->positions->name ?? '',
+                'dept' => $map->requestedBy->departements->name ?? '',
+                'division' => $map->requestedBy->divisions->name ?? '',
                 'status' => [
                     'name' => $map->status->name,
                     'classname' => $map->status->classname,
@@ -1151,6 +1157,17 @@ class ReportController extends Controller
         $destination = $request->get('destination');
         $department = $request->get('department');
 
+        if ($request->approval == "1") {
+            $data = Approval::where('user_id', Auth::user()->id)
+                ->where('document_name', 'TRIP')
+                ->pluck('document_id')
+                ->toArray();
+            $query = $query->whereIn('id', $data);
+        }
+        if (Auth::user()->is_admin != '1') {
+            $query = $query->where('created_by', Auth::user()->id)
+                ->orWhere('request_for', Auth::user()->id);
+        }
 
         if ($startDate && $endDate) {
             $query->whereDate('created_at', '>=', $startDate)
@@ -1167,17 +1184,6 @@ class ReportController extends Controller
             });
         }
 
-        if ($request->approval == "1") {
-            $data = Approval::where('user_id', Auth::user()->id)
-                ->where('document_name', 'TRIP')
-                ->pluck('document_id')
-                ->toArray();
-            $query = $query->whereIn('id', $data);
-        }
-        if (Auth::user()->is_admin != '1') {
-            $query = $query->where('created_by', Auth::user()->id)
-                ->orWhere('request_for', Auth::user()->id);
-        }
         if ($destination) {
             $query->whereHas('businessTripDestination', function ($q) use ($destination) {
                 $q->where('destination', $destination);
