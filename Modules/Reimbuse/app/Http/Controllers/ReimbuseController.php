@@ -287,7 +287,8 @@ class ReimbuseController extends Controller
             $currencies = Currency::select('code', 'name')->where('code', 'IDR')->get();
             $cost_center = MasterCostCenter::select('id', 'cost_center')->get();
             $taxDefaultValue = (string) Pajak::where('mwszkz', 'V0')->first()->id;
-            $uomDefaultValue = (string) Uom::where('iso_code', 'PCE')->first()->id;
+            // $uomDefaultValue = (string) Uom::where('iso_code', 'PC')->first()->id;
+            $uomDefaultValue = "2";
             return Inertia::render(
                 'Reimburse/Index',
                 compact('currentUser',  'users', 'categories', 'currencies', 'taxDefaultValue', 'uomDefaultValue')
