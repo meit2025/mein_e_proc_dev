@@ -133,6 +133,9 @@ class DropdownMasterController extends Controller
             // }
         }
 
+        // get opsi untuk list yang memiliki value, karena kondisi list opsi terdapat limit ada kemungkinan list opsi diluar limit sehingga dropdown blank
+        if ($request->hasValue) $data = $data->orWhere($request->hasValueKey, $request->hasValue);
+
         if ($request->softDelete == 'true') {
             $data = $data->whereNull('deleted_at');
         }
