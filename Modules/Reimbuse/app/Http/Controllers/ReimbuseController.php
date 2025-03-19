@@ -19,6 +19,7 @@ use Modules\Master\Models\Family;
 use Modules\Master\Models\MasterCostCenter;
 use Modules\Master\Models\MasterTypeReimburse;
 use Modules\Master\Models\MasterTypeReimburseGrades;
+use Modules\Master\Models\MasterTypeReimburseUserAssign;
 use Modules\Master\Models\Pajak;
 use Modules\Master\Models\Uom;
 use Modules\Master\Models\PurchasingGroup;
@@ -533,14 +534,19 @@ class ReimbuseController extends Controller
         if ($request->search) {
             $data = $data->where('name', 'ilike', '%' . $request->search . '%')->orWhere('nip', 'ilike', '%' . $request->search . '%');
         }
-
-        $data = $data->limit(50)->get();
+        if ($request->hasValue) $data = $data->orWhere($request->hasValueKey, $request->hasValue);
+        $data = $data->orderBy('name')->limit(50)->get();
         return $this->successResponse($data);
     }
 
     public function cloneValidation($id) {
         $data =  ReimburseGroup::with(['reimburses.reimburseType'])->where('id', $id)->first();
         foreach ($data->reimburses as $key => $value) {
+            $cekUserAssignReimburseType = MasterTypeReimburseUserAssign::where('user_id', Auth::user()->id)->where('reimburse_type_id', $value->reimburseType->id)->first();
+            if ($cekUserAssignReimburseType == null || ($cekUserAssignReimburseType != null && $cekUserAssignReimburseType->is_assign == false)) {
+                return $this->errorResponse('Failed, unable to clone this data as the reimbursement type used is not yet assigned to you.');
+            }
+
             $dateNow = Carbon::now()->format('Y-m-d');
             if ($value->reimburseType->interval_claim_period != null && ($dateNow >= $value->claim_date && $dateNow <= Carbon::createFromFormat('Y-m-d', $value->claim_date)->addDays($value->reimburseType->interval_claim_period))) {
                 return $this->errorResponse('Failed, unable to clone this data as the data type reimbursement used falls within the claim period.');

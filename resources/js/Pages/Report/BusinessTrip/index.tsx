@@ -43,7 +43,7 @@ export const Index = ({}: Props) => {
 
         getDestination('', {
             name: 'destination',
-            id: 'id',
+            id: 'destination',
             tabel: 'destinations',
         });
 
@@ -112,12 +112,20 @@ export const Index = ({}: Props) => {
                         <FormAutocomplete<any>
                             fieldName='status'
                             placeholder={'Select Status'}
-                            classNames='mt-2 w-40'
+                            classNames='mt-2 w-64'
                             fieldLabel={''}
                             options={dataStatus}
                             onSearch={(search: string) => {
-                                if (search.length > 0) {
+                                const isLabelMatch = dataStatus?.some(option => option.label === search);
+                                if (search.length > 0 && !isLabelMatch) {
                                     getStatus(search, {
+                                        name: 'name',
+                                        id: 'code',
+                                        tabel: 'master_statuses',
+                                        search: search,
+                                    });
+                                } else {
+                                    getStatus('', {
                                         name: 'name',
                                         id: 'code',
                                         tabel: 'master_statuses',
@@ -126,6 +134,13 @@ export const Index = ({}: Props) => {
                             }}
                             onChangeOutside={(data: any) => {
                                 setStatusFilter(data);
+                            }}
+                            onFocus={() => {
+                                getStatus('', {
+                                    name: 'name',
+                                    id: 'code',
+                                    tabel: 'master_statuses',
+                                })
                             }}
                         />
                     </div>
@@ -138,8 +153,16 @@ export const Index = ({}: Props) => {
                             fieldLabel={''}
                             options={dataPurposeType}
                             onSearch={(search: string) => {
-                                if (search.length > 0) {
+                                const isLabelMatch = dataPurposeType?.some(option => option.label === search);
+                                if (search.length > 0 && !isLabelMatch) {
                                     getPurposeType(search, {
+                                        name: 'name',
+                                        id: 'id',
+                                        tabel: 'purpose_types',
+                                        search: search,
+                                    });
+                                } else {
+                                    getPurposeType('', {
                                         name: 'name',
                                         id: 'id',
                                         tabel: 'purpose_types',
@@ -148,6 +171,13 @@ export const Index = ({}: Props) => {
                             }}
                             onChangeOutside={(data: any) => {
                                 setPurposeTypeFilter(data);
+                            }}
+                            onFocus={() => {
+                                getPurposeType('', {
+                                    name: 'name',
+                                    id: 'id',
+                                    tabel: 'purpose_types',
+                                })
                             }}
                         />
                     </div>
@@ -161,14 +191,31 @@ export const Index = ({}: Props) => {
                             fieldLabel={''}
                             options={dataDestination}
                             onSearch={(search: string) => {
-                                getDestination(search, {
-                                    name: 'destination',
-                                    id: 'id',
-                                    tabel: 'destinations',
-                                });
+                                const isLabelMatch = dataPurposeType?.some(option => option.label === search);
+                                if (search.length > 0 && !isLabelMatch) {
+                                    getDestination(search, {
+                                        name: 'destination',
+                                        id: 'destination',
+                                        tabel: 'destinations',
+                                        search: search,
+                                    });
+                                } else {
+                                    getDestination('', {
+                                        name: 'destination',
+                                        id: 'destination',
+                                        tabel: 'destinations',
+                                    });
+                                }
                             }}
                             onChangeOutside={(data: any) => {
                                 setDestinationFilter(data);
+                            }}
+                            onFocus={() => {
+                                getDestination('', {
+                                    name: 'destination',
+                                    id: 'destination',
+                                    tabel: 'destinations',
+                                })
                             }}
                         />
                     </div>
@@ -182,14 +229,31 @@ export const Index = ({}: Props) => {
                             fieldLabel={''}
                             options={dataDepartment}
                             onSearch={(search: string) => {
-                                getDepartment(search, {
-                                    name: 'name',
-                                    id: 'id',
-                                    tabel: 'master_departments',
-                                });
+                                const isLabelMatch = dataPurposeType?.some(option => option.label === search);
+                                if (search.length > 0 && !isLabelMatch) {
+                                    getDepartment(search, {
+                                        name: 'name',
+                                        id: 'id',
+                                        tabel: 'master_departments',
+                                        search: search,
+                                    });
+                                } else {
+                                    getDepartment('', {
+                                        name: 'name',
+                                        id: 'id',
+                                        tabel: 'master_departments',
+                                    });
+                                }
                             }}
                             onChangeOutside={(data: any) => {
                                 setDepartmentFilter(data);
+                            }}
+                            onFocus={() => {
+                                getDepartment('', {
+                                    name: 'name',
+                                    id: 'id',
+                                    tabel: 'master_departments',
+                                })
                             }}
                         />
                     </div>

@@ -144,87 +144,72 @@ export const ReimburseForm: React.FC<Props> = ({
   });
   
   useEffect(() => {
-    getTax('', {
-      name: 'mwszkz',
-      id: 'id',
-      tabel: 'pajaks',
-      where:{
-        key       : 'mwszkz',
-        parameter : 'V0'
+    const fetchData = async () => {
+      if (type === ReimburseFormType.edit || type === ReimburseFormType.clone) {
+        setLoading(true);
+        await getDetailData();
       }
-    });
 
-    // getUom('', {
-    //   name: 'unit_of_measurement_text',
-    //   id: 'id',
-    //   tabel: 'uoms',
-    //   where:{
-    //     key       : 'iso_code',
-    //     parameter : 'PC'
-    //   }
-    // });
+      getTax('', {
+        name: 'mwszkz',
+        id: 'id',
+        tabel: 'pajaks',
+        where:{
+          key       : 'mwszkz',
+          parameter : 'V0'
+        }
+      });
 
-    getPurchasingGroup('', {
-      name: 'purchasing_group_desc',
-      id: 'id',
-      tabel: 'purchasing_groups',
-      idType: 'string',
-    });
+      // getUom('', {
+      //   name: 'unit_of_measurement_text',
+      //   id: 'id',
+      //   tabel: 'uoms',
+      //   where:{
+      //     key       : 'iso_code',
+      //     parameter : 'PC'
+      //   }
+      // });
+      
+      let activeForm = parseInt(activeTab.split('form')[1]) - 1;
+      getPurchasingGroup('', {
+        name: 'purchasing_group_desc',
+        id: 'id',
+        tabel: 'purchasing_groups',
+        idType: 'string',
+        hasValue: {
+          key: form.getValues('forms')[activeForm]?.purchasing_group ? 'id' : '',
+          value: form.getValues('forms')[activeForm]?.purchasing_group ?? '',
+        }
+      });
 
-    getCostCenter('', {
-      name: 'cost_center',
-      id: 'id',
-      tabel: 'master_cost_centers',
-      idType: 'string',
-    });
+      getCostCenter('', {
+        name: 'cost_center',
+        id: 'id',
+        tabel: 'master_cost_centers',
+        idType: 'string',
+        hasValue: {
+          key: form.getValues('cost_center') ? 'id' : '',
+          value: form.getValues('cost_center') ?? '',
+        }
+      });
 
-    getEmployee('', {
-      name: 'name',
-      id: 'nip',
-      tabel: 'users',
-    });
+      getEmployee('', {
+        name: 'name',
+        id: 'nip',
+        tabel: 'users',
+        hasValue: {
+          key: form.getValues('requester') ? 'name' : '',
+          value: form.getValues('requester') ?? '',
+        }
+      });
+      
+      if (form.getValues('requester') !== '' && type === ReimburseFormType.create) {
+        fetchReimburseType(0);
+      }
+    };
 
-    if (form.getValues('requester') !== '') {
-      fetchReimburseType(0);
-    }
-  }, []);
-
-  const defaultValues = {
-    formCount: '1',
-    remark_group: '',
-    cost_center: '',
-    requester: String(currentUser?.is_admin) === '1' ? '' : currentUser?.nip,
-    forms: [
-      {
-        reimburseId: '',
-        for: '',
-        group: '',
-        reimburse_type: '',
-        short_text: '',
-        balance: '',
-        remaining_balance_when_request: 0,
-        currency: 'IDR',
-        tax_on_sales: taxDefaultValue,
-        purchase_requisition_unit_of_measure: uomDefaultValue,
-        purchasing_group: '',
-        type: '',
-        item_delivery_data: new Date(),
-        claim_date: new Date(),
-        attachment: [],
-        // url: '',
-      },
-    ],
-  };
-  
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: defaultValues
-  });
-  
-  const { fields: formFields, update: updateForm } = useFieldArray({
-    control: form.control,
-    name: 'forms',
-  });
+    fetchData();
+  }, [type]);
 
   async function getDetailData() {
     form.setValue('forms', []);
@@ -286,12 +271,42 @@ export const ReimburseForm: React.FC<Props> = ({
     }
   }
 
-  useEffect(() => {
-    if (type === ReimburseFormType.edit || type === ReimburseFormType.clone) {
-      setLoading(true);
-      getDetailData();
-    }
-  }, [type]);
+  const defaultValues = {
+    formCount: '1',
+    remark_group: '',
+    cost_center: '',
+    requester: String(currentUser?.is_admin) === '1' ? '' : currentUser?.nip,
+    forms: [
+      {
+        reimburseId: '',
+        for: '',
+        group: '',
+        reimburse_type: '',
+        short_text: '',
+        balance: '',
+        remaining_balance_when_request: 0,
+        currency: 'IDR',
+        tax_on_sales: taxDefaultValue,
+        purchase_requisition_unit_of_measure: uomDefaultValue,
+        purchasing_group: '',
+        type: '',
+        item_delivery_data: new Date(),
+        claim_date: new Date(),
+        attachment: [],
+        // url: '',
+      },
+    ],
+  };
+  
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: defaultValues
+  });
+  
+  const { fields: formFields, update: updateForm } = useFieldArray({
+    control: form.control,
+    name: 'forms',
+  });
 
   const fetchReimburseType = async (index:number, otherParams:any = null) => {
     const requester = form.getValues('requester');
@@ -481,7 +496,7 @@ export const ReimburseForm: React.FC<Props> = ({
       const response = await axiosInstance.get('reimburse/data-limit-and-balance', {
         params: params,
       });
-
+      
       setDetailLimit((prev) => {
         const forms = form.getValues('forms');
         const sameTypeForms = forms.filter((formItem, idx) => 
@@ -642,14 +657,31 @@ export const ReimburseForm: React.FC<Props> = ({
                       placeholder={'Cost Center'}
                       classNames='mt-2 w-full'
                       onSearch={async (search,) => {
-                        if (search.length > 0) {
+                        const isLabelMatch = dataCostCenter?.some(option => option.label === search);
+                        if (search.length > 0 && !isLabelMatch) {
                           await getCostCenter(search, {
+                            name: 'cost_center',
+                            id: 'id',
+                            tabel: 'master_cost_centers',
+                            idType: 'string',
+                            search: search
+                          })
+                        } else {
+                          getCostCenter('', {
                             name: 'cost_center',
                             id: 'id',
                             tabel: 'master_cost_centers',
                             idType: 'string',
                           })
                         }
+                      }}
+                      onFocus={() => {
+                        getCostCenter('', {
+                          name: 'cost_center',
+                          id: 'id',
+                          tabel: 'master_cost_centers',
+                          idType: 'string',
+                        })
                       }}
                     />
                   </td>
@@ -663,9 +695,17 @@ export const ReimburseForm: React.FC<Props> = ({
                       fieldName='requester'
                       disabled={String(currentUser?.is_admin) === '0' || type === ReimburseFormType.edit}
                       placeholder={'Select Employee'}
-                      onSearch={async (search,) => {
-                        if (search.length > 0) {
-                          await getEmployee(search, {
+                      onSearch={(search) => {
+                        const isLabelMatch = dataEmployee?.some(option => option.label === search);
+                        if (search.length > 0 && !isLabelMatch) {
+                          getEmployee(search, {
+                            name: 'name',
+                            id: 'nip',
+                            tabel: 'users',
+                            search: search
+                          });
+                        } else {
+                          getEmployee('', {
                             name: 'name',
                             id: 'nip',
                             tabel: 'users',
@@ -673,6 +713,13 @@ export const ReimburseForm: React.FC<Props> = ({
                         }
                       }}
                       onChangeOutside={(value) => onChangeEmployee(value)}
+                      onFocus={() => {
+                        getEmployee('', {
+                          name: 'name',
+                          id: 'nip',
+                          tabel: 'users',
+                        });
+                      }}
                       classNames='mt-2 w-full'
                     />
                   </td>
@@ -912,9 +959,18 @@ export const ReimburseForm: React.FC<Props> = ({
                                 disabled={type === ReimburseFormType.edit}
                                 placeholder={'Puchasing Group'}
                                 classNames='mt-2 w-full'
-                                onSearch={async(search) => {
-                                  if (search.length > 0) {
-                                    await getPurchasingGroup(search, {
+                                onSearch={(search) => {
+                                  const isLabelMatch = dataPurchasingGroup?.some(option => option.label === search);
+                                  if (search.length > 0 && !isLabelMatch) {
+                                    getPurchasingGroup(search, {
+                                      name: 'purchasing_group_desc',
+                                      id: 'id',
+                                      tabel: 'purchasing_groups',
+                                      idType: 'string',
+                                      search: search
+                                    })
+                                  } else {
+                                    getPurchasingGroup('', {
                                       name: 'purchasing_group_desc',
                                       id: 'id',
                                       tabel: 'purchasing_groups',
@@ -922,13 +978,21 @@ export const ReimburseForm: React.FC<Props> = ({
                                     })
                                   }
                                 }}
-                                onChangeOutside={async (data) => {
+                                onChangeOutside={(data) => {
                                   if (data) {
                                     updateForm(index, {
                                       ...formValue,
                                       purchasing_group: data,
                                     });
                                   }
+                                }}
+                                onFocus={() => {
+                                  getPurchasingGroup('', {
+                                    name: 'purchasing_group_desc',
+                                    id: 'id',
+                                    tabel: 'purchasing_groups',
+                                    idType: 'string',
+                                  })
                                 }}
                               />
                               {form.formState.errors?.forms?.[index]?.purchasing_group && (

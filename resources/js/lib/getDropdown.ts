@@ -8,6 +8,12 @@ interface WhereProps {
   isNotNull?: boolean;
   groupBy?: string;
 }
+
+interface HasValueProps {
+  key?: string;
+  value?: any;
+}
+
 interface StructDropdown {
   isMapping?: boolean;
   name: string;
@@ -16,6 +22,7 @@ interface StructDropdown {
   where?: WhereProps;
   search?: string;
   attribut?: string;
+  hasValue?: HasValueProps; // karena ada limit data ada kemungkinan value tidak terdapat di option (edit form), karena itu ditambah object key ini untu melakukan orwhere
   join?: string;
   hiddenZero?: boolean;
   idType?: 'number' | 'string';
@@ -54,6 +61,8 @@ const useDropdownOptions = (urls: string = 'api/master/dropdown') => {
           declaration: struct.declaration ?? '',
           groupBy: struct.where?.groupBy ?? '',
           attribut: struct.attribut ?? '',
+          hasValueKey: struct.hasValue?.key ?? '',
+          hasValue: struct.hasValue?.value ?? '',
           join: struct.join ?? '',
           softDelete: struct.softDelete ?? '',
         },

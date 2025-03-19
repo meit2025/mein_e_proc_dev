@@ -373,26 +373,26 @@ export const sidebarAdmin = () => [
                             'approval pr delete',
                         ],
                     },
-                    {
-                        name: 'Approval Conditional Route',
-                        route: LIST_PAGE_APPROVAL_CONDITIONAL_USER,
-                        role: [
-                            'approval conditional user create',
-                            'approval conditional user view',
-                            'approval conditional user update',
-                            'approval conditional user delete',
-                        ],
-                    },
-                    {
-                        name: 'Tracking Number Auto',
-                        route: LIST_PAGE_TRACKING_NUMBER_AUTO,
-                        role: [
-                            'tracking number auto create',
-                            'tracking number auto view',
-                            'tracking number auto update',
-                            'tracking number auto delete',
-                        ],
-                    },
+                    // {
+                    //     name: 'Approval Conditional Route',
+                    //     route: LIST_PAGE_APPROVAL_CONDITIONAL_USER,
+                    //     role: [
+                    //         'approval conditional user create',
+                    //         'approval conditional user view',
+                    //         'approval conditional user update',
+                    //         'approval conditional user delete',
+                    //     ],
+                    // },
+                    // {
+                    //     name: 'Tracking Number Auto',
+                    //     route: LIST_PAGE_TRACKING_NUMBER_AUTO,
+                    //     role: [
+                    //         'tracking number auto create',
+                    //         'tracking number auto view',
+                    //         'tracking number auto update',
+                    //         'tracking number auto delete',
+                    //     ],
+                    // },
                     {
                         name: 'Tracking Number Choose',
                         route: LIST_PAGE_TRACKING_NUMBER_CHOOSE,
@@ -761,16 +761,16 @@ export const sidebarAdmin = () => [
                             'master pr document type delete',
                         ],
                     },
-                    {
-                        name: 'Valuation Type',
-                        route: LIST_PAGE_MASTER_VALUATION_TYPE,
-                        role: [
-                            'master pr valuation type create',
-                            'master pr valuation type view',
-                            'master pr valuation type update',
-                            'master pr valuation type delete',
-                        ],
-                    },
+                    // {
+                    //     name: 'Valuation Type',
+                    //     route: LIST_PAGE_MASTER_VALUATION_TYPE,
+                    //     role: [
+                    //         'master pr valuation type create',
+                    //         'master pr valuation type view',
+                    //         'master pr valuation type update',
+                    //         'master pr valuation type delete',
+                    //     ],
+                    // },
                     {
                         name: 'Purchasing Groups',
                         route: LIST_PAGE_MASTER_PURCHASING_GROUP,
@@ -791,16 +791,16 @@ export const sidebarAdmin = () => [
                             'master pr account assignment category delete',
                         ],
                     },
-                    {
-                        name: 'Item Categories',
-                        route: LIST_PAGE_MASTER_ITEM_CATEGORY,
-                        role: [
-                            'master pr item category create',
-                            'master pr item category view',
-                            'master pr item category update',
-                            'master pr item category delete',
-                        ],
-                    },
+                    // {
+                    //     name: 'Item Categories',
+                    //     route: LIST_PAGE_MASTER_ITEM_CATEGORY,
+                    //     role: [
+                    //         'master pr item category create',
+                    //         'master pr item category view',
+                    //         'master pr item category update',
+                    //         'master pr item category delete',
+                    //     ],
+                    // },
                     {
                         name: 'Storage Locations',
                         route: LIST_PAGE_MASTER_STORAGE_LOCATION,

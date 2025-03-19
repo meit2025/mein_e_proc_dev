@@ -119,8 +119,16 @@ export const Index = ({}: Props) => {
                             fieldLabel={''}
                             options={dataStatus}
                             onSearch={(search: string) => {
-                                if (search.length > 0) {
+                                const isLabelMatch = dataStatus?.some(option => option.label === search);
+                                if (search.length > 0 && !isLabelMatch) {
                                     getStatus(search, {
+                                        name: 'name',
+                                        id: 'code',
+                                        tabel: 'master_statuses',
+                                        search: search,
+                                    });
+                                } else {
+                                    getStatus('', {
                                         name: 'name',
                                         id: 'code',
                                         tabel: 'master_statuses',
@@ -129,6 +137,13 @@ export const Index = ({}: Props) => {
                             }}
                             onChangeOutside={(data: any) => {
                                 setStatusFilter(data);
+                            }}
+                            onFocus={() => {
+                                getStatus('', {
+                                    name: 'name',
+                                    id: 'code',
+                                    tabel: 'master_statuses',
+                                })
                             }}
                         />
                     </div>
@@ -141,14 +156,31 @@ export const Index = ({}: Props) => {
                             fieldLabel={''}
                             options={dataReimburseType}
                             onSearch={(search: string) => {
-                                getReimburseType(search, {
-                                    name: 'name',
-                                    id: 'code',
-                                    tabel: 'master_type_reimburses',
-                                });
+                                const isLabelMatch = dataReimburseType?.some(option => option.label === search);
+                                if (search.length > 0 && !isLabelMatch) {
+                                    getReimburseType(search, {
+                                        name: 'name',
+                                        id: 'code',
+                                        tabel: 'master_type_reimburses',
+                                        search: search,
+                                    });
+                                } else {
+                                    getReimburseType('', {
+                                        name: 'name',
+                                        id: 'code',
+                                        tabel: 'master_type_reimburses',
+                                    });
+                                }
                             }}
                             onChangeOutside={(data: any) => {
                                 setReimburseTypeFilter(data);
+                            }}
+                            onFocus={() => {
+                                getReimburseType('', {
+                                    name: 'name',
+                                    id: 'code',
+                                    tabel: 'master_type_reimburses',
+                                })
                             }}
                         />
                     </div>
@@ -161,14 +193,31 @@ export const Index = ({}: Props) => {
                             fieldLabel={''}
                             options={dataDepartment}
                             onSearch={(search: string) => {
-                                getDepartment(search, {
+                                const isLabelMatch = dataReimburseType?.some(option => option.label === search);
+                                if (search.length > 0 && !isLabelMatch) {
+                                    getDepartment(search, {
+                                        name: 'name',
+                                        id: 'id',
+                                        tabel: 'master_departments',
+                                        search: search,
+                                    });
+                                } else {
+                                    getDepartment('', {
+                                        name: 'name',
+                                        id: 'id',
+                                        tabel: 'master_departments',
+                                    });
+                                }
+                            }}
+                            onChangeOutside={(data: any) => {
+                                setDepartmentFilter(data);
+                            }}
+                            onFocus={() => {
+                                getDepartment('', {
                                     name: 'name',
                                     id: 'id',
                                     tabel: 'master_departments',
                                 });
-                            }}
-                            onChangeOutside={(data: any) => {
-                                setDepartmentFilter(data);
                             }}
                         />
                     </div>

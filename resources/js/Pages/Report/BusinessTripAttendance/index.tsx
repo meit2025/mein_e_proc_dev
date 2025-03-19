@@ -19,40 +19,6 @@ export const Index = ({}: Props) => {
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const { showToast } = useAlert();
     const methods = useForm();
-    const { dataDropdown: dataStatus, getDropdown: getStatus } = useDropdownOptions();
-    const [statusFilter, setStatusFilter] = useState<string | null>(null);
-    const { dataDropdown: dataPurposeType, getDropdown: getPurposeType } = useDropdownOptions();
-    const [purposeTypeFilter, setPurposeTypeFilter] = useState<string | null>(null);
-    const { dataDropdown: dataDestination, getDropdown: getDestination } = useDropdownOptions();
-    const [destinationFilter, setDestinationFilter] = useState<string | null>(null);
-    const { dataDropdown: dataDepartment, getDropdown: getDepartment } = useDropdownOptions();
-    const [departmentFilter, setDepartmentFilter] = useState<string | null>(null);
-
-    useEffect(() => {
-        getStatus('', {
-            name: 'name',
-            id: 'code',
-            tabel: 'master_statuses',
-        });
-
-        getPurposeType('', {
-            name: 'name',
-            id: 'id',
-            tabel: 'purpose_types',
-        });
-
-        getDestination('', {
-            name: 'destination',
-            id: 'id',
-            tabel: 'destinations',
-        });
-
-        getDepartment('', {
-            name: 'name',
-            id: 'id',
-            tabel: 'master_departments',
-        });
-    }, []);
 
     const exporter = async (data: string) => {
         try {
@@ -103,98 +69,12 @@ export const Index = ({}: Props) => {
                             placeholder='End Date'
                         />
                     </div>
-                    <div>
-                        <label htmlFor='status' className='block mb-1'>Status</label>
-                        <FormAutocomplete<any>
-                            fieldName='status'
-                            placeholder={'Select Status'}
-                            classNames='mt-2 w-40'
-                            fieldLabel={''}
-                            options={dataStatus}
-                            onSearch={(search: string) => {
-                                if (search.length > 0) {
-                                    getStatus(search, {
-                                        name: 'name',
-                                        id: 'code',
-                                        tabel: 'master_statuses',
-                                    });
-                                }
-                            }}
-                            onChangeOutside={(data: any) => {
-                                setStatusFilter(data);
-                            }}
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor='status' className='block mb-1'>Purpose Type</label>
-                        <FormAutocomplete<any>
-                            fieldName='purposeType'
-                            placeholder={'Select Purpose Type'}
-                            classNames='mt-2 w-40'
-                            fieldLabel={''}
-                            options={dataPurposeType}
-                            onSearch={(search: string) => {
-                                if (search.length > 0) {
-                                    getPurposeType(search, {
-                                        name: 'name',
-                                        id: 'id',
-                                        tabel: 'purpose_types',
-                                    });
-                                }
-                            }}
-                            onChangeOutside={(data: any) => {
-                                setPurposeTypeFilter(data);
-                            }}
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor='destination' className='block mb-1'>Destination</label>
-                        <FormAutocomplete<any>
-                            fieldName='destination'
-                            placeholder={'Select Destination'}
-                            classNames='mt-2 w-40'
-                            fieldLabel={''}
-                            options={dataDestination}
-                            onSearch={(search: string) => {
-                                getDestination(search, {
-                                    name: 'destination',
-                                    id: 'id',
-                                    tabel: 'destinations',
-                                });
-                            }}
-                            onChangeOutside={(data: any) => {
-                                setDestinationFilter(data);
-                            }}
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor='department' className='block mb-1'>Department</label>
-                        <FormAutocomplete<any>
-                            fieldName='department'
-                            placeholder={'Select Department'}
-                            classNames='mt-2 w-40'
-                            fieldLabel={''}
-                            options={dataDepartment}
-                            onSearch={(search: string) => {
-                                getDepartment(search, {
-                                    name: 'name',
-                                    id: 'id',
-                                    tabel: 'master_departments',
-                                });
-                            }}
-                            onChangeOutside={(data: any) => {
-                                setDepartmentFilter(data);
-                            }}
-                        />
-                    </div>
                 </div>
             </div>
             <DataGridComponent
                 isHistory={false}
                 onExportXls={async (x: string) => await exporter(x)}
-                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${statusFilter || ''}&type=${purposeTypeFilter || ''}&destination=${destinationFilter || ''}&department=${departmentFilter || ''}&`}
+                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&`}
                 columns={columns}
                 url={{
                     url: REPORT_BT_ATTENDANCE_LIST,
