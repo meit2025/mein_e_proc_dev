@@ -277,7 +277,7 @@ class ReportController extends Controller
                     CASE
                         WHEN 
                             MIN(mtrua_grade_relation_exist.id) IS NULL
-                            AND MIN(mtrua_grade_relation_not_exist.id) IS NULL
+                            AND MIN(mtrua_grade_relation_not_exist.id) IS NOT NULL
                             AND MIN(rg.id) IS NOT NULL
                         THEN 1
                         ELSE 0
@@ -294,7 +294,7 @@ class ReportController extends Controller
             })
             ->leftJoin('master_type_reimburse_user_assign as mtrua_grade_relation_not_exist', function($join) {
                 $join->on('mtrua_grade_relation_not_exist.reimburse_type_id', '=', 'master_type_reimburses.id')
-                    ->where('mtrua_grade_relation_not_exist.is_assign', true);
+                    ->whereNot('mtrua_grade_relation_not_exist.is_assign', true);
             })
             ->leftJoin('users as u', function($join) {
                 $join->on('u.id', '=', 'mtrua_grade_relation_exist.user_id')
@@ -306,7 +306,8 @@ class ReportController extends Controller
                     ->whereColumn('master_type_reimburses.family_status', 'f.status');
             })
             ->leftJoin('reimburses as r', function($join) {
-                $join->on('r.reimburse_type', '=', 'master_type_reimburses.code');
+                $join->on('r.reimburse_type', '=', 'master_type_reimburses.code')
+                    ->whereColumn('r.requester', 'u.nip');
             })
             ->leftJoin('reimburse_groups as rg', function($join) {
                 $join->on('rg.code', '=', 'r.group')
@@ -314,7 +315,10 @@ class ReportController extends Controller
             })
             ->where(function($query) {
                 $query->whereNotNull('mtrua_grade_relation_exist.is_assign')
-                    ->orWhereNotNull('mtrua_grade_relation_not_exist.is_assign')
+                    ->orWhere(function($query) {
+                        $query->whereNotNull('mtrua_grade_relation_not_exist.is_assign')
+                            ->whereNot('mtrua_grade_relation_not_exist.is_assign', true);
+                    })
                     ->orWhereNotNull('rg.id');
             })
             ->where(function($query) {
@@ -339,7 +343,10 @@ class ReportController extends Controller
                 $query->where('grade_option', 'all')
                     ->where(function($query) {
                         $query->whereNotNull('mtrua_grade_relation_exist.is_assign')
-                            ->orWhereNotNull('mtrua_grade_relation_not_exist.is_assign')
+                            ->orWhere(function($query) {
+                                $query->whereNotNull('mtrua_grade_relation_not_exist.is_assign')
+                                    ->whereNot('mtrua_grade_relation_not_exist.is_assign', true);
+                            })
                             ->orWhereNotNull('rg.id');
                     })
                     ->where(function($query) {
@@ -536,7 +543,8 @@ class ReportController extends Controller
                     ->whereColumn('master_type_reimburses.family_status', 'f.status');
             })
             ->leftJoin('reimburses as r', function($join) {
-                $join->on('r.reimburse_type', '=', 'master_type_reimburses.code');
+                $join->on('r.reimburse_type', '=', 'master_type_reimburses.code')
+                    ->whereColumn('r.requester', 'u.nip');
             })
             ->leftJoin('reimburse_groups as rg', function($join) {
                 $join->on('rg.code', '=', 'r.group')
@@ -544,7 +552,10 @@ class ReportController extends Controller
             })
             ->where(function($query) {
                 $query->whereNotNull('mtrua_grade_relation_exist.is_assign')
-                    ->orWhereNotNull('mtrua_grade_relation_not_exist.is_assign')
+                    ->orWhere(function($query) {
+                        $query->whereNotNull('mtrua_grade_relation_not_exist.is_assign')
+                            ->whereNot('mtrua_grade_relation_not_exist.is_assign', true);
+                    })
                     ->orWhereNotNull('rg.id');
             })
             ->where(function($query) {
