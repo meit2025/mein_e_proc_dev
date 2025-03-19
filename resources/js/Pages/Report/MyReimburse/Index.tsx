@@ -51,24 +51,6 @@ export const Index = ({}: Props) => {
       cardTitle.style.display = 'none';
     }
   }, []);
-
-  const handleSearchReimburseType = async (search: string) => {
-    if (search.length > 0) {
-      getReimburseType(search, {
-        name: 'name',
-        id: 'code',
-        tabel: 'master_type_reimburses',
-      });
-    }
-  };
-
-  // const handleFilter = () => {
-  //   const reimburseType = methods.getValues('reimburse_type') === undefined ? 'null' : methods.getValues('reimburse_type');
-  //   const employee = methods.getValues('employee') === undefined ? 'null' : methods.getValues('employee');
-  //   const family = methods.getValues('family') === undefined ? 'null' : methods.getValues('family');
-    
-  //   return setDefaultSearch(`?reimburse_type=${reimburseType}&employee=${employee}&family=${family}&`)
-  // };
   
   const exportExcel = async (data: string) => {
       try {
@@ -110,11 +92,32 @@ export const Index = ({}: Props) => {
               fieldLabel={''}
               options={dataReimburseType}
               onSearch={(search: string) => {
-                handleSearchReimburseType(search);
-              }}
-              onChangeOutside={(data: any) => {
-                setReimburseType(data);
-              }}
+                const isLabelMatch = dataReimburseType?.some(option => option.label === search);
+                if (search.length > 0 && !isLabelMatch) {
+                    getReimburseType(search, {
+                        name: 'name',
+                        id: 'code',
+                        tabel: 'master_type_reimburses',
+                        search: search,
+                    });
+                } else {
+                    getReimburseType('', {
+                        name: 'name',
+                        id: 'code',
+                        tabel: 'master_type_reimburses',
+                    });
+                }
+            }}
+            onChangeOutside={(data: any) => {
+              setReimburseType(data);
+            }}
+            onFocus={() => {
+                getReimburseType('', {
+                    name: 'name',
+                    id: 'code',
+                    tabel: 'master_type_reimburses',
+                })
+            }}
             />
           </div>
           <div>
@@ -126,8 +129,16 @@ export const Index = ({}: Props) => {
               fieldLabel={''}
               options={dataEmployee}
               onSearch={(search : any) => {
-                if (search.length > 0) {
+                const isLabelMatch = dataEmployee?.some(option => option.label === search);
+                if (search.length > 0 && !isLabelMatch) {
                   getEmployee(search, {
+                    name: 'name',
+                    id: 'id',
+                    tabel: 'users',
+                    search: search,
+                  });
+                } else {
+                  getEmployee('', {
                     name: 'name',
                     id: 'id',
                     tabel: 'users',
@@ -159,6 +170,13 @@ export const Index = ({}: Props) => {
                 }
                 setEmployee(data);
               }}
+              onFocus={() => {
+                getEmployee('', {
+                  name: 'name',
+                  id: 'id',
+                  tabel: 'users',
+                })
+              }}
             />
           </div>
           <div>
@@ -170,8 +188,20 @@ export const Index = ({}: Props) => {
               fieldLabel={''}
               options={dataFamily}
               onSearch={(search : any) => {
-                if (search.length > 0) {
+                const isLabelMatch = dataFamily?.some(option => option.label === search);
+                if (search.length > 0 && !isLabelMatch) {
                   getFamily(search, {
+                    name: 'name',
+                    id: 'id',
+                    tabel: 'families',
+                    where: {
+                      key: 'userId',
+                      parameter: methods.getValues('employee'),
+                    },
+                    search: search,
+                  });
+                } else {
+                  getFamily('', {
                     name: 'name',
                     id: 'id',
                     tabel: 'families',
@@ -184,6 +214,17 @@ export const Index = ({}: Props) => {
               }}
               onChangeOutside={(data: any) => {
                 setFamily(data);
+              }}
+              onFocus={() => {
+                getFamily('', {
+                  name: 'name',
+                  id: 'id',
+                  tabel: 'families',
+                  where: {
+                    key: 'userId',
+                    parameter: methods.getValues('employee'),
+                  }
+                })
               }}
             />
           </div>

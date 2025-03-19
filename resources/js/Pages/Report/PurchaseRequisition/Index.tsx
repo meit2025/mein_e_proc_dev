@@ -120,12 +120,20 @@ export const Index = ({}: Props) => {
                         <FormAutocomplete<any>
                             fieldName='status'
                             placeholder={'Select Status'}
-                            classNames='mt-2 w-40'
+                            classNames='mt-2 w-64'
                             fieldLabel={''}
                             options={dataStatus}
                             onSearch={(search: string) => {
-                                if (search.length > 0) {
+                                const isLabelMatch = dataStatus?.some(option => option.label === search);
+                                if (search.length > 0 && !isLabelMatch) {
                                     getStatus(search, {
+                                        name: 'name',
+                                        id: 'code',
+                                        tabel: 'master_statuses',
+                                        search: search,
+                                    });
+                                } else {
+                                    getStatus('', {
                                         name: 'name',
                                         id: 'code',
                                         tabel: 'master_statuses',
@@ -134,6 +142,13 @@ export const Index = ({}: Props) => {
                             }}
                             onChangeOutside={(data: any) => {
                                 setStatusFilter(data);
+                            }}
+                            onFocus={() => {
+                                getStatus('', {
+                                    name: 'name',
+                                    id: 'code',
+                                    tabel: 'master_statuses',
+                                })
                             }}
                         />
                     </div>
@@ -147,14 +162,31 @@ export const Index = ({}: Props) => {
                             fieldLabel={''}
                             options={dataType}
                             onSearch={(search: string) => {
-                                getType(search, {
-                                    name: 'purchasing_doc',
-                                    id: 'id',
-                                    tabel: 'document_types',
-                                });
+                                const isLabelMatch = dataType?.some(option => option.label === search);
+                                if (search.length > 0 && !isLabelMatch) {
+                                    getType(search, {
+                                        name: 'purchasing_doc',
+                                        id: 'id',
+                                        tabel: 'document_types',
+                                        search: search,
+                                    });
+                                } else {
+                                    getType('', {
+                                        name: 'purchasing_doc',
+                                        id: 'id',
+                                        tabel: 'document_types',
+                                    });
+                                }
                             }}
                             onChangeOutside={(data: any) => {
                                 setTypeFilter(data);
+                            }}
+                            onFocus={() => {
+                                getType('', {
+                                    name: 'purchasing_doc',
+                                    id: 'id',
+                                    tabel: 'document_types',
+                                })
                             }}
                         />
                     </div>
@@ -168,14 +200,31 @@ export const Index = ({}: Props) => {
                             fieldLabel={''}
                             options={dataVendor}
                             onSearch={(search: string) => {
-                                getVendor(search, {
-                                    name: 'label',
-                                    id: 'value',
-                                    tabel: 'vendors',
-                                });
+                                const isLabelMatch = dataVendor?.some(option => option.label === search);
+                                if (search.length > 0 && !isLabelMatch) {
+                                    getVendor(search, {
+                                        name: 'label',
+                                        id: 'value',
+                                        tabel: 'vendors',
+                                        search: search,
+                                    });
+                                } else {
+                                    getVendor('', {
+                                        name: 'label',
+                                        id: 'value',
+                                        tabel: 'vendors',
+                                    });
+                                }
                             }}
                             onChangeOutside={(data: any) => {
                                 setVendorFilter(data);
+                            }}
+                            onFocus={() => {
+                                getVendor('', {
+                                    name: 'label',
+                                    id: 'value',
+                                    tabel: 'vendors',
+                                })
                             }}
                         />
                     </div>
@@ -189,14 +238,31 @@ export const Index = ({}: Props) => {
                             fieldLabel={''}
                             options={dataDepartment}
                             onSearch={(search: string) => {
-                                getDepartment(search, {
-                                    name: 'name',
-                                    id: 'id',
-                                    tabel: 'master_departments',
-                                });
+                                const isLabelMatch = dataPurposeType?.some(option => option.label === search);
+                                if (search.length > 0 && !isLabelMatch) {
+                                    getDepartment(search, {
+                                        name: 'name',
+                                        id: 'id',
+                                        tabel: 'master_departments',
+                                        search: search,
+                                    });
+                                } else {
+                                    getDepartment('', {
+                                        name: 'name',
+                                        id: 'id',
+                                        tabel: 'master_departments',
+                                    });
+                                }
                             }}
                             onChangeOutside={(data: any) => {
                                 setDepartmentFilter(data);
+                            }}
+                            onFocus={() => {
+                                getDepartment('', {
+                                    name: 'name',
+                                    id: 'id',
+                                    tabel: 'master_departments',
+                                })
                             }}
                         />
                     </div>
