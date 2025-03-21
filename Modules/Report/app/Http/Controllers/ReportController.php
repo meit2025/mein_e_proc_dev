@@ -1076,7 +1076,7 @@ class ReportController extends Controller
     public function listBTOverall(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType', 'status', 'businessTripDestination', 'requestFor', 'requestedBy']);
+        $query =  BusinessTrip::query()->with(['purposeType', 'status', 'businessTripDestination', 'requestFor', 'requestedBy', 'parentBusinessTrip']);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
@@ -1128,11 +1128,13 @@ class ReportController extends Controller
 
         $data->getCollection()->transform(function ($map) {
             $purposeRelations = $map->purposeType ? $map->purposeType->name : ''; // Assuming 'name' is the field
-
+            
             return [
                 'id' => $map->id,
                 'status_id' => $map->status_id,
                 'request_no' => $map->request_no,
+                'parent_request_no' => $map->type == 'declaration' ? optional($map->parentBusinessTrip)->request_no ?? 0 : '',
+                'parent_request_status' => $map->type == 'declaration' ? 'Fully Approve' : '',
                 'remarks' => $map->remarks,
                 'request_for' => $map->requestFor->name ?? '',
                 'employee_no' => $map->requestedBy->nip,

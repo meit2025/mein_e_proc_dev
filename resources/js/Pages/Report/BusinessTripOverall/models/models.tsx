@@ -2,25 +2,10 @@ import { GridColDef } from '@mui/x-data-grid';
 import { CustomStatus } from '@/components/commons/CustomStatus';
 
 export const columns: GridColDef[] = [
-    { field: 'employee_no', headerName: 'Employee No', width: 200, filterable: true },
-    { field: 'employee_name', headerName: 'Employee Name', width: 200, filterable: true },
-    { field: 'position', headerName: 'Position', width: 200, filterable: true },
-    { field: 'dept', headerName: 'Departement', width: 200, filterable: true },
-    { field: 'division', headerName: 'Division', width: 200, filterable: true },
-
-    {
-        field: 'request_no',
-        headerName: 'Request No.',
-        width: 200,
-        filterable: true,
-    },
-    { field: 'request_for', headerName: 'Request For', width: 200, filterable: true },
-    { field: 'purpose_type', headerName: 'Purpose Type', width: 200, filterable: true },
-    { field: 'remarks', headerName: 'Remarks', width: 200, filterable: true },
-    { field: 'created_at', headerName: 'Request Date', width: 200, filterable: true },
+    { field: 'request_no', headerName: 'Request No.', width: 200, filterable: true },
     {
         field: 'status',
-        headerName: 'Status',
+        headerName: 'Request Status',
         width: 200,
         filterable: true,
         renderCell: (params: any) => {
@@ -33,7 +18,36 @@ export const columns: GridColDef[] = [
             );
         },
     },
-    { field: 'total_destination', headerName: 'Total Destinations', width: 200, filterable: true },
+    { field: 'parent_request_no', headerName: 'Request Reference No.', width: 200, filterable: true },
+    {
+        field: 'parent_request_status',
+        headerName: 'Request Reference Status',
+        width: 200,
+        filterable: true,
+        renderCell: (params: any) => {
+            if (params.value == '') {
+                return ''
+            } else {
+                return  (
+                    <CustomStatus
+                        name="Fully Approve"
+                        className="bg-green-100 text-green-600 border-green-600"
+                        code="approve_to"
+                    />
+                );
+            }
+        },
+    },
+    { field: 'employee_no', headerName: 'Employee No', width: 200, filterable: true },
+    { field: 'employee_name', headerName: 'Employee Name', width: 200, filterable: true },
+    { field: 'position', headerName: 'Position', width: 200, filterable: true },
+    { field: 'dept', headerName: 'Departement', width: 200, filterable: true },
+    { field: 'division', headerName: 'Division', width: 200, filterable: true },
+    // { field: 'request_for', headerName: 'Request For', width: 200, filterable: true },
+    { field: 'purpose_type', headerName: 'Purpose Type', width: 200, filterable: true },
+    // { field: 'remarks', headerName: 'Remarks', width: 200, filterable: true },
+    { field: 'created_at', headerName: 'Request Date', width: 200, filterable: true },
+    // { field: 'total_destination', headerName: 'Total Destinations', width: 200, filterable: true },
 ];
 
 // Fungsi untuk menangani aksi cetak detail
