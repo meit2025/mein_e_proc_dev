@@ -108,43 +108,6 @@ export const Index = ({}: Props) => {
                         />
                     </div>
                     <div>
-                        <label htmlFor='status' className='block mb-1'>Status</label>
-                        <FormAutocomplete<any>
-                            fieldName='status'
-                            placeholder={'Select Status'}
-                            classNames='mt-2 w-64'
-                            fieldLabel={''}
-                            options={dataStatus}
-                            onSearch={(search: string) => {
-                                const isLabelMatch = dataStatus?.some(option => option.label === search);
-                                if (search.length > 0 && !isLabelMatch) {
-                                    getStatus(search, {
-                                        name: 'name',
-                                        id: 'code',
-                                        tabel: 'master_statuses',
-                                        search: search,
-                                    });
-                                } else {
-                                    getStatus('', {
-                                        name: 'name',
-                                        id: 'code',
-                                        tabel: 'master_statuses',
-                                    });
-                                }
-                            }}
-                            onChangeOutside={(data: any) => {
-                                setStatusFilter(data);
-                            }}
-                            onFocus={() => {
-                                getStatus('', {
-                                    name: 'name',
-                                    id: 'code',
-                                    tabel: 'master_statuses',
-                                })
-                            }}
-                        />
-                    </div>
-                    <div>
                         <label htmlFor='status' className='block mb-1'>Purpose Type</label>
                         <FormAutocomplete<any>
                             fieldName='purposeType'
@@ -177,44 +140,6 @@ export const Index = ({}: Props) => {
                                     name: 'name',
                                     id: 'id',
                                     tabel: 'purpose_types',
-                                })
-                            }}
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor='destination' className='block mb-1'>Destination</label>
-                        <FormAutocomplete<any>
-                            fieldName='destination'
-                            placeholder={'Select Destination'}
-                            classNames='mt-2 w-40'
-                            fieldLabel={''}
-                            options={dataDestination}
-                            onSearch={(search: string) => {
-                                const isLabelMatch = dataPurposeType?.some(option => option.label === search);
-                                if (search.length > 0 && !isLabelMatch) {
-                                    getDestination(search, {
-                                        name: 'destination',
-                                        id: 'destination',
-                                        tabel: 'destinations',
-                                        search: search,
-                                    });
-                                } else {
-                                    getDestination('', {
-                                        name: 'destination',
-                                        id: 'destination',
-                                        tabel: 'destinations',
-                                    });
-                                }
-                            }}
-                            onChangeOutside={(data: any) => {
-                                setDestinationFilter(data);
-                            }}
-                            onFocus={() => {
-                                getDestination('', {
-                                    name: 'destination',
-                                    id: 'destination',
-                                    tabel: 'destinations',
                                 })
                             }}
                         />
@@ -267,7 +192,7 @@ export const Index = ({}: Props) => {
                 columns={columns}
                 url={{
                     url: REPORT_BT_OVERALL_LIST,
-                    detailUrl: DETAIL_PAGE_BUSINESS_TRIP,
+                    // detailUrl: DETAIL_PAGE_BUSINESS_TRIP,
                 }}
                 labelFilter='search'
             />
