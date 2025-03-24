@@ -124,7 +124,7 @@ export const Index = ({}: Props) => {
                                         tabel: 'purpose_types',
                                         search: search,
                                     });
-                                } else {
+                                } else if (search.length == 0 && !isLabelMatch) {
                                     getPurposeType('', {
                                         name: 'name',
                                         id: 'id',
@@ -162,7 +162,7 @@ export const Index = ({}: Props) => {
                                         tabel: 'master_departments',
                                         search: search,
                                     });
-                                } else {
+                                } else if (search.length == 0 && !isLabelMatch) {
                                     getDepartment('', {
                                         name: 'name',
                                         id: 'id',

@@ -127,7 +127,7 @@ export const Index = ({}: Props) => {
                                         tabel: 'master_statuses',
                                         search: search,
                                     });
-                                } else {
+                                } else if (search.length == 0 && !isLabelMatch) {
                                     getStatus('', {
                                         name: 'name',
                                         id: 'code',
@@ -164,7 +164,7 @@ export const Index = ({}: Props) => {
                                         tabel: 'master_type_reimburses',
                                         search: search,
                                     });
-                                } else {
+                                } else if (search.length == 0 && !isLabelMatch) {
                                     getReimburseType('', {
                                         name: 'name',
                                         id: 'code',
@@ -201,7 +201,7 @@ export const Index = ({}: Props) => {
                                         tabel: 'master_departments',
                                         search: search,
                                     });
-                                } else {
+                                } else if (search.length == 0 && !isLabelMatch) {
                                     getDepartment('', {
                                         name: 'name',
                                         id: 'id',

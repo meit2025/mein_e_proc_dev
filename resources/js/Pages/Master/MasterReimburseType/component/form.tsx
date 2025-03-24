@@ -498,7 +498,7 @@ export default function ReimburseTypeForm({
                         tabel: 'material_groups',
                         search: search,
                       });
-                    } else {
+                    } else if (search.length == 0 && !isLabelMatch) {
                       getMaterialGroup('', {
                         name: 'material_group',
                         id: 'id',
@@ -546,7 +546,7 @@ export default function ReimburseTypeForm({
                         },
                         search: search,
                       });
-                    } else {
+                    } else if (search.length == 0 && !isLabelMatch) {
                       getMaterialNumber('', {
                         name: 'material_number',
                         id: 'id',
