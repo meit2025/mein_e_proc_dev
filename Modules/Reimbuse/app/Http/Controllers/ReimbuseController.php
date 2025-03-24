@@ -118,7 +118,7 @@ class ReimbuseController extends Controller
                     //     $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
                     // })
                     ->where(function($query) {
-                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
+                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist.user_id');
                     })
                     ->where('master_type_reimburses.is_employee', true);
 
@@ -138,7 +138,7 @@ class ReimbuseController extends Controller
                     //     $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
                     // })
                     ->where(function($query) {
-                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
+                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist.user_id');
                     })
                     ->whereIn('master_type_reimburses.family_status', $getFamilieStatus);
                 })->orWhere(function($query) use ($request,$getFamilieStatus) {
@@ -147,7 +147,7 @@ class ReimbuseController extends Controller
                     //     $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
                     // })
                     ->where(function($query) {
-                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
+                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist.user_id');
                     })
                     ->where(function($query) use ($getFamilieStatus) {
                         $query->whereIn('master_type_reimburses.family_status', $getFamilieStatus)
