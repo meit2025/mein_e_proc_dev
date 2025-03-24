@@ -198,7 +198,7 @@ export const ReimburseForm: React.FC<Props> = ({
         id: 'nip',
         tabel: 'users',
         hasValue: {
-          key: form.getValues('requester') ? 'name' : '',
+          key: form.getValues('requester') ? 'nip' : '',
           value: form.getValues('requester') ?? '',
         }
       });
@@ -676,11 +676,16 @@ export const ReimburseForm: React.FC<Props> = ({
                         }
                       }}
                       onFocus={() => {
+                        let value = form.getValues('cost_center');
                         getCostCenter('', {
                           name: 'cost_center',
                           id: 'id',
                           tabel: 'master_cost_centers',
                           idType: 'string',
+                          hasValue: {
+                            key: value ? 'id' : '',
+                            value: value ?? '',
+                          }
                         })
                       }}
                     />
@@ -714,11 +719,15 @@ export const ReimburseForm: React.FC<Props> = ({
                       }}
                       onChangeOutside={(value) => onChangeEmployee(value)}
                       onFocus={() => {
-                        console.log('focus');
+                        let value = form.getValues('requester');
                         getEmployee('', {
                           name: 'name',
                           id: 'nip',
                           tabel: 'users',
+                          hasValue: {
+                            key: value ? 'nip' : '',
+                            value: value ?? '',
+                          }
                         });
                       }}
                       classNames='mt-2 w-full'
@@ -988,11 +997,16 @@ export const ReimburseForm: React.FC<Props> = ({
                                   }
                                 }}
                                 onFocus={() => {
+                                  let value = form.getValues('forms')[index]?.purchasing_group;
                                   getPurchasingGroup('', {
                                     name: 'purchasing_group_desc',
                                     id: 'id',
                                     tabel: 'purchasing_groups',
                                     idType: 'string',
+                                    hasValue: {
+                                      key: value ? 'id' : '',
+                                      value: value ?? '',
+                                    }
                                   })
                                 }}
                               />
