@@ -100,7 +100,7 @@ export const Index = ({}: Props) => {
                         tabel: 'master_type_reimburses',
                         search: search,
                     });
-                } else {
+                } else if (search.length == 0 && !isLabelMatch) {
                     getReimburseType('', {
                         name: 'name',
                         id: 'code',
@@ -137,7 +137,7 @@ export const Index = ({}: Props) => {
                     tabel: 'users',
                     search: search,
                   });
-                } else {
+                } else if (search.length == 0 && !isLabelMatch) {
                   getEmployee('', {
                     name: 'name',
                     id: 'id',
@@ -157,7 +157,7 @@ export const Index = ({}: Props) => {
                       parameter: data,
                     }
                   });
-                } else {
+                } else if (search.length == 0 && !isLabelMatch) {
                   getFamily('', {
                     name: 'name',
                     id: 'id',
@@ -200,7 +200,7 @@ export const Index = ({}: Props) => {
                     },
                     search: search,
                   });
-                } else {
+                } else if (search.length == 0 && !isLabelMatch) {
                   getFamily('', {
                     name: 'name',
                     id: 'id',

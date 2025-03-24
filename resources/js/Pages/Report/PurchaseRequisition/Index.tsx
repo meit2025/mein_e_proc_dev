@@ -132,7 +132,7 @@ export const Index = ({}: Props) => {
                                         tabel: 'master_statuses',
                                         search: search,
                                     });
-                                } else {
+                                } else if (search.length == 0 && !isLabelMatch) {
                                     getStatus('', {
                                         name: 'name',
                                         id: 'code',
@@ -170,7 +170,7 @@ export const Index = ({}: Props) => {
                                         tabel: 'document_types',
                                         search: search,
                                     });
-                                } else {
+                                } else if (search.length == 0 && !isLabelMatch) {
                                     getType('', {
                                         name: 'purchasing_doc',
                                         id: 'id',
@@ -208,7 +208,7 @@ export const Index = ({}: Props) => {
                                         tabel: 'vendors',
                                         search: search,
                                     });
-                                } else {
+                                } else if (search.length == 0 && !isLabelMatch) {
                                     getVendor('', {
                                         name: 'label',
                                         id: 'value',
@@ -246,7 +246,7 @@ export const Index = ({}: Props) => {
                                         tabel: 'master_departments',
                                         search: search,
                                     });
-                                } else {
+                                } else if (search.length == 0 && !isLabelMatch) {
                                     getDepartment('', {
                                         name: 'name',
                                         id: 'id',

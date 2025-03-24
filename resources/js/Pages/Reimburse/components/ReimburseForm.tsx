@@ -666,7 +666,7 @@ export const ReimburseForm: React.FC<Props> = ({
                             idType: 'string',
                             search: search
                           })
-                        } else {
+                        } else if (search.length == 0 && !isLabelMatch) {
                           getCostCenter('', {
                             name: 'cost_center',
                             id: 'id',
@@ -695,7 +695,7 @@ export const ReimburseForm: React.FC<Props> = ({
                       fieldName='requester'
                       disabled={String(currentUser?.is_admin) === '0' || type === ReimburseFormType.edit}
                       placeholder={'Select Employee'}
-                      onSearch={(search) => {
+                      onSearch={(search: string, data : any) => {
                         const isLabelMatch = dataEmployee?.some(option => option.label === search);
                         if (search.length > 0 && !isLabelMatch) {
                           getEmployee(search, {
@@ -704,7 +704,7 @@ export const ReimburseForm: React.FC<Props> = ({
                             tabel: 'users',
                             search: search
                           });
-                        } else {
+                        } else if (search.length == 0 && !isLabelMatch) {
                           getEmployee('', {
                             name: 'name',
                             id: 'nip',
@@ -714,6 +714,7 @@ export const ReimburseForm: React.FC<Props> = ({
                       }}
                       onChangeOutside={(value) => onChangeEmployee(value)}
                       onFocus={() => {
+                        console.log('focus');
                         getEmployee('', {
                           name: 'name',
                           id: 'nip',
@@ -969,7 +970,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                       idType: 'string',
                                       search: search
                                     })
-                                  } else {
+                                  } else if (search.length == 0 && !isLabelMatch) {
                                     getPurchasingGroup('', {
                                       name: 'purchasing_group_desc',
                                       id: 'id',
