@@ -510,10 +510,15 @@ export default function ReimburseTypeForm({
                     await handleChangeMaterialGroup(data?.label.split(' - ')[1]);
                   }}
                   onFocus={async () => {
+                    let value = form.getValues('material_group');
                     await getMaterialGroup('', {
                       name: 'material_group',
                       id: 'id',
                       tabel: 'material_groups',
+                      hasValue: {
+                        key: value ? 'id' : '',
+                        value: value ?? '',
+                      }
                     });
                   }}
                 />
@@ -561,6 +566,7 @@ export default function ReimburseTypeForm({
                   onFocus={() => {
                     const selectedMaterialGroup = form.getValues('material_group');
                     const selectedMaterialGroupLabel = dataMaterialGroup.find(item => item.value === selectedMaterialGroup)?.label;
+                    let value = form.getValues('material_number');
                     getMaterialNumber('', {
                       name: 'material_number',
                       id: 'id',
@@ -569,6 +575,10 @@ export default function ReimburseTypeForm({
                         key: 'material_group',
                         parameter: selectedMaterialGroupLabel?.split(' - ')[1],
                       },
+                      hasValue: {
+                        key: value ? 'id' : '',
+                        value: value ?? '',
+                      }
                     });
                   }}
                 />
