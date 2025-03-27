@@ -240,17 +240,17 @@ class ReimbuseController extends Controller
                 return [
                     'id' => $map->id,
                     'code' => $map->code,
-                    'request_for' => $map->user->name,
-                    'request_by' => $map->user_create_request->name,
+                    'request_for' => optional($map->user)->name ?? '-',
+                    'request_by' => optional($map->user_create_request)->name ?? '-',
                     'remark' => $map->remark,
                     'balance' => $balance,
                     'form' => count($map->reimburses),
                     'status_id' => $map->status_id,
                     'status' => [
-                        'name' => $map->status->name,
-                        'classname' => $map->status->classname,
+                        'name' => optional($map->status)->name ?? '-',
+                        'classname' => optional($map->status)->classname ?? '-',
                         'code' =>
-                        $map->status->code
+                        optional($map->status)->code ?? '-'
                     ],
                     'created_at' => $map->created_at,
                     'pr_number' => isset($map->purchase_requisition[0]) ? $map->purchase_requisition[0]->purchase_requisition_number : '',
