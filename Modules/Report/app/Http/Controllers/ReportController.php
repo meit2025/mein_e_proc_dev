@@ -560,14 +560,15 @@ class ReportController extends Controller
                     });
             });
 
-            if ($reimburseType !== null) $query = $query->where('master_type_reimburses.code', $reimburseType);
-            if ($employee !== null) $query = $query->where('u.id', $employee);
-            if ($family !== null) $query = $query->where('f.id', $family);
-
+            
             $query->groupBy(['master_type_reimburses.id', 'u.id', 'f.id']);
             $orderBy = $request->sort_by == 'id' ? 'master_type_reimburses.name' : $request->sort_by;
             $sortBy = $request->sort_by == 'id' ? 'asc' : $request->sort_direction;
             $query->orderBy($orderBy, $sortBy);
+
+            if ($reimburseType !== null) $query = $query->having('master_type_reimburses.code', $reimburseType);
+            if ($employee !== null) $query = $query->having('u.id', $employee);
+            if ($family !== null) $query = $query->having('f.id', $family);
 
             $queryResult = $query->get();
 
