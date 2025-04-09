@@ -157,7 +157,7 @@ export const Index = ({}: Props) => {
                       parameter: data,
                     }
                   });
-                } else if (search.length == 0 && !isLabelMatch) {
+                } else {
                   getFamily('', {
                     name: 'name',
                     id: 'id',

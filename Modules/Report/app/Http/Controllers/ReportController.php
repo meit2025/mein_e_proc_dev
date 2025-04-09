@@ -263,7 +263,7 @@ class ReportController extends Controller
             $reimburseType  = isset($request->reimburse_type) && $request->reimburse_type !== "null" ? $request->reimburse_type : null;
             $employee       = isset($request->employee) && $request->employee !== "null" ? $request->employee : null;
             $family         = isset($request->family) && $request->family !== "null" ? $request->family : null;
-
+            
             $query = MasterTypeReimburse::with([
                     'reimburses' => function ($reimburseQuery) {
                         $reimburseQuery->join('reimburse_groups as rg', 'reimburses.group', '=', 'rg.code')
@@ -342,22 +342,16 @@ class ReportController extends Controller
                             ->whereNotNull('f.id');
                     });
             });
-
-            if ($reimburseType !== null) $query = $query->where('master_type_reimburses.code', $reimburseType);
-            if ($employee !== null) $query = $query->where('u.id', $employee);
-            if ($family !== null) $query = $query->where('f.id', $family);
-            // if ($request->search) {
-            //     $query = $query->where(function($query) use ($request) {
-            //         $query->where('master_type_reimburses.code', 'ILIKE', '%' . $request->search . '%')
-            //         ->orWhere('master_type_reimburses.name', 'ILIKE', '%' . $request->search . '%');
-            //     }); 
-            // }
-
             
             $orderBy = $request->sort_by == 'id' ? 'master_type_reimburses.name' : $request->sort_by;
             $sortBy = $request->sort_by == 'id' ? 'asc' : $request->sort_direction;
             $query->groupBy(['master_type_reimburses.id', 'u.id', 'f.id']);
             $query->orderBy($orderBy, $sortBy);
+
+            if ($reimburseType !== null) $query = $query->having('master_type_reimburses.code', $reimburseType);
+            if ($employee !== null) $query = $query->having('u.id', $employee);
+            if ($family !== null) $query = $query->having('f.id', $family);
+
             $perPage = $request->get('per_page', 10);
             $queryResult = $query->paginate($perPage);
             
@@ -566,14 +560,15 @@ class ReportController extends Controller
                     });
             });
 
-            if ($reimburseType !== null) $query = $query->where('master_type_reimburses.code', $reimburseType);
-            if ($employee !== null) $query = $query->where('u.id', $employee);
-            if ($family !== null) $query = $query->where('f.id', $family);
-
+            
             $query->groupBy(['master_type_reimburses.id', 'u.id', 'f.id']);
             $orderBy = $request->sort_by == 'id' ? 'master_type_reimburses.name' : $request->sort_by;
             $sortBy = $request->sort_by == 'id' ? 'asc' : $request->sort_direction;
             $query->orderBy($orderBy, $sortBy);
+
+            if ($reimburseType !== null) $query = $query->having('master_type_reimburses.code', $reimburseType);
+            if ($employee !== null) $query = $query->having('u.id', $employee);
+            if ($family !== null) $query = $query->having('f.id', $family);
 
             $queryResult = $query->get();
 
