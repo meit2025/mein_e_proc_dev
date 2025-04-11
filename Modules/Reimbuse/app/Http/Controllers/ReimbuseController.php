@@ -179,22 +179,22 @@ class ReimbuseController extends Controller
                 }]);
             if ($request->approval == 1) {
                 $approval = Approval::leftJoinSub("
-                    SELECT
-                        MIN(user_id) as user_id,
+                    SELECT DISTINCT ON (document_id)
+                        id,
+                        user_id,
                         document_id
                     FROM
                         approvals
                     WHERE
                         document_name = 'REIM'
                         AND status = 'Waiting'
-                    GROUP BY document_id
                 ",
                 'approvalQueueUser',
                 function ($join) {
                     $join->on('approvalQueueUser.document_id', '=', 'approvals.document_id');
                 })
                 ->where([
-                    'approvals.document_name' => 'REIM', 
+                    'approvals.document_name' => 'REIM',
                     'approvals.status' => 'Waiting', 
                     'approvals.user_id' => Auth::user()->id,
                 ])
