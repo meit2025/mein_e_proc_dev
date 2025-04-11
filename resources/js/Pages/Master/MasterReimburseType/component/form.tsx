@@ -408,6 +408,7 @@ export default function ReimburseTypeForm({
                       id='id'
                       options={listGrades || []}
                       value={form.getValues('grades').map((item) => item.id)}
+                      isHidden='hidden'
                       onSelect={(value) => {
                         form.setValue(
                           'grades',

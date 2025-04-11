@@ -172,11 +172,33 @@ abstract class Controller
         if ($userData) {
             if ($request->approval == 1) {
 
-                $data = Approval::where('user_id', Auth::user()->id)
-                    ->where('document_name', 'PR')
-                    ->where('status', 'Waiting')
-                    ->pluck('document_id')
-                    ->toArray();
+                // $data = Approval::where('user_id', Auth::user()->id)
+                //     ->where('document_name', 'PR')
+                //     ->where('status', 'Waiting')
+                //     ->pluck('document_id')
+                //     ->toArray();
+                $data = Approval::leftJoinSub("
+                    SELECT DISTINCT ON (document_id)
+                        id,
+                        user_id,
+                        document_id
+                    FROM
+                        approvals
+                    WHERE
+                        document_name = 'PR'
+                        AND status = 'Waiting'
+                ",
+                'approvalQueueUser',
+                function ($join) {
+                    $join->on('approvalQueueUser.document_id', '=', 'approvals.document_id');
+                })
+                ->where([
+                    'approvals.document_name' => 'PR', 
+                    'approvals.status' => 'Waiting', 
+                    'approvals.user_id' => Auth::user()->id,
+                ])
+                ->whereColumn('approvalQueueUser.user_id', 'approvals.user_id')
+                ->pluck('approvals.document_id')->toArray();
                 $query = $query->whereIn('id', $data);
             } else {
                 $query->where(function ($q) use ($request, $filterableColumns) {
@@ -236,11 +258,28 @@ abstract class Controller
         if ($userData) {
             if ($request->approval == 1) {
 
-                $data = Approval::where('user_id', Auth::user()->id)
-                    ->where('document_name', 'PR')
-                    ->where('status', 'Waiting')
-                    ->pluck('document_id')
-                    ->toArray();
+                $data = Approval::leftJoinSub("
+                    SELECT DISTINCT ON (document_id)
+                        id,
+                        user_id,
+                        document_id
+                    FROM
+                        approvals
+                    WHERE
+                        document_name = 'PR'
+                        AND status = 'Waiting'
+                ",
+                'approvalQueueUser',
+                function ($join) {
+                    $join->on('approvalQueueUser.document_id', '=', 'approvals.document_id');
+                })
+                ->where([
+                    'approvals.document_name' => 'PR', 
+                    'approvals.status' => 'Waiting', 
+                    'approvals.user_id' => Auth::user()->id,
+                ])
+                ->whereColumn('approvalQueueUser.user_id', 'approvals.user_id')
+                ->pluck('approvals.document_id')->toArray();
                 $query = $query->whereIn('id', $data);
             } else {
                 $query->where(function ($q) use ($request, $filterableColumns) {
