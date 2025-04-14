@@ -550,13 +550,6 @@ export const BussinessTripFormV1 = ({
   const [isClone, setIsClone] = React.useState(false);
 
   React.useEffect(() => {
-    if (id && type == BusinessTripType.clone) {
-      getDetailData();
-      setIsClone(true);
-    }
-  }, [type]);
-
-  React.useEffect(() => {
     if (type == BusinessTripType.create) {
       setAllowancesProperty();
     }
@@ -705,42 +698,56 @@ export const BussinessTripFormV1 = ({
     useDropdownOptions();
 
   React.useEffect(() => {
-    getEmployee('', {
-      name: 'name',
-      id: 'id',
-      tabel: 'users',
-      idType: 'string',
-    });
-    getPurposeType('', {
-      name: 'name',
-      id: 'id',
-      tabel: 'purpose_types',
-      idType: 'string',
-      softDelete: true
-    });
-    getCostCenter('', {
-      name: 'desc',
-      id: 'cost_center',
-      tabel: 'master_cost_centers',
-      idType: 'string',
-      isMapping: true,
-      hiddenZero:true
-    });
-    getTax('', {
-        name: 'description',
-        id: 'mwszkz',
-        tabel: 'pajaks',
+    const fetchData = async () => {
+      if (id && type == BusinessTripType.clone) {
+        await getDetailData();
+        setIsClone(true);
+      }
+      console.log(form.getValues('request_for'));
+      
+      getEmployee('', {
+        name: 'name',
+        id: 'id',
+        tabel: 'users',
+        hasValue: {
+          key: form.getValues('request_for') ? 'id' : '',
+          value: form.getValues('request_for') ?? '',
+        },
+        idType: 'string',
+      });
+      getPurposeType('', {
+        name: 'name',
+        id: 'id',
+        tabel: 'purpose_types',
+        idType: 'string',
+        softDelete: true
+      });
+      getCostCenter('', {
+        name: 'desc',
+        id: 'cost_center',
+        tabel: 'master_cost_centers',
         idType: 'string',
         isMapping: true,
-    });
-    getPurchasingGroup('', {
-      name: 'purchasing_group_desc',
-      id: 'purchasing_group',
-      tabel: 'purchasing_groups',
-      idType: 'string',
-      isMapping: true,
-    });
-  }, []);
+        hiddenZero:true
+      });
+      getTax('', {
+          name: 'description',
+          id: 'mwszkz',
+          tabel: 'pajaks',
+          idType: 'string',
+          isMapping: true,
+      });
+      getPurchasingGroup('', {
+        name: 'purchasing_group_desc',
+        id: 'purchasing_group',
+        tabel: 'purchasing_groups',
+        idType: 'string',
+        isMapping: true,
+      });
+    }
+
+    fetchData()
+  }, [type]);
 
   React.useEffect(() => {
     if (type != BusinessTripType.clone) {
@@ -779,9 +786,38 @@ export const BussinessTripFormV1 = ({
                   disabled={isAdmin == '0' ? true : false}
                   placeholder={'Select Employee'}
                   classNames='mt-2 w-full'
-                  onChangeOutside={(value) => {
-                    setSelectedUserId(value);
-                    // getDateBusinessTrip(value);
+                  onSearch={(search: string, data : any) => {
+                    const isLabelMatch = dataEmployee?.some(option => option.label === search);
+                    if (search.length > 0 && !isLabelMatch) {
+                      getEmployee(search, {
+                        name: 'name',
+                        id: 'id',
+                        tabel: 'users',
+                        search: search,
+                        idType: 'string'
+                      });
+                    } else if (search.length == 0 && !isLabelMatch) {
+                      getEmployee('', {
+                        name: 'name',
+                        id: 'id',
+                        tabel: 'users',
+                        idType: 'string'
+                      });
+                    }
+                  }}
+                  onChangeOutside={(value) => setSelectedUserId(value)}
+                  onFocus={() => {
+                    let value = form.getValues('request_for');
+                    getEmployee('', {
+                      name: 'name',
+                      id: 'id',
+                      tabel: 'users',
+                      hasValue: {
+                        key: value ? 'id' : '',
+                        value: value ?? '',
+                      },
+                      idType: 'string'
+                    });
                   }}
                 />
               </td>

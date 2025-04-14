@@ -95,7 +95,15 @@ class PurposeTypeController extends Controller
 
         $query =  PurposeType::query()->with(['listAllowance']);
 
-
+        if ($request->search) {
+            $query = $query->where('code', 'ilike', '%' . $request->search . '%')
+                ->orWhere('name', 'ilike', '%' . $request->search . '%')
+                ->orWhereHas('listAllowance', function ($query) use ($request) {
+                    $query->whereHas('allowanceItem', function ($query) use ($request) {
+                        $query->where('name', 'ilike', '%' . $request->search . '%');
+                    });
+                });
+        }
 
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');

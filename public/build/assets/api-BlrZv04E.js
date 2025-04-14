@@ -1,1 +1,0 @@
-const S="/api/business-trip",s=`${S}/list`,E=`${S}/create`,I=`${S}/update`,t=_=>`${S}/detail/${_}`,T=_=>`${S}/detail-bt/${_}`,e=_=>`${S}/get-date-byuser/${_}`,a=`${S}/clone-store`,R=`${S}/get-user-business-trip`;export{E as C,I as E,T as G,R as a,a as b,t as c,e as d,s as e};
