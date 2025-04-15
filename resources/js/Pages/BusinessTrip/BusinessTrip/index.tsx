@@ -115,18 +115,18 @@ export const Index = ({
         //   });
         //   setOpenForm(true);
         // }}
-        onClone={(value) => {
-          setBusinessTripForm({
-            type: BusinessTripType.clone,
-            id: value.toString(),
-          });
-          setOpenForm(true);
-        }}
+        // onClone={(value) => {
+        //   setBusinessTripForm({
+        //     type: BusinessTripType.clone,
+        //     id: value.toString(),
+        //   });
+        //   setOpenForm(true);
+        // }}
         url={{
           url: GET_LIST_BUSINESS_TRIP,
           detailUrl: DETAIL_PAGE_BUSINESS_TRIP,
           //   editUrl: EDIT_PAGE_BUSINESS_TRIP,
-          clone: CLONE_PAGE_BUSINESS_TRIP,
+          // clone: CLONE_PAGE_BUSINESS_TRIP,
           cancelApproval: 'trip',
         }}
         labelFilter='search'
