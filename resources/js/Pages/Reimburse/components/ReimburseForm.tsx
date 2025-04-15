@@ -656,7 +656,7 @@ export const ReimburseForm: React.FC<Props> = ({
                       disabled={type === ReimburseFormType.edit}
                       placeholder={'Cost Center'}
                       classNames='mt-2 w-full'
-                      onSearch={async (search,) => {
+                      onSearch={async (search) => {
                         const isLabelMatch = dataCostCenter?.some(option => option.label === search);
                         if (search.length > 0 && !isLabelMatch) {
                           await getCostCenter(search, {

@@ -98,6 +98,11 @@ class BusinessTrip extends Model
         return $this->belongsTo(BusinessTrip::class, 'parent_id', 'id');
     }
 
+    function requestReferenceDeclaration()
+    {
+        return $this->belongsTo(BusinessTrip::class, 'id', 'parent_id')->with('status');
+    }
+
     function status()
     {
         return $this->belongsTo(MasterStatus::class, 'status_id', 'id');

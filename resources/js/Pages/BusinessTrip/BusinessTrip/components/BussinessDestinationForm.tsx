@@ -37,6 +37,7 @@ import { ResultTotalItem } from './ResultTotalItem';
 import { DayPickerProps } from 'react-day-picker';
 import { Checkbox } from '@/components/shacdn/checkbox';
 import { useAlert } from '@/contexts/AlertContext';
+import useDropdownOptions from '@/lib/getDropdown';
 
 interface DateObject {
     from: string;
@@ -102,6 +103,7 @@ export function BussinessDestinationForm({
   });
 
   const { showToast } = useAlert();
+  const { dataDropdown: dataDestinationOnSearch, getDropdown: getDestination } = useDropdownOptions();
 
   function detailAttedancesGenerate() {
     let momentStart = moment(destination.business_trip_start_date).startOf('day');
@@ -304,6 +306,51 @@ export function BussinessDestinationForm({
                     ...destination,
                     destination: value,
                   });
+                }}
+                onSearch={async (search) => {
+                  const isLabelMatch = dataDestination?.some(option => option.label === search);
+                  if (search.length > 0 && !isLabelMatch) {
+                    await getDestination(search, {
+                      name: 'destination',
+                      id: 'destination',
+                      tabel: 'destinations',
+                      where: {
+                        key: 'type',
+                        parameter: destination.type,
+                      },
+                      search: search
+                    })
+                  } else if (search.length == 0 && !isLabelMatch) {
+                    await getDestination('', {
+                      name: 'destination',
+                      id: 'destination',
+                      tabel: 'destinations',
+                      where: {
+                        key: 'type',
+                        parameter: destination.type,
+                      },
+                    })
+                  }
+
+                  dataDestination = dataDestinationOnSearch
+                }}
+                onFocus={async () => {
+                  let value = form.getValues('cost_center');
+                  await getDestination('', {
+                    name: 'destination',
+                    id: 'destination',
+                    tabel: 'destinations',
+                    where: {
+                        key: 'type',
+                        parameter: destination.type,
+                      },
+                    hasValue: {
+                      key: value ? 'id' : '',
+                      value: value ?? '',
+                    }
+                  })
+                  
+                  dataDestination = dataDestinationOnSearch
                 }}
               />
             </td>
