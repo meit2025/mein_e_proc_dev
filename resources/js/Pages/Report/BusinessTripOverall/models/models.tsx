@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid';
 import { CustomStatus } from '@/components/commons/CustomStatus';
 
 export const columns: GridColDef[] = [
-    { field: 'request_no', headerName: 'Request No.', width: 200, filterable: true },
+    { field: 'request_no', headerName: 'Request Number', width: 200, filterable: true },
     {
         field: 'status',
         headerName: 'Request Status',
@@ -18,23 +18,23 @@ export const columns: GridColDef[] = [
             );
         },
     },
-    { field: 'parent_request_no', headerName: 'Request Reference No.', width: 200, filterable: true },
+    { field: 'parent_request_no', headerName: 'Declaration Number', width: 200, filterable: true },
     {
         field: 'parent_request_status',
-        headerName: 'Request Reference Status',
+        headerName: 'Declaration Number Status',
         width: 200,
         filterable: true,
         renderCell: (params: any) => {
-            if (params.value == '') {
-                return ''
-            } else {
-                return  (
+            if (params.value != 0) {
+                return (
                     <CustomStatus
-                        name="Fully Approve"
-                        className="bg-green-100 text-green-600 border-green-600"
-                        code="approve_to"
+                        name={params.value?.name}
+                        className={params.value?.classname}
+                        code={params.value?.code}
                     />
                 );
+            } else {
+                return '';
             }
         },
     },
