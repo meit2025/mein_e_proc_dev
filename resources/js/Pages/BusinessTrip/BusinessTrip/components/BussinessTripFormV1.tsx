@@ -358,7 +358,7 @@ export const BussinessTripFormV1 = ({
         const getPurposeType = GET_DETAIL_PURPOSE_TYPE(value);
         try {
         const response = await axiosInstance.get(url);
-        console.log(response,'response');
+        
         const responsePurposeType = await axiosInstance.get(getPurposeType);
         //   const typePurpose = responsePurposeType.data.data.purpose.type;
         //   if (typePurpose == 'international') {

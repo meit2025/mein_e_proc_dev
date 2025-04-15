@@ -70,17 +70,17 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         //   });
         //   setOpenForm(true);
         // }}
-        onClone={(value) => {
-          setBusinessTripForm({
-            type: BusinessTripType.clone,
-            id: value.toString(),
-          });
-          setOpenForm(true);
-        }}
+        // onClone={(value) => {
+        //   setBusinessTripForm({
+        //     type: BusinessTripType.clone,
+        //     id: value.toString(),
+        //   });
+        //   setOpenForm(true);
+        // }}
         url={{
           url: GET_LIST_BUSINESS_TRIP_DECLARATION,
           detailUrl: DETAIL_PAGE_BUSINESS_TRIP_DECLARATION,
-          clone: CLONE_PAGE_BUSINESS_TRIP_DECLARATION,
+          // clone: CLONE_PAGE_BUSINESS_TRIP_DECLARATION,
           cancelApproval: 'trip_declaration',
         }}
         labelFilter='search'

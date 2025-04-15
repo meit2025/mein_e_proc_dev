@@ -1073,7 +1073,9 @@ class ReportController extends Controller
     public function listBTOverall(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType', 'status', 'businessTripDestination', 'requestFor', 'requestedBy', 'parentBusinessTrip']);
+        $query = BusinessTrip::query()->with(['purposeType', 'status', 'businessTripDestination', 'requestFor', 'requestedBy', 'requestReferenceDeclaration'])
+            ->where('type', 'request')
+            ->where('status_id', 3);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
@@ -1098,11 +1100,7 @@ class ReportController extends Controller
             $query->whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $endDate);
         }
-        if ($status) {
-            $query->whereHas('status', function ($q) use ($status) {
-                $q->where('code', $status);
-            });
-        }
+
         if ($destination) {
             $query->whereHas('businessTripDestination', function ($q) use ($destination) {
                 $q->where('destination', $destination);
@@ -1130,8 +1128,8 @@ class ReportController extends Controller
                 'id' => $map->id,
                 'status_id' => $map->status_id,
                 'request_no' => $map->request_no,
-                'parent_request_no' => $map->type == 'declaration' ? optional($map->parentBusinessTrip)->request_no ?? 0 : '',
-                'parent_request_status' => $map->type == 'declaration' ? 'Fully Approve' : '',
+                'parent_request_no' => optional($map->requestReferenceDeclaration)->request_no ?? '',
+                'parent_request_status' => optional($map->requestReferenceDeclaration)->status ?? 0,
                 'remarks' => $map->remarks,
                 'request_for' => $map->requestFor->name ?? '',
                 'employee_no' => $map->requestedBy->nip,
@@ -1155,7 +1153,9 @@ class ReportController extends Controller
 
     public function exportBTOverall(Request $request)
     {
-        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'parentBusinessTrip', 'businessTripDestination', 'requestedBy', 'requestedBy.positions', 'requestedBy.divisions', 'requestedBy.departements']);
+        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'requestReferenceDeclaration', 'businessTripDestination', 'requestedBy', 'requestedBy.positions', 'requestedBy.divisions', 'requestedBy.departements'])
+            ->where('type', 'request')
+            ->where('status_id', 3);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
         $startDate = $request->get('startDate');
@@ -1219,7 +1219,8 @@ class ReportController extends Controller
                 'purpose' => $businessTrip->purposeType ?? '',
                 'remarks' => $businessTrip->remarks ?? '',
                 'is_declaration' => $isDeclaration,
-                'request_no_parent' => optional($businessTrip->parentBusinessTrip)->request_no ?? '',
+                'parent_request_no' => optional($businessTrip->requestReferenceDeclaration)->request_no ?? '',
+                'parent_request_status' => optional($businessTrip->requestReferenceDeclaration)->status ?? 0,
                 'destinations' => optional($businessTrip->businessTripDestination)->map(function ($destination) use ($isDeclaration) {
                     return [
                         'start_date' => $destination->business_trip_start_date ?? '',

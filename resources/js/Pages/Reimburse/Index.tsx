@@ -134,20 +134,20 @@ export const Index = ({
         role={roleConfig}
         onCreate={openFormHandler}
         columns={columns}
-        onEdit={(value) => {
-          setFormType({
-            type: ReimburseFormType.edit,
-            id: value.toString(),
-          });
-          setOpenForm(true);
-        }}
-        onClone={(value) => {
-          cloneFormHandler(value.toString())
-        }}
+        // onEdit={(value) => {
+        //   setFormType({
+        //     type: ReimburseFormType.edit,
+        //     id: value.toString(),
+        //   });
+        //   setOpenForm(true);
+        // }}
+        // onClone={(value) => {
+        //   cloneFormHandler(value.toString())
+        // }}
         url={{
           url: LIST_REIMBURSE,
           detailUrl: PAGE_DETAIL_REIMBURSE,
-          clone: CLONE_REIMBURSE,
+          // clone: CLONE_REIMBURSE,
           cancelApproval: 'reim',
         }}
         labelFilter='search'

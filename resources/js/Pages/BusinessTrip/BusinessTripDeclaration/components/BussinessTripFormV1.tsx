@@ -305,7 +305,7 @@ export const BussinessTripFormV1 = ({
       form.setValue('total_destination', businessTripData.total_destination || 1);
       form.setValue('cash_advance', businessTripData.cash_advance == 1 ? true : false);
       form.setValue('reference_number', businessTripData.reference_number);
-      form.setValue('total_percent', businessTripData.total_percent);
+      form.setValue('total_percent', Number(businessTripData.total_percent));
         form.setValue(
             'total_cash_advance',
             businessTripData?.total_cash_advance != null

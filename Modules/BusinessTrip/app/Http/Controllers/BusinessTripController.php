@@ -1035,7 +1035,7 @@ class BusinessTripController extends Controller
         if ($request->search) {
             $data = $data->where('name', 'ilike', '%' . $request->search . '%')->orWhere('nip', 'ilike', '%' . $request->search . '%');
         }
-
+        if ($request->hasValue) $data = $data->orWhere($request->hasValueKey, $request->hasValue);
         $data = $data->limit(50)->get();
         return $this->successResponse($data);
     }
