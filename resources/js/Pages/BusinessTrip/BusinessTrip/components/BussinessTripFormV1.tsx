@@ -271,7 +271,6 @@ export const BussinessTripFormV1 = ({
     try {
       const response = await axios.get(url);
       const data = response.data.data;
-        console.log(data, 'data');
       const urlGetAllowance = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(
         data.purpose_type_id,
         data.request_for.id,
@@ -554,7 +553,8 @@ export const BussinessTripFormV1 = ({
       setAllowancesProperty();
     }
     getDateBusinessTrip();
-  }, [totalDestination, listAllowances, isAdmin, idUser]);
+    
+  }, [totalDestination, listAllowances, isAdmin, idUser, selectedUserId]);
 
   const [isShow, setIsShow] = React.useState(false);
   const [approvalRoute, setApprovalRoute] = React.useState({
@@ -703,8 +703,6 @@ export const BussinessTripFormV1 = ({
         await getDetailData();
         setIsClone(true);
       }
-      console.log(form.getValues('request_for'));
-      
       getEmployee('', {
         name: 'name',
         id: 'id',
@@ -762,7 +760,7 @@ export const BussinessTripFormV1 = ({
     <ScrollArea className='h-[600px] w-full '>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <table className='text-xs mt-4 reimburse-form-table font-thin'>
+          <table className='mt-4 text-xs font-thin reimburse-form-table'>
             <tr>
               <td width={200}>Request No.</td>
               <td>ODR-YYYY-MM-XXXXXXXX</td>
@@ -805,7 +803,12 @@ export const BussinessTripFormV1 = ({
                       });
                     }
                   }}
-                  onChangeOutside={(value) => setSelectedUserId(value)}
+                  onChangeOutside={(value) => {
+                    setSelectedUserId(value)
+                    if (value === null) {
+                      setSelectedDates([])
+                    }
+                  }}
                   onFocus={() => {
                     let value = form.getValues('request_for');
                     getEmployee('', {
@@ -891,12 +894,12 @@ export const BussinessTripFormV1 = ({
                   name='attachment'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='text-xs text-gray-500 font-extralight mb-1'>
+                      <FormLabel className='mb-1 text-xs text-gray-500 font-extralight'>
                         Max File: 1000KB
                       </FormLabel>
                       <FormControl>
                         <input
-                          className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
+                          className='flex w-full px-3 py-1 text-xs transition-colors bg-transparent border rounded-md shadow-sm h-9 border-input file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
                           type='file'
                           accept='.jpg,.jpeg,.png,.pdf,.heic,.heif'
                           multiple // Menambahkan atribut multiple
@@ -942,7 +945,7 @@ export const BussinessTripFormV1 = ({
                       <a
                         href={attachment.url}
                         target='_blank'
-                        className='text-blue-500 inline-block'
+                        className='inline-block text-blue-500'
                         key={index}
                         rel='noreferrer'
                       >
@@ -951,7 +954,7 @@ export const BussinessTripFormV1 = ({
                       <button
                         type='button'
                         onClick={() => handleDelete(attachment.id)}
-                        className='text-red-500 mt-2 inline-block ml-2 cursor-pointer'
+                        className='inline-block mt-2 ml-2 text-red-500 cursor-pointer'
                       >
                         Delete
                       </button>
@@ -962,7 +965,7 @@ export const BussinessTripFormV1 = ({
             )}
             <tr>
               <td width={200}>File Extension</td>
-              <td className='text-gray-500 text-xs font-extralight'>
+              <td className='text-xs text-gray-500 font-extralight'>
                 PDF, JPG, JPEG, PNG and HEIC Max 1mb
               </td>
             </tr>
@@ -1029,7 +1032,7 @@ export const BussinessTripFormV1 = ({
           <Separator className='my-4' />
 
           {/* CASH ADVANCE */}
-          <table className='w-full text-sm mt-10'>
+          <table className='w-full mt-10 text-sm'>
             <tr>
               <td className='w-[50%]'>Cash Advance</td>
               <td className='w-[50%] pb-0'>
