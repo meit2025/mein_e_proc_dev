@@ -187,6 +187,9 @@ abstract class Controller
                     WHERE
                         document_name = 'PR'
                         AND status = 'Waiting'
+                    ORDER BY
+                        document_id,
+                        number_approval
                 ",
                 'approvalQueueUser',
                 function ($join) {
@@ -268,6 +271,9 @@ abstract class Controller
                     WHERE
                         document_name = 'PR'
                         AND status = 'Waiting'
+                    ORDER BY
+                        document_id,
+                        number_approval
                 ",
                 'approvalQueueUser',
                 function ($join) {

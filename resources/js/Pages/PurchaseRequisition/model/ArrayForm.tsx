@@ -61,6 +61,10 @@ const ArrayForm = ({
       tabel: 'master_business_partners',
       hiddenZero: true,
       isMapping: true,
+      hasValue: {
+        key: getValues(`vendors[${dataIndex}].vendor`) ? 'id' : '',
+        value: getValues(`vendors[${dataIndex}].vendor`) ?? '',
+      }
     });
     getMaterialGroup('', {
       name: 'material_group_desc',
@@ -430,7 +434,7 @@ const ArrayForm = ({
             }}
             href='#'
           >
-            <i className='ki-filled ki-copy text-warning text-2xl'></i>
+            <i className='text-2xl ki-filled ki-copy text-warning'></i>
           </Link>
           <Link
             type='button'
@@ -440,7 +444,7 @@ const ArrayForm = ({
             }}
             href='#'
           >
-            <i className=' ki-duotone ki-notepad-edit text-success text-2xl'></i>
+            <i className='text-2xl ki-duotone ki-notepad-edit text-success'></i>
           </Link>
           <Link
             type='button'
@@ -450,7 +454,7 @@ const ArrayForm = ({
             }}
             href='#'
           >
-            <i className=' ki-duotone ki-trash-square text-danger text-2xl'></i>
+            <i className='text-2xl ki-duotone ki-trash-square text-danger'></i>
           </Link>
         </div>
       ),
@@ -517,6 +521,41 @@ const ArrayForm = ({
             placeholder={'Select Vendor'}
             classNames='mt-2'
             disabled={disable}
+            onSearch={async (search) => {
+              const isLabelMatch = dataVendor?.some(option => option.label === search);
+              if (search.length > 0 && !isLabelMatch) {
+                await getVendor(search, {
+                  name: 'name_one',
+                  id: 'id',
+                  tabel: 'master_business_partners',
+                  hiddenZero: true,
+                  isMapping: true,
+                  search: search
+                })
+              } else if (search.length == 0 && !isLabelMatch) {
+                await getVendor(search, {
+                  name: 'name_one',
+                  id: 'id',
+                  tabel: 'master_business_partners',
+                  hiddenZero: true,
+                  isMapping: true,
+                })
+              }
+            }}
+            onFocus={async() => {
+              let value = getValues(`vendors[${dataIndex}].vendor`);
+              await getVendor('', {
+                name: 'name_one',
+                id: 'id',
+                tabel: 'master_business_partners',
+                hiddenZero: true,
+                isMapping: true,
+                hasValue: {
+                  key: value ? 'id' : '',
+                  value: value ?? '',
+                }
+              })
+            }}
           />
 
           <FormSwitch
@@ -550,7 +589,7 @@ const ArrayForm = ({
         </>
       )}
       {!disable && (
-        <div className='card mt-2'>
+        <div className='mt-2 card'>
           <div className='card-header'>
             <p>item</p>
           </div>
@@ -726,7 +765,7 @@ const ArrayForm = ({
             <Button
               type='button'
               variant='contained'
-              className='bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-all'
+              className='px-6 py-2 text-white transition-all bg-blue-500 rounded hover:bg-blue-600'
               onClick={async () => await handleClick()}
             >
               Add Item
@@ -737,7 +776,7 @@ const ArrayForm = ({
       <Box sx={{ width: '100%', overflowX: 'auto', marginTop: '1rem' }}>
         <div className='lg:col-span-2'>
           <div className='grid'>
-            <div className='card card-grid h-full min-w-full'>
+            <div className='h-full min-w-full card card-grid'>
               <div className='card-body'>
                 <div data-datatable='true'>
                   <div className='scrollable-x-auto'>
@@ -770,7 +809,7 @@ const ArrayForm = ({
                 marginTop: '1rem',
                 marginRight: '1rem',
               }}
-              className='bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-all'
+              className='px-6 py-2 text-white transition-all bg-blue-500 rounded hover:bg-blue-600'
               onClick={async () => await dataCopyToVendor(index)}
             >
               Copy To Vendor {index + 1}
