@@ -180,6 +180,7 @@ class ReimbuseController extends Controller
             if ($request->approval == 1) {
                 $approval = Approval::leftJoinSub("
                     SELECT DISTINCT ON (document_id)
+                        number_approval,
                         id,
                         user_id,
                         document_id
@@ -188,6 +189,9 @@ class ReimbuseController extends Controller
                     WHERE
                         document_name = 'REIM'
                         AND status = 'Waiting'
+                    ORDER BY
+                        document_id,
+                        number_approval
                 ",
                 'approvalQueueUser',
                 function ($join) {
