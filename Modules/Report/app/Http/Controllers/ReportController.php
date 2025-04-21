@@ -428,7 +428,7 @@ class ReportController extends Controller
                         ->whereIn('rg.status_id', [1, 3, 5]);
                 })->get()->toArray();
 
-                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] != 'S' && $value['status_closed'] != 'X' && $value['pr_status'] != 'X') && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
+                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] != 'S' && $value['pr_status'] != 'X') && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
                 $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] == 'S' && $value['status_closed'] == 'S' && $value['pr_status'] != 'X') && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
 
                 // Remaining Balance
@@ -643,7 +643,7 @@ class ReportController extends Controller
                 })->get()->toArray();
 
                 $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) {
-                    return ($value['clearing_status'] != 'S' && $value['status_closed'] != 'X' && $value['pr_status'] != 'X') &&
+                    return ($value['clearing_status'] != 'S' && $value['pr_status'] != 'X') &&
                         (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null);
                 }), 'balance'));
 

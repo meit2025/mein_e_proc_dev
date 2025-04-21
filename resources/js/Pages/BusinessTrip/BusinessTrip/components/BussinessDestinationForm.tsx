@@ -287,7 +287,7 @@ export function BussinessDestinationForm({
   return (
     <TabsContent key={key} value={`destination${index + 1}`}>
       <div key={index}>
-        <table className='text-xs mt-4 reimburse-form-detail font-thin'>
+        <table className='mt-4 text-xs font-thin reimburse-form-detail'>
           <tr>
             <td width={200}>
               Destination<span className='text-red-600'>*</span>
@@ -430,7 +430,7 @@ export function BussinessDestinationForm({
             <td width={200}>
               Bussines Trip Date<span className='text-red-600'>*</span>
             </td>
-            <td className='flex space-x-2 items-center'>
+            <td className='flex items-center space-x-2'>
               <FormField
                 control={form.control}
                 name={`destinations.${index}.business_trip_start_date`}
@@ -537,7 +537,7 @@ export function BussinessDestinationForm({
           type={type}
           btClone={btClone}
         />
-        <table className='text-xs mt-4 reimburse-form-detail font-thin'>
+        <table className='mt-4 text-xs font-thin reimburse-form-detail'>
           <tr>
             <td className='text-sm'>Detail Bussines Trip Allowance:</td>
             <td></td>
