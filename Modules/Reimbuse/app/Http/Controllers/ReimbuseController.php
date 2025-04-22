@@ -212,7 +212,7 @@ class ReimbuseController extends Controller
             }
 
             if ($request->search) {
-                $query = $query->orWhere('code', 'ILIKE', '%' . $request->search . '%')
+                $query = $query->where('code', 'ILIKE', '%' . $request->search . '%')
                     ->orWhere('remark', 'ILIKE', '%' . $request->search . '%')
                     ->orWhere('requester', 'ILIKE', '%' . $request->search . '%');
 

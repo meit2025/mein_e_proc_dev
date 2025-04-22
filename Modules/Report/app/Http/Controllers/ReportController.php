@@ -66,24 +66,6 @@ class ReportController extends Controller
                 if (Auth::user()->is_admin == '0') $data = $query->where('requester', Auth::user()->nip);
             }
 
-            if ($request->search) {
-                $query = $query->orWhere('code', 'ILIKE', '%' . $request->search . '%')
-                    ->orWhere('remark', 'ILIKE', '%' . $request->search . '%')
-                    ->orWhere('requester', 'ILIKE', '%' . $request->search . '%');
-
-                $query = $query->orWhereHas('reimburses', function ($q) use ($request) {
-                    $q->where('remark', 'ILIKE', '%' . $request->search . '%');
-                });
-
-                $query = $query->orWhereHas('status', function ($q) use ($request) {
-                    $q->where('name', 'ILIKE', '%' . $request->search . '%');
-                });
-
-                $query = $query->orWhereHas('user', function ($q) use ($request) {
-                    $q->where('name', 'ILIKE', '%' . $request->search . '%');
-                });
-            }
-
             if ($startDate && $endDate) {
                 $query->whereDate('created_at', '>=', $startDate)
                     ->whereDate('created_at', '<=', $endDate);
@@ -102,6 +84,23 @@ class ReportController extends Controller
             if ($department) {
                 $query->whereHas('user', function ($q) use ($department) {
                     $q->where('departement_id', $department);
+                });
+            }
+
+            if ($request->search) {
+                $query = $query->where(function ($query) use ($request) {
+                    $query->where('code', 'ILIKE', '%' . $request->search . '%')
+                    ->orWhere('remark', 'ILIKE', '%' . $request->search . '%')
+                    ->orWhere('requester', 'ILIKE', '%' . $request->search . '%')
+                    ->orWhereHas('reimburses', function ($q) use ($request) {
+                        $q->where('remark', 'ILIKE', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('status', function ($q) use ($request) {
+                        $q->where('name', 'ILIKE', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('user', function ($q) use ($request) {
+                        $q->where('name', 'ILIKE', '%' . $request->search . '%');
+                    });
                 });
             }
 
@@ -166,26 +165,6 @@ class ReportController extends Controller
                 }
             }
 
-            // Apply search functionality
-            if ($request->filled('search')) {
-                $search = $request->search;
-
-                $query->where(function ($q) use ($search) {
-                    $q->where('code', 'ILIKE', '%' . $search . '%')
-                        ->orWhere('remark', 'ILIKE', '%' . $search . '%')
-                        ->orWhere('requester', 'ILIKE', '%' . $search . '%')
-                        ->orWhereHas('reimburses', function ($q) use ($search) {
-                            $q->where('remark', 'ILIKE', '%' . $search . '%');
-                        })
-                        ->orWhereHas('status', function ($q) use ($search) {
-                            $q->where('name', 'ILIKE', '%' . $search . '%');
-                        })
-                        ->orWhereHas('user', function ($q) use ($search) {
-                            $q->where('name', 'ILIKE', '%' . $search . '%');
-                        });
-                });
-            }
-
             if ($startDate && $endDate) {
                 $query->whereDate('created_at', '>=', $startDate)
                     ->whereDate('created_at', '<=', $endDate);
@@ -203,6 +182,23 @@ class ReportController extends Controller
             if ($department) {
                 $query->whereHas('user', function ($q) use ($department) {
                     $q->where('departement_id', $department);
+                });
+            }
+
+            if ($request->search) {
+                $query = $query->where(function ($query) use ($request) {
+                    $query->where('code', 'ILIKE', '%' . $request->search . '%')
+                    ->orWhere('remark', 'ILIKE', '%' . $request->search . '%')
+                    ->orWhere('requester', 'ILIKE', '%' . $request->search . '%')
+                    ->orWhereHas('reimburses', function ($q) use ($request) {
+                        $q->where('remark', 'ILIKE', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('status', function ($q) use ($request) {
+                        $q->where('name', 'ILIKE', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('user', function ($q) use ($request) {
+                        $q->where('name', 'ILIKE', '%' . $request->search . '%');
+                    });
                 });
             }
 
