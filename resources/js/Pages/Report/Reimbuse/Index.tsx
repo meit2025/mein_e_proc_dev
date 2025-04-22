@@ -87,7 +87,7 @@ export const Index = ({}: Props) => {
 
     return (
         <FormProvider {...methods}>
-            <div className='flex flex-col md:mb-4 mb-2 w-full'>
+            <div className='flex flex-col w-full mb-2 md:mb-4'>
                 {/* Filters */}
                 <div className='flex gap-4 mb-4'>
                     <div>
