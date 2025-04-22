@@ -202,7 +202,7 @@ abstract class Controller
                 ])
                 ->whereColumn('approvalQueueUser.user_id', 'approvals.user_id')
                 ->pluck('approvals.document_id')->toArray();
-                $query = $query->whereIn('id', $data);
+                $query = $query->whereIn('id', $data)->where('status_id', 1);
             } else {
                 $query->where(function ($q) use ($request, $filterableColumns) {
                     $q->orWhere('user_id', Auth::user()->id)
@@ -286,7 +286,7 @@ abstract class Controller
                 ])
                 ->whereColumn('approvalQueueUser.user_id', 'approvals.user_id')
                 ->pluck('approvals.document_id')->toArray();
-                $query = $query->whereIn('id', $data);
+                $query = $query->whereIn('id', $data)->where('status_id', 1);
             } else {
                 $query->where(function ($q) use ($request, $filterableColumns) {
                     $q->orWhere('user_id', Auth::user()->id)
