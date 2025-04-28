@@ -44,42 +44,7 @@ class ReportController extends Controller
      */
     public function index()
     {
-        try {
-
-            $is_Admin = Auth::user()->is_admin;
-
-            $listFamily = [];
-            if (!$is_Admin) {
-                $users = User::where('id', Auth::id())->select('nip', 'name')->get();
-
-                // $listFamily = Family::where('userId', Auth::user()->id)->get();
-            } else {
-                $users = User::select('nip', 'name')->get();
-                // $listFamily = Family::where('userId', User::select('nip')->pluck('nip')->toArray())->get();
-            }
-
-            $currentUser = Auth::user();
-
-            $categories = ['Employee', 'Family'];
-            $purchasing_groups = PurchasingGroup::select('id', 'purchasing_group', 'purchasing_group_desc')->get();
-            $currencies = Currency::select('code', 'name')->where('code', 'IDR')->get();
-            // $periods = MasterPeriodReimburse::select('id', 'code', 'start', 'end')->get();
-            $cost_center = MasterCostCenter::select('id', 'cost_center')->get();
-            $taxes = Pajak::select('id', 'mwszkz')->get();
-
-            $types = MasterTypeReimburse::select('code', 'name')->get();
-            $statuses = MasterStatus::select('code', 'name')->get();
-            $departments = MasterDepartment::select('id', 'name')->get();
-
-            // $latestPeriod = MasterPeriodReimburse::orderBy('id', 'desc')->first();
-
-            return Inertia::render(
-                'Report/Reimbuse/Index',
-                compact('purchasing_groups', 'currentUser',  'users', 'categories', 'currencies', 'cost_center', 'taxes', 'types', 'statuses', 'departments')
-            );
-        } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage());
-        }
+        return Inertia::render('Report/Reimbuse/Index');
     }
 
     public function list(Request $request)
@@ -101,20 +66,6 @@ class ReportController extends Controller
                 if (Auth::user()->is_admin == '0') $data = $query->where('requester', Auth::user()->nip);
             }
 
-            if ($request->search) {
-                $query = $query->orWhere('code', 'ILIKE', '%' . $request->search . '%')
-                    ->orWhere('remark', 'ILIKE', '%' . $request->search . '%')
-                    ->orWhere('requester', 'ILIKE', '%' . $request->search . '%');
-
-                $query = $query->orWhereHas('reimburses', function ($q) use ($request) {
-                    $q->where('remark', 'ILIKE', '%' . $request->search . '%');
-                });
-
-                $query = $query->orWhereHas('status', function ($q) use ($request) {
-                    $q->where('name', 'ILIKE', '%' . $request->search . '%');
-                });
-            }
-
             if ($startDate && $endDate) {
                 $query->whereDate('created_at', '>=', $startDate)
                     ->whereDate('created_at', '<=', $endDate);
@@ -133,6 +84,23 @@ class ReportController extends Controller
             if ($department) {
                 $query->whereHas('user', function ($q) use ($department) {
                     $q->where('departement_id', $department);
+                });
+            }
+
+            if ($request->search) {
+                $query = $query->where(function ($query) use ($request) {
+                    $query->where('code', 'ILIKE', '%' . $request->search . '%')
+                    ->orWhere('remark', 'ILIKE', '%' . $request->search . '%')
+                    ->orWhere('requester', 'ILIKE', '%' . $request->search . '%')
+                    ->orWhereHas('reimburses', function ($q) use ($request) {
+                        $q->where('remark', 'ILIKE', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('status', function ($q) use ($request) {
+                        $q->where('name', 'ILIKE', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('user', function ($q) use ($request) {
+                        $q->where('name', 'ILIKE', '%' . $request->search . '%');
+                    });
                 });
             }
 
@@ -197,23 +165,6 @@ class ReportController extends Controller
                 }
             }
 
-            // Apply search functionality
-            if ($request->filled('search')) {
-                $search = $request->search;
-
-                $query->where(function ($q) use ($search) {
-                    $q->where('code', 'ILIKE', '%' . $search . '%')
-                        ->orWhere('remark', 'ILIKE', '%' . $search . '%')
-                        ->orWhere('requester', 'ILIKE', '%' . $search . '%')
-                        ->orWhereHas('reimburses', function ($q) use ($search) {
-                            $q->where('remark', 'ILIKE', '%' . $search . '%');
-                        })
-                        ->orWhereHas('status', function ($q) use ($search) {
-                            $q->where('name', 'ILIKE', '%' . $search . '%');
-                        });
-                });
-            }
-
             if ($startDate && $endDate) {
                 $query->whereDate('created_at', '>=', $startDate)
                     ->whereDate('created_at', '<=', $endDate);
@@ -225,12 +176,29 @@ class ReportController extends Controller
             }
             if ($type) {
                 $query->whereHas('reimburses', function ($q) use ($type) {
-                    $q->where('type', $type);
+                    $q->where('reimburse_type', $type);
                 });
             }
             if ($department) {
                 $query->whereHas('user', function ($q) use ($department) {
                     $q->where('departement_id', $department);
+                });
+            }
+
+            if ($request->search) {
+                $query = $query->where(function ($query) use ($request) {
+                    $query->where('code', 'ILIKE', '%' . $request->search . '%')
+                    ->orWhere('remark', 'ILIKE', '%' . $request->search . '%')
+                    ->orWhere('requester', 'ILIKE', '%' . $request->search . '%')
+                    ->orWhereHas('reimburses', function ($q) use ($request) {
+                        $q->where('remark', 'ILIKE', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('status', function ($q) use ($request) {
+                        $q->where('name', 'ILIKE', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('user', function ($q) use ($request) {
+                        $q->where('name', 'ILIKE', '%' . $request->search . '%');
+                    });
                 });
             }
 
@@ -291,7 +259,7 @@ class ReportController extends Controller
             $reimburseType  = isset($request->reimburse_type) && $request->reimburse_type !== "null" ? $request->reimburse_type : null;
             $employee       = isset($request->employee) && $request->employee !== "null" ? $request->employee : null;
             $family         = isset($request->family) && $request->family !== "null" ? $request->family : null;
-
+            
             $query = MasterTypeReimburse::with([
                     'reimburses' => function ($reimburseQuery) {
                         $reimburseQuery->join('reimburse_groups as rg', 'reimburses.group', '=', 'rg.code')
@@ -305,7 +273,7 @@ class ReportController extends Controller
                     CASE
                         WHEN 
                             MIN(mtrua_grade_relation_exist.id) IS NULL
-                            AND MIN(mtrua_grade_relation_not_exist.id) IS NULL
+                            AND MIN(mtrua_grade_relation_not_exist.id) IS NOT NULL
                             AND MIN(rg.id) IS NOT NULL
                         THEN 1
                         ELSE 0
@@ -320,12 +288,20 @@ class ReportController extends Controller
                     ->whereColumn('mtrua_grade_relation_exist.reimburse_type_id', 'master_type_reimburses.id')
                     ->where('mtrua_grade_relation_exist.is_assign', true);
             })
+            ->leftJoin('master_type_reimburse_user_assign as mtrua_grade_all_relation_exist', function($join) {
+                $join->on('mtrua_grade_all_relation_exist.reimburse_type_id', 'master_type_reimburses.id')
+                    ->where('grade_option', 'all');
+            })
             ->leftJoin('master_type_reimburse_user_assign as mtrua_grade_relation_not_exist', function($join) {
                 $join->on('mtrua_grade_relation_not_exist.reimburse_type_id', '=', 'master_type_reimburses.id')
-                    ->where('mtrua_grade_relation_not_exist.is_assign', true);
+                    ->where(function($query) {
+                        $query->whereColumn('mtrua_grade_relation_not_exist.user_id', 'mtrua_grade_relation_exist.user_id')
+                            ->orWhereColumn('mtrua_grade_relation_not_exist.user_id', 'mtrua_grade_all_relation_exist.user_id');
+                    });
             })
             ->leftJoin('users as u', function($join) {
                 $join->on('u.id', '=', 'mtrua_grade_relation_exist.user_id')
+                    ->orOn('u.id', '=', 'mtrua_grade_all_relation_exist.user_id')
                     ->orOn('u.id', '=', 'mtrua_grade_relation_not_exist.user_id');
             })
             ->leftJoin('families as f', function($join) {
@@ -334,65 +310,44 @@ class ReportController extends Controller
                     ->whereColumn('master_type_reimburses.family_status', 'f.status');
             })
             ->leftJoin('reimburses as r', function($join) {
-                $join->on('r.reimburse_type', '=', 'master_type_reimburses.code');
+                $join->on('r.reimburse_type', '=', 'master_type_reimburses.code')
+                    ->whereColumn('r.requester', 'u.nip');
             })
             ->leftJoin('reimburse_groups as rg', function($join) {
                 $join->on('rg.code', '=', 'r.group')
                     ->whereIn('rg.status_id', [1, 3, 5]);
             })
+            ->where('master_type_reimburses.is_employee', true)
             ->where(function($query) {
-                $query->whereNotNull('mtrua_grade_relation_exist.is_assign')
-                    ->orWhereNotNull('mtrua_grade_relation_not_exist.is_assign')
-                    ->orWhereNotNull('rg.id');
+                $query->where(function($query) {
+                    $query->where('master_type_reimburses.grade_option', 'grade')
+                        ->where('mtrua_grade_relation_exist.is_assign', true);
+                })
+                ->orWhere(function($query) {
+                    $query->where('master_type_reimburses.grade_option', 'all')
+                        ->where('mtrua_grade_all_relation_exist.is_assign', true);
+                })
+                ->orWhere(function($query) {
+                    $query->whereNot('mtrua_grade_relation_not_exist.is_assign', true)
+                        ->whereNotNull('rg.id');
+                });
             })
-            ->where(function($query) {
-                $query->where('master_type_reimburses.is_employee', true)
-                    ->orWhere(function($query) {
+            ->orWhere(function($query) {
+                    $query->where(function($query) {
                         $query->where('master_type_reimburses.is_employee', false)
                             ->whereNotNull('f.id');
                     });
-            });
-
-            if ($reimburseType !== null) $query = $query->where('master_type_reimburses.code', $reimburseType);
-            if ($employee !== null) $query = $query->where('u.id', $employee);
-            if ($family !== null) $query = $query->where('f.id', $family);
-            // if ($request->search) {
-            //     $query = $query->where(function($query) use ($request) {
-            //         $query->where('master_type_reimburses.code', 'ILIKE', '%' . $request->search . '%')
-            //         ->orWhere('master_type_reimburses.name', 'ILIKE', '%' . $request->search . '%');
-            //     }); 
-            // }
-
-            $query = $query->orWhere(function($query) use ($reimburseType, $employee, $family) {
-                $query->where('grade_option', 'all')
-                    ->where(function($query) {
-                        $query->whereNotNull('mtrua_grade_relation_exist.is_assign')
-                            ->orWhereNotNull('mtrua_grade_relation_not_exist.is_assign')
-                            ->orWhereNotNull('rg.id');
-                    })
-                    ->where(function($query) {
-                        $query->where('master_type_reimburses.is_employee', true)
-                            ->orWhere(function($query) {
-                                $query->where('master_type_reimburses.is_employee', false)
-                                    ->whereNotNull('f.id');
-                        });
-                    });
-
-                if ($reimburseType !== null) $query = $query->where('master_type_reimburses.code', $reimburseType);
-                if ($employee !== null) $query = $query->where('u.id', $employee);
-                if ($family !== null) $query = $query->where('f.id', $family);
-                // if ($request->search) {
-                //     $query = $query->where(function($query) use ($request) {
-                //         $query->where('master_type_reimburses.code', 'ILIKE', '%' . $request->search . '%')
-                //         ->orWhere('master_type_reimburses.name', 'ILIKE', '%' . $request->search . '%');
-                //     }); 
-                // }
             });
             
             $orderBy = $request->sort_by == 'id' ? 'master_type_reimburses.name' : $request->sort_by;
             $sortBy = $request->sort_by == 'id' ? 'asc' : $request->sort_direction;
             $query->groupBy(['master_type_reimburses.id', 'u.id', 'f.id']);
             $query->orderBy($orderBy, $sortBy);
+
+            if ($reimburseType !== null) $query = $query->having('master_type_reimburses.code', $reimburseType);
+            if ($employee !== null) $query = $query->having('u.id', $employee);
+            if ($family !== null) $query = $query->having('f.id', $family);
+
             $perPage = $request->get('per_page', 10);
             $queryResult = $query->paginate($perPage);
             
@@ -469,7 +424,7 @@ class ReportController extends Controller
                         ->whereIn('rg.status_id', [1, 3, 5]);
                 })->get()->toArray();
 
-                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] != 'S' && $value['status_closed'] != 'X' && $value['pr_status'] != 'X') && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
+                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] != 'S' && $value['pr_status'] != 'X') && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
                 $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] == 'S' && $value['status_closed'] == 'S' && $value['pr_status'] != 'X') && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
 
                 // Remaining Balance
@@ -550,12 +505,20 @@ class ReportController extends Controller
                     ->whereColumn('mtrua_grade_relation_exist.reimburse_type_id', 'master_type_reimburses.id')
                     ->where('mtrua_grade_relation_exist.is_assign', true);
             })
+            ->leftJoin('master_type_reimburse_user_assign as mtrua_grade_all_relation_exist', function($join) {
+                $join->on('mtrua_grade_all_relation_exist.reimburse_type_id', 'master_type_reimburses.id')
+                    ->where('grade_option', 'all');
+            })
             ->leftJoin('master_type_reimburse_user_assign as mtrua_grade_relation_not_exist', function($join) {
                 $join->on('mtrua_grade_relation_not_exist.reimburse_type_id', '=', 'master_type_reimburses.id')
-                    ->where('mtrua_grade_relation_not_exist.is_assign', true);
+                    ->where(function($query) {
+                        $query->whereColumn('mtrua_grade_relation_not_exist.user_id', 'mtrua_grade_relation_exist.user_id')
+                            ->orWhereColumn('mtrua_grade_relation_not_exist.user_id', 'mtrua_grade_all_relation_exist.user_id');
+                    });
             })
             ->leftJoin('users as u', function($join) {
                 $join->on('u.id', '=', 'mtrua_grade_relation_exist.user_id')
+                    ->orOn('u.id', '=', 'mtrua_grade_all_relation_exist.user_id')
                     ->orOn('u.id', '=', 'mtrua_grade_relation_not_exist.user_id');
             })
             ->leftJoin('families as f', function($join) {
@@ -564,33 +527,44 @@ class ReportController extends Controller
                     ->whereColumn('master_type_reimburses.family_status', 'f.status');
             })
             ->leftJoin('reimburses as r', function($join) {
-                $join->on('r.reimburse_type', '=', 'master_type_reimburses.code');
+                $join->on('r.reimburse_type', '=', 'master_type_reimburses.code')
+                    ->whereColumn('r.requester', 'u.nip');
             })
             ->leftJoin('reimburse_groups as rg', function($join) {
                 $join->on('rg.code', '=', 'r.group')
                     ->whereIn('rg.status_id', [1, 3, 5]);
             })
+            ->where('master_type_reimburses.is_employee', true)
             ->where(function($query) {
-                $query->whereNotNull('mtrua_grade_relation_exist.is_assign')
-                    ->orWhereNotNull('mtrua_grade_relation_not_exist.is_assign')
-                    ->orWhereNotNull('rg.id');
+                $query->where(function($query) {
+                    $query->where('master_type_reimburses.grade_option', 'grade')
+                        ->where('mtrua_grade_relation_exist.is_assign', true);
+                })
+                ->orWhere(function($query) {
+                    $query->where('master_type_reimburses.grade_option', 'all')
+                        ->where('mtrua_grade_all_relation_exist.is_assign', true);
+                })
+                ->orWhere(function($query) {
+                    $query->whereNot('mtrua_grade_relation_not_exist.is_assign', true)
+                        ->whereNotNull('rg.id');
+                });
             })
-            ->where(function($query) {
-                $query->where('master_type_reimburses.is_employee', true)
-                    ->orWhere(function($query) {
+            ->orWhere(function($query) {
+                    $query->where(function($query) {
                         $query->where('master_type_reimburses.is_employee', false)
                             ->whereNotNull('f.id');
                     });
             });
 
-            if ($reimburseType !== null) $query = $query->where('master_type_reimburses.code', $reimburseType);
-            if ($employee !== null) $query = $query->where('u.id', $employee);
-            if ($family !== null) $query = $query->where('f.id', $family);
-
+            
             $query->groupBy(['master_type_reimburses.id', 'u.id', 'f.id']);
             $orderBy = $request->sort_by == 'id' ? 'master_type_reimburses.name' : $request->sort_by;
             $sortBy = $request->sort_by == 'id' ? 'asc' : $request->sort_direction;
             $query->orderBy($orderBy, $sortBy);
+
+            if ($reimburseType !== null) $query = $query->having('master_type_reimburses.code', $reimburseType);
+            if ($employee !== null) $query = $query->having('u.id', $employee);
+            if ($family !== null) $query = $query->having('f.id', $family);
 
             $queryResult = $query->get();
 
@@ -665,7 +639,7 @@ class ReportController extends Controller
                 })->get()->toArray();
 
                 $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) {
-                    return ($value['clearing_status'] != 'S' && $value['status_closed'] != 'X' && $value['pr_status'] != 'X') &&
+                    return ($value['clearing_status'] != 'S' && $value['pr_status'] != 'X') &&
                         (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null);
                 }), 'balance'));
 
@@ -712,18 +686,7 @@ class ReportController extends Controller
 
     public function businessTrip()
     {
-        $users = User::select('nip', 'name', 'id')->get();
-
-        $listPurposeType = PurposeType::select('name', 'id')->get();
-        $pajak = Pajak::select('id', 'mwszkz', 'desimal')->get();
-        $costcenter = MasterCostCenter::select('id', 'cost_center', 'controlling_name')->get();
-        $purchasingGroup = PurchasingGroup::select('id', 'purchasing_group')->get();
-
-        $listDestination = Destination::get();
-        $departments = MasterDepartment::select('id', 'name')->get();
-        $statuses = MasterStatus::select('code', 'name')->get();
-
-        return Inertia::render('Report/BusinessTrip/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup', 'listDestination', 'departments', 'statuses'));
+        return Inertia::render('Report/BusinessTrip/index');
     }
 
     public function listBT(Request $request)
@@ -911,15 +874,7 @@ class ReportController extends Controller
 
     public function businessTripDec()
     {
-        $users = User::select('nip', 'name', 'id')->get();
-        $inBusinessTripRequest = BusinessTrip::where('type', 'declaration')->pluck('parent_id')->toArray();
-        $listBusinessTrip = BusinessTrip::where('type', 'request')->whereNotIn('id', $inBusinessTripRequest)->get();
-        $listPurposeType = PurposeType::select('name', 'id')->get();
-        $listDestination = Destination::get();
-        $departments = MasterDepartment::select('id', 'name')->get();
-        $statuses = MasterStatus::select('code', 'name')->get();
-
-        return Inertia::render('Report/BusinessTripDeclaration/index', compact('users', 'listPurposeType', 'listBusinessTrip', 'listDestination', 'departments', 'statuses'));
+        return Inertia::render('Report/BusinessTripDeclaration/index');
     }
 
     public function listBTDec(Request $request)
@@ -973,7 +928,7 @@ class ReportController extends Controller
         }
 
 
-        $data = $query->where('type', 'declaration')->latest()->paginate($perPage);
+        $data = $query->where('type', 'declaration')->latest()->search(request(['search']))->paginate($perPage);
 
         $data->getCollection()->transform(function ($map) {
 
@@ -1056,7 +1011,7 @@ class ReportController extends Controller
         }
 
         // Filter for type declaration
-        $data = $query->where('type', 'declaration')->latest()->get();
+        $data = $query->where('type', 'declaration')->latest()->search(request(['search']))->get();
 
         // Transform the data for export
         $transformedData = $data->map(function ($businessTrip) {
@@ -1108,24 +1063,15 @@ class ReportController extends Controller
 
     public function businessTripOverall()
     {
-        $users = User::select('nip', 'name', 'id')->get();
-
-        $listPurposeType = PurposeType::select('name', 'id')->get();
-        $pajak = Pajak::select('id', 'mwszkz', 'desimal')->get();
-        $costcenter = MasterCostCenter::select('id', 'cost_center', 'controlling_name')->get();
-        $purchasingGroup = PurchasingGroup::select('id', 'purchasing_group')->get();
-
-        $listDestination = Destination::get();
-        $departments = MasterDepartment::select('id', 'name')->get();
-        $statuses = MasterStatus::select('code', 'name')->get();
-
-        return Inertia::render('Report/BusinessTripOverall/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup', 'listDestination', 'departments', 'statuses'));
+        return Inertia::render('Report/BusinessTripOverall/index');
     }
 
     public function listBTOverall(Request $request)
     {
 
-        $query =  BusinessTrip::query()->with(['purposeType', 'status', 'businessTripDestination', 'requestFor']);
+        $query = BusinessTrip::query()->with(['purposeType', 'status', 'businessTripDestination', 'requestFor', 'requestedBy', 'requestReferenceDeclaration'])
+            ->where('type', 'request')
+            ->where('status_id', 3);
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
@@ -1150,11 +1096,7 @@ class ReportController extends Controller
             $query->whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $endDate);
         }
-        if ($status) {
-            $query->whereHas('status', function ($q) use ($status) {
-                $q->where('code', $status);
-            });
-        }
+
         if ($destination) {
             $query->whereHas('businessTripDestination', function ($q) use ($destination) {
                 $q->where('destination', $destination);
@@ -1176,20 +1118,21 @@ class ReportController extends Controller
         $data = $query->latest()->search(request(['search']))->paginate($perPage);
 
         $data->getCollection()->transform(function ($map) {
-
             $purposeRelations = $map->purposeType ? $map->purposeType->name : ''; // Assuming 'name' is the field
-
+            
             return [
                 'id' => $map->id,
                 'status_id' => $map->status_id,
                 'request_no' => $map->request_no,
+                'parent_request_no' => optional($map->requestReferenceDeclaration)->request_no ?? '',
+                'parent_request_status' => optional($map->requestReferenceDeclaration)->status ?? 0,
                 'remarks' => $map->remarks,
-                'request_for' => $map->requestFor->name,
+                'request_for' => $map->requestFor->name ?? '',
                 'employee_no' => $map->requestedBy->nip,
-                'employee_name' => $map->requestedBy->name,
-                'position' => $map->requestedBy->positions->name,
-                'dept' => $map->requestedBy->departements->name,
-                'division' => $map->requestedBy->divisions->name,
+                'employee_name' => $map->requestedBy->name ?? '',
+                'position' => $map->requestedBy->positions->name ?? '',
+                'dept' => $map->requestedBy->departements->name ?? '',
+                'division' => $map->requestedBy->divisions->name ?? '',
                 'status' => [
                     'name' => $map->status->name,
                     'classname' => $map->status->classname,
@@ -1206,7 +1149,9 @@ class ReportController extends Controller
 
     public function exportBTOverall(Request $request)
     {
-        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'parentBusinessTrip', 'businessTripDestination', 'requestedBy', 'requestedBy.positions', 'requestedBy.divisions', 'requestedBy.departements']);
+        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'requestReferenceDeclaration', 'businessTripDestination', 'requestedBy', 'requestedBy.positions', 'requestedBy.divisions', 'requestedBy.departements'])
+            ->where('type', 'request')
+            ->where('status_id', 3);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
         $startDate = $request->get('startDate');
@@ -1216,6 +1161,17 @@ class ReportController extends Controller
         $destination = $request->get('destination');
         $department = $request->get('department');
 
+        if ($request->approval == "1") {
+            $data = Approval::where('user_id', Auth::user()->id)
+                ->where('document_name', 'TRIP')
+                ->pluck('document_id')
+                ->toArray();
+            $query = $query->whereIn('id', $data);
+        }
+        if (Auth::user()->is_admin != '1') {
+            $query = $query->where('created_by', Auth::user()->id)
+                ->orWhere('request_for', Auth::user()->id);
+        }
 
         if ($startDate && $endDate) {
             $query->whereDate('created_at', '>=', $startDate)
@@ -1232,17 +1188,6 @@ class ReportController extends Controller
             });
         }
 
-        if ($request->approval == "1") {
-            $data = Approval::where('user_id', Auth::user()->id)
-                ->where('document_name', 'TRIP')
-                ->pluck('document_id')
-                ->toArray();
-            $query = $query->whereIn('id', $data);
-        }
-        if (Auth::user()->is_admin != '1') {
-            $query = $query->where('created_by', Auth::user()->id)
-                ->orWhere('request_for', Auth::user()->id);
-        }
         if ($destination) {
             $query->whereHas('businessTripDestination', function ($q) use ($destination) {
                 $q->where('destination', $destination);
@@ -1270,7 +1215,8 @@ class ReportController extends Controller
                 'purpose' => $businessTrip->purposeType ?? '',
                 'remarks' => $businessTrip->remarks ?? '',
                 'is_declaration' => $isDeclaration,
-                'request_no_parent' => optional($businessTrip->parentBusinessTrip)->request_no ?? '',
+                'parent_request_no' => optional($businessTrip->requestReferenceDeclaration)->request_no ?? '',
+                'parent_request_status' => optional($businessTrip->requestReferenceDeclaration)->status ?? 0,
                 'destinations' => optional($businessTrip->businessTripDestination)->map(function ($destination) use ($isDeclaration) {
                     return [
                         'start_date' => $destination->business_trip_start_date ?? '',
@@ -1547,36 +1493,32 @@ class ReportController extends Controller
 
     public function purchaseVendors(Request $request)
     {
-        $data = Vendor::with('masterBusinesPartnerss') // Eager load the relationship
-            ->where('winner', true) // Filter winners
-            ->get();
+        $data = Vendor::with(['masterBusinesPartnerss' => function ($query) use ($request) {
+            if ($request->search) {
+                $query->where('name_one', 'ilike', '%' . $request->search . '%');
+            }
+        }])->where('winner', true);
 
-        // Map related data to the result
+        if ($request->search) {
+            $data = $data->orWhere('vendor', 'ilike', '%' . $request->search . '%');
+        }
+        
+        $data = $data->limit(50)->get();
+
         $data = $data->map(function ($vendor) {
             return [
-                'vendor' => $vendor->vendor,
-                'vendor_name' => $vendor->masterBusinesPartnerss->name_one ?? '', // Access related column
+                'value' => $vendor->vendor,
+                'label' => $vendor->masterBusinesPartnerss->name_one ?? '',
             ];
-        })->unique('vendor') // Ensure uniqueness based on 'vendor' column
-            ->values(); // Reset collection keys
+        })->unique('vendor')
+            ->values();
 
         return $this->successResponse($data);
     }
 
     public function businessTripAttendance()
     {
-        $users = User::select('nip', 'name', 'id')->get();
-
-        $listPurposeType = PurposeType::select('name', 'id')->get();
-        $pajak = Pajak::select('id', 'mwszkz', 'desimal')->get();
-        $costcenter = MasterCostCenter::select('id', 'cost_center', 'controlling_name')->get();
-        $purchasingGroup = PurchasingGroup::select('id', 'purchasing_group')->get();
-
-        $listDestination = Destination::get();
-        $departments = MasterDepartment::select('id', 'name')->get();
-        $statuses = MasterStatus::select('code', 'name')->get();
-
-        return Inertia::render('Report/BusinessTripAttendance/index', compact('users', 'listPurposeType', 'pajak', 'costcenter', 'purchasingGroup', 'listDestination', 'departments', 'statuses'));
+        return Inertia::render('Report/BusinessTripAttendance/index');
     }
 
     public function listBTAttendance(Request $request)

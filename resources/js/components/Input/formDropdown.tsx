@@ -111,7 +111,7 @@ const FormAutocomplete = <T,>({
         />
       </div>
       <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
-        <label className='form-label max-w-32'>{''}</label>
+        {/* <label className='form-label max-w-32'>{''}</label> */}
         {errors[fieldName] && (
           <FormHelperText error>{String(errors[fieldName]?.message)}</FormHelperText>
         )}

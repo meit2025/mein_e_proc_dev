@@ -1,86 +1,31 @@
 import DataGridComponent from '@/components/commons/DataGrid';
-import { DETAIL_PAGE_BUSINESS_TRIP } from '@/endpoint/business-trip/page';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import { usePage } from '@inertiajs/react';
-import React, { ReactNode } from 'react';
-import {
-    BusinessTripType,
-    columns,
-    Costcenter,
-    Pajak,
-    UserModel,
-} from './models/models';
+import React, { ReactNode, useState, useEffect } from 'react';
+import {columns} from './models/models';
 import { REPORT_BT_ATTENDANCE_EXPORT, REPORT_BT_ATTENDANCE_LIST } from '@/endpoint/report/api';
 import { useAlert } from '@/contexts/AlertContext';
 import axiosInstance from '@/axiosInstance';
-interface propsType {
-    users: UserModel[];
-    pajak: Pajak[];
-    costcenter: Costcenter[];
-    types: any[];
-    listPurposeType: any[];
-    listDestination: any[];
-    departments: any[];
-    statuses: any[];
-}
+import FormAutocomplete from '@/components/Input/formDropdown';
+import { FormProvider, get, useForm } from 'react-hook-form';
+import useDropdownOptions from '@/lib/getDropdown';
 
-interface UserAuth {
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-    role_id: string;
-}
+interface Props {}
 
-interface SharedProps {
-    auth: {
-        user: UserAuth | null;
-    };
-}
-
-const roleAkses = 'report business trip';
-
-export const Index = ({
-    listPurposeType,
-    listDestination,
-    departments,
-    statuses,
-
-}: propsType) => {
-    const [openForm, setOpenForm] = React.useState<boolean>(false);
-
-    const [businessTripForm, setBusinessTripForm] = React.useState({
-        type: BusinessTripType.create,
-        id: undefined,
-    });
-
+export const Index = ({}: Props) => {
     // Filter states
     const [startDate, setStartDate] = React.useState<string | null>(null);
     const [endDate, setEndDate] = React.useState<string | null>(null);
-    const [status, setStatus] = React.useState<string>('');
-    const [type, setType] = React.useState<string>('');
-    const [destination, setDestination] = React.useState<string>('');
-    const [department, setDepartment] = React.useState<string>('');
-
-    function openFormHandler() {
-        setOpenForm(!openForm);
-    }
-
-    const { auth } = usePage().props as unknown as SharedProps;
-
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const { showToast } = useAlert();
+    const methods = useForm();
 
     const exporter = async (data: string) => {
         try {
-            console.log(data);
-
             // Kirim permintaan ke endpoint dengan filter
             const response = await axiosInstance.get(REPORT_BT_ATTENDANCE_EXPORT + data, {
                 responseType: "blob"
             });
-
-            console.log(response);
-
 
             // Membuat file dari respons
             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -100,10 +45,10 @@ export const Index = ({
     };
 
     return (
-        <>
+        <FormProvider {...methods}>
             <div className='flex md:mb-4 mb-2 w-full'>
                 {/* Filters */}
-                <div className='flex gap-4 mb-4'>
+                <div className='flex gap-4 mb-4 overflow-x-auto lg:overflow-y-hidden'>
                     <div>
                         <label htmlFor='start-date' className='block mb-1'>Start Date</label>
                         <input
@@ -124,76 +69,19 @@ export const Index = ({
                             placeholder='End Date'
                         />
                     </div>
-                    <div>
-                        <label htmlFor='type' className='block mb-1'>Purpose Type</label>
-                        <select
-                            value={type}
-                            onChange={(e) => setType(e.target.value)}
-                            className="select-class"
-                            id="type"
-                        >
-                            <option value="">All Types</option>
-                            {listPurposeType.map((typeOption) => (
-                                <option
-                                    key={typeOption.id}
-                                    value={typeOption.id}
-                                >
-                                    {typeOption.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label htmlFor='destination' className='block mb-1'>Destination</label>
-                        <select
-                            value={destination}
-                            onChange={(e) => setDestination(e.target.value)}
-                            className="select-class"
-                            id="destination"
-                        >
-                            <option value="">All Destination</option>
-                            {listDestination.map((typeOption) => (
-                                <option
-                                    key={typeOption.id}
-                                    value={typeOption.id}
-                                >
-                                    {typeOption.destination}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label htmlFor='end-date' className='block mb-1'>Department</label>
-                        <select
-                            value={department}
-                            onChange={(e) => setDepartment(e.target.value)}
-                            className="select-class"
-                            id="department"
-                        >
-                            <option value="">All Department</option>
-                            {departments.map((dept) => (
-                                <option
-                                    key={dept.id}
-                                    value={dept.id}
-                                >
-                                    {dept.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
                 </div>
             </div>
             <DataGridComponent
                 isHistory={false}
                 onExportXls={async (x: string) => await exporter(x)}
-                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&destination=${destination || ''}&department=${department || ''}&`}
+                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&`}
                 columns={columns}
                 url={{
                     url: REPORT_BT_ATTENDANCE_LIST,
                 }}
                 labelFilter='search'
             />
-        </>
+        </FormProvider>
     );
 };
 

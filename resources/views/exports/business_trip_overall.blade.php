@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Business Trip Report</title>
+    <title>Business Trip Report Overall</title>
     <style>
         table {
             width: 100%;
@@ -60,29 +60,18 @@
                         <td>{{ $trip['requested_by']->name ?? '' }}</td>
                         <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
 
-                        @if ($trip['is_declaration'])
-                        <td>{{ $trip['request_no_parent'] ?? '' }}</td>
-                        <td>{{ 'Fully Approve' }}</td>
+                        <td>{{ $trip['request_no'] ?? '' }}</td>
+                        <td>{{ $trip['status']->name ?? 'Pending' }}</td>
                         <td>{{ $trip['purpose']->name ?? '' }}</td>
                         <td>{{ $destination['destination'] ?? '' }}</td>
                         <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
                         <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
 
-                        <td>{{ $trip['request_no'] ?? '' }}</td>
-                        <td>{{ $trip['status']->name ?? 'Pending' }}</td>
+                        <td>{{ $trip['parent_request_no'] ?? '' }}</td>
+                        <td>{{ $trip['parent_request_status']->name ?? 'Pending' }}</td>
                         <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
                         <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
                         <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
-                        @else
-                        <td>{{ $trip['request_no'] ?? '' }}</td>
-                        <td>{{ $trip['status']->name ?? 'Pending' }}</td>
-                        <td>{{ $trip['purpose']->name ?? '' }}</td>
-                        {{-- <td>{{ $trip['remarks'] ?? '' }}</td> --}}
-                        <td>{{ $destination['destination'] ?? '' }}</td>
-                        <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
-                        <td colspan="5">N/A</td>
-                        @endif
                     </tr>
                 @endforeach
             @endforeach

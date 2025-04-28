@@ -44,8 +44,30 @@ class AllowanceItemController extends Controller
     public function listAPI(Request $request)
     {
 
-        $query =  AllowanceItem::query()->with(['allowanceCategory']);
-
+        $query =  AllowanceItem::query()->with(['allowanceCategory', 'allowancePurposeType']);
+        if ($request->search) {
+            $query = $query->where('code', 'ilike', '%' . $request->search . '%')
+                ->orWhere('name', 'ilike', '%' . $request->search . '%')
+                ->orWhere('currency_id', 'ilike', '%' . $request->search . '%')
+                ->orWhere('type', 'ilike', '%' . $request->search . '%')
+                ->orWhere('grade_option', 'ilike', '%' . $request->search . '%')
+                ->orWhere('material_number', 'ilike', '%' . $request->search . '%')
+                ->orWhere('material_group', 'ilike', '%' . $request->search . '%')
+                ->orWhereHas('allowanceCategory', function ($query) use ($request) {
+                    $query->where('name', 'ilike', '%' . $request->search . '%');
+                })
+                ->orWhereHas('allowancePurposeType', function ($query) use ($request) {
+                    $query->whereHas('purposeType', function ($query) use ($request) {
+                        $query->where('name', 'ilike', '%' . $request->search . '%');
+                    });
+                })
+                ->orWhereHas('allowanceGrades', function ($query) use ($request) {
+                    $query->whereHas('grade', function ($query) use ($request) {
+                        $query->where('grade', 'ilike', '%' . $request->search . '%');
+                    })
+                    ->orWhere('plafon', 'ilike', '%' . $request->search . '%');
+                });
+        }
 
 
         $perPage = $request->get('per_page', 10);
@@ -56,7 +78,6 @@ class AllowanceItemController extends Controller
 
         $data = $query->paginate($perPage);
 
-        // dd($data);
         $data->getCollection()->transform(function ($map) {
             $gradeRelations = collect($map->allowanceGrades)->map(function ($relation) {
 

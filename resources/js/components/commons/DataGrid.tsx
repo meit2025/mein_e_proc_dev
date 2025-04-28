@@ -148,7 +148,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
         setLoading(false);
       }
     },
-    [url], // Dependensi di sini memastikan fungsi hanya berubah jika `url` berubah
+    [defaultSearch, sortModel, filterModel, search, value, paginationModel],
   );
 
   useEffect(() => {
@@ -234,9 +234,9 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                 {actionType === 'dropdown' ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <ShacdnButton variant='ghost' className='h-8 w-8 p-0'>
+                      <ShacdnButton variant='ghost' className='w-8 h-8 p-0'>
                         <span className='sr-only'>...</span>
-                        <DotsHorizontalIcon className='h-4 w-4' />
+                        <DotsHorizontalIcon className='w-4 h-4' />
                       </ShacdnButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end'>
@@ -245,7 +245,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                         <>
                           {(!role || permissions.includes(role?.update ?? '')) && (
                             <DropdownMenuItem onClick={() => onEdit && onEdit(params.row.id)}>
-                              <span className='flex items-center text-sm space-x-2'>
+                              <span className='flex items-center space-x-2 text-sm'>
                                 <span>Edit</span>
                                 <Edit size={14} />
                               </span>
@@ -275,7 +275,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                                 })
                               }
                             >
-                              <span className='flex items-center  text-sm space-x-2'>
+                              <span className='flex items-center space-x-2 text-sm'>
                                 <span>Delete</span>
                                 <Trash2Icon size={14} />
                               </span>
@@ -326,7 +326,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                             }}
                             alt='detail'
                           >
-                            <i className=' ki-duotone ki-size text-info text-2xl'></i>
+                            <i className='text-2xl ki-duotone ki-size text-info'></i>
                           </Link>
                         )}
                       </>
@@ -344,7 +344,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                             }}
                             alt='detail'
                           >
-                            <i className=' ki-filled ki-copy text-warning text-2xl'></i>
+                            <i className='text-2xl ki-filled ki-copy text-warning'></i>
                           </Link>
                         )}
                       </>
@@ -363,7 +363,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                             }}
                             alt='edit'
                           >
-                            <i className=' ki-duotone ki-notepad-edit text-success text-2xl'></i>
+                            <i className='text-2xl ki-duotone ki-notepad-edit text-success'></i>
                           </Link>
                         )}
                       </>
@@ -387,7 +387,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                             }}
                             alt='delete'
                           >
-                            <i className=' ki-duotone ki-trash-square text-danger text-2xl'></i>
+                            <i className='text-2xl ki-duotone ki-trash-square text-danger'></i>
                           </Link>
                         )}
                       </>
@@ -410,7 +410,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                           }}
                           alt='delete'
                         >
-                          <i className='ki-filled ki-cross-square text-danger text-2xl'></i>
+                          <i className='text-2xl ki-filled ki-cross-square text-danger'></i>
                         </Link>
                       </>
                     ) : (
@@ -460,9 +460,9 @@ const DataGridComponent: React.FC<DataGridProps> = ({
             </Box>
           )}
 
-          <div className='lg:col-span-2 mt-2'>
+          <div className='mt-2 lg:col-span-2'>
             <div className='grid'>
-              <div className='card card-grid h-full min-w-full'>
+              <div className='h-full min-w-full card card-grid'>
                 <div className='card-header'>
                   <h3 className='card-title'>
                     <div className='input input-sm max-w-48'>

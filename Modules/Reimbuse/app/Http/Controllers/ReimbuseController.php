@@ -19,6 +19,7 @@ use Modules\Master\Models\Family;
 use Modules\Master\Models\MasterCostCenter;
 use Modules\Master\Models\MasterTypeReimburse;
 use Modules\Master\Models\MasterTypeReimburseGrades;
+use Modules\Master\Models\MasterTypeReimburseUserAssign;
 use Modules\Master\Models\Pajak;
 use Modules\Master\Models\Uom;
 use Modules\Master\Models\PurchasingGroup;
@@ -101,17 +102,33 @@ class ReimbuseController extends Controller
             // })
             ;
         
+            if ($request->search) {
+                $data = $data->where(function($query) use ($request) {
+                    $query->where('master_type_reimburses.name', 'ilike', '%' . $request->search . '%')
+                    ->orWhere('master_type_reimburses.code', 'ilike', '%' . $request->search . '%')
+                    ->orWhere('master_type_reimburses.family_status', 'ilike', '%' . $request->search . '%');
+            });
+        }
+        
         if (count($getFamilieStatus) == 0) {
             $data = 
-                $data->orWhere(function($query) use ($getFamilieStatus) {
+                $data->orWhere(function($query) use ($request) {
                     $query->where('master_type_reimburses.grade_option', 'all')
                     // ->where(function($query) {
                     //     $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
                     // })
                     ->where(function($query) {
-                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
+                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist.user_id');
                     })
                     ->where('master_type_reimburses.is_employee', true);
+
+                    if ($request->search) {
+                        $query = $query->where(function($query) use ($request) {
+                            $query->where('master_type_reimburses.name', 'ilike', '%' . $request->search . '%')
+                            ->orWhere('master_type_reimburses.code', 'ilike', '%' . $request->search . '%')
+                            ->orWhere('master_type_reimburses.family_status', 'ilike', '%' . $request->search . '%');
+                        });
+                    }
                 });
         } else {
             $data = 
@@ -121,27 +138,32 @@ class ReimbuseController extends Controller
                     //     $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
                     // })
                     ->where(function($query) {
-                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
+                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist.user_id');
                     })
                     ->whereIn('master_type_reimburses.family_status', $getFamilieStatus);
-                })->orWhere(function($query) use ($getFamilieStatus) {
+                })->orWhere(function($query) use ($request,$getFamilieStatus) {
                     $query->where('master_type_reimburses.grade_option', 'all')
                     // ->where(function($query) {
                     //     $query->where('checkInterval.on_interval', 0)->orWhereNull('checkInterval.on_interval');
                     // })
                     ->where(function($query) {
-                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
+                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist.user_id');
                     })
                     ->where(function($query) use ($getFamilieStatus) {
                         $query->whereIn('master_type_reimburses.family_status', $getFamilieStatus)
                         ->orWhere('master_type_reimburses.is_employee', true);
                     });
+
+                    if ($request->search) {
+                        $query = $query->where(function($query) use ($request) {
+                            $query->where('master_type_reimburses.name', 'ilike', '%' . $request->search . '%')
+                            ->orWhere('master_type_reimburses.code', 'ilike', '%' . $request->search . '%')
+                            ->orWhere('master_type_reimburses.family_status', 'ilike', '%' . $request->search . '%');
+                        });
+                    }
                 });
         }
         if ($hasValue !== null) $data = $data->orWhere('master_type_reimburses.code', $hasValue);
-        if ($request->search) $data = $data->where('master_type_reimburses.name', 'ilike', '%' . $request->search . '%')
-                                    ->orWhere('master_type_reimburses.code', 'ilike', '%' . $request->search . '%')
-                                    ->orWhere('master_type_reimburses.family_status', 'ilike', '%' . $request->search . '%');
         
         $data = $data->limit(50)->groupBy('master_type_reimburses.name', 'master_type_reimburses.code')->get();
     
@@ -157,22 +179,26 @@ class ReimbuseController extends Controller
                 }]);
             if ($request->approval == 1) {
                 $approval = Approval::leftJoinSub("
-                    SELECT
-                        MIN(user_id) as user_id,
+                    SELECT DISTINCT ON (document_id)
+                        number_approval,
+                        id,
+                        user_id,
                         document_id
                     FROM
                         approvals
                     WHERE
                         document_name = 'REIM'
                         AND status = 'Waiting'
-                    GROUP BY document_id
+                    ORDER BY
+                        document_id,
+                        number_approval
                 ",
                 'approvalQueueUser',
                 function ($join) {
                     $join->on('approvalQueueUser.document_id', '=', 'approvals.document_id');
                 })
                 ->where([
-                    'approvals.document_name' => 'REIM', 
+                    'approvals.document_name' => 'REIM',
                     'approvals.status' => 'Waiting', 
                     'approvals.user_id' => Auth::user()->id,
                 ])
@@ -186,10 +212,20 @@ class ReimbuseController extends Controller
             }
 
             if ($request->search) {
-                $query = $query->where(function ($query) use ($request) {
-                    $query->where('code', 'ILIKE', '%' . $request->search . '%')
+                $query = $query->where('code', 'ILIKE', '%' . $request->search . '%')
                     ->orWhere('remark', 'ILIKE', '%' . $request->search . '%')
                     ->orWhere('requester', 'ILIKE', '%' . $request->search . '%');
+
+                $query = $query->orWhereHas('reimburses', function ($q) use ($request) {
+                    $q->where('remark', 'ILIKE', '%' . $request->search . '%');
+                });
+
+                $query = $query->orWhereHas('status', function ($q) use ($request) {
+                    $q->where('name', 'ILIKE', '%' . $request->search . '%');
+                });
+
+                $query = $query->orWhereHas('user', function ($q) use ($request) {
+                    $q->where('name', 'ILIKE', '%' . $request->search . '%');
                 });
             }
 
@@ -208,17 +244,17 @@ class ReimbuseController extends Controller
                 return [
                     'id' => $map->id,
                     'code' => $map->code,
-                    'request_for' => $map->user->name,
-                    'request_by' => $map->user_create_request->name,
+                    'request_for' => optional($map->user)->name ?? '-',
+                    'request_by' => optional($map->user_create_request)->name ?? '-',
                     'remark' => $map->remark,
                     'balance' => $balance,
                     'form' => count($map->reimburses),
                     'status_id' => $map->status_id,
                     'status' => [
-                        'name' => $map->status->name,
-                        'classname' => $map->status->classname,
+                        'name' => optional($map->status)->name ?? '-',
+                        'classname' => optional($map->status)->classname ?? '-',
                         'code' =>
-                        $map->status->code
+                        optional($map->status)->code ?? '-'
                     ],
                     'created_at' => $map->created_at,
                     'pr_number' => isset($map->purchase_requisition[0]) ? $map->purchase_requisition[0]->purchase_requisition_number : '',
@@ -256,7 +292,8 @@ class ReimbuseController extends Controller
             $currencies = Currency::select('code', 'name')->where('code', 'IDR')->get();
             $cost_center = MasterCostCenter::select('id', 'cost_center')->get();
             $taxDefaultValue = (string) Pajak::where('mwszkz', 'V0')->first()->id;
-            $uomDefaultValue = (string) Uom::where('iso_code', 'PCE')->first()->id;
+            // $uomDefaultValue = (string) Uom::where('iso_code', 'PC')->first()->id;
+            $uomDefaultValue = "2";
             return Inertia::render(
                 'Reimburse/Index',
                 compact('currentUser',  'users', 'categories', 'currencies', 'taxDefaultValue', 'uomDefaultValue')
@@ -501,14 +538,19 @@ class ReimbuseController extends Controller
         if ($request->search) {
             $data = $data->where('name', 'ilike', '%' . $request->search . '%')->orWhere('nip', 'ilike', '%' . $request->search . '%');
         }
-
-        $data = $data->limit(50)->get();
+        if ($request->hasValue) $data = $data->orWhere($request->hasValueKey, $request->hasValue);
+        $data = $data->orderBy('name')->limit(50)->get();
         return $this->successResponse($data);
     }
 
     public function cloneValidation($id) {
         $data =  ReimburseGroup::with(['reimburses.reimburseType'])->where('id', $id)->first();
         foreach ($data->reimburses as $key => $value) {
+            $cekUserAssignReimburseType = MasterTypeReimburseUserAssign::where('user_id', Auth::user()->id)->where('reimburse_type_id', $value->reimburseType->id)->first();
+            if ($cekUserAssignReimburseType == null || ($cekUserAssignReimburseType != null && $cekUserAssignReimburseType->is_assign == false)) {
+                return $this->errorResponse('Failed, unable to clone this data as the reimbursement type used is not yet assigned to you.');
+            }
+
             $dateNow = Carbon::now()->format('Y-m-d');
             if ($value->reimburseType->interval_claim_period != null && ($dateNow >= $value->claim_date && $dateNow <= Carbon::createFromFormat('Y-m-d', $value->claim_date)->addDays($value->reimburseType->interval_claim_period))) {
                 return $this->errorResponse('Failed, unable to clone this data as the data type reimbursement used falls within the claim period.');

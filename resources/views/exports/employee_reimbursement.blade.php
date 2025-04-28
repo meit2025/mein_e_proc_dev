@@ -67,7 +67,7 @@
             <td colspan="8">Grand Total</td>
             <td></td>
             <td>{{ $data->sum('balance') }}</td>
-            <td>{{ $data->sum('balance') }}</td>
+            <td>{{ $data->where('status', 'Fully Approve')->sum('balance') }}</td>
             <td colspan="9"></td>
         </tr>
     </tbody>

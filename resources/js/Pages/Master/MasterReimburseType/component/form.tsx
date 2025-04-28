@@ -176,20 +176,30 @@ export default function ReimburseTypeForm({
           key: 'material_group',
           parameter: query,
         },
+        hasValue: {
+          key: form.getValues('material_number') ? 'id' : '',
+          value: form.getValues('material_number') ?? '',
+        }
       });
     }
   };
 
   React.useEffect(() => {
-    getMaterialGroup('', {
-      name: 'material_group',
-      id: 'id',
-      tabel: 'material_groups',
-    });
-
-    if (type === FormType.edit) {
-      getDetailData();
-    }
+    const fetchData = async () => {
+      if (type === FormType.edit) {
+        await getDetailData();
+      }
+      getMaterialGroup('', {
+        name: 'material_group',
+        id: 'id',
+        tabel: 'material_groups',
+        hasValue: {
+          key: form.getValues('material_group') ? 'id' : '',
+          value: form.getValues('material_group') ?? '',
+        }
+      });
+    };
+    fetchData();
   }, []);
   
   return (
@@ -398,6 +408,7 @@ export default function ReimburseTypeForm({
                       id='id'
                       options={listGrades || []}
                       value={form.getValues('grades').map((item) => item.id)}
+                      isHidden='hidden'
                       onSelect={(value) => {
                         form.setValue(
                           'grades',
@@ -472,6 +483,7 @@ export default function ReimburseTypeForm({
               <td width={200}>Material Group</td>
               <td>
                 <FormAutocomplete<any>
+                  fieldLabel={''}
                   options={dataMaterialGroup}
                   fieldName='material_group'
                   isRequired={true}
@@ -479,8 +491,16 @@ export default function ReimburseTypeForm({
                   placeholder={'Material Group'}
                   classNames='mt-2 w-full'
                   onSearch={(search) => {
-                    if (search.length > 0) {
-                      getMaterialGroup(search, {
+                    const isLabelMatch = dataMaterialGroup?.some(option => option.label === search);
+                    if (search.length > 0 && !isLabelMatch) {
+                      getMaterialGroup('', {
+                        name: 'material_group',
+                        id: 'id',
+                        tabel: 'material_groups',
+                        search: search,
+                      });
+                    } else if (search.length == 0 && !isLabelMatch) {
+                      getMaterialGroup('', {
                         name: 'material_group',
                         id: 'id',
                         tabel: 'material_groups',
@@ -490,7 +510,18 @@ export default function ReimburseTypeForm({
                   onChangeOutside={async (x: any, data: any) => {
                     await handleChangeMaterialGroup(data?.label.split(' - ')[1]);
                   }}
-                  fieldLabel={''}
+                  onFocus={async () => {
+                    let value = form.getValues('material_group');
+                    await getMaterialGroup('', {
+                      name: 'material_group',
+                      id: 'id',
+                      tabel: 'material_groups',
+                      hasValue: {
+                        key: value ? 'id' : '',
+                        value: value ?? '',
+                      }
+                    });
+                  }}
                 />
               </td>
             </tr>
@@ -509,8 +540,20 @@ export default function ReimburseTypeForm({
                   onSearch={(search) => {
                     const selectedMaterialGroup = form.getValues('material_group');
                     const selectedMaterialGroupLabel = dataMaterialGroup.find(item => item.value === selectedMaterialGroup)?.label;
-                    if (search.length > 0) {
-                      getMaterialNumber(search, {
+                    const isLabelMatch = dataMaterialNumber?.some(option => option.label === search);
+                    if (search.length > 0 && !isLabelMatch) {
+                      getMaterialNumber('', {
+                        name: 'material_number',
+                        id: 'id',
+                        tabel: 'master_materials',
+                        where: {
+                          key: 'material_group',
+                          parameter: selectedMaterialGroupLabel?.split(' - ')[1],
+                        },
+                        search: search,
+                      });
+                    } else if (search.length == 0 && !isLabelMatch) {
+                      getMaterialNumber('', {
                         name: 'material_number',
                         id: 'id',
                         tabel: 'master_materials',
@@ -520,6 +563,24 @@ export default function ReimburseTypeForm({
                         },
                       });
                     }
+                  }}
+                  onFocus={() => {
+                    const selectedMaterialGroup = form.getValues('material_group');
+                    const selectedMaterialGroupLabel = dataMaterialGroup.find(item => item.value === selectedMaterialGroup)?.label;
+                    let value = form.getValues('material_number');
+                    getMaterialNumber('', {
+                      name: 'material_number',
+                      id: 'id',
+                      tabel: 'master_materials',
+                      where: {
+                        key: 'material_group',
+                        parameter: selectedMaterialGroupLabel?.split(' - ')[1],
+                      },
+                      hasValue: {
+                        key: value ? 'id' : '',
+                        value: value ?? '',
+                      }
+                    });
                   }}
                 />
               </td>
