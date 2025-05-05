@@ -19,7 +19,11 @@ class ApprovalRoute extends Model
         'hr_approval',
         'user_hr_id',
         'is_conditional',
-        'nominal'
+        'nominal',
+        'is_bt',
+        'is_reim',
+        'day',
+        'is_restricted_area',
     ];
 
     public function userApprovals()

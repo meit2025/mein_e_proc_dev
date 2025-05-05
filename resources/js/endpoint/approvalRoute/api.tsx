@@ -8,6 +8,6 @@ export const DETAIL_APPROVAL_ROUTE = (id: any) => `${ROUTE_APPROVAL_ROUTE}/detai
 
 export const DELET_APPROVAL_ROUTE = `${ROUTE_APPROVAL_ROUTE}/delete`;
 
-export const DETAIL_APPROVAL_USER_DROPDOWN_ROUTE = (id: any) =>
-  `${ROUTE_APPROVAL_ROUTE_USERS}/get-user-dropdown/${id}`;
+export const DETAIL_APPROVAL_USER_DROPDOWN_ROUTE = (id: any, type: string) =>
+  `${ROUTE_APPROVAL_ROUTE_USERS}/get-user-dropdown/${id}/${type}`;
 export const CREATE_APPROVAL_USER_DROPDOWN_ROUTE = `${ROUTE_APPROVAL_ROUTE_USERS}/create`;

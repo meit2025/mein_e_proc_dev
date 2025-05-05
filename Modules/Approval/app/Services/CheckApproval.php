@@ -154,7 +154,13 @@ class CheckApproval
             }
 
             // get approval
-            $approval = ApprovalToUser::where('user_id', $getUserId->id)->first();
+            $approval = ApprovalToUser::where('user_id', $getUserId->id);
+            if ($request->type == 'TRIP') {
+                $approval->where('is_bt', true);
+            } else {
+                $approval->where('is_reim', true);
+            }
+            $approval = $approval->first();
             if (!$approval) {
                 throw new Exception('Approval not found');
             }
@@ -215,12 +221,45 @@ class CheckApproval
                 }
             }
 
+            // check if approval route is conditional
+            $baseQuery = ApprovalRoute::where('nominal', '<=', $request->value)
+                ->where('is_conditional', true)
+                ->orderBy('nominal', 'desc');
 
-            // chcek condition approval
-            $ApprovalCondition = ApprovalRoute::where('nominal', '<=', $request->value)
-                ->where('nominal', '!=', 0)
-                ->orderBy('nominal', 'desc')
+            // 1. Full match: nominal + is_restricted_area (jika true) + day
+            $fullMatch = (clone $baseQuery)
+                ->when($request->is_restricted_area, function ($query) {
+                    $query->where('is_restricted_area', true);
+                })
+                ->where('day','<=', $request->day)
                 ->first();
+
+            if ($fullMatch) {
+                $ApprovalCondition = $fullMatch;
+            } else {
+                // 2. Fallback: nominal + is_restricted_area (jika true)
+                $secondMatch = (clone $baseQuery)
+                    ->when($request->is_restricted_area, function ($query) {
+                        $query->where('is_restricted_area', true);
+                    })
+                    ->first();
+
+                if ($secondMatch) {
+                    $ApprovalCondition = $secondMatch;
+                } else {
+                    // 3. Fallback: nominal + day
+                    $thirdMatch = (clone $baseQuery)
+                        ->where('day', $request->day)
+                        ->first();
+
+                    if ($thirdMatch) {
+                        $ApprovalCondition = $thirdMatch;
+                    } else {
+                        // 4. Fallback: nominal only
+                        $ApprovalCondition = (clone $baseQuery)->first();
+                    }
+                }
+            }
 
             if ($ApprovalCondition) {
                 $getApprovalConditional = ApprovalRouteUsers::select('users.id', 'users.name', 'master_divisions.name as division_name')

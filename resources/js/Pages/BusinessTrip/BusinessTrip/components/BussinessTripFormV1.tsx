@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 import {
   Form,
   FormControl,
@@ -42,7 +43,7 @@ import {
 } from '@/components/shacdn/select';
 import { useAlert } from '@/contexts/AlertContext';
 import {
-    CLONE_API_BUSINESS_TRIP,
+  CLONE_API_BUSINESS_TRIP,
   CREATE_API_BUSINESS_TRIP,
   EDIT_API_BUSINESS_TRIP,
   GET_DATE_BUSINESS_TRIP_BY_USER,
@@ -113,13 +114,13 @@ const dummyPrice = 25000;
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
 const ACCEPTED_FILE_TYPES = [
-    'heic',
-    'image/jpeg',
-    'image/jpg',
-    'image/png',
-    'image/heic',
-    'image/heif',
-    'application/pdf',
+  'heic',
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/heic',
+  'image/heif',
+  'application/pdf',
 ];
 
 export const BussinessTripFormV1 = ({
@@ -143,66 +144,71 @@ export const BussinessTripFormV1 = ({
   isAdmin: string | undefined;
   idUser: number | undefined;
 }) => {
-  const formSchema = z.object({
-    purpose_type_id: z.string().min(1, 'Purpose type required'),
-    request_for: z.string().min(1, 'Request is required'),
-    cost_center_id: z.string().min(1, 'Cost Center is required'),
-    remark: z.string().min(1, 'Remark is required'),
-    attachment: z.array(
-      z
-        .instanceof(File)
-        .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
-          message: 'File type must be JPG, JPEG, PNG, HEIC or PDF',
-        })
-        .refine((file) => file.size <= MAX_FILE_SIZE, {
-          message: 'File size must be less than 1MB',
-        }),
-    ).min(1, 'Attachment is required'),
-    total_destination: z.number().min(1, 'Total Destinantion Required'),
-    cash_advance: z.boolean().nullable().optional(),
-    total_percent: z.number().nullable().optional(),
-    total_cash_advance: z.string().nullable().optional(),
-    destinations: z.array(
-      z.object({
-        destination: z.string().min(1, 'Destinantion is Required'),
-        restricted_area: z.boolean().nullable().optional(),
-        pajak_id: z.string().min(1, 'Pajak is required'),
-        purchasing_group_id: z.string().min(1, 'Purchasing Group is required'),
-        business_trip_start_date: z.date().optional(),
-        business_trip_end_date: z.date().optional(),
-        detail_attedances: z.array(
-          z.object({
-            date: z.date().optional(),
-            shift_code: z.string().optional(),
-            shift_start: z.string().optional(),
-            shift_end: z.string().optional(),
-            start_time: z.string().optional(),
-            end_time: z.string().optional(),
-            start_date: z.date().optional(),
-            end_date: z.date().optional(),
-          }),
-        ),
-        allowances: z.array(
-          z.object({
-            name: z.string().optional(),
-            code: z.string().optional(),
-            default_price: z.number().optional(),
-            type: z.string().optional(),
-            subtotal: z.number().optional(),
-            currency: z.string().optional(),
-            detail: z.array(
+  const formSchema = z
+    .object({
+      purpose_type_id: z.string().min(1, 'Purpose type required'),
+      request_for: z.string().min(1, 'Request is required'),
+      cost_center_id: z.string().min(1, 'Cost Center is required'),
+      remark: z.string().min(1, 'Remark is required'),
+      attachment: z
+        .array(
+          z
+            .instanceof(File)
+            .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
+              message: 'File type must be JPG, JPEG, PNG, HEIC or PDF',
+            })
+            .refine((file) => file.size <= MAX_FILE_SIZE, {
+              message: 'File size must be less than 1MB',
+            }),
+        )
+        .min(1, 'Attachment is required'),
+      total_destination: z.number().min(1, 'Total Destinantion Required'),
+      cash_advance: z.boolean().nullable().optional(),
+      total_percent: z.number().nullable().optional(),
+      total_cash_advance: z.string().nullable().optional(),
+      destinations: z.array(
+        z.object({
+          destination: z.string().min(1, 'Destinantion is Required'),
+          restricted_area: z.boolean().nullable().optional(),
+          pajak_id: z.string().min(1, 'Pajak is required'),
+          purchasing_group_id: z.string().min(1, 'Purchasing Group is required'),
+          business_trip_start_date: z.date().optional(),
+          business_trip_end_date: z.date().optional(),
+          detail_attedances: z.array(
+            z.object({
+              date: z.date().optional(),
+              shift_code: z.string().optional(),
+              shift_start: z.string().optional(),
+              shift_end: z.string().optional(),
+              start_time: z.string().optional(),
+              end_time: z.string().optional(),
+              start_date: z.date().optional(),
+              end_date: z.date().optional(),
+            }),
+          ),
+          allowances: z
+            .array(
               z.object({
-                date: z.date().nullish(),
-                request_price: z.any().optional(),
+                name: z.string().optional(),
+                code: z.string().optional(),
+                default_price: z.number().optional(),
+                type: z.string().optional(),
+                subtotal: z.number().optional(),
+                currency: z.string().optional(),
+                detail: z.array(
+                  z.object({
+                    date: z.date().nullish(),
+                    request_price: z.any().optional(),
+                  }),
+                ),
               }),
-            ),
-          }),
-        ).min(1, "Allowances tidak boleh kosong"),
-      }),
-    ),
-  })
-  .superRefine(({ cash_advance, total_percent}, refinementContext) => {
-    if (cash_advance === true) {
+            )
+            .min(1, 'Allowances tidak boleh kosong'),
+        }),
+      ),
+    })
+    .superRefine(({ cash_advance, total_percent }, refinementContext) => {
+      if (cash_advance === true) {
         // Validasi jika total_percent kosong
         if (!total_percent || total_percent.toString().trim() === '') {
           refinementContext.addIssue({
@@ -222,7 +228,7 @@ export const BussinessTripFormV1 = ({
           }
         }
       }
-  });
+    });
   const [totalDestination, setTotalDestination] = React.useState<string>('1');
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -334,183 +340,184 @@ export const BussinessTripFormV1 = ({
     }
   }
 
-    // const [typePurpose, setTypePurpose] = React.useState<string>('');
-    const { dataDropdown: dataDestination, getDropdown: getDestination } = useDropdownOptions();
+  // const [typePurpose, setTypePurpose] = React.useState<string>('');
+  const { dataDropdown: dataDestination, getDropdown: getDestination } = useDropdownOptions();
 
-    const [selectedUserId, setSelectedUserId] = React.useState(
-        isAdmin === '0' ? idUser?.toString() : '',
-    );
+  const [selectedUserId, setSelectedUserId] = React.useState(
+    isAdmin === '0' ? idUser?.toString() : '',
+  );
 
-    const [dateBusinessTripByUser, setDateBusinessTripByUser] = React.useState<[]>([]);
+  const [dateBusinessTripByUser, setDateBusinessTripByUser] = React.useState<[]>([]);
 
-    async function getDateBusinessTrip() {
-        const userid = isAdmin == '0' ? idUser || 0 : selectedUserId || 0;
-        const url = GET_DATE_BUSINESS_TRIP_BY_USER(userid);
-        const response = await axiosInstance.get(url);
-        setDateBusinessTripByUser(response.data.data);
+  async function getDateBusinessTrip() {
+    const userid = isAdmin == '0' ? idUser || 0 : selectedUserId || 0;
+    const url = GET_DATE_BUSINESS_TRIP_BY_USER(userid);
+    const response = await axiosInstance.get(url);
+    setDateBusinessTripByUser(response.data.data);
+  }
+
+  async function handlePurposeType(value: string) {
+    form.setValue('purpose_type_id', value || '');
+    const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
+    const url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
+    const getPurposeType = GET_DETAIL_PURPOSE_TYPE(value);
+    try {
+      const response = await axiosInstance.get(url);
+
+      const responsePurposeType = await axiosInstance.get(getPurposeType);
+      //   const typePurpose = responsePurposeType.data.data.purpose.type;
+      //   if (typePurpose == 'international') {
+      //     totalDestinationHandler('1');
+      //   }
+      //   setTypePurpose(typePurpose);
+      setListAllowances(response.data.data as AllowanceItemModel[]);
+      getDestination('', {
+        name: 'destination',
+        id: 'destination',
+        tabel: 'destinations',
+        where: {
+          key: 'type',
+          parameter: responsePurposeType.data.data.purpose.type,
+        },
+      });
+    } catch (e) {
+      console.log(e);
     }
+  }
 
-    async function handlePurposeType(value: string) {
-        form.setValue('purpose_type_id', value || '');
-        const userid = isAdmin == '0' ? idUser || '' : selectedUserId || '';
-        const url = GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE(value, userid);
-        const getPurposeType = GET_DETAIL_PURPOSE_TYPE(value);
-        try {
-        const response = await axiosInstance.get(url);
-        
-        const responsePurposeType = await axiosInstance.get(getPurposeType);
-        //   const typePurpose = responsePurposeType.data.data.purpose.type;
-        //   if (typePurpose == 'international') {
-        //     totalDestinationHandler('1');
-        //   }
-        //   setTypePurpose(typePurpose);
-        setListAllowances(response.data.data as AllowanceItemModel[]);
-        getDestination('', {
-            name: 'destination',
-            id: 'destination',
-            tabel: 'destinations',
-            where: {
-            key: 'type',
-            parameter: responsePurposeType.data.data.purpose.type,
-            },
-        });
-        } catch (e) {
-        console.log(e);
-        }
-    }
-
-    const [selectedDates, setSelectedDates] = React.useState<
+  const [selectedDates, setSelectedDates] = React.useState<
     { start: Date | undefined; end: Date | undefined }[]
-    >([]);
+  >([]);
 
-    const totalDestinationHandler = (value: string) => {
-        form.setValue('total_destination', parseInt(value, 10));
-        setTotalDestination(value);
-        setAllowancesProperty();
-        setSelectedDates([]);
-        // let valueToInt = parseInt(value);
-    };
+  const totalDestinationHandler = (value: string) => {
+    form.setValue('total_destination', parseInt(value, 10));
+    setTotalDestination(value);
+    setAllowancesProperty();
+    setSelectedDates([]);
+    // let valueToInt = parseInt(value);
+  };
 
-    const [activeTab, setActiveTab] = React.useState('destination1');
+  const [activeTab, setActiveTab] = React.useState('destination1');
 
-    React.useEffect(() => {
-        if (parseInt(totalDestination, 10) < 1) {
-        setTotalDestination('1');
-        } else {
-        setActiveTab(`destination${totalDestination}`);
+  React.useEffect(() => {
+    if (parseInt(totalDestination, 10) < 1) {
+      setTotalDestination('1');
+    } else {
+      setActiveTab(`destination${totalDestination}`);
+    }
+  }, [totalDestination]);
+
+  const { showToast } = useAlert();
+  const [loading, setLoading] = React.useState(false);
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const isValid = await form.trigger();
+    if (!isValid) {
+      // Dapatkan daftar field yang memiliki error
+      const errors = form.formState.errors;
+
+      // Looping untuk menemukan tab yang memiliki error
+      for (let i = 0; i < destinationField.length; i++) {
+        if (errors?.destinations?.[i]) {
+          // Pastikan ada error di tab tertentu
+          setActiveTab(`destination${i + 1}`); // Pindah ke tab yang error
+          break; // Hentikan loop setelah menemukan tab pertama yang error
         }
-    }, [totalDestination]);
+      }
+      return;
+    }
 
-    const { showToast } = useAlert();
-    const [loading, setLoading] = React.useState(false);
+    const totalAll = getTotalDes();
+    if (totalAll === 0) {
+      showToast('Please add at least one destination', 'error');
+      return;
+    }
 
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        const isValid = await form.trigger();
-        if (!isValid) {
-            // Dapatkan daftar field yang memiliki error
-            const errors = form.formState.errors;
-
-            // Looping untuk menemukan tab yang memiliki error
-            for (let i = 0; i < destinationField.length; i++) {
-                if (errors?.destinations?.[i]) { // Pastikan ada error di tab tertentu
-                    setActiveTab(`destination${i + 1}`); // Pindah ke tab yang error
-                    break; // Hentikan loop setelah menemukan tab pertama yang error
-                }
-            }
-            return;
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('user_id', values.request_for ?? '');
+      formData.append('value', totalAll.toString());
+      formData.append('purpose_type_id', values.purpose_type_id ?? '');
+      formData.append('request_for', values.request_for ?? '');
+      formData.append('cost_center_id', values.cost_center_id ?? '');
+      formData.append('remark', values.remark ?? '');
+      formData.append('cash_advance', `${values.cash_advance}`);
+      formData.append('total_percent', `${values.total_percent}`);
+      formData.append('total_cash_advance', `${values.total_cash_advance}`);
+      values.attachment.forEach((file: any, index: number) => {
+        if (file) {
+          formData.append(`attachment[${index}]`, file);
         }
-
-        const totalAll = getTotalDes();
-        if (totalAll === 0) {
-            showToast('Please add at least one destination', 'error');
-            return;
-        }
-
-        try {
-        setLoading(true);
-        const formData = new FormData();
-        formData.append('user_id', values.request_for ?? '');
-        formData.append('value', totalAll.toString());
-        formData.append('purpose_type_id', values.purpose_type_id ?? '');
-        formData.append('request_for', values.request_for ?? '');
-        formData.append('cost_center_id', values.cost_center_id ?? '');
-        formData.append('remark', values.remark ?? '');
-        formData.append('cash_advance', `${values.cash_advance}`);
-        formData.append('total_percent', `${values.total_percent}`);
-        formData.append('total_cash_advance', `${values.total_cash_advance}`);
-        values.attachment.forEach((file: any, index: number) => {
-            if (file) {
-            formData.append(`attachment[${index}]`, file);
-            }
-        });
-        formData.append('total_destination', `${values.total_destination}`);
-        values.destinations.forEach((item, index) => {
-            const itemCopy = {
-            ...item,
-            business_trip_start_date: moment(item.business_trip_start_date).format('YYYY-MM-DD'),
-            business_trip_end_date: moment(item.business_trip_end_date).format('YYYY-MM-DD'),
-            detail_attedances: item.detail_attedances.map((detail) => {
-                return {
-                ...detail,
-                date: moment(detail.date).format('YYYY-MM-DD'),
-                };
-            }),
-            allowances: item.allowances.map((allowance) => {
-                return {
-                ...allowance,
-                detail: allowance.detail.map((detail) => {
-                    return {
-                    ...detail,
-                    date: detail?.date != null ? moment(detail.date).format('YYYY-MM-DD') : null,
-                    };
-                }),
-                };
-            }),
+      });
+      formData.append('total_destination', `${values.total_destination}`);
+      values.destinations.forEach((item, index) => {
+        const itemCopy = {
+          ...item,
+          business_trip_start_date: moment(item.business_trip_start_date).format('YYYY-MM-DD'),
+          business_trip_end_date: moment(item.business_trip_end_date).format('YYYY-MM-DD'),
+          detail_attedances: item.detail_attedances.map((detail) => {
+            return {
+              ...detail,
+              date: moment(detail.date).format('YYYY-MM-DD'),
             };
-            formData.append(`destinations[${index}]`, JSON.stringify(itemCopy));
+          }),
+          allowances: item.allowances.map((allowance) => {
+            return {
+              ...allowance,
+              detail: allowance.detail.map((detail) => {
+                return {
+                  ...detail,
+                  date: detail?.date != null ? moment(detail.date).format('YYYY-MM-DD') : null,
+                };
+              }),
+            };
+          }),
+        };
+        formData.append(`destinations[${index}]`, JSON.stringify(itemCopy));
+      });
+
+      if (type == BusinessTripType.create) {
+        await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         });
+        showToast('succesfully created data', 'success');
+      } else {
+        // const formDataEdit = new FormData();
+        // formDataEdit.append('remark', values.remark ?? '');
+        // values.attachment.forEach((file: any, index: number) => {
+        //   if (file) {
+        //     formDataEdit.append(`attachment[${index}]`, file);
+        //   }
+        // });
+        fileAttachment.forEach((file: any, index: number) => {
+          if (file) {
+            formData.append(`file_existing[${index}]`, JSON.stringify(file));
+          }
+        });
+        await Inertia.post(`${CLONE_API_BUSINESS_TRIP}/${id}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        showToast('succesfully updated data', 'success');
+      }
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+      // console.log(response);
+      //   onSuccess?.(true);
+    } catch (e) {
+      const error = e as AxiosError;
 
-        if (type == BusinessTripType.create) {
-            await Inertia.post(CREATE_API_BUSINESS_TRIP, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-            });
-            showToast('succesfully created data', 'success');
-        } else {
-            // const formDataEdit = new FormData();
-            // formDataEdit.append('remark', values.remark ?? '');
-            // values.attachment.forEach((file: any, index: number) => {
-            //   if (file) {
-            //     formDataEdit.append(`attachment[${index}]`, file);
-            //   }
-            // });
-            fileAttachment.forEach((file: any, index: number) => {
-            if (file) {
-                formData.append(`file_existing[${index}]`, JSON.stringify(file));
-            }
-            });
-            await Inertia.post(`${CLONE_API_BUSINESS_TRIP}/${id}`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-            });
-            showToast('succesfully updated data', 'success');
-        }
-        setTimeout(() => {
-            setLoading(false);
-        }, 1000);
-        // console.log(response);
-        //   onSuccess?.(true);
-        } catch (e) {
-        const error = e as AxiosError;
+      //   onSuccess?.(false);
+      console.log(error);
+    }
 
-        //   onSuccess?.(false);
-        console.log(error);
-        }
-
-        // console.log('values bg', values);
-    };
+    // console.log('values bg', values);
+  };
 
   function setAllowancesProperty() {
     const destinationForm = [];
@@ -553,7 +560,6 @@ export const BussinessTripFormV1 = ({
       setAllowancesProperty();
     }
     getDateBusinessTrip();
-    
   }, [totalDestination, listAllowances, isAdmin, idUser, selectedUserId]);
 
   const [isShow, setIsShow] = React.useState(false);
@@ -602,16 +608,49 @@ export const BussinessTripFormV1 = ({
     return totalAll;
   };
 
+  const getTotalDay = (data: any[]) => {
+    const allDates: string[] = [];
+    data.forEach((destination) => {
+      destination.detail_attedances.forEach((detail: any) => {
+        if (detail.start_date) allDates.push(detail.start_date);
+        if (detail.end_date) allDates.push(detail.end_date);
+      });
+    });
+
+    // Ubah ke Date object dan urutkan
+    const sortedDates = allDates
+      .map((dateStr) => new Date(dateStr))
+      .sort((a, b) => a.getTime() - b.getTime());
+
+    if (sortedDates.length === 0) {
+      return 0;
+    } else {
+      const start = sortedDates[0];
+      const end = sortedDates[sortedDates.length - 1];
+
+      // Hitung jumlah hari, +1 agar termasuk tanggal awal
+      const dayDiff = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      return dayDiff;
+    }
+  };
+
   const fetchDataValue = async () => {
     try {
-      const totalAll = getTotalDes();
+    //   const totalAll = getTotalDes();
+      const totalAll = 200000;
+      const alldestinations = form.getValues('destinations');
       if (totalAll === 0) {
         showToast('Please fill the balance', 'error');
         return;
       }
 
+      const totalDays = getTotalDay(alldestinations);
+
+      const hasRestrictedArea = alldestinations?.some((item) => item.restricted_area === true);
       const response = await axiosInstance.get('/check-approval', {
         params: {
+          is_restricted_area: hasRestrictedArea,
+          day: totalDays,
           value: totalAll,
           user_id: form.getValues('request_for'),
           type: 'TRIP',
@@ -690,7 +729,9 @@ export const BussinessTripFormV1 = ({
     form.setValue('total_cash_advance', formatRupiah(total.toFixed(0), false)); // Save the total in total_cash_advance field
   }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance cha
 
-  const { dataDropdown: dataEmployee, getDropdown: getEmployee } = useDropdownOptions(GET_LIST_USER_BUSINESS_TRIP);
+  const { dataDropdown: dataEmployee, getDropdown: getEmployee } = useDropdownOptions(
+    GET_LIST_USER_BUSINESS_TRIP,
+  );
   const { dataDropdown: dataPurposeType, getDropdown: getPurposeType } = useDropdownOptions();
   const { dataDropdown: dataCostCenter, getDropdown: getCostCenter } = useDropdownOptions();
   const { dataDropdown: dataTax, getDropdown: getTax } = useDropdownOptions();
@@ -718,7 +759,7 @@ export const BussinessTripFormV1 = ({
         id: 'id',
         tabel: 'purpose_types',
         idType: 'string',
-        softDelete: true
+        softDelete: true,
       });
       getCostCenter('', {
         name: 'desc',
@@ -726,14 +767,14 @@ export const BussinessTripFormV1 = ({
         tabel: 'master_cost_centers',
         idType: 'string',
         isMapping: true,
-        hiddenZero:true
+        hiddenZero: true,
       });
       getTax('', {
-          name: 'description',
-          id: 'mwszkz',
-          tabel: 'pajaks',
-          idType: 'string',
-          isMapping: true,
+        name: 'description',
+        id: 'mwszkz',
+        tabel: 'pajaks',
+        idType: 'string',
+        isMapping: true,
       });
       getPurchasingGroup('', {
         name: 'purchasing_group_desc',
@@ -742,9 +783,9 @@ export const BussinessTripFormV1 = ({
         idType: 'string',
         isMapping: true,
       });
-    }
+    };
 
-    fetchData()
+    fetchData();
   }, [type]);
 
   React.useEffect(() => {
@@ -784,29 +825,29 @@ export const BussinessTripFormV1 = ({
                   disabled={isAdmin == '0' ? true : false}
                   placeholder={'Select Employee'}
                   classNames='mt-2 w-full'
-                  onSearch={(search: string, data : any) => {
-                    const isLabelMatch = dataEmployee?.some(option => option.label === search);
+                  onSearch={(search: string, data: any) => {
+                    const isLabelMatch = dataEmployee?.some((option) => option.label === search);
                     if (search.length > 0 && !isLabelMatch) {
                       getEmployee(search, {
                         name: 'name',
                         id: 'id',
                         tabel: 'users',
                         search: search,
-                        idType: 'string'
+                        idType: 'string',
                       });
                     } else if (search.length == 0 && !isLabelMatch) {
                       getEmployee('', {
                         name: 'name',
                         id: 'id',
                         tabel: 'users',
-                        idType: 'string'
+                        idType: 'string',
                       });
                     }
                   }}
                   onChangeOutside={(value) => {
-                    setSelectedUserId(value)
+                    setSelectedUserId(value);
                     if (value === null) {
-                      setSelectedDates([])
+                      setSelectedDates([]);
                     }
                   }}
                   onFocus={() => {
@@ -819,7 +860,7 @@ export const BussinessTripFormV1 = ({
                         key: value ? 'id' : '',
                         value: value ?? '',
                       },
-                      idType: 'string'
+                      idType: 'string',
                     });
                   }}
                 />
@@ -922,15 +963,15 @@ export const BussinessTripFormV1 = ({
                             </p>
                           ))
                         : null} */}
-                        {form.formState.errors.attachment && (
-                        <p className="text-[0.8rem] font-medium text-destructive">
-                            {Array.isArray(form.formState.errors.attachment)
+                      {form.formState.errors.attachment && (
+                        <p className='text-[0.8rem] font-medium text-destructive'>
+                          {Array.isArray(form.formState.errors.attachment)
                             ? form.formState.errors.attachment.map((error, index) => (
                                 <span key={index}>{error.message}</span>
-                                ))
+                              ))
                             : form.formState.errors.attachment.message}
                         </p>
-                        )}
+                      )}
                     </FormItem>
                   )}
                 />
@@ -1056,13 +1097,13 @@ export const BussinessTripFormV1 = ({
                         <FormItem>
                           <FormControl>
                             <Input
-                            type="number"
-                            {...field}
-                            value={field.value || ''}
-                            className='w-[50%]'
-                            // min="1"
-                            // max="100"
-                            onChange={(e) => {
+                              type='number'
+                              {...field}
+                              value={field.value || ''}
+                              className='w-[50%]'
+                              // min="1"
+                              // max="100"
+                              onChange={(e) => {
                                 const inputValue = e.target.value;
 
                                 // Pastikan input hanya angka
@@ -1089,7 +1130,11 @@ export const BussinessTripFormV1 = ({
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input value={field.value || ''} readOnly={true} className='w-[50%] mt-3'/>
+                            <Input
+                              value={field.value || ''}
+                              readOnly={true}
+                              className='w-[50%] mt-3'
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1135,7 +1180,9 @@ export const BussinessTripFormV1 = ({
               />
             )}
           </div>
-          <Button type='submit' loading={loading}>submit</Button>
+          <Button type='submit' loading={loading}>
+            submit
+          </Button>
         </form>
       </Form>
     </ScrollArea>

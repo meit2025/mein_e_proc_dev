@@ -36,10 +36,20 @@ class ApprovalToUserController extends Controller
             $approvalRouteId = $request->input('approval_route_id');
 
             // Proses penyimpanan data
-            ApprovalToUser::where('approval_route_id', $approvalRouteId)->delete();
+            ApprovalToUser::where('approval_route_id', $approvalRouteId)
+                ->where(function ($query) use ($request) {
+                    if ($request->input('type') == 'reim') {
+                        $query->where('is_reim', true);
+                    } else {
+                        $query->where('is_bt', true);
+                    }
+                })
+                ->delete();
             foreach ($userIds as $userId) {
                 ApprovalToUser::create(
                     [
+                        'is_reim' => $request->input('type') == 'reim' ? true : false,
+                        'is_bt' => $request->input('type') == 'bt' ? true : false,
                         'user_id' => $userId,
                         'approval_route_id' => $approvalRouteId,
                     ],
@@ -62,20 +72,32 @@ class ApprovalToUserController extends Controller
      * @param int $id The ID of the approval route.
      * @return \Illuminate\Http\JsonResponse A JSON response with the list of available user IDs and current user IDs.
      */
-    public function getUsersDropdown($id)
+    public function getUsersDropdown($id, $type)
     {
         try {
             //code...
-            $dataUserExsit =  ApprovalToUser::pluck('user_id')->toArray();
-            $data =  ApprovalToUser::select('users.id as value', 'users.name as label')->leftJoin('users', 'users.id', '=', 'approval_to_users.user_id')
-                ->where('approval_to_users.approval_route_id', $id)
-                ->get();
+
+            if($type == 'reim') {
+                $dataUserExsit = ApprovalToUser::where('is_reim', true)->pluck('user_id')->toArray();
+            }else {
+                $dataUserExsit =  ApprovalToUser::where('is_bt', true)->pluck('user_id')->toArray();
+            }
+
+            $query =  ApprovalToUser::select('users.id as value', 'users.name as label')->leftJoin('users', 'users.id', '=', 'approval_to_users.user_id')
+                ->where('approval_to_users.approval_route_id', $id);
+
+            if ($type == 'reim') {
+                $query->where('approval_to_users.is_reim', true);
+            } else {
+                $query->where('approval_to_users.is_bt', true);
+            }
+            $data = $query->get();
 
             $users = User::select('id as value', 'name as label')->whereNotIn('id', $dataUserExsit)->get();
 
             return $this->successResponse([
                 'users' => $users,
-                'data' => $data
+                'data' => $data ?? [],
             ]); // return response
         } catch (\Throwable $th) {
             //throw $th;

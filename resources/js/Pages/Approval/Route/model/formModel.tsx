@@ -33,6 +33,19 @@ export const formModel: Array<FormFieldModel<any>> = [
       width: '65.5rem',
     },
   },
+
+  {
+    type: 'switch',
+    name: 'is_bt',
+    label: 'Approval Business Trip',
+    placeholder: 'Enter your Approval Business Trip',
+  },
+  {
+    type: 'switch',
+    name: 'is_reim',
+    label: 'Approval Reimbursement',
+    placeholder: 'Enter your Approval Reimbursement',
+  },
   {
     type: 'switch',
     name: 'is_conditional',
@@ -48,5 +61,24 @@ export const formModel: Array<FormFieldModel<any>> = [
     label: 'Nominal Conditional',
     placeholder: 'Enter your Nominal Conditional',
     required: true,
+  },
+  {
+    conditional: true,
+    valueConditional: true,
+    parameterConditional: 'is_conditional',
+    type: 'input',
+    name: 'day',
+    label: 'Day Trip Conditional',
+    placeholder: 'Enter Day Trip Conditional',
+    required: true,
+  },
+  {
+    conditional: true,
+    valueConditional: true,
+    parameterConditional: 'is_conditional',
+    type: 'switch',
+    name: 'is_restricted_area',
+    label: 'Restricted Area',
+    placeholder: 'Enter your restricted area',
   },
 ];
