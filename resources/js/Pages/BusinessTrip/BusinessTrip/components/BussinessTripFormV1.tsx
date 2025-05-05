@@ -636,8 +636,8 @@ export const BussinessTripFormV1 = ({
 
   const fetchDataValue = async () => {
     try {
-    //   const totalAll = getTotalDes();
-      const totalAll = 200000;
+      const totalAll = getTotalDes();
+    //   const totalAll = 200000;
       const alldestinations = form.getValues('destinations');
       if (totalAll === 0) {
         showToast('Please fill the balance', 'error');
