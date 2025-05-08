@@ -43,8 +43,8 @@
                 <th>Request Number</th>
                 <th>Request Status</th>
                 <th>Request Date</th>
-                <th>Start Date</th>
-                <th>End Date</th>
+                <th><strong>Start Date</strong></th>
+                <th><strong>End Date</strong></th>
             </tr>
         </thead>
         <tbody>
@@ -67,11 +67,15 @@
                         <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
                         <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
 
-                        <td>{{ $trip['parent_request_no'] ?? '' }}</td>
-                        <td>{{ $trip['parent_request_status']->name ?? 'Pending' }}</td>
-                        <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
+                        @if ($trip['parent_request_no'] != null)
+                            <td>{{ $trip['parent_request_no'] ?? '' }}</td>
+                            <td>{{ $trip['parent_request_status']->name ?? 'Pending' }}</td>
+                            <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
+                            <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
+                            <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
+                        @else
+                            <th colspan="5">N/A</th>
+                        @endif
                     </tr>
                 @endforeach
             @endforeach

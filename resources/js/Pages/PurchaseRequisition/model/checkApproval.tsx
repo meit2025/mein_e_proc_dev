@@ -42,7 +42,7 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
 
       if (dataVendor === null || dataVendor === undefined) {
         setLoading(false);
-        showToast('Please Select Vendor Winner', 'error');
+        showToast('Please Select Propose Vendor', 'error');
         return;
       }
 
@@ -180,7 +180,7 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
 
   return (
     <>
-      <div className='card card-grid h-full min-w-full p-4'>
+      <div className='h-full min-w-full p-4 card card-grid'>
         <Loading isLoading={loading} />
         <div className='card-body'>
           <div className='flex justify-start mt-4 mb-2'>
