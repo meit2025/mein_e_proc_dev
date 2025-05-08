@@ -13,7 +13,7 @@ deploy:
     - ssh mein@server.majapahit.id "
         cd /home/mein/public_html/mein &&
         git pull origin develop &&
-        composer install --optimize-autoloader --no-dev &&
+        /usr/bin/php8.2 /bin/composer install --optimize-autoloader --no-dev &&
         /usr/bin/php8.2 artisan migrate &&
         /usr/bin/php8.2 artisan cache:clear &&
         /usr/bin/php8.2 artisan config:clear &&
