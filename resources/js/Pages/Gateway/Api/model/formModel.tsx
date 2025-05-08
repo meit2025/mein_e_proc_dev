@@ -119,7 +119,12 @@ export const formModelValue: Array<FormFieldModel<any>> = [
     name: 'default',
     label: 'Parameter default',
     placeholder: 'Enter your Parameter default',
-    required: true,
+    required: false,
+    note: (
+      <p style={{ color: 'red' }}>
+        Please fill in according to the table provisions, leave it blank if nullable and (-) if not nullable but the data is likely to be empty.
+      </p>
+    )
   },
   {
     type: 'switch',
