@@ -54,7 +54,10 @@ export const Index = ({
 }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
-  const [businessTripForm, setBusinessTripForm] = React.useState({
+  const [businessTripForm, setBusinessTripForm] = React.useState<{
+    type: BusinessTripType;
+    id: string | undefined;
+  }>({
     type: BusinessTripType.create,
     id: undefined,
   });
@@ -62,7 +65,7 @@ export const Index = ({
   function openFormHandler() {
     setBusinessTripForm({
       type: BusinessTripType.create,
-      id: null,
+      id: undefined,
     });
     setOpenForm(!openForm);
   }
@@ -115,18 +118,16 @@ export const Index = ({
         //   });
         //   setOpenForm(true);
         // }}
-        // onClone={(value) => {
-        //   setBusinessTripForm({
-        //     type: BusinessTripType.clone,
-        //     id: value.toString(),
-        //   });
-        //   setOpenForm(true);
-        // }}
+        onClone={(value) => {
+          setBusinessTripForm({
+            type: BusinessTripType.clone,
+            id: value.toString(),
+          });
+          setOpenForm(true);
+        }}
         url={{
           url: GET_LIST_BUSINESS_TRIP,
           detailUrl: DETAIL_PAGE_BUSINESS_TRIP,
-          //   editUrl: EDIT_PAGE_BUSINESS_TRIP,
-          // clone: CLONE_PAGE_BUSINESS_TRIP,
           cancelApproval: 'trip',
         }}
         labelFilter='search'

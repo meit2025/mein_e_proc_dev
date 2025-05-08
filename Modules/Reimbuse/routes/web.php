@@ -31,16 +31,16 @@ Route::group(['prefix' => 'reimburse'], function () {
     Route::get('/data-limit-and-balance', [ReimbuseController::class, 'getDataLimitAndBalance'])->name('reimburse.data-limit-balance');
 
     Route::group(['prefix' => 'my-reimburse'], function () {
-        Route::get('/', [MyReimburseController::class, 'index'])->name('reimburse.myReimburse.index');    
-        Route::get('/{isEmployee}', [MyReimburseController::class, 'list'])->name('reimburse.myReimburse.list');    
-        Route::get('/balance-family-reimburse/{id}/{relation}/{maximumBalance}', [MyReimburseController::class, 'listBalanceFamily'])->name('reimburse.myReimburse.balanceFamily');    
+        Route::get('/', [MyReimburseController::class, 'index'])->name('reimburse.myReimburse.index');
+        Route::get('/{isEmployee}', [MyReimburseController::class, 'list'])->name('reimburse.myReimburse.list');
+        Route::get('/balance-family-reimburse/{id}/{relation}/{maximumBalance}', [MyReimburseController::class, 'listBalanceFamily'])->name('reimburse.myReimburse.balanceFamily');
     });
 });
 
 
 Route::group(['prefix' => 'api/reimburse'], function () {
     Route::get('/', [ReimbuseController::class, 'list'])->name('api.reimburse.list');
-    Route::PUT('/update/{id}', [ReimbuseController::class, 'update'])->name('api.reimburse.update');
+    Route::post('/update/{id}', [ReimbuseController::class, 'update'])->name('api.reimburse.update');
     Route::POST('/store', [ReimbuseController::class, 'store'])->name('api.reimburse.store');
     Route::DELETE('/destory/{id}', [ReimbuseController::class, 'destroy'])->name('api.reimburse.destroy');
 
@@ -49,7 +49,6 @@ Route::group(['prefix' => 'api/reimburse'], function () {
     Route::get('/get-employee-reimburse', [ReimbuseController::class, 'dropdownEmployee'])->name('reimburse.get-reimburse-employee');
     Route::get('/get-family-reimburse', [ReimbuseController::class, 'dropdownFamily'])->name('reimburse.get-reimburse-family');
     Route::get('/clone-validation/{id}', [ReimbuseController::class, 'cloneValidation'])->name('reimburse.cloneValidation');
-
 });
 
 Route::get('/family/show/{employee}', [FamilyController::class, 'show']);

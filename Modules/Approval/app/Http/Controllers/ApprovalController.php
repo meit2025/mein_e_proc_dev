@@ -171,7 +171,7 @@ class ApprovalController extends Controller
                 case 'REIM':
                 case 'TRIP':
                 case 'TRIP_DECLARATION':
-                    $result = $this->approvalServices->Payment($request);
+                    $result = $this->approvalServices->Payment($request, false, null, $request->type);
                     break;
                 case 'PR':
                     $result = $this->approvalServices->PR($request);

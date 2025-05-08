@@ -141,7 +141,6 @@ class CheckApproval
         // Implement Reim logic if necessary
         try {
             //code...
-            // dd($request);
 
             if (isset($request->user_id)) {
                 $getUserId = User::where('id', $request->user_id)->first();
@@ -153,9 +152,10 @@ class CheckApproval
                 throw new Exception('Username not found');
             }
 
+
             // get approval
             $approval = ApprovalToUser::where('user_id', $getUserId->id);
-            if ($request->type == 'TRIP') {
+            if ($type == 'TRIP') {
                 $approval->where('is_bt', true);
             } else {
                 $approval->where('is_reim', true);
@@ -164,6 +164,8 @@ class CheckApproval
             if (!$approval) {
                 throw new Exception('Approval not found');
             }
+
+            // get approval route
 
             // get Approval route
             $approvalRoute = ApprovalRoute::where('id', $approval->approval_route_id)->first(); // get approval route
@@ -205,6 +207,7 @@ class CheckApproval
                 ->orderBy('approval_route_users.id', 'asc')
                 ->get()->toArray();
 
+
             if ($approvalRoute->is_hr) {
                 $hrUser = [
                     'id' => $dataUser->id,
@@ -221,45 +224,92 @@ class CheckApproval
                 }
             }
 
-            // check if approval route is conditional
+
+
+            $ApprovalCondition = null;
+
+            // Base query
             $baseQuery = ApprovalRoute::where('nominal', '<=', $request->value)
                 ->where('is_conditional', true)
-                ->orderBy('nominal', 'desc');
+                ->orderBy('nominal', 'desc')
+                ->when($type === 'TRIP', fn($q) => $q->where('is_bt', true))
+                ->when($type !== 'TRIP', fn($q) => $q->where('is_reim', true));
 
-            // 1. Full match: nominal + is_restricted_area (jika true) + day
-            $fullMatch = (clone $baseQuery)
-                ->when($request->is_restricted_area, function ($query) {
-                    $query->where('is_restricted_area', true);
-                })
-                ->where('day','<=', $request->day)
-                ->first();
-
-            if ($fullMatch) {
-                $ApprovalCondition = $fullMatch;
-            } else {
-                // 2. Fallback: nominal + is_restricted_area (jika true)
-                $secondMatch = (clone $baseQuery)
-                    ->when($request->is_restricted_area, function ($query) {
-                        $query->where('is_restricted_area', true);
-                    })
+            if ($type === 'TRIP') {
+                // 1. nominal + is_restricted_area + day
+                $ApprovalCondition = (clone $baseQuery)
+                    ->when(
+                        $request->is_restricted_area,
+                        fn($query) =>
+                        $query->where('is_restricted_area', true)
+                    )
+                    ->where('day', '<=', $request->day ?? 0)
                     ->first();
 
-                if ($secondMatch) {
-                    $ApprovalCondition = $secondMatch;
-                } else {
-                    // 3. Fallback: nominal + day
-                    $thirdMatch = (clone $baseQuery)
+                // 2. nominal + is_restricted_area
+                if (!$ApprovalCondition) {
+                    $ApprovalCondition = (clone $baseQuery)
+                        ->when(
+                            $request->is_restricted_area,
+                            fn($query) =>
+                            $query->where('is_restricted_area', true)
+                        )
+                        ->first();
+                }
+
+                // 3. nominal + day
+                if (!$ApprovalCondition) {
+                    $ApprovalCondition = (clone $baseQuery)
                         ->where('day', $request->day)
                         ->first();
-
-                    if ($thirdMatch) {
-                        $ApprovalCondition = $thirdMatch;
-                    } else {
-                        // 4. Fallback: nominal only
-                        $ApprovalCondition = (clone $baseQuery)->first();
-                    }
                 }
+
+                // 4. nominal only
+                if (!$ApprovalCondition) {
+                    $ApprovalCondition = (clone $baseQuery)->first();
+                }
+
+                // 5. day only
+                if (!$ApprovalCondition) {
+                    $ApprovalCondition = ApprovalRoute::where('is_conditional', true)
+                        ->where('day', $request->day)
+                        ->where('is_bt', true)
+                        ->orderBy('nominal', 'desc')
+                        ->first();
+                }
+
+                // 6. is_restricted_area only
+                if (!$ApprovalCondition) {
+                    $ApprovalCondition = ApprovalRoute::where('is_conditional', true)
+                        ->when(
+                            $request->is_restricted_area,
+                            fn($q) =>
+                            $q->where('is_restricted_area', true)
+                        )
+                        ->where('is_bt', true)
+                        ->orderBy('nominal', 'desc')
+                        ->first();
+                }
+
+                // 7. day + is_restricted_area only
+                if (!$ApprovalCondition) {
+                    $ApprovalCondition = ApprovalRoute::where('is_conditional', true)
+                        ->where('day', '<=', $request->day ?? 0)
+                        ->when(
+                            $request->is_restricted_area,
+                            fn($q) =>
+                            $q->where('is_restricted_area', true)
+                        )
+                        ->where('is_bt', true)
+                        ->orderBy('nominal', 'desc')
+                        ->first();
+                }
+            } else {
+                // Jika bukan TRIP: hanya nominal only
+                $ApprovalCondition = $baseQuery->first();
             }
+
+
 
             if ($ApprovalCondition) {
                 $getApprovalConditional = ApprovalRouteUsers::select('users.id', 'users.name', 'master_divisions.name as division_name')
@@ -273,6 +323,10 @@ class CheckApproval
             }
 
             if ($save) {
+                // delete old approval
+                Approval::where('document_id', $idDocument)
+                    ->where('document_name', $type)->delete();
+
                 foreach ($getApproval as $key =>  $approvalRoute) {
                     Approval::create(
                         [
@@ -287,6 +341,7 @@ class CheckApproval
                     );
                 }
             }
+
 
             return [
                 'approval' => $getApproval,

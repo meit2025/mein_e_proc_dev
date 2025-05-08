@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 import axiosInstance from '@/axiosInstance'; // Pastikan mengimport axiosInstance
 import { useAlert } from '@/contexts/AlertContext';
 import { Link, usePage } from '@inertiajs/react';
@@ -241,7 +242,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end'>
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      {(onEdit || url.editUrl) && value === 0 && (
+                      {(onEdit || url.editUrl) && value === 0 && params.row.status_id === '6' && (
                         <>
                           {(!role || permissions.includes(role?.update ?? '')) && (
                             <DropdownMenuItem onClick={() => onEdit && onEdit(params.row.id)}>
@@ -333,7 +334,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                     )}
                     {(onClone || url.clone) && (
                       <>
-                        {(!role || permissions.includes(role?.create ?? '')) && value === 0 && (
+                        {params.row.status_id == '6' && (
                           <Link
                             href={url.clone === '' ? '#' : `${url.clone}/${params.row.id}`}
                             onClick={(e) => {

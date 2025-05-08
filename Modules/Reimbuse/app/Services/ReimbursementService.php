@@ -123,7 +123,7 @@ class ReimbursementService
             // if (!empty($getUserApproval)) {
             //     $reimburseGroup = ReimburseGroup::with(['reimburses.reimburseType'])->find($group->id);
             //     $reimburseGroup->notes = '';
-    
+
             //     Mail::to($getUserApproval->email)->send(new ChangeStatus($getUserApproval, 'Reimbursement', 'Approver', '', null, $reimburseGroup, null, $baseurl));
             // }
 
@@ -145,9 +145,11 @@ class ReimbursementService
             DB::beginTransaction();
             $reimburseGroup = ReimburseGroup::find($groupData['groupId']);
             $reimburseGroup->remark         = $groupData['remark'];
-            // $reimburseGroup->cost_center    = $groupData['cost_center'];
-            // $reimburseGroup->requester      = $groupData['requester'];
+            $reimburseGroup->status_id         = 1;
+            $reimburseGroup->cost_center    = $groupData['cost_center'];
             $reimburseGroup->save();
+
+            $balance = 0;
 
             foreach ($forms as $form) {
                 if (!isset($form['for'])) $form['for'] = $groupData['requester'];
@@ -181,9 +183,15 @@ class ReimbursementService
                         }
                     }
                 }
+                $balance += $form['balance'];
             }
 
             DB::commit();
+            $parseForApproval = [
+                'requester' => $reimburseGroup->requester,
+                'value'     => $balance
+            ];
+            $this->approvalServices->Payment((object)$parseForApproval, true, $reimburseGroup->id, 'REIM');
             return "Reimbursements updated successfully.";
         } catch (\Exception $e) {
             DB::rollBack();

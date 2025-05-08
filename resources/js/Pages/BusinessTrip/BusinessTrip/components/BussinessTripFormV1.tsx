@@ -150,18 +150,16 @@ export const BussinessTripFormV1 = ({
       request_for: z.string().min(1, 'Request is required'),
       cost_center_id: z.string().min(1, 'Cost Center is required'),
       remark: z.string().min(1, 'Remark is required'),
-      attachment: z
-        .array(
-          z
-            .instanceof(File)
-            .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
-              message: 'File type must be JPG, JPEG, PNG, HEIC or PDF',
-            })
-            .refine((file) => file.size <= MAX_FILE_SIZE, {
-              message: 'File size must be less than 1MB',
-            }),
-        )
-        .min(1, 'Attachment is required'),
+      attachment: z.array(
+        z
+          .instanceof(File)
+          .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
+            message: 'File type must be JPG, JPEG, PNG, HEIC or PDF',
+          })
+          .refine((file) => file.size <= MAX_FILE_SIZE, {
+            message: 'File size must be less than 1MB',
+          }),
+      ),
       total_destination: z.number().min(1, 'Total Destinantion Required'),
       cash_advance: z.boolean().nullable().optional(),
       total_percent: z.number().nullable().optional(),
@@ -207,7 +205,18 @@ export const BussinessTripFormV1 = ({
         }),
       ),
     })
-    .superRefine(({ cash_advance, total_percent }, refinementContext) => {
+    .superRefine(({ cash_advance, total_percent, attachment }, refinementContext) => {
+      if (type === BusinessTripType.create && attachment && attachment.length === 0) {
+        refinementContext.addIssue({
+          path: ['attachment'],
+          code: z.ZodIssueCode.too_small,
+          minimum: 1,
+          type: 'array',
+          inclusive: true,
+          message: 'Attachment is required',
+        });
+      }
+
       if (cash_advance === true) {
         // Validasi jika total_percent kosong
         if (!total_percent || total_percent.toString().trim() === '') {
@@ -270,6 +279,13 @@ export const BussinessTripFormV1 = ({
   const [fromRequestNo, setFromRequestNo] = React.useState(null);
   const [listAllowances, setListAllowances] = React.useState<AllowanceItemModel[]>([]);
 
+  function removeLeadingZeros(input: string): string {
+    if (/^0+\d+$/.test(input)) {
+      return input.replace(/^0+/, '');
+    }
+    return input;
+  }
+
   async function getDetailData() {
     const url = GET_DETAIL_BUSINESS_TRIP(id);
     //fixing data not showing in index 0
@@ -296,7 +312,7 @@ export const BussinessTripFormV1 = ({
       setfileAttachment(data.attachments as BusinessTripAttachement[]);
       form.setValue('purpose_type_id', data.purpose_type_id.toString());
       form.setValue('request_for', data.request_for.id.toString());
-      form.setValue('cost_center_id', data.cost_center.cost_center.toString());
+      form.setValue('cost_center_id', removeLeadingZeros(data.cost_center.cost_center.toString()));
       form.setValue('remark', data.remarks);
       form.setValue('total_destination', data.total_destination);
       form.setValue('cash_advance', data.cash_advance == 1 ? true : false);
@@ -435,7 +451,12 @@ export const BussinessTripFormV1 = ({
 
     try {
       setLoading(true);
+      const alldestinations = form.getValues('destinations');
+      const totalDays = getTotalDay(alldestinations);
+      const hasRestrictedArea = alldestinations?.some((item) => item.restricted_area === true);
       const formData = new FormData();
+      formData.append('is_restricted_area', hasRestrictedArea ? 'true' : 'false');
+      formData.append('day', totalDays.toString());
       formData.append('user_id', values.request_for ?? '');
       formData.append('value', totalAll.toString());
       formData.append('purpose_type_id', values.purpose_type_id ?? '');
@@ -637,13 +658,12 @@ export const BussinessTripFormV1 = ({
   const fetchDataValue = async () => {
     try {
       const totalAll = getTotalDes();
-    //   const totalAll = 200000;
+      //   const totalAll = 200000;
       const alldestinations = form.getValues('destinations');
       if (totalAll === 0) {
         showToast('Please fill the balance', 'error');
         return;
       }
-
       const totalDays = getTotalDay(alldestinations);
 
       const hasRestrictedArea = alldestinations?.some((item) => item.restricted_area === true);
@@ -851,7 +871,7 @@ export const BussinessTripFormV1 = ({
                     }
                   }}
                   onFocus={() => {
-                    let value = form.getValues('request_for');
+                    const value = form.getValues('request_for');
                     getEmployee('', {
                       name: 'name',
                       id: 'id',
