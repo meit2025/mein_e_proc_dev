@@ -460,7 +460,7 @@ const ArrayForm = ({
       ),
     },
   ];
-
+  
   const CustomFooter = () => {
     const totalAmount = (dataArrayItem ?? []).reduce(
       (sum: any, row: any) => parseInt(sum) + parseInt(row.total_amount),
@@ -800,7 +800,7 @@ const ArrayForm = ({
       </Box>
       {Array.from({ length: tabCount }, (_, index) => (
         <>
-          {index !== dataIndex && (
+          {!disable && index !== dataIndex && (
             <Button
               key={index}
               type='button'

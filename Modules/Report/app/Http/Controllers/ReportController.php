@@ -1149,9 +1149,10 @@ class ReportController extends Controller
 
     public function exportBTOverall(Request $request)
     {
-        $query = BusinessTrip::query()->with(['purposeType', 'status', 'requestFor', 'requestReferenceDeclaration', 'businessTripDestination', 'requestedBy', 'requestedBy.positions', 'requestedBy.divisions', 'requestedBy.departements'])
+        $query = BusinessTrip::query()->with(['purposeType', 'status', 'businessTripDestination', 'requestFor', 'requestedBy', 'requestReferenceDeclaration'])
             ->where('type', 'request')
             ->where('status_id', 3);
+        $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'desc');
         $startDate = $request->get('startDate');
@@ -1162,10 +1163,7 @@ class ReportController extends Controller
         $department = $request->get('department');
 
         if ($request->approval == "1") {
-            $data = Approval::where('user_id', Auth::user()->id)
-                ->where('document_name', 'TRIP')
-                ->pluck('document_id')
-                ->toArray();
+            $data = Approval::where('user_id', Auth::user()->id)->where('document_name', 'TRIP')->pluck('document_id')->toArray();
             $query = $query->whereIn('id', $data);
         }
         if (Auth::user()->is_admin != '1') {
@@ -1177,20 +1175,16 @@ class ReportController extends Controller
             $query->whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $endDate);
         }
-        if ($status) {
-            $query->whereHas('status', function ($q) use ($status) {
-                $q->where('code', $status);
-            });
-        }
-        if ($type) {
-            $query->whereHas('purposeType', function ($q) use ($type) {
-                $q->where('id', $type);
-            });
-        }
 
         if ($destination) {
             $query->whereHas('businessTripDestination', function ($q) use ($destination) {
                 $q->where('destination', $destination);
+            });
+        }
+
+        if ($type) {
+            $query->whereHas('purposeType', function ($q) use ($type) {
+                $q->where('id', $type);
             });
         }
 
@@ -1529,47 +1523,12 @@ class ReportController extends Controller
         $perPage = $request->get('per_page', 10);
         $startDate = $request->get('startDate');
         $endDate = $request->get('endDate');
-        $type = $request->get('type');
-        $destination = $request->get('destination');
-        $department = $request->get('department');
 
         $query->orderBy($sortBy, $sortDirection);
-
-        if (Auth::user()->is_admin != '1') {
-
-            $query->whereHas('BusinessTrip', function ($q) {
-                $q->where('created_by', Auth::user()->id)
-                    ->orWhere('request_for', Auth::user()->id);
-            });
-        }
 
         if ($startDate && $endDate) {
             $query->whereDate('start_date', '>=', $startDate)
                 ->whereDate('end_date', '<=', $endDate);
-        }
-
-        if ($type) {
-            $query->whereHas('BusinessTrip', function ($q) use ($type) {
-                $q->whereHas('purposeType', function ($q) use ($type) {
-                    $q->where('id', $type);
-                });
-            });
-        }
-
-        if ($destination) {
-            $query->whereHas('BusinessTrip', function ($q) use ($destination) {
-                $q->whereHas('businessTripDestination', function ($q) use ($destination) {
-                    $q->where('destination', $destination);
-                });
-            });
-        }
-
-        if ($department) {
-            $query->whereHas('BusinessTrip', function ($q) use ($department) {
-                $q->whereHas('requestFor', function ($q) use ($department) {
-                    $q->where('departement_id', $department);
-                });
-            });
         }
 
         $data =
@@ -1607,43 +1566,18 @@ class ReportController extends Controller
         $sortDirection = $request->get('sort_direction', 'desc');
         $startDate = $request->get('startDate');
         $endDate = $request->get('endDate');
-        $type = $request->get('type');
-        $destination = $request->get('destination');
-        $department = $request->get('department');
 
         $query->orderBy($sortBy, $sortDirection);
-
-        if (Auth::user()->is_admin != '1') {
-            $query = $query->where('created_by', Auth::user()->id)
-                ->orWhere('request_for', Auth::user()->id);
-        }
 
         if ($startDate && $endDate) {
             $query->whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $endDate);
         }
 
-        if ($type) {
-            $query->whereHas('purposeType', function ($q) use ($type) {
-                $q->where('id', $type);
-            });
-        }
-
-        if ($destination) {
-            $query->whereHas('businessTripDestination', function ($q) use ($destination) {
-                $q->where('destination', $destination);
-            });
-        }
-
-        if ($department) {
-            $query->whereHas('requestFor', function ($q) use ($department) {
-                $q->where('departement_id', $department);
-            });
-        }
-
         $data = $query
             ->whereHas('BusinessTrip', function ($query) {
-                $query->whereHas('status', function ($query) {
+                $query->where('type', 'declaration')->
+                    whereHas('status', function ($query) {
                     $query->where('name',  'Fully Approve');
                 });
             })
