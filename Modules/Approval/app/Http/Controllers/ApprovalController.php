@@ -277,7 +277,7 @@ class ApprovalController extends Controller
                     }
                     break;
             }
-            // dd('zz');
+
             if (isset($modelMap[$request->type]) && $statusId != 0) {
                 $modelMap[$request->type]::where('id', $request->id)->update(['status_id' => $statusId]);
             }

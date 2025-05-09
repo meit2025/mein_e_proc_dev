@@ -51,6 +51,7 @@ class ProcurementService
             $entertainment = Entertainment::where('purchase_id', $id)->first();
             $findAttachment = $this->findAttachment($id);
 
+            $totalAmountDp = 0;
             foreach ($items as $key => $value) {
                 $datainsert = $this->preparePurchaseRequisitionData(
                     $procurement,
@@ -65,10 +66,12 @@ class ProcurementService
                 );
                 $array[] = $datainsert;
                 PurchaseRequisition::create($datainsert);
+                $totalAmountDp += $value->total_amount;
             }
-
+            
             $cashData = CashAdvancePurchases::where('purchase_id', $id)->first();
             if ($cashData) {
+                $value->total_amount = $totalAmountDp;
                 $datainsertCash = $this->prepareCashAdvanceData($procurement, $vendor, $value, $cashData, $reqno, $settings);
                 CashAdvance::create($datainsertCash);
                 $arrayCash[] = $datainsertCash;
