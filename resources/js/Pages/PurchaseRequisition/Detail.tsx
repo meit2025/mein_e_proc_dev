@@ -17,7 +17,7 @@ const Detail = ({ id }: { id: number }) => {
       try {
         const response = await axiosInstance.get(DETAIL_PR(id));
         const data = response.data;
-        console.log(data.data.data);
+        
         setData(data.data.data);
       } catch (error) {
         console.error('Error fetching detail:', error);
