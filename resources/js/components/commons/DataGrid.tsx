@@ -62,6 +62,7 @@ interface DataGridProps {
   titleConfirmationText?: string;
   isHistory?: boolean;
   isLoading?: boolean;
+  isClone?: boolean;
 }
 
 const a11yProps = (index: number) => {
@@ -90,6 +91,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   titleConfirmationText,
   isHistory = false,
   isLoading = false,
+  isClone = false,
   role,
   tabelFooter,
 }) => {
@@ -334,7 +336,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                     )}
                     {(onClone || url.clone) && (
                       <>
-                        {params.row.status_id == '6' && (
+                        {(params.row.status_id == '6' || isClone) && (
                           <Link
                             href={url.clone === '' ? '#' : `${url.clone}/${params.row.id}`}
                             onClick={(e) => {
