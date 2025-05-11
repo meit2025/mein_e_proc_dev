@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Modules\Approval\Models\Approval;
 use Modules\Approval\Models\ApprovalRoute;
 use Modules\Approval\Models\ApprovalRouteUsers;
+use Modules\Approval\Models\ApprovalToUser;
 use Modules\Approval\Services\CheckApproval;
 use Modules\BusinessTrip\Models\BusinessTrip;
 use Modules\PurchaseRequisition\Models\Purchase;
@@ -142,6 +143,14 @@ class ApprovalController extends Controller
 
         // Hapus user_approvals yang lama terkait approval_route ini
         ApprovalRouteUsers::where('approval_route_id', $approvalRoute->id)->delete();
+
+        if (!$request->is_bt) {
+            ApprovalToUser::where('approval_route_id', $approvalRoute->id)->where('is_bt', true)->delete();
+        }
+
+        if (!$request->is_reim) {
+            ApprovalToUser::where('approval_route_id', $approvalRoute->id)->where('is_reim', true)->delete();
+        }
 
         // Insert user_id baru ke user_approvals
         foreach ($userIds as $userId) {
