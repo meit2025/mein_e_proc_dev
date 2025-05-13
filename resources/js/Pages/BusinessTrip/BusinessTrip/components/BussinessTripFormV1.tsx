@@ -133,6 +133,7 @@ export const BussinessTripFormV1 = ({
   id,
   isAdmin,
   idUser,
+  successSubmit,
 }: {
   users: User[];
   listPurposeType: PurposeTypeModel[];
@@ -143,6 +144,7 @@ export const BussinessTripFormV1 = ({
   id: string | undefined;
   isAdmin: string | undefined;
   idUser: number | undefined;
+  successSubmit?: (success: boolean) => void;
 }) => {
   const formSchema = z
     .object({
@@ -529,12 +531,12 @@ export const BussinessTripFormV1 = ({
         setLoading(false);
       }, 1000);
       // console.log(response);
-      //   onSuccess?.(true);
+      successSubmit?.(true);
     } catch (e) {
       const error = e as AxiosError;
-
-      //   onSuccess?.(false);
-      console.log(error);
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
     }
 
     // console.log('values bg', values);

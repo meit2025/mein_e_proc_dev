@@ -67,6 +67,7 @@ class ApprovalController extends Controller
                 'is_reim',
                 'day',
                 'is_restricted_area',
+                'type_approval_conditional'
             ]);
             $approvalRouteData['is_hr'] = $request->is_hr ?? false;
             $approvalRouteData['nominal'] = $request->is_conditional ? $request->nominal : 0;
@@ -133,6 +134,7 @@ class ApprovalController extends Controller
             'is_reim',
             'day',
             'is_restricted_area',
+            'type_approval_conditional',
         ]);
         $approvalRouteData['is_hr'] = $request->is_hr ?? false;
         $approvalRouteData['nominal'] = $request->is_conditional ? $request->nominal : 0;

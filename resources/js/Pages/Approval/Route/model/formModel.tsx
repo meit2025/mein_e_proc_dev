@@ -1,4 +1,5 @@
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
+import FormConditional from './formConditional';
 
 export const formModel: Array<FormFieldModel<any>> = [
   {
@@ -53,32 +54,7 @@ export const formModel: Array<FormFieldModel<any>> = [
     placeholder: 'Enter your Approval Conditional',
   },
   {
-    conditional: true,
-    valueConditional: true,
-    parameterConditional: 'is_conditional',
-    type: 'input',
-    name: 'nominal',
-    label: 'Nominal Conditional',
-    placeholder: 'Enter your Nominal Conditional',
-    required: true,
-  },
-  {
-    conditional: true,
-    valueConditional: true,
-    parameterConditional: 'is_conditional',
-    type: 'input',
-    name: 'day',
-    label: 'Day Trip Conditional',
-    placeholder: 'Enter Day Trip Conditional',
-    required: true,
-  },
-  {
-    conditional: true,
-    valueConditional: true,
-    parameterConditional: 'is_conditional',
-    type: 'switch',
-    name: 'is_restricted_area',
-    label: 'Restricted Area',
-    placeholder: 'Enter your restricted area',
+    fieldCustome: true,
+    fieldCustomeValue: <FormConditional />,
   },
 ];

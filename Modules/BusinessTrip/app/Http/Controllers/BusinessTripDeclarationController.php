@@ -245,8 +245,8 @@ class BusinessTripDeclarationController extends Controller
                     'shift_code' => $parentAttendance->shift_code,
                     'shift_start' => $parentAttendance->shift_start,
                     'shift_end' => $parentAttendance->shift_end,
-                    'start_date' => date('d-m-Y',strtotime($parentAttendance->start_date)),
-                    'end_date' => date('d-m-Y',strtotime($parentAttendance->end_date)),
+                    'start_date' => date('d-m-Y', strtotime($parentAttendance->start_date)),
+                    'end_date' => date('d-m-Y', strtotime($parentAttendance->end_date)),
                 ];
             }
 
@@ -258,14 +258,14 @@ class BusinessTripDeclarationController extends Controller
             $detail_attendance = [];
             foreach ($destination->detailAttendance as $detail) {
                 $detail_attendance[] = [
-                    'date' => date('d-m-Y',strtotime($detail->date)),
+                    'date' => date('d-m-Y', strtotime($detail->date)),
                     'start_time' => $detail->start_time,
                     'end_time' => $detail->end_time,
                     'shift_code' => $detail->shift_code,
                     'shift_start' => $detail->shift_start,
                     'shift_end' => $detail->shift_end,
-                    'start_date' => date('d-m-Y',strtotime($detail->start_date)),
-                    'end_date' => date('d-m-Y',strtotime($detail->end_date)),
+                    'start_date' => date('d-m-Y', strtotime($detail->start_date)),
+                    'end_date' => date('d-m-Y', strtotime($detail->end_date)),
                 ];
             }
 
@@ -387,6 +387,7 @@ class BusinessTripDeclarationController extends Controller
         try {
             $businessTrip = BusinessTrip::find($id);
             $businessTrip->remarks = $request->remark;
+            $businessTrip->status_id = 1;
             $businessTrip->save();
 
             if ($request->file_existing != null) {
@@ -419,8 +420,7 @@ class BusinessTripDeclarationController extends Controller
                     ]);
                 }
             }
-
-            // return $this->successResponse("Updated successfully");
+            $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP_DECLARATION');
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
         }
@@ -595,8 +595,8 @@ class BusinessTripDeclarationController extends Controller
                         'shift_end' => $destination['shift_end'],
                         'start_time' => $destination['start_time'],
                         'end_time' => $destination['end_time'],
-                        'start_date' => date('Y-m-d',strtotime($destination['start_date'])),
-                        'end_date' => date('Y-m-d',strtotime($destination['end_date'])),
+                        'start_date' => date('Y-m-d', strtotime($destination['start_date'])),
+                        'end_date' => date('Y-m-d', strtotime($destination['end_date'])),
                     ]);
                 }
                 foreach ($data_destination['allowances'] as $key => $allowance) {
@@ -630,7 +630,6 @@ class BusinessTripDeclarationController extends Controller
             // $bt->processTextData($request->request_no);
             DB::commit();
         } catch (\Exception $e) {
-            dd($e->getMessage());
             DB::rollBack();
         }
     }

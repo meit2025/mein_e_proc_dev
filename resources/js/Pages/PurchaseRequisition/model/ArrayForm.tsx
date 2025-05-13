@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 import FormAutocomplete from '@/components/Input/formDropdown';
 import FormInput from '@/components/Input/formInput';
 import useDropdownOptions from '@/lib/getDropdown';
@@ -56,15 +57,16 @@ const ArrayForm = ({
       isMapping: true,
     });
     getVendor('', {
-      name: 'name_one',
+      name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
       id: 'id',
       tabel: 'master_business_partners',
       hiddenZero: true,
-      isMapping: true,
+      isMapping: false,
+      raw: true,
       hasValue: {
         key: getValues(`vendors[${dataIndex}].vendor`) ? 'id' : '',
         value: getValues(`vendors[${dataIndex}].vendor`) ?? '',
-      }
+      },
     });
     getMaterialGroup('', {
       name: 'material_group_desc',
@@ -460,7 +462,7 @@ const ArrayForm = ({
       ),
     },
   ];
-  
+
   const CustomFooter = () => {
     const totalAmount = (dataArrayItem ?? []).reduce(
       (sum: any, row: any) => parseInt(sum) + parseInt(row.total_amount),
@@ -522,39 +524,42 @@ const ArrayForm = ({
             classNames='mt-2'
             disabled={disable}
             onSearch={async (search) => {
-              const isLabelMatch = dataVendor?.some(option => option.label === search);
+              const isLabelMatch = dataVendor?.some((option) => option.label === search);
               if (search.length > 0 && !isLabelMatch) {
                 await getVendor(search, {
-                  name: 'name_one',
+                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
                   id: 'id',
                   tabel: 'master_business_partners',
                   hiddenZero: true,
-                  isMapping: true,
-                  search: search
-                })
+                  isMapping: false,
+                  search: search,
+                  raw: true,
+                });
               } else if (search.length == 0 && !isLabelMatch) {
                 await getVendor(search, {
-                  name: 'name_one',
+                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
                   id: 'id',
                   tabel: 'master_business_partners',
                   hiddenZero: true,
-                  isMapping: true,
-                })
+                  isMapping: false,
+                  raw: true,
+                });
               }
             }}
-            onFocus={async() => {
-              let value = getValues(`vendors[${dataIndex}].vendor`);
+            onFocus={async () => {
+              const value = getValues(`vendors[${dataIndex}].vendor`);
               await getVendor('', {
-                name: 'name_one',
+                name: "name_one || ' - '  || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
                 id: 'id',
                 tabel: 'master_business_partners',
                 hiddenZero: true,
-                isMapping: true,
+                isMapping: false,
+                raw: true,
                 hasValue: {
                   key: value ? 'id' : '',
                   value: value ?? '',
-                }
-              })
+                },
+              });
             }}
           />
 

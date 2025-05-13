@@ -63,6 +63,7 @@ interface DataGridProps {
   isHistory?: boolean;
   isLoading?: boolean;
   isClone?: boolean;
+  onRefresh?: () => Promise<void> | void;
 }
 
 const a11yProps = (index: number) => {

@@ -25,7 +25,10 @@ const roleAkses = 'business trip declaration';
 export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
-  const [businessTripForm, setBusinessTripForm] = React.useState({
+  const [businessTripForm, setBusinessTripForm] = React.useState<{
+    type: BusinessTripType;
+    id: string | undefined;
+  }>({
     type: BusinessTripType.create,
     id: undefined,
   });
@@ -33,7 +36,7 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
   function openFormHandler() {
     setBusinessTripForm({
       type: BusinessTripType.create,
-      id: null,
+      id: undefined,
     });
     setOpenForm(!openForm);
   }
@@ -63,6 +66,7 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         }}
         onCreate={openFormHandler}
         columns={columns}
+        isClone={true}
         // onEdit={(value) => {
         //   setBusinessTripForm({
         //     type: BusinessTripType.edit,
@@ -70,17 +74,16 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         //   });
         //   setOpenForm(true);
         // }}
-        // onClone={(value) => {
-        //   setBusinessTripForm({
-        //     type: BusinessTripType.clone,
-        //     id: value.toString(),
-        //   });
-        //   setOpenForm(true);
-        // }}
+        onClone={(value) => {
+          setBusinessTripForm({
+            type: BusinessTripType.clone,
+            id: value.toString(),
+          });
+          setOpenForm(true);
+        }}
         url={{
           url: GET_LIST_BUSINESS_TRIP_DECLARATION,
           detailUrl: DETAIL_PAGE_BUSINESS_TRIP_DECLARATION,
-          // clone: CLONE_PAGE_BUSINESS_TRIP_DECLARATION,
           cancelApproval: 'trip_declaration',
         }}
         labelFilter='search'

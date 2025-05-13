@@ -70,7 +70,10 @@ class DropdownMasterController extends Controller
 
     function dropdown(Request $request)
     {
-        $select = [$request->name . ' as label', $request->id . ' as value'];
+        $select = [
+            $request->raw == 'true' ? DB::raw($request->name . ' as label') : $request->name . ' as label',
+            $request->id . ' as value'
+        ];
 
         if (!$request->groupBy) {
             $select[] = '*';

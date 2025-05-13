@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-key */
 import '../css/index.scss';
 import {
   Form,
@@ -80,11 +81,11 @@ export const BussinessTripFormV1 = ({
   type: BusinessTripType;
   id: string | undefined;
 }) => {
-  const formSchema = z.object({
-    request_no: z.string().nonempty('Request for required'),
-    remark: z.string().nonempty('Remark is required'),
-    attachment: z
-      .array(
+  const formSchema = z
+    .object({
+      request_no: z.string().nonempty('Request for required'),
+      remark: z.string().nonempty('Remark is required'),
+      attachment: z.array(
         z
           .instanceof(File)
           .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
@@ -93,56 +94,68 @@ export const BussinessTripFormV1 = ({
           .refine((file) => file.size <= MAX_FILE_SIZE, {
             message: 'File size must be less than 1MB',
           }),
-      )
-      .min(1, 'Attachment is required'),
-    total_destination: z.number().int('Total Destinantion Required'),
-    cash_advance: z.boolean().nullable().optional(),
-    reference_number: z.string().nullable().optional(),
-    total_percent: z.number().nullable().optional(),
-    total_cash_advance: z.string().nullable().optional(),
-    destinations: z.array(
-      z.object({
-        destination: z.string().nonempty('Destinantion Required'),
-        business_trip_start_date: z.date().optional(),
-        business_trip_end_date: z.date().optional(),
-        detail_attedances: z.array(
-          z.object({
-            date: z.string().optional(),
-            shift_code: z.string().optional(),
-            shift_start: z.string().optional(),
-            shift_end: z.string().optional(),
-            start_time: z.string().optional(),
-            end_time: z.string().optional(),
-            start_date: z.string().optional(),
-            end_date: z.string().optional(),
-            request_start_time: z.string().optional(),
-            request_end_time: z.string().optional(),
-          }),
-        ),
-        allowances: z.array(
-          z.object({
-            name: z.string().optional(),
-            code: z.string().optional(),
-            default_price: z.string().optional(),
-            type: z.string().optional(),
-            currency: z.string().optional(),
-            subtotal: z.number().optional(),
-            detail: z.array(
-              z.object({
-                date: z.string().nullish(),
-                request_price: z.number().optional(),
-              }),
-            ),
-          }),
-        ),
-        other: z.array(
-          z.object({
-            value: z.number().optional(),
-          }),
-        ),
-      }),
-    ),
-  });
+      ),
+      total_destination: z.number().int('Total Destinantion Required'),
+      cash_advance: z.boolean().nullable().optional(),
+      reference_number: z.string().nullable().optional(),
+      total_percent: z.number().nullable().optional(),
+      total_cash_advance: z.string().nullable().optional(),
+      destinations: z.array(
+        z.object({
+          restricted_area: z.boolean().optional(),
+          destination: z.string().nonempty('Destinantion Required'),
+          business_trip_start_date: z.date().optional(),
+          business_trip_end_date: z.date().optional(),
+          detail_attedances: z.array(
+            z.object({
+              date: z.string().optional(),
+              shift_code: z.string().optional(),
+              shift_start: z.string().optional(),
+              shift_end: z.string().optional(),
+              start_time: z.string().optional(),
+              end_time: z.string().optional(),
+              start_date: z.string().optional(),
+              end_date: z.string().optional(),
+              request_start_time: z.string().optional(),
+              request_end_time: z.string().optional(),
+            }),
+          ),
+          allowances: z.array(
+            z.object({
+              name: z.string().optional(),
+              code: z.string().optional(),
+              default_price: z.string().optional(),
+              type: z.string().optional(),
+              currency: z.string().optional(),
+              subtotal: z.number().optional(),
+              detail: z.array(
+                z.object({
+                  date: z.string().nullish(),
+                  request_price: z.number().optional(),
+                }),
+              ),
+            }),
+          ),
+          other: z.array(
+            z.object({
+              value: z.number().optional(),
+            }),
+          ),
+        }),
+      ),
+    })
+    .superRefine(({ cash_advance, total_percent, attachment }, refinementContext) => {
+      if (type === BusinessTripType.create && attachment && attachment.length === 0) {
+        refinementContext.addIssue({
+          path: ['attachment'],
+          code: z.ZodIssueCode.too_small,
+          minimum: 1,
+          type: 'array',
+          inclusive: true,
+          message: 'Attachment is required',
+        });
+      }
+    });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -234,14 +247,24 @@ export const BussinessTripFormV1 = ({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     // console.log(otherAllowance, ' valuesnya');
     try {
-        setLoading(true);
+      setLoading(true);
+      const alldestinations = form.getValues('destinations');
+      const totalDays = getTotalDay(alldestinations);
+      const hasRestrictedArea = businessTripDetail?.business_trip_destination?.some(
+        (item: any) =>
+          item.restricted_area === true ||
+          item.restricted_area === '1' ||
+          item.restricted_area === 1,
+      );
+      const totalAll = getTotalDes();
+      const formData = new FormData();
+      formData.append('is_restricted_area', hasRestrictedArea ? 'true' : 'false');
+      formData.append('day', totalDays.toString());
+      formData.append('user_id', businessTripDetail?.request_for?.id.toString() ?? '');
+      formData.append('value', totalAll.toString());
+      formData.append('request_no', values.request_no ?? '');
+      formData.append('remark', values.remark ?? '');
       if (type === BusinessTripType.create) {
-        const totalAll = getTotalDes();
-        const formData = new FormData();
-        formData.append('user_id', businessTripDetail?.request_for?.id.toString() ?? '');
-        formData.append('value', totalAll.toString());
-        formData.append('request_no', values.request_no ?? '');
-        formData.append('remark', values.remark ?? '');
         values.attachment.forEach((file: any, index: number) => {
           if (file) {
             formData.append(`attachment[${index}]`, file);
@@ -258,19 +281,17 @@ export const BussinessTripFormV1 = ({
         });
         showToast('succesfully created data', 'success');
       } else {
-        const formDataEdit = new FormData();
-        formDataEdit.append('remark', values.remark ?? '');
         values.attachment.forEach((file: any, index: number) => {
           if (file) {
-            formDataEdit.append(`attachment[${index}]`, file);
+            formData.append(`attachment[${index}]`, file);
           }
         });
         fileAttachment.forEach((file: any, index: number) => {
           if (file) {
-            formDataEdit.append(`file_existing[${index}]`, JSON.stringify(file));
+            formData.append(`file_existing[${index}]`, JSON.stringify(file));
           }
         });
-        await Inertia.post(`${EDIT_API_BUSINESS_TRIP_DECLARATION}/${id}`, formDataEdit, {
+        await Inertia.post(`${EDIT_API_BUSINESS_TRIP_DECLARATION}/${id}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -287,7 +308,9 @@ export const BussinessTripFormV1 = ({
     }
   };
 
-  const [businessTripDetail, setBusinessTripDetail] = React.useState<BusinessTripModel | null>(null);
+  const [businessTripDetail, setBusinessTripDetail] = React.useState<BusinessTripModel | null>(
+    null,
+  );
 
   const [listAllowances, setListAllowances] = React.useState<AllowanceItemModel[]>([]);
   const [listDestination, setListDestination] = React.useState<[]>([]);
@@ -299,6 +322,7 @@ export const BussinessTripFormV1 = ({
 
     try {
       const response = await axiosInstance.get(url);
+      console.log(response.data.data, 'response');
       const businessTripData = response.data.data;
       setIsCashAdvance(businessTripData.cash_advance == 1 ? true : false);
       form.setValue('remark', businessTripData.remarks || '');
@@ -306,12 +330,13 @@ export const BussinessTripFormV1 = ({
       form.setValue('cash_advance', businessTripData.cash_advance == 1 ? true : false);
       form.setValue('reference_number', businessTripData.reference_number);
       form.setValue('total_percent', Number(businessTripData.total_percent));
-        form.setValue(
-            'total_cash_advance',
-            businessTripData?.total_cash_advance != null
-            ? formatRupiah(businessTripData.total_cash_advance, false)
-            : '0'
-        );
+      form.setValue('request_no', value);
+      form.setValue(
+        'total_cash_advance',
+        businessTripData?.total_cash_advance !== null
+          ? formatRupiah(businessTripData.total_cash_advance, false)
+          : '0',
+      );
       setBusinessTripDetail(response.data.data as BusinessTripModel);
       setListDestination(businessTripData.destinations);
       setTotalDestination(businessTripData.total_destination);
@@ -363,8 +388,43 @@ export const BussinessTripFormV1 = ({
     acknowledgeFrom: [],
     approvalFromStatusRoute: [],
   });
+
+  const getTotalDay = (data: any[]) => {
+    const allDates: string[] = [];
+    data.forEach((destination) => {
+      destination.detail_attedances.forEach((detail: any) => {
+        if (detail.date) allDates.push(detail.date);
+        if (detail.end_date) allDates.push(detail.end_date);
+      });
+    });
+
+    // Ubah ke Date object dan urutkan
+    const sortedDates = allDates
+      .map((dateStr) => new Date(dateStr))
+      .sort((a, b) => a.getTime() - b.getTime());
+
+    if (sortedDates.length === 0) {
+      return 0;
+    } else {
+      const start = sortedDates[0];
+      const end = sortedDates[sortedDates.length - 1];
+
+      // Hitung jumlah hari, +1 agar termasuk tanggal awal
+      const dayDiff = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      return dayDiff;
+    }
+  };
   const fetchDataValue = async () => {
     try {
+      const alldestinations = form.getValues('destinations');
+      const day = getTotalDay(alldestinations);
+      console.log(alldestinations, 'day');
+      const hasRestrictedArea = businessTripDetail?.business_trip_destination?.some(
+        (item: any) =>
+          item.restricted_area === true ||
+          item.restricted_area === '1' ||
+          item.restricted_area === 1,
+      );
       const totalAll = getTotalDes();
       if (totalAll === 0) {
         showToast('Please fill the balance', 'error');
@@ -373,6 +433,8 @@ export const BussinessTripFormV1 = ({
 
       const response = await axiosInstance.get('/check-approval', {
         params: {
+          is_restricted_area: hasRestrictedArea,
+          day: day,
           value: totalAll,
           user_id: businessTripDetail?.request_for?.id ?? '',
           type: 'TRIP_DECLARATION',
@@ -407,7 +469,7 @@ export const BussinessTripFormV1 = ({
         setApprovalRoute(dataApproval);
         setIsShow(true);
       }
-    } catch (error) {
+    } catch (error: any) {
       showToast(error?.response?.data?.message, 'error');
     }
   };
@@ -431,7 +493,7 @@ export const BussinessTripFormV1 = ({
         key: 'type',
         parameter: 'request',
       },
-      declaration: 'true',
+      declaration: BusinessTripType.create === type ? 'true' : 'false',
     });
   }, [form.watch('destinations')]);
 
@@ -441,6 +503,7 @@ export const BussinessTripFormV1 = ({
     form.setValue('destinations', []);
     const url = GET_EDIT_BUSINESS_TRIP_DECLARATION(id);
     const response = await axios.get(url);
+    console.log(response.data.data, 'response');
     const data = response.data.data;
     await handleGetBusinessTrip(data.parent_id.toString());
     setfileAttachment(data.attachments as BusinessTripAttachement[]);
@@ -451,9 +514,8 @@ export const BussinessTripFormV1 = ({
   }
 
   React.useEffect(() => {
-    if (id && type == BusinessTripType.clone) {
-      getDetailData();
-      getdataRequestNoEdit('', {
+    if (id && type === BusinessTripType.clone) {
+      getdataRequestNo('', {
         name: 'request_no',
         id: 'id',
         tabel: 'business_trip',
@@ -463,6 +525,7 @@ export const BussinessTripFormV1 = ({
           parameter: 'request',
         },
       });
+      getDetailData();
     }
   }, [type]);
 
@@ -487,7 +550,7 @@ export const BussinessTripFormV1 = ({
                   options={dataRequestNo}
                   fieldName='request_no'
                   isRequired={true}
-                  disabled={false}
+                  disabled={BusinessTripType.create === type ? false : true}
                   placeholder={'Select Request No.'}
                   classNames='mt-2 w-full'
                   onChangeOutside={(value) => {
@@ -535,7 +598,9 @@ export const BussinessTripFormV1 = ({
               </td>
             </tr>
             <tr>
-              <td width={200}>File Attachment<span className='text-red-600'>*</span></td>
+              <td width={200}>
+                File Attachment<span className='text-red-600'>*</span>
+              </td>
               <td>
                 <FormField
                   control={form.control}
@@ -689,7 +754,9 @@ export const BussinessTripFormV1 = ({
             )}
           </div>
 
-          <Button type='submit' loading={loading}>submit</Button>
+          <Button type='submit' loading={loading}>
+            submit
+          </Button>
         </form>
       </Form>
     </ScrollArea>
@@ -735,6 +802,7 @@ export function BussinesTripDestination({
 
       {destinationField.map((destination: any, index: number) => (
         <BussinessDestinationForm
+          key={index}
           listAllowances={listAllowances}
           updateDestination={updateDestination}
           destination={destination}
@@ -847,7 +915,6 @@ export function BussinessDestinationForm({
           date: momentStart.toDate(),
           request_price: price,
         });
-
       }
 
       return detailAllowance;
@@ -956,7 +1023,7 @@ export function BussinessDestinationForm({
         />
       </div>
       {/* disini */}
-       <ResultTotalItem
+      <ResultTotalItem
         allowanceField={allowancesField}
         destinationIndex={index}
         form={form}
@@ -1083,7 +1150,7 @@ export function DetailAttedances({
             <tbody>
               {detailAttedanceWatch.map((attedance: any, index: any) => (
                 <tr key={attedance.index}>
-                  <td style={{verticalAlign: 'middle'}}>
+                  <td style={{ verticalAlign: 'middle' }}>
                     {moment(attedance.date).format('DD/MM/YYYY')}
 
                     <FormField
@@ -1103,7 +1170,7 @@ export function DetailAttedances({
                       )}
                     />
                   </td>
-                  <td style={{verticalAlign: 'middle'}}>
+                  <td style={{ verticalAlign: 'middle' }}>
                     {attedance.shift_code}
                     <FormField
                       control={form.control}
@@ -1122,7 +1189,7 @@ export function DetailAttedances({
                       )}
                     />
                   </td>
-                  <td style={{verticalAlign: 'middle'}}>
+                  <td style={{ verticalAlign: 'middle' }}>
                     {attedance.shift_start}
                     <FormField
                       control={form.control}
@@ -1141,7 +1208,7 @@ export function DetailAttedances({
                       )}
                     />
                   </td>
-                  <td style={{verticalAlign: 'middle'}}>
+                  <td style={{ verticalAlign: 'middle' }}>
                     {attedance.shift_end}
                     <FormField
                       control={form.control}
@@ -1160,24 +1227,24 @@ export function DetailAttedances({
                       )}
                     />
                   </td>
-                  <td style={{verticalAlign: 'middle'}}>
+                  <td style={{ verticalAlign: 'middle' }}>
                     <FormField
-                        control={form.control}
-                        name={`destinations.${destinationIndex}.detail_attedances.${index}.request_start_date`}
-                        render={({ field }) => (
+                      control={form.control}
+                      name={`destinations.${destinationIndex}.detail_attedances.${index}.request_start_date`}
+                      render={({ field }) => (
                         <FormItem>
-                            <FormControl>
+                          <FormControl>
                             <Input
-                                defaultValue={moment(field.value).format('YYYY-MM-DD')}
-                                onChange={field.onChange}
-                                type='date'
-                                readOnly={true}
-                                style={{marginBottom: '5px'}}
+                              defaultValue={moment(field.value).format('YYYY-MM-DD')}
+                              onChange={field.onChange}
+                              type='date'
+                              readOnly={true}
+                              style={{ marginBottom: '5px' }}
                             />
-                            </FormControl>
-                            <FormMessage />
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
-                        )}
+                      )}
                     />
                     <FormField
                       control={form.control}
@@ -1185,31 +1252,35 @@ export function DetailAttedances({
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input defaultValue={field.value} onChange={field.onChange} readOnly={true}/>
+                            <Input
+                              defaultValue={field.value}
+                              onChange={field.onChange}
+                              readOnly={true}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </td>
-                  <td style={{verticalAlign: 'middle'}}>
+                  <td style={{ verticalAlign: 'middle' }}>
                     <FormField
-                        control={form.control}
-                        name={`destinations.${destinationIndex}.detail_attedances.${index}.request_end_date`}
-                        render={({ field }) => (
+                      control={form.control}
+                      name={`destinations.${destinationIndex}.detail_attedances.${index}.request_end_date`}
+                      render={({ field }) => (
                         <FormItem>
-                            <FormControl>
+                          <FormControl>
                             <Input
-                                defaultValue={moment(field.value).format('YYYY-MM-DD')}
-                                onChange={field.onChange}
-                                type='date'
-                                readOnly={true}
-                                style={{marginBottom: '5px'}}
+                              defaultValue={moment(field.value).format('YYYY-MM-DD')}
+                              onChange={field.onChange}
+                              type='date'
+                              readOnly={true}
+                              style={{ marginBottom: '5px' }}
                             />
-                            </FormControl>
-                            <FormMessage />
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
-                        )}
+                      )}
                     />
                     <FormField
                       control={form.control}
@@ -1217,7 +1288,11 @@ export function DetailAttedances({
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input defaultValue={field.value} onChange={field.onChange} readOnly={true} />
+                            <Input
+                              defaultValue={field.value}
+                              onChange={field.onChange}
+                              readOnly={true}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1249,7 +1324,7 @@ export function DetailAttedances({
             <tbody>
               {detailAttedanceWatch.map((attedance: any, index: any) => (
                 <tr key={attedance.index}>
-                  <td style={{verticalAlign: 'middle'}}>
+                  <td style={{ verticalAlign: 'middle' }}>
                     {moment(attedance.date).format('DD/MM/YYYY')}
 
                     <FormField
@@ -1269,7 +1344,7 @@ export function DetailAttedances({
                       )}
                     />
                   </td>
-                  <td style={{verticalAlign: 'middle'}}>
+                  <td style={{ verticalAlign: 'middle' }}>
                     {attedance.shift_code}
                     <FormField
                       control={form.control}
@@ -1288,7 +1363,7 @@ export function DetailAttedances({
                       )}
                     />
                   </td>
-                  <td style={{verticalAlign: 'middle'}}>
+                  <td style={{ verticalAlign: 'middle' }}>
                     {attedance.shift_start}
                     <FormField
                       control={form.control}
@@ -1307,7 +1382,7 @@ export function DetailAttedances({
                       )}
                     />
                   </td>
-                  <td style={{verticalAlign: 'middle'}}>
+                  <td style={{ verticalAlign: 'middle' }}>
                     {attedance.shift_end}
                     <FormField
                       control={form.control}
@@ -1326,23 +1401,23 @@ export function DetailAttedances({
                       )}
                     />
                   </td>
-                  <td style={{verticalAlign: 'middle'}}>
+                  <td style={{ verticalAlign: 'middle' }}>
                     <FormField
-                        control={form.control}
-                        name={`destinations.${destinationIndex}.detail_attedances.${index}.start_date`}
-                        render={({ field }) => (
+                      control={form.control}
+                      name={`destinations.${destinationIndex}.detail_attedances.${index}.start_date`}
+                      render={({ field }) => (
                         <FormItem>
-                            <FormControl>
+                          <FormControl>
                             <Input
-                                defaultValue={moment(field.value).format('YYYY-MM-DD')}
-                                onChange={field.onChange}
-                                type='date'
-                                style={{marginBottom: '5px'}}
+                              defaultValue={moment(field.value).format('YYYY-MM-DD')}
+                              onChange={field.onChange}
+                              type='date'
+                              style={{ marginBottom: '5px' }}
                             />
-                            </FormControl>
-                            <FormMessage />
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
-                        )}
+                      )}
                     />
                     <FormField
                       control={form.control}
@@ -1350,30 +1425,34 @@ export function DetailAttedances({
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input defaultValue={field.value} onChange={field.onChange} type='time'/>
+                            <Input
+                              defaultValue={field.value}
+                              onChange={field.onChange}
+                              type='time'
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </td>
-                  <td style={{verticalAlign: 'middle'}}>
+                  <td style={{ verticalAlign: 'middle' }}>
                     <FormField
-                        control={form.control}
-                        name={`destinations.${destinationIndex}.detail_attedances.${index}.end_date`}
-                        render={({ field }) => (
+                      control={form.control}
+                      name={`destinations.${destinationIndex}.detail_attedances.${index}.end_date`}
+                      render={({ field }) => (
                         <FormItem>
-                            <FormControl>
+                          <FormControl>
                             <Input
-                                defaultValue={moment(field.value).format('YYYY-MM-DD')}
-                                onChange={field.onChange}
-                                type='date'
-                                style={{marginBottom: '5px'}}
+                              defaultValue={moment(field.value).format('YYYY-MM-DD')}
+                              onChange={field.onChange}
+                              type='date'
+                              style={{ marginBottom: '5px' }}
                             />
-                            </FormControl>
-                            <FormMessage />
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
-                        )}
+                      )}
                     />
                     <FormField
                       control={form.control}
@@ -1381,7 +1460,11 @@ export function DetailAttedances({
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input defaultValue={field.value} onChange={field.onChange} type='time'/>
+                            <Input
+                              defaultValue={field.value}
+                              onChange={field.onChange}
+                              type='time'
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1486,19 +1569,19 @@ export function DetailAllowance({
                         min='0'
                         value={field.value ?? ''} // Gunakan string kosong jika nilai null/undefined
                         onChange={(e) => {
-                            const value = e.target.value.trim(); // Hilangkan spasi ekstra
+                          const value = e.target.value.trim(); // Hilangkan spasi ekstra
 
-                            // Izinkan input kosong
-                            if (value === '') {
-                              field.onChange(undefined);
-                              return;
-                            }
-                            console.log(value,'value')
-                            // Pastikan hanya angka yang diterima
-                            const parsedValue = Number(value);
-                            if (!isNaN(parsedValue) && parsedValue >= 0) {
-                              field.onChange(parsedValue);
-                            }
+                          // Izinkan input kosong
+                          if (value === '') {
+                            field.onChange(undefined);
+                            return;
+                          }
+                          console.log(value, 'value');
+                          // Pastikan hanya angka yang diterima
+                          const parsedValue = Number(value);
+                          if (!isNaN(parsedValue) && parsedValue >= 0) {
+                            field.onChange(parsedValue);
+                          }
                         }}
                       />
                     </FormControl>
@@ -1615,18 +1698,18 @@ export function AllowanceRowInput({
       );
 
       // Hitung subtotal allowance ini
-    const details = form.getValues(
-        `destinations[${destinationIndex}].allowances[${allowanceIndex}].detail`
+      const details = form.getValues(
+        `destinations[${destinationIndex}].allowances[${allowanceIndex}].detail`,
       );
-    //   console.log(details,'details')
+      //   console.log(details,'details')
       const subtotal = details.reduce((total: number, detail: any) => {
         return total + (parseFloat(detail.request_price) || 0);
       }, 0);
-    //   console.log(details,'detailsdetailsdetails')
+      //   console.log(details,'detailsdetailsdetails')
       // Update subtotal di form
       form.setValue(
         `destinations[${destinationIndex}].allowances[${allowanceIndex}].subtotal`,
-        subtotal
+        subtotal,
       );
     }
   };
@@ -1731,97 +1814,97 @@ export function AllowanceRowInput({
 }
 
 export function ResultTotalItem({
-    allowanceField,
-    destinationIndex,
-    form,
-    setTotalAllowance,
-  }: {
-    allowanceField: any;
-    destinationIndex: number;
-    form: any;
-    setTotalAllowance: any;
-  }) {
-    const [grandTotal, setGrandTotal] = React.useState(0);
-    const other = form.watch(`destinations.${destinationIndex}.other`);
+  allowanceField,
+  destinationIndex,
+  form,
+  setTotalAllowance,
+}: {
+  allowanceField: any;
+  destinationIndex: number;
+  form: any;
+  setTotalAllowance: any;
+}) {
+  const [grandTotal, setGrandTotal] = React.useState(0);
+  const other = form.watch(`destinations.${destinationIndex}.other`);
 
-    const resultItem = form.watch(`destinations[${destinationIndex}].allowances`);
-    // const totalItem = form.watch(`destinations[${destinationIndex}].total_allowance`);
-    // const total = form.watch(`destinations[${destinationIndex}].allowances[${allowanceIndex}].detail`)
-      // console.log(allowanceField,' lorem isum')
-    React.useEffect(() => {
-        const newTotal = resultItem.reduce((totalSum: number, allowance: any, index: number) => {
-            const details = form.getValues(`destinations.${destinationIndex}.allowances.${index}.detail`);
-            const itemTotal = calculateTotal(allowance, details);
-            return totalSum + itemTotal;
-        }, 0);
-        const totalSubtotal = (other || []).reduce((total: number, allowance: any) => {
-            const allowanceValue = Number(allowance?.value) || 0; // Pastikan nilai adalah angka atau default ke 0
-            return total + allowanceValue;
-        }, 0);
+  const resultItem = form.watch(`destinations[${destinationIndex}].allowances`);
+  // const totalItem = form.watch(`destinations[${destinationIndex}].total_allowance`);
+  // const total = form.watch(`destinations[${destinationIndex}].allowances[${allowanceIndex}].detail`)
+  // console.log(allowanceField,' lorem isum')
+  React.useEffect(() => {
+    const newTotal = resultItem.reduce((totalSum: number, allowance: any, index: number) => {
+      const details = form.getValues(`destinations.${destinationIndex}.allowances.${index}.detail`);
+      const itemTotal = calculateTotal(allowance, details);
+      return totalSum + itemTotal;
+    }, 0);
+    const totalSubtotal = (other || []).reduce((total: number, allowance: any) => {
+      const allowanceValue = Number(allowance?.value) || 0; // Pastikan nilai adalah angka atau default ke 0
+      return total + allowanceValue;
+    }, 0);
 
-        setGrandTotal(newTotal + totalSubtotal);
+    setGrandTotal(newTotal + totalSubtotal);
     //       // Update nilai total allowance di form
     //       form.setValue(`destinations[${destinationIndex}].total_allowance`, total);
 
     //       // Panggil fungsi setTotalAllowance jika diperlukan di luar
     //       // setTotalAllowance(total);
-        }, [resultItem, form.watch()]);
-        const calculateTotal = (allowance: any, details: any) => {
-            if (allowance.type === 'total') {
-              const basePrice = parseFloat(details?.[0]?.request_price || 0);
-              return basePrice;
-            } else {
-              return details?.reduce(
-                (sum: number, item: any) => sum + parseFloat(item.request_price || 0),
-                0,
-              );
-            }
-          };
-    return (
-      <>
-        <table className='w-full text-sm mt-10'>
-          <thead>
-            <tr>
-              <th className='w-[50%]'>Item</th>
-              <th className='w-[50%]'>Sub Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {resultItem.map((allowance: any, index: number) => (
-              <tr key={allowance.id}>
-                <td>{allowance.name}</td>
-                <td className='flex justify-between pr-4'>
-                  <span>IDR</span>
-                  <span>{formatRupiah(allowance.subtotal)}</span>
-                </td>
-              </tr>
-            ))}
-            {other.length > 0 && (
-                <>
-                    {other.map((allowance: any, index: number) => (
-                        <tr key={index}>
-                            <td>Other Allowance</td>
-                            <td className='flex justify-between pr-4'>
-                                <span>IDR</span>
-                                <span>{allowance?.value ? formatRupiah(allowance.value) : '0'}</span>
-                            </td>
-                        </tr>
-                    ))}
-                </>
-            )}
-          </tbody>
-          <tfoot className='mt-4'>
-            <tr>
-              <td>
-                <i>Total Allowance</i>
-              </td>
+  }, [resultItem, form.watch()]);
+  const calculateTotal = (allowance: any, details: any) => {
+    if (allowance.type === 'total') {
+      const basePrice = parseFloat(details?.[0]?.request_price || 0);
+      return basePrice;
+    } else {
+      return details?.reduce(
+        (sum: number, item: any) => sum + parseFloat(item.request_price || 0),
+        0,
+      );
+    }
+  };
+  return (
+    <>
+      <table className='w-full text-sm mt-10'>
+        <thead>
+          <tr>
+            <th className='w-[50%]'>Item</th>
+            <th className='w-[50%]'>Sub Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {resultItem.map((allowance: any, index: number) => (
+            <tr key={allowance.id}>
+              <td>{allowance.name}</td>
               <td className='flex justify-between pr-4'>
                 <span>IDR</span>
-                <span>{formatRupiah(grandTotal)}</span>
+                <span>{formatRupiah(allowance.subtotal)}</span>
               </td>
             </tr>
-          </tfoot>
-        </table>
-      </>
-    );
-  }
+          ))}
+          {other.length > 0 && (
+            <>
+              {other.map((allowance: any, index: number) => (
+                <tr key={index}>
+                  <td>Other Allowance</td>
+                  <td className='flex justify-between pr-4'>
+                    <span>IDR</span>
+                    <span>{allowance?.value ? formatRupiah(allowance.value) : '0'}</span>
+                  </td>
+                </tr>
+              ))}
+            </>
+          )}
+        </tbody>
+        <tfoot className='mt-4'>
+          <tr>
+            <td>
+              <i>Total Allowance</i>
+            </td>
+            <td className='flex justify-between pr-4'>
+              <span>IDR</span>
+              <span>{formatRupiah(grandTotal)}</span>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </>
+  );
+}

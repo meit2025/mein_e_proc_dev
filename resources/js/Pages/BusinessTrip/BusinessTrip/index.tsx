@@ -98,6 +98,9 @@ export const Index = ({
             purchasingGroup={purchasingGroup}
             type={businessTripForm.type}
             id={businessTripForm.id}
+            successSubmit={(x: boolean) => {
+              if (x) window.location.reload();
+            }}
           />
         </CustomDialog>
       </div>

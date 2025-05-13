@@ -155,7 +155,7 @@ class CheckApproval
 
             // get approval
             $approval = ApprovalToUser::where('user_id', $getUserId->id);
-            if ($type == 'TRIP') {
+            if ($type == 'TRIP' || $type == 'TRIP_DECLARATION') {
                 $approval->where('is_bt', true);
             } else {
                 $approval->where('is_reim', true);
@@ -226,101 +226,64 @@ class CheckApproval
 
 
 
-            $ApprovalCondition = null;
 
-            // Base query
-            $baseQuery = ApprovalRoute::where('nominal', '<=', $request->value)
-                ->where('is_conditional', true)
-                ->orderBy('nominal', 'desc')
-                ->when($type === 'TRIP', fn($q) => $q->where('is_bt', true))
-                ->when($type !== 'TRIP', fn($q) => $q->where('is_reim', true));
-
-            if ($type === 'TRIP') {
-                // 1. nominal + is_restricted_area + day
-                $ApprovalCondition = (clone $baseQuery)
-                    ->when(
-                        $request->is_restricted_area,
-                        fn($query) =>
-                        $query->where('is_restricted_area', true)
-                    )
-                    ->where('day', '<=', $request->day ?? 0)
-                    ->first();
-
-                // 2. nominal + is_restricted_area
-                if (!$ApprovalCondition) {
-                    $ApprovalCondition = (clone $baseQuery)
-                        ->when(
-                            $request->is_restricted_area,
-                            fn($query) =>
-                            $query->where('is_restricted_area', true)
-                        )
-                        ->first();
-                }
-
-                // 3. nominal + day
-                if (!$ApprovalCondition) {
-                    $ApprovalCondition = (clone $baseQuery)
-                        ->where('day', $request->day)
-                        ->first();
-                }
-
-                // 4. nominal only
-                if (!$ApprovalCondition) {
-                    $ApprovalCondition = (clone $baseQuery)->first();
-                }
-
-                // 5. day only
-                if (!$ApprovalCondition) {
-                    $ApprovalCondition = ApprovalRoute::where('is_conditional', true)
-                        ->where('day', $request->day)
-                        ->where('is_bt', true)
-                        ->orderBy('nominal', 'desc')
-                        ->first();
-                }
-
-                // 6. is_restricted_area only
-                if (!$ApprovalCondition) {
-                    $ApprovalCondition = ApprovalRoute::where('is_conditional', true)
-                        ->when(
-                            $request->is_restricted_area,
-                            fn($q) =>
-                            $q->where('is_restricted_area', true)
-                        )
-                        ->where('is_bt', true)
-                        ->orderBy('nominal', 'desc')
-                        ->first();
-                }
-
-                // 7. day + is_restricted_area only
-                if (!$ApprovalCondition) {
-                    $ApprovalCondition = ApprovalRoute::where('is_conditional', true)
-                        ->where('day', '<=', $request->day ?? 0)
-                        ->when(
-                            $request->is_restricted_area,
-                            fn($q) =>
-                            $q->where('is_restricted_area', true)
-                        )
-                        ->where('is_bt', true)
-                        ->orderBy('nominal', 'desc')
-                        ->first();
-                }
+            $baseQuery = ApprovalRoute::where('is_conditional', true);
+            if ($type == 'TRIP' || $type == 'TRIP_DECLARATION') {
+                $baseQuery->where('is_bt', true);
             } else {
-                // Jika bukan TRIP: hanya nominal only
-                $ApprovalCondition = $baseQuery->first();
+                $baseQuery->where('is_reim', true);
             }
 
+            // nominal approval
+            $ApprovalConditionNominal = $baseQuery->where('nominal', '<=', $request->value)
+                ->where('type_approval_conditional', 'nominal')->first();
 
-
-            if ($ApprovalCondition) {
+            if ($ApprovalConditionNominal) {
                 $getApprovalConditional = ApprovalRouteUsers::select('users.id', 'users.name', 'master_divisions.name as division_name')
                     ->join('users', 'approval_route_users.user_id', '=', 'users.id')
                     ->leftJoin('master_divisions', 'master_divisions.id', '=', 'users.division_id')
-                    ->where('approval_route_id', $ApprovalCondition->id)
+                    ->where('approval_route_id', $ApprovalConditionNominal->id)
                     ->orderBy('approval_route_users.id', 'asc')
                     ->get()->toArray();
 
                 $getApproval = array_merge($getApproval, $getApprovalConditional);
             }
+
+            if ($type == 'TRIP' || $type == 'TRIP_DECLARATION') {
+                // nominal day
+                $ApprovalConditionday = $baseQuery->where('day', '>=', $request->day)
+                    ->where('type_approval_conditional', 'day')->first();
+
+                if ($ApprovalConditionday) {
+                    $getApprovalDay = ApprovalRouteUsers::select('users.id', 'users.name', 'master_divisions.name as division_name')
+                        ->join('users', 'approval_route_users.user_id', '=', 'users.id')
+                        ->leftJoin('master_divisions', 'master_divisions.id', '=', 'users.division_id')
+                        ->where('approval_route_id', $ApprovalConditionday->id)
+                        ->orderBy('approval_route_users.id', 'asc')
+                        ->get()->toArray();
+
+                    $getApproval = array_merge($getApproval, $getApprovalDay);
+                }
+
+                // restricted_area
+                if ($request->is_restricted_area == 'true' || $request->is_restricted_area == true || $request->is_restricted_area == 1) {
+                    $ApprovalConditionarea = $baseQuery->where('is_restricted_area', '=', true)
+                        ->where('type_approval_conditional', 'restricted_area')->first();
+
+                    if ($ApprovalConditionarea) {
+                        $getApprovalarea = ApprovalRouteUsers::select('users.id', 'users.name', 'master_divisions.name as division_name')
+                            ->join('users', 'approval_route_users.user_id', '=', 'users.id')
+                            ->leftJoin('master_divisions', 'master_divisions.id', '=', 'users.division_id')
+                            ->where('approval_route_id', $ApprovalConditionarea->id)
+                            ->orderBy('approval_route_users.id', 'asc')
+                            ->get()->toArray();
+
+                        $getApproval = array_merge($getApproval, $getApprovalarea);
+                    }
+                }
+            }
+
+
 
             if ($save) {
                 // delete old approval
@@ -341,7 +304,6 @@ class CheckApproval
                     );
                 }
             }
-
 
             return [
                 'approval' => $getApproval,

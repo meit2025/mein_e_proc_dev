@@ -141,6 +141,12 @@ export const columns: GridColDef[] = [
 export const columnsItem: GridColDef[] = [
   { field: 'qty', headerName: 'QTY', width: 200, filterable: true },
   {
+    field: 'account_assignment_categories',
+    headerName: 'Account Assignment Categories',
+    width: 200,
+    filterable: false,
+  },
+  {
     field: 'unit_price',
     headerName: 'Unit Price ',
     width: 200,
@@ -164,12 +170,7 @@ export const columnsItem: GridColDef[] = [
       return formatRupiah(params.row.total_amount_conversion, false);
     },
   },
-  {
-    field: 'account_assignment_categories',
-    headerName: 'Account Assignment Categories',
-    width: 200,
-    filterable: false,
-  },
+
   {
     field: 'cost_center',
     headerName: 'Cost Center',
