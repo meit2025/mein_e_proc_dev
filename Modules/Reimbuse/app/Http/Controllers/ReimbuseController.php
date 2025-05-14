@@ -89,7 +89,7 @@ class ReimbuseController extends Controller
                     rg.code = r.group
                 WHERE
                     r.requester = '" . $nip . "'
-                    AND rg.status_id in (1,3,5)
+                    AND rg.status_id in (1,3,5,6)
                 GROUP BY
                     mtr.code
             ",
@@ -331,7 +331,7 @@ class ReimbuseController extends Controller
             ];
             $forms = $data['forms'];
 
-            $response = $this->reimbursementService->storeReimbursements($groupData, $forms, $data);
+            $response = $this->reimbursementService->storeReimbursements($groupData, $forms);
             if (isset($response['error'])) {
                 return $this->errorResponse($response['error']);
             }
@@ -355,6 +355,7 @@ class ReimbuseController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->all();
+        
         $groupData = [
             'groupId'       => $id,
             'remark'        => $data['remark_group'],
@@ -389,7 +390,7 @@ class ReimbuseController extends Controller
                     $join->on('pr.purchase_id', '=', 'rg.id')
                         ->where('pr.code_transaction', '=', 'REIM');
                 })
-                ->whereIn('rg.status_id', [1, 3, 5])
+                ->whereIn('rg.status_id', [1, 3, 5, 6])
                 ->where('reimburses.reimburse_type', $reimbuseTypeID);
 
             if ($for !== null) {
