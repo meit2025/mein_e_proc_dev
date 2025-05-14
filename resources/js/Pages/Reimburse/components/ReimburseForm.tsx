@@ -107,6 +107,8 @@ export const ReimburseForm: React.FC<Props> = ({
   const [isShow, setIsShow] = useState(false);
   const [isLoading, setLoading] = useState<boolean>(false);
   const [detailLimit, setDetailLimit] = useState<any[]>([]);
+  const [reimburseTypeCostRevise, setReimburseTypeCostRevise] = useState<any[]>([]);
+
 
   const [approvalRoute, setApprovalRoute] = useState({
     approvalRequest: [],
@@ -269,6 +271,8 @@ export const ReimburseForm: React.FC<Props> = ({
       form.setValue('remark_group', reimburseGroup.remark);
       form.setValue('cost_center', String(reimburseGroup.cost_center.id));
       form.setValue('requester', reimburseGroup.requester);
+      
+      // setReimburseTypeCostRevise(reimburseFormMapping);
 
       let formCounter = 0;
       for (const map of reimburseForms) {
