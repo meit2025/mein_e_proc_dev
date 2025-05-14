@@ -112,6 +112,7 @@ export const Index = ({
           update: `${roleAkses} update`,
           delete: `${roleAkses} delete`,
         }}
+        isClone={true}
         onCreate={openFormHandler}
         columns={columns}
         // onEdit={(value) => {

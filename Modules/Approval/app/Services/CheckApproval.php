@@ -251,19 +251,22 @@ class CheckApproval
 
             if ($type == 'TRIP' || $type == 'TRIP_DECLARATION') {
                 // nominal day
-                $ApprovalConditionday = $baseQuery->where('day', '>=', $request->day)
-                    ->where('type_approval_conditional', 'day')->first();
+                if ($request->day > 0) {
+                    $ApprovalConditionday = $baseQuery->where('day', '>=', $request->day)
+                        ->where('type_approval_conditional', 'day')->first();
 
-                if ($ApprovalConditionday) {
-                    $getApprovalDay = ApprovalRouteUsers::select('users.id', 'users.name', 'master_divisions.name as division_name')
-                        ->join('users', 'approval_route_users.user_id', '=', 'users.id')
-                        ->leftJoin('master_divisions', 'master_divisions.id', '=', 'users.division_id')
-                        ->where('approval_route_id', $ApprovalConditionday->id)
-                        ->orderBy('approval_route_users.id', 'asc')
-                        ->get()->toArray();
+                    if ($ApprovalConditionday) {
+                        $getApprovalDay = ApprovalRouteUsers::select('users.id', 'users.name', 'master_divisions.name as division_name')
+                            ->join('users', 'approval_route_users.user_id', '=', 'users.id')
+                            ->leftJoin('master_divisions', 'master_divisions.id', '=', 'users.division_id')
+                            ->where('approval_route_id', $ApprovalConditionday->id)
+                            ->orderBy('approval_route_users.id', 'asc')
+                            ->get()->toArray();
 
-                    $getApproval = array_merge($getApproval, $getApprovalDay);
+                        $getApproval = array_merge($getApproval, $getApprovalDay);
+                    }
                 }
+
 
                 // restricted_area
                 if ($request->is_restricted_area == 'true' || $request->is_restricted_area == true || $request->is_restricted_area == 1) {
@@ -283,7 +286,9 @@ class CheckApproval
                 }
             }
 
-
+            $getApproval = collect($getApproval)->unique(function ($item) {
+                return $item['id'];
+            })->values();
 
             if ($save) {
                 // delete old approval
@@ -293,7 +298,7 @@ class CheckApproval
                 foreach ($getApproval as $key =>  $approvalRoute) {
                     Approval::create(
                         [
-                            'user_id' => $approvalRoute['id'],
+                            'user_id' => $approvalRoute->id ?? $approvalRoute['id'],
                             'is_status' => false,
                             'message' => '',
                             'document_id' => $idDocument,
