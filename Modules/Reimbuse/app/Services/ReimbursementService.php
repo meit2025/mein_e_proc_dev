@@ -161,9 +161,9 @@ class ReimbursementService
                 if ($validator->fails()) {
                     return ['error' => $validator->errors()];
                 }
-                // $validatedData = $validator->validated();
-                $validatedData = ['short_text' => $form['short_text']]; // temporary update data only fiel short_text
-
+                $validatedData = $validator->validated();
+                // $validatedData['short_text'] = $form['short_text'];
+                
                 $reimburse = Reimburse::find($form['reimburseId']);
                 if ($reimburse) {
                     $reimburse->update($validatedData);
