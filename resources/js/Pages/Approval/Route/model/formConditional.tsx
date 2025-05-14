@@ -8,10 +8,6 @@ import FormSwitch from '@/components/Input/formSwitchCustom';
 export const FormConditional = () => {
   const { control, setValue, watch } = useFormContext();
 
-  useEffect(() => {
-    setValue('type_approval_conditional', 'nominal');
-  }, []);
-
   //   useEffect(() => {
   //     setValue('type_approval_conditional', 'nominal');
   //     setValue('day', 0);

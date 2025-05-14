@@ -119,6 +119,7 @@ class ApprovalController extends Controller
      */
     public function update(Request $request, $id)
     {
+
         // Cari ApprovalRoute yang akan di-update
         $approvalRoute = ApprovalRoute::findOrFail($id);
 
@@ -138,6 +139,7 @@ class ApprovalController extends Controller
         ]);
         $approvalRouteData['is_hr'] = $request->is_hr ?? false;
         $approvalRouteData['nominal'] = $request->is_conditional ? $request->nominal : 0;
+
         $approvalRoute->update($approvalRouteData);
 
         // Ambil array user_id dari request

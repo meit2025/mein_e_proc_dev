@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Modules\Approval\Models\SettingApproval;
 use Spatie\Permission\Models\Role as ModelsRole;
 
 class HandleInertiaRequests extends Middleware
@@ -39,6 +40,10 @@ class HandleInertiaRequests extends Middleware
 
         return array_merge(parent::share($request), [
             'csrf_token' => csrf_token(),
+            'auth.setting_export' => fn() => $request->user()
+                ? SettingApproval::where('key', 'send_sap')
+                ->where('is_active', 1)->first()?->value
+                : null,
             'auth.user' => fn() => $request->user()
                 ? $request->user()
                 : null,

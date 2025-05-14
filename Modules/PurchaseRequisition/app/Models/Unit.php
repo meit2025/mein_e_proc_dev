@@ -18,6 +18,7 @@ class Unit extends Model
         'cost_center',
         'material_group',
         'material_number',
+        'material_number_description',
         'uom',
         'qty',
         'unit_price',

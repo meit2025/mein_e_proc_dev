@@ -137,12 +137,24 @@ export const columns: GridColDef[] = [
     },
   },
 ];
-
+//
 export const columnsItem: GridColDef[] = [
   { field: 'qty', headerName: 'QTY', width: 200, filterable: true },
   {
     field: 'account_assignment_categories',
     headerName: 'Account Assignment Categories',
+    width: 200,
+    filterable: false,
+  },
+  {
+    field: 'material_number',
+    headerName: 'Material Number',
+    width: 200,
+    filterable: false,
+  },
+  {
+    field: 'material_number_description',
+    headerName: 'Material Number Description',
     width: 200,
     filterable: false,
   },
@@ -183,12 +195,7 @@ export const columnsItem: GridColDef[] = [
     width: 200,
     filterable: false,
   },
-  {
-    field: 'material_number',
-    headerName: 'Material Number',
-    width: 200,
-    filterable: false,
-  },
+
   {
     field: 'uom',
     headerName: 'UOM',

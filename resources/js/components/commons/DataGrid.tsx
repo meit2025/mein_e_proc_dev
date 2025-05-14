@@ -55,6 +55,7 @@ interface DataGridProps {
   onDetail?: (id: number) => Promise<void> | void;
   onClone?: (id: number) => Promise<void> | void;
   onCreate?: () => Promise<void> | void;
+  onSendSap?: () => Promise<void> | void;
   actionType?: string;
   buttonActionCustome?: ReactNode;
   tabelFooter?: ReactNode;
@@ -85,6 +86,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   onDetail,
   onCreate,
   onClone,
+  onSendSap,
   defaultSearch,
   actionType,
   buttonActionCustome,
@@ -118,7 +120,11 @@ const DataGridComponent: React.FC<DataGridProps> = ({
     onConfirm: async () => {},
   });
 
-  const { props } = usePage<{ auth: { permission: string[]; user: User } }>();
+  const { props } = usePage<{
+    auth: { permission: string[]; user: User; setting_export: string };
+  }>();
+
+  console.log('props', props.auth);
 
   const permissions = props.auth?.permission || [];
 
@@ -337,7 +343,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                     )}
                     {(onClone || url.clone) && (
                       <>
-                        {(params.row.status_id == '6' || isClone) && (
+                        {(params.row.status_id == '6' || isClone) && value === 0 && (
                           <Link
                             href={url.clone === '' ? '#' : `${url.clone}/${params.row.id}`}
                             onClick={(e) => {
@@ -527,6 +533,19 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                         style={{ marginBottom: '10px' }} // Add margin for spacing
                       >
                         Export TXT
+                      </Button>
+                    )}
+
+                    {props.auth.setting_export == props.auth?.user?.username && (
+                      <Button
+                        className='btn'
+                        variant='contained'
+                        onClick={() => onSendSap && onSendSap()}
+                        color='primary'
+                        startIcon={<i className='ki-filled ki-folder-down' />}
+                        style={{ marginBottom: '10px' }} // Add margin for spacing
+                      >
+                        Send TXT To Sap
                       </Button>
                     )}
 

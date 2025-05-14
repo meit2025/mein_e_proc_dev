@@ -185,6 +185,11 @@ const ArrayForm = ({
         currency_total = response.data.data;
       }
 
+      const dataMaterialDesc = dataMaterial.filter(
+        (item: any) => item.material_number === dataobj.item_material_number,
+      );
+      console.log('dataMaterialDesc', dataMaterialDesc);
+
       const newItem = {
         id: id,
         qty: dataobj.item_qty,
@@ -194,6 +199,7 @@ const ArrayForm = ({
         cost_center: dataobj.item_cost_center,
         material_group: dataobj.item_material_group,
         material_number: dataobj.item_material_number,
+        material_number_description: dataobj.item_material_number_description,
         uom: dataobj.item_uom,
         tax: dataobj.item_tax,
         short_text: dataobj.item_short_text,
@@ -260,6 +266,7 @@ const ArrayForm = ({
     setValue('item_is_cashAdvance', '');
     setValue('item_material_group', 'NTSVC');
     setValue('item_material_number', '');
+    setValue('item_material_number_description', '');
     setValue('item_order_number', '');
     setValue('item_qty', '');
     setValue('item_short_text', '');
@@ -284,6 +291,7 @@ const ArrayForm = ({
     setValue('item_id', id);
     setValue('item_material_group', data.material_group ?? '');
     setValue('item_material_number', data.material_number ?? '');
+    setValue('item_material_number_description', data.material_number_description ?? '');
     setValue('item_order_number', data.order_number ?? '');
     setValue('item_qty', data.qty ?? '0');
     setValue('item_short_text', data.short_text ?? '');
@@ -307,6 +315,7 @@ const ArrayForm = ({
       cost_center: data.cost_center ?? '',
       material_group: data.material_group ?? '',
       material_number: data.material_number ?? '',
+      material_number_description: data.material_number_description ?? '',
       uom: data.uom ?? '',
       tax: data.tax ?? '',
       short_text: data.short_text ?? '',
@@ -535,7 +544,7 @@ const ArrayForm = ({
                   search: search,
                   raw: true,
                 });
-              } else if (search.length == 0 && !isLabelMatch) {
+              } else if (search.length === 0 && !isLabelMatch) {
                 await getVendor(search, {
                   name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
                   id: 'id',
@@ -681,6 +690,9 @@ const ArrayForm = ({
               }}
               placeholder={'Material Number'}
               classNames='mt-2'
+              onChangeOutside={async (value: string, data: any) => {
+                setValue('item_material_number_description', data.label.split('-')[0]);
+              }}
             />
 
             <FormAutocomplete<any>

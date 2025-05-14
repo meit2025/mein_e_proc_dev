@@ -24,15 +24,11 @@ class ApprovalRoute extends Model
         'is_reim',
         'day',
         'is_restricted_area',
+        'type_approval_conditional'
     ];
 
     public function userApprovals()
     {
         return $this->hasMany(ApprovalRouteUsers::class);
     }
-
-    // protected static function newFactory(): ApprovalRouteFactory
-    // {
-    //     // return ApprovalRouteFactory::new();
-    // }
 }
