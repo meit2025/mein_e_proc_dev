@@ -8,12 +8,13 @@ import FormSwitch from '@/components/Input/formSwitchCustom';
 export const FormConditional = () => {
   const { control, setValue, watch } = useFormContext();
 
-  //   useEffect(() => {
-  //     setValue('type_approval_conditional', 'nominal');
-  //     setValue('day', 0);
-  //     setValue('nominal', 0);
-  //     setValue('is_restricted_area', false);
-  //   }, [watch('is_bt'), watch('is_conditional'), watch('type_approval_conditional')]);
+  useEffect(() => {
+    if (!watch('is_bt')) {
+      setValue('type_approval_conditional', 'nominal');
+      setValue('day', 0);
+      setValue('is_restricted_area', false);
+    }
+  }, [watch('is_bt')]);
 
   return (
     <>

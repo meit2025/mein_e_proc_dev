@@ -235,7 +235,7 @@ class CheckApproval
             }
 
             // nominal approval
-            $ApprovalConditionNominal = $baseQuery->where('nominal', '<=', $request->value)
+            $ApprovalConditionNominal = (clone $baseQuery)->where('nominal', '<=', $request->value)
                 ->where('type_approval_conditional', 'nominal')->first();
 
             if ($ApprovalConditionNominal) {
@@ -252,7 +252,7 @@ class CheckApproval
             if ($type == 'TRIP' || $type == 'TRIP_DECLARATION') {
                 // nominal day
                 if ($request->day) {
-                    $ApprovalConditionday = $baseQuery->where('day', '>=', $request->day)
+                    $ApprovalConditionday = (clone $baseQuery)->where('day', '<=', $request->day)
                         ->where('type_approval_conditional', 'day')->first();
 
                     if ($ApprovalConditionday) {
@@ -270,7 +270,7 @@ class CheckApproval
 
                 // restricted_area
                 if ($request->is_restricted_area == 'true' || $request->is_restricted_area == true || $request->is_restricted_area == 1) {
-                    $ApprovalConditionarea = $baseQuery->where('is_restricted_area', '=', true)
+                    $ApprovalConditionarea = (clone $baseQuery)->where('is_restricted_area', '=', true)
                         ->where('type_approval_conditional', 'restricted_area')->first();
 
                     if ($ApprovalConditionarea) {
