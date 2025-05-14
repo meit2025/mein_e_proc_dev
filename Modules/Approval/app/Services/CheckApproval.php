@@ -251,7 +251,7 @@ class CheckApproval
 
             if ($type == 'TRIP' || $type == 'TRIP_DECLARATION') {
                 // nominal day
-                if ($request->day > 0) {
+                if ($request->day) {
                     $ApprovalConditionday = $baseQuery->where('day', '>=', $request->day)
                         ->where('type_approval_conditional', 'day')->first();
 
