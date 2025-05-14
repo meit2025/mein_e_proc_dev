@@ -42,13 +42,21 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
 
       if (dataVendor === null || dataVendor === undefined) {
         setLoading(false);
-        showToast('Please Select Vendor Winner', 'error');
+        showToast('Please Select Propose Vendor', 'error');
         return;
       }
 
       const winnerUnit = dataVendor?.units || [];
-      const totalSum = winnerUnit.reduce((sum: number, item: any) => sum + item.total_amount, 0);
+      const totalSum = winnerUnit.reduce(
+        (sum: number, item: any) => sum + parseInt(item.total_amount),
+        0,
+      );
       setValue('total_all_amount', totalSum);
+
+      const highestAmount = winnerUnit.reduce((max: number, item: any) => {
+        return item.unit_price > max ? parseInt(item.unit_price) : max;
+      }, 0);
+      setValue('amount_max', highestAmount);
 
       if (getData.document_type === null || getData.document_type === undefined) {
         setLoading(false);
@@ -98,8 +106,9 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
         params: {
           document_type_id: getData.document_type,
           purchasing_group_id: getData.purchasing_groups,
-          value: totalSum,
+          value: getData.document_type === 'ZENT' ? highestAmount : totalSum,
           user_id: getData.user_id,
+          currency_from: getData.currency_from,
           type: 'PR',
           metode_approval: getData.metode_approval,
           chooses_approval_id: getData.chooses_approval_id,
@@ -171,7 +180,7 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
 
   return (
     <>
-      <div className='card card-grid h-full min-w-full p-4'>
+      <div className='h-full min-w-full p-4 card card-grid'>
         <Loading isLoading={loading} />
         <div className='card-body'>
           <div className='flex justify-start mt-4 mb-2'>

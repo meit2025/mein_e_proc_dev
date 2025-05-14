@@ -26,6 +26,8 @@ import { LIST_PAGE_SETTING_APPROVAL } from '@/endpoint/settingApproval/page';
 import { LIST_PAGE_MASTER_MATERIAL_GROUP } from '@/endpoint/materialGroup/page';
 import { LIST_PAGE_MASTER_UOM } from '@/endpoint/uom/page';
 import { LIST_PAGE_MASTER_PAJAK } from '@/endpoint/pajak/page';
+import { LIST_PAGE_MASTER_CURRENCY } from '@/endpoint/currency/page';
+import { LIST_PAGE_MASTER_EXCHANGERATE } from '@/endpoint/exchangeRate/page';
 import { LIST_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
 import { PAGE_REIMBURSE_TYPE } from '@/endpoint/reimburseType/page';
 import { PAGE_REIMBURSE, PAGE_MY_REIMBURSE } from '@/endpoint/reimburse/page';
@@ -41,9 +43,11 @@ import { LIST_PAGE_TRACKING_NUMBER_CHOOSE } from '@/endpoint/approvalTrackingNum
 import { LIST_PAGE_APPROVAL_CONDITIONAL_USER } from '@/endpoint/settingApprovalPrConditionalUser/page';
 import {
     PAGE_REPORT,
+    PAGE_REPORT_MY_REIMBURSE,
     PAGE_REPORT_BT_DEC,
     PAGE_REPORT_BT_OVERALL,
     PAGE_REPORT_BT_REQ,
+    PAGE_REPORT_BT_ATT,
     PAGE_REPORT_PURCHASE,
 } from '@/endpoint/report/page';
 
@@ -369,26 +373,26 @@ export const sidebarAdmin = () => [
                             'approval pr delete',
                         ],
                     },
-                    {
-                        name: 'Approval Conditional Route',
-                        route: LIST_PAGE_APPROVAL_CONDITIONAL_USER,
-                        role: [
-                            'approval conditional user create',
-                            'approval conditional user view',
-                            'approval conditional user update',
-                            'approval conditional user delete',
-                        ],
-                    },
-                    {
-                        name: 'Tracking Number Auto',
-                        route: LIST_PAGE_TRACKING_NUMBER_AUTO,
-                        role: [
-                            'tracking number auto create',
-                            'tracking number auto view',
-                            'tracking number auto update',
-                            'tracking number auto delete',
-                        ],
-                    },
+                    // {
+                    //     name: 'Approval Conditional Route',
+                    //     route: LIST_PAGE_APPROVAL_CONDITIONAL_USER,
+                    //     role: [
+                    //         'approval conditional user create',
+                    //         'approval conditional user view',
+                    //         'approval conditional user update',
+                    //         'approval conditional user delete',
+                    //     ],
+                    // },
+                    // {
+                    //     name: 'Tracking Number Auto',
+                    //     route: LIST_PAGE_TRACKING_NUMBER_AUTO,
+                    //     role: [
+                    //         'tracking number auto create',
+                    //         'tracking number auto view',
+                    //         'tracking number auto update',
+                    //         'tracking number auto delete',
+                    //     ],
+                    // },
                     {
                         name: 'Tracking Number Choose',
                         route: LIST_PAGE_TRACKING_NUMBER_CHOOSE,
@@ -472,6 +476,16 @@ export const sidebarAdmin = () => [
                             'department view',
                             'department update',
                             'department delete',
+                        ],
+                    },
+                    {
+                        name: 'User Grade',
+                        route: LIST_PAGE_BUSINESS_GRADE,
+                        role: [
+                            'master business trip grade create',
+                            'master business trip grade view',
+                            'master business trip grade update',
+                            'master business trip grade delete',
                         ],
                     },
                 ],
@@ -727,6 +741,14 @@ export const sidebarAdmin = () => [
                     'master pr tax view',
                     'master pr tax update',
                     'master pr tax delete',
+                    'master pr currency create',
+                    'master pr currency view',
+                    'master pr currency update',
+                    'master pr currency delete',
+                    'master pr exchange rate create',
+                    'master pr exchange rate view',
+                    'master pr exchange rate update',
+                    'master pr exchange rate delete',
                 ],
                 sub: [
                     {
@@ -739,16 +761,16 @@ export const sidebarAdmin = () => [
                             'master pr document type delete',
                         ],
                     },
-                    {
-                        name: 'Valuation Type',
-                        route: LIST_PAGE_MASTER_VALUATION_TYPE,
-                        role: [
-                            'master pr valuation type create',
-                            'master pr valuation type view',
-                            'master pr valuation type update',
-                            'master pr valuation type delete',
-                        ],
-                    },
+                    // {
+                    //     name: 'Valuation Type',
+                    //     route: LIST_PAGE_MASTER_VALUATION_TYPE,
+                    //     role: [
+                    //         'master pr valuation type create',
+                    //         'master pr valuation type view',
+                    //         'master pr valuation type update',
+                    //         'master pr valuation type delete',
+                    //     ],
+                    // },
                     {
                         name: 'Purchasing Groups',
                         route: LIST_PAGE_MASTER_PURCHASING_GROUP,
@@ -769,16 +791,16 @@ export const sidebarAdmin = () => [
                             'master pr account assignment category delete',
                         ],
                     },
-                    {
-                        name: 'Item Categories',
-                        route: LIST_PAGE_MASTER_ITEM_CATEGORY,
-                        role: [
-                            'master pr item category create',
-                            'master pr item category view',
-                            'master pr item category update',
-                            'master pr item category delete',
-                        ],
-                    },
+                    // {
+                    //     name: 'Item Categories',
+                    //     route: LIST_PAGE_MASTER_ITEM_CATEGORY,
+                    //     role: [
+                    //         'master pr item category create',
+                    //         'master pr item category view',
+                    //         'master pr item category update',
+                    //         'master pr item category delete',
+                    //     ],
+                    // },
                     {
                         name: 'Storage Locations',
                         route: LIST_PAGE_MASTER_STORAGE_LOCATION,
@@ -817,6 +839,26 @@ export const sidebarAdmin = () => [
                             'master pr tax view',
                             'master pr tax update',
                             'master pr tax delete',
+                        ],
+                    },
+                    {
+                        name: 'Currency',
+                        route: LIST_PAGE_MASTER_CURRENCY,
+                        role: [
+                            'master pr currency create',
+                            'master pr currency view',
+                            'master pr currency update',
+                            'master pr currency delete',
+                        ],
+                    },
+                    {
+                        name: 'Exhange Rate',
+                        route: LIST_PAGE_MASTER_EXCHANGERATE,
+                        role: [
+                            'master pr exchange rate create',
+                            'master pr exchange rate view',
+                            'master pr exchange rate update',
+                            'master pr exchange rate delete',
                         ],
                     },
                 ],
@@ -876,16 +918,6 @@ export const sidebarAdmin = () => [
                             'master business trip purpose type view',
                             'master business trip purpose type update',
                             'master business trip purpose type delete',
-                        ],
-                    },
-                    {
-                        name: 'Business Trip Grade',
-                        route: LIST_PAGE_BUSINESS_GRADE,
-                        role: [
-                            'master business trip grade create',
-                            'master business trip grade view',
-                            'master business trip grade update',
-                            'master business trip grade delete',
                         ],
                     },
                     {
@@ -952,9 +984,20 @@ export const sidebarAdmin = () => [
             {
                 title: 'Reimburse',
                 icon: 'ki-element-11',
-                route: PAGE_REPORT,
+                route: '/',
                 role: ['report reimburse view', 'report reimburse export'],
-                sub: [],
+                sub: [
+                    {
+                        name: 'Reimbursement Request',
+                        route: PAGE_REPORT,
+                        role: ['report reimburse view', 'report reimburse export'],
+                    },
+                    {
+                        name: 'My Reimbursement',
+                        route: PAGE_REPORT_MY_REIMBURSE,
+                        role: ['report reimburse view', 'report reimburse export'],
+                    },
+                ],
             },
 
             {
@@ -972,6 +1015,14 @@ export const sidebarAdmin = () => [
                 ],
                 sub: [
                     {
+                        name: 'Business Trip Overall',
+                        route: PAGE_REPORT_BT_OVERALL,
+                        role: [
+                            'report business trip overall view',
+                            'report business trip overall export',
+                        ],
+                    },
+                    {
                         name: 'Business Trip Request',
                         route: PAGE_REPORT_BT_REQ,
                         role: ['report business trip request view', 'report business trip request export'],
@@ -985,11 +1036,11 @@ export const sidebarAdmin = () => [
                         ],
                     },
                     {
-                        name: 'Business Trip Overall',
-                        route: PAGE_REPORT_BT_OVERALL,
+                        name: 'Business Trip Attendance',
+                        route: PAGE_REPORT_BT_ATT,
                         role: [
-                            'report business trip overall view',
-                            'report business trip overall export',
+                            'report business trip attendance view',
+                            'report business trip attendance export',
                         ],
                     },
                 ],

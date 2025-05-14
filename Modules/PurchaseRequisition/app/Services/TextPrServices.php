@@ -45,6 +45,7 @@ class TextPrServices
 
     private function preparePurchaseRequisitionData($pr)
     {
+        $pg =  explode("-", $pr->purchasing_group);
         return [
             'code_transaction' => $pr->code_transaction, // code_transaction
             'purchase_requisition_number' => $pr->purchase_requisition_number, // banfn
@@ -55,7 +56,7 @@ class TextPrServices
             'document_type' => $pr->document_type, //bsart
             'valuation_type' => $pr->valuation_type, //bwtar
             'is_closed' => $pr->is_closed, // ebakz
-            'purchasing_group' => $pr->purchasing_group, // perlu input // ekgrp
+            'purchasing_group' => count($pg) > 0 ? $pg[0] : '', // perlu input // ekgrp
             'purchasing_organization' => $pr->purchasing_organization, // ekorg
             'account_assignment_category' => $pr->account_assignment_category, // knttp
             'item_delivery_date' => $pr->item_delivery_date, // lfdat
@@ -66,7 +67,7 @@ class TextPrServices
             'unit_of_measure' => $pr->unit_of_measure, // meins
             'quantity' => $pr->quantity, // menge
             'balance' => $pr->balance, // NILAI NYA//netpr
-            'waers' => 'IDR', // MATA UANG
+            'waers' => $pr->currency ?? 'IDR', // MATA UANG
             'tax_code' => $pr->tax_code, // mwskz
             'item_category' => $pr->item_category, // pstyp
             'short_text' => $pr->short_text, // txz01
@@ -100,7 +101,7 @@ class TextPrServices
             'code_transaction' => $ca->code_transaction,
             'belnr' => $ca->belnr, // belnr
             'company_code' => $ca->company_code, // bukrs
-            'gjahr' =>  '', // gjahr ini year
+            'gjahr' =>  $ca->gjahr, // gjahr ini year
             'currency' => 'IDR', // waers
             'document_date' => $ca->document_date, // bldat
             'budat' => $ca->budat, // budat

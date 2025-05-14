@@ -76,6 +76,11 @@ const Attachment = ({ isDisabled }: { isDisabled?: boolean }) => {
               }
             }}
             classNames='flex items-center space-x-4'
+            note={
+              <p style={{ color: 'red' }}>
+                Please Upload file: Vendor Selection Form, Agreement , Quotation etc Here
+              </p>
+            }
           />
         )}
 

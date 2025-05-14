@@ -70,7 +70,10 @@ class DropdownMasterController extends Controller
 
     function dropdown(Request $request)
     {
-        $select = [$request->name . ' as label', $request->id . ' as value'];
+        $select = [
+            $request->raw == 'true' ? DB::raw($request->name . ' as label') : $request->name . ' as label',
+            $request->id . ' as value'
+        ];
 
         if (!$request->groupBy) {
             $select[] = '*';
@@ -114,24 +117,27 @@ class DropdownMasterController extends Controller
 
         if ($request->declaration == 'true') {
             $inBusinessTripRequest = BusinessTrip::where('type', 'declaration')
-            ->where(function($query) {
-                $query->where('created_by', Auth::user()->id)
-                      ->orWhere('request_for', Auth::user()->id);
-            })
-            ->whereNotIn('status_id',[2,4])
-            ->pluck('parent_id')
-            ->toArray();
+                ->where(function ($query) {
+                    $query->where('created_by', Auth::user()->id)
+                        ->orWhere('request_for', Auth::user()->id);
+                })
+                ->whereNotIn('status_id', [2, 4])
+                ->pluck('parent_id')
+                ->toArray();
             $data = $data->whereNull('deleted_at')
-                        ->where(function($query) {
-                            $query->where('created_by', Auth::user()->id)
-                                ->orWhere('request_for', Auth::user()->id);
-                        })
-                        ->where('status_id', 3)
-                        ->whereNotIn('id', $inBusinessTripRequest);
+                ->where(function ($query) {
+                    $query->where('created_by', Auth::user()->id)
+                        ->orWhere('request_for', Auth::user()->id);
+                })
+                ->where('status_id', 3)
+                ->whereNotIn('id', $inBusinessTripRequest);
             // if (Auth::user()->is_admin == "0") {
             //     $data = $data->where('created_by', Auth::user()->id);
             // }
         }
+
+        // get opsi untuk list yang memiliki value, karena kondisi list opsi terdapat limit ada kemungkinan list opsi diluar limit sehingga dropdown blank
+        if ($request->hasValue) $data = $data->orWhere($request->hasValueKey, $request->hasValue);
 
         if ($request->softDelete == 'true') {
             $data = $data->whereNull('deleted_at');

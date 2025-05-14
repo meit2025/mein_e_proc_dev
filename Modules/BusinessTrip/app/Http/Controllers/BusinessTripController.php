@@ -199,6 +199,8 @@ class BusinessTripController extends Controller
                     'date' => $row->date,
                     'start_time' => $row->start_time,
                     'end_time' => $row->end_time,
+                    'start_date' => date('d-m-Y', strtotime($row->start_date)),
+                    'end_date' => date('d-m-Y', strtotime($row->end_date)),
                     'shift_code' => $row->shift_code,
                     'shift_start' => $row->shift_start,
                     'shift_end' => $row->shift_end,
@@ -456,6 +458,8 @@ class BusinessTripController extends Controller
                         'shift_end' => $destination['shift_end'],
                         'start_time' => $destination['start_time'],
                         'end_time' => $destination['end_time'],
+                        'start_date' => date('Y-m-d', strtotime($destination['start_date'])),
+                        'end_date' => date('Y-m-d', strtotime($destination['end_date'])),
                     ]);
                 }
                 foreach ($data_destination['allowances'] as $key => $allowance) {
@@ -546,6 +550,7 @@ class BusinessTripController extends Controller
 
             $purposeRelations = $map->purposeType ? $map->purposeType->name : ''; // Assuming 'name' is the field
             $status = $map->status->name;
+            // dd($map->purchaseRequisitions()?->first()?->purchase_requisition_number);
             // if ($map->status->name == 'Reject To :name') {
             //     $name_reject = $map->approval->where('status','Rejected')->first()?->user?->name;
             //     $status = str_replace(':name',$name_reject,$status);
@@ -565,6 +570,8 @@ class BusinessTripController extends Controller
                 'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array
                 'total_destination' => $map->total_destination, // You can join multiple relations here if it's an array
                 'created_at' => date('d/m/Y', strtotime($map->created_at)),
+                'pr_number' => $map->purchaseRequisitions()?->first()?->purchase_requisition_number ?? '-',
+                'status_pr_number' => $map->purchaseRequisitions()?->first()?->status ?? '-',
             ];
         });
 
@@ -657,6 +664,8 @@ class BusinessTripController extends Controller
                     'date' => $detail->date,
                     'start_time' => $detail->start_time,
                     'end_time' => $detail->end_time,
+                    'start_date' => $detail->start_date,
+                    'end_date' => $detail->end_date,
                     'shift_code' => $detail->shift_code,
                     'shift_start' => $detail->shift_start,
                     'shift_end' => $detail->shift_end,
@@ -766,6 +775,8 @@ class BusinessTripController extends Controller
                     'date' => date('d-m-Y', strtotime($detail->date)),
                     'start_time' => $detail->start_time,
                     'end_time' => $detail->end_time,
+                    'start_date' => date('d/m/Y', strtotime($detail->start_date)),
+                    'end_date' => date('d/m/Y', strtotime($detail->end_date)),
                     'shift_code' => $detail->shift_code,
                     'shift_start' => $detail->shift_start,
                     'shift_end' => $detail->shift_end,
@@ -872,43 +883,20 @@ class BusinessTripController extends Controller
     function cloneStore(Request $request, $id)
     {
         try {
-            DB::beginTransaction();
-            $yearMonth = now()->format('Y-m'); // Format tahun dan bulan
-            $prefix = "ODR-{$yearMonth}-"; // Prefix untuk request number
+            $businessTrip = BusinessTrip::find($id);
+            $getCostCenter = MasterCostCenter::whereRaw("ltrim(cost_center, '0') = ?", [$request->cost_center_id])->first();
 
-            // Cari nomor urut terakhir berdasarkan prefix dan type
-            $latestOrder = BusinessTrip::where('request_no', 'like', "$prefix%")
-                ->where('type', 'request') // Filter berdasarkan tipe
-                ->latest('id') // Urutkan berdasarkan ID terbaru
-                ->first();
-
-            // Ambil nomor urut terakhir dari kode, atau mulai dari 1 jika belum ada
-            $sequence = $latestOrder
-                ? (int)substr($latestOrder->request_no, strlen($prefix)) + 1
-                : 1;
-
-            // Format menjadi angka 8 digit (misalnya 00000001, 00000002, dst.)
-            $sequence = str_pad($sequence, 8, '0', STR_PAD_LEFT);
-
-            // Gabungkan prefix dan nomor urut
-            $requestNo = $prefix . $sequence;
-
-            $getCostCenter = MasterCostCenter::where('cost_center', $request->cost_center_id)->first();
-
-            $businessTrip = BusinessTrip::create([
-                'request_no' => $requestNo,
+            $businessTrip->update([
                 'purpose_type_id' => $request->purpose_type_id,
-                'request_for' => $request->request_for,
-                'cost_center_id' => $getCostCenter->id,
+                'cost_center_id' => $getCostCenter->id ?? null,
                 'remarks' => $request->remark,
                 'total_destination' => $request->total_destination,
-                'created_by' => auth()->user()->id,
+                'created_by' => Auth::user()->id,
                 'type' => 'request',
                 'cash_advance' => $request->cash_advance == "true" ? 1 : 0,
-                'reference_number' => $requestNo,
                 'total_percent' => $request->cash_advance == "true" ? $request->total_percent : null,
                 'total_cash_advance' => $request->cash_advance == "true" ? str_replace('.', '', $request->total_cash_advance) : null,
-                'clone_id' => $id
+                'status_id' => 1,
             ]);
 
             if ($request->attachment != null) {
@@ -929,34 +917,11 @@ class BusinessTripController extends Controller
                 }
             }
 
-            if ($request->file_existing != null) {
-                foreach ($request->file_existing as $key => $attachment) {
-                    $decode = json_decode($attachment);
-
-                    $url = $decode->url;
-                    // return saveImageFromUrl($url);
-                    // Membuat instance Guzzle client
-                    $client = new Client();
-
-                    // Mengambil gambar dari URL
-                    $response = $client->get($url);
-                    // Mendapatkan konten gambar
-                    $imageContent = $response->getBody()->getContents();
-
-                    // Menentukan nama file dan path penyimpanan
-                    $fileName = 'clone-' . time() . basename($url); // Mengambil nama file dari URL
-                    $path = 'business_trip/' . $fileName; // Menentukan path penyimpanan
-
-                    // Menyimpan gambar ke storage
-                    Storage::disk('public')->put($path, $imageContent);
-
-                    BusinessTripAttachment::create([
-                        'business_trip_id' => $businessTrip->id,
-                        'file_path' => 'business_trip', // Folder tempat file disimpan
-                        'file_name' => $fileName, // Nama file dengan timestamp
-                    ]);
-                }
-            }
+            // remove business trip Destination
+            BusinessTripDestination::where('business_trip_id', $businessTrip->id)->delete();
+            BusinessTripDetailAttedance::where('business_trip_id', $businessTrip->id)->delete();
+            BusinessTripDetailDestinationTotal::where('business_trip_id', $businessTrip->id)->delete();
+            BusinessTripDetailDestinationDayTotal::where('business_trip_id', $businessTrip->id)->delete();
 
             foreach ($request->destinations as $key => $value) {
                 $data_destination = json_decode($value, true);
@@ -981,6 +946,8 @@ class BusinessTripController extends Controller
                         'shift_end' => $destination['shift_end'],
                         'start_time' => $destination['start_time'],
                         'end_time' => $destination['end_time'],
+                        'start_date' => date('Y-m-d', strtotime($destination['start_date'])),
+                        'end_date' => date('Y-m-d', strtotime($destination['end_date'])),
                     ]);
                 }
                 foreach ($data_destination['allowances'] as $key => $allowance) {
@@ -1009,11 +976,9 @@ class BusinessTripController extends Controller
                 }
             }
             $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP');
-            DB::commit();
-            // return $this->successResponse("Clone successfully");
         } catch (\Throwable $th) {
-            DB::rollBack();
-            return $this->errorResponse($th->getMessage());
+            //throw $th;
+            dd($th);
         }
     }
 
@@ -1024,7 +989,7 @@ class BusinessTripController extends Controller
         if ($request->search) {
             $data = $data->where('name', 'ilike', '%' . $request->search . '%')->orWhere('nip', 'ilike', '%' . $request->search . '%');
         }
-
+        if ($request->hasValue) $data = $data->orWhere($request->hasValueKey, $request->hasValue);
         $data = $data->limit(50)->get();
         return $this->successResponse($data);
     }

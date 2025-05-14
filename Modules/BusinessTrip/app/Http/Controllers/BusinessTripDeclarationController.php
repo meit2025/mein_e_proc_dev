@@ -143,11 +143,15 @@ class BusinessTripDeclarationController extends Controller
                     'date' => $row->date,
                     'start_time' => $row->start_time,
                     'end_time' => $row->end_time,
+                    'start_date' => $row->start_date,
+                    'end_date' => $row->end_date,
                     'shift_code' => $row->shift_code,
                     'shift_start' => $row->shift_start,
                     'shift_end' => $row->shift_end,
-                    'request_start_time' => '08:00',
-                    'request_end_time' => '17:00',
+                    'request_start_time' => $row->start_time,
+                    'request_end_time' => $row->end_time,
+                    'request_start_date' => $row->start_date,
+                    'request_end_date' => $row->end_date,
                 ];
             }
 
@@ -231,6 +235,22 @@ class BusinessTripDeclarationController extends Controller
 
             // $parentDestination['request_detail_allowance'][] = $request_detail_allowance;
             $parentRequestAllowanceByDestination[$parent->destination] = $request_detail_allowance;
+
+            $request_detail_attendance = [];
+            foreach ($parent->detailAttendance as $parentAttendance) {
+                $request_detail_attendance[] = [
+                    'date' => date('d-m-Y', strtotime($parentAttendance->date)),
+                    'start_time' => $parentAttendance->start_time,
+                    'end_time' => $parentAttendance->end_time,
+                    'shift_code' => $parentAttendance->shift_code,
+                    'shift_start' => $parentAttendance->shift_start,
+                    'shift_end' => $parentAttendance->shift_end,
+                    'start_date' => date('d-m-Y', strtotime($parentAttendance->start_date)),
+                    'end_date' => date('d-m-Y', strtotime($parentAttendance->end_date)),
+                ];
+            }
+
+            $parentRequestAttendanceByDestination[$parent->destination] = $request_detail_attendance;
         }
 
 
@@ -238,12 +258,14 @@ class BusinessTripDeclarationController extends Controller
             $detail_attendance = [];
             foreach ($destination->detailAttendance as $detail) {
                 $detail_attendance[] = [
-                    'date' => $detail->date,
+                    'date' => date('d-m-Y', strtotime($detail->date)),
                     'start_time' => $detail->start_time,
                     'end_time' => $detail->end_time,
                     'shift_code' => $detail->shift_code,
                     'shift_start' => $detail->shift_start,
                     'shift_end' => $detail->shift_end,
+                    'start_date' => date('d-m-Y', strtotime($detail->start_date)),
+                    'end_date' => date('d-m-Y', strtotime($detail->end_date)),
                 ];
             }
 
@@ -309,6 +331,7 @@ class BusinessTripDeclarationController extends Controller
             foreach ($request_detail_allowance as $detail) {
                 $total_request += $detail['total'];
             }
+            $business_trip_request_detail_attendance = $parentRequestAttendanceByDestination[$destination->destination] ?? [];
 
             $data['business_trip_destination'][] = [
                 'destination' => $destination->destination,
@@ -317,6 +340,7 @@ class BusinessTripDeclarationController extends Controller
                 'business_trip_end_date' => $destination->business_trip_end_date,
                 // 'other_allowance' => $destination->other_allowance,
                 'business_trip_detail_attendance' => $detail_attendance,
+                'business_trip_request_detail_attendance' => $business_trip_request_detail_attendance,
                 'standar_detail_allowance' => $standar_detail_allowance,
                 'request_detail_allowance' => $request_detail_allowance,
                 'declaration_detail_allowance' => $declaration_detail_allowance,
@@ -363,6 +387,7 @@ class BusinessTripDeclarationController extends Controller
         try {
             $businessTrip = BusinessTrip::find($id);
             $businessTrip->remarks = $request->remark;
+            $businessTrip->status_id = 1;
             $businessTrip->save();
 
             if ($request->file_existing != null) {
@@ -395,8 +420,7 @@ class BusinessTripDeclarationController extends Controller
                     ]);
                 }
             }
-
-            // return $this->successResponse("Updated successfully");
+            $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP_DECLARATION');
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
         }
@@ -467,6 +491,8 @@ class BusinessTripDeclarationController extends Controller
                     'code' => $map->status?->code
                 ],
                 'created_at' => date('d/m/Y', strtotime($map->created_at)),
+                'po_number' => $map->purchaseOrderDeclaration()?->first()?->purchasing_document_number ?? '-',
+                'status_po_number' => $map->purchaseOrderDeclaration()?->first()?->status ?? '-',
                 // 'purpose_type' => $purposeRelations, // You can join multiple relations here if it's an array
                 // 'total_destination' => $map->total_destination, // You can join multiple relations here if it's an array
             ];
@@ -567,8 +593,10 @@ class BusinessTripDeclarationController extends Controller
                         'shift_code' => $destination['shift_code'],
                         'shift_start' => $destination['shift_start'],
                         'shift_end' => $destination['shift_end'],
-                        'start_time' => $destination['request_start_time'],
-                        'end_time' => $destination['request_end_time'],
+                        'start_time' => $destination['start_time'],
+                        'end_time' => $destination['end_time'],
+                        'start_date' => date('Y-m-d', strtotime($destination['start_date'])),
+                        'end_date' => date('Y-m-d', strtotime($destination['end_date'])),
                     ]);
                 }
                 foreach ($data_destination['allowances'] as $key => $allowance) {

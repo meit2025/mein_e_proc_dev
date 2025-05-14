@@ -1,9 +1,10 @@
+/* eslint-disable eqeqeq */
 import axiosInstance from '@/axiosInstance'; // Pastikan mengimport axiosInstance
 import { useAlert } from '@/contexts/AlertContext';
 import { Link, usePage } from '@inertiajs/react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import { DataGrid, GridColDef, GridFilterModel, GridSortModel } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridFilterModel, GridFooter, GridSortModel } from '@mui/x-data-grid';
 import axios from 'axios';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { ConfirmationDeleteModal } from './ConfirmationDeleteModal';
@@ -54,11 +55,16 @@ interface DataGridProps {
   onDetail?: (id: number) => Promise<void> | void;
   onClone?: (id: number) => Promise<void> | void;
   onCreate?: () => Promise<void> | void;
+  onSendSap?: () => Promise<void> | void;
   actionType?: string;
   buttonActionCustome?: ReactNode;
+  tabelFooter?: ReactNode;
   deleteConfirmationText?: string;
   titleConfirmationText?: string;
   isHistory?: boolean;
+  isLoading?: boolean;
+  isClone?: boolean;
+  onRefresh?: () => Promise<void> | void;
 }
 
 const a11yProps = (index: number) => {
@@ -80,13 +86,17 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   onDetail,
   onCreate,
   onClone,
+  onSendSap,
   defaultSearch,
   actionType,
   buttonActionCustome,
   deleteConfirmationText,
   titleConfirmationText,
   isHistory = false,
+  isLoading = false,
+  isClone = false,
   role,
+  tabelFooter,
 }) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -110,7 +120,11 @@ const DataGridComponent: React.FC<DataGridProps> = ({
     onConfirm: async () => {},
   });
 
-  const { props } = usePage<{ auth: { permission: string[]; user: User } }>();
+  const { props } = usePage<{
+    auth: { permission: string[]; user: User; setting_export: string };
+  }>();
+
+  console.log('props', props.auth);
 
   const permissions = props.auth?.permission || [];
 
@@ -144,7 +158,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
         setLoading(false);
       }
     },
-    [url], // Dependensi di sini memastikan fungsi hanya berubah jika `url` berubah
+    [defaultSearch, sortModel, filterModel, search, value, paginationModel],
   );
 
   useEffect(() => {
@@ -230,18 +244,18 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                 {actionType === 'dropdown' ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <ShacdnButton variant='ghost' className='h-8 w-8 p-0'>
+                      <ShacdnButton variant='ghost' className='w-8 h-8 p-0'>
                         <span className='sr-only'>...</span>
-                        <DotsHorizontalIcon className='h-4 w-4' />
+                        <DotsHorizontalIcon className='w-4 h-4' />
                       </ShacdnButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end'>
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      {(onEdit || url.editUrl) && value === 0 && (
+                      {(onEdit || url.editUrl) && value === 0 && params.row.status_id === '6' && (
                         <>
                           {(!role || permissions.includes(role?.update ?? '')) && (
                             <DropdownMenuItem onClick={() => onEdit && onEdit(params.row.id)}>
-                              <span className='flex items-center text-sm space-x-2'>
+                              <span className='flex items-center space-x-2 text-sm'>
                                 <span>Edit</span>
                                 <Edit size={14} />
                               </span>
@@ -271,7 +285,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                                 })
                               }
                             >
-                              <span className='flex items-center  text-sm space-x-2'>
+                              <span className='flex items-center space-x-2 text-sm'>
                                 <span>Delete</span>
                                 <Trash2Icon size={14} />
                               </span>
@@ -322,14 +336,14 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                             }}
                             alt='detail'
                           >
-                            <i className=' ki-duotone ki-size text-info text-2xl'></i>
+                            <i className='text-2xl ki-duotone ki-size text-info'></i>
                           </Link>
                         )}
                       </>
                     )}
                     {(onClone || url.clone) && (
                       <>
-                        {(!role || permissions.includes(role?.create ?? '')) && value === 0 && (
+                        {(params.row.status_id == '6' || isClone) && value === 0 && (
                           <Link
                             href={url.clone === '' ? '#' : `${url.clone}/${params.row.id}`}
                             onClick={(e) => {
@@ -340,7 +354,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                             }}
                             alt='detail'
                           >
-                            <i className=' ki-filled ki-copy text-warning text-2xl'></i>
+                            <i className='text-2xl ki-filled ki-copy text-warning'></i>
                           </Link>
                         )}
                       </>
@@ -359,7 +373,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                             }}
                             alt='edit'
                           >
-                            <i className=' ki-duotone ki-notepad-edit text-success text-2xl'></i>
+                            <i className='text-2xl ki-duotone ki-notepad-edit text-success'></i>
                           </Link>
                         )}
                       </>
@@ -368,8 +382,22 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                     {(url.deleteUrl || onDelete) && value === 0 && (
                       <>
                         {(!role || permissions.includes(role?.delete ?? '')) && (
-                          <Link href={''} onClick={() => handleDelete(params.row.id)} alt='delete'>
-                            <i className=' ki-duotone ki-trash-square text-danger text-2xl'></i>
+                          <Link
+                            href={''}
+                            onClick={(e) => {
+                              e.preventDefault(); // Mencegah perilaku default
+                              setAlertProps({
+                                isOpen: true,
+                                labelConfirmButton: 'Delete',
+                                message: 'Are you sure you want to delete this record?',
+                                onConfirm: async () => {
+                                  handleDelete(params.row.id);
+                                },
+                              });
+                            }}
+                            alt='delete'
+                          >
+                            <i className='text-2xl ki-duotone ki-trash-square text-danger'></i>
                           </Link>
                         )}
                       </>
@@ -384,7 +412,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                             setAlertProps({
                               isOpen: true,
                               labelConfirmButton: 'Cancel Approval',
-                              message: 'Are you sure you want to cancel this record?',
+                              message: 'Are you sure want to cancel this request?',
                               onConfirm: async () => {
                                 handleCancel(params.row.id);
                               },
@@ -392,7 +420,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                           }}
                           alt='delete'
                         >
-                          <i className='ki-filled ki-cross-square text-danger text-2xl'></i>
+                          <i className='text-2xl ki-filled ki-cross-square text-danger'></i>
                         </Link>
                       </>
                     ) : (
@@ -420,6 +448,15 @@ const DataGridComponent: React.FC<DataGridProps> = ({
     );
   };
 
+  const CustomFooter = (props: any) => {
+    return (
+      <>
+        {tabelFooter}
+        <GridFooter {...props} />
+      </>
+    );
+  };
+
   return (
     <Box>
       <Box sx={{ height: '45rem', width: '100%', overflowX: 'auto' }}>
@@ -433,9 +470,9 @@ const DataGridComponent: React.FC<DataGridProps> = ({
             </Box>
           )}
 
-          <div className='lg:col-span-2 mt-2'>
+          <div className='mt-2 lg:col-span-2'>
             <div className='grid'>
-              <div className='card card-grid h-full min-w-full'>
+              <div className='h-full min-w-full card card-grid'>
                 <div className='card-header'>
                   <h3 className='card-title'>
                     <div className='input input-sm max-w-48'>
@@ -499,16 +536,30 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                       </Button>
                     )}
 
+                    {props.auth.setting_export == props.auth?.user?.username && (
+                      <Button
+                        className='btn'
+                        variant='contained'
+                        onClick={() => onSendSap && onSendSap()}
+                        color='primary'
+                        startIcon={<i className='ki-filled ki-folder-down' />}
+                        style={{ marginBottom: '10px' }} // Add margin for spacing
+                      >
+                        Send TXT To Sap
+                      </Button>
+                    )}
+
                     {onExportXls && (
                       <Button
                         className='btn'
                         variant='contained'
                         onClick={() => onExportXls(onStateFilter)}
                         color='primary'
+                        disabled={isLoading}
                         startIcon={<i className='ki-filled ki-folder-down' />}
                         style={{ marginBottom: '10px' }} // Add margin for spacing
                       >
-                        Export Excel
+                        {isLoading ? 'Downloading...' : 'Export to Excel'}
                       </Button>
                     )}
 
@@ -543,6 +594,9 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                         filterMode='server'
                         filterModel={filterModel}
                         onFilterModelChange={(model) => setFilterModel(model)}
+                        slots={{
+                          footer: CustomFooter,
+                        }}
                       />
                     </div>
                   </div>

@@ -19,16 +19,16 @@ class ApprovalRoute extends Model
         'hr_approval',
         'user_hr_id',
         'is_conditional',
-        'nominal'
+        'nominal',
+        'is_bt',
+        'is_reim',
+        'day',
+        'is_restricted_area',
+        'type_approval_conditional'
     ];
 
     public function userApprovals()
     {
         return $this->hasMany(ApprovalRouteUsers::class);
     }
-
-    // protected static function newFactory(): ApprovalRouteFactory
-    // {
-    //     // return ApprovalRouteFactory::new();
-    // }
 }

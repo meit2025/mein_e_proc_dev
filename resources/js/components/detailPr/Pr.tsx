@@ -32,7 +32,7 @@ const Pr: React.FC<PrProps> = (props) => {
         url={{
           url: GET_PR_SAP,
         }}
-        onExport={async () => {
+        onSendSap={async () => {
           await sendSap(); // This will work asynchronously when the onExport function is triggered
         }}
         labelFilter='search'

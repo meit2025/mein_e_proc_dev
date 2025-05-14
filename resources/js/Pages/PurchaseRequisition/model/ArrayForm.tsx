@@ -1,7 +1,8 @@
+/* eslint-disable quotes */
 import FormAutocomplete from '@/components/Input/formDropdown';
 import FormInput from '@/components/Input/formInput';
 import useDropdownOptions from '@/lib/getDropdown';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import FormSwitch from '@/components/Input/formSwitch';
@@ -10,6 +11,9 @@ import { DataGrid } from '@mui/x-data-grid';
 import { columnsItem } from './listModel';
 import { Link } from '@inertiajs/react';
 import { useAlert } from '@/contexts/AlertContext';
+import axiosInstance from '@/axiosInstance';
+import axios from 'axios';
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 
 const ArrayForm = ({
   dataIndex,
@@ -41,6 +45,8 @@ const ArrayForm = ({
   const watchAccountAssigment = useWatch({ name: 'item_account_assignment_categories' });
 
   const watchDocumentType = useWatch({ name: 'document_type' });
+  const item_material_group = useWatch({ name: 'item_material_group' });
+  const currency_from = useWatch({ name: 'currency_from' });
 
   useEffect(() => {
     getCostCenter('', {
@@ -51,11 +57,16 @@ const ArrayForm = ({
       isMapping: true,
     });
     getVendor('', {
-      name: 'name_one',
+      name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
       id: 'id',
       tabel: 'master_business_partners',
       hiddenZero: true,
-      isMapping: true,
+      isMapping: false,
+      raw: true,
+      hasValue: {
+        key: getValues(`vendors[${dataIndex}].vendor`) ? 'id' : '',
+        value: getValues(`vendors[${dataIndex}].vendor`) ?? '',
+      },
     });
     getMaterialGroup('', {
       name: 'material_group_desc',
@@ -95,6 +106,7 @@ const ArrayForm = ({
       hiddenZero: true,
       isMapping: true,
     });
+    handelGetMaterialNumber(item_material_group);
   }, []);
 
   useEffect(() => {
@@ -123,61 +135,125 @@ const ArrayForm = ({
     });
   };
   const handleClick = async () => {
-    const dataobj = getValues();
-    const id =
-      dataobj.item_id !== undefined && dataobj.item_id !== null && dataobj.item_id !== ''
-        ? dataobj.item_id
-        : `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
+    try {
+      const dataobj = getValues();
+      const requiredFields = {
+        item_qty: 'Qty',
+        item_unit_price: 'Unit Price',
+        item_account_assignment_categories: 'Account Assignment',
+        item_material_group: 'Grup Material',
+        item_material_number: 'Number Material',
+        item_uom: 'UOM',
+        item_tax: 'Tax',
+        item_short_text: 'Short Text',
+      };
 
-    const newItem = {
-      id: id,
-      qty: dataobj.item_qty,
-      unit_price: dataobj.item_unit_price,
-      total_amount: dataobj.item_qty * dataobj.item_unit_price,
-      account_assignment_categories: dataobj.item_account_assignment_categories,
-      cost_center: dataobj.item_cost_center,
-      material_group: dataobj.item_material_group,
-      material_number: dataobj.item_material_number,
-      uom: dataobj.item_uom,
-      tax: dataobj.item_tax,
-      short_text: dataobj.item_short_text,
-      order_number: dataobj.item_order_number,
-      asset_number: dataobj.item_asset_number,
-      sub_asset_number: dataobj.item_sub_asset_number,
-    };
-    console.log(dataobj.action, newItem);
-    console.log(dataobj.id, newItem);
-    const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
-    let updatedItems = [];
-    if (dataobj.action === 'edit') {
-      updatedItems = currentItems.map((item: any, index: any) =>
-        item.id === dataobj.indexEdit ? newItem : item,
+      // Cek data yang kosong
+      const missingFields = Object.entries(requiredFields)
+        .filter(([key]) => !dataobj[key])
+        .map(([_, label]) => label);
+
+      if (missingFields.length > 0) {
+        showToast(
+          `Harap lengkapi data berikut sebelum menambahkan item:\n- ${missingFields.join('\n- ')}`,
+          'error',
+        );
+        return;
+      }
+
+      const id =
+        dataobj.item_id !== undefined && dataobj.item_id !== null && dataobj.item_id !== ''
+          ? dataobj.item_id
+          : `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
+
+      // fetch currancy
+      let currency_total = 0;
+      if (dataobj.is_conversion_currency) {
+        const response = await axiosInstance.post(
+          '/currency-conversion',
+          {
+            from: dataobj.currency_from, // Mata uang asal
+            to: dataobj.currency_to, // Mata uang tujuan
+            amount: parseInt(dataobj.item_qty) * parseInt(dataobj.item_unit_price), // Jumlah yang dikonversi
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+        currency_total = response.data.data;
+      }
+
+      const dataMaterialDesc = dataMaterial.filter(
+        (item: any) => item.material_number === dataobj.item_material_number,
       );
-    } else {
-      updatedItems = [...currentItems, newItem];
+      console.log('dataMaterialDesc', dataMaterialDesc);
+
+      const newItem = {
+        id: id,
+        qty: dataobj.item_qty,
+        unit_price: dataobj.item_unit_price,
+        total_amount: dataobj.item_qty * dataobj.item_unit_price,
+        account_assignment_categories: dataobj.item_account_assignment_categories,
+        cost_center: dataobj.item_cost_center,
+        material_group: dataobj.item_material_group,
+        material_number: dataobj.item_material_number,
+        material_number_description: dataobj.item_material_number_description,
+        uom: dataobj.item_uom,
+        tax: dataobj.item_tax,
+        short_text: dataobj.item_short_text,
+        order_number: dataobj.item_order_number,
+        asset_number: dataobj.item_asset_number,
+        sub_asset_number: dataobj.item_sub_asset_number,
+        total_amount_conversion: currency_total,
+      };
+
+      const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
+      let updatedItems = [];
+      if (dataobj.action === 'edit') {
+        updatedItems = currentItems.map((item: any, index: any) =>
+          item.id === dataobj.indexEdit ? newItem : item,
+        );
+      } else {
+        updatedItems = [...currentItems, newItem];
+      }
+
+      // Simpan array baru ke React Hook Form state
+      setValue(`vendors[${dataIndex}].units`, updatedItems);
+      setValue('indexEdit', 0);
+      setValue('item_id', null);
+
+      const dataVendorArray = getValues('vendors').filter(
+        (item: any) => (item.winner || false) === true,
+      ); // get the vendor data
+
+      const dataVendor = dataVendorArray.length > 0 ? dataVendorArray[0] : null;
+
+      if (dataVendor !== null) {
+        const winnerUnit = dataVendor.units || [];
+
+        const totalSum = winnerUnit.reduce(
+          (sum: number, item: any) => sum + parseInt(item.total_amount),
+          0,
+        );
+        setValue('total_all_amount', totalSum);
+
+        const highestAmount = winnerUnit.reduce((max: number, item: any) => {
+          return item.unit_price > max ? parseInt(item.unit_price) : max;
+        }, 0);
+        setValue('amount_max', highestAmount);
+
+        const data = (parseInt(watch('cash_advance_purchases.dp')) / 100) * parseInt(totalSum);
+        setValue('cash_advance_purchases.nominal', data);
+      }
+
+      resetindex();
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        showToast(error.response.data.message, 'error');
+      }
     }
-
-    // Simpan array baru ke React Hook Form state
-    setValue(`vendors[${dataIndex}].units`, updatedItems);
-    setValue('indexEdit', 0);
-    setValue('item_id', null);
-
-    const dataVendorArray = getValues('vendors').filter(
-      (item: any) => (item.winner || false) === true,
-    ); // get the vendor data
-
-    const dataVendor = dataVendorArray.length > 0 ? dataVendorArray[0] : null;
-
-    if (dataVendor !== null) {
-      const winnerUnit = dataVendor.units || [];
-
-      const totalSum = winnerUnit.reduce((sum: number, item: any) => sum + item.total_amount, 0);
-      setValue('total_all_amount', totalSum);
-      const data = (parseInt(watch('cash_advance_purchases.dp')) / 100) * parseInt(totalSum);
-      setValue('cash_advance_purchases.nominal', data);
-    }
-
-    resetindex();
   };
 
   const resetindex = () => {
@@ -186,18 +262,19 @@ const ArrayForm = ({
     setValue('item_account_assignment_categories', '');
     setValue('item_asset_number', '');
     setValue('item_cost_center', '');
-
     setValue('item_id', '');
     setValue('item_is_cashAdvance', '');
-    setValue('item_material_group', '');
+    setValue('item_material_group', 'NTSVC');
     setValue('item_material_number', '');
+    setValue('item_material_number_description', '');
     setValue('item_order_number', '');
     setValue('item_qty', '');
     setValue('item_short_text', '');
     setValue('item_sub_asset_number', '');
-    setValue('item_tax', '');
+    setValue('item_tax', 'V0');
     setValue('item_unit_price', '');
-    setValue('item_uom', '');
+    setValue('item_uom', 'AU');
+    handelGetMaterialNumber('NTSVC');
   };
 
   const handelEdit = async (data: any, rowIndex: any) => {
@@ -214,6 +291,7 @@ const ArrayForm = ({
     setValue('item_id', id);
     setValue('item_material_group', data.material_group ?? '');
     setValue('item_material_number', data.material_number ?? '');
+    setValue('item_material_number_description', data.material_number_description ?? '');
     setValue('item_order_number', data.order_number ?? '');
     setValue('item_qty', data.qty ?? '0');
     setValue('item_short_text', data.short_text ?? '');
@@ -226,6 +304,8 @@ const ArrayForm = ({
   const handelCopy = async (data: any, rowIndex: any) => {
     const id = `random-generated-id-${Math.random().toString(36).substr(2, 9)}`;
     await handelGetMaterialNumber(data.material_group);
+    setValue(': currency_total,', data.uom ?? '');
+
     const newItem = {
       id: id,
       qty: data.qty ?? '0',
@@ -235,12 +315,14 @@ const ArrayForm = ({
       cost_center: data.cost_center ?? '',
       material_group: data.material_group ?? '',
       material_number: data.material_number ?? '',
+      material_number_description: data.material_number_description ?? '',
       uom: data.uom ?? '',
       tax: data.tax ?? '',
       short_text: data.short_text ?? '',
       order_number: data.order_number ?? '',
       asset_number: data.asset_number ?? '',
       sub_asset_number: data.sub_asset_number ?? '',
+      total_amount_conversion: data.total_amount_conversion ?? '',
     };
 
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
@@ -257,8 +339,17 @@ const ArrayForm = ({
     if (dataVendor !== null) {
       const winnerUnit = dataVendor.units || [];
 
-      const totalSum = winnerUnit.reduce((sum: number, item: any) => sum + item.total_amount, 0);
+      const totalSum = winnerUnit.reduce(
+        (sum: number, item: any) => sum + parseInt(item.total_amount),
+        0,
+      );
       setValue('total_all_amount', totalSum);
+
+      const highestAmount = winnerUnit.reduce((max: number, item: any) => {
+        return item.unit_price > max ? parseInt(item.unit_price) : max;
+      }, 0);
+      setValue('amount_max', highestAmount);
+
       const data = (parseInt(watch('cash_advance_purchases.dp')) / 100) * parseInt(totalSum);
       setValue('cash_advance_purchases.nominal', data);
     }
@@ -268,7 +359,6 @@ const ArrayForm = ({
 
   const handleDelete = (data: any, rowIndex: any) => {
     const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
-    console.log('currentItems', currentItems);
     const updatedItems = currentItems.filter((item: any, index: number) => item.id !== data.id);
     setValue(`vendors[${dataIndex}].units`, updatedItems);
   };
@@ -283,6 +373,54 @@ const ArrayForm = ({
 
     setValue(`vendors[${x}].units`, currentItems);
   };
+  useEffect(() => {
+    const fetchCurrencyConversion = async () => {
+      const dataobj = getValues();
+      const currentItems = getValues(`vendors[${dataIndex}].units`) || [];
+
+      if (!dataobj.is_conversion_currency) return; // Hanya eksekusi jika konversi diaktifkan
+
+      const updatedItems = await Promise.all(
+        currentItems.map(async (item: any) => {
+          let cleanUnitPrice = item.unit_price;
+          if (currency_from === 'IDR' || currency_from === 'JPY') {
+            cleanUnitPrice = item.unit_price.toString().split(/[.,]/)[0];
+          }
+          try {
+            const response = await axiosInstance.post(
+              '/currency-conversion',
+              {
+                from: dataobj.currency_from,
+                to: dataobj.currency_to,
+                amount: parseInt(item.qty) * parseInt(item.unit_price), // Hitung jumlah konversi
+              },
+              {
+                headers: { 'Content-Type': 'application/json' },
+              },
+            );
+
+            return {
+              ...item,
+              total_amount_conversion: response.data.data,
+              unit_price: cleanUnitPrice,
+              total_amount: parseInt(cleanUnitPrice) * parseInt(item.qty),
+            }; // Tambahkan hasil konversi ke item
+          } catch (error) {
+            return {
+              ...item,
+              total_amount_conversion: 0,
+              unit_price: parseInt(cleanUnitPrice),
+              total_amount: parseInt(cleanUnitPrice) * parseInt(item.qty),
+            }; // Jika gagal, isi dengan 0
+          }
+        }),
+      );
+
+      setValue(`vendors[${dataIndex}].units`, updatedItems); // Simpan kembali hasil konversi
+    };
+
+    fetchCurrencyConversion();
+  }, [currency_from]);
 
   const action = [
     {
@@ -307,7 +445,7 @@ const ArrayForm = ({
             }}
             href='#'
           >
-            <i className='ki-filled ki-copy text-warning text-2xl'></i>
+            <i className='text-2xl ki-filled ki-copy text-warning'></i>
           </Link>
           <Link
             type='button'
@@ -317,7 +455,7 @@ const ArrayForm = ({
             }}
             href='#'
           >
-            <i className=' ki-duotone ki-notepad-edit text-success text-2xl'></i>
+            <i className='text-2xl ki-duotone ki-notepad-edit text-success'></i>
           </Link>
           <Link
             type='button'
@@ -327,12 +465,36 @@ const ArrayForm = ({
             }}
             href='#'
           >
-            <i className=' ki-duotone ki-trash-square text-danger text-2xl'></i>
+            <i className='text-2xl ki-duotone ki-trash-square text-danger'></i>
           </Link>
         </div>
       ),
     },
   ];
+
+  const CustomFooter = () => {
+    const totalAmount = (dataArrayItem ?? []).reduce(
+      (sum: any, row: any) => parseInt(sum) + parseInt(row.total_amount),
+      0,
+    );
+    const totalAmountConversion = (dataArrayItem ?? []).reduce(
+      (sum: any, row: any) => parseInt(sum) + parseInt(row.total_amount_conversion),
+      0,
+    );
+
+    return (
+      <Box
+        sx={{ display: 'flex', justifyContent: 'flex-end', padding: '10px', background: '#f5f5f5' }}
+      >
+        <Typography sx={{ marginRight: '20px', fontWeight: 'bold' }}>
+          Total Amount: {formatRupiah(totalAmount, false)}
+        </Typography>
+        <Typography sx={{ fontWeight: 'bold' }}>
+          Total Amount Conversion: {formatRupiah(totalAmountConversion, false)}
+        </Typography>
+      </Box>
+    );
+  };
 
   return (
     <div>
@@ -357,7 +519,6 @@ const ArrayForm = ({
         classNames='mt-2'
         disabled={disable}
       />
-
       {watch(`vendors[${dataIndex}].type_vendor`) === 'existing' && (
         <>
           <FormAutocomplete<any[]>
@@ -371,6 +532,44 @@ const ArrayForm = ({
             placeholder={'Select Vendor'}
             classNames='mt-2'
             disabled={disable}
+            onSearch={async (search) => {
+              const isLabelMatch = dataVendor?.some((option) => option.label === search);
+              if (search.length > 0 && !isLabelMatch) {
+                await getVendor(search, {
+                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
+                  id: 'id',
+                  tabel: 'master_business_partners',
+                  hiddenZero: true,
+                  isMapping: false,
+                  search: search,
+                  raw: true,
+                });
+              } else if (search.length === 0 && !isLabelMatch) {
+                await getVendor(search, {
+                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
+                  id: 'id',
+                  tabel: 'master_business_partners',
+                  hiddenZero: true,
+                  isMapping: false,
+                  raw: true,
+                });
+              }
+            }}
+            onFocus={async () => {
+              const value = getValues(`vendors[${dataIndex}].vendor`);
+              await getVendor('', {
+                name: "name_one || ' - '  || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
+                id: 'id',
+                tabel: 'master_business_partners',
+                hiddenZero: true,
+                isMapping: false,
+                raw: true,
+                hasValue: {
+                  key: value ? 'id' : '',
+                  value: value ?? '',
+                },
+              });
+            }}
           />
 
           <FormSwitch
@@ -381,7 +580,6 @@ const ArrayForm = ({
           />
         </>
       )}
-
       {watch(`vendors[${dataIndex}].winner`) && (
         <FormInput
           fieldLabel={'Number Quotation'}
@@ -392,7 +590,6 @@ const ArrayForm = ({
           disabled={disable}
         />
       )}
-
       {watch(`vendors[${dataIndex}].type_vendor`) === 'new' && (
         <>
           <FormInput
@@ -405,9 +602,8 @@ const ArrayForm = ({
           />
         </>
       )}
-
       {!disable && (
-        <div className='card mt-2'>
+        <div className='mt-2 card'>
           <div className='card-header'>
             <p>item</p>
           </div>
@@ -427,6 +623,8 @@ const ArrayForm = ({
             />
 
             <FormInput
+              removeDecimal={true}
+              nameDecimal='currency_from'
               fieldLabel={'Unit Price'}
               fieldName={'item_unit_price'}
               isRequired={false}
@@ -492,6 +690,9 @@ const ArrayForm = ({
               }}
               placeholder={'Material Number'}
               classNames='mt-2'
+              onChangeOutside={async (value: string, data: any) => {
+                setValue('item_material_number_description', data.label.split('-')[0]);
+              }}
             />
 
             <FormAutocomplete<any>
@@ -581,7 +782,7 @@ const ArrayForm = ({
             <Button
               type='button'
               variant='contained'
-              className='bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-all'
+              className='px-6 py-2 text-white transition-all bg-blue-500 rounded hover:bg-blue-600'
               onClick={async () => await handleClick()}
             >
               Add Item
@@ -589,11 +790,10 @@ const ArrayForm = ({
           </div>
         </div>
       )}
-
       <Box sx={{ width: '100%', overflowX: 'auto', marginTop: '1rem' }}>
         <div className='lg:col-span-2'>
           <div className='grid'>
-            <div className='card card-grid h-full min-w-full'>
+            <div className='h-full min-w-full card card-grid'>
               <div className='card-body'>
                 <div data-datatable='true'>
                   <div className='scrollable-x-auto'>
@@ -604,6 +804,9 @@ const ArrayForm = ({
                       ]}
                       rows={dataArrayItem}
                       hideFooterPagination={true}
+                      slots={{
+                        footer: CustomFooter,
+                      }}
                     />
                   </div>
                 </div>
@@ -612,10 +815,9 @@ const ArrayForm = ({
           </div>
         </div>
       </Box>
-
       {Array.from({ length: tabCount }, (_, index) => (
         <>
-          {index !== dataIndex && (
+          {!disable && index !== dataIndex && (
             <Button
               key={index}
               type='button'
@@ -624,7 +826,7 @@ const ArrayForm = ({
                 marginTop: '1rem',
                 marginRight: '1rem',
               }}
-              className='bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-all'
+              className='px-6 py-2 text-white transition-all bg-blue-500 rounded hover:bg-blue-600'
               onClick={async () => await dataCopyToVendor(index)}
             >
               Copy To Vendor {index + 1}

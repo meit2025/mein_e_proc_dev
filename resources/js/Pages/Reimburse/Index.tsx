@@ -5,12 +5,9 @@ import {
   LIST_REIMBURSE,
   STORE_REIMBURSE,
   UPDATE_REIMBURSE,
-  CHECK_CLONE_VALIDATION_REIMBURSE
+  CHECK_CLONE_VALIDATION_REIMBURSE,
 } from '@/endpoint/reimburse/api';
-import {
-  PAGE_DETAIL_REIMBURSE,
-  CLONE_REIMBURSE
-} from '@/endpoint/reimburse/page';
+import { PAGE_DETAIL_REIMBURSE, CLONE_REIMBURSE } from '@/endpoint/reimburse/page';
 import { FormType } from '@/lib/utils';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import React, { ReactNode } from 'react';
@@ -18,7 +15,14 @@ import axiosInstance from '@/axiosInstance';
 import { AxiosError } from 'axios';
 import { useAlert } from '../../contexts/AlertContext';
 import { ReimburseForm } from './components/ReimburseForm';
-import { columns, CostCenter, Currency, PurchasingGroup, User, ReimburseFormType } from './model/listModel';
+import {
+  columns,
+  CostCenter,
+  Currency,
+  PurchasingGroup,
+  User,
+  ReimburseFormType,
+} from './model/listModel';
 
 interface Props {
   users: User[];
@@ -44,10 +48,13 @@ export const Index = ({
   currencies,
   currentUser,
   taxDefaultValue,
-  uomDefaultValue
+  uomDefaultValue,
 }: Props) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
-  const [formType, setFormType] = React.useState({
+  const [formType, setFormType] = React.useState<{
+    type: ReimburseFormType;
+    id: string | undefined;
+  }>({
     type: ReimburseFormType.create,
     id: undefined,
   });
@@ -56,12 +63,12 @@ export const Index = ({
   function openFormHandler() {
     setFormType({
       type: ReimburseFormType.create,
-      id: null,
+      id: undefined,
     });
     setOpenForm(!openForm);
   }
 
-  async function cloneFormHandler(id:string) {
+  async function cloneFormHandler(id: string) {
     try {
       const response = await axiosInstance.get(CHECK_CLONE_VALIDATION_REIMBURSE(id), {
         headers: {
@@ -74,8 +81,8 @@ export const Index = ({
         id: id,
       });
       setOpenForm(!openForm);
-    } catch (e) {
-      showToast(e?.response?.data?.message, 'error');
+    } catch (e: any) {
+      showToast(e.response?.data?.message || 'An error occurred', 'error');
     }
   }
 
@@ -90,8 +97,6 @@ export const Index = ({
           <ReimburseForm
             taxDefaultValue={taxDefaultValue}
             uomDefaultValue={uomDefaultValue}
-            users={users}
-            categories={categories}
             currencies={currencies}
             currentUser={currentUser}
             edit_url={DETAIL_REIMBURSE(formType.id)}
@@ -136,20 +141,20 @@ export const Index = ({
         role={roleConfig}
         onCreate={openFormHandler}
         columns={columns}
-        onEdit={(value) => {
-          setFormType({
-            type: ReimburseFormType.edit,
-            id: value.toString(),
-          });
-          setOpenForm(true);
-        }}
+        // onEdit={(value) => {
+        //   setFormType({
+        //     type: ReimburseFormType.edit,
+        //     id: value.toString(),
+        //   });
+        //   setOpenForm(true);
+        // }}
         onClone={(value) => {
-          cloneFormHandler(value.toString())
+          cloneFormHandler(value.toString());
         }}
         url={{
           url: LIST_REIMBURSE,
           detailUrl: PAGE_DETAIL_REIMBURSE,
-          clone: CLONE_REIMBURSE,
+          // clone: CLONE_REIMBURSE,
           cancelApproval: 'reim',
         }}
         labelFilter='search'

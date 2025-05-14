@@ -21,9 +21,21 @@ class BusinessTripDetailAttedance extends Model
         'shift_start',
         'start_time',
         'end_time',
+        'start_date',
+        'end_date',
         'date',
     ];
 
+    function BusinessTrip()
+    {
+        return $this->belongsTo(BusinessTrip::class, 'business_trip_id', 'id');
+    }
+
+    function businessTripDestination()
+    {
+        return $this->belongsTo(businessTripDestination::class, 'business_trip_destination_id', 'id');
+    }
+    
     function getStartTimeAttribute()
     {
         return date('H:i', strtotime($this->attributes['start_time']));

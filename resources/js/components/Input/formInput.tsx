@@ -20,6 +20,8 @@ interface FormInputProps {
   onChanges?: (data: any) => void;
   isRupiah?: boolean;
   note?: string;
+  removeDecimal?: boolean;
+  nameDecimal?: string;
 }
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -39,12 +41,16 @@ const FormInput: React.FC<FormInputProps> = ({
   lengthLabel = 40,
   isRupiah = false,
   note,
+  removeDecimal,
+  nameDecimal = '',
 }) => {
   const {
     control,
     formState: { errors },
     watch,
   } = useFormContext();
+
+  const currency = watch(nameDecimal);
 
   return (
     <div className='w-full mt-2'>
@@ -86,7 +92,8 @@ const FormInput: React.FC<FormInputProps> = ({
                 <input
                   {...restField} // Spread the remaining properties excluding onChange
                   onChange={(e) => {
-                    const value = e.target.value;
+                    let value = e.target.value;
+
                     if (
                       type === 'number' &&
                       maxLength !== undefined &&
@@ -94,8 +101,23 @@ const FormInput: React.FC<FormInputProps> = ({
                     ) {
                       return; // Prevent user from typing more than maxLength
                     }
-                    onChange(e); // Call the default onChange handler from react-hook-form
-                    if (onChanges) onChanges(e); // Also call custom onChanges if provided
+
+                    if (removeDecimal && (currency === 'IDR' || currency === 'JPY')) {
+                      value = value.replace(/[.,]/g, ''); // Hapus titik dan koma
+                      e.target.value = value; // Set ulang nilai input agar tidak menghilang
+                    }
+
+                    onChange({
+                      ...e,
+                      target: { ...e.target, value },
+                    });
+
+                    if (onChanges) {
+                      onChanges({
+                        ...e,
+                        target: { ...e.target, value },
+                      });
+                    }
                   }}
                   placeholder={placeholder}
                   type={type}
@@ -106,6 +128,10 @@ const FormInput: React.FC<FormInputProps> = ({
                   onKeyDown={(e) => {
                     if (type === 'number' && e.key === '-') {
                       e.preventDefault(); // Cegah pengguna mengetik "-" lebih dari sekali
+                    }
+
+                    if (removeDecimal && (currency === 'IDR' || currency === 'JPY')) {
+                      if (e.key === '.' || e.key === ',') e.preventDefault();
                     }
                   }}
                 />

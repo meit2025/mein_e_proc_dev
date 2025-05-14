@@ -3,9 +3,13 @@
 namespace Modules\Reimbuse\Services;
 
 use App\Jobs\SapJobs;
+use App\Jobs\SendNotification;
+use App\Mail\ChangeStatus;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Modules\Approval\Models\Approval as ApprovalModels;
 use Modules\Reimbuse\Models\Reimburse;
 use Modules\Reimbuse\Models\ReimburseGroup;
 use Modules\Reimbuse\Models\ReimburseProgress;
@@ -22,6 +26,7 @@ class ReimbursementService
 
     public function __construct(CheckApproval $approvalServices)
     {
+        date_default_timezone_set('Asia/Jakarta');
         $this->approvalServices = $approvalServices;
     }
     protected $validator_rule_group = [
@@ -31,17 +36,18 @@ class ReimbursementService
     ];
 
     protected $validator_rule_reimburse = [
-        'reimburse_type'        =>  'required|exists:master_type_reimburses,code',
-        'short_text'            =>  'nullable',
-        'balance'               =>  'required|numeric',
-        'item_delivery_data'    =>  'required|date',
-        'claim_date'            =>  'required|date',
-        'currency'              =>  'required|string|exists:currencies,code',
-        'for'                   =>  'required',
-        'desired_vendor'        =>  'required',
-        'type'                  =>  'required|in:Employee,Family',
-        'purchasing_group'      =>  'required|exists:purchasing_groups,id',
-        'tax_on_sales'          =>  'required|exists:pajaks,id',
+        'reimburse_type'                    =>  'required|exists:master_type_reimburses,code',
+        'short_text'                        =>  'nullable',
+        'balance'                           =>  'required|numeric',
+        'remaining_balance_when_request'    =>  'required|numeric',
+        'item_delivery_data'                =>  'required|date',
+        'claim_date'                        =>  'required|date',
+        'currency'                          =>  'required|string|exists:currencies,code',
+        'for'                               =>  'required',
+        'desired_vendor'                    =>  'required',
+        'type'                              =>  'required|in:Employee,Family',
+        'purchasing_group'                  =>  'required|exists:purchasing_groups,id',
+        'tax_on_sales'                      =>  'required|exists:pajaks,id',
     ];
 
     public function checkGroupStatus(string $groupCode): string
@@ -110,6 +116,17 @@ class ReimbursementService
             ];
             $this->approvalServices->Payment((object)$parseForApproval, true, $group->id, 'REIM');
 
+            // send notif email to approver
+            // $baseurl = env('APP_URL') .  '/reimburse/detail/' .  $group->id;
+            // $getApproval = ApprovalModels::where('document_id', $group->id)->where('document_name', 'REIM')->orderBy('id', 'ASC')->first();
+            // $getUserApproval = User::where('id', $getApproval->user_id)->first();
+            // if (!empty($getUserApproval)) {
+            //     $reimburseGroup = ReimburseGroup::with(['reimburses.reimburseType'])->find($group->id);
+            //     $reimburseGroup->notes = '';
+
+            //     Mail::to($getUserApproval->email)->send(new ChangeStatus($getUserApproval, 'Reimbursement', 'Approver', '', null, $reimburseGroup, null, $baseurl));
+            // }
+
             // $reim = new ReimburseServices();
             // $reim->processTextData($group->id);
 
@@ -128,9 +145,11 @@ class ReimbursementService
             DB::beginTransaction();
             $reimburseGroup = ReimburseGroup::find($groupData['groupId']);
             $reimburseGroup->remark         = $groupData['remark'];
-            // $reimburseGroup->cost_center    = $groupData['cost_center'];
-            // $reimburseGroup->requester      = $groupData['requester'];
+            $reimburseGroup->status_id         = 1;
+            $reimburseGroup->cost_center    = $groupData['cost_center'];
             $reimburseGroup->save();
+
+            $balance = 0;
 
             foreach ($forms as $form) {
                 if (!isset($form['for'])) $form['for'] = $groupData['requester'];
@@ -142,9 +161,9 @@ class ReimbursementService
                 if ($validator->fails()) {
                     return ['error' => $validator->errors()];
                 }
-                // $validatedData = $validator->validated();
-                $validatedData = ['short_text' => $form['short_text']]; // temporary update data only fiel short_text
-
+                $validatedData = $validator->validated();
+                // $validatedData['short_text'] = $form['short_text'];
+                
                 $reimburse = Reimburse::find($form['reimburseId']);
                 if ($reimburse) {
                     $reimburse->update($validatedData);
@@ -164,9 +183,15 @@ class ReimbursementService
                         }
                     }
                 }
+                $balance += $form['balance'];
             }
 
             DB::commit();
+            $parseForApproval = [
+                'requester' => $reimburseGroup->requester,
+                'value'     => $balance
+            ];
+            $this->approvalServices->Payment((object)$parseForApproval, true, $reimburseGroup->id, 'REIM');
             return "Reimbursements updated successfully.";
         } catch (\Exception $e) {
             DB::rollBack();

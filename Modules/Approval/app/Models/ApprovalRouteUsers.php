@@ -17,6 +17,8 @@ class ApprovalRouteUsers extends Model
     protected $fillable = [
         'user_id',
         'approval_route_id',
+        'is_bt',
+        'is_reim',
     ];
 
     public function approvalRoute()

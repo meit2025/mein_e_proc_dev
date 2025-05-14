@@ -13,6 +13,7 @@ export interface User {
   role_id: string;
   is_approval: boolean;
   is_admin: string;
+  username: string;
 }
 
 export interface Auth {

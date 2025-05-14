@@ -1,0 +1,68 @@
+import { GridColDef } from '@mui/x-data-grid';
+import { CustomStatus } from '@/components/commons/CustomStatus';
+
+export const columns: GridColDef[] = [
+    { field: 'employee_no', headerName: 'Employee No', width: 200, filterable: true },
+    { field: 'employee_name', headerName: 'Employee Name', width: 400, filterable: true },
+    { field: 'in', headerName: 'Attendance In', width: 400, filterable: true },
+    { field: 'out', headerName: 'Attendance Out', width: 400, filterable: true },
+
+];
+
+// Fungsi untuk menangani aksi cetak detail
+const handlePrintDetail = (id: string) => {
+    const printUrl = `/business-trip/print/${id}`;
+    window.open(printUrl, '_blank');
+};
+
+export interface CurrencyModel {
+    code: string;
+    name: string;
+}
+
+export interface BusinessTripModel {
+    request_no: string;
+    id: string;
+}
+
+export interface UserModel {
+    name: string;
+    id: string;
+    nip: string;
+}
+
+export interface AllowanceItemModel {
+    id: string;
+    code: string;
+    name: string;
+    purpose_type?: [];
+    currency_id: string;
+    request_value: string;
+    formula: string;
+    type: string;
+    max_value?: string;
+    fixed_value?: string;
+    allowance_category_id: number;
+}
+
+export interface Pajak {
+    mwszkz: string;
+    id: string;
+}
+
+export interface Costcenter {
+    cost_center: string;
+    controlling_name: string;
+    id: string;
+}
+
+export interface PurchasingGroup {
+    purchasing_group: string;
+    id: string;
+}
+
+export enum BusinessTripType {
+    create,
+    edit,
+    update,
+}

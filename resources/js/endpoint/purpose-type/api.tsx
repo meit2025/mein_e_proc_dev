@@ -4,6 +4,7 @@ export const GET_LIST_PURPOSE_TYPE = `${ROUTE_API}/list`;
 export const CREATE_API_PURPOSE_TYPE = `${ROUTE_API}/create`;
 export const EDIT_API = `${ROUTE_API}/update`;
 export const GET_DETAIL_PURPOSE_TYPE = (id: any) => `${ROUTE_API}/detail/${id}`;
+export const CHECK_PURPOSETYPE_UNIQUE = (id: any) => `${ROUTE_API}/check-unique-code/${id}`;
 export const UPDATE_PURPOSE_TYPE = (id: any) => `${ROUTE_API}/update/${id}`;
 export const DELETE_API_PURPOSE_TYPE = `${ROUTE_API}/delete`;
 export const GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE = (id: any, userid: any) =>

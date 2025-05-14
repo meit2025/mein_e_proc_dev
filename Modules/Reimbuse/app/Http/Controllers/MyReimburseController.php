@@ -47,7 +47,16 @@ class MyReimburseController extends Controller
                         ->with('reimburseGroup');
                 }
             ])
-            ->select('master_type_reimburses.*')
+            ->select('master_type_reimburses.*', 
+                DB::raw('
+                CASE
+                    WHEN 
+                    MIN(mtrua_grade_relation_exist.id) IS NULL
+                    and MIN(mtrua_grade_relation_not_exist.id) IS NULL
+                    and MIN(rg.id) IS NOT NULL
+                THEN 1
+                ELSE 0 END 
+                AS unassign_but_has_reimburse'))
             ->leftJoin('master_type_reimburse_grades as mtrg', 'mtrg.reimburse_type_id', '=', 'master_type_reimburses.id')
             ->leftJoin('business_trip_grades as btg', 'btg.id', '=', 'mtrg.grade_id')
             ->leftJoin('business_trip_grade_users as btgu', 'btgu.grade_id', '=', 'btg.id')
@@ -62,13 +71,20 @@ class MyReimburseController extends Controller
             })
             ->leftJoin('users as u', function($join) {
                 $join->on('u.id', '=', 'mtrua_grade_relation_exist.user_id')
-                ->orOn('u.id', '=', 'mtrua_grade_relation_not_exist.user_id');
+                ->on('u.id', '=', 'mtrua_grade_relation_not_exist.user_id');
+            })
+            ->leftJoin('reimburses as r', function($join) {
+                $join->on('r.reimburse_type', '=', 'master_type_reimburses.code')->where('r.requester', Auth::user()->nip)
+                ->leftJoin('reimburse_groups as rg', 'rg.code', '=', 'r.group')
+                ->whereIn('rg.status_id', [1, 3, 5]);
             })
             ->where([
                 'u.id' => Auth::user()->id,
                 'master_type_reimburses.is_employee' => $isEmployee
             ])->where(function($query) {
-                $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
+                $query->whereNotNull('mtrua_grade_relation_exist.is_assign')
+                    ->orWhereNotNull('mtrua_grade_relation_not_exist.is_assign')
+                    ->orWhereNotNull('rg.id');
             });
             
             if ($isEmployee == 0 && count($getFamilieStatus) != 0) {
@@ -86,7 +102,9 @@ class MyReimburseController extends Controller
                 $query->where('grade_option', 'all')
                     ->where('is_employee', $isEmployee)
                     ->where(function($query) {
-                        $query->whereNotNull('mtrua_grade_relation_exist.user_id')->orWhereNotNull('mtrua_grade_relation_not_exist');
+                        $query->whereNotNull('mtrua_grade_relation_exist.is_assign')
+                            ->orWhereNotNull('mtrua_grade_relation_not_exist.is_assign')
+                            ->orWhereNotNull('rg.id');
                     });
             
                 if ($isEmployee == 0 && count($getFamilieStatus) != 0) {
@@ -110,9 +128,12 @@ class MyReimburseController extends Controller
             
             $queryResult->getCollection()->each(function ($masterTypeReimburse) {
                 $masterTypeReimburse->load([
-                    'reimburseTypeGrades.grade.gradeOneUsers.reimburseTypeAssignUsers' => function ($assignQuery) use ($masterTypeReimburse) {
-                        $assignQuery->where('reimburse_type_id', $masterTypeReimburse->id)
-                            ->where('is_assign', true);
+                    'reimburseTypeGrades.grade.gradeUsers.reimburseTypeAssignUsers' => function ($assignQuery) use ($masterTypeReimburse) {
+                        $assignQuery->where([
+                            'reimburse_type_id' => $masterTypeReimburse->id,
+                            'user_id' => Auth::user()->id,
+                            'is_assign' => true
+                        ]);
                     },
                     'reimburseTypeUserAssign' => function ($assignQuery) use ($masterTypeReimburse) {
                         $assignQuery->where([
@@ -132,8 +153,8 @@ class MyReimburseController extends Controller
                     $maximumBalance = collect($map->reimburse_type_grades)
                         ->filter(function ($reimburseTypeGrade) {
                             return isset($reimburseTypeGrade->grade) &&
-                                !empty($reimburseTypeGrade->grade->grade_one_users) &&
-                                collect($reimburseTypeGrade->grade->grade_one_users)
+                                !empty($reimburseTypeGrade->grade->grade_users) &&
+                                collect($reimburseTypeGrade->grade->grade_users)
                                     ->contains('user_id', Auth::user()->id);
                         })
                         ->pluck('plafon')
@@ -147,6 +168,8 @@ class MyReimburseController extends Controller
                     reimburses.balance as balance, 
                     mtr.interval_claim_period as has_interval_claim, 
                     pr.is_closed as status_closed,
+                    pr.clearing_status as clearing_status,
+                    pr.status as pr_status,
                     CASE 
                         WHEN 
                             mtr.interval_claim_period is not null
@@ -176,11 +199,11 @@ class MyReimburseController extends Controller
                         ->whereIn('rg.status_id', [1, 3, 5]);
                 })->get()->toArray();
 
-                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return $value['status_closed'] != 'S' && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
-                $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return $value['status_closed'] == 'S' && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
+                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] != 'S' && $value['pr_status'] != 'X') && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
+                $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] == 'S' && $value['status_closed'] == 'S' && $value['pr_status'] != 'X') && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
 
                 // Remaining Balance
-                $remainingBalance = (int)$maximumBalance - ($paidBalance + $unpaidBalance);
+                $remainingBalance = $map->unassign_but_has_reimburse == 1 ? 0 : (int)$maximumBalance - ($paidBalance + $unpaidBalance);
             
                 // Last Claim Date
                 $lastClaimDate = collect($map->reimburses)->isNotEmpty() ? 
@@ -240,6 +263,9 @@ class MyReimburseController extends Controller
                     reimburses.claim_date,
                     mtr.interval_claim_period, 
                     pr.is_closed as status_closed,
+                    pr.is_closed as status_closed,
+                    pr.clearing_status as clearing_status,
+                    pr.status as pr_status,
                     CASE 
                         WHEN 
                             mtr.interval_claim_period is not null
@@ -269,8 +295,8 @@ class MyReimburseController extends Controller
                         ->whereIn('rg.status_id', [1, 3, 5]);
                 })->orderByDesc('reimburses.id')->get()->toArray();
 
-                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return $value['status_closed'] != 'S' && (($value['interval_claim_period'] !== null && $value['on_interval'] == 1) || $value['interval_claim_period'] == null); }), 'balance'));
-                $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return $value['status_closed'] == 'S' && (($value['interval_claim_period'] !== null && $value['on_interval'] == 1) || $value['interval_claim_period'] == null); }), 'balance'));
+                $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] != 'S' && $value['pr_status'] != 'X') && (($value['interval_claim_period'] !== null && $value['on_interval'] == 1) || $value['interval_claim_period'] == null); }), 'balance'));
+                $paidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] == 'S' && $value['status_closed'] == 'S' && $value['pr_status'] != 'X') && (($value['interval_claim_period'] !== null && $value['on_interval'] == 1) || $value['interval_claim_period'] == null); }), 'balance'));
 
                 // Remaining Balance
                 $remainingBalance   = (int)$maximumBalance - ($paidBalance + $unpaidBalance);
@@ -282,7 +308,7 @@ class MyReimburseController extends Controller
                     $reimburses['claim_date'] : null;
                 
                 // Available Claim Date
-                if ((empty($reimburses) && $reimburses['interval_claim_period'] == null) || $lastClaimDate == null) {
+                if ((empty($reimburses) && (isset($reimburses['interval_claim_period']) && $reimburses['interval_claim_period'] == null)) || $lastClaimDate == null) {
                     $availableClaimDate = null;
                 } else {
                     $createDate         = Carbon::createFromFormat('Y-m-d', $lastClaimDate);

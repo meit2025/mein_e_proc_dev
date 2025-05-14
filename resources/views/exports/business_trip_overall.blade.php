@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Business Trip Report</title>
+    <title>Business Trip Report Overall</title>
     <style>
         table {
             width: 100%;
@@ -18,30 +18,33 @@
     </style>
 </head>
 <body>
-    <h2 style="text-align: center;">Business Trip Request Detail Report</h2>
-
     <table>
         <thead>
             <tr>
-                <th>No.</th>
-                <th>Employee No</th>
-                <th>Name</th>
-                <th>Position</th>
-                <th>Department</th>
-                <th>Division</th>
-                <th>Requested By</th>
-                <th>Date</th>
-                <th>Request No</th>
-                <th>Status</th>
-                <th>Purpose</th>
-                <th>Remarks</th>
+                <th rowspan="2">No.</th>
+                <th rowspan="2">Employee No</th>
+                <th rowspan="2">Employee Name</th>
+                <th rowspan="2">Position</th>
+                <th rowspan="2">Dept</th>
+                <th rowspan="2">Division</th>
+                <th rowspan="2">Requested By</th>
+                <th rowspan="2">Request Date</th>
+                <th colspan="6">Business Trip Request</th>
+                <th colspan="5">Business Trip Declaration</th>
+            </tr>
+            <tr>
+                <th>Request Number</th>
+                <th>Request Status</th>
+                <th>Purpose Type</th>
                 <th>Destination</th>
                 <th>Start Date</th>
                 <th>End Date</th>
-                <th>Allowance Item</th>
-                <th>Currency</th>
-                <th>Amount</th>
-                <th>Total</th>
+
+                <th>Request Number</th>
+                <th>Request Status</th>
+                <th>Request Date</th>
+                <th><strong>Start Date</strong></th>
+                <th><strong>End Date</strong></th>
             </tr>
         </thead>
         <tbody>
@@ -49,24 +52,30 @@
                 @foreach ($trip['destinations'] as $destination)
                     <tr>
                         <td>{{ $index + 1 }}</td>
-                        <td>{{ $trip['employee']->employee_no ?? '' }}</td>
+                        <td>{{ $trip['employee']->nip ?? '' }}</td>
                         <td>{{ $trip['employee']->name ?? '' }}</td>
                         <td>{{ $trip['employee']->positions->name ?? '' }}</td>
                         <td>{{ $trip['employee']->departements->name ?? '' }}</td>
                         <td>{{ $trip['employee']->divisions->name ?? '' }}</td>
                         <td>{{ $trip['requested_by']->name ?? '' }}</td>
                         <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
+
                         <td>{{ $trip['request_no'] ?? '' }}</td>
                         <td>{{ $trip['status']->name ?? 'Pending' }}</td>
                         <td>{{ $trip['purpose']->name ?? '' }}</td>
-                        <td>{{ $trip['remarks'] ?? '' }}</td>
                         <td>{{ $destination['destination'] ?? '' }}</td>
-                        <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
-                        <td>Gasoline Total</td>
-                        <td>IDR</td>
-                        <td>{{ $destination['total'] ?? 0 }}</td>
-                        <td>{{ $destination['total'] ?? 0 }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
+
+                        @if ($trip['parent_request_no'] != null)
+                            <td>{{ $trip['parent_request_no'] ?? '' }}</td>
+                            <td>{{ $trip['parent_request_status']->name ?? 'Pending' }}</td>
+                            <td>{{ \Carbon\Carbon::parse($destination['date'] ?? null)->format('d/m/Y') }}</td>
+                            <td>{{ \Carbon\Carbon::parse($destination['start_date'] ?? null)->format('d/m/Y') }}</td>
+                            <td>{{ \Carbon\Carbon::parse($destination['end_date'] ?? null)->format('d/m/Y') }}</td>
+                        @else
+                            <th colspan="5">N/A</th>
+                        @endif
                     </tr>
                 @endforeach
             @endforeach

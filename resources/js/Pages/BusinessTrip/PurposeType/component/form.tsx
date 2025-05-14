@@ -43,7 +43,7 @@ import {
 import { useAlert } from '@/contexts/AlertContext';
 import { AllowanceCategoryModel } from '../../AllowanceCategory/model/AllowanceModel';
 import { RadioGroup, RadioGroupItem } from '@/components/shacdn/radio-group';
-import { CREATE_API_PURPOSE_TYPE } from '@/endpoint/purpose-type/api';
+import { CHECK_PURPOSETYPE_UNIQUE, CREATE_API_PURPOSE_TYPE } from '@/endpoint/purpose-type/api';
 import { all, AxiosError } from 'axios';
 import { AllowanceItemModel } from '../../AllowanceItem/models/models';
 import { FormType } from '@/lib/utils';
@@ -118,14 +118,20 @@ export default function PurposeTypeForm({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log(values);
     try {
-      // const response = await axiosInstance.post(CREATE_API_PURPOSE_TYPE, values);
-      let response = null;
-      if (type === FormType.edit) {
-        response = await axiosInstance.put(editUrl ?? '', values);
-      } else {
-        response = await axiosInstance.post(createUrl ?? '', values);
-      }
+        const url = CHECK_PURPOSETYPE_UNIQUE(values.code);
+        let check = await axiosInstance.get(url);
 
+        let response = null;
+        if (type === FormType.create) {
+            if (check.data.msg == 'already') {
+                showToast('Code purpose type already used', 'error');
+                return;
+            }
+            response = await axiosInstance.post(createUrl ?? '', values);
+        }else{
+            response = await axiosInstance.put(editUrl ?? '', values);
+        }
+      // const response = await axiosInstance.post(CREATE_API_PURPOSE_TYPE, values);
       console.log(response, 'response');
 
       showToast('success', 'success');

@@ -24,3 +24,6 @@ yarn-error.log
 /bootstrap/cache/
 /public/purchaserequisition/
 /public/storage/
+*.mdb
+*.log
+*.sql

@@ -6,11 +6,13 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use DateTime;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Modules\Approval\Models\SettingApproval;
 use Modules\Master\Models\MasterBusinessPartner;
 use Modules\Master\Models\Pajak;
+use Modules\PurchaseRequisition\Models\AttachmentPurchaseRequisition;
 use Modules\PurchaseRequisition\Models\CashAdvance;
 use Modules\PurchaseRequisition\Models\CashAdvancePurchases;
 use Modules\PurchaseRequisition\Models\Entertainment;
@@ -47,8 +49,9 @@ class ProcurementService
             $reqno = (int) SettingApproval::where('key', 'dokumenType_' . $procurement->document_type)->lockForUpdate()->value('value') + 1;
 
             $entertainment = Entertainment::where('purchase_id', $id)->first();
+            $findAttachment = $this->findAttachment($id);
 
-
+            $totalAmountDp = 0;
             foreach ($items as $key => $value) {
                 $datainsert = $this->preparePurchaseRequisitionData(
                     $procurement,
@@ -58,14 +61,17 @@ class ProcurementService
                     $reqno,
                     $entertainment,
                     $key + 1,
-                    $settings
+                    $settings,
+                    $findAttachment
                 );
                 $array[] = $datainsert;
                 PurchaseRequisition::create($datainsert);
+                $totalAmountDp += $value->total_amount;
             }
-
+            
             $cashData = CashAdvancePurchases::where('purchase_id', $id)->first();
             if ($cashData) {
+                $value->total_amount = $totalAmountDp;
                 $datainsertCash = $this->prepareCashAdvanceData($procurement, $vendor, $value, $cashData, $reqno, $settings);
                 CashAdvance::create($datainsertCash);
                 $arrayCash[] = $datainsertCash;
@@ -124,10 +130,11 @@ class ProcurementService
         return null;
     }
 
-    private function preparePurchaseRequisitionData($procurement, $vendor, $item, $businessPartner, $reqno, $entertainment, $inx, $settings)
+    private function preparePurchaseRequisitionData($procurement, $vendor, $item, $businessPartner, $reqno, $entertainment, $inx, $settings, $attachmnet)
     {
         $formattedDate = Carbon::parse($procurement->created_at)->format('Y-m-d');
         $delivery_date = Carbon::parse($procurement->delivery_date)->format('Y-m-d');
+
 
         return [
             'purchase_id' => $procurement->id,
@@ -150,8 +157,8 @@ class ProcurementService
             'material_number' => $item->material_number, // matnr
             'unit_of_measure' => $item->uom,
             'quantity' => $item->qty,
-            'balance' => round($item->total_amount, 0),
-            'waers' => 'IDR',
+            'balance' => $item->unit_price,
+            'currency' => $procurement->currency_from ?? 'IDR', // waers
             'tax_code' => $item->tax, // mwskz
             'item_category' => '', // pstyp
             'short_text' => $item->short_text,  // txz01
@@ -172,8 +179,20 @@ class ProcurementService
             'B01' => $item->short_text,
             'B03' => $item->short_text,
             'B04' => $item->short_text,
-            'attachment_link' => '',
+            'attachment_link' => $attachmnet,
         ];
+    }
+
+    private function findAttachment($id)
+    {
+        $items = AttachmentPurchaseRequisition::where('purchase_id', $id)->get();
+        $attachmentString = $items->map(function ($attachment, $index) {
+            $title = $attachment->file_name;
+            $url =   $attachment->file_path;
+
+            return "{$title};{$url}";
+        })->implode('$');
+        return $attachmentString;
     }
 
     private function prepareCashAdvanceData($procurement, $vendor, $item, $cashData, $reqno, $settings)
@@ -188,13 +207,16 @@ class ProcurementService
         $formattedDate = Carbon::parse($cashData->document_date)->format('Y-m-d');
         $month = Carbon::parse($cashData->document_date)->format('m');
 
+        $year = $this->getFiscalYear($formattedDate);
+
+
         return [
             'extdoc' => $procurement->id,
             'purchase_id' => $procurement->id,
             'code_transaction' => 'VEN',  // code_transaction
             'belnr' =>  $procurement->id, // belnr
             'company_code' => $settings['companyCode'],
-            'gjahr' => '', // gjahr ini year
+            'gjahr' => $year, // gjahr ini year
             'currency' => 'IDR', // waers
             'document_date' => $formattedDate, // bldat
             'budat' => $formattedDate, // budat
@@ -214,5 +236,21 @@ class ProcurementService
             'amount' => $totalAmount,
             'dp' => $cashData->dp,
         ];
+    }
+
+    function getFiscalYear($date = null)
+    {
+        // Gunakan tanggal sekarang jika tidak ada input
+        $date = $date ? new DateTime($date) : new DateTime();
+
+        $year = (int) $date->format('Y');
+        $month = (int) $date->format('m');
+
+        // Jika bulan Januari - Maret, gunakan tahun sebelumnya
+        if ($month <= 3) {
+            return $year - 1;
+        } else {
+            return $year;
+        }
     }
 }

@@ -1,0 +1,1 @@
+const i=(n,c=!0)=>{const t=n??0,e=t.toString(),r=e.includes(".")?e.split(".")[1].length:0,a=new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",minimumFractionDigits:r,maximumFractionDigits:r}).format(Number(t)).replace(",",".");return c?a:a.replace(/^Rp\s*/,"")};export{i as f};

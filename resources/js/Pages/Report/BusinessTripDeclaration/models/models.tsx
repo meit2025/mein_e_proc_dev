@@ -20,7 +20,6 @@ export const columns: GridColDef[] = [
   { field: 'request_for', headerName: 'Request For', width: 200, filterable: true },
   { field: 'created_at', headerName: 'Request Date', width: 200, filterable: true },
   { field: 'remarks', headerName: 'Remark', width: 200, filterable: true },
-
   {
     field: 'status',
     headerName: 'Status',

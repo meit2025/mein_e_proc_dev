@@ -30,6 +30,7 @@ export const Index = () => {
 
   return (
     <DataGridComponent
+      isClone={true}
       isHistory={true}
       role={roleConfig}
       columns={columns}

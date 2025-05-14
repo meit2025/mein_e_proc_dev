@@ -131,7 +131,7 @@ const LayoutApproval = ({
               >
                 APPROVE
               </Button>
-              {/* <Button
+              <Button
                 onClick={() => handleOpen('Revise')}
                 style={{
                   marginLeft: '1rem',
@@ -141,7 +141,7 @@ const LayoutApproval = ({
                 type='button'
               >
                 Revise
-              </Button> */}
+              </Button>
               <Button
                 onClick={() => handleOpen('Rejected')}
                 style={{

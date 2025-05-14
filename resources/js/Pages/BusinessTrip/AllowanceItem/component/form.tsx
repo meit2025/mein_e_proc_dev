@@ -44,7 +44,7 @@ import { useAlert } from '@/contexts/AlertContext';
 import { AllowanceCategoryModel } from '../../AllowanceCategory/model/AllowanceModel';
 import { CurrencyModel } from '../models/models';
 import { RadioGroup, RadioGroupItem } from '@/components/shacdn/radio-group';
-import { CREATE_API_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/api';
+import { CHECK_ALLOWANCE_UNIQUE, CREATE_API_ALLOWANCE_ITEM, GET_DETAIL_ALLOWANCE_ITEM, GET_LIST_ALLOWANCE_ITEM } from '@/endpoint/allowance-item/api';
 import { AxiosError } from 'axios';
 import { MultiSelect } from '@/components/commons/MultiSelect';
 import { BusinessTripGrade } from '../../BusinessGrade/model/model';
@@ -217,12 +217,18 @@ export default function AllowanceItemForm({
   const { showToast } = useAlert();
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      console.log(values);
-      if (type === FormType.create) {
-        const response = await axiosInstance.post(createUrl ?? '', values);
-      } else if (type === FormType.edit) {
-        const response = await axiosInstance.put(editUrl ?? '', values);
-      }
+        const url = CHECK_ALLOWANCE_UNIQUE(values.code);
+        let check = await axiosInstance.get(url);
+
+        if (type === FormType.create) {
+            if (check.data.msg == 'already') {
+                showToast('Code allowance already used', 'error');
+                return;
+            }
+            const response = await axiosInstance.post(createUrl ?? '', values);
+        } else if (type === FormType.edit) {
+            const response = await axiosInstance.put(editUrl ?? '', values);
+        }
 
       showToast('success', 'success');
       onSuccess?.(true);

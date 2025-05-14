@@ -209,7 +209,7 @@ class ReimburseServices
             'waers' => 'IDR',
             'tax_code' => $pajak->mwszkz, // mwskz
             'item_category' => '', // pstyp
-            'short_text' => $reim->short_text,  // txz01
+            'short_text' => $reim->remark,  // txz01
             'plant' => $plant, // werks
             'cost_center' => $costCenter->cost_center,  // kostl
             'order_number' => '', // AUFNR

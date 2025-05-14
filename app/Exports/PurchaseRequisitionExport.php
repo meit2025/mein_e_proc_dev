@@ -3,10 +3,16 @@
 namespace App\Exports;
 
 use App\Models\Purchase;
+use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromView;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class PurchaseRequisitionExport implements FromCollection, WithHeadings
+class PurchaseRequisitionExport implements FromView, WithStyles, ShouldAutoSize
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -18,36 +24,31 @@ class PurchaseRequisitionExport implements FromCollection, WithHeadings
         $this->data = $data;
     }
 
-    public function collection()
+    public function view(): View
     {
-        $numberedData = $this->data->map(function ($item, $index) {
-            // Ensure $item is an array
-            $itemArray = (array) $item;
-
-            // Merge the array with the numbering
-            return array_merge(['Nomor' => $index + 1], $itemArray);
-        });
-
-        return collect($numberedData);
+        return view(
+            'exports.purchase',
+            ['data' => $this->data]
+        );
     }
 
-    public function headings(): array
+    public function styles(Worksheet $sheet)
     {
-        return [
-            'No',
-            'Purchase Number',
-            'Request For',
-            'Document type',
-            'Purchasing groups',
-            'Delivery date',
-            'Storage locations',
-            'Total Vendor',
-            'Total Item',
-            'Status',
-            'Requester By',
-            'Created At',
-            'Number PO',
-            'Number PR',
-        ];
+        $sheet->getStyle('A1:AO1')->getFont()->setBold(true); // Contoh: Header dengan font tebal
+        $sheet->getStyle('A:AO')->getAlignment()->setHorizontal('center'); // Rata tengah seluruh kolom
+
+        // Tambahkan border untuk semua data
+        $highestRow = $sheet->getHighestRow();
+        $highestColumn = $sheet->getHighestColumn();
+
+        $sheet->getStyle("A1:$highestColumn$highestRow")->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'], // Hitam
+                ],
+            ],
+        ]);
+        return [];
     }
 }

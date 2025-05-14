@@ -1,0 +1,1 @@
+const P="/api/purpose-type",s=`${P}/list`,t=`${P}/create`,T=E=>`${P}/detail/${E}`,e=E=>`${P}/check-unique-code/${E}`,a=E=>`${P}/update/${E}`,c=`${P}/delete`,o=(E,_)=>`${P}/list-allowances-by-purpose-type/${E}/${_}`;export{t as C,c as D,o as G,a as U,T as a,s as b,e as c};

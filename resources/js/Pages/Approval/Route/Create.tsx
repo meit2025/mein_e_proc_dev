@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import FormMapping from '@/components/form/FormMapping';
 import { formModel } from './model/formModel';
@@ -12,6 +12,11 @@ function Create() {
     mode: 'onChange',
     reValidateMode: 'onChange',
   });
+  useEffect(() => {
+    methods.setValue('type_approval_conditional', 'nominal');
+    methods.setValue('nominal', 0);
+    methods.setValue('day', 0);
+  }, []);
   return (
     <>
       <div className='card card-grid h-full min-w-full p-4'>
