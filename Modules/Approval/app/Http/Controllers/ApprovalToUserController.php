@@ -94,11 +94,7 @@ class ApprovalToUserController extends Controller
                 ->distinct()
                 ->get();
 
-            $users = User::select('id as value', 'name as label')->when($type == 'reim', function ($q) {
-                return $q->where('approval_to_users.is_reim', true);
-            }, function ($q) {
-                return $q->where('approval_to_users.is_bt', true);
-            })->whereNotIn('id', $dataUserExsit)->get();
+            $users = User::select('id as value', 'name as label')->whereNotIn('id', $dataUserExsit)->get();
 
             return $this->successResponse([
                 'users' => $users,
