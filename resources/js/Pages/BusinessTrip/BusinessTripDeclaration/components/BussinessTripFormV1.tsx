@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 /* eslint-disable react/jsx-key */
 import '../css/index.scss';
 import {
@@ -264,16 +265,17 @@ export const BussinessTripFormV1 = ({
       formData.append('value', totalAll.toString());
       formData.append('request_no', values.request_no ?? '');
       formData.append('remark', values.remark ?? '');
+      formData.append('total_destination', `${values.total_destination}`);
+      values.destinations.forEach((item, index) => {
+        formData.append(`destinations[${index}]`, JSON.stringify(item));
+      });
       if (type === BusinessTripType.create) {
         values.attachment.forEach((file: any, index: number) => {
           if (file) {
             formData.append(`attachment[${index}]`, file);
           }
         });
-        formData.append('total_destination', `${values.total_destination}`);
-        values.destinations.forEach((item, index) => {
-          formData.append(`destinations[${index}]`, JSON.stringify(item));
-        });
+
         await Inertia.post(CREATE_API_BUSINESS_TRIP_DECLARATION, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -296,6 +298,12 @@ export const BussinessTripFormV1 = ({
             'Content-Type': 'multipart/form-data',
           },
         });
+        // await axios.post(`${EDIT_API_BUSINESS_TRIP_DECLARATION}/${id}`, formData, {
+        //   headers: {
+        //     'Content-Type': 'multipart/form-data',
+        //   },
+        //   withCredentials: true, // jika kamu butuh kirim cookie/session
+        // });
         showToast('succesfully updated data', 'success');
       }
 
@@ -322,8 +330,10 @@ export const BussinessTripFormV1 = ({
 
     try {
       const response = await axiosInstance.get(url);
-      console.log(response.data.data, 'response');
+
       const businessTripData = response.data.data;
+      console.log(response.data.data, 'response');
+
       setIsCashAdvance(businessTripData.cash_advance == 1 ? true : false);
       form.setValue('remark', businessTripData.remarks || '');
       form.setValue('total_destination', businessTripData.total_destination || 1);
@@ -338,9 +348,11 @@ export const BussinessTripFormV1 = ({
           : '0',
       );
       setBusinessTripDetail(response.data.data as BusinessTripModel);
-      setListDestination(businessTripData.destinations);
+      if (type === BusinessTripType.create) {
+        setListDestination(businessTripData.destinations);
+        setAllowancesProperty(businessTripData.destinations);
+      }
       setTotalDestination(businessTripData.total_destination);
-      setAllowancesProperty(businessTripData.destinations);
     } catch (e) {
       console.log(e);
     }
@@ -501,12 +513,20 @@ export const BussinessTripFormV1 = ({
 
   async function getDetailData() {
     form.setValue('destinations', []);
+
     const url = GET_EDIT_BUSINESS_TRIP_DECLARATION(id);
     const response = await axios.get(url);
-    console.log(response.data.data, 'response');
     const data = response.data.data;
+
     await handleGetBusinessTrip(data.parent_id.toString());
     setfileAttachment(data.attachments as BusinessTripAttachement[]);
+
+    const urlDetail = GET_DETAIL_BUSINESS_TRIP_DECLARATION(id);
+    const responseDetail = await axios.get(urlDetail);
+    const dataDetail = responseDetail.data.data;
+
+    setListDestination(dataDetail.destinations);
+    setAllowancesProperty(dataDetail.destinations);
     try {
     } catch (e) {
       const error = e as AxiosError;
@@ -1539,7 +1559,7 @@ export function DetailAllowance({
           allowanceIndex={index}
         />
       ))}
-      {otherAllowances.length === 0 && (
+      {/* {otherAllowances.length === 0 && (
         <tr>
           <td>
             <Button type='button' className='text-xl' onClick={addOtherAllowance}>
@@ -1547,8 +1567,8 @@ export function DetailAllowance({
             </Button>
           </td>
         </tr>
-      )}
-      {otherAllowances.map((_, index) => (
+      )} */}
+      {/* {otherAllowances.map((_, index) => (
         <tr key={index}>
           <td width={220} style={{ verticalAlign: 'middle' }} className='text-sm'>
             Other Allowance
@@ -1605,7 +1625,7 @@ export function DetailAllowance({
             </Button>
           </td>
         </tr>
-      ))}
+      ))} */}
     </table>
   );
 }
@@ -1837,10 +1857,12 @@ export function ResultTotalItem({
       const itemTotal = calculateTotal(allowance, details);
       return totalSum + itemTotal;
     }, 0);
-    const totalSubtotal = (other || []).reduce((total: number, allowance: any) => {
-      const allowanceValue = Number(allowance?.value) || 0; // Pastikan nilai adalah angka atau default ke 0
-      return total + allowanceValue;
-    }, 0);
+    const totalSubtotal = Array.isArray(other)
+      ? other.reduce((total: number, allowance: any) => {
+          const allowanceValue = Number(allowance?.value) || 0;
+          return total + allowanceValue;
+        }, 0)
+      : 0;
 
     setGrandTotal(newTotal + totalSubtotal);
     //       // Update nilai total allowance di form
@@ -1879,7 +1901,7 @@ export function ResultTotalItem({
               </td>
             </tr>
           ))}
-          {other.length > 0 && (
+          {Array.isArray(other) && other.length > 0 && (
             <>
               {other.map((allowance: any, index: number) => (
                 <tr key={index}>
