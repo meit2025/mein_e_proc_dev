@@ -57,7 +57,7 @@ class ApprovalToUserController extends Controller
             }
             return $this->successResponse($request->all());
         } catch (\Throwable $th) {
-            //throw $th;
+            return $this->errorResponse($th->getMessage());
         }
     }
 
