@@ -536,7 +536,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                       </Button>
                     )}
 
-                    {props.auth.setting_export == props.auth?.user?.username && (
+                    {props.auth.setting_export == props.auth?.user?.username && onSendSap && (
                       <Button
                         className='btn'
                         variant='contained'
