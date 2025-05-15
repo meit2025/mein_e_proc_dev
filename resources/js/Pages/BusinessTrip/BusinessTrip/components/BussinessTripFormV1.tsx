@@ -288,6 +288,25 @@ export const BussinessTripFormV1 = ({
     return input;
   }
 
+  function isValidDateYMD(dateStr: string): boolean {
+    // Cek format dengan regex: YYYY-MM-DD
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
+
+    if (!regex.test(dateStr)) return false;
+
+    // Cek validitas tanggal
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return false;
+
+    // Pastikan nilai tidak berubah (contoh: 2025-02-31 akan jadi Maret)
+    const [year, month, day] = dateStr.split('-');
+    return (
+      date.getFullYear() === parseInt(year, 10) &&
+      date.getMonth() + 1 === parseInt(month, 10) &&
+      date.getDate() === parseInt(day, 10)
+    );
+  }
+
   async function getDetailData() {
     const url = GET_DETAIL_BUSINESS_TRIP(id);
     //fixing data not showing in index 0
@@ -331,12 +350,20 @@ export const BussinessTripFormV1 = ({
           business_trip_start_date: new Date(destination.business_trip_start_date),
           business_trip_end_date: new Date(destination.business_trip_end_date),
           detail_attedances: destination.detail_attedances.map((detail: any) => {
-            return {
+            const newData = {
               ...detail,
-              date: new Date(detail.date),
-              start_date: new Date(detail.start_date),
-              end_date: new Date(detail.end_date),
+              date: isValidDateYMD(detail.date)
+                ? new Date(detail.date)
+                : new Date(detail.end_date.split('-').reverse().join('-')),
+              start_date: isValidDateYMD(detail.start_date)
+                ? new Date(detail.start_date)
+                : new Date(detail.start_date.split('-').reverse().join('-')),
+              end_date: isValidDateYMD(detail.end_date)
+                ? new Date(detail.end_date)
+                : new Date(detail.end_date.split('-').reverse().join('-')),
             };
+            console.log(newData, ' newData');
+            return newData;
           }),
           allowances: destination.allowances.map((allowance: any) => {
             return {
