@@ -112,16 +112,8 @@ export const Index = ({
           update: `${roleAkses} update`,
           delete: `${roleAkses} delete`,
         }}
-        // isClone={true}
         onCreate={openFormHandler}
         columns={columns}
-        // onEdit={(value) => {
-        //   setBusinessTripForm({
-        //     type: BusinessTripType.edit,
-        //     id: value.toString(),
-        //   });
-        //   setOpenForm(true);
-        // }}
         onClone={(value) => {
           setBusinessTripForm({
             type: BusinessTripType.clone,
