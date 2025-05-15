@@ -420,6 +420,66 @@ class BusinessTripDeclarationController extends Controller
                     ]);
                 }
             }
+
+            // BARU TAMBAH DESTINASI
+            BusinessTripDestination::where('business_trip_id', $businessTrip->id)->delete();
+            BusinessTripDetailAttedance::where('business_trip_id', $businessTrip->id)->delete();
+            BusinessTripDetailDestinationTotal::where('business_trip_id', $businessTrip->id)->delete();
+            BusinessTripDetailDestinationDayTotal::where('business_trip_id', $businessTrip->id)->delete();
+
+            foreach ($request->destinations as $key => $value) {
+                $data_destination = json_decode($value, true);
+                $other = 0;
+                if (count($data_destination['other']) > 0) {
+                    $other = $data_destination['other'][0]['value'];
+                }
+
+                $businessTripDestination = BusinessTripDestination::create([
+                    'business_trip_id' => $businessTrip->id,
+                    'destination' => $data_destination['destination'],
+                    'business_trip_start_date' => date('Y-m-d', strtotime($data_destination['business_trip_start_date'])),
+                    'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
+                    'other_allowance' => $other,
+                ]);
+                foreach ($data_destination['detail_attedances'] as $key => $destination) {
+                    $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
+                        'business_trip_destination_id' => $businessTripDestination->id,
+                        'business_trip_id' => $businessTrip->id,
+                        'date' => date('Y-m-d', strtotime($destination['date'])),
+                        'shift_code' => $destination['shift_code'],
+                        'shift_start' => $destination['shift_start'],
+                        'shift_end' => $destination['shift_end'],
+                        'start_time' => $destination['start_time'],
+                        'end_time' => $destination['end_time'],
+                        'start_date' => date('Y-m-d', strtotime($destination['start_date'])),
+                        'end_date' => date('Y-m-d', strtotime($destination['end_date'])),
+                    ]);
+                }
+                foreach ($data_destination['allowances'] as $key => $allowance) {
+                    if (strtolower($allowance['type']) == 'total') {
+                        foreach ($allowance['detail'] as $detail) {
+                            BusinessTripDetailDestinationTotal::create([
+                                'business_trip_destination_id' => $businessTripDestination->id,
+                                'business_trip_id' => $businessTrip->id,
+                                'price' => $detail['request_price'],
+                                'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->withTrashed()->first()?->id,
+                                'standard_value' => $allowance['default_price'],
+                            ]);
+                        }
+                    } else {
+                        foreach ($allowance['detail'] as $detail) {
+                            BusinessTripDetailDestinationDayTotal::create([
+                                'business_trip_destination_id' => $businessTripDestination->id,
+                                'date' => $detail['date'],
+                                'business_trip_id' => $businessTrip->id,
+                                'price' => $detail['request_price'],
+                                'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->withTrashed()->first()?->id,
+                                'standard_value' => $allowance['default_price'],
+                            ]);
+                        }
+                    }
+                }
+            }
             $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP_DECLARATION');
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
