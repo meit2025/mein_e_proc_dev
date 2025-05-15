@@ -77,23 +77,28 @@ class ApprovalToUserController extends Controller
         try {
             //code...
 
-            if($type == 'reim') {
+            if ($type == 'reim') {
                 $dataUserExsit = ApprovalToUser::where('is_reim', true)->pluck('user_id')->toArray();
-            }else {
+            } else {
                 $dataUserExsit =  ApprovalToUser::where('is_bt', true)->pluck('user_id')->toArray();
             }
 
-            $query =  ApprovalToUser::select('users.id as value', 'users.name as label')->leftJoin('users', 'users.id', '=', 'approval_to_users.user_id')
-                ->where('approval_to_users.approval_route_id', $id);
+            $data = ApprovalToUser::select('users.id as value', 'users.name as label')
+                ->leftJoin('users', 'users.id', '=', 'approval_to_users.user_id')
+                ->where('approval_to_users.approval_route_id', $id)
+                ->when($type == 'reim', function ($q) {
+                    return $q->where('approval_to_users.is_reim', true);
+                }, function ($q) {
+                    return $q->where('approval_to_users.is_bt', true);
+                })
+                ->distinct()
+                ->get();
 
-            if ($type == 'reim') {
-                $query->where('approval_to_users.is_reim', true);
-            } else {
-                $query->where('approval_to_users.is_bt', true);
-            }
-            $data = $query->get();
-
-            $users = User::select('id as value', 'name as label')->whereNotIn('id', $dataUserExsit)->get();
+            $users = User::select('id as value', 'name as label')->when($type == 'reim', function ($q) {
+                return $q->where('approval_to_users.is_reim', true);
+            }, function ($q) {
+                return $q->where('approval_to_users.is_bt', true);
+            })->whereNotIn('id', $dataUserExsit)->get();
 
             return $this->successResponse([
                 'users' => $users,
