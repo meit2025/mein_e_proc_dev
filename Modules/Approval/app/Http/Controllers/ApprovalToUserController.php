@@ -31,7 +31,6 @@ class ApprovalToUserController extends Controller
     public function store(Request $request)
     {
         try {
-            dd($request->all());
             //code...
             $userIds = $request->input('user_ids');
             $approvalRouteId = $request->input('approval_route_id');
