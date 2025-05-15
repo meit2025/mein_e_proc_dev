@@ -1,1 +1,0 @@
-const e=[{field:"group_id",headerName:"Group Id",width:200,filterable:!0},{field:"is_hr",headerName:"Approval Hr",width:200,filterable:!0},{field:"is_conditional",headerName:"Approval Conditional",width:200,filterable:!0},{field:"nominal",headerName:"Nominal Conditional",width:200,filterable:!0}];export{e as columns};
