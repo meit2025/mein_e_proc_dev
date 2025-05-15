@@ -403,7 +403,9 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                       </>
                     )}
 
-                    {url.cancelApproval && params.row.status_id === 1 && value === 0 ? (
+                    {url.cancelApproval &&
+                    (params.row.status_id === 1 || params.row.status_id === 6) &&
+                    value === 0 ? (
                       <>
                         <Link
                           href={''}
