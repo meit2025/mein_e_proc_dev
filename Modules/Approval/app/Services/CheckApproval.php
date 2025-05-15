@@ -252,18 +252,24 @@ class CheckApproval
             if ($type == 'TRIP' || $type == 'TRIP_DECLARATION') {
                 // nominal day
                 if ($request->day) {
-                    $ApprovalConditionday = (clone $baseQuery)->where('day', '<=', $request->day)
-                        ->where('type_approval_conditional', 'day')->first();
+                    try {
+                        //code...
+                        $ApprovalConditionday = (clone $baseQuery)->where('day', '<=', $request->day)
+                            ->where('type_approval_conditional', 'day')->first();
 
-                    if ($ApprovalConditionday) {
-                        $getApprovalDay = ApprovalRouteUsers::select('users.id', 'users.name', 'master_divisions.name as division_name')
-                            ->join('users', 'approval_route_users.user_id', '=', 'users.id')
-                            ->leftJoin('master_divisions', 'master_divisions.id', '=', 'users.division_id')
-                            ->where('approval_route_id', $ApprovalConditionday->id)
-                            ->orderBy('approval_route_users.id', 'asc')
-                            ->get()->toArray();
+                        if ($ApprovalConditionday) {
+                            $getApprovalDay = ApprovalRouteUsers::select('users.id', 'users.name', 'master_divisions.name as division_name')
+                                ->join('users', 'approval_route_users.user_id', '=', 'users.id')
+                                ->leftJoin('master_divisions', 'master_divisions.id', '=', 'users.division_id')
+                                ->where('approval_route_id', $ApprovalConditionday->id)
+                                ->orderBy('approval_route_users.id', 'asc')
+                                ->get()->toArray();
 
-                        $getApproval = array_merge($getApproval, $getApprovalDay);
+                            $getApproval = array_merge($getApproval, $getApprovalDay);
+                        }
+                    } catch (\Throwable $th) {
+                        //throw $th;
+                        throw new Exception("Please Check Your Date Detail");
                     }
                 }
 
