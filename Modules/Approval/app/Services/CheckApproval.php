@@ -269,7 +269,7 @@ class CheckApproval
 
 
                 // restricted_area
-                if ($request->is_restricted_area == 'true' || $request->is_restricted_area == true || $request->is_restricted_area == 1) {
+                if ($request->is_restricted_area == 'true' || $request->is_restricted_area === true || $request->is_restricted_area === 1) {
                     $ApprovalConditionarea = (clone $baseQuery)->where('is_restricted_area', '=', true)
                         ->where('type_approval_conditional', 'restricted_area')->first();
 
