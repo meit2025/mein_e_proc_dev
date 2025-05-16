@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/shacdn/button';
 import { Button as ButtonMui, FormHelperText } from '@mui/material';
 import moment from 'moment';
@@ -69,10 +69,10 @@ interface Props {
   currentUser?: User;
 }
 
-interface reimburseAttachement {
-  id: number;
-  url: string;
-  file_name: string;
+interface reimburseRevise {
+  reimburse_type: string,
+  balance: number | string,
+  for: string | number
 }
 
 export const ReimburseForm: React.FC<Props> = ({
@@ -107,8 +107,8 @@ export const ReimburseForm: React.FC<Props> = ({
   const [isShow, setIsShow] = useState(false);
   const [isLoading, setLoading] = useState<boolean>(false);
   const [detailLimit, setDetailLimit] = useState<any[]>([]);
-  const [reimburseTypeCostRevise, setReimburseTypeCostRevise] = useState<any[]>([]);
-
+  const reimburseReviseData = useRef<Array<reimburseRevise>>([]);
+  const [reviseDataUsed, setReviseDataUsed] = useState<any[]>([]);
 
   const [approvalRoute, setApprovalRoute] = useState({
     approvalRequest: [],
@@ -161,6 +161,7 @@ export const ReimburseForm: React.FC<Props> = ({
               }),
           )
           .min(type === ReimburseFormType.create ? 1 : 0, 'Attachment is required'),
+        savedAttachment: z.array(z.any()).optional().nullable(),
         // url: z.string().optional(),
       }),
     ),
@@ -233,7 +234,7 @@ export const ReimburseForm: React.FC<Props> = ({
 
     fetchData();
   }, [type]);
-
+  
   async function getDetailData() {
     form.setValue('forms', []);
 
@@ -263,6 +264,7 @@ export const ReimburseForm: React.FC<Props> = ({
           item_delivery_data: new Date(map.item_delivery_data),
           claim_date: new Date(map.claim_date),
           attachment: [],
+          savedAttachment: map.reimburse_attachment,
           // url: GET_LIST_MASTER_REIMBUSE_TYPE,
         };
       });
@@ -272,8 +274,15 @@ export const ReimburseForm: React.FC<Props> = ({
       form.setValue('cost_center', String(reimburseGroup.cost_center.id));
       form.setValue('requester', reimburseGroup.requester);
       
-      // setReimburseTypeCostRevise(reimburseFormMapping);
+      reimburseReviseData.current = reimburseForms.map((map, index) => ({
+        id: String(map.id),
+        reimburse_type: map.reimburse_type.code,
+        balance: reimburseForms.filter((item, idx) => idx >= index && item.for === map.for && item.reimburse_type.code === map.reimburse_type.code).reduce((acc, curr) => acc + parseInt(curr.balance) || 0, 0),
+        limit: reimburseForms.filter((item, idx) => idx >= index && item.for === map.for && item.reimburse_type.code === map.reimburse_type.code).reduce((acc, curr) => acc + 1 || 0, 0),
+        for: String(map.for)
+      }));
 
+      form.setValue('forms', reimburseFormMapping);
       let formCounter = 0;
       for (const map of reimburseForms) {
         await fetchReimburseType(formCounter, { reimburse_type: map.reimburse_type.code });
@@ -288,14 +297,13 @@ export const ReimburseForm: React.FC<Props> = ({
         formCounter++;
       }
 
-      form.setValue('forms', reimburseFormMapping);
       setLoading(false);
     } catch (e) {
       const error = e as AxiosError;
       setLoading(false);
     }
   }
-
+  
   const defaultValues = {
     formCount: '1',
     remark_group: '',
@@ -327,12 +335,12 @@ export const ReimburseForm: React.FC<Props> = ({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues,
   });
-
+  
   const { fields: formFields, update: updateForm } = useFieldArray({
     control: form.control,
     name: 'forms',
   });
-
+  
   const fetchReimburseType = async (index: number, otherParams: any = null) => {
     const requester = form.getValues('requester');
 
@@ -361,7 +369,7 @@ export const ReimburseForm: React.FC<Props> = ({
       return newData;
     });
   };
-
+  
   const handleSearchReimburseType = async (search: string, index: number) => {
     if (search && search.length > 0) {
       try {
@@ -518,10 +526,10 @@ export const ReimburseForm: React.FC<Props> = ({
       const error = e as AxiosError;
     }
   };
-
+  
   async function getDataByLimit(index: number, param: any = null) {
     const data = form.getValues(`forms.${index}`);
-
+    
     const params = {
       user: form.getValues('requester'),
       reimbuse_type: param != null ? param.reimburse_type : data.reimburse_type,
@@ -542,15 +550,34 @@ export const ReimburseForm: React.FC<Props> = ({
           (acc, curr) => acc + parseInt(curr.balance) || 0,
           0,
         );
-
+        
+        let finalBalance = 0;
+        let finalLimit = 0;
+        // Adjust revise condition
+        if (type === ReimburseFormType.clone) {
+          // setReviseDataUsed((prev) => [...prev, { reimburse_type: data.reimburse_type, for: data.for }]);
+          let forValue = 
+            data.for === "" 
+              ? form.getValues('requester') 
+              : data.for;
+          if (data.reimburse_type === reimburseReviseData.current[index].reimburse_type 
+            && forValue === reimburseReviseData.current[index].for) {
+              finalBalance  = response.data.data.balance + parseInt(reimburseReviseData.current[index].balance)
+              finalLimit    = Math.max(0, response.data.data.limit - sameTypeForms.length) + reimburseReviseData.current[index].limit;
+          }
+        } else {
+          finalBalance  = (response.data.data.balance - totalBalance)
+          finalLimit = Math.max(0, response.data.data.limit - sameTypeForms.length);
+        }
+        
         const newData = [...prev];
         newData[index] = {
           ...response.data.data,
-          balance: response.data.data.balance - totalBalance,
+          balance: finalBalance,
           limit:
             response.data.data.type_limit == 'Unlimited'
               ? response.data.data.type_limit
-              : Math.max(0, response.data.data.limit - sameTypeForms.length),
+              : finalLimit,
         };
 
         return newData;
@@ -571,7 +598,7 @@ export const ReimburseForm: React.FC<Props> = ({
       const hasZeroValue = reimburseCostFormList.some((item) => item.value === 0);
       if (hasZeroValue) {
         const index = reimburseCostFormList.findIndex((item) => item.value === 0);
-        showToast(`Please  for form ${index + 1}`, 'error');
+        showToast(`Please fill balance form ${index + 1}`, 'error');
         return;
       }
 
@@ -626,7 +653,6 @@ export const ReimburseForm: React.FC<Props> = ({
   }, [form.watch('forms'), form.watch('requester')]);
 
   const checkValidation = (error: any) => {
-    console.log('error', error);
     const checkError = error;
     if (Object.keys(checkError).length > 0) {
       let errorMessages = `
@@ -649,7 +675,7 @@ export const ReimburseForm: React.FC<Props> = ({
       showToast(<div dangerouslySetInnerHTML={{ __html: errorMessages }} />, 'error');
     }
   };
-
+  
   return (
     <ScrollArea className='h-[600px] w-full'>
       <CustomFormWrapper isLoading={isLoading}>
@@ -805,7 +831,6 @@ export const ReimburseForm: React.FC<Props> = ({
                               onValueChange={(value) => {
                                 field.onChange(value);
                                 generateForms(value);
-                                handleTabChange(`form${parseInt(value)}`);
 
                                 const forms = form.getValues('forms');
                                 if (forms.length > parseInt(value)) {
@@ -1473,7 +1498,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   </FormItem>
                                 )}
                               />
-                              <div className='mt-2'>
+                              <div className='pb-3 mt-2'>
                                 {formValue.attachment && formValue.attachment.length > 0 && (
                                   <ul>
                                     {formValue.attachment.map((file: File, fileIndex: number) => (
@@ -1481,7 +1506,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                         key={fileIndex}
                                         className='flex items-center justify-between'
                                       >
-                                        <span className='text-sm'>{file.name}</span>
+                                        <span className='text-xs'>{file.name}</span>
                                         <button
                                           type='button'
                                           className='ml-2 text-red-500'
@@ -1501,6 +1526,36 @@ export const ReimburseForm: React.FC<Props> = ({
                                     ))}
                                   </ul>
                                 )}
+                                <hr />
+                                <div className='pb-3 mt-2'>
+                                  {formValue.savedAttachment && formValue.savedAttachment.length > 0 && (
+                                    <ul>
+                                      {formValue.savedAttachment.map((file: Object, fileIndex: number) => (
+                                        <li
+                                          key={fileIndex}
+                                          className='flex items-center justify-between'
+                                        >
+                                          <span className='text-xs'>{file.url}</span>
+                                          <button
+                                            type='button'
+                                            className='ml-2 text-red-500'
+                                            onClick={() => {
+                                              const updatedSavedAttachments = formValue.savedAttachment.filter(
+                                                (_, index) => index !== fileIndex,
+                                              );
+                                              updateForm(index, {
+                                                ...formValue,
+                                                savedAttachment: updatedSavedAttachments,
+                                              });
+                                            }}
+                                          >
+                                            Delete
+                                          </button>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </div>
                               </div>
                             </td>
                           </tr>

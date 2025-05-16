@@ -35,7 +35,7 @@ export const Singel = (menu: any, url: string) => {
       className={`menu-item  menu-item-active:text-primary menu-link-hover:!text-primary ${isActive ? 'active text-blue-500' : ''}`}
     >
       <Link
-        className='menu-link border border-transparent items-center grow menu-item-active:bg-secondary-active dark:menu-item-active:bg-coal-300 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-secondary-active dark:hover:bg-coal-300 dark:hover:border-gray-100 hover:rounded-lg'
+        className='items-center border border-transparent menu-link grow menu-item-active:bg-secondary-active dark:menu-item-active:bg-coal-300 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-secondary-active dark:hover:bg-coal-300 dark:hover:border-gray-100 hover:rounded-lg'
         href={menu.route}
         tabIndex={0}
       >
@@ -46,7 +46,7 @@ export const Singel = (menu: any, url: string) => {
           <span className='menu-icon items-start text-gray-500 dark:text-gray-400 w-[20px]'>
             <i className={`ki-filled ${menu.icon}  text-lg`}></i>
           </span>
-          <span className='menu-title text-sm font-medium text-gray-800'>{menu.title}</span>
+          <span className='text-sm font-medium text-gray-800 menu-title'>{menu.title}</span>
         </div>
       </Link>
     </div>
@@ -75,7 +75,7 @@ export const MultiMenu = (menu: any, url: string) => {
         </span>
         <span className='menu-arrow text-gray-400 w-[20px] shrink-0 justify-end ml-1 mr-[-10px]'>
           <i className='ki-filled ki-plus text-2xs menu-item-show:hidden'></i>
-          <i className='ki-filled ki-minus text-2xs hidden menu-item-show:inline-flex'></i>
+          <i className='hidden ki-filled ki-minus text-2xs menu-item-show:inline-flex'></i>
         </span>
       </div>
       <div className='menu-accordion gap-0.5 pl-[10px] relative before:absolute before:left-[20px] before:top-0 before:bottom-0 before:border-l before:border-gray-200'>
@@ -124,7 +124,6 @@ export default function Sidebar() {
 
   useEffect(() => {
     if (cookies['menu-site']) {
-      console.log(props.auth?.user?.is_admin, cookies['menu-site']);
       if (props.auth?.user?.is_admin === '1' || props.auth?.user?.is_admin === 'TRUE') {
         setSidebar(sidebarAdmin);
       } else if (cookies['menu-site'] === 'business-trip') {
@@ -139,14 +138,14 @@ export default function Sidebar() {
 
   return (
     <div
-      className='sidebar dark:bg-coal-600 bg-light border-e border-e-gray-200 dark:border-e-coal-100 fixed z-20 hidden lg:flex flex-col items-stretch shrink-0'
+      className='fixed z-20 flex-col items-stretch hidden sidebar dark:bg-coal-600 bg-light border-e border-e-gray-200 dark:border-e-coal-100 lg:flex shrink-0'
       data-drawer='true'
-      data-drawer-classname='drawer drawer-start top-0 bottom-0'
+      data-drawer-classname='top-0 bottom-0 drawer drawer-start'
       data-drawer-enable='true|lg:false'
       id='sidebar'
     >
       <div
-        className='sidebar-header hidden lg:flex items-center relative justify-between px-3 lg:px-6 shrink-0'
+        className='relative items-center justify-between hidden px-3 sidebar-header lg:flex lg:px-6 shrink-0'
         id='sidebar_header'
       >
         <a className='dark:hidden' href='/'>
@@ -163,19 +162,19 @@ export default function Sidebar() {
           data-toggle-classname='sidebar-collapse'
           id='sidebar_toggle'
         >
-          <i className='ki-filled ki-black-left-line toggle-active:rotate-180 transition-all duration-300'></i>
+          <i className='transition-all duration-300 ki-filled ki-black-left-line toggle-active:rotate-180'></i>
         </button>
       </div>
       <ScrollArea>
         <div
-          className='sidebar-content flex grow shrink-0 py-5 pr-2'
+          className='flex py-5 pr-2 sidebar-content grow shrink-0'
           id='sidebar_content'
           style={{
             height: '93vh',
           }}
         >
           <div
-            className='scrollable-y-hover grow shrink-0 flex pl-2 lg:pl-5 pr-1 lg:pr-3'
+            className='flex pl-2 pr-1 scrollable-y-hover grow shrink-0 lg:pl-5 lg:pr-3'
             data-scrollable='true'
             data-scrollable-dependencies='#sidebar_header'
             data-scrollable-height='auto'

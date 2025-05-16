@@ -364,7 +364,7 @@ class ReimbuseController extends Controller
         ];
         $forms = $data['forms'];
         $response = $this->reimbursementService->updateReimbursements($groupData, $forms);
-
+        
         if (isset($response['error'])) return $this->errorResponse($response['error']);
         return $this->successResponse("Reimbursements updated successfully.");
     }
@@ -560,12 +560,12 @@ class ReimbuseController extends Controller
         foreach ($data->reimburses as $key => $value) {
             $cekUserAssignReimburseType = MasterTypeReimburseUserAssign::where('user_id', Auth::user()->id)->where('reimburse_type_id', $value->reimburseType->id)->first();
             if ($cekUserAssignReimburseType == null || ($cekUserAssignReimburseType != null && $cekUserAssignReimburseType->is_assign == false)) {
-                return $this->errorResponse('Failed, unable to clone this data as the reimbursement type used is not yet assigned to you.');
+                return $this->errorResponse('Failed, unable to resubmit this data as the reimbursement type used is not yet assigned to you.');
             }
 
             $dateNow = Carbon::now()->format('Y-m-d');
             if ($value->reimburseType->interval_claim_period != null && ($dateNow >= $value->claim_date && $dateNow <= Carbon::createFromFormat('Y-m-d', $value->claim_date)->addDays($value->reimburseType->interval_claim_period))) {
-                return $this->errorResponse('Failed, unable to clone this data as the data type reimbursement used falls within the claim period.');
+                return $this->errorResponse('Failed, unable to resubmit this data as the data type reimbursement used falls within the claim period.');
             };
         }
 

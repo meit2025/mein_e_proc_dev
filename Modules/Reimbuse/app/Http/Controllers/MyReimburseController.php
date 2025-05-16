@@ -42,7 +42,7 @@ class MyReimburseController extends Controller
                 'reimburses' => function ($reimburseQuery) {
                     $reimburseQuery->join('reimburse_groups as rg', 'reimburses.group', '=', 'rg.code')
                         ->where(['reimburses.requester' => Auth::user()->nip])
-                        ->whereIn('rg.status_id', [1, 3, 5])
+                        ->whereIn('rg.status_id', [1, 3, 5, 6])
                         ->select('reimburses.*')
                         ->with('reimburseGroup');
                 }
@@ -76,7 +76,7 @@ class MyReimburseController extends Controller
             ->leftJoin('reimburses as r', function($join) {
                 $join->on('r.reimburse_type', '=', 'master_type_reimburses.code')->where('r.requester', Auth::user()->nip)
                 ->leftJoin('reimburse_groups as rg', 'rg.code', '=', 'r.group')
-                ->whereIn('rg.status_id', [1, 3, 5]);
+                ->whereIn('rg.status_id', [1, 3, 5, 6]);
             })
             ->where([
                 'u.id' => Auth::user()->id,
@@ -190,13 +190,13 @@ class MyReimburseController extends Controller
                     $query->where('reimburses.requester', Auth::user()->nip)
                         ->where('reimburses.reimburse_type', $map->code)
                         ->where('pr.code_transaction', 'REIM')
-                        ->whereIn('rg.status_id', [1, 3, 5]);
+                        ->whereIn('rg.status_id', [1, 3, 5, 6]);
                 })
                 ->orWhere(function ($query) use ($map) {
                     $query->where('reimburses.requester', Auth::user()->nip)
                         ->where('reimburses.reimburse_type', $map->code)
                         ->whereNull('pr.code_transaction')
-                        ->whereIn('rg.status_id', [1, 3, 5]);
+                        ->whereIn('rg.status_id', [1, 3, 5, 6]);
                 })->get()->toArray();
 
                 $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] != 'S' && $value['pr_status'] != 'X') && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
@@ -286,13 +286,13 @@ class MyReimburseController extends Controller
                     $query->where('reimburses.for', $map->id)
                         ->where('mtr.id',  $id)
                         ->where('pr.code_transaction', 'REIM')
-                        ->whereIn('rg.status_id', [1, 3, 5]);
+                        ->whereIn('rg.status_id', [1, 3, 5, 6]);
                 })
                 ->orWhere(function ($query) use ($map, $id) {
                     $query->where('reimburses.for', $map->id)
                         ->where('mtr.id',  $id)
                         ->whereNull('pr.code_transaction')
-                        ->whereIn('rg.status_id', [1, 3, 5]);
+                        ->whereIn('rg.status_id', [1, 3, 5, 6]);
                 })->orderByDesc('reimburses.id')->get()->toArray();
 
                 $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] != 'S' && $value['pr_status'] != 'X') && (($value['interval_claim_period'] !== null && $value['on_interval'] == 1) || $value['interval_claim_period'] == null); }), 'balance'));
