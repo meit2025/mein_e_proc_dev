@@ -1526,6 +1526,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                     ))}
                                   </ul>
                                 )}
+                                <hr />
                                 <div className='pb-3 mt-2'>
                                   {formValue.savedAttachment && formValue.savedAttachment.length > 0 && (
                                     <ul>

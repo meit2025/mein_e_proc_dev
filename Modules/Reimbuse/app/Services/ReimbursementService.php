@@ -167,6 +167,15 @@ class ReimbursementService
                 if ($reimburse) {
                     $reimburse->update($validatedData);
                     
+                    if (isset($form['savedAttachment']) && count($form['savedAttachment']) > 0) {
+                        $savedAttachmentId = array_column($form['savedAttachment'], 'id');
+                        $deletedAttachment = ReimburseAttachment::query()->where('reimburse', $reimburse->id)->whereNotIn('id', $savedAttachmentId);
+                        foreach ($deletedAttachment->get() as $attachment) {
+                            Storage::disk('public')->delete('reimburse/' . $attachment->url);
+                            $attachment->delete();
+                        }
+                    }
+                    
                     if (isset($form['attachment'])) {
                         foreach ($form['attachment'] as $file) {
                             $fileName = time() . '_' . str_replace(' ', '', $file->getClientOriginalName());
@@ -175,15 +184,6 @@ class ReimbursementService
                                 'reimburse' => $reimburse->id,
                                 'url' => $fileName,
                             ]);
-                        }
-                    }
-
-                    if (isset($form['savedAttachment']) && count($form['savedAttachment']) > 0) {
-                        $savedAttachmentId = array_column($form['savedAttachment'], 'id');
-                        $deletedAttachment = ReimburseAttachment::query()->where('reimburse', $reimburse->id)->whereNotIn('id', $savedAttachmentId);
-                        foreach ($deletedAttachment->get() as $attachment) {
-                            Storage::disk('public')->delete('reimburse/' . $attachment->url);
-                            $attachment->delete();
                         }
                     }
                 }
