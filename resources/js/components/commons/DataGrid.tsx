@@ -158,7 +158,8 @@ const DataGridComponent: React.FC<DataGridProps> = ({
         setLoading(false);
       }
     },
-    [defaultSearch, sortModel, filterModel, search, value, paginationModel],
+    // [url],
+    [defaultSearch, sortModel, filterModel, search, value, paginationModel, onCreate, onEdit, onClone],
   );
 
   useEffect(() => {
