@@ -263,7 +263,7 @@ class ReportController extends Controller
             $query = MasterTypeReimburse::with([
                     'reimburses' => function ($reimburseQuery) {
                         $reimburseQuery->join('reimburse_groups as rg', 'reimburses.group', '=', 'rg.code')
-                            ->whereIn('rg.status_id', [1, 3, 5, 6])
+                            ->whereIn('rg.status_id', [1, 3, 5])
                             ->select('reimburses.*')
                             ->with('reimburseGroup');
                     }
@@ -315,7 +315,7 @@ class ReportController extends Controller
             })
             ->leftJoin('reimburse_groups as rg', function($join) {
                 $join->on('rg.code', '=', 'r.group')
-                    ->whereIn('rg.status_id', [1, 3, 5, 6]);
+                    ->whereIn('rg.status_id', [1, 3, 5]);
             })
             ->where('master_type_reimburses.is_employee', true)
             ->where(function($query) {
@@ -415,13 +415,13 @@ class ReportController extends Controller
                     $query->where($for, $forValue)
                         ->where('reimburses.reimburse_type', $map->code)
                         ->where('pr.code_transaction', 'REIM')
-                        ->whereIn('rg.status_id', [1, 3, 5, 6]);
+                        ->whereIn('rg.status_id', [1, 3, 5]);
                 })
                 ->orWhere(function ($query) use ($map, $for, $forValue) {
                     $query->where($for, $forValue)
                         ->where('reimburses.reimburse_type', $map->code)
                         ->whereNull('pr.code_transaction')
-                        ->whereIn('rg.status_id', [1, 3, 5, 6]);
+                        ->whereIn('rg.status_id', [1, 3, 5]);
                 })->get()->toArray();
 
                 $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) { return ($value['clearing_status'] != 'S' && $value['pr_status'] != 'X') && (($value['has_interval_claim'] !== null && $value['on_interval'] == 1) || $value['has_interval_claim'] == null); }), 'balance'));
@@ -480,7 +480,7 @@ class ReportController extends Controller
             $query = MasterTypeReimburse::with([
                     'reimburses' => function ($reimburseQuery) {
                         $reimburseQuery->join('reimburse_groups as rg', 'reimburses.group', '=', 'rg.code')
-                            ->whereIn('rg.status_id', [1, 3, 5, 6])
+                            ->whereIn('rg.status_id', [1, 3, 5])
                             ->select('reimburses.*')
                             ->with('reimburseGroup');
                     }
@@ -532,7 +532,7 @@ class ReportController extends Controller
             })
             ->leftJoin('reimburse_groups as rg', function($join) {
                 $join->on('rg.code', '=', 'r.group')
-                    ->whereIn('rg.status_id', [1, 3, 5, 6]);
+                    ->whereIn('rg.status_id', [1, 3, 5]);
             })
             ->where('master_type_reimburses.is_employee', true)
             ->where(function($query) {
@@ -629,13 +629,13 @@ class ReportController extends Controller
                     $query->where($for, $forValue)
                         ->where('reimburses.reimburse_type', $item->code)
                         ->where('pr.code_transaction', 'REIM')
-                        ->whereIn('rg.status_id', [1, 3, 5, 6]);
+                        ->whereIn('rg.status_id', [1, 3, 5]);
                 })
                 ->orWhere(function ($query) use ($item, $for, $forValue) {
                     $query->where($for, $forValue)
                         ->where('reimburses.reimburse_type', $item->code)
                         ->whereNull('pr.code_transaction')
-                        ->whereIn('rg.status_id', [1, 3, 5, 6]);
+                        ->whereIn('rg.status_id', [1, 3, 5]);
                 })->get()->toArray();
 
                 $unpaidBalance = array_sum(array_column(array_filter($getBalanceOnPr, function ($value) {
