@@ -96,7 +96,7 @@ class ReimbursementService
                 $validatedData['requester'] = $groupData['requester'];
 
                 $reimburse = Reimburse::create($validatedData);
-
+                
                 if (isset($form['attachment'])) {
                     foreach ($form['attachment'] as $file) {
                         $fileName = time() . '_' . str_replace(' ', '', $file->getClientOriginalName());
@@ -162,24 +162,28 @@ class ReimbursementService
                     return ['error' => $validator->errors()];
                 }
                 $validatedData = $validator->validated();
-                // $validatedData['short_text'] = $form['short_text'];
                 
                 $reimburse = Reimburse::find($form['reimburseId']);
                 if ($reimburse) {
                     $reimburse->update($validatedData);
-
+                    
                     if (isset($form['attachment'])) {
-                        foreach ($reimburse->attachments as $attachment) {
-                            Storage::delete($attachment->path);
-                            $attachment->delete();
-                        }
-
                         foreach ($form['attachment'] as $file) {
-                            $path = $file->store('reimburse_attachments');
+                            $fileName = time() . '_' . str_replace(' ', '', $file->getClientOriginalName());
+                            $filePath = $file->storeAs('reimburse', $fileName, 'public');
                             ReimburseAttachment::create([
-                                'reimburse_id' => $reimburse->id,
-                                'path' => $path,
+                                'reimburse' => $reimburse->id,
+                                'url' => $fileName,
                             ]);
+                        }
+                    }
+
+                    if (isset($form['savedAttachment']) && count($form['savedAttachment']) > 0) {
+                        $savedAttachmentId = array_column($form['savedAttachment'], 'id');
+                        $deletedAttachment = ReimburseAttachment::query()->where('reimburse', $reimburse->id)->whereNotIn('id', $savedAttachmentId);
+                        foreach ($deletedAttachment->get() as $attachment) {
+                            Storage::disk('public')->delete('reimburse/' . $attachment->url);
+                            $attachment->delete();
                         }
                     }
                 }

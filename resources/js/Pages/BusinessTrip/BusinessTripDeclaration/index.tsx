@@ -5,14 +5,8 @@ import React, { ReactNode } from 'react';
 import { CustomDialog } from '@/components/commons/CustomDialog';
 import { BusinessTripType, columns, UserModel } from './models/models';
 
-import {
-  DELET_API,
-  GET_LIST_BUSINESS_TRIP_DECLARATION,
-} from '@/endpoint/business-trip-declaration/api';
-import {
-  CLONE_PAGE_BUSINESS_TRIP_DECLARATION,
-  DETAIL_PAGE_BUSINESS_TRIP_DECLARATION,
-} from '@/endpoint/business-trip-declaration/page';
+import { GET_LIST_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/api';
+import { DETAIL_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
 import { PurposeTypeModel } from '../PurposeType/models/models';
 import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
 
@@ -66,7 +60,7 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         }}
         onCreate={openFormHandler}
         columns={columns}
-        // isClone={true}
+        isClone={true}
         // onEdit={(value) => {
         //   setBusinessTripForm({
         //     type: BusinessTripType.edit,

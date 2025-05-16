@@ -107,6 +107,8 @@ export const BussinessTripFormV1 = ({
           destination: z.string().nonempty('Destinantion Required'),
           business_trip_start_date: z.date().optional(),
           business_trip_end_date: z.date().optional(),
+          pajak_id: z.string().optional(),
+          purchasing_group_id: z.string().optional(),
           detail_attedances: z.array(
             z.object({
               date: z.string().optional(),
@@ -267,8 +269,10 @@ export const BussinessTripFormV1 = ({
       formData.append('remark', values.remark ?? '');
       formData.append('total_destination', `${values.total_destination}`);
       values.destinations.forEach((item, index) => {
+        console.log(item, 'item');
         formData.append(`destinations[${index}]`, JSON.stringify(item));
       });
+      console.log(values, 'values');
       if (type === BusinessTripType.create) {
         values.attachment.forEach((file: any, index: number) => {
           if (file) {
@@ -325,14 +329,19 @@ export const BussinessTripFormV1 = ({
 
   const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
   async function handleGetBusinessTrip(value: string) {
-    form.setValue('request_no', value || '');
+    // form.setValue('request_no', value || '');
     const url = GET_DETAIL_BUSINESS_TRIP_DECLARATION(value);
 
     try {
       const response = await axiosInstance.get(url);
 
       const businessTripData = response.data.data;
-      console.log(response.data.data, 'response');
+      if (type === BusinessTripType.clone) {
+        console.log(businessTripData.parent_id, 'businessTripData');
+        form.setValue('request_no', businessTripData.parent_id.toString() || '');
+      } else {
+        form.setValue('request_no', value.toString() || '');
+      }
 
       setIsCashAdvance(businessTripData.cash_advance == 1 ? true : false);
       form.setValue('remark', businessTripData.remarks || '');
@@ -340,19 +349,20 @@ export const BussinessTripFormV1 = ({
       form.setValue('cash_advance', businessTripData.cash_advance == 1 ? true : false);
       form.setValue('reference_number', businessTripData.reference_number);
       form.setValue('total_percent', Number(businessTripData.total_percent));
-      form.setValue('request_no', value);
       form.setValue(
         'total_cash_advance',
         businessTripData?.total_cash_advance !== null
           ? formatRupiah(businessTripData.total_cash_advance, false)
           : '0',
       );
+      //   form.setValue('request_no', value.toString() || '');
+
       setBusinessTripDetail(response.data.data as BusinessTripModel);
-      if (type === BusinessTripType.create) {
-        setListDestination(businessTripData.destinations);
-        setAllowancesProperty(businessTripData.destinations);
-      }
+      setListDestination(businessTripData.destinations);
+      setAllowancesProperty(businessTripData.destinations);
       setTotalDestination(businessTripData.total_destination);
+
+      console.log(form.getValues());
     } catch (e) {
       console.log(e);
     }
@@ -376,6 +386,8 @@ export const BussinessTripFormV1 = ({
       detail_attedances: destination.detail_attedances || [],
       total_allowance: destination.total_allowance || 0,
       other: destination.other || [],
+      pajak_id: destination.pajak_id.toString(),
+      purchasing_group_id: destination.purchasing_group_id.toString(),
     }));
     form.setValue('destinations', destinationForm);
   }
@@ -518,33 +530,14 @@ export const BussinessTripFormV1 = ({
     const response = await axios.get(url);
     const data = response.data.data;
 
-    await handleGetBusinessTrip(data.parent_id.toString());
+    // await handleGetBusinessTrip(data.parent_id ?? '');
+    await handleGetBusinessTrip(data.id);
+
     setfileAttachment(data.attachments as BusinessTripAttachement[]);
-
-    const urlDetail = GET_DETAIL_BUSINESS_TRIP_DECLARATION(id);
-    const responseDetail = await axios.get(urlDetail);
-    const dataDetail = responseDetail.data.data;
-
-    setListDestination(dataDetail.destinations);
-    setAllowancesProperty(dataDetail.destinations);
-    try {
-    } catch (e) {
-      const error = e as AxiosError;
-    }
   }
 
   React.useEffect(() => {
     if (id && type === BusinessTripType.clone) {
-      getdataRequestNo('', {
-        name: 'request_no',
-        id: 'id',
-        tabel: 'business_trip',
-        idType: 'string',
-        where: {
-          key: 'type',
-          parameter: 'request',
-        },
-      });
       getDetailData();
     }
   }, [type]);
@@ -1553,6 +1546,7 @@ export function DetailAllowance({
       {detailAllowanceceWatch.map((allowance: any, index: any) => (
         // eslint-disable-next-line react/jsx-key
         <AllowanceRowInput
+          key={index}
           form={form}
           allowance={allowance}
           destinationIndex={destinationIndex}

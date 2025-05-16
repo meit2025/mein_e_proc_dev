@@ -88,7 +88,7 @@ export const Index = ({
 
   return (
     <>
-      <div className='flex md:mb-4 mb-2 w-full justify-end'>
+      <div className='flex justify-end w-full mb-2 md:mb-4'>
         <CustomDialog
           onClose={() => setOpenForm(false)}
           open={openForm}
@@ -110,7 +110,7 @@ export const Index = ({
         </CustomDialog>
       </div>
 
-      <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
+      <div className='grid grid-cols-2 gap-3 md:grid-cols-4'>
         <div>
           {/* <FormField
                 control={form.control}

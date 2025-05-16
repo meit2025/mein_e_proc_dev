@@ -159,7 +159,9 @@ class BusinessTripDeclarationController extends Controller
                 'destination' => $value->destination,
                 'other_allowance' => $value->other_allowance,
                 'pajak' => $value->pajak->mwszkz ?? '',
+                'pajak_id' => $value->pajak_id ?? '',
                 'purchasing_group' => $value->purchasingGroup->purchasing_group ?? '',
+                'purchasing_group_id' => $value->purchasing_group_id ?? '',
                 'business_trip_start_date' => $value->business_trip_start_date,
                 'business_trip_end_date' => $value->business_trip_end_date,
                 'detail_attedances' => $detailAttendance,
@@ -440,6 +442,8 @@ class BusinessTripDeclarationController extends Controller
                     'business_trip_start_date' => date('Y-m-d', strtotime($data_destination['business_trip_start_date'])),
                     'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
                     'other_allowance' => $other,
+                    'pajak_id' => $data_destination['pajak_id'],
+                    'purchasing_group_id' => $data_destination['purchasing_group_id'],
                 ]);
                 foreach ($data_destination['detail_attedances'] as $key => $destination) {
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
@@ -644,6 +648,8 @@ class BusinessTripDeclarationController extends Controller
                     'business_trip_start_date' => date('Y-m-d', strtotime($data_destination['business_trip_start_date'])),
                     'business_trip_end_date' => date('Y-m-d', strtotime($data_destination['business_trip_end_date'])),
                     'other_allowance' => $other,
+                    'pajak_id' => $data_destination['pajak_id'],
+                    'purchasing_group_id' => $data_destination['purchasing_group_id'],
                 ]);
                 foreach ($data_destination['detail_attedances'] as $key => $destination) {
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
@@ -690,6 +696,7 @@ class BusinessTripDeclarationController extends Controller
             // $bt->processTextData($request->request_no);
             DB::commit();
         } catch (\Exception $e) {
+            dd($e);
             DB::rollBack();
         }
     }
