@@ -388,6 +388,7 @@ export const BussinessTripFormV1 = ({
       other: destination.other || [],
       pajak_id: destination.pajak_id.toString(),
       purchasing_group_id: destination.purchasing_group_id.toString(),
+      restricted_area: destination.restricted_area || false,
     }));
     form.setValue('destinations', destinationForm);
   }
@@ -996,6 +997,14 @@ export function BussinessDestinationForm({
           <tr>
             <td width={200}>Destination</td>
             <td>{destination.destination}</td>
+          </tr>
+          <tr>
+            <td width={200}>Restricted Area</td>
+            <td>
+              {destination.restricted_area == true || destination.restricted_area == 1
+                ? 'Yes'
+                : 'No'}
+            </td>
           </tr>
           <tr>
             <td width={200}>Pajak</td>

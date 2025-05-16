@@ -395,8 +395,12 @@ export const BussinessTripFormV1 = ({
   const [dateBusinessTripByUser, setDateBusinessTripByUser] = React.useState<[]>([]);
 
   async function getDateBusinessTrip() {
-    const userid = isAdmin == '0' ? idUser || 0 : selectedUserId || 0;
-    const url = GET_DATE_BUSINESS_TRIP_BY_USER(userid);
+    let userid = isAdmin == '0' ? idUser || 0 : selectedUserId || 0;
+
+    if (type == BusinessTripType.clone) {
+      userid = form.getValues('request_for');
+    }
+    const url = GET_DATE_BUSINESS_TRIP_BY_USER(userid) + `?id=${id}`;
     const response = await axiosInstance.get(url);
     setDateBusinessTripByUser(response.data.data);
   }
@@ -437,7 +441,7 @@ export const BussinessTripFormV1 = ({
   const totalDestinationHandler = (value: string) => {
     form.setValue('total_destination', parseInt(value, 10));
     setTotalDestination(value);
-    setAllowancesProperty();
+    setAllowancesProperty(value);
     setSelectedDates([]);
     // let valueToInt = parseInt(value);
   };
@@ -569,10 +573,10 @@ export const BussinessTripFormV1 = ({
     // console.log('values bg', values);
   };
 
-  function setAllowancesProperty() {
+  function setAllowancesProperty(value?: string) {
     const destinationForm = [];
 
-    const destinationCount = parseInt(totalDestination);
+    const destinationCount = parseInt(value || totalDestination);
 
     for (let i = 0; i < destinationCount; i++) {
       destinationForm.push({

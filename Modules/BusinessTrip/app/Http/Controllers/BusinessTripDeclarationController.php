@@ -155,6 +155,7 @@ class BusinessTripDeclarationController extends Controller
                 ];
             }
 
+
             $destinations[] = [
                 'destination' => $value->destination,
                 'other_allowance' => $value->other_allowance,
@@ -167,6 +168,8 @@ class BusinessTripDeclarationController extends Controller
                 'detail_attedances' => $detailAttendance,
                 'allowances' => $allowances,
                 'total_allowance' => $total_allowance,
+                'total_allowance' => $total_allowance,
+                'restricted_area' => $value->restricted_area,
                 // 'allowancesResultItem' => $allowancesResultItem,
             ];
         }
@@ -692,11 +695,8 @@ class BusinessTripDeclarationController extends Controller
             }
 
             $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP_DECLARATION');
-            // $bt = new BtPOService();
-            // $bt->processTextData($request->request_no);
             DB::commit();
         } catch (\Exception $e) {
-            dd($e);
             DB::rollBack();
         }
     }
