@@ -58,7 +58,7 @@ const ReimburseDetail = () => {
           <strong>Remark Header:</strong> {data?.remark}
         </p>
         <br />
-        <p className='text-sm flex items-center gap-2'>
+        <p className='flex items-center gap-2 text-sm'>
           <strong>Status:</strong>{' '}
           <CustomStatus
             name={data?.reimbursementStatus?.name!}
@@ -80,7 +80,7 @@ const ReimburseDetail = () => {
               <div key={index}>
                 <h3>Detail Form {index + 1}</h3>
 
-                <table className='info-table text-sm mt-4'>
+                <table className='mt-4 text-sm info-table'>
                   <tr>
                     <td>
                       <strong>Reimburse Type</strong>
@@ -196,8 +196,10 @@ const ReimburseDetail = () => {
                       <strong>Attachment File</strong>
                     </td>
                     <td>
+                      <ul></ul>
                       {reimburse?.reimburse_attachment.map((attachment: any, index: number) => (
-                        <>
+                        <li>
+                          
                           <a
                             href={`/storage/reimburse/${attachment.url}`}
                             target='_blank'
@@ -208,7 +210,7 @@ const ReimburseDetail = () => {
                             {attachment.url}
                           </a>
                           <br />
-                        </>
+                        </li>
                       ))}
                     </td>
                   </tr>
