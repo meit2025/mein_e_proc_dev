@@ -165,7 +165,7 @@ export const BussinessTripFormV1 = ({
       total_destination: z.number().min(1, 'Total Destinantion Required'),
       cash_advance: z.boolean().nullable().optional(),
       total_percent: z.number().nullable().optional(),
-      total_cash_advance: z.string().nullable().optional(),
+      total_cash_advance: z.union([z.string(), z.number()]).nullable().optional(),
       destinations: z.array(
         z.object({
           destination: z.string().min(1, 'Destinantion is Required'),
