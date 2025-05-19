@@ -577,25 +577,29 @@ export const BussinessTripFormV1 = ({
   };
 
   function setAllowancesProperty(value?: string) {
-    const destinationForm = [];
-
     const destinationCount = parseInt(value || totalDestination);
+    const currentDestinations = form.getValues('destinations') || [];
 
-    for (let i = 0; i < destinationCount; i++) {
-      destinationForm.push({
-        destination: '',
-        // business_trip_start_date: new Date(),
-        // business_trip_end_date: new Date(),
-        business_trip_start_date: '',
-        business_trip_end_date: '',
-        pajak_id: 'V0',
-        purchasing_group_id: '',
-        restricted_area: false,
-        allowances: [],
-        detail_attedances: [],
-      });
+    const newDestinations = [...currentDestinations];
+
+    if (destinationCount < currentDestinations.length) {
+      // Kurangi data dari akhir array
+      newDestinations.splice(destinationCount);
+    } else if (destinationCount > currentDestinations.length) {
+      // Tambah data kosong ke akhir array
+      for (let i = currentDestinations.length; i < destinationCount; i++) {
+        newDestinations.push({
+          destination: '',
+          pajak_id: 'V0',
+          purchasing_group_id: '',
+          restricted_area: false,
+          allowances: [],
+          detail_attedances: [],
+        });
+      }
     }
-    form.setValue('destinations', destinationForm);
+    console.log(newDestinations, ' newDestinations');
+    form.setValue('destinations', newDestinations);
   }
 
   function getUser() {}
