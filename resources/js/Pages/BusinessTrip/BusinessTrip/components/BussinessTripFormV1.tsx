@@ -338,6 +338,9 @@ export const BussinessTripFormV1 = ({
       form.setValue('total_destination', data.total_destination);
       form.setValue('cash_advance', data.cash_advance == 1 ? true : false);
       form.setValue('total_percent', data.total_percent);
+      if (data.total_cash_advance != null) {
+        data.total_cash_advance = String(data.total_cash_advance);
+      }
       form.setValue('total_cash_advance', data.total_cash_advance);
       //   console.log(data.destinations, ' data.destinations');
       form.setValue(
