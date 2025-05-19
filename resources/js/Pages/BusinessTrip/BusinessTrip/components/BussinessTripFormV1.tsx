@@ -165,7 +165,7 @@ export const BussinessTripFormV1 = ({
       total_destination: z.number().min(1, 'Total Destinantion Required'),
       cash_advance: z.boolean().nullable().optional(),
       total_percent: z.number().nullable().optional(),
-      total_cash_advance: z.union([z.string(), z.number()]).nullable().optional(),
+      total_cash_advance: z.string().nullable().optional(),
       destinations: z.array(
         z.object({
           destination: z.string().min(1, 'Destinantion is Required'),
@@ -337,11 +337,11 @@ export const BussinessTripFormV1 = ({
       form.setValue('remark', data.remarks);
       form.setValue('total_destination', data.total_destination);
       form.setValue('cash_advance', data.cash_advance == 1 ? true : false);
-      form.setValue('total_percent', data.total_percent);
-      if (data.total_cash_advance != null) {
-        data.total_cash_advance = String(data.total_cash_advance);
-      }
-      form.setValue('total_cash_advance', data.total_cash_advance);
+      form.setValue('total_percent', Number(data.total_percent) || 0);
+      form.setValue(
+        'total_cash_advance',
+        data?.total_cash_advance !== null ? formatRupiah(data.total_cash_advance, false) : '0',
+      );
       //   console.log(data.destinations, ' data.destinations');
       form.setValue(
         'destinations',

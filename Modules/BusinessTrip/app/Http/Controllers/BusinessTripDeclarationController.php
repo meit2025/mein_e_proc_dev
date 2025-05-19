@@ -447,6 +447,7 @@ class BusinessTripDeclarationController extends Controller
                     'other_allowance' => $other,
                     'pajak_id' => $data_destination['pajak_id'],
                     'purchasing_group_id' => $data_destination['purchasing_group_id'],
+                    'restricted_area' => $data_destination['restricted_area'] ?? false,
                 ]);
                 foreach ($data_destination['detail_attedances'] as $key => $destination) {
                     $businessTripDetailAttedance = BusinessTripDetailAttedance::create([
