@@ -172,6 +172,7 @@ export const BussinessTripFormV1 = ({
       total_cash_advance: '0',
       destinations: [
         {
+          restricted_area: false,
           destination: '',
           business_trip_start_date: new Date(),
           business_trip_end_date: new Date(),
@@ -388,6 +389,13 @@ export const BussinessTripFormV1 = ({
       other: destination.other || [],
       pajak_id: destination.pajak_id.toString(),
       purchasing_group_id: destination.purchasing_group_id.toString(),
+      restricted_area:
+        destination.restricted_area == 1 ||
+        destination.restricted_area == true ||
+        destination.restricted_area == '1' ||
+        destination.restricted_area == 'true'
+          ? true
+          : false,
     }));
     form.setValue('destinations', destinationForm);
   }
@@ -996,6 +1004,14 @@ export function BussinessDestinationForm({
           <tr>
             <td width={200}>Destination</td>
             <td>{destination.destination}</td>
+          </tr>
+          <tr>
+            <td width={200}>Restricted Area</td>
+            <td>
+              {destination.restricted_area == true || destination.restricted_area == 1
+                ? 'Yes'
+                : 'No'}
+            </td>
           </tr>
           <tr>
             <td width={200}>Pajak</td>

@@ -337,8 +337,11 @@ export const BussinessTripFormV1 = ({
       form.setValue('remark', data.remarks);
       form.setValue('total_destination', data.total_destination);
       form.setValue('cash_advance', data.cash_advance == 1 ? true : false);
-      form.setValue('total_percent', data.total_percent);
-      form.setValue('total_cash_advance', data.total_cash_advance);
+      form.setValue('total_percent', Number(data.total_percent) || 0);
+      form.setValue(
+        'total_cash_advance',
+        data?.total_cash_advance !== null ? formatRupiah(data.total_cash_advance, false) : '0',
+      );
       //   console.log(data.destinations, ' data.destinations');
       form.setValue(
         'destinations',
@@ -395,8 +398,12 @@ export const BussinessTripFormV1 = ({
   const [dateBusinessTripByUser, setDateBusinessTripByUser] = React.useState<[]>([]);
 
   async function getDateBusinessTrip() {
-    const userid = isAdmin == '0' ? idUser || 0 : selectedUserId || 0;
-    const url = GET_DATE_BUSINESS_TRIP_BY_USER(userid);
+    let userid = isAdmin == '0' ? idUser || 0 : selectedUserId || 0;
+
+    if (type == BusinessTripType.clone) {
+      userid = form.getValues('request_for');
+    }
+    const url = GET_DATE_BUSINESS_TRIP_BY_USER(userid) + `?id=${id}`;
     const response = await axiosInstance.get(url);
     setDateBusinessTripByUser(response.data.data);
   }
@@ -437,7 +444,7 @@ export const BussinessTripFormV1 = ({
   const totalDestinationHandler = (value: string) => {
     form.setValue('total_destination', parseInt(value, 10));
     setTotalDestination(value);
-    setAllowancesProperty();
+    setAllowancesProperty(value);
     setSelectedDates([]);
     // let valueToInt = parseInt(value);
   };
@@ -569,26 +576,30 @@ export const BussinessTripFormV1 = ({
     // console.log('values bg', values);
   };
 
-  function setAllowancesProperty() {
-    const destinationForm = [];
+  function setAllowancesProperty(value?: string) {
+    const destinationCount = parseInt(value || totalDestination);
+    const currentDestinations = form.getValues('destinations') || [];
 
-    const destinationCount = parseInt(totalDestination);
+    const newDestinations = [...currentDestinations];
 
-    for (let i = 0; i < destinationCount; i++) {
-      destinationForm.push({
-        destination: '',
-        // business_trip_start_date: new Date(),
-        // business_trip_end_date: new Date(),
-        business_trip_start_date: '',
-        business_trip_end_date: '',
-        pajak_id: 'V0',
-        purchasing_group_id: '',
-        restricted_area: false,
-        allowances: [],
-        detail_attedances: [],
-      });
+    if (destinationCount < currentDestinations.length) {
+      // Kurangi data dari akhir array
+      newDestinations.splice(destinationCount);
+    } else if (destinationCount > currentDestinations.length) {
+      // Tambah data kosong ke akhir array
+      for (let i = currentDestinations.length; i < destinationCount; i++) {
+        newDestinations.push({
+          destination: '',
+          pajak_id: 'V0',
+          purchasing_group_id: '',
+          restricted_area: false,
+          allowances: [],
+          detail_attedances: [],
+        });
+      }
     }
-    form.setValue('destinations', destinationForm);
+    console.log(newDestinations, ' newDestinations');
+    form.setValue('destinations', newDestinations);
   }
 
   function getUser() {}

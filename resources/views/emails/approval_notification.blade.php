@@ -80,7 +80,9 @@
                             <td>{{$item['pr']}}</td>
                             <td>{{$item['name']}}</td>
                             <td>{{$item['type']}}</td>
-                            <td><a href="{{$item['url']}}" class="link">Link</a></td>
+                            <td>
+                                <a href="{{ $item['url'] ?? '#' }}" class="link">Link</a>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>

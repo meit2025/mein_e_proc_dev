@@ -106,6 +106,7 @@ export const Index = ({
       </div>
       <DataGridComponent
         isHistory={true}
+        isClone={true}
         role={{
           detail: `${roleAkses} view`,
           create: `${roleAkses} create`,

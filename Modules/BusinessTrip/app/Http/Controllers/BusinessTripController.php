@@ -857,21 +857,23 @@ class BusinessTripController extends Controller
         return $this->successResponse($data);
     }
 
-    function getDateByUser($user_id)
+    function getDateByUser(Request $request, $user_id)
     {
         $data = BusinessTripDestination::whereHas('businessTrip', function ($query) use ($user_id) {
             $query->where('request_for', $user_id)
                 ->where('type', 'request')
-                ->whereIn('status_id', [1, 3, 5]);
+                ->whereIn('status_id', [1, 3, 5, 6]);
         })->get();
+
         $destination = [];
         $offset = 10;
         foreach ($data as $key => $value) {
             // Pastikan status approval bukan 'Cancel' atau 'Reject'
-            $hasValidApproval = Approval::where('document_id', $value->business_trip_id)->whereIn('status', ['Rejected', 'Revise'])->exists();
+            $hasValidApproval = Approval::where('document_id', $value->business_trip_id)->whereIn('status', ['Rejected', 'Cancel'])->exists();
 
-            if (!$hasValidApproval) {
+            if (!$hasValidApproval && $value->business_trip_id != $request->id) {
                 $destination[$key + $offset] = [
+                    'id' => $value->business_trip_id,
                     'from' => $value->business_trip_start_date,
                     'to' => $value->business_trip_end_date,
                 ];
