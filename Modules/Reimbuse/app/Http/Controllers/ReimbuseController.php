@@ -483,7 +483,7 @@ class ReimbuseController extends Controller
         ]);
     }
 
-    function print($id)
+    public function print($id)
     {
         $reimburseGroup = ReimburseGroup::where('id', $id)
             ->with(['user', 'costCenter', 'status'])
@@ -542,7 +542,7 @@ class ReimbuseController extends Controller
         return $this->successResponse($data);
     }
 
-    function dropdownEmployee(Request $request)
+    public function dropdownEmployee(Request $request)
     {
         $data = User::selectRaw("name || ' [' || nip || ']' as label, nip as value");
         if (Auth::user()->is_admin == 0) $data = $data->where('id', Auth::user()->id);
@@ -556,9 +556,10 @@ class ReimbuseController extends Controller
 
     public function cloneValidation($id)
     {
-        $data =  ReimburseGroup::with(['reimburses.reimburseType'])->where('id', $id)->first();
+        $data =  ReimburseGroup::with(['reimburses.reimburseType', 'user'])->find($id);
         foreach ($data->reimburses as $key => $value) {
-            $cekUserAssignReimburseType = MasterTypeReimburseUserAssign::where('user_id', Auth::user()->id)->where('reimburse_type_id', $value->reimburseType->id)->first();
+            $cekUserAssignReimburseType = MasterTypeReimburseUserAssign::where('user_id', $data->user->id)->where('reimburse_type_id', $value->reimburseType->id)->first();
+            
             if ($cekUserAssignReimburseType == null || ($cekUserAssignReimburseType != null && $cekUserAssignReimburseType->is_assign == false)) {
                 return $this->errorResponse('Failed, unable to resubmit this data as the reimbursement type used is not yet assigned to you.');
             }
