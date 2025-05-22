@@ -901,6 +901,20 @@ class BusinessTripController extends Controller
                 'status_id' => 1,
             ]);
 
+
+
+            if ($request->file_existing != null) {
+                // DELETE ATTACHMENT DULU JIKA ADA YANG DI HAPUS
+                $array_id_exist = [];
+                foreach ($request->file_existing as $key => $attachment) {
+                    $decode = json_decode($attachment);
+                    $array_id_exist[] = $decode->id;
+                }
+                $businessTrip->attachment()->whereNotIn('id', $array_id_exist)->delete();
+            } else {
+                $businessTrip->attachment()->delete();
+            }
+
             if ($request->attachment != null) {
                 foreach ($request->attachment as $row) {
                     // Ambil nama asli file
