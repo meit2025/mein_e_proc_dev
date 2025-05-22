@@ -69,21 +69,21 @@ export const Index = ({
   }
 
   async function cloneFormHandler(id: string) {
-    try {
-      const response = await axiosInstance.get(CHECK_CLONE_VALIDATION_REIMBURSE(id), {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      showToast(response?.data?.data, 'success');
+    // try {
+    //   const response = await axiosInstance.get(CHECK_CLONE_VALIDATION_REIMBURSE(id), {
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //   });
+      // showToast(response?.data?.data, 'success');
       setFormType({
         type: ReimburseFormType.clone,
         id: id,
       });
       setOpenForm(!openForm);
-    } catch (e: any) {
-      showToast(e.response?.data?.message || 'An error occurred', 'error');
-    }
+    // } catch (e: any) {
+    //   showToast(e.response?.data?.message || 'An error occurred', 'error');
+    // }
   }
 
   return (

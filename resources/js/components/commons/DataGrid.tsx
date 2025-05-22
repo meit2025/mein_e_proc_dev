@@ -124,8 +124,6 @@ const DataGridComponent: React.FC<DataGridProps> = ({
     auth: { permission: string[]; user: User; setting_export: string };
   }>();
 
-  console.log('props', props.auth);
-
   const permissions = props.auth?.permission || [];
 
   const fetchRows = useCallback(
