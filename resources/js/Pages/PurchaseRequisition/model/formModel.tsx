@@ -204,24 +204,6 @@ export const formModel: Array<FormFieldModel<any>> = [
       width: '63.3rem',
     },
   },
-  //   {
-  //     type: 'switch',
-  //     name: 'is_conversion_currency',
-  //     label: 'Currency Conversion',
-  //   },
-  //   {
-  //     conditional: true,
-  //     valueConditional: true,
-  //     parameterConditional: 'is_conversion_currency',
-  //     type: 'select',
-  //     name: 'currency_to',
-  //     label: 'Currency Conversion',
-  //     options: [],
-  //     required: true,
-  //     style: {
-  //       width: '63.5rem',
-  //     },
-  //   },
   {
     fieldCustome: true,
     fieldCustomeValue: <Attachment isDisabled={false} />,

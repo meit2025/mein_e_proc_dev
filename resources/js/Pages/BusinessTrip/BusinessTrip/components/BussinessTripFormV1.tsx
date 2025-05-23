@@ -152,6 +152,9 @@ export const BussinessTripFormV1 = ({
       request_for: z.string().min(1, 'Request is required'),
       cost_center_id: z.string().min(1, 'Cost Center is required'),
       remark: z.string().min(1, 'Remark is required'),
+      attachmentOld: z
+        .array(z.object({ id: z.number(), url: z.string(), file_name: z.string() }))
+        .optional(),
       attachment: z.array(
         z
           .instanceof(File)
@@ -331,6 +334,7 @@ export const BussinessTripFormV1 = ({
       });
       setFromRequestNo(data.request_no);
       setfileAttachment(data.attachments as BusinessTripAttachement[]);
+      form.setValue('attachmentOld', data.attachments);
       form.setValue('purpose_type_id', data.purpose_type_id.toString());
       form.setValue('request_for', data.request_for.id.toString());
       form.setValue('cost_center_id', removeLeadingZeros(data.cost_center.cost_center.toString()));
@@ -542,18 +546,21 @@ export const BussinessTripFormV1 = ({
         });
         showToast('succesfully created data', 'success');
       } else {
-        // const formDataEdit = new FormData();
-        // formDataEdit.append('remark', values.remark ?? '');
-        // values.attachment.forEach((file: any, index: number) => {
-        //   if (file) {
-        //     formDataEdit.append(`attachment[${index}]`, file);
-        //   }
-        // });
         fileAttachment.forEach((file: any, index: number) => {
           if (file) {
             formData.append(`file_existing[${index}]`, JSON.stringify(file));
           }
         });
+
+        const hasFileAttachment = fileAttachment.some((file: any) => file);
+        const hasAttachment = values.attachment.some((file: any) => file);
+
+        if (!hasFileAttachment && !hasAttachment) {
+          showToast('Please add at least one attachment', 'error');
+          setLoading(false);
+          return;
+        }
+
         await Inertia.post(`${CLONE_API_BUSINESS_TRIP}/${id}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -592,13 +599,14 @@ export const BussinessTripFormV1 = ({
           destination: '',
           pajak_id: 'V0',
           purchasing_group_id: '',
+          business_trip_start_date: new Date(),
+          business_trip_end_date: new Date(),
           restricted_area: false,
           allowances: [],
           detail_attedances: [],
         });
       }
     }
-    console.log(newDestinations, ' newDestinations');
     form.setValue('destinations', newDestinations);
   }
 
@@ -1271,6 +1279,7 @@ export function AllowanceInputForm({
       {allowanceInput.map((item, index) => {
         return (
           <FormField
+            key={item.id}
             control={form.control}
             name={`destinations.${destinationIndex}.allowances.${index}.detail.${index}.request_price`}
             render={({ field }) => (
@@ -1287,10 +1296,3 @@ export function AllowanceInputForm({
     </>
   );
 }
-// function showToast(arg0: string, arg1: string) {
-//   throw new Error('Function not implemented.');
-// }
-
-// function onSuccess(arg0: boolean) {
-//   throw new Error('Function not implemented.');
-// }

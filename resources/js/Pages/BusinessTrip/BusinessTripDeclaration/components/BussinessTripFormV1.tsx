@@ -273,7 +273,6 @@ export const BussinessTripFormV1 = ({
         console.log(item, 'item');
         formData.append(`destinations[${index}]`, JSON.stringify(item));
       });
-      console.log(values, 'values');
       if (type === BusinessTripType.create) {
         values.attachment.forEach((file: any, index: number) => {
           if (file) {
@@ -298,17 +297,22 @@ export const BussinessTripFormV1 = ({
             formData.append(`file_existing[${index}]`, JSON.stringify(file));
           }
         });
+
+        const hasFileAttachment = fileAttachment.some((file: any) => file);
+        const hasAttachment = values.attachment.some((file: any) => file);
+
+        if (!hasFileAttachment && !hasAttachment) {
+          showToast('Please add at least one attachment', 'error');
+          setLoading(false);
+          return;
+        }
+
         await Inertia.post(`${EDIT_API_BUSINESS_TRIP_DECLARATION}/${id}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
-        // await axios.post(`${EDIT_API_BUSINESS_TRIP_DECLARATION}/${id}`, formData, {
-        //   headers: {
-        //     'Content-Type': 'multipart/form-data',
-        //   },
-        //   withCredentials: true, // jika kamu butuh kirim cookie/session
-        // });
+
         showToast('succesfully updated data', 'success');
       }
 
