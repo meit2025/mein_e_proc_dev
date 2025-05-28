@@ -560,20 +560,25 @@ export const ReimburseForm: React.FC<Props> = ({
       );
       
       let reviseBalance = 0;
-      let reviseLimit = 1;
+      let reviseLimit = 0;
       // Adjust revise condition
       if (type === ReimburseFormType.clone) {
         if (fromGetData) {
           let reviseMatch = (reimburseReviseData.current).find(reimburse => data.reimburseId == reimburse.id )
           reviseBalance   = totalBalance + Number(reviseMatch.balance)
           reviseLimit     = sameTypeForms.length + Number(reviseMatch.limit)
+          setReviseDataUsed((prev) => {
+            const newReviseDataUsed = [...prev];
+            newReviseDataUsed[index] = reviseMatch.id;
+            return newReviseDataUsed;
+          })
         } else {
           let forValue = data.for === "" ? form.getValues('requester') : data.for
           let reviseMatch = (reimburseReviseData.current).find(reimburse => 
             reimburse.reimburse_type === data.reimburse_type && reimburse.for === forValue && !reviseDataUsed.includes(reimburse.id));
           if (reviseMatch !== undefined) {
             reviseBalance = Number(reviseMatch.balance);
-            reviseLimit = sameTypeForms.length + Number(reviseMatch.limit);
+            reviseLimit = Number(reviseMatch.limit);
             setReviseDataUsed((prev) => {
               const newReviseDataUsed = [...prev];
               newReviseDataUsed[index] = reviseMatch.id;
@@ -846,15 +851,24 @@ export const ReimburseForm: React.FC<Props> = ({
                                 generateForms(value);
 
                                 const forms = form.getValues('forms');
-                                if (forms.length > Number(value)) {
-                                  const updatedForms = forms.slice(0, Number(value));
+                                let formIndex = Number(value)
+                                if (forms.length > formIndex) {
+                                  const updatedForms = forms.slice(0, formIndex);
                                   form.setValue('forms', updatedForms);
 
                                   setDetailLimit((prev) => {
                                     let newDetailLimit = [...prev];
-                                    newDetailLimit = newDetailLimit.slice(0, Number(value));
+                                    newDetailLimit = newDetailLimit.slice(0, formIndex);
                                     return newDetailLimit;
                                   });
+                                  
+                                  setActiveTab(`form${Math.max(1, formIndex)}`);
+
+                                  setReviseDataUsed((prev) => {
+                                    const newReviseDataUsed = [...prev];
+                                    newReviseDataUsed[formIndex] = '';
+                                    return newReviseDataUsed;
+                                  })
                                 }
                               }}
                               value={field.value?.toString()}
@@ -1455,7 +1469,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                                   return newDetailLimit;
                                                 });
                                                 updateForm(idx, {
-                                                  ...formValue,
+                                                  ...formItem,
                                                   balance: '',
                                                 });
                                               }
