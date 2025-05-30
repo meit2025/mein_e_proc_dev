@@ -250,7 +250,8 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end'>
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      {(onEdit || url.editUrl) && value === 0 && params.row.status_id === '6' && (
+                      {(onEdit || url.editUrl) && value === 0 && (
+                      // {(onEdit || url.editUrl) && value === 0 && params.row.status_id === '6' && (
                         <>
                           {(!role || permissions.includes(role?.update ?? '')) && (
                             <DropdownMenuItem onClick={() => onEdit && onEdit(params.row.id)}>
