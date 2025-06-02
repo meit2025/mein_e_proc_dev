@@ -57,7 +57,7 @@ const ArrayForm = ({
       isMapping: true,
     });
     getVendor('', {
-      name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
+      name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '') || ' - ' || type",
       id: 'id',
       tabel: 'master_business_partners',
       hiddenZero: true,
@@ -535,8 +535,8 @@ const ArrayForm = ({
             onSearch={async (search) => {
               const isLabelMatch = dataVendor?.some((option) => option.label === search);
               if (search.length > 0 && !isLabelMatch) {
-                await getVendor(search, {
-                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
+                await getVendor('', {
+                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '') || ' - ' ||  type",
                   id: 'id',
                   tabel: 'master_business_partners',
                   hiddenZero: true,
@@ -545,8 +545,8 @@ const ArrayForm = ({
                   raw: true,
                 });
               } else if (search.length === 0 && !isLabelMatch) {
-                await getVendor(search, {
-                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
+                await getVendor('', {
+                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '') || ' - ' || type",
                   id: 'id',
                   tabel: 'master_business_partners',
                   hiddenZero: true,
@@ -554,11 +554,13 @@ const ArrayForm = ({
                   raw: true,
                 });
               }
+              // Return the updated options or an empty array to satisfy the type
+              return dataVendor ?? [];
             }}
             onFocus={async () => {
               const value = getValues(`vendors[${dataIndex}].vendor`);
               await getVendor('', {
-                name: "name_one || ' - '  || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
+                name: "name_one || ' - '  || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '') || ' - ' || type",
                 id: 'id',
                 tabel: 'master_business_partners',
                 hiddenZero: true,
