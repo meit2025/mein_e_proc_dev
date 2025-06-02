@@ -60,7 +60,7 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         }}
         onCreate={openFormHandler}
         columns={columns}
-        isClone={true}
+        // isClone={true}
         // onEdit={(value) => {
         //   setBusinessTripForm({
         //     type: BusinessTripType.edit,
