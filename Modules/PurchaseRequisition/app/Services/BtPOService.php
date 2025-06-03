@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Approval\Models\SettingApproval;
+use Modules\BusinessTrip\Models\BusinessTrip;
 use Modules\BusinessTrip\Models\BusinessTripAttachment;
 use Modules\PurchaseRequisition\Models\PurchaseOrder;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
@@ -140,8 +141,28 @@ class BtPOService
 
     private function findBusinessTripPr($id)
     {
-        $items = PurchaseRequisition::where('purchase_id', $id)->where('code_transaction', 'BTRE')->get();
-        return $items;
+        $items = PurchaseRequisition::where('purchase_id', $id)->where('code_transaction', 'BTRE')->where('item_number', '1')->first();
+        $bt = new BtService();
+
+        $BusinessTrip = BusinessTrip::where('parent_id', $id)
+                ->first();
+
+        $data =  $bt->processTextData($BusinessTrip->id, false);
+        if ($items) {
+            foreach ($data as &$obj) {
+                if (array_key_exists('purchase_requisition_number', $obj)) {
+                    $obj['purchase_requisition_number'] = $items->purchase_requisition_number;
+                    $obj['created_at'] = $items->created_at;
+                    $obj['purchase_id'] = $items->purchase_id;
+                    $obj['remarks'] = $obj['short_text'];
+                }
+            }
+        }
+
+
+        return array_map(function ($item) {
+            return (object) $item;
+        }, $data);
     }
 
     private function findBusinessAttachment($id)

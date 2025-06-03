@@ -1,25 +1,27 @@
-import { CustomDialog } from '@/components/commons/CustomDialog';
-import DataGridComponent from '@/components/commons/DataGrid';
-import { DELET_API_BUSINESS_TRIP, GET_LIST_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
+import {
+  BusinessTripType,
+  Costcenter,
+  Pajak,
+  PurchasingGroup,
+  UserModel,
+  columns,
+} from './models/models';
 import {
   CLONE_PAGE_BUSINESS_TRIP,
   DETAIL_PAGE_BUSINESS_TRIP,
   EDIT_PAGE_BUSINESS_TRIP,
 } from '@/endpoint/business-trip/page';
-import MainLayout from '@/Pages/Layouts/MainLayout';
+import { DELET_API_BUSINESS_TRIP, GET_LIST_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
 import { Link, usePage } from '@inertiajs/react';
 import React, { ReactNode } from 'react';
-import { DestinationModel } from '../Destination/models/models';
-import { PurposeTypeModel } from '../PurposeType/models/models';
+
 import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
-import {
-  BusinessTripType,
-  columns,
-  Costcenter,
-  Pajak,
-  PurchasingGroup,
-  UserModel,
-} from './models/models';
+import { CustomDialog } from '@/components/commons/CustomDialog';
+import DataGridComponent from '@/components/commons/DataGrid';
+import { DestinationModel } from '../Destination/models/models';
+import MainLayout from '@/Pages/Layouts/MainLayout';
+import { PurposeTypeModel } from '../PurposeType/models/models';
+
 interface propsType {
   listPurposeType: PurposeTypeModel[];
   users: UserModel[];

@@ -1,3 +1,22 @@
+import '../css/index.scss';
+
+import * as React from 'react';
+
+import {
+  AllowanceItemModel,
+  BusinessTripType,
+  Costcenter,
+  Pajak,
+  PurchasingGroup,
+} from '../models/models';
+import {
+  CLONE_API_BUSINESS_TRIP,
+  CREATE_API_BUSINESS_TRIP,
+  EDIT_API_BUSINESS_TRIP,
+  GET_DATE_BUSINESS_TRIP_BY_USER,
+  GET_DETAIL_BUSINESS_TRIP,
+  GET_LIST_USER_BUSINESS_TRIP,
+} from '@/endpoint/business-trip/api';
 /* eslint-disable eqeqeq */
 import {
   Form,
@@ -7,33 +26,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/shacdn/form';
-
-import { z } from 'zod';
-
-import { Inertia } from '@inertiajs/inertia';
-
-import { Button } from '@/components/shacdn/button';
-import { ChevronsUpDown } from 'lucide-react';
-
-import { Textarea } from '@/components/shacdn/textarea';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useFieldArray, useForm, useWatch } from 'react-hook-form';
-
-import { ScrollArea } from '@/components/shacdn/scroll-area';
-import { Separator } from '@/components/shacdn/separator';
-import '../css/index.scss';
-
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
-
-import axiosInstance from '@/axiosInstance';
-import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import {
-  WorkflowApprovalDiagramInterface,
-  WorkflowApprovalStepInterface,
-  WorkflowComponent,
-} from '@/components/commons/WorkflowComponent';
-import FormSwitch from '@/components/Input/formSwitchCustom';
-import { Input } from '@/components/shacdn/input';
+  GET_DETAIL_PURPOSE_TYPE,
+  GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE,
+} from '@/endpoint/purpose-type/api';
 import {
   Select,
   SelectContent,
@@ -41,39 +37,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/shacdn/select';
-import { useAlert } from '@/contexts/AlertContext';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
 import {
-  CLONE_API_BUSINESS_TRIP,
-  CREATE_API_BUSINESS_TRIP,
-  EDIT_API_BUSINESS_TRIP,
-  GET_DATE_BUSINESS_TRIP_BY_USER,
-  GET_DETAIL_BUSINESS_TRIP,
-  GET_LIST_USER_BUSINESS_TRIP,
-} from '@/endpoint/business-trip/api';
-import {
-  GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE,
-  GET_DETAIL_PURPOSE_TYPE,
-} from '@/endpoint/purpose-type/api';
-import { Button as ButtonMui } from '@mui/material';
+  WorkflowApprovalDiagramInterface,
+  WorkflowApprovalStepInterface,
+  WorkflowComponent,
+} from '@/components/commons/WorkflowComponent';
 import axios, { AxiosError } from 'axios';
-import moment from 'moment';
-import * as React from 'react';
-import { DestinationModel } from '../../Destination/models/models';
-import { PurposeTypeModel } from '../../PurposeType/models/models';
-import {
-  AllowanceItemModel,
-  BusinessTripType,
-  Costcenter,
-  Pajak,
-  PurchasingGroup,
-} from '../models/models';
-import { GET_LIST_DESTINATION_BY_TYPE } from '@/endpoint/destination/api';
-import useDropdownOptions from '@/lib/getDropdown';
-import FormAutocomplete from '@/components/Input/formDropdown';
-import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
-import { Combobox } from '@/components/shacdn/combobox';
+import { useFieldArray, useForm, useWatch } from 'react-hook-form';
+
 import { BussinesTripDestination } from './BussinesTripDestination';
+import { Button } from '@/components/shacdn/button';
+import { Button as ButtonMui } from '@mui/material';
+import { ChevronsUpDown } from 'lucide-react';
+import { Combobox } from '@/components/shacdn/combobox';
+import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
+import { DestinationModel } from '../../Destination/models/models';
+import FormAutocomplete from '@/components/Input/formDropdown';
+import FormSwitch from '@/components/Input/formSwitchCustom';
+import { GET_LIST_DESTINATION_BY_TYPE } from '@/endpoint/destination/api';
+import { Inertia } from '@inertiajs/inertia';
+import { Input } from '@/components/shacdn/input';
+import { PurposeTypeModel } from '../../PurposeType/models/models';
+import { ScrollArea } from '@/components/shacdn/scroll-area';
+import { Separator } from '@/components/shacdn/separator';
+import { Textarea } from '@/components/shacdn/textarea';
+import axiosInstance from '@/axiosInstance';
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 import { jsx } from 'react/jsx-runtime';
+import moment from 'moment';
+import { useAlert } from '@/contexts/AlertContext';
+import useDropdownOptions from '@/lib/getDropdown';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 interface User {
   id: string;
@@ -265,8 +261,8 @@ export const BussinessTripFormV1 = ({
           restricted_area: false,
           pajak_id: 'V0',
           purchasing_group_id: '',
-          business_trip_start_date: new Date(),
-          business_trip_end_date: new Date(),
+          business_trip_start_date: undefined,
+          business_trip_end_date: undefined,
         },
       ],
     },
@@ -599,8 +595,8 @@ export const BussinessTripFormV1 = ({
           destination: '',
           pajak_id: 'V0',
           purchasing_group_id: '',
-          business_trip_start_date: new Date(),
-          business_trip_end_date: new Date(),
+          business_trip_start_date: undefined,
+          business_trip_end_date: undefined,
           restricted_area: false,
           allowances: [],
           detail_attedances: [],
