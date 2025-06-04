@@ -1,14 +1,13 @@
-import DataGridComponent from '@/components/commons/DataGrid';
-import MainLayout from '@/Pages/Layouts/MainLayout';
+import { BusinessTripType, UserModel, columns } from './models/models';
 import React, { ReactNode } from 'react';
 
-import { CustomDialog } from '@/components/commons/CustomDialog';
-import { BusinessTripType, columns, UserModel } from './models/models';
-
-import { GET_LIST_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/api';
-import { DETAIL_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
-import { PurposeTypeModel } from '../PurposeType/models/models';
 import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
+import { CustomDialog } from '@/components/commons/CustomDialog';
+import { DETAIL_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
+import DataGridComponent from '@/components/commons/DataGrid';
+import { GET_LIST_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/api';
+import MainLayout from '@/Pages/Layouts/MainLayout';
+import { PurposeTypeModel } from '../PurposeType/models/models';
 
 interface propsType {
   listPurposeType: PurposeTypeModel[];
@@ -60,7 +59,7 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         }}
         onCreate={openFormHandler}
         columns={columns}
-        isClone={true}
+        // isClone={true}
         // onEdit={(value) => {
         //   setBusinessTripForm({
         //     type: BusinessTripType.edit,

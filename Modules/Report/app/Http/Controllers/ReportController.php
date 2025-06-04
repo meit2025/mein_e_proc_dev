@@ -409,18 +409,15 @@ class ReportController extends Controller
                 ->join('reimburse_groups as rg', 'rg.code', '=', 'reimburses.group')
                 ->leftJoin('purchase_requisitions as pr', function ($join) {
                     $join->on('rg.id', '=', DB::raw('CAST(pr.purchase_id AS BIGINT)'))
-                        ->where('reimburses.item_number', '=', DB::raw('CAST(pr.item_number AS BIGINT)'));
+                        ->where('reimburses.item_number', '=', DB::raw('CAST(pr.item_number AS BIGINT)'))
+                        ->where(function ($query) {
+                            $query->where('pr.code_transaction', 'REIM')
+                                ->orWhereNull('pr.code_transaction');
+                        });
                 })
                 ->where(function ($query) use ($map, $for, $forValue) {
                     $query->where($for, $forValue)
                         ->where('reimburses.reimburse_type', $map->code)
-                        ->where('pr.code_transaction', 'REIM')
-                        ->whereIn('rg.status_id', [1, 3, 5, 6]);
-                })
-                ->orWhere(function ($query) use ($map, $for, $forValue) {
-                    $query->where($for, $forValue)
-                        ->where('reimburses.reimburse_type', $map->code)
-                        ->whereNull('pr.code_transaction')
                         ->whereIn('rg.status_id', [1, 3, 5, 6]);
                 })->get()->toArray();
 
@@ -623,18 +620,15 @@ class ReportController extends Controller
                 ->join('reimburse_groups as rg', 'rg.code', '=', 'reimburses.group')
                 ->leftJoin('purchase_requisitions as pr', function ($join) {
                     $join->on('rg.id', '=', DB::raw('CAST(pr.purchase_id AS BIGINT)'))
-                        ->where('reimburses.item_number', '=', DB::raw('CAST(pr.item_number AS BIGINT)'));
+                        ->where('reimburses.item_number', '=', DB::raw('CAST(pr.item_number AS BIGINT)'))
+                        ->where(function ($query) {
+                            $query->where('pr.code_transaction', 'REIM')
+                                ->orWhereNull('pr.code_transaction');
+                        });
                 })
                 ->where(function ($query) use ($item, $for, $forValue) {
                     $query->where($for, $forValue)
                         ->where('reimburses.reimburse_type', $item->code)
-                        ->where('pr.code_transaction', 'REIM')
-                        ->whereIn('rg.status_id', [1, 3, 5, 6]);
-                })
-                ->orWhere(function ($query) use ($item, $for, $forValue) {
-                    $query->where($for, $forValue)
-                        ->where('reimburses.reimburse_type', $item->code)
-                        ->whereNull('pr.code_transaction')
                         ->whereIn('rg.status_id', [1, 3, 5, 6]);
                 })->get()->toArray();
 

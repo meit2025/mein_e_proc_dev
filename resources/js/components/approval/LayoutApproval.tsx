@@ -1,15 +1,16 @@
-import axiosInstance from '@/axiosInstance';
-import { Loading } from '@/components/commons/Loading';
+import { Box, Modal } from '@mui/material';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
+
+import { Auth } from '@/Pages/Layouts/Header';
+import Button from '@mui/material/Button';
+import DetailApproval from './detailApproval';
 import FormMapping from '@/components/form/FormMapping';
 import FormTextArea from '@/components/Input/formTextArea';
-import { Auth } from '@/Pages/Layouts/Header';
-import { usePage } from '@inertiajs/react';
-import { Box, Modal } from '@mui/material';
-import Button from '@mui/material/Button';
-import { ReactNode, useCallback, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import DetailApproval from './detailApproval';
+import { Loading } from '@/components/commons/Loading';
+import axiosInstance from '@/axiosInstance';
 import moment from 'moment';
+import { useForm } from 'react-hook-form';
+import { usePage } from '@inertiajs/react';
 
 const style = {
   position: 'absolute',
@@ -109,7 +110,6 @@ const LayoutApproval = ({
     methods.setValue('note', '');
     methods.setValue('id_approval', '');
     methods.setValue('status', '');
-    methods.setValue('type', '');
   };
   const handleOpen = (status: string) => {
     setOpen(true);

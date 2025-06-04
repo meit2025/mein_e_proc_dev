@@ -23,7 +23,7 @@ use Modules\PurchaseRequisition\Models\PurchaseRequisition;
 
 class BtService
 {
-    public function processTextData($id)
+    public function processTextData($id, $saveToFile = true)
     {
         DB::beginTransaction();
         try {
@@ -61,19 +61,25 @@ class BtService
                     $getDestination
                 );
 
-                $dataMapping = $datainsert;
-                $dataMapping['purchase_id'] = $BusinessTrip->id;
-                PurchaseRequisition::create($dataMapping);
+                if ($saveToFile) {
+                    $dataMapping = $datainsert;
+                    $dataMapping['purchase_id'] = $BusinessTrip->id;
+                    PurchaseRequisition::create($dataMapping);
+                }
+
                 $array[] = $datainsert;
             }
 
             if ($BusinessTrip->cash_advance == 1) {
                 $datainsertCash = $this->prepareCashAdvanceData($BusinessTrip, $reqno, $settings);
 
-                $newDataInser = $datainsertCash;
-                $newDataInser['amount'] = $BusinessTrip->total_cash_advance;
-                $newDataInser['purchase_id'] = $BusinessTrip->id;
-                CashAdvance::create($newDataInser);
+                if ($saveToFile) {
+                    $newDataInser = $datainsertCash;
+                    $newDataInser['amount'] = $BusinessTrip->total_cash_advance;
+                    $newDataInser['purchase_id'] = $BusinessTrip->id;
+                    CashAdvance::create($newDataInser);
+                }
+
                 $arrayCash[] = $datainsertCash;
             }
 
@@ -106,9 +112,10 @@ class BtService
         if ($getAllowanceItem && $getAllowanceItem->material_number == '') {
             throw new Exception('allowance Item Not set materila number');
         }
-
         // get material number
-        $getMaterial = MasterMaterial::where('material_number', $getAllowanceItem->material_number)->first();
+        $cleaned = ltrim($getAllowanceItem->material_number, '0');
+
+        $getMaterial = MasterMaterial::whereRaw("ltrim(material_number, '0') = ?", [$cleaned])->first();
         if (!$getMaterial) {
             throw new Exception('materila number not found');
         }
