@@ -366,7 +366,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                       <>
                         {(!role || permissions.includes(role?.detail ?? '')) && (
                           <a href={url.printUrl === '' ? '#' : `${url.printUrl}/${params.row.id}`} target='_blank'>
-                            <i className='text-2xl text-gray-500 ki-duotone ki-printer'></i>
+                            <i className='text-2xl text-blue-500 ki-duotone ki-printer'></i>
                           </a>
                         )}
                       </>
