@@ -76,6 +76,7 @@ const FormAutocomplete = <T,>({
                 }}
                 sx={{ ...style, pointerEvents: 'auto !important', cursor: 'auto !important' }}
                 disabled={disabled}
+                disablePortal
                 loading={loading}
                 onInputChange={(_, newInputValue) => {
                   if (onSearch) {
