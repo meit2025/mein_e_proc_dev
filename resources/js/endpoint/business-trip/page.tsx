@@ -4,4 +4,5 @@ export const LIST_PAGE_BUSINESS_TRIP = `${ROUTE_API_PAGE}`;
 export const CREATE_PAGE_BUSINESS_TRIP = `${ROUTE_API_PAGE}/create`;
 export const EDIT_PAGE_BUSINESS_TRIP = `${ROUTE_API_PAGE}/update`;
 export const DETAIL_PAGE_BUSINESS_TRIP = `${ROUTE_API_PAGE}/detail-page`;
+export const PRINT_PAGE_BUSINESS_TRIP = `${ROUTE_API_PAGE}/print`;
 export const CLONE_PAGE_BUSINESS_TRIP = `${ROUTE_API_PAGE}/clone`;

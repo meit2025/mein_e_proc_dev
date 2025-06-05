@@ -9,7 +9,7 @@ export const columns: GridColDef[] = [
     filterable: true,
     renderCell: (params) => (
       <span
-        onClick={() => handlePrintDetail(params.row.id)}
+        onClick={() => goToDetail(params.row.id)}
         style={{ color: '#1976d2', cursor: 'pointer', textDecoration: 'underline' }}
       >
         {params.value}
@@ -41,8 +41,8 @@ export const columns: GridColDef[] = [
 ];
 
 // Fungsi untuk menangani aksi cetak detail
-const handlePrintDetail = (id: string) => {
-  const printUrl = `/business-trip-declaration/print/${id}`;
+const goToDetail = (id: string) => {
+  const printUrl = `/business-trip/business-trip-declaration/detail-page/${id}`;
   window.open(printUrl, '_blank');
 };
 

@@ -10,7 +10,7 @@ export const columns: GridColDef[] = [
     filterable: true,
     renderCell: (params) => (
       <span
-        onClick={() => handlePrintDetail(params.row.id)}
+        onClick={() => goToDetail(params.row.id)}
         style={{ color: '#1976d2', cursor: 'pointer', textDecoration: 'underline' }}
       >
         {params.value}
@@ -64,9 +64,9 @@ export const columns: GridColDef[] = [
   { field: 'po_status', headerName: 'PO Status', width: 100, filterable: true, sortable: false },
 ];
 
-const handlePrintDetail = (id: string) => {
-  const printUrl = `/reimburse/print/${id}`;
-  window.open(printUrl, '_blank');
+const goToDetail = (id: string) => {
+  const detailUrl = `/reimburse/detail/${id}`;
+  window.open(detailUrl, '_blank');
 };
 
 export interface Tax {
