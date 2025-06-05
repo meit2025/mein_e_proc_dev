@@ -30,6 +30,7 @@ interface UrlDataGrid {
   editUrl?: string;
   deleteUrl?: string;
   detailUrl?: string;
+  printUrl?: string;
   clone?: string;
   cancelApproval?: string;
 }
@@ -53,6 +54,7 @@ interface DataGridProps {
   onEdit?: (id: number) => Promise<void> | void;
   onDelete?: (id: number) => Promise<void> | void;
   onDetail?: (id: number) => Promise<void> | void;
+  onPrint?: (id: number) => Promise<void> | void;
   onClone?: (id: number) => Promise<void> | void;
   onCreate?: () => Promise<void> | void;
   onSendSap?: () => Promise<void> | void;
@@ -84,6 +86,7 @@ const DataGridComponent: React.FC<DataGridProps> = ({
   onEdit,
   onDelete,
   onDetail,
+  onPrint,
   onCreate,
   onClone,
   onSendSap,
@@ -223,13 +226,15 @@ const DataGridComponent: React.FC<DataGridProps> = ({
       setDeleteLoading(false);
     }
   };
-
+  
   // Kondisi untuk menambahkan kolom "Actions" jika salah satu aksi tersedia
   const actionColumn =
     onEdit ||
     onDelete ||
     onDetail ||
+    onPrint ||
     url.detailUrl ||
+    url.printUrl ||
     url.editUrl ||
     url.deleteUrl ||
     buttonActionCustome
@@ -295,6 +300,22 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                       )}
 
                       <DropdownMenuSeparator />
+                      {(onPrint || url.printUrl) && (
+                        <>
+                          {(!role || permissions.includes(role?.detail ?? '')) && (
+                            <DropdownMenuItem
+                              onClick={() => {
+                                onPrint && onPrint(params.row.id);
+                                if (url.printUrl) {
+                                  window.open(`${url.printUrl}/${params.row.id}`, '_blank');
+                                }
+                              }}
+                            >
+                              Print
+                            </DropdownMenuItem>
+                          )}
+                        </>
+                      )}
                       {(onDetail || url.detailUrl) && (
                         <>
                           {(!role || permissions.includes(role?.detail ?? '')) && (
@@ -338,6 +359,15 @@ const DataGridComponent: React.FC<DataGridProps> = ({
                           >
                             <i className='text-2xl ki-duotone ki-size text-info'></i>
                           </Link>
+                        )}
+                      </>
+                    )}
+                    {(onPrint || url.printUrl) && (
+                      <>
+                        {(!role || permissions.includes(role?.detail ?? '')) && (
+                          <a href={url.printUrl === '' ? '#' : `${url.printUrl}/${params.row.id}`} target='_blank'>
+                            <i className='text-2xl text-gray-500 ki-duotone ki-printer'></i>
+                          </a>
                         )}
                       </>
                     )}

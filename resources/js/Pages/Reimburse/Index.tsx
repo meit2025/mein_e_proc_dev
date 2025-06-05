@@ -7,7 +7,7 @@ import {
   UPDATE_REIMBURSE,
   CHECK_CLONE_VALIDATION_REIMBURSE,
 } from '@/endpoint/reimburse/api';
-import { PAGE_DETAIL_REIMBURSE, CLONE_REIMBURSE } from '@/endpoint/reimburse/page';
+import { PAGE_DETAIL_REIMBURSE, PAGE_PRINT_REIMBURSE } from '@/endpoint/reimburse/page';
 import { FormType } from '@/lib/utils';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import React, { ReactNode } from 'react';
@@ -154,7 +154,7 @@ export const Index = ({
         url={{
           url: LIST_REIMBURSE,
           detailUrl: PAGE_DETAIL_REIMBURSE,
-          // clone: CLONE_REIMBURSE,
+          printUrl: PAGE_PRINT_REIMBURSE,
           cancelApproval: 'reim',
         }}
         labelFilter='search'
