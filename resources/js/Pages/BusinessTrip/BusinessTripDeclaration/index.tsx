@@ -3,7 +3,7 @@ import React, { ReactNode } from 'react';
 
 import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
 import { CustomDialog } from '@/components/commons/CustomDialog';
-import { DETAIL_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
+import { DETAIL_PAGE_BUSINESS_TRIP_DECLARATION, PRINT_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
 import DataGridComponent from '@/components/commons/DataGrid';
 import { GET_LIST_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/api';
 import MainLayout from '@/Pages/Layouts/MainLayout';
@@ -35,7 +35,7 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
   }
   return (
     <>
-      <div className='flex md:mb-4 mb-2 w-full justify-end'>
+      <div className='flex justify-end w-full mb-2 md:mb-4'>
         {/* <Button onClick={openFormHandler}>
           <PlusIcon />
         </Button> */}
@@ -77,6 +77,7 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         url={{
           url: GET_LIST_BUSINESS_TRIP_DECLARATION,
           detailUrl: DETAIL_PAGE_BUSINESS_TRIP_DECLARATION,
+          printUrl: PRINT_PAGE_BUSINESS_TRIP_DECLARATION,
           cancelApproval: 'trip_declaration',
         }}
         labelFilter='search'

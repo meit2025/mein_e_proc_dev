@@ -6,6 +6,7 @@ export const UPDATE_REIMBURSE = (id: any) => `${ROUTE_REIMBURSE}/update/${id}`;
 export const DELETE_REIMBURSE = (id: any) => `${ROUTE_REIMBURSE}/delete/${id}`;
 
 export const DETAIL_REIMBURSE = (id: any) => `${ROUTE_REIMBURSE}/detail/${id}`;
+export const PRINT_REIMBURSE = (id: any) => `${ROUTE_REIMBURSE}/print/${id}`;
 
 export const GET_LIST_MASTER_REIMBUSE_TYPE = `${ROUTE_REIMBURSE}/get-list-master-reimburse-type/`;
 export const GET_LIST_EMPLOYEE_REIMBURSE = `${ROUTE_REIMBURSE}/get-employee-reimburse/`;

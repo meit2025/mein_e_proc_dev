@@ -9,6 +9,7 @@ import {
 import {
   CLONE_PAGE_BUSINESS_TRIP,
   DETAIL_PAGE_BUSINESS_TRIP,
+  PRINT_PAGE_BUSINESS_TRIP,
   EDIT_PAGE_BUSINESS_TRIP,
 } from '@/endpoint/business-trip/page';
 import { DELET_API_BUSINESS_TRIP, GET_LIST_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
@@ -80,7 +81,7 @@ export const Index = ({
 
   return (
     <>
-      <div className='flex md:mb-4 mb-2 w-full justify-end'>
+      <div className='flex justify-end w-full mb-2 md:mb-4'>
         {/* <Button onClick={openFormHandler}>
           <PlusIcon />
         </Button> */}
@@ -127,6 +128,7 @@ export const Index = ({
         url={{
           url: GET_LIST_BUSINESS_TRIP,
           detailUrl: DETAIL_PAGE_BUSINESS_TRIP,
+          printUrl: PRINT_PAGE_BUSINESS_TRIP,
           cancelApproval: 'trip',
         }}
         labelFilter='search'
