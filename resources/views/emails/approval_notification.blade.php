@@ -97,7 +97,7 @@
                     </p>
                 </div>
                 <div style="background-color: #D7E1EA;height:2px"></div>
-                <div style="display:flex;margin-top:20px">
+                {{-- <div style="display:flex;margin-top:20px">
                     <div style="margin-left: 1px">
                         <div style="margin-top: 5px">
                             <b style="font-weight: 700;font-size: 20px;color: #1f1f1f;"><strong> PT Mitsubishi Electric
@@ -120,7 +120,7 @@
                         </div>
 
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>

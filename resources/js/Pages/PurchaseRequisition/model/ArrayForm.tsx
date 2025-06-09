@@ -1,19 +1,20 @@
+import { Box, Button, Typography } from '@mui/material';
+import { useFormContext, useWatch } from 'react-hook-form';
+
+import { DataGrid } from '@mui/x-data-grid';
 /* eslint-disable quotes */
 import FormAutocomplete from '@/components/Input/formDropdown';
 import FormInput from '@/components/Input/formInput';
-import useDropdownOptions from '@/lib/getDropdown';
-import { Box, Button, Typography } from '@mui/material';
-import { useEffect } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
 import FormSwitch from '@/components/Input/formSwitch';
 import FormTextArea from '@/components/Input/formTextArea';
-import { DataGrid } from '@mui/x-data-grid';
-import { columnsItem } from './listModel';
 import { Link } from '@inertiajs/react';
-import { useAlert } from '@/contexts/AlertContext';
-import axiosInstance from '@/axiosInstance';
 import axios from 'axios';
+import axiosInstance from '@/axiosInstance';
+import { columnsItem } from './listModel';
 import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
+import { useAlert } from '@/contexts/AlertContext';
+import useDropdownOptions from '@/lib/getDropdown';
+import { useEffect } from 'react';
 
 const ArrayForm = ({
   dataIndex,
@@ -57,7 +58,7 @@ const ArrayForm = ({
       isMapping: true,
     });
     getVendor('', {
-      name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '') || ' - ' || type",
+      name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^(0+)(\\d)', '\\2') ",
       id: 'id',
       tabel: 'master_business_partners',
       hiddenZero: true,
@@ -536,7 +537,7 @@ const ArrayForm = ({
               const isLabelMatch = dataVendor?.some((option) => option.label === search);
               if (search.length > 0 && !isLabelMatch) {
                 await getVendor('', {
-                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '') || ' - ' ||  type",
+                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^(0+)(\\d)', '\\2')",
                   id: 'id',
                   tabel: 'master_business_partners',
                   hiddenZero: true,
@@ -546,7 +547,7 @@ const ArrayForm = ({
                 });
               } else if (search.length === 0 && !isLabelMatch) {
                 await getVendor('', {
-                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '') || ' - ' || type",
+                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^(0+)(\\d)', '\\2') ",
                   id: 'id',
                   tabel: 'master_business_partners',
                   hiddenZero: true,
@@ -560,7 +561,7 @@ const ArrayForm = ({
             onFocus={async () => {
               const value = getValues(`vendors[${dataIndex}].vendor`);
               await getVendor('', {
-                name: "name_one || ' - '  || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '') || ' - ' || type",
+                name: "name_one || ' - '  || REGEXP_REPLACE(partner_number, '^(0+)(\\d)', '\\2') ",
                 id: 'id',
                 tabel: 'master_business_partners',
                 hiddenZero: true,

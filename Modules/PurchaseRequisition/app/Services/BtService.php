@@ -50,24 +50,29 @@ class BtService
             foreach ($BusinessTripDetailDestinationTotal as $key => $value) {
                 $getDestination = $this->findBusinessTripDestination($value->business_trip_destination_id);
 
-                $datainsert = $this->preparePurchaseRequisitionData(
-                    $BusinessTrip,
-                    $value,
-                    $reqno,
-                    $BusinessAttachment,
-                    $key + 1,
-                    $dokumenType,
-                    $settings,
-                    $getDestination
-                );
+                $datainsert = $this->preparePurchaseRequisitionData([
+                    'BusinessTrip' => $BusinessTrip,
+                    'item' => $value,
+                    'reqno' => $reqno,
+                    'BusinessAttachment' => $BusinessAttachment,
+                    'indx' => $key + 1,
+                    'dokumenType' => $dokumenType,
+                    'settings' => $settings,
+                    'getDestination' => $getDestination
+                ]);
+                $dataMapping = $datainsert;
 
                 if ($saveToFile) {
-                    $dataMapping = $datainsert;
                     $dataMapping['purchase_id'] = $BusinessTrip->id;
+                    $dataMapping['business_trip_day_total_id'] = $value->id;
+                    $dataMapping['business_trip_day_total_type'] = $value->type;
                     PurchaseRequisition::create($dataMapping);
+                    $array[] = $datainsert;
+                } else {
+                    $dataMapping['business_trip_day_total_id'] = $value->parent_id;
+                    $dataMapping['business_trip_day_total_type'] = $value->type;
+                    $array[] = $dataMapping;
                 }
-
-                $array[] = $datainsert;
             }
 
             if ($BusinessTrip->cash_advance == 1) {
@@ -85,27 +90,30 @@ class BtService
 
 
             // $this->generateFiles($array, $arrayCash, $reqno);
-            SettingApproval::where('key', 'dokumenType_' . $dokumenType)->update(['value' => $reqno]);
+            if ($saveToFile) {
+                SettingApproval::where('key', 'dokumenType_' . $dokumenType)->update(['value' => $reqno]);
+            }
 
             DB::commit();
             return $array;
         } catch (Exception $e) {
+            dd($e);
             DB::rollBack();
             Log::channel('bt_txt')->error($e->getMessage(), ['id' => $id]);
             throw new Exception($e->getMessage());
         }
     }
 
-    private function preparePurchaseRequisitionData(
-        $BusinessTrip,
-        $item,
-        $reqno,
-        $BusinessAttachment,
-        $indx,
-        $dokumenType,
-        $settings,
-        $getDestination
-    ) {
+    private function preparePurchaseRequisitionData(array $params)
+    {
+        $BusinessTrip = $params['BusinessTrip'];
+        $item = $params['item'];
+        $reqno = $params['reqno'];
+        $BusinessAttachment = $params['BusinessAttachment'];
+        $indx = $params['indx'];
+        $dokumenType = $params['dokumenType'];
+        $settings = $params['settings'];
+        $getDestination = $params['getDestination'];
 
         $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y-m-d');
         $getAllowanceItem = AllowanceItem::where('id', $item->allowance_item_id)->first();
@@ -129,7 +137,7 @@ class BtService
 
         return [
             'code_transaction' => 'BTRE', // code_transaction
-            'purchase_requisition_number' => $reqno, // banfn
+            'purchase_requisition_number' => $item->price  == "0" ? '' : $reqno, // banfn
             'item_number' => $indx, //
             'requisitioner_name' => $BusinessTrip->requestFor->employee->partner_number ?? '', // afnam
             'requisition_date' => $formattedDate, // badat
@@ -211,10 +219,12 @@ class BtService
 
         $totalQuery = DB::table('business_trip_detail_destination_totals')
             ->select(
+                'id',
                 'business_trip_destination_id',
                 'business_trip_id',
                 'price',
                 'allowance_item_id',
+                'parent_id',
                 DB::raw("'total' as type") // Add a 'type' column to differentiate the data
             )
             ->where('business_trip_id', $id);
@@ -222,16 +232,18 @@ class BtService
         // Query for BusinessTripDetailDestinationDayTotal
         $dayTotalQuery = DB::table('business_trip_detail_destination_day_totals')
             ->select(
+                'id',
                 'business_trip_destination_id',
                 'business_trip_id',
                 'price',
                 'allowance_item_id',
+                'parent_id',
                 DB::raw("'day_total' as type") // Add a 'type' column to differentiate the data
             )
             ->where('business_trip_id', $id);
 
         // Merge the two queries using union
-        $mergedQuery = $totalQuery->union($dayTotalQuery)->get();
+        $mergedQuery = $totalQuery->unionAll($dayTotalQuery)->orderBy('price', 'desc')->get();
         return $mergedQuery;
     }
 
