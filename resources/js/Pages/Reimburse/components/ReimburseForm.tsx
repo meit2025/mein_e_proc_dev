@@ -577,7 +577,7 @@ export const ReimburseForm: React.FC<Props> = ({
           let reviseMatch = (reimburseReviseData.current).find(reimburse => 
             reimburse.reimburse_type === data.reimburse_type && reimburse.for === forValue && !reviseDataUsed.includes(reimburse.id));
           if (reviseMatch !== undefined) {
-            reviseBalance = Number(reviseMatch.balance);
+            reviseBalance = totalBalance + Number(reviseMatch.balance);
             reviseLimit = Number(reviseMatch.limit);
             setReviseDataUsed((prev) => {
               const newReviseDataUsed = [...prev];
