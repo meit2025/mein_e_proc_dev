@@ -242,9 +242,8 @@ class PurchaseRequisitionController extends Controller
         ];
 
         // get pr
-        $prdata = PurchaseRequisition::where('purchase_id', $request->data_id)->where('code_transaction', $request->type_code_transaction)->first();
 
-        $pr = PurchaseOrder::where('purchase_requisition_number', $prdata->purchase_requisition_number);
+        $pr = PurchaseOrder::where('purchase_id', $request->data_id);
         $data = $this->filterAndPaginate($request, $pr, $filterableColumns);
         return $this->successResponse($data);
     }

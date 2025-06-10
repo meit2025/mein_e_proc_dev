@@ -258,7 +258,7 @@
                     </p>
                 </div>
                 <div style="background-color: #D7E1EA;height:2px"></div>
-                <div style="display:flex;margin-top:20px">
+                {{-- <div style="display:flex;margin-top:20px">
 
 
                     <div style="margin-left: 1px">
@@ -283,7 +283,7 @@
                         </div>
 
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>

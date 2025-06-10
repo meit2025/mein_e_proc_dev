@@ -1,14 +1,18 @@
 /* eslint-disable eqeqeq */
 /* eslint-disable react/jsx-key */
 import '../css/index.scss';
+
+import * as React from 'react';
+
+import { AllowanceItemModel, BusinessTripModel, BusinessTripType } from '../models/models';
+import { Button as ButtonMui, filledInputClasses } from '@mui/material';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-  FormLabel,
-} from '@/components/shacdn/form';
+  CREATE_API_BUSINESS_TRIP_DECLARATION,
+  EDIT_API_BUSINESS_TRIP_DECLARATION,
+  GET_DETAIL_BUSINESS_TRIP_DECLARATION,
+  GET_EDIT_BUSINESS_TRIP_DECLARATION,
+} from '@/endpoint/business-trip-declaration/api';
+import { ChevronsUpDown, Plus, UndoIcon, X } from 'lucide-react';
 import {
   FieldArray,
   FieldArrayWithId,
@@ -18,45 +22,44 @@ import {
   useWatch,
 } from 'react-hook-form';
 import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/shacdn/form';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/shacdn/select';
-import { Separator } from '@/components/shacdn/separator';
-import { Textarea } from '@/components/shacdn/textarea';
-import { Input } from '@/components/shacdn/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
-import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { ScrollArea } from '@/components/shacdn/scroll-area';
-import * as React from 'react';
-import {
-  CREATE_API_BUSINESS_TRIP_DECLARATION,
-  EDIT_API_BUSINESS_TRIP_DECLARATION,
-  GET_DETAIL_BUSINESS_TRIP_DECLARATION,
-  GET_EDIT_BUSINESS_TRIP_DECLARATION,
-} from '@/endpoint/business-trip-declaration/api';
-import { AllowanceItemModel, BusinessTripModel, BusinessTripType } from '../models/models';
-import axiosInstance from '@/axiosInstance';
-import moment from 'moment';
-import FormSwitch from '@/components/Input/formSwitchCustom';
-import { Button } from '@/components/shacdn/button';
-import { ChevronsUpDown, Plus, UndoIcon, X } from 'lucide-react';
-import axios, { AxiosError } from 'axios';
-import { Inertia } from '@inertiajs/inertia';
-import { useAlert } from '@/contexts/AlertContext';
-import { Button as ButtonMui, filledInputClasses } from '@mui/material';
 import {
   WorkflowApprovalDiagramInterface,
   WorkflowApprovalStepInterface,
   WorkflowComponent,
 } from '@/components/commons/WorkflowComponent';
+import axios, { AxiosError } from 'axios';
+
+import { Button } from '@/components/shacdn/button';
+import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import FormAutocomplete from '@/components/Input/formDropdown';
-import useDropdownOptions from '@/lib/getDropdown';
+import FormSwitch from '@/components/Input/formSwitchCustom';
+import { Inertia } from '@inertiajs/inertia';
+import { Input } from '@/components/shacdn/input';
+import { ScrollArea } from '@/components/shacdn/scroll-area';
+import { Separator } from '@/components/shacdn/separator';
+import { Textarea } from '@/components/shacdn/textarea';
+import axiosInstance from '@/axiosInstance';
 import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
+import moment from 'moment';
+import { useAlert } from '@/contexts/AlertContext';
+import useDropdownOptions from '@/lib/getDropdown';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 interface BusinessTripAttachement {
   id: number;
@@ -125,6 +128,8 @@ export const BussinessTripFormV1 = ({
           ),
           allowances: z.array(
             z.object({
+              id: z.number().optional(),
+              data_type: z.string().optional(),
               name: z.string().optional(),
               code: z.string().optional(),
               default_price: z.string().optional(),

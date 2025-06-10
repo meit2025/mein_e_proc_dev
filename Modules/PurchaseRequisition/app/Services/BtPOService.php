@@ -38,6 +38,7 @@ class BtPOService
             $reqno = (int) SettingApproval::where('key', 'dokumenType_' . $dokumenType)->lockForUpdate()->value('value') + 1;
             $increment = 1;
 
+
             foreach ($BusinessTrip as $key => $value) {
                 # code...
                 $data = $this->preparePurchaseRequisitionData(
@@ -56,6 +57,8 @@ class BtPOService
                 $array[] = $data;
                 $increment++;
             }
+
+            dd($array);
 
             SettingApproval::where('key', 'dokumenType_' . $dokumenType)->update(['value' => $reqno]);
             DB::commit();
@@ -141,24 +144,29 @@ class BtPOService
 
     private function findBusinessTripPr($id)
     {
-        $items = PurchaseRequisition::where('purchase_id', $id)->where('code_transaction', 'BTRE')->where('item_number', '1')->first();
+
         $bt = new BtService();
 
         $BusinessTrip = BusinessTrip::where('parent_id', $id)
-                ->first();
+            ->first();
 
         $data =  $bt->processTextData($BusinessTrip->id, false);
-        if ($items) {
-            foreach ($data as &$obj) {
+        foreach ($data as &$obj) {
+
+            // find text item
+            $items = PurchaseRequisition::where('business_trip_day_total_id', $obj['business_trip_day_total_id'])
+                ->where('business_trip_day_total_type', $obj['business_trip_day_total_type'])->first();
+            if ($items) {
+
                 if (array_key_exists('purchase_requisition_number', $obj)) {
                     $obj['purchase_requisition_number'] = $items->purchase_requisition_number;
+                    $obj['item_number'] = $items->item_number;
                     $obj['created_at'] = $items->created_at;
                     $obj['purchase_id'] = $items->purchase_id;
                     $obj['remarks'] = $obj['short_text'];
                 }
             }
         }
-
 
         return array_map(function ($item) {
             return (object) $item;
