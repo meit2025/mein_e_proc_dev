@@ -260,11 +260,9 @@ export default function Header() {
                 <div className='menu-dropdown menu-default light:border-gray-300 w-screen max-w-[250px]'>
                   <div className='flex items-center justify-between px-5 py-1.5 gap-1.5'>
                     <div className='flex items-center gap-2'>
-                      <img
-                        alt=''
-                        className='border-2 rounded-full size-9 border-success'
-                        src={Logo}
-                      ></img>
+                      <div className='rounded-full menu-toggle btn btn-icon'>
+                        <i className='!text-lg md:!text-3xl text-blue-500 ki-filled ki-profile-circle'></i>
+                      </div>
                       <div className='flex flex-col gap-1.5'>
                         <span className='text-sm font-semibold leading-none text-gray-800'>
                           {auth?.user?.name}
