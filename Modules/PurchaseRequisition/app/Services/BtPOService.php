@@ -64,6 +64,7 @@ class BtPOService
         } catch (Exception $e) {
             Log::channel('po_txt')->error($e->getMessage(), ['id' => $id]);
             DB::rollBack();
+            dd($e);
             throw new Exception($e->getMessage());
         }
     }
@@ -80,7 +81,9 @@ class BtPOService
         $StorageLocation,
         $PurchasingOrganization,
     ) {
-        $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y-m-d');
+        if ($BusinessTrip->created_at) {
+            $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y-m-d');
+        }
         $data = [
             'purchase_id' => $BusinessTrip->purchase_id,
             'code_transaction' => 'BTRE',
@@ -159,7 +162,7 @@ class BtPOService
                 if (array_key_exists('purchase_requisition_number', $obj)) {
                     $obj['purchase_requisition_number'] = $items->purchase_requisition_number;
                     $obj['item_number'] = $items->item_number;
-                    $obj['created_at'] = $items->created_at;
+                   $obj['created_at'] = isset($items->created_at) ? $items->created_at : date('Y-m-d H:i:s');
                     $obj['purchase_id'] = $items->purchase_id;
                     $obj['remarks'] = $obj['short_text'];
                 }
