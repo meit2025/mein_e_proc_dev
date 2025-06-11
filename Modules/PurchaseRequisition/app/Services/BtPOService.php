@@ -58,8 +58,6 @@ class BtPOService
                 $increment++;
             }
 
-            dd($array);
-
             SettingApproval::where('key', 'dokumenType_' . $dokumenType)->update(['value' => $reqno]);
             DB::commit();
             return $array;

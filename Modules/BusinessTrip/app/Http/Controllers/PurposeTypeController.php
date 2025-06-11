@@ -176,9 +176,9 @@ class PurposeTypeController extends Controller
 
             return $this->successResponse($purpose, 'Successfully creeted Destination');
         } catch (\Exception $e) {
-            dd($e);
 
             DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 500);
         }
     }
 
@@ -224,9 +224,9 @@ class PurposeTypeController extends Controller
 
             return $this->successResponse($purpose, 'Successfully update Destination');
         } catch (\Exception $e) {
-            dd($e);
 
             DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 500);
         }
     }
 

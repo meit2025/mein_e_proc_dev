@@ -35,9 +35,9 @@ use Modules\BusinessTrip\Models\BusinessTrip;
 Route::group(['middleware' => 'auth'], function () {
     Route::prefix('business-trip')->group(function () {
         Route::get('/print/{id}', [BusinessTripController::class, 'printAPI'])->name('business-trip.print');
-    });
-    Route::prefix('business-trip-declaration')->group(function () {
-        Route::get('/print/{id}', [BusinessTripDeclarationController::class, 'printAPI'])->name('business-trip-declaration.print');
+        Route::prefix('business-trip-declaration')->group(function () {
+            Route::get('/print/{id}', [BusinessTripDeclarationController::class, 'printAPI'])->name('business-trip-declaration.print');
+        });
     });
 });
 

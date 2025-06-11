@@ -97,7 +97,6 @@ class BtService
             DB::commit();
             return $array;
         } catch (Exception $e) {
-            dd($e);
             DB::rollBack();
             Log::channel('bt_txt')->error($e->getMessage(), ['id' => $id]);
             throw new Exception($e->getMessage());

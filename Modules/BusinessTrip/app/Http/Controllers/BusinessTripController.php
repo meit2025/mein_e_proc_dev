@@ -994,7 +994,7 @@ class BusinessTripController extends Controller
             $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP');
         } catch (\Throwable $th) {
             //throw $th;
-            dd($th);
+            return $this->errorResponse($th->getMessage());
         }
     }
 
