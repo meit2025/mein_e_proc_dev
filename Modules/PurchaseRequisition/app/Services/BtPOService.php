@@ -159,13 +159,11 @@ class BtPOService
                 ->where('business_trip_day_total_type', $obj['business_trip_day_total_type'])->first();
             if ($items) {
 
-                if (array_key_exists('purchase_requisition_number', $obj)) {
-                    $obj['purchase_requisition_number'] = $items->purchase_requisition_number;
-                    $obj['item_number'] = $items->item_number;
-                   $obj['created_at'] = isset($items->created_at) ? $items->created_at : date('Y-m-d H:i:s');
-                    $obj['purchase_id'] = $items->purchase_id;
-                    $obj['remarks'] = $obj['short_text'];
-                }
+                $obj['purchase_requisition_number'] = $items->purchase_requisition_number;
+                $obj['item_number'] = $items->item_number;
+                $obj['created_at'] = isset($items->created_at) ? $items->created_at : date('Y-m-d H:i:s');
+                $obj['purchase_id'] = $items->purchase_id;
+                $obj['remarks'] = $obj['short_text'];
             }
         }
 
