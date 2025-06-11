@@ -158,13 +158,17 @@ class BtPOService
             $items = PurchaseRequisition::where('business_trip_day_total_id', $obj['business_trip_day_total_id'])
                 ->where('business_trip_day_total_type', $obj['business_trip_day_total_type'])->first();
             if ($items) {
-
                 $obj['purchase_requisition_number'] = $items->purchase_requisition_number;
                 $obj['item_number'] = $items->item_number;
                 $obj['created_at'] = isset($items->created_at) ? $items->created_at : date('Y-m-d H:i:s');
                 $obj['purchase_id'] = $items->purchase_id;
-                $obj['remarks'] = $obj['short_text'];
+            }else {
+                $obj['purchase_requisition_number'] = '';
+                $obj['item_number'] = '';
+                $obj['created_at'] = date('Y-m-d H:i:s');
+                $obj['purchase_id'] = '';
             }
+            $obj['remarks'] = $obj['short_text'];
         }
 
         return array_map(function ($item) {
