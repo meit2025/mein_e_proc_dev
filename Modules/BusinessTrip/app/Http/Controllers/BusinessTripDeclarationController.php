@@ -88,6 +88,7 @@ class BusinessTripDeclarationController extends Controller
                 $allowanceId = $row->allowance->id;
                 if (!isset($allowances[$allowanceId])) {
                     $allowances[$allowanceId] = [
+                        'id' => $row->id,
                         'name' => $row->allowance->name,
                         'code' => $row->allowance->code,
                         'default_price' => number_format($row->standard_value, 0, '.', ''),
