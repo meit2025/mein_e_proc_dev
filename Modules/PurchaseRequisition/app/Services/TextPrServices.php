@@ -153,7 +153,7 @@ class TextPrServices
             ];
         } catch (\Throwable $th) {
             //throw $th;
-            dd($th);
+            throw new Exception('Error generating files: ' . $th->getMessage());
         }
     }
 

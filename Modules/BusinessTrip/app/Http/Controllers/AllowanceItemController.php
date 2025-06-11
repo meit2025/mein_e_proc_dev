@@ -216,7 +216,6 @@ class AllowanceItemController extends Controller
             DB::commit();
             return $this->successResponse("Successfully created allowance item");
         } catch (\Exception  $e) {
-            dd($e);
 
             DB::rollBack();
         }
@@ -318,7 +317,6 @@ class AllowanceItemController extends Controller
             DB::commit();
             return $this->successResponse("Successfully created allowance item");
         } catch (\Exception  $e) {
-            dd($e);
 
             DB::rollBack();
         }
