@@ -157,6 +157,9 @@ class BtPOService
             // find text item
             $items = PurchaseRequisition::where('business_trip_day_total_id', $obj['business_trip_day_total_id'])
                 ->where('business_trip_day_total_type', $obj['business_trip_day_total_type'])->first();
+                if (!$items) {
+                    dd($obj['business_trip_day_total_id'], $obj['business_trip_day_total_type'], dd($obj));
+                }
             if ($items) {
                 $obj['purchase_requisition_number'] = $items->purchase_requisition_number;
                 $obj['item_number'] = $items->item_number;
