@@ -138,6 +138,8 @@ export const BussinessTripFormV1 = ({
               subtotal: z.number().optional(),
               detail: z.array(
                 z.object({
+                  id: z.number().optional(),
+                  data_type: z.string().optional(),
                   date: z.string().nullish(),
                   request_price: z.number().optional(),
                 }),
