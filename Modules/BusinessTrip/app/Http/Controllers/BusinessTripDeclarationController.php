@@ -88,7 +88,6 @@ class BusinessTripDeclarationController extends Controller
                 $allowanceId = $row->allowance->id;
                 if (!isset($allowances[$allowanceId])) {
                     $allowances[$allowanceId] = [
-                        'id' => $row->id,
                         'name' => $row->allowance->name,
                         'code' => $row->allowance->code,
                         'default_price' => number_format($row->standard_value, 0, '.', ''),
@@ -96,13 +95,14 @@ class BusinessTripDeclarationController extends Controller
                         'subtotal' => 0,
                         'currency' => $row->allowance->currency_id,
                         'request_value' => $row->allowance->request_value,
-                        'data_type' => 'day_total',
                         'detail' => [] // Array untuk menampung detail
                     ];
                 }
 
                 // Tambahkan detail allowance
                 $allowances[$allowanceId]['detail'][] = [
+                    'data_type' => 'day_total',
+                    'id' => $row->id,
                     'date' => $row->date, // Sesuaikan dengan nama kolom tanggal di detailDestinationDay
                     'request_price' => (int)$row->price // Sesuaikan dengan kolom request_price di detailDestinationDay
                 ];
@@ -116,7 +116,6 @@ class BusinessTripDeclarationController extends Controller
                 $allowanceId = $row->allowance->id;
                 if (!isset($allowances[$allowanceId])) {
                     $allowances[$allowanceId] = [
-                        'id' => $row->id,
                         'name' => $row->allowance->name,
                         'code' => $row->allowance->code,
                         'default_price' => number_format($row->standard_value, 0, '.', ''),
@@ -124,13 +123,14 @@ class BusinessTripDeclarationController extends Controller
                         'subtotal' => 0,
                         'currency' => $row->allowance->currency_id,
                         'request_value' => $row->allowance->request_value,
-                        'data_type' => 'total',
                         'detail' => []
                     ];
                 }
 
                 // Tambahkan detail allowance
                 $allowances[$allowanceId]['detail'][] = [
+                    'id' => $row->id,
+                    'data_type' => 'total',
                     'date' => '', // Sesuaikan dengan nama kolom tanggal di detailDestinationTotal
                     'request_price' => (int)$row->price // Sesuaikan dengan kolom request_price di detailDestinationTotal
                 ];
@@ -683,7 +683,7 @@ class BusinessTripDeclarationController extends Controller
                                 'price' => $detail['request_price'],
                                 'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->withTrashed()->first()?->id,
                                 'standard_value' => $allowance['default_price'],
-                                'parent_id' => $allowance['id'] ?? null,
+                                'parent_id' => $detail['id'] ?? null,
                             ]);
                         }
                     } else {
@@ -695,7 +695,7 @@ class BusinessTripDeclarationController extends Controller
                                 'price' => $detail['request_price'],
                                 'allowance_item_id' => AllowanceItem::where('code', $allowance['code'])->withTrashed()->first()?->id,
                                 'standard_value' => $allowance['default_price'],
-                                'parent_id' => $allowance['id'] ?? null,
+                                'parent_id' => $detail['id'] ?? null,
                             ]);
                         }
                     }
@@ -706,6 +706,8 @@ class BusinessTripDeclarationController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+            dd($e);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
