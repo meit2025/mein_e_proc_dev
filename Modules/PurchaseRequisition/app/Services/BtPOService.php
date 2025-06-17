@@ -174,6 +174,37 @@ class BtPOService
             $obj['remarks'] = $obj['short_text'];
         }
 
+        // add sorting dari item_number
+        usort($data, function ($a, $b) {
+            // First priority: both item_number and balance have values
+            if ($a['item_number'] !== null && $a['balance'] !== '0' && $b['item_number'] === null && $b['balance'] === "0") {
+                return -1; // $a goes first
+            }
+
+            // Second priority: item_number null and balance has value
+            if ($a['item_number'] === null && $a['balance'] !== '0' && $b['item_number'] !== null && $b['balance'] !== '0') {
+                return -1; // $a goes first
+            }
+
+            // Third priority: item_number null and balance null
+            if ($a['item_number'] === null && $a['balance'] === '0' && $b['item_number'] !== null && $b['balance'] !== '0') {
+                return 1; // $b goes first
+            }
+
+            // Default sorting when both are similar
+            return 0; // No change in order
+        });
+
+        $lastItemNumber = 0;
+        foreach ($data as &$obj) {
+            if ($obj['item_number'] === null) {
+                $lastItemNumber++; // Increment the item_number
+                $obj['item_number'] = $lastItemNumber; // Assign the next available number
+            } else {
+                $lastItemNumber = $obj['item_number']; // Update the lastItemNumber if it's not null
+            }
+        }
+
         return array_map(function ($item) {
             return (object) $item;
         }, $data);

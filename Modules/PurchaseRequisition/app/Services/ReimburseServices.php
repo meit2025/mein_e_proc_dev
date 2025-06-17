@@ -30,45 +30,6 @@ use Modules\Reimbuse\Models\ReimburseGroup;
 
 class ReimburseServices
 {
-    // public function processTextData($id)
-    // {
-    //     DB::beginTransaction();
-    //     try {
-    //         $reim = $this->findReimburse($id);
-    //         $businessPartner = $this->getBusinessPartner($reim->requester);
-    //         $reimData = $this->findReimburseData($reim->code);
-
-    //         $array = [];
-    //         $dokumenType = SettingApproval::where('key', 'dokumenType_reimburse')->first()->value;
-    //         $PurchasingOrganization = SettingApproval::where('key', 'PurchasingOrganization')->first()->value;
-    //         $AccountAssignmentCategory = SettingApproval::where('key', 'AccountAssignmentCategory')->first()->value;
-    //         $StorageLocation = SettingApproval::where('key', 'StorageLocation')->first()->value;
-    //         $PurchaseRequisitionQuantity = SettingApproval::where('key', 'PurchaseRequisitionQuantity')->first()->value;
-    //         $plant = SettingApproval::where('key', 'plant')->first()->value;
-    //         $latestRequisition = SettingApproval::where('key', 'dokumenType_' . $dokumenType)->lockForUpdate()->first();
-
-    //         $reqno = $latestRequisition ? (int) $latestRequisition->value + 1 : 0;
-
-    //         foreach ($reimData as $key => $value) {
-    //             $datainsert = $this->preparePurchaseRequisitionData($key + 1, $reim, $dokumenType, $reqno, $value, $businessPartner, $PurchasingOrganization, $AccountAssignmentCategory, $StorageLocation, $PurchaseRequisitionQuantity, $plant);
-    //             $array[] = $datainsert;
-    //             PurchaseRequisition::create($datainsert);
-    //         }
-
-    //         $latestRequisition->update([
-    //             'value' => $reqno
-    //         ]);
-
-    //         DB::commit();
-    //         return $array;
-    //     } catch (Exception $e) {
-    //         DB::rollBack();
-    //         Log::channel('reim_txt')->info($e->getMessage());
-    //         dd($e);
-    //         throw new Exception($e->getMessage());
-    //     }
-    // }
-
     public function processTextData($id)
     {
         DB::beginTransaction();
@@ -76,6 +37,11 @@ class ReimburseServices
             // Fetch necessary data
             $reim = $this->findReimburse($id);
             $businessPartner = $this->getBusinessPartner($reim->requester);
+            $user = User::where('nip', $reim->requester)->first();
+            if (!$user) {
+                Log::channel('reim_txt')->info('User not found for requester: ' . $reim->requester);
+                throw new Exception('User not found for requester: ' . $reim->requester);
+            }
             $reimData = $this->findReimburseData($reim->code);
 
             // Collect SettingApproval values
@@ -94,19 +60,19 @@ class ReimburseServices
             // Insert Purchase Requisition data
             $array = [];
             foreach ($reimData as $key => $value) {
-                $data = $this->preparePurchaseRequisitionData(
-                    $key + 1,
-                    $reim,
-                    $dokumenType,
-                    $reqno,
-                    $value,
-                    $businessPartner,
-                    $settings['PurchasingOrganization'],
-                    $settings['AccountAssignmentCategory'],
-                    $settings['StorageLocation'],
-                    $settings['PurchaseRequisitionQuantity'],
-                    $settings['plant']
-                );
+                $data = $this->preparePurchaseRequisitionData([
+                    'reim' => $reim,
+                    'dokumenType' => $dokumenType,
+                    'reqno' => $reqno,
+                    'value' => $value,
+                    'businessPartner' => $businessPartner,
+                    'PurchasingOrganization' => $settings['PurchasingOrganization'],
+                    'AccountAssignmentCategory' => $settings['AccountAssignmentCategory'],
+                    'StorageLocation' => $settings['StorageLocation'],
+                    'PurchaseRequisitionQuantity' => $settings['PurchaseRequisitionQuantity'],
+                    'plant' => $settings['plant'],
+                    'user' => $user
+                ]);
 
                 $array[] = $data;
                 PurchaseRequisition::create($data);
@@ -136,7 +102,8 @@ class ReimburseServices
 
     private function findReimburseData($code)
     {
-        $reim = Reimburse::where('group', $code)->get();
+        $reim = Reimburse::with('reimburseType')->where('group', $code)->get();
+        // dd($reim);
         return $reim;
     }
     private function findReimburseAttachment($id)
@@ -171,8 +138,20 @@ class ReimburseServices
         return null;
     }
 
-    private function preparePurchaseRequisitionData($index, $reim, $dokumenType, $reqno, $value, $businessPartner, $PurchasingOrganization, $AccountAssignmentCategory, $StorageLocation, $PurchaseRequisitionQuantity, $plant)
+    private function preparePurchaseRequisitionData(array $params)
     {
+        $reim = $params['reim'];
+        $dokumenType = $params['dokumenType'];
+        $reqno = $params['reqno'];
+        $value = $params['value'];
+        $businessPartner = $params['businessPartner'];
+        $PurchasingOrganization = $params['PurchasingOrganization'];
+        $AccountAssignmentCategory = $params['AccountAssignmentCategory'];
+        $StorageLocation = $params['StorageLocation'];
+        $PurchaseRequisitionQuantity = $params['PurchaseRequisitionQuantity'];
+        $plant = $params['plant'];
+        $user = $params['user'];
+
         $formattedDate = Carbon::parse($reim->created_at)->format('Y-m-d');
         $attachment = $this->findReimburseAttachment($value->id);
         $reimburseType = $this->findReimburseType($value->reimburse_type);
@@ -183,6 +162,17 @@ class ReimburseServices
         $uom = Uom::find($value->purchase_requisition_unit_of_measure);
 
         $costCenter = MasterCostCenter::where('id', $reim->cost_center)->first();
+
+        // generate txt
+        // $destinationShort = substr($value->reimburseType->name, 0, 10);
+        // $wordrequestFors = explode(' ', $user->name);
+        // $userName = $wordrequestFors[0] ?? 'Unknown User';
+        // $businessTripStartDateFormatted = date("Md", strtotime($value->claim_date));
+
+        // $shortText = strtoupper("{$destinationShort}-{$userName}-{$businessTripStartDateFormatted}");
+
+
+        // $headerNote = "Remark Item: {$value->short_text} - Remark header: {$reim->remark}";
 
         return [
             'purchase_id' => $reim->id,
@@ -209,7 +199,7 @@ class ReimburseServices
             'waers' => 'IDR',
             'tax_code' => $pajak->mwszkz, // mwskz
             'item_category' => '', // pstyp
-            'short_text' => $reim->remark,  // txz01
+            'short_text' => $value->short_text,  // txz01
             'plant' => $plant, // werks
             'cost_center' => $costCenter->cost_center,  // kostl
             'order_number' => '', // AUFNR
@@ -224,7 +214,7 @@ class ReimburseServices
             'nama_perusahaan' => '',
             'jenis_usaha_entertainment' =>  '',
             'jenis_kegiatan_entertainment' =>  '', // b89
-            'header_not' =>  '', // b01
+            'header_not' =>   $reim->remark, // b01
             'B01' => '',
             'B03' => '',
             'B04' => '',

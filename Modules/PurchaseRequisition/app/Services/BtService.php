@@ -134,10 +134,26 @@ class BtService
         $pajak = Pajak::find($getDestination->pajak_id);
         $costCenter = MasterCostCenter::find($BusinessTrip->cost_center_id);
 
+        if (!$BusinessTrip->purposeType) {
+            throw new Exception('Purchasing Group not found');
+        }
+
+
+        $name = substr($getAllowanceItem->name, 0, 3);
+        $words = explode(' ', $BusinessTrip->purposeType->code);
+        $purposeType = $words[0];
+        $wordrequestFors = explode(' ', $BusinessTrip->requestFor->name);
+        $destinationShort = substr($getDestination->destination, 0, 10);
+        $requestFor = $wordrequestFors[0] ?? '';
+        $businessTripStartDateFormatted = date("Md", strtotime($getDestination->business_trip_start_date));
+
+        $shortText = strtoupper("{$name}{$purposeType}-{$requestFor}-{$destinationShort}-{$businessTripStartDateFormatted}");
+
+
         return [
             'code_transaction' => 'BTRE', // code_transaction
             'purchase_requisition_number' => $item->price  == "0" ? '' : $reqno, // banfn
-            'item_number' => $indx, //
+            'item_number' => $item->price  == "0" ? null : $indx, //
             'requisitioner_name' => $BusinessTrip->requestFor->employee->partner_number ?? '', // afnam
             'requisition_date' => $formattedDate, // badat
             'requirement_tracking_number' => '', // bednr
@@ -158,7 +174,7 @@ class BtService
             'waers' => 'IDR', // MATA UANG
             'tax_code' => $pajak->mwszkz ?? 'V0', // mwskz
             'item_category' => '', // pstyp
-            'short_text' => $BusinessTrip->remarks, // txz01
+            'short_text' => $shortText, // txz01
             'plant' => $settings['plant'], // werks
             'cost_center' => $costCenter?->cost_center, // kostl
             'order_number' => '', // AUFNR
@@ -173,7 +189,7 @@ class BtService
             'nama_perusahaan' => '',
             'jenis_usaha_entertainment' => '',
             'jenis_kegiatan_entertainment' => '',
-            'header_not' => '', // b01
+            'header_not' => $BusinessTrip->remarks ?? '', // b01
             'B01' => $BusinessTrip->remark,
             'B03' => $BusinessTrip->remark,
             'B04' => $BusinessTrip->remark,
@@ -183,7 +199,7 @@ class BtService
 
     private function findBusinessTrip($id)
     {
-        $items = BusinessTrip::with('requestFor.employee')->find($id);
+        $items = BusinessTrip::with('requestFor.employee', 'purposeType')->find($id);
         if (!$items) {
             throw new Exception(' Business Trip not found');
         }
