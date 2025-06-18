@@ -140,7 +140,7 @@ class BtService
 
 
         $name = substr($getAllowanceItem->name, 0, 3);
-        $words = explode(' ', $BusinessTrip->purposeType->code);
+        $words = explode('-', $BusinessTrip->purposeType->code);
         $purposeType = $words[0];
         $wordrequestFors = explode(' ', $BusinessTrip->requestFor->name);
         $destinationShort = substr($getDestination->destination, 0, 10);
