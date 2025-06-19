@@ -863,7 +863,8 @@ class BusinessTripController extends Controller
         $data = BusinessTripDestination::whereHas('businessTrip', function ($query) use ($user_id) {
             $query->leftJoin('purchase_requisitions as pr', function ($join) {
                 $join->on('pr.purchase_id', '=', 'business_trip.id')
-                    ->where('pr.code_transaction', '=', 'BTRE');
+                    ->where('pr.code_transaction', '=', 'BTRE')
+                    ->where('pr.balance', '>', 0);
             })
             ->where('business_trip.request_for', $user_id)
             ->where('business_trip.type', 'request')
