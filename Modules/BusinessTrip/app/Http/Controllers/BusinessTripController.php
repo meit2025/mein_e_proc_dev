@@ -377,6 +377,7 @@ class BusinessTripController extends Controller
 
     public function storeAPI(Request $request)
     {
+        dd($request->all());
         try {
             DB::beginTransaction();
 
@@ -860,9 +861,20 @@ class BusinessTripController extends Controller
     function getDateByUser(Request $request, $user_id)
     {
         $data = BusinessTripDestination::whereHas('businessTrip', function ($query) use ($user_id) {
-            $query->where('request_for', $user_id)
-                ->where('type', 'request')
-                ->whereIn('status_id', [1, 3, 5, 6]);
+            $query->leftJoin('purchase_requisitions as pr', function ($join) {
+                $join->on('pr.purchase_id', '=', 'business_trip.id')
+                    ->where('pr.code_transaction', '=', 'BTRE');
+            })
+            ->where('business_trip.request_for', $user_id)
+            ->where('business_trip.type', 'request')
+            ->whereIn('business_trip.status_id', [1, 3, 5, 6])
+            ->where(function ($query) {
+                $query->where(function ($query) { 
+                    $query->whereNotNull('pr.status')
+                    ->where('pr.status', '!=', 'X'); 
+                })
+                ->orWhereNull('pr.status');
+            });
         })->get();
 
         $destination = [];
