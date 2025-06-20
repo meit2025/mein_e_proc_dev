@@ -764,6 +764,38 @@ const ArrayForm = ({
                   onChangeOutside={(x: any, data: any) => {
                     FetchDataValue(x, dataIndex);
                   }}
+                  onSearch={async (search: string) => {
+                    await getMainAssetNumber('', {
+                      name: 'desc',
+                      id: 'asset',
+                      tabel: 'master_assets',
+                      search: search,
+                      where: {
+                        groupBy: 'asset,desc',
+                      },
+                      hiddenZero: true,
+                      isMapping: true,
+                    });
+
+                    return dataMainAsset ?? [];
+                  }}
+                  onFocus={async () => {
+                    const value = getValues('item_asset_number');
+                    await getVendor('', {
+                      name: 'desc',
+                      id: 'asset',
+                      tabel: 'master_assets',
+                      hasValue: {
+                        key: value ? 'id' : '',
+                        value: value ?? '',
+                      },
+                      where: {
+                        groupBy: 'asset,desc',
+                      },
+                      hiddenZero: true,
+                      isMapping: true,
+                    });
+                  }}
                 />
 
                 <FormAutocomplete<any>
