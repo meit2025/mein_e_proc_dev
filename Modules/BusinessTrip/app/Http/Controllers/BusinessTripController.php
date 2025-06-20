@@ -377,7 +377,6 @@ class BusinessTripController extends Controller
 
     public function storeAPI(Request $request)
     {
-        dd($request->all());
         try {
             DB::beginTransaction();
 
