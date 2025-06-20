@@ -1,1 +1,0 @@
-import{r as e}from"./app-Bycr8tKQ.js";function i(r){const t=e.useRef(r);return e.useEffect(()=>{t.current=r}),e.useMemo(()=>(...n)=>{var o;return(o=t.current)==null?void 0:o.call(t,...n)},[])}var u=e.createContext(void 0);function c(r){const t=e.useContext(u);return r||t||"ltr"}export{i as a,c as u};

@@ -95,7 +95,10 @@ class DropdownMasterController extends Controller
 
         if ($request->groupBy) {
             $groupByColumns = explode(',', $request->groupBy);
-            $data = $data->groupBy($groupByColumns);
+            $groupByColumns = array_map(function ($column) {
+                return $column == 'desc' ? '"desc"' : $column;
+            }, $groupByColumns);
+            $data = $data->groupBy(...$groupByColumns);
         }
 
         // cek where data dari data dropdown document type

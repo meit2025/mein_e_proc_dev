@@ -91,21 +91,21 @@ const ArrayForm = ({
       isMapping: true,
     });
     getIo('', {
-      name: 'desc',
+      name: `master_orders.desc || ' - ' || REGEXP_REPLACE(order_number, '^(0+)(\\d)', '\\2') `,
       id: 'order_number',
       tabel: 'master_orders',
-      hiddenZero: true,
-      isMapping: true,
+      hiddenZero: false,
+      isMapping: false,
+      raw: true,
     });
     getMainAssetNumber('', {
-      name: 'desc',
+      name: `master_assets.desc || ' - ' || REGEXP_REPLACE(asset, '^(0+)(\\d)', '\\2') `,
       id: 'asset',
       tabel: 'master_assets',
       where: {
-        groupBy: 'asset,desc',
+        groupBy: 'asset,master_assets.desc',
       },
-      hiddenZero: true,
-      isMapping: true,
+      raw: true,
     });
     handelGetMaterialNumber(item_material_group);
   }, []);
@@ -746,6 +746,30 @@ const ArrayForm = ({
                 }}
                 placeholder={'Order Number'}
                 classNames='mt-2'
+                onSearch={async (search: string) => {
+                  await getIo('', {
+                    name: `master_orders.desc || ' - ' || REGEXP_REPLACE(order_number, '^(0+)(\\d)', '\\2') `,
+                    id: 'order_number',
+                    tabel: 'master_orders',
+                    search: search,
+                    raw: true,
+                  });
+
+                  return dataIo ?? [];
+                }}
+                onFocus={async () => {
+                  const value = getValues('item_order_number');
+                  await getIo('', {
+                    name: `master_orders.desc || ' - ' || REGEXP_REPLACE(order_number, '^(0+)(\\d)', '\\2') `,
+                    id: 'order_number',
+                    tabel: 'master_orders',
+                    hasValue: {
+                      key: value ? 'id' : '',
+                      value: value ?? '',
+                    },
+                    raw: true,
+                  });
+                }}
               />
             )}
             {watchAccountAssigment === 'A' && (
@@ -766,34 +790,32 @@ const ArrayForm = ({
                   }}
                   onSearch={async (search: string) => {
                     await getMainAssetNumber('', {
-                      name: 'desc',
+                      name: `master_assets.desc || ' - ' || REGEXP_REPLACE(asset, '^(0+)(\\d)', '\\2') `,
                       id: 'asset',
                       tabel: 'master_assets',
                       search: search,
+                      raw: true,
                       where: {
-                        groupBy: 'asset,desc',
+                        groupBy: 'asset,master_assets.desc',
                       },
-                      hiddenZero: true,
-                      isMapping: true,
                     });
 
                     return dataMainAsset ?? [];
                   }}
                   onFocus={async () => {
                     const value = getValues('item_asset_number');
-                    await getVendor('', {
-                      name: 'desc',
+                    await getMainAssetNumber('', {
+                      name: `master_assets.desc || ' - ' || REGEXP_REPLACE(asset, '^(0+)(\\d)', '\\2') `,
                       id: 'asset',
                       tabel: 'master_assets',
+                      raw: true,
                       hasValue: {
                         key: value ? 'id' : '',
                         value: value ?? '',
                       },
                       where: {
-                        groupBy: 'asset,desc',
+                        groupBy: 'asset,master_assets.desc',
                       },
-                      hiddenZero: true,
-                      isMapping: true,
                     });
                   }}
                 />
