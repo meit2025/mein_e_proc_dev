@@ -133,9 +133,9 @@ class DestinationController extends Controller
             DB::commit();
             return $this->successResponse('Susccessfully', 'Successfully update purpose type');
         } catch (\Exception $e) {
-            dd($e);
 
             DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 500);
         }
     }
 
@@ -166,9 +166,9 @@ class DestinationController extends Controller
             DB::commit();
             return $this->successResponse($purpose, 'Successfully creeted purpose type');
         } catch (\Exception $e) {
-            dd($e);
 
             DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 500);
         }
     }
 

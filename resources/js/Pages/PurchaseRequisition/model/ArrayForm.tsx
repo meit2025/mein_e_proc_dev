@@ -1,19 +1,20 @@
+import { Box, Button, Typography } from '@mui/material';
+import { useFormContext, useWatch } from 'react-hook-form';
+
+import { DataGrid } from '@mui/x-data-grid';
 /* eslint-disable quotes */
 import FormAutocomplete from '@/components/Input/formDropdown';
 import FormInput from '@/components/Input/formInput';
-import useDropdownOptions from '@/lib/getDropdown';
-import { Box, Button, Typography } from '@mui/material';
-import { useEffect } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
 import FormSwitch from '@/components/Input/formSwitch';
 import FormTextArea from '@/components/Input/formTextArea';
-import { DataGrid } from '@mui/x-data-grid';
-import { columnsItem } from './listModel';
 import { Link } from '@inertiajs/react';
-import { useAlert } from '@/contexts/AlertContext';
-import axiosInstance from '@/axiosInstance';
 import axios from 'axios';
+import axiosInstance from '@/axiosInstance';
+import { columnsItem } from './listModel';
 import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
+import { useAlert } from '@/contexts/AlertContext';
+import useDropdownOptions from '@/lib/getDropdown';
+import { useEffect } from 'react';
 
 const ArrayForm = ({
   dataIndex,
@@ -57,7 +58,7 @@ const ArrayForm = ({
       isMapping: true,
     });
     getVendor('', {
-      name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
+      name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^(0+)(\\d)', '\\2') ",
       id: 'id',
       tabel: 'master_business_partners',
       hiddenZero: true,
@@ -90,21 +91,21 @@ const ArrayForm = ({
       isMapping: true,
     });
     getIo('', {
-      name: 'desc',
+      name: `master_orders.desc || ' - ' || REGEXP_REPLACE(order_number, '^(0+)(\\d)', '\\2') `,
       id: 'order_number',
       tabel: 'master_orders',
-      hiddenZero: true,
-      isMapping: true,
+      hiddenZero: false,
+      isMapping: false,
+      raw: true,
     });
     getMainAssetNumber('', {
-      name: 'desc',
+      name: `master_assets.desc || ' - ' || REGEXP_REPLACE(asset, '^(0+)(\\d)', '\\2') `,
       id: 'asset',
       tabel: 'master_assets',
       where: {
-        groupBy: 'asset,desc',
+        groupBy: 'asset,master_assets.desc',
       },
-      hiddenZero: true,
-      isMapping: true,
+      raw: true,
     });
     handelGetMaterialNumber(item_material_group);
   }, []);
@@ -535,8 +536,8 @@ const ArrayForm = ({
             onSearch={async (search) => {
               const isLabelMatch = dataVendor?.some((option) => option.label === search);
               if (search.length > 0 && !isLabelMatch) {
-                await getVendor(search, {
-                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
+                await getVendor('', {
+                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^(0+)(\\d)', '\\2')",
                   id: 'id',
                   tabel: 'master_business_partners',
                   hiddenZero: true,
@@ -545,8 +546,8 @@ const ArrayForm = ({
                   raw: true,
                 });
               } else if (search.length === 0 && !isLabelMatch) {
-                await getVendor(search, {
-                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
+                await getVendor('', {
+                  name: "name_one || ' - ' || REGEXP_REPLACE(partner_number, '^(0+)(\\d)', '\\2') ",
                   id: 'id',
                   tabel: 'master_business_partners',
                   hiddenZero: true,
@@ -554,11 +555,13 @@ const ArrayForm = ({
                   raw: true,
                 });
               }
+              // Return the updated options or an empty array to satisfy the type
+              return dataVendor ?? [];
             }}
             onFocus={async () => {
               const value = getValues(`vendors[${dataIndex}].vendor`);
               await getVendor('', {
-                name: "name_one || ' - '  || REGEXP_REPLACE(partner_number, '^[^0-9]*0*', '')",
+                name: "name_one || ' - '  || REGEXP_REPLACE(partner_number, '^(0+)(\\d)', '\\2') ",
                 id: 'id',
                 tabel: 'master_business_partners',
                 hiddenZero: true,
@@ -743,6 +746,30 @@ const ArrayForm = ({
                 }}
                 placeholder={'Order Number'}
                 classNames='mt-2'
+                onSearch={async (search: string) => {
+                  await getIo('', {
+                    name: `master_orders.desc || ' - ' || REGEXP_REPLACE(order_number, '^(0+)(\\d)', '\\2') `,
+                    id: 'order_number',
+                    tabel: 'master_orders',
+                    search: search,
+                    raw: true,
+                  });
+
+                  return dataIo ?? [];
+                }}
+                onFocus={async () => {
+                  const value = getValues('item_order_number');
+                  await getIo('', {
+                    name: `master_orders.desc || ' - ' || REGEXP_REPLACE(order_number, '^(0+)(\\d)', '\\2') `,
+                    id: 'order_number',
+                    tabel: 'master_orders',
+                    hasValue: {
+                      key: value ? 'id' : '',
+                      value: value ?? '',
+                    },
+                    raw: true,
+                  });
+                }}
               />
             )}
             {watchAccountAssigment === 'A' && (
@@ -760,6 +787,36 @@ const ArrayForm = ({
                   classNames='mt-2'
                   onChangeOutside={(x: any, data: any) => {
                     FetchDataValue(x, dataIndex);
+                  }}
+                  onSearch={async (search: string) => {
+                    await getMainAssetNumber('', {
+                      name: `master_assets.desc || ' - ' || REGEXP_REPLACE(asset, '^(0+)(\\d)', '\\2') `,
+                      id: 'asset',
+                      tabel: 'master_assets',
+                      search: search,
+                      raw: true,
+                      where: {
+                        groupBy: 'asset,master_assets.desc',
+                      },
+                    });
+
+                    return dataMainAsset ?? [];
+                  }}
+                  onFocus={async () => {
+                    const value = getValues('item_asset_number');
+                    await getMainAssetNumber('', {
+                      name: `master_assets.desc || ' - ' || REGEXP_REPLACE(asset, '^(0+)(\\d)', '\\2') `,
+                      id: 'asset',
+                      tabel: 'master_assets',
+                      raw: true,
+                      hasValue: {
+                        key: value ? 'id' : '',
+                        value: value ?? '',
+                      },
+                      where: {
+                        groupBy: 'asset,master_assets.desc',
+                      },
+                    });
                   }}
                 />
 

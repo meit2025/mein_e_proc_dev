@@ -96,7 +96,7 @@ class ReimbursementService
                 $validatedData['requester'] = $groupData['requester'];
 
                 $reimburse = Reimburse::create($validatedData);
-
+                
                 if (isset($form['attachment'])) {
                     foreach ($form['attachment'] as $file) {
                         $fileName = time() . '_' . str_replace(' ', '', $file->getClientOriginalName());
@@ -151,7 +151,23 @@ class ReimbursementService
 
             $balance = 0;
 
-            foreach ($forms as $form) {
+            // delete if total form decreased
+            $getReimburseId = array_column($forms, 'reimburseId');
+            $reimburseNeedToDelete = Reimburse::whereNotIn('id', $getReimburseId)->where('group', $reimburseGroup['code'])->get();
+            if (!empty($reimburseNeedToDelete)) {
+                foreach ($reimburseNeedToDelete as $reimburse) {
+                    $reimburseAttachmentWantDestroy = ReimburseAttachment::where('reimburse', $reimburse->id)->get();
+                    if (count($reimburseAttachmentWantDestroy) > 0) {
+                        foreach ($reimburseAttachmentWantDestroy as $attachment) {
+                            Storage::disk('public')->delete('reimburse/' . $attachment->url);
+                        }
+                    }
+                    ReimburseAttachment::where('reimburse', $reimburse->id)->delete();
+                    $reimburse->delete();
+                }
+            }
+
+            foreach ($forms as $key => $form) {
                 if (!isset($form['for'])) $form['for'] = $groupData['requester'];
                 $form['desired_vendor']   = $groupData['requester'];
                 $form['item_delivery_data']         = Carbon::parse($form['item_delivery_data'])->format('Y-m-d');
@@ -162,23 +178,45 @@ class ReimbursementService
                     return ['error' => $validator->errors()];
                 }
                 $validatedData = $validator->validated();
-                // $validatedData['short_text'] = $form['short_text'];
                 
                 $reimburse = Reimburse::find($form['reimburseId']);
                 if ($reimburse) {
                     $reimburse->update($validatedData);
-
-                    if (isset($form['attachment'])) {
-                        foreach ($reimburse->attachments as $attachment) {
-                            Storage::delete($attachment->path);
+                    
+                    if (isset($form['savedAttachment']) && count($form['savedAttachment']) > 0) {
+                        $savedAttachmentId = array_column($form['savedAttachment'], 'id');
+                        $deletedAttachment = ReimburseAttachment::query()->where('reimburse', $reimburse->id)->whereNotIn('id', $savedAttachmentId);
+                        foreach ($deletedAttachment->get() as $attachment) {
+                            Storage::disk('public')->delete('reimburse/' . $attachment->url);
                             $attachment->delete();
                         }
-
+                    }
+                    
+                    if (isset($form['attachment'])) {
                         foreach ($form['attachment'] as $file) {
-                            $path = $file->store('reimburse_attachments');
+                            $fileName = time() . '_' . str_replace(' ', '', $file->getClientOriginalName());
+                            $filePath = $file->storeAs('reimburse', $fileName, 'public');
                             ReimburseAttachment::create([
-                                'reimburse_id' => $reimburse->id,
-                                'path' => $path,
+                                'reimburse' => $reimburse->id,
+                                'url' => $fileName,
+                            ]);
+                        }
+                    }
+                } else {
+                    $validatedData['group'] = $reimburseGroup->code;
+                    $validatedData['purchase_requisition_unit_of_measure']   = $form['purchase_requisition_unit_of_measure'];
+                    $validatedData['item_number'] = $key + 1;
+                    $validatedData['item_delivery_data'] = Carbon::parse($form['item_delivery_data'])->format('Y-m-d');
+                    $validatedData['claim_date'] = Carbon::parse($form['claim_date'])->format('Y-m-d');
+                    $validatedData['requester'] = $groupData['requester'];
+                    $reimburse = Reimburse::create($validatedData);
+                    if (isset($form['attachment'])) {
+                        foreach ($form['attachment'] as $file) {
+                            $fileName = time() . '_' . str_replace(' ', '', $file->getClientOriginalName());
+                            $filePath = $file->storeAs('reimburse', $fileName, 'public');
+                            ReimburseAttachment::create([
+                                'reimburse' => $reimburse->id,
+                                'url' => $fileName,
                             ]);
                         }
                     }

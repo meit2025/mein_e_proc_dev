@@ -23,21 +23,21 @@ export interface Auth {
 const messageNotifikasi = (data: Notification) => {
   return (
     <>
-      <div className='flex items-center justify-center size-8 bg-success-light rounded-full border border-success-clarity'>
+      <div className='flex items-center justify-center border rounded-full size-8 bg-success-light border-success-clarity'>
         <i
           className={`ki-filled ${data.is_read ? ' ki-check text-success' : 'ki-information-1 text-warning'}  text-lg `}
         ></i>
       </div>
       <div className='flex flex-col gap-1'>
-        <div className='text-2sm font-medium mb-px'>
+        <div className='mb-px font-medium text-2sm'>
           <Link
-            className='hover:text-primary-active text-gray-900 font-semibold'
+            className='font-semibold text-gray-900 hover:text-primary-active'
             href={data.url_redirect}
           >
             {data.message}
           </Link>
         </div>
-        <span className='flex items-center text-2xs font-medium text-gray-500'>
+        <span className='flex items-center font-medium text-gray-500 text-2xs'>
           {formatTimeAgo(data.created_at)}
         </span>
       </div>
@@ -128,11 +128,11 @@ export default function Header() {
         id='header'
       >
         <div
-          className='container-fixed flex justify-end items-stretch lg:gap-4'
+          className='flex items-stretch justify-end container-fixed lg:gap-4'
           id='header_container'
         >
           {/* mobile logo */}
-          <div className='flex gap-1 lg:hidden items-center -ml-1'>
+          <div className='flex items-center gap-1 -ml-1 lg:hidden'>
             <a className='shrink-0' href='/'>
               <img className='max-h-[25px] w-full' src={Logo} />
             </a>
@@ -159,7 +159,7 @@ export default function Header() {
             {window.location.pathname !== '/portal' && (
               <div className='menu-item'>
                 <a
-                  className='btn bg-blue-500 border px-4 py-2 my-4 border-solid border-white text-white rounded-full menu-link text-sm text-gray-700 font-medium menu-item-show:text-primary'
+                  className='px-4 py-2 my-4 text-sm font-medium text-white text-gray-700 bg-blue-500 border border-white border-solid rounded-full btn menu-link menu-item-show:text-primary'
                   href='/portal'
                 >
                   <div className='menu-title text-nowrap'>Portal</div>
@@ -177,7 +177,7 @@ export default function Header() {
               data-dropdown-placement='bottom-end'
               data-dropdown-trigger='click|lg:click'
             >
-              <button className='dropdown-toggle btn btn-icon btn-icon-lg relative cursor-pointer size-9 rounded-full hover:bg-primary-light hover:text-primary dropdown-open:bg-primary-light dropdown-open:text-primary text-gray-500'>
+              <button className='relative text-gray-500 rounded-full cursor-pointer dropdown-toggle btn btn-icon btn-icon-lg size-9 hover:bg-primary-light hover:text-primary dropdown-open:bg-primary-light dropdown-open:text-primary'>
                 <i className='ki-filled ki-notification-on'></i>
                 {isRead && (
                   <span className='badge badge-dot badge-success size-[5px] absolute top-0.5 right-0.5 transform translate-y-1/2'></span>
@@ -197,7 +197,7 @@ export default function Header() {
                   </button>
                 </div>
                 <div
-                  className='tabs justify-between px-5 mb-2'
+                  className='justify-between px-5 mb-2 tabs'
                   data-tabs='true'
                   id='notifications_tabs'
                 ></div>
@@ -228,13 +228,13 @@ export default function Header() {
                     <div className='grid grid-cols-2 p-5 gap-2.5' id='notifications_all_footer'>
                       <button
                         onClick={(x) => action('/notifikasi/delete')}
-                        className='btn btn-sm btn-light justify-center'
+                        className='justify-center btn btn-sm btn-light'
                       >
                         Delete all
                       </button>
                       <button
                         onClick={(x) => action('/notifikasi/read')}
-                        className='btn btn-sm btn-light justify-center'
+                        className='justify-center btn btn-sm btn-light'
                       >
                         Mark all as read
                       </button>
@@ -254,27 +254,21 @@ export default function Header() {
                 data-menu-item-toggle='dropdown'
                 data-menu-item-trigger='click|lg:click'
               >
-                <div className='menu-toggle btn btn-icon rounded-full'>
-                  <img
-                    alt=''
-                    className='size-10 rounded-full border-2 border-success shrink-0'
-                    src={Logo}
-                  ></img>
+                <div className='rounded-full menu-toggle btn btn-icon'>
+                  <i className='!text-lg md:!text-3xl text-blue-500 ki-filled ki-profile-circle'></i>
                 </div>
                 <div className='menu-dropdown menu-default light:border-gray-300 w-screen max-w-[250px]'>
                   <div className='flex items-center justify-between px-5 py-1.5 gap-1.5'>
                     <div className='flex items-center gap-2'>
-                      <img
-                        alt=''
-                        className='size-9 rounded-full border-2 border-success'
-                        src={Logo}
-                      ></img>
+                      <div className='rounded-full menu-toggle btn btn-icon'>
+                        <i className='!text-lg md:!text-3xl text-blue-500 ki-filled ki-profile-circle'></i>
+                      </div>
                       <div className='flex flex-col gap-1.5'>
-                        <span className='text-sm text-gray-800 font-semibold leading-none'>
+                        <span className='text-sm font-semibold leading-none text-gray-800'>
                           {auth?.user?.name}
                         </span>
                         <a
-                          className='text-xs text-gray-600 hover:text-primary font-medium leading-none'
+                          className='text-xs font-medium leading-none text-gray-600 hover:text-primary'
                           href='html/demo1/account/home/get-started.html'
                         >
                           {auth?.user?.email}
@@ -350,7 +344,7 @@ export default function Header() {
                               data-tooltip='true'
                               data-tooltip-placement='top'
                             >
-                              <i className='ki-filled ki-information-2 text-md text-gray-500'></i>
+                              <i className='text-gray-500 ki-filled ki-information-2 text-md'></i>
                               <span className='tooltip' data-tooltip-content='true'>
                                 Payment and subscription info
                               </span>
@@ -400,7 +394,7 @@ export default function Header() {
                   <div className='menu-separator'></div>
                   <div className='flex flex-col'>
                     <div className='menu-item px-4 py-1.5'>
-                      <a className='btn btn-sm btn-light justify-center' href='/logout'>
+                      <a className='justify-center btn btn-sm btn-light' href='/logout'>
                         Log out
                       </a>
                     </div>

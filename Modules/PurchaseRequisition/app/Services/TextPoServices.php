@@ -17,7 +17,7 @@ class TextPoServices
         DB::beginTransaction();
         try {
 
-            $po = PurchaseOrder::where('purchase_id', $id)->get();
+            $po = PurchaseOrder::where('purchase_id', $id)->where('net_price', '>', 0)->get();
             $array = [];
             $reqno = '';
             foreach ($po as $key => $value) {

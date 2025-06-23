@@ -7,7 +7,7 @@ import {
   UPDATE_REIMBURSE,
   CHECK_CLONE_VALIDATION_REIMBURSE,
 } from '@/endpoint/reimburse/api';
-import { PAGE_DETAIL_REIMBURSE, CLONE_REIMBURSE } from '@/endpoint/reimburse/page';
+import { PAGE_DETAIL_REIMBURSE, PAGE_PRINT_REIMBURSE } from '@/endpoint/reimburse/page';
 import { FormType } from '@/lib/utils';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import React, { ReactNode } from 'react';
@@ -69,26 +69,26 @@ export const Index = ({
   }
 
   async function cloneFormHandler(id: string) {
-    try {
-      const response = await axiosInstance.get(CHECK_CLONE_VALIDATION_REIMBURSE(id), {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      showToast(response?.data?.data, 'success');
+    // try {
+    //   const response = await axiosInstance.get(CHECK_CLONE_VALIDATION_REIMBURSE(id), {
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //   });
+      // showToast(response?.data?.data, 'success');
       setFormType({
         type: ReimburseFormType.clone,
         id: id,
       });
       setOpenForm(!openForm);
-    } catch (e: any) {
-      showToast(e.response?.data?.message || 'An error occurred', 'error');
-    }
+    // } catch (e: any) {
+    //   showToast(e.response?.data?.message || 'An error occurred', 'error');
+    // }
   }
 
   return (
     <>
-      <div className='flex md:mb-4 mb-2 w-full justify-end'>
+      <div className='flex justify-end w-full mb-2 md:mb-4'>
         <CustomDialog
           onClose={() => setOpenForm(false)}
           open={openForm}
@@ -110,7 +110,7 @@ export const Index = ({
         </CustomDialog>
       </div>
 
-      <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
+      <div className='grid grid-cols-2 gap-3 md:grid-cols-4'>
         <div>
           {/* <FormField
                 control={form.control}
@@ -154,7 +154,7 @@ export const Index = ({
         url={{
           url: LIST_REIMBURSE,
           detailUrl: PAGE_DETAIL_REIMBURSE,
-          // clone: CLONE_REIMBURSE,
+          printUrl: PAGE_PRINT_REIMBURSE,
           cancelApproval: 'reim',
         }}
         labelFilter='search'

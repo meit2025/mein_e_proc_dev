@@ -1,17 +1,18 @@
+import { Box, Button, Tab, Tabs } from '@mui/material';
+import { TabPanel, a11yProps } from './itemForm';
+import { useEffect, useState } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
+
+import ArrayItem from './ArrayItem';
+import { DataGrid } from '@mui/x-data-grid';
+import DataGridComponent from '@/components/commons/DataGrid';
 import FormAutocomplete from '@/components/Input/formDropdown';
 import FormInput from '@/components/Input/formInput';
-import useDropdownOptions from '@/lib/getDropdown';
-import { Box, Button, Tab, Tabs } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { a11yProps, TabPanel } from './itemForm';
-import { useFormContext, useWatch } from 'react-hook-form';
-import ArrayItem from './ArrayItem';
 import FormSwitch from '@/components/Input/formSwitch';
 import FormTextArea from '@/components/Input/formTextArea';
-import DataGridComponent from '@/components/commons/DataGrid';
-import { DataGrid } from '@mui/x-data-grid';
-import { columnsItem } from './listModel';
 import { Link } from '@inertiajs/react';
+import { columnsItem } from './listModel';
+import useDropdownOptions from '@/lib/getDropdown';
 
 const ArrayForm = ({
   dataIndex,
@@ -443,6 +444,34 @@ const ArrayForm = ({
                   classNames='mt-2'
                   onChangeOutside={(x: any, data: any) => {
                     FetchDataValue(x, dataIndex);
+                  }}
+                  onSearch={async (search: string) => {
+                    await getMainAssetNumber('', {
+                      name: 'desc',
+                      id: 'asset',
+                      tabel: 'master_assets',
+                      search: search,
+                      where: {
+                        groupBy: 'asset,desc',
+                      },
+                    });
+
+                    return dataMainAsset ?? [];
+                  }}
+                  onFocus={async () => {
+                    const value = getValues('item_asset_number');
+                    await getVendor('', {
+                      name: 'desc',
+                      id: 'asset',
+                      tabel: 'master_assets',
+                      hasValue: {
+                        key: value ? 'id' : '',
+                        value: value ?? '',
+                      },
+                      where: {
+                        groupBy: 'asset,desc',
+                      },
+                    });
                   }}
                 />
 

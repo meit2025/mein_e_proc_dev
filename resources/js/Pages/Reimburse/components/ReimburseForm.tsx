@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/shacdn/button';
 import { Button as ButtonMui, FormHelperText } from '@mui/material';
 import moment from 'moment';
-import { z } from 'zod';
+import { number, z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 import {
@@ -69,10 +69,49 @@ interface Props {
   currentUser?: User;
 }
 
-interface reimburseAttachement {
-  id: number;
-  url: string;
-  file_name: string;
+interface reimburseReviseInterface {
+  id: number | string,
+  reimburse_type: string,
+  balance: number | string,
+  limit: number,
+  for: string | number,
+}
+
+interface remainingBalanceReviseInterface {
+  reimburse_type: string,
+  totalBalance: number | string,
+  for: string | number,
+}
+
+interface reimburseFormDataInterface {
+  id: number | string;
+  for: string | number;
+  group: string | number;
+  reimburse_type: { code: string };
+  short_text: string;
+  balance: string | number;
+  currency: string;
+  tax_on_sales: string | number;
+  purchase_requisition_unit_of_measure: string | number;
+  remaining_balance_when_request: number;
+  purchasing_group: string | number;
+  type: string;
+  item_delivery_data: string;
+  claim_date: string;
+  reimburse_attachment: any[];
+}
+
+interface ErrorResponse {
+  message: string;
+  data: {
+    message: string;
+  };
+}
+
+interface RequestStatusInterface {
+  name: string;
+  classname: string;
+  code: string;
 }
 
 export const ReimburseForm: React.FC<Props> = ({
@@ -103,12 +142,14 @@ export const ReimburseForm: React.FC<Props> = ({
 
   const [dataReimburseType, setDataReimburseType] = useState<any[]>([]);
   const [dataFamily, setDataFamily] = useState<any[]>([]);
-  const [requestStatus, setRequestStatus] = useState<any[]>(false);
+  const [requestStatus, setRequestStatus] = useState<RequestStatusInterface | null>(null);
   const [isShow, setIsShow] = useState(false);
   const [isLoading, setLoading] = useState<boolean>(false);
   const [detailLimit, setDetailLimit] = useState<any[]>([]);
-  const [reimburseTypeCostRevise, setReimburseTypeCostRevise] = useState<any[]>([]);
-
+  const [reviseDataUsed, setReviseDataUsed] = useState<Array<number | string>>([]);
+  const [additionalBalanceRevise, setAdditionalBalanceRevise] = useState<any[]>([]);
+  const reimburseReviseData = useRef<Array<reimburseReviseInterface>>([]);
+  const remainingBalanceRevise = useRef<Array<remainingBalanceReviseInterface>>([]);
 
   const [approvalRoute, setApprovalRoute] = useState({
     approvalRequest: [],
@@ -161,6 +202,7 @@ export const ReimburseForm: React.FC<Props> = ({
               }),
           )
           .min(type === ReimburseFormType.create ? 1 : 0, 'Attachment is required'),
+        savedAttachment: z.array(z.any()).optional().nullable(),
         // url: z.string().optional(),
       }),
     ),
@@ -193,7 +235,7 @@ export const ReimburseForm: React.FC<Props> = ({
       //   }
       // });
 
-      const activeForm = parseInt(activeTab.split('form')[1]) - 1;
+      const activeForm = Number(activeTab.split('form')[1]) - 1;
       getPurchasingGroup('', {
         name: 'purchasing_group_desc',
         id: 'id',
@@ -233,7 +275,7 @@ export const ReimburseForm: React.FC<Props> = ({
 
     fetchData();
   }, [type]);
-
+  
   async function getDetailData() {
     form.setValue('forms', []);
 
@@ -241,29 +283,64 @@ export const ReimburseForm: React.FC<Props> = ({
 
     try {
       const response = await axiosInstance.get(edit_url ?? '');
-      const reimburseGroup = response.data.data.group;
-      const reimburseForms = response.data.data.forms as [];
+      const data = response.data.data;
+      const reimburseForms = data.forms ?? [];
+      const reimburseGroup = data.group;
 
       setRequestStatus(reimburseGroup.reimbursementStatus);
+      setReviseDataUsed(reimburseForms.map((form: reimburseFormDataInterface) => String(form.id)));
 
-      const reimburseFormMapping = reimburseForms.map((map: any) => {
+      const reimburseFormMapping = reimburseForms.map((form : reimburseFormDataInterface, index : number) => {
+        const {
+          id, for: forValue, group, reimburse_type, short_text,
+          balance, currency, tax_on_sales, purchase_requisition_unit_of_measure,
+          remaining_balance_when_request, purchasing_group, type,
+          item_delivery_data, claim_date, reimburse_attachment,
+        } = form;
+
+        const matchingForms = reimburseForms.slice(index).filter((f : reimburseFormDataInterface) =>
+          f.for === forValue && f.reimburse_type.code === reimburse_type.code
+        );
+
+        reimburseReviseData.current.push({
+          id: String(id),
+          reimburse_type: reimburse_type.code,
+          balance: matchingForms.reduce((acc : number, curr : reimburseFormDataInterface) => acc + Number(curr.balance || 0), 0),
+          limit: matchingForms.reduce((acc : number) => acc + 1 || 0, 0),
+          for: String(forValue),
+        });
+
+        const existingIndex = remainingBalanceRevise.current.findIndex(item =>
+          item.reimburse_type === reimburse_type.code && item.for === String(forValue)
+        );
+
+        if (existingIndex !== -1) {
+          remainingBalanceRevise.current[existingIndex].totalBalance = Number(remainingBalanceRevise.current[existingIndex].totalBalance) + Number(balance || 0);
+        } else {
+          remainingBalanceRevise.current.push({
+            reimburse_type: reimburse_type.code,
+            totalBalance: Number(balance || 0),
+            for: String(forValue),
+          });
+        }
+
         return {
-          reimburseId: String(map.id),
-          for: String(map.for),
-          group: String(map.group),
-          reimburse_type: map.reimburse_type.code,
-          short_text: map.short_text,
-          balance: map.balance,
-          currency: map.currency,
-          tax_on_sales: String(map.tax_on_sales),
-          purchase_requisition_unit_of_measure: String(map.purchase_requisition_unit_of_measure),
-          remaining_balance_when_request: parseInt(map.remaining_balance_when_request) ?? 0,
-          purchasing_group: String(map.purchasing_group),
-          type: map.type,
-          item_delivery_data: new Date(map.item_delivery_data),
-          claim_date: new Date(map.claim_date),
+          reimburseId: String(id),
+          for: String(forValue),
+          group: String(group),
+          reimburse_type: reimburse_type.code,
+          short_text,
+          balance,
+          currency,
+          tax_on_sales: String(tax_on_sales),
+          purchase_requisition_unit_of_measure: String(purchase_requisition_unit_of_measure),
+          remaining_balance_when_request: Number(remaining_balance_when_request) || 0,
+          purchasing_group: String(purchasing_group),
+          type,
+          item_delivery_data: new Date(item_delivery_data),
+          claim_date: new Date(claim_date),
           attachment: [],
-          // url: GET_LIST_MASTER_REIMBUSE_TYPE,
+          savedAttachment: reimburse_attachment,
         };
       });
 
@@ -271,31 +348,30 @@ export const ReimburseForm: React.FC<Props> = ({
       form.setValue('remark_group', reimburseGroup.remark);
       form.setValue('cost_center', String(reimburseGroup.cost_center.id));
       form.setValue('requester', reimburseGroup.requester);
-      
-      // setReimburseTypeCostRevise(reimburseFormMapping);
+      form.setValue('forms', reimburseFormMapping);
 
-      let formCounter = 0;
-      for (const map of reimburseForms) {
-        await fetchReimburseType(formCounter, { reimburse_type: map.reimburse_type.code });
-        await fetchFamily(formCounter, {
+      // Jalankan pemanggilan data per-form
+      for (let i = 0; i < reimburseForms.length; i++) {
+        const map = reimburseForms[i];
+        await fetchReimburseType(i, { reimburse_type: map.reimburse_type.code });
+        await fetchFamily(i, {
           type: map.type,
           reimburse_type: map.reimburse_type.code,
         });
-        await getDataByLimit(formCounter, {
+        await getDataByLimit(i, {
           reimburse_type: map.reimburse_type.code,
           for: map.reimburse_type.is_employee === 1 ? null : map.for,
-        });
-        formCounter++;
+        }, true);
       }
 
-      form.setValue('forms', reimburseFormMapping);
       setLoading(false);
     } catch (e) {
-      const error = e as AxiosError;
+      const error = e as AxiosError<ErrorResponse>;
       setLoading(false);
+      showToast(error?.response?.data?.message, 'error');
     }
   }
-
+  
   const defaultValues = {
     formCount: '1',
     remark_group: '',
@@ -327,12 +403,12 @@ export const ReimburseForm: React.FC<Props> = ({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues,
   });
-
+  
   const { fields: formFields, update: updateForm } = useFieldArray({
     control: form.control,
     name: 'forms',
   });
-
+  
   const fetchReimburseType = async (index: number, otherParams: any = null) => {
     const requester = form.getValues('requester');
 
@@ -361,7 +437,7 @@ export const ReimburseForm: React.FC<Props> = ({
       return newData;
     });
   };
-
+  
   const handleSearchReimburseType = async (search: string, index: number) => {
     if (search && search.length > 0) {
       try {
@@ -415,9 +491,41 @@ export const ReimburseForm: React.FC<Props> = ({
     setDataFamily([]);
   };
 
+  const updateRemainingBalanceNextFormWhenSameType = (index: number, formValue: any) => {
+    const forms = form.getValues('forms');
+    forms.forEach((formItem, idx) => {
+      if (
+        idx > index &&
+        forms[idx].reimburse_type === formValue.reimburse_type
+      ) {
+        const remainingBalance = detailLimit[idx]?.balance || 0;
+        const remainingLimit = detailLimit[idx]?.limit || 0;
+
+        setDetailLimit((prev) => {
+          const newDetailLimit = [...prev];
+          newDetailLimit[idx] = {
+            ...newDetailLimit[idx],
+            balance:
+              remainingBalance + Number(formValue.balance || '0'),
+          };
+
+          if (detailLimit[idx]?.type_limit !== 'Unlimited') {
+            newDetailLimit[idx] = {
+              ...newDetailLimit[idx],
+              limit: remainingLimit + 1,
+            };
+          }
+          return newDetailLimit;
+        });
+
+        form.setValue(`forms.${idx}.balance`, '');
+      }
+    });
+  }
+
   function generateForms(count: string) {
     const forms = [...form.getValues('forms')];
-    for (let i = 0; i < parseInt(count); i++) {
+    for (let i = 0; i < Number(count); i++) {
       if (i + 1 > forms.length) {
         fetchReimburseType(i);
         const object = {
@@ -446,7 +554,7 @@ export const ReimburseForm: React.FC<Props> = ({
     form.setValue('forms', forms);
   }
 
-  const handleTabChange = (tabValue) => {
+  const handleTabChange = (tabValue: string) => {
     setActiveTab(tabValue);
   };
 
@@ -457,7 +565,7 @@ export const ReimburseForm: React.FC<Props> = ({
 
         if (
           detailLimit[index]?.type_limit !== 'Unlimited' &&
-          parseInt(detailLimit[index]?.limit) == 0
+          Number(detailLimit[index]?.limit) == 0
         ) {
           showToast(
             'Claim Limit for form ' + (index + 1) + ' is Empty, Please Contact the Admin',
@@ -466,13 +574,13 @@ export const ReimburseForm: React.FC<Props> = ({
           return;
         }
 
-        if (values.forms[index].balance == '' || parseInt(values.forms[index].balance) == 0) {
+        if (values.forms[index].balance == '' || Number(values.forms[index].balance) == 0) {
           showToast('Claim Balance for form ' + (index + 1) + ' cannot be 0', 'error');
           return;
         }
 
         if (
-          parseInt(detailLimit[index]?.balance ?? 0) < parseInt(values.forms[index].balance ?? 0)
+          Number(detailLimit[index]?.balance ?? 0) < Number(values.forms[index].balance ?? 0)
         ) {
           showToast(
             'Please check your balance input for forms ' +
@@ -487,13 +595,13 @@ export const ReimburseForm: React.FC<Props> = ({
         // update format date
         values.forms = values.forms.map((form, formIndex) => ({
           ...form,
-          claim_date: moment(form.claim_date).format('YYYY-MM-DD'),
-          item_delivery_data: moment(form.item_delivery_data).format('YYYY-MM-DD'),
-          remaining_balance_when_request: parseInt(detailLimit[formIndex]?.balance ?? 0), // Ganti index dengan formIndex
+          claim_date: moment(form.claim_date).toDate(),
+          item_delivery_data: moment(form.item_delivery_data).toDate(),
+          remaining_balance_when_request: Number(detailLimit[formIndex]?.balance ?? 0),
         }));
       }
     }
-    const totalNominal = values.forms.reduce((acc, item) => acc + parseInt(item.balance) || 0, 0);
+    const totalNominal = values.forms.reduce((acc, item) => acc + Number(item.balance) || 0, 0);
 
     values.value = totalNominal;
     values.user_id = values?.requester || '0';
@@ -513,69 +621,112 @@ export const ReimburseForm: React.FC<Props> = ({
         });
       }
       showToast(response?.data?.data, 'success');
-      onSuccess();
+      onSuccess?.();
     } catch (e) {
-      const error = e as AxiosError;
+      const error = e as AxiosError<ErrorResponse>;
     }
   };
-
-  async function getDataByLimit(index: number, param: any = null) {
+  
+  async function getDataByLimit(index: number, param: any = null, fromGetData: boolean = false) {
     const data = form.getValues(`forms.${index}`);
-
+    let forValue = !data.for || data.for === "" ? form.getValues('requester') || '' : data.for;
+    
     const params = {
       user: form.getValues('requester'),
       reimbuse_type: param != null ? param.reimburse_type : data.reimburse_type,
-      for: param != null ? param.for : data.for,
+      for: param != null ? param.for : forValue,
     };
-
+    
     try {
       const response = await axiosInstance.get('reimburse/data-limit-and-balance', {
         params: params,
       });
+      const forms = form.getValues('forms');
+      
+      let reviseBalance = 0;
+      let reviseLimit = 0;
+      let remainingBalanceOld = response.data.data.balance;
+      let remainingLimitOld = response.data.data.limit;
 
+      let sameTypeForms = (forLimit: boolean = false) => forms.filter(
+        (formItem, idx) => {
+          let formForValue = !formItem.for || formItem.for === "" ? form.getValues('requester') || '' : formItem.for;
+          return formItem.reimburse_type === data.reimburse_type
+          && formForValue === forValue
+          && (type === ReimburseFormType.clone && fromGetData && !forLimit ? true : idx !== index)
+        } 
+      );
+      let totalLimit = sameTypeForms(true).length;
+      
+      let totalBalance = sameTypeForms().reduce(
+        (acc, curr) => acc + Number(curr.balance || 0),
+        0
+      );
+      
+      // Adjust revise condition
+      if (type === ReimburseFormType.clone) {
+        let totalBalancePerReimburseType = (remainingBalanceRevise.current).find(reimburse => reimburse.reimburse_type === data.reimburse_type && reimburse.for === forValue)?.totalBalance ?? 0;
+        remainingBalanceOld += totalBalancePerReimburseType;
+        
+        if (fromGetData) {
+          let reviseMatch = (reimburseReviseData.current).find(reimburse => data.reimburseId == reimburse.id);
+          if (reviseMatch) {
+            reviseBalance = Number(reviseMatch.balance)
+            reviseLimit = totalLimit + Number(reviseMatch.limit)
+            setReviseDataUsed((prev) => {
+              const newReviseDataUsed = [...prev];
+              newReviseDataUsed[index] = reviseMatch.id;
+              return newReviseDataUsed;
+            })
+          }
+        } else {
+          let reviseMatch = (reimburseReviseData.current).find(reimburse => 
+            reimburse.reimburse_type === data.reimburse_type && reimburse.for === forValue);
+          if (reviseMatch !== undefined) {
+            reviseLimit = Number(reviseMatch.limit);
+            setReviseDataUsed((prev) => {
+              const newReviseDataUsed = [...prev];
+              newReviseDataUsed[index] = reviseMatch.id;
+              return newReviseDataUsed;
+            })
+          }
+        }
+      }
+      
+      let finalBalance = (remainingBalanceOld - totalBalance) + reviseBalance;
+      let finalLimit = Math.max(0, remainingLimitOld - totalLimit + reviseLimit);
+      
       setDetailLimit((prev) => {
-        const forms = form.getValues('forms');
-        const sameTypeForms = forms.filter(
-          (formItem, idx) => idx !== index && formItem.reimburse_type === data.reimburse_type,
-        );
-        const totalBalance = sameTypeForms.reduce(
-          (acc, curr) => acc + parseInt(curr.balance) || 0,
-          0,
-        );
-
         const newData = [...prev];
         newData[index] = {
           ...response.data.data,
-          balance: response.data.data.balance - totalBalance,
-          limit:
-            response.data.data.type_limit == 'Unlimited'
-              ? response.data.data.type_limit
-              : Math.max(0, response.data.data.limit - sameTypeForms.length),
+          balance: finalBalance,
+          limit: response.data.data.type_limit === 'Unlimited' ? response.data.data.type_limit : finalLimit,
         };
-
         return newData;
       });
     } catch (e) {
-      showToast(e?.response?.data?.message, 'error');
+      const error = e as AxiosError<ErrorResponse>;
+      showToast(error?.response?.data?.message, 'error');
     }
   }
-
+  
   const fetchDataValue = async () => {
     try {
       const values = form.getValues('forms');
       const reimburseCostFormList = values.map((item, index) => ({
         index,
-        value: item.balance ? parseInt(item.balance) : 0,
+        value: item.balance ? Number(item.balance) : 0,
       }));
 
       const hasZeroValue = reimburseCostFormList.some((item) => item.value === 0);
       if (hasZeroValue) {
         const index = reimburseCostFormList.findIndex((item) => item.value === 0);
-        showToast(`Please  for form ${index + 1}`, 'error');
+        showToast(`Please fill balance form ${index + 1}`, 'error');
         return;
       }
 
-      const totalNominal = values.reduce((acc, item) => acc + (parseInt(item.balance) || 0), 0);
+      const totalNominal = values.reduce((acc, item) => acc + (Number(item.balance) || 0), 0);
       const response = await axiosInstance.get('/check-approval', {
         params: {
           value: totalNominal,
@@ -613,20 +764,20 @@ export const ReimburseForm: React.FC<Props> = ({
         setIsShow(true);
       }
     } catch (error) {
-      showToast(error?.response?.data?.message, 'error');
+      const err = error as AxiosError<ErrorResponse>;
+      showToast(err?.response?.data?.message, 'error');
     }
   };
-
+  
   useEffect(() => {
     const values = form.getValues('forms');
-    const totalNominal = values.reduce((acc, item) => acc + parseInt(item.balance) || 0, 0);
+    const totalNominal = values.reduce((acc, item) => acc + Number(item.balance) || 0, 0);
     if (totalNominal > 0 && isShow === true) {
       fetchDataValue();
     }
   }, [form.watch('forms'), form.watch('requester')]);
 
   const checkValidation = (error: any) => {
-    console.log('error', error);
     const checkError = error;
     if (Object.keys(checkError).length > 0) {
       let errorMessages = `
@@ -635,21 +786,21 @@ export const ReimburseForm: React.FC<Props> = ({
       `;
       Object.entries(checkError).forEach(([key, value]) => {
         if (key === 'forms') {
-          value.forEach((item: any, index: number) => {
+          (value as any[]).forEach((item: any, index: number) => {
             errorMessages += `</br><strong>Form ${index + 1}:</strong></br>`;
             Object.values(item).forEach((subItem: any) => {
               errorMessages += `<li>${subItem.message}</li>`;
             });
           });
         } else {
-          errorMessages += `<li>${value.message}</li>`;
+          errorMessages += `<li>${(value as { message: string }).message}</li>`;
         }
       });
       errorMessages += '</ul>';
       showToast(<div dangerouslySetInnerHTML={{ __html: errorMessages }} />, 'error');
     }
   };
-
+  
   return (
     <ScrollArea className='h-[600px] w-full'>
       <CustomFormWrapper isLoading={isLoading}>
@@ -666,9 +817,9 @@ export const ReimburseForm: React.FC<Props> = ({
                   <td>
                     {requestStatus && (
                       <CustomStatus
-                        name={requestStatus?.name}
-                        className={requestStatus?.classname}
-                        code={requestStatus?.code}
+                        name={requestStatus.name}
+                        className={requestStatus.classname}
+                        code={requestStatus.code}
                       />
                     )}
                   </td>
@@ -805,18 +956,26 @@ export const ReimburseForm: React.FC<Props> = ({
                               onValueChange={(value) => {
                                 field.onChange(value);
                                 generateForms(value);
-                                handleTabChange(`form${parseInt(value)}`);
 
                                 const forms = form.getValues('forms');
-                                if (forms.length > parseInt(value)) {
-                                  const updatedForms = forms.slice(0, parseInt(value));
+                                let formIndex = Number(value)
+                                if (forms.length > formIndex) {
+                                  const updatedForms = forms.slice(0, formIndex);
                                   form.setValue('forms', updatedForms);
 
                                   setDetailLimit((prev) => {
                                     let newDetailLimit = [...prev];
-                                    newDetailLimit = newDetailLimit.slice(0, parseInt(value));
+                                    newDetailLimit = newDetailLimit.slice(0, formIndex);
                                     return newDetailLimit;
                                   });
+                                  
+                                  setActiveTab(`form${Math.max(1, formIndex)}`);
+
+                                  setReviseDataUsed((prev) => {
+                                    const newReviseDataUsed = [...prev];
+                                    newReviseDataUsed[formIndex] = '';
+                                    return newReviseDataUsed;
+                                  })
                                 }
                               }}
                               value={field.value?.toString()}
@@ -847,7 +1006,7 @@ export const ReimburseForm: React.FC<Props> = ({
             <Tabs value={activeTab} onValueChange={handleTabChange} className='w-full'>
               <TabsList className={'flex items-center justify-start space-x-4'}>
                 {' '}
-                {Array.from({ length: form.watch('formCount') || 1 }).map((_, index) => (
+                {Array.from({ length: Number(form.watch('formCount')) || 1 }).map((_, index) => (
                   <TabsTrigger key={index} value={`form${index + 1}`}>
                     Form {index + 1}
                   </TabsTrigger>
@@ -908,6 +1067,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                       ...formValue,
                                       reimburse_type: data,
                                       type: selectedValue.is_employee === 1 ? 'Employee' : 'Family',
+                                      balance: '',
                                     });
 
                                     if (selectedValue.is_employee === 1) {
@@ -919,7 +1079,18 @@ export const ReimburseForm: React.FC<Props> = ({
                                         return newDetailLimit;
                                       });
                                       form.setValue(`forms.${index}.balance`, '');
+                                      form.setValue(`forms.${index}.for`, '');
                                       fetchFamily(index, { type: 'Family', reimburse_type: data });
+                                    }
+                                    const currentReimburseType = form.getValues(`forms.${index}.reimburse_type`);
+                                    if (data !== currentReimburseType) {
+                                      setReviseDataUsed((prev) => {
+                                        const newReviseDataUsed = [...prev];
+                                        newReviseDataUsed[index] = '';
+                                        return newReviseDataUsed;
+                                      })
+
+                                      updateRemainingBalanceNextFormWhenSameType(index, formValue);
                                     }
                                   } else {
                                     setDetailLimit((prev) => {
@@ -929,8 +1100,15 @@ export const ReimburseForm: React.FC<Props> = ({
                                     });
                                     updateForm(index, {
                                       ...formValue,
+                                      reimburse_type: '',
+                                      type: '',
                                       balance: '',
                                     });
+                                    setReviseDataUsed((prev) => {
+                                      const newReviseDataUsed = [...prev];
+                                      newReviseDataUsed[index] = '';
+                                      return newReviseDataUsed;
+                                    })
 
                                     form.setValue(`forms.${index}.for`, '');
                                     setDataFamily((prev) => {
@@ -939,35 +1117,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                       return newData;
                                     });
 
-                                    const forms = form.getValues('forms');
-                                    forms.forEach((formItem, idx) => {
-                                      if (
-                                        idx > index &&
-                                        forms[idx].reimburse_type === formValue.reimburse_type
-                                      ) {
-                                        const remainingBalance = detailLimit[idx]?.balance || 0;
-                                        const remainingLimit = detailLimit[idx]?.limit || 0;
-
-                                        setDetailLimit((prev) => {
-                                          const newDetailLimit = [...prev];
-                                          newDetailLimit[idx] = {
-                                            ...newDetailLimit[idx],
-                                            balance:
-                                              remainingBalance + parseInt(formValue.balance || '0'),
-                                          };
-
-                                          if (detailLimit[idx]?.type_limit !== 'Unlimited') {
-                                            newDetailLimit[idx] = {
-                                              ...newDetailLimit[idx],
-                                              limit: remainingLimit + 1,
-                                            };
-                                          }
-                                          return newDetailLimit;
-                                        });
-
-                                        form.setValue(`forms.${idx}.balance`, '');
-                                      }
-                                    });
+                                    updateRemainingBalanceNextFormWhenSameType(index, formValue);
                                   }
                                 }}
                                 onFocus={() => {
@@ -1377,7 +1527,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                             const rawValue = e.target.value.replace(/[^0-9]/g, '');
                                             const formattedValue = formatRupiah(rawValue, false);
 
-                                            const currentBalance = parseInt(rawValue) || 0;
+                                            const currentBalance = Number(rawValue) || 0;
                                             const remainingBalance =
                                               detailLimit[index]?.balance || 0;
 
@@ -1412,7 +1562,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                                   return newDetailLimit;
                                                 });
                                                 updateForm(idx, {
-                                                  ...formValue,
+                                                  ...formItem,
                                                   balance: '',
                                                 });
                                               }
@@ -1473,7 +1623,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                   </FormItem>
                                 )}
                               />
-                              <div className='mt-2'>
+                              <div className='pb-3 mt-2'>
                                 {formValue.attachment && formValue.attachment.length > 0 && (
                                   <ul>
                                     {formValue.attachment.map((file: File, fileIndex: number) => (
@@ -1481,7 +1631,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                         key={fileIndex}
                                         className='flex items-center justify-between'
                                       >
-                                        <span className='text-sm'>{file.name}</span>
+                                        <span className='text-xs'>{file.name}</span>
                                         <button
                                           type='button'
                                           className='ml-2 text-red-500'
@@ -1501,6 +1651,36 @@ export const ReimburseForm: React.FC<Props> = ({
                                     ))}
                                   </ul>
                                 )}
+                                <hr />
+                                <div className='pb-3 mt-2'>
+                                  {formValue.savedAttachment && formValue.savedAttachment.length > 0 && (
+                                    <ul>
+                                      {formValue.savedAttachment.map((file: Object, fileIndex: number) => (
+                                        <li
+                                          key={fileIndex}
+                                          className='flex items-center justify-between'
+                                        >
+                                          <span className='text-xs'>{file.url}</span>
+                                          <button
+                                            type='button'
+                                            className='ml-2 text-red-500'
+                                            onClick={() => {
+                                              const updatedSavedAttachments = formValue.savedAttachment.filter(
+                                                (_, index) => index !== fileIndex,
+                                              );
+                                              updateForm(index, {
+                                                ...formValue,
+                                                savedAttachment: updatedSavedAttachments,
+                                              });
+                                            }}
+                                          >
+                                            Delete
+                                          </button>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </div>
                               </div>
                             </td>
                           </tr>

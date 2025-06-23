@@ -1,3 +1,4 @@
+import DropdownBusinessPartner from '../components/dropdownBusinessPartner';
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
 
 export const formModel: Array<FormFieldModel<any>> = [
@@ -72,16 +73,20 @@ export const formModel: Array<FormFieldModel<any>> = [
     },
   },
   {
-    type: 'select',
-    name: 'master_business_partner_id',
-    label: 'Business Partner',
-    placeholder: 'Select Business Partner',
-    options: [],
-    required: true,
-    style: {
-      width: '63.5rem',
-    },
+    fieldCustome: true,
+    fieldCustomeValue: <DropdownBusinessPartner />,
   },
+  //   {
+  //     type: 'select',
+  //     name: 'master_business_partner_id',
+  //     label: 'Business Partner',
+  //     placeholder: 'Select Business Partner',
+  //     options: [],
+  //     required: true,
+  //     style: {
+  //       width: '63.5rem',
+  //     },
+  //   },
   {
     type: 'select',
     name: 'role_id',

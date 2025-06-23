@@ -82,7 +82,7 @@ class DropdownMasterController extends Controller
         $data = DB::table($request->tabelname)->select($select);
 
         if ($request->search) {
-            $data = $data->where($request->name, 'ilike', '%' . $request->search . '%');
+            $data = $data->where($request->raw == 'true' ? DB::raw($request->name) : $request->name, 'ilike', '%' . $request->search . '%');
         }
 
         if ($request->key && $request->parameter) {
@@ -95,7 +95,10 @@ class DropdownMasterController extends Controller
 
         if ($request->groupBy) {
             $groupByColumns = explode(',', $request->groupBy);
-            $data = $data->groupBy($groupByColumns);
+            $groupByColumns = array_map(function ($column) {
+                return $column == 'desc' ? '"desc"' : $column;
+            }, $groupByColumns);
+            $data = $data->groupBy(...$groupByColumns);
         }
 
         // cek where data dari data dropdown document type

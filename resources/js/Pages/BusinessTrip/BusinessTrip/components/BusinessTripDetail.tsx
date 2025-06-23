@@ -202,9 +202,7 @@ const BusinessTripDetail = () => {
               <>
                 <tr>
                   <td>
-                    <strong>
-                      Ref Number
-                    </strong>
+                    <strong>Ref Number</strong>
                   </td>
                   <td>{data?.reference_number}</td>
                 </tr>
@@ -238,15 +236,15 @@ const BusinessTripDetail = () => {
           {data?.business_trip_destination.map((destination: any, index: number) => (
             <TabsContent key={index} value={`destination${index + 1}`}>
               <div key={index}>
-                <div className="">
-                    <h3>Detail {destination.destination}</h3>
-                    {destination.restricted_area === 1 ? (
-                        <div className="bg-red-500 inline-block text-white my-2 py-2 px-4 rounded-md">
-                            <span className='text-xs'>Restricted Area</span>
-                        </div>
-                        ) : (
-                        <div className="hidden"></div> // atau sesuatu yang sesuai jika tidak ada elemen
-                    )}
+                <div className=''>
+                  <h3>Detail {destination.destination}</h3>
+                  {destination.restricted_area === 1 ? (
+                    <div className='bg-red-500 inline-block text-white my-2 py-2 px-4 rounded-md'>
+                      <span className='text-xs'>Restricted Area</span>
+                    </div>
+                  ) : (
+                    <div className='hidden'></div> // atau sesuatu yang sesuai jika tidak ada elemen
+                  )}
                 </div>
                 <table className='detail-table'>
                   <tr>
@@ -264,8 +262,12 @@ const BusinessTripDetail = () => {
                         <td>{attendance.shift_code}</td>
                         <td>{attendance.shift_start}</td>
                         <td>{attendance.shift_end}</td>
-                        <td>{attendance.start_date} {attendance.start_time}</td>
-                        <td>{attendance.end_date} {attendance.end_time}</td>
+                        <td>
+                          {attendance.start_date} {attendance.start_time}
+                        </td>
+                        <td>
+                          {attendance.end_date} {attendance.end_time}
+                        </td>
                       </tr>
                     ),
                   )}

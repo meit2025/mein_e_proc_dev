@@ -1,0 +1,1 @@
+const d=[{dropdown:"role_id",struct:{name:"name",id:"id",tabel:"roles"}},{dropdown:"division_id",struct:{name:"name",id:"id",tabel:"master_divisions"}},{dropdown:"position_id",struct:{name:"name",id:"id",tabel:"master_positions"}},{dropdown:"departement_id",struct:{name:"name",id:"id",tabel:"master_departments"}}];export{d as modelDropdowns};

@@ -16,7 +16,7 @@ class TextPrServices
         DB::beginTransaction();
         try {
 
-            $pr = PurchaseRequisition::where('purchase_id', $id)->where('code_transaction', $code)->get();
+            $pr = PurchaseRequisition::where('purchase_id', $id)->where('code_transaction', $code)->where('balance', '>', 0)->get();
             $CashAdvance = CashAdvance::where('purchase_id', $id)->where('code_transaction', $code)->get();
             $array = [];
             $arrayCash = [];
@@ -153,7 +153,7 @@ class TextPrServices
             ];
         } catch (\Throwable $th) {
             //throw $th;
-            dd($th);
+            throw new Exception('Error generating files: ' . $th->getMessage());
         }
     }
 

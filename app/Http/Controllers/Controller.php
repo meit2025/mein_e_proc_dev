@@ -196,8 +196,8 @@ abstract class Controller
                     $join->on('approvalQueueUser.document_id', '=', 'approvals.document_id');
                 })
                 ->where([
-                    'approvals.document_name' => 'PR', 
-                    'approvals.status' => 'Waiting', 
+                    'approvals.document_name' => 'PR',
+                    'approvals.status' => 'Waiting',
                     'approvals.user_id' => Auth::user()->id,
                 ])
                 ->whereColumn('approvalQueueUser.user_id', 'approvals.user_id')
@@ -280,8 +280,8 @@ abstract class Controller
                     $join->on('approvalQueueUser.document_id', '=', 'approvals.document_id');
                 })
                 ->where([
-                    'approvals.document_name' => 'PR', 
-                    'approvals.status' => 'Waiting', 
+                    'approvals.document_name' => 'PR',
+                    'approvals.status' => 'Waiting',
                     'approvals.user_id' => Auth::user()->id,
                 ])
                 ->whereColumn('approvalQueueUser.user_id', 'approvals.user_id')
@@ -523,7 +523,7 @@ abstract class Controller
                 break;
 
             case 'BT':
-                $bt->processTextData($id);
+                $bt->processTextData($id, true);
                 $txtpr->processTextData($id, 'BTRE');
                 break;
 

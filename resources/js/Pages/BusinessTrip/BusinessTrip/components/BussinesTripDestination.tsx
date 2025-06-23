@@ -7,9 +7,9 @@ import { GET_DATE_BUSINESS_TRIP_BY_USER } from '@/endpoint/business-trip/api';
 import axiosInstance from '@/axiosInstance';
 
 interface DateObject {
-    from: string;
-    to: string;
-  }
+  from: string;
+  to: string;
+}
 
 export function BussinesTripDestination({
   updateDestination,
@@ -50,39 +50,39 @@ export function BussinesTripDestination({
   setActiveTab: any;
   activeTab: any;
 }) {
+  React.useEffect(() => {
+    const fetchAndSetDates = async () => {
+      try {
+        const dates = dateBusinessTripByUser;
+        // // Update state dengan data dari API
+        setSelectedDates((prev: any) => {
+          const updated = [...prev];
 
-      React.useEffect(() => {
-        const fetchAndSetDates = async () => {
-          try {
-            const dates = dateBusinessTripByUser;
-            // // Update state dengan data dari API
-            setSelectedDates((prev: any) => {
-                const updated = [...prev];
+          Object.entries(dates).forEach(([key, value]: [any, DateObject]) => {
+            updated[key] = {
+              ...updated[key], // Tetap pertahankan data lainnya jika ada
+              from: new Date(value.from), // Konversi string tanggal ke objek Date
+              to: new Date(value.to), // Konversi string tanggal ke objek Date
+            };
+          });
 
-                Object.entries(dates).forEach(([key, value]: [any, DateObject]) => {
-                    updated[key] = {
-                        ...updated[key], // Tetap pertahankan data lainnya jika ada
-                        from: new Date(value.from), // Konversi string tanggal ke objek Date
-                        to: new Date(value.to),   // Konversi string tanggal ke objek Date
-                    };
-                  });
+          return updated;
+        });
+      } catch (error) {
+        console.error('Failed to fetch dates:', error);
+      }
+    };
 
-              return updated;
-            });
-          } catch (error) {
-            console.error("Failed to fetch dates:", error);
-          }
-        };
+    fetchAndSetDates();
+  }, [dateBusinessTripByUser]);
 
-        fetchAndSetDates();
-      }, [dateBusinessTripByUser]);
-
-
-    return (
+  return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
       <TabsList className={'flex items-center justify-start space-x-4'}>
         {destinationField.map((field: any, index: number) => (
-          <TabsTrigger key={`trigger-${index}`} value={`destination${index + 1}`}>Destination {index + 1}</TabsTrigger>
+          <TabsTrigger key={`trigger-${index}`} value={`destination${index + 1}`}>
+            Destination {index + 1}
+          </TabsTrigger>
         ))}
       </TabsList>
 

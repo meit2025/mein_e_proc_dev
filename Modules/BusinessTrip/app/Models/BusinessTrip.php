@@ -111,7 +111,7 @@ class BusinessTrip extends Model
     public function purchaseRequisitions()
     {
         return $this->hasMany(PurchaseRequisition::class,'purchase_id','id')
-            ->where('code_transaction', 'BTRE');
+            ->where('code_transaction', 'BTRE')->where('item_number', 1);
     }
 
     public function purchaseOrderDeclaration()

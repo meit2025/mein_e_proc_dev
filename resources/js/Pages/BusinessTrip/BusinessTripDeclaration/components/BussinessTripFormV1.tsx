@@ -1,14 +1,18 @@
 /* eslint-disable eqeqeq */
 /* eslint-disable react/jsx-key */
 import '../css/index.scss';
+
+import * as React from 'react';
+
+import { AllowanceItemModel, BusinessTripModel, BusinessTripType } from '../models/models';
+import { Button as ButtonMui, filledInputClasses } from '@mui/material';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-  FormLabel,
-} from '@/components/shacdn/form';
+  CREATE_API_BUSINESS_TRIP_DECLARATION,
+  EDIT_API_BUSINESS_TRIP_DECLARATION,
+  GET_DETAIL_BUSINESS_TRIP_DECLARATION,
+  GET_EDIT_BUSINESS_TRIP_DECLARATION,
+} from '@/endpoint/business-trip-declaration/api';
+import { ChevronsUpDown, Plus, UndoIcon, X } from 'lucide-react';
 import {
   FieldArray,
   FieldArrayWithId,
@@ -18,45 +22,44 @@ import {
   useWatch,
 } from 'react-hook-form';
 import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/shacdn/form';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/shacdn/select';
-import { Separator } from '@/components/shacdn/separator';
-import { Textarea } from '@/components/shacdn/textarea';
-import { Input } from '@/components/shacdn/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
-import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { ScrollArea } from '@/components/shacdn/scroll-area';
-import * as React from 'react';
-import {
-  CREATE_API_BUSINESS_TRIP_DECLARATION,
-  EDIT_API_BUSINESS_TRIP_DECLARATION,
-  GET_DETAIL_BUSINESS_TRIP_DECLARATION,
-  GET_EDIT_BUSINESS_TRIP_DECLARATION,
-} from '@/endpoint/business-trip-declaration/api';
-import { AllowanceItemModel, BusinessTripModel, BusinessTripType } from '../models/models';
-import axiosInstance from '@/axiosInstance';
-import moment from 'moment';
-import FormSwitch from '@/components/Input/formSwitchCustom';
-import { Button } from '@/components/shacdn/button';
-import { ChevronsUpDown, Plus, UndoIcon, X } from 'lucide-react';
-import axios, { AxiosError } from 'axios';
-import { Inertia } from '@inertiajs/inertia';
-import { useAlert } from '@/contexts/AlertContext';
-import { Button as ButtonMui, filledInputClasses } from '@mui/material';
 import {
   WorkflowApprovalDiagramInterface,
   WorkflowApprovalStepInterface,
   WorkflowComponent,
 } from '@/components/commons/WorkflowComponent';
+import axios, { AxiosError } from 'axios';
+
+import { Button } from '@/components/shacdn/button';
+import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import FormAutocomplete from '@/components/Input/formDropdown';
-import useDropdownOptions from '@/lib/getDropdown';
+import FormSwitch from '@/components/Input/formSwitchCustom';
+import { Inertia } from '@inertiajs/inertia';
+import { Input } from '@/components/shacdn/input';
+import { ScrollArea } from '@/components/shacdn/scroll-area';
+import { Separator } from '@/components/shacdn/separator';
+import { Textarea } from '@/components/shacdn/textarea';
+import axiosInstance from '@/axiosInstance';
 import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
+import moment from 'moment';
+import { useAlert } from '@/contexts/AlertContext';
+import useDropdownOptions from '@/lib/getDropdown';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 interface BusinessTripAttachement {
   id: number;
@@ -107,6 +110,8 @@ export const BussinessTripFormV1 = ({
           destination: z.string().nonempty('Destinantion Required'),
           business_trip_start_date: z.date().optional(),
           business_trip_end_date: z.date().optional(),
+          pajak_id: z.string().optional(),
+          purchasing_group_id: z.string().optional(),
           detail_attedances: z.array(
             z.object({
               date: z.string().optional(),
@@ -123,6 +128,8 @@ export const BussinessTripFormV1 = ({
           ),
           allowances: z.array(
             z.object({
+              id: z.number().optional(),
+              data_type: z.string().optional(),
               name: z.string().optional(),
               code: z.string().optional(),
               default_price: z.string().optional(),
@@ -131,6 +138,8 @@ export const BussinessTripFormV1 = ({
               subtotal: z.number().optional(),
               detail: z.array(
                 z.object({
+                  id: z.number().optional(),
+                  data_type: z.string().optional(),
                   date: z.string().nullish(),
                   request_price: z.number().optional(),
                 }),
@@ -170,6 +179,7 @@ export const BussinessTripFormV1 = ({
       total_cash_advance: '0',
       destinations: [
         {
+          restricted_area: false,
           destination: '',
           business_trip_start_date: new Date(),
           business_trip_end_date: new Date(),
@@ -267,6 +277,7 @@ export const BussinessTripFormV1 = ({
       formData.append('remark', values.remark ?? '');
       formData.append('total_destination', `${values.total_destination}`);
       values.destinations.forEach((item, index) => {
+        console.log(item, 'item');
         formData.append(`destinations[${index}]`, JSON.stringify(item));
       });
       if (type === BusinessTripType.create) {
@@ -293,17 +304,22 @@ export const BussinessTripFormV1 = ({
             formData.append(`file_existing[${index}]`, JSON.stringify(file));
           }
         });
+
+        const hasFileAttachment = fileAttachment.some((file: any) => file);
+        const hasAttachment = values.attachment.some((file: any) => file);
+
+        if (!hasFileAttachment && !hasAttachment) {
+          showToast('Please add at least one attachment', 'error');
+          setLoading(false);
+          return;
+        }
+
         await Inertia.post(`${EDIT_API_BUSINESS_TRIP_DECLARATION}/${id}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
-        // await axios.post(`${EDIT_API_BUSINESS_TRIP_DECLARATION}/${id}`, formData, {
-        //   headers: {
-        //     'Content-Type': 'multipart/form-data',
-        //   },
-        //   withCredentials: true, // jika kamu butuh kirim cookie/session
-        // });
+
         showToast('succesfully updated data', 'success');
       }
 
@@ -325,14 +341,19 @@ export const BussinessTripFormV1 = ({
 
   const [isCashAdvance, setIsCashAdvance] = React.useState<boolean>(false);
   async function handleGetBusinessTrip(value: string) {
-    form.setValue('request_no', value || '');
+    // form.setValue('request_no', value || '');
     const url = GET_DETAIL_BUSINESS_TRIP_DECLARATION(value);
 
     try {
       const response = await axiosInstance.get(url);
 
       const businessTripData = response.data.data;
-      console.log(response.data.data, 'response');
+      if (type === BusinessTripType.clone) {
+        console.log(businessTripData.parent_id, 'businessTripData');
+        form.setValue('request_no', businessTripData.parent_id.toString() || '');
+      } else {
+        form.setValue('request_no', value.toString() || '');
+      }
 
       setIsCashAdvance(businessTripData.cash_advance == 1 ? true : false);
       form.setValue('remark', businessTripData.remarks || '');
@@ -340,19 +361,20 @@ export const BussinessTripFormV1 = ({
       form.setValue('cash_advance', businessTripData.cash_advance == 1 ? true : false);
       form.setValue('reference_number', businessTripData.reference_number);
       form.setValue('total_percent', Number(businessTripData.total_percent));
-      form.setValue('request_no', value);
       form.setValue(
         'total_cash_advance',
         businessTripData?.total_cash_advance !== null
           ? formatRupiah(businessTripData.total_cash_advance, false)
           : '0',
       );
+      //   form.setValue('request_no', value.toString() || '');
+
       setBusinessTripDetail(response.data.data as BusinessTripModel);
-      if (type === BusinessTripType.create) {
-        setListDestination(businessTripData.destinations);
-        setAllowancesProperty(businessTripData.destinations);
-      }
+      setListDestination(businessTripData.destinations);
+      setAllowancesProperty(businessTripData.destinations);
       setTotalDestination(businessTripData.total_destination);
+
+      console.log(form.getValues());
     } catch (e) {
       console.log(e);
     }
@@ -376,6 +398,15 @@ export const BussinessTripFormV1 = ({
       detail_attedances: destination.detail_attedances || [],
       total_allowance: destination.total_allowance || 0,
       other: destination.other || [],
+      pajak_id: destination.pajak_id.toString(),
+      purchasing_group_id: destination.purchasing_group_id.toString(),
+      restricted_area:
+        destination.restricted_area == 1 ||
+        destination.restricted_area == true ||
+        destination.restricted_area == '1' ||
+        destination.restricted_area == 'true'
+          ? true
+          : false,
     }));
     form.setValue('destinations', destinationForm);
   }
@@ -518,33 +549,14 @@ export const BussinessTripFormV1 = ({
     const response = await axios.get(url);
     const data = response.data.data;
 
-    await handleGetBusinessTrip(data.parent_id.toString());
+    // await handleGetBusinessTrip(data.parent_id ?? '');
+    await handleGetBusinessTrip(data.id);
+
     setfileAttachment(data.attachments as BusinessTripAttachement[]);
-
-    const urlDetail = GET_DETAIL_BUSINESS_TRIP_DECLARATION(id);
-    const responseDetail = await axios.get(urlDetail);
-    const dataDetail = responseDetail.data.data;
-
-    setListDestination(dataDetail.destinations);
-    setAllowancesProperty(dataDetail.destinations);
-    try {
-    } catch (e) {
-      const error = e as AxiosError;
-    }
   }
 
   React.useEffect(() => {
     if (id && type === BusinessTripType.clone) {
-      getdataRequestNo('', {
-        name: 'request_no',
-        id: 'id',
-        tabel: 'business_trip',
-        idType: 'string',
-        where: {
-          key: 'type',
-          parameter: 'request',
-        },
-      });
       getDetailData();
     }
   }, [type]);
@@ -1003,6 +1015,14 @@ export function BussinessDestinationForm({
           <tr>
             <td width={200}>Destination</td>
             <td>{destination.destination}</td>
+          </tr>
+          <tr>
+            <td width={200}>Restricted Area</td>
+            <td>
+              {destination.restricted_area == true || destination.restricted_area == 1
+                ? 'Yes'
+                : 'No'}
+            </td>
           </tr>
           <tr>
             <td width={200}>Pajak</td>
@@ -1553,6 +1573,7 @@ export function DetailAllowance({
       {detailAllowanceceWatch.map((allowance: any, index: any) => (
         // eslint-disable-next-line react/jsx-key
         <AllowanceRowInput
+          key={index}
           form={form}
           allowance={allowance}
           destinationIndex={destinationIndex}

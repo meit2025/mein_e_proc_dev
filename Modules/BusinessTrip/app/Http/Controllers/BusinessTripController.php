@@ -857,21 +857,35 @@ class BusinessTripController extends Controller
         return $this->successResponse($data);
     }
 
-    function getDateByUser($user_id)
+    function getDateByUser(Request $request, $user_id)
     {
         $data = BusinessTripDestination::whereHas('businessTrip', function ($query) use ($user_id) {
-            $query->where('request_for', $user_id)
-                ->where('type', 'request')
-                ->whereIn('status_id', [1, 3, 5]);
+            $query->leftJoin('purchase_requisitions as pr', function ($join) {
+                $join->on('pr.purchase_id', '=', 'business_trip.id')
+                    ->where('pr.code_transaction', '=', 'BTRE')
+                    ->where('pr.balance', '>', 0);
+            })
+            ->where('business_trip.request_for', $user_id)
+            ->where('business_trip.type', 'request')
+            ->whereIn('business_trip.status_id', [1, 3, 5, 6])
+            ->where(function ($query) {
+                $query->where(function ($query) { 
+                    $query->whereNotNull('pr.status')
+                    ->where('pr.status', '!=', 'X'); 
+                })
+                ->orWhereNull('pr.status');
+            });
         })->get();
+
         $destination = [];
         $offset = 10;
         foreach ($data as $key => $value) {
             // Pastikan status approval bukan 'Cancel' atau 'Reject'
-            $hasValidApproval = Approval::where('document_id', $value->business_trip_id)->whereIn('status', ['Rejected', 'Revise'])->exists();
+            $hasValidApproval = Approval::where('document_id', $value->business_trip_id)->whereIn('status', ['Rejected', 'Cancel'])->exists();
 
-            if (!$hasValidApproval) {
+            if (!$hasValidApproval && $value->business_trip_id != $request->id) {
                 $destination[$key + $offset] = [
+                    'id' => $value->business_trip_id,
                     'from' => $value->business_trip_start_date,
                     'to' => $value->business_trip_end_date,
                 ];
@@ -898,6 +912,20 @@ class BusinessTripController extends Controller
                 'total_cash_advance' => $request->cash_advance == "true" ? str_replace('.', '', $request->total_cash_advance) : null,
                 'status_id' => 1,
             ]);
+
+
+
+            if ($request->file_existing != null) {
+                // DELETE ATTACHMENT DULU JIKA ADA YANG DI HAPUS
+                $array_id_exist = [];
+                foreach ($request->file_existing as $key => $attachment) {
+                    $decode = json_decode($attachment);
+                    $array_id_exist[] = $decode->id;
+                }
+                $businessTrip->attachment()->whereNotIn('id', $array_id_exist)->delete();
+            } else {
+                $businessTrip->attachment()->delete();
+            }
 
             if ($request->attachment != null) {
                 foreach ($request->attachment as $row) {
@@ -978,7 +1006,7 @@ class BusinessTripController extends Controller
             $this->approvalServices->Payment($request, true, $businessTrip->id, 'TRIP');
         } catch (\Throwable $th) {
             //throw $th;
-            dd($th);
+            return $this->errorResponse($th->getMessage());
         }
     }
 
