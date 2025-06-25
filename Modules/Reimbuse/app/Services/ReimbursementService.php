@@ -190,6 +190,14 @@ class ReimbursementService
                             Storage::disk('public')->delete('reimburse/' . $attachment->url);
                             $attachment->delete();
                         }
+                    } else {
+                        $deletedAttachment = ReimburseAttachment::query()->where('reimburse', $reimburse->id);
+                        if (count($deletedAttachment->get()) > 0) {
+                            foreach ($deletedAttachment->get() as $attachment) {
+                                Storage::disk('public')->delete('reimburse/' . $attachment->url);
+                                $attachment->delete();
+                            }
+                        }
                     }
                     
                     if (isset($form['attachment'])) {
