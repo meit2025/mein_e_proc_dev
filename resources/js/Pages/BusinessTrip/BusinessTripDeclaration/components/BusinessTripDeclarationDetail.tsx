@@ -241,12 +241,44 @@ const BusinessTripDeclarationDetail = () => {
               <div key={index}>
                 <h3>Detail {destination.destination}</h3>
                 {destination.restricted_area === 1 ? (
-                    <div className="bg-red-500 inline-block text-white my-2 py-2 px-4 rounded-md">
-                        <span className='text-xs'>Restricted Area</span>
-                    </div>
-                    ) : (
-                    <div className="hidden"></div> // atau sesuatu yang sesuai jika tidak ada elemen
+                  <div className='bg-red-500 inline-block text-white my-2 py-2 px-4 rounded-md'>
+                    <span className='text-xs'>Restricted Area</span>
+                  </div>
+                ) : (
+                  <div className='hidden'></div> // atau sesuatu yang sesuai jika tidak ada elemen
                 )}
+                <div className='mt-4'>
+                  <h1>Detail Attendace Request: </h1>
+                </div>
+                <table className='detail-table'>
+                  <tr>
+                    <th>Date</th>
+                    <th>Shift Code</th>
+                    <th>Shift Start</th>
+                    <th>Shift End</th>
+                    <th>Actual Start</th>
+                    <th>Actual End</th>
+                  </tr>
+                  {destination.business_trip_request_detail_attendance.map(
+                    (attendance: any, index: number) => (
+                      <tr key={index}>
+                        <td>{attendance.date}</td>
+                        <td>{attendance.shift_code}</td>
+                        <td>{attendance.shift_start}</td>
+                        <td>{attendance.shift_end}</td>
+                        <td>
+                          {attendance.start_date} {attendance.start_time}
+                        </td>
+                        <td>
+                          {attendance.end_date} {attendance.end_time}
+                        </td>
+                      </tr>
+                    ),
+                  )}
+                </table>
+                <div className='mt-4'>
+                  <h1>Detail Attendace Declaration: </h1>
+                </div>
                 <table className='detail-table'>
                   <tr>
                     <th>Date</th>
@@ -263,135 +295,145 @@ const BusinessTripDeclarationDetail = () => {
                         <td>{attendance.shift_code}</td>
                         <td>{attendance.shift_start}</td>
                         <td>{attendance.shift_end}</td>
-                        <td>{attendance.start_time}</td>
-                        <td>{attendance.end_time}</td>
+                        <td>
+                          {attendance.start_date} {attendance.start_time}
+                        </td>
+                        <td>
+                          {attendance.end_date} {attendance.end_time}
+                        </td>
                       </tr>
                     ),
                   )}
                 </table>
-                <div className="mt-5">
-                    <div className='tables-wrapper'>
-                        <table className='value-table'>
-                            <caption>Standard Value</caption>
-                            <tr>
-                                <th>Item Name</th>
-                                <th>Currency Code</th>
-                                <th>Value</th>
-                                <th>Total Days</th>
-                                <th>Total</th>
-                            </tr>
-                            {destination.standar_detail_allowance.map((item: any, index: number) => (
-                                <tr key={index}>
-                                <td>
-                                    {item.item_name} ({item.type})
-                                </td>
-                                <td>{item.currency_code}</td>
-                                <td>{formatRupiah(item.value)}</td>
-                                <td className='text-center'>{item.total_day}</td>
-                                <td>{formatRupiah(item.total)}</td>
-                                </tr>
-                            ))}
-
-                            <tr>
-                                <td>
-                                <strong>Total Standar Value</strong>
-                                </td>
-                                <td>IDR</td>
-                                <td></td>
-                                <td className='text-center'></td>
-                                <td>{formatRupiah(destination.total_standard)}</td>
-                            </tr>
-                            </table>
-                    </div>
-                    <div className='tables-wrapper'>
-                        <table className='value-table'>
-                        <caption>Requested Value</caption>
-                        <tr>
-                            <th>Item Name</th>
-                            <th>Currency Code</th>
-                            <th>Value</th>
-                            <th>Total Days</th>
-                            <th>Total</th>
+                <div className='mt-5'>
+                  <div className='tables-wrapper'>
+                    <table className='value-table'>
+                      <caption>Standard Value</caption>
+                      <tr>
+                        <th>Item Name</th>
+                        <th>Currency Code</th>
+                        <th>Value</th>
+                        <th>Total Days</th>
+                        <th>Total</th>
+                      </tr>
+                      {destination.standar_detail_allowance.map((item: any, index: number) => (
+                        <tr key={index}>
+                          <td>
+                            {item.item_name} ({item.type})
+                          </td>
+                          <td>{item.currency_code}</td>
+                          <td>{formatRupiah(item.value)}</td>
+                          <td className='text-center'>{item.total_day}</td>
+                          <td>{formatRupiah(item.total)}</td>
                         </tr>
-                        {destination.request_detail_allowance.map((item: any, index: number) => (
-                            <tr key={index}>
-                            <td>
-                                {item.item_name} ({item.type})
-                            </td>
-                            <td>{item.currency_code}</td>
-                            <td>{formatRupiah(item.value)}</td>
-                            <td className='text-center'>{item.total_day}</td>
-                            <td>{formatRupiah(item.total)}</td>
-                            </tr>
-                        ))}
-                        <tr>
-                            <td>
-                            <strong>Total Request Value</strong>
-                            </td>
-                            <td>IDR</td>
-                            <td></td>
-                            <td className='text-center'></td>
-                            <td>{formatRupiah(destination.total_request)}</td>
-                        </tr>
-                        </table>
+                      ))}
 
-                        <table className='value-table'>
-                            <caption>Declared Value</caption>
-                            <tr>
-                                <th>Item Name</th>
-                                <th>Currency Code</th>
-                                <th>Value</th>
-                                <th>Total Days</th>
-                                <th>Total</th>
-                            </tr>
-                            {destination.declaration_detail_allowance.map((item: any, index: number) => (
-                                <tr key={index}>
-                                <td>
-                                    {item.item_name} ({item.type})
-                                </td>
-                                <td>{item.currency_code}</td>
-                                <td>{formatRupiah(item.value)}</td>
-                                <td className='text-center'>{item.total_day}</td>
-                                <td>{formatRupiah(item.total)}</td>
-                                </tr>
-                            ))}
-                            <tr>
+                      <tr>
+                        <td>
+                          <strong>Total Standar Value</strong>
+                        </td>
+                        <td>IDR</td>
+                        <td></td>
+                        <td className='text-center'></td>
+                        <td>{formatRupiah(destination.total_standard)}</td>
+                      </tr>
+                    </table>
+                  </div>
+                  <div className='tables-wrapper'>
+                    <table className='value-table'>
+                      <caption>Requested Value</caption>
+                      <tr>
+                        <th>Item Name</th>
+                        <th>Currency Code</th>
+                        <th>Value</th>
+                        <th>Total Days</th>
+                        <th>Total</th>
+                      </tr>
+                      {destination.request_detail_allowance.map((item: any, index: number) => (
+                        <tr key={index}>
+                          <td>
+                            {item.item_name} ({item.type})
+                          </td>
+                          <td>{item.currency_code}</td>
+                          <td>{formatRupiah(item.value)}</td>
+                          <td className='text-center'>{item.total_day}</td>
+                          <td>{formatRupiah(item.total)}</td>
+                        </tr>
+                      ))}
+                      <tr>
+                        <td>
+                          <strong>Total Request Value</strong>
+                        </td>
+                        <td>IDR</td>
+                        <td></td>
+                        <td className='text-center'></td>
+                        <td>{formatRupiah(destination.total_request)}</td>
+                      </tr>
+                    </table>
+
+                    <table className='value-table'>
+                      <caption>Declared Value</caption>
+                      <tr>
+                        <th>Item Name</th>
+                        <th>Currency Code</th>
+                        <th>Value</th>
+                        <th>Total Days</th>
+                        <th>Total</th>
+                      </tr>
+                      {destination.declaration_detail_allowance.map((item: any, index: number) => (
+                        <tr key={index}>
+                          <td>
+                            {item.item_name} ({item.type})
+                          </td>
+                          <td>{item.currency_code}</td>
+                          <td>{formatRupiah(item.value)}</td>
+                          <td className='text-center'>{item.total_day}</td>
+                          <td>{formatRupiah(item.total)}</td>
+                        </tr>
+                      ))}
+                      {/* <tr>
                                 <td>Other Allowance</td>
                                 <td>IDR</td>
                                 <td></td>
                                 <td className='text-center'>-</td>
                                 <td>{formatRupiah(destination.other_allowance, false)}</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                <strong>Total Declaration Value</strong>
-                                </td>
-                                <td>IDR</td>
-                                <td></td>
-                                <td className='text-center'></td>
-                                <td>{formatRupiah(destination.total_declaration)}</td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div className='mt-5'>
-                        <table className='border-collapse'>
-                            <tr>
-                                <th className='text-left align-top'>Total Request Value</th>
-                                <td>:</td>
-                                <td className='text-left align-top'>{formatRupiah(destination.total_request)}</td>
-                            </tr>
-                            <tr className='border-b'>
-                                <th className='text-left align-top'>Total Declaration Value</th>
-                                <td>:</td>
-                                <td className='text-left align-top'>{formatRupiah(destination.total_declaration)} -</td>
-                            </tr>
-                            <tr>
-                                <th className='text-left align-top'>Deviation Value</th>
-                                <th>:</th>
-                                <th className='mt-1 text-left align-top'>{formatRupiah(destination.total_deviation)}</th>
-                            </tr>
-                        </table>
-                    </div>
+                            </tr> */}
+                      <tr>
+                        <td>
+                          <strong>Total Declaration Value</strong>
+                        </td>
+                        <td>IDR</td>
+                        <td></td>
+                        <td className='text-center'></td>
+                        <td>{formatRupiah(destination.total_declaration)}</td>
+                      </tr>
+                    </table>
+                  </div>
+                  <div className='mt-5'>
+                    <table className='border-collapse'>
+                      <tr>
+                        <th className='text-left align-top'>Total Request Value</th>
+                        <td>:</td>
+                        <td className='text-left align-top'>
+                          {formatRupiah(destination.total_request)}
+                        </td>
+                      </tr>
+                      <tr className='border-b'>
+                        <th className='text-left align-top'>Total Declaration Value</th>
+                        <td>:</td>
+                        <td className='text-left align-top'>
+                          {formatRupiah(destination.total_declaration)} -
+                        </td>
+                      </tr>
+                      <tr>
+                        <th className='text-left align-top'>Deviation Value</th>
+                        <th>:</th>
+                        <th className='mt-1 text-left align-top'>
+                          {formatRupiah(destination.total_deviation)}
+                        </th>
+                      </tr>
+                    </table>
+                  </div>
                 </div>
               </div>
             </TabsContent>

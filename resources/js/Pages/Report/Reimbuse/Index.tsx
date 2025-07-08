@@ -1,60 +1,56 @@
-import React from 'react';
-import { CustomDialog } from '@/components/commons/CustomDialog';
+import React, { useState,useEffect } from 'react';
 import DataGridComponent from '@/components/commons/DataGrid';
 import { REPORT_REIMBURSE_LIST, REPORT_REIMBURSE_EXPORT } from '@/endpoint/report/api';
 import MainLayout from '@/Pages/Layouts/MainLayout';
 import { useAlert } from '@/contexts/AlertContext';
 import axiosInstance from '@/axiosInstance';
-import { FormType } from '@/lib/utils';
 import { columns } from './model/listModel';
+import FormAutocomplete from '@/components/Input/formDropdown';
+import { FormProvider, get, useForm } from 'react-hook-form';
+import useDropdownOptions from '@/lib/getDropdown';
 
-interface Props {
-    users: any[];
-    categories: string;
-    periods: any[];
-    currencies: any[];
-    purchasing_groups: any[];
-    taxes: any[];
-    cost_center: any[];
-    currentUser: any;
-    latestPeriod: any;
-    types: any[];
-    departments: any[];
-    statuses: any[];
-}
+interface Props {}
 
-export const Index = ({
-    purchasing_groups,
-    users,
-    categories,
-    currencies,
-    taxes,
-    cost_center,
-    periods,
-    currentUser,
-    latestPeriod,
-    types,
-    departments,
-    statuses,
-}: Props) => {
-    const [openForm, setOpenForm] = React.useState<boolean>(false);
-    const [formType, setFormType] = React.useState({
-        type: FormType.create,
-        id: undefined,
-    });
+export const Index = ({}: Props) => {
 
     // Filter states
     const [startDate, setStartDate] = React.useState<string | null>(null);
     const [endDate, setEndDate] = React.useState<string | null>(null);
-    const [status, setStatus] = React.useState<string>('');
-    const [type, setType] = React.useState<string>('');
-    const [department, setDepartment] = React.useState<string>('');
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
     const { showToast } = useAlert();
+    const methods = useForm();
+    const { dataDropdown: dataStatus, getDropdown: getStatus } = useDropdownOptions();
+    const [statusFilter, setStatusFilter] = useState<string | null>(null);
+    const { dataDropdown: dataReimburseType, getDropdown: getReimburseType } = useDropdownOptions();
+    const [reimburseTypeFilter, setReimburseTypeFilter] = useState<string | null>(null);
+    const { dataDropdown: dataDepartment, getDropdown: getDepartment } = useDropdownOptions();
+    const [departmentFilter, setDepartmentFilter] = useState<string | null>(null);
+
+    useEffect(() => {
+        getStatus('', {
+            name: 'name',
+            id: 'code',
+            tabel: 'master_statuses',
+        });
+
+        getReimburseType('', {
+            name: 'name',
+            id: 'code',
+            tabel: 'master_type_reimburses',
+        });
+
+        getDepartment('', {
+            name: 'name',
+            id: 'id',
+            tabel: 'master_departments',
+        });
+    }, []);
 
     // Handle Exporter
     const exporter = async (data: string) => {
         try {
+            setIsLoading(true);
             // const params = new URLSearchParams({
             //     startDate: startDate || '',
             //     endDate: endDate || '',
@@ -84,12 +80,14 @@ export const Index = ({
                 error.response?.data?.message || 'Terjadi kesalahan saat ekspor.',
                 'error'
             );
+        } finally {
+            setIsLoading(false); // Selesai loading
         }
     };
 
     return (
-        <>
-            <div className='flex flex-col md:mb-4 mb-2 w-full'>
+        <FormProvider {...methods}>
+            <div className='flex flex-col w-full mb-2 md:mb-4'>
                 {/* Filters */}
                 <div className='flex gap-4 mb-4'>
                     <div>
@@ -113,61 +111,115 @@ export const Index = ({
                         />
                     </div>
                     <div>
-                        <label htmlFor='end-date' className='block mb-1'>Status</label>
-                        <select
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
-                            className="select-class"
-                            id="status"
-                        >
-                            <option value="">All Status</option>
-                            {statuses.map((typeOption) => (
-                                <option
-                                    key={typeOption.code}
-                                    value={typeOption.code}
-                                >
-                                    {typeOption.name}
-                                </option>
-                            ))}
-                        </select>
+                        <label htmlFor='status' className='block mb-1'>Status</label>
+                        <FormAutocomplete<any>
+                            fieldName='status'
+                            placeholder={'Select Status'}
+                            classNames='mt-2 w-64'
+                            fieldLabel={''}
+                            options={dataStatus}
+                            onSearch={(search: string) => {
+                                const isLabelMatch = dataStatus?.some(option => option.label === search);
+                                if (search.length > 0 && !isLabelMatch) {
+                                    getStatus(search, {
+                                        name: 'name',
+                                        id: 'code',
+                                        tabel: 'master_statuses',
+                                        search: search,
+                                    });
+                                } else if (search.length == 0 && !isLabelMatch) {
+                                    getStatus('', {
+                                        name: 'name',
+                                        id: 'code',
+                                        tabel: 'master_statuses',
+                                    });
+                                }
+                            }}
+                            onChangeOutside={(data: any) => {
+                                setStatusFilter(data);
+                            }}
+                            onFocus={() => {
+                                getStatus('', {
+                                    name: 'name',
+                                    id: 'code',
+                                    tabel: 'master_statuses',
+                                })
+                            }}
+                        />
                     </div>
                     <div>
-                        <label htmlFor='end-date' className='block mb-1'>Reimburse Type</label>
-                        <select
-                            value={type}
-                            onChange={(e) => setType(e.target.value)}
-                            className="select-class"
-                            id="type"
-                        >
-                            <option value="">All Types</option>
-                            {types.map((typeOption) => (
-                                <option
-                                    key={typeOption.id}
-                                    value={typeOption.id}
-                                >
-                                    {typeOption.name}
-                                </option>
-                            ))}
-                        </select>
+                        <label htmlFor='reimburse_type' className='block mb-1'>Reimburse Type</label>
+                        <FormAutocomplete<any>
+                            fieldName='reimburse_type'
+                            placeholder={'Select Reimburse Type'}
+                            classNames='mt-2 w-64'
+                            fieldLabel={''}
+                            options={dataReimburseType}
+                            onSearch={(search: string) => {
+                                const isLabelMatch = dataReimburseType?.some(option => option.label === search);
+                                if (search.length > 0 && !isLabelMatch) {
+                                    getReimburseType(search, {
+                                        name: 'name',
+                                        id: 'code',
+                                        tabel: 'master_type_reimburses',
+                                        search: search,
+                                    });
+                                } else if (search.length == 0 && !isLabelMatch) {
+                                    getReimburseType('', {
+                                        name: 'name',
+                                        id: 'code',
+                                        tabel: 'master_type_reimburses',
+                                    });
+                                }
+                            }}
+                            onChangeOutside={(data: any) => {
+                                setReimburseTypeFilter(data);
+                            }}
+                            onFocus={() => {
+                                getReimburseType('', {
+                                    name: 'name',
+                                    id: 'code',
+                                    tabel: 'master_type_reimburses',
+                                })
+                            }}
+                        />
                     </div>
                     <div>
-                        <label htmlFor='end-date' className='block mb-1'>Department</label>
-                        <select
-                            value={department}
-                            onChange={(e) => setDepartment(e.target.value)}
-                            className="select-class"
-                            id="department"
-                        >
-                            <option value="">All Department</option>
-                            {departments.map((dept) => (
-                                <option
-                                    key={dept.id}
-                                    value={dept.id}
-                                >
-                                    {dept.name}
-                                </option>
-                            ))}
-                        </select>
+                        <label htmlFor='department' className='block mb-1'>Department</label>
+                        <FormAutocomplete<any>
+                            fieldName='department'
+                            placeholder={'Select Department'}
+                            classNames='mt-2 w-64'
+                            fieldLabel={''}
+                            options={dataDepartment}
+                            onSearch={(search: string) => {
+                                const isLabelMatch = dataReimburseType?.some(option => option.label === search);
+                                if (search.length > 0 && !isLabelMatch) {
+                                    getDepartment(search, {
+                                        name: 'name',
+                                        id: 'id',
+                                        tabel: 'master_departments',
+                                        search: search,
+                                    });
+                                } else if (search.length == 0 && !isLabelMatch) {
+                                    getDepartment('', {
+                                        name: 'name',
+                                        id: 'id',
+                                        tabel: 'master_departments',
+                                    });
+                                }
+                            }}
+                            onChangeOutside={(data: any) => {
+                                setDepartmentFilter(data);
+                            }}
+                            onFocus={() => {
+                                getDepartment('', {
+                                    name: 'name',
+                                    id: 'id',
+                                    tabel: 'master_departments',
+                                });
+                            }}
+                        />
                     </div>
                 </div>
             </div>
@@ -175,10 +227,9 @@ export const Index = ({
             {/* Data Grid Component */}
             <DataGridComponent
                 isHistory={false}
-                // onExport={async () => await exporter(false)}
                 onExportXls={async (x: string) => await exporter(x)}
-                // onExportPdf={async () => await exporter(true)}
-                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${status || ''}&type=${type || ''}&department=${department || ''}&`}
+                isLoading={isLoading}
+                defaultSearch={`?startDate=${startDate || ''}&endDate=${endDate || ''}&status=${statusFilter || ''}&type=${reimburseTypeFilter || ''}&department=${departmentFilter || ''}&`}
                 columns={columns}
                 url={{
                     url: `${REPORT_REIMBURSE_LIST}`,
@@ -186,7 +237,7 @@ export const Index = ({
                 }}
                 labelFilter='Search'
             />
-        </>
+        </FormProvider>
     );
 };
 

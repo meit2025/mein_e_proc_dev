@@ -1,3 +1,19 @@
+import '../css/index.scss';
+
+import * as React from 'react';
+
+import {
+  AllowanceItemModel,
+  BusinessTripType,
+  Costcenter,
+  Pajak,
+  PurchasingGroup,
+} from '../models/models';
+import {
+  CREATE_API_BUSINESS_TRIP,
+  EDIT_API_BUSINESS_TRIP,
+  GET_DETAIL_BUSINESS_TRIP,
+} from '@/endpoint/business-trip/api';
 import {
   Form,
   FormControl,
@@ -6,33 +22,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/shacdn/form';
-
-import { z } from 'zod';
-
-import { Inertia } from '@inertiajs/inertia';
-
-import { Button } from '@/components/shacdn/button';
-import { ChevronsUpDown } from 'lucide-react';
-
-import { Textarea } from '@/components/shacdn/textarea';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useFieldArray, useForm, useWatch } from 'react-hook-form';
-
-import { ScrollArea } from '@/components/shacdn/scroll-area';
-import { Separator } from '@/components/shacdn/separator';
-import '../css/index.scss';
-
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
-
-import axiosInstance from '@/axiosInstance';
-import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import {
-  WorkflowApprovalDiagramInterface,
-  WorkflowApprovalStepInterface,
-  WorkflowComponent,
-} from '@/components/commons/WorkflowComponent';
-import FormSwitch from '@/components/Input/formSwitchCustom';
-import { Input } from '@/components/shacdn/input';
+  GET_DETAIL_PURPOSE_TYPE,
+  GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE,
+} from '@/endpoint/purpose-type/api';
 import {
   Select,
   SelectContent,
@@ -40,30 +33,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/shacdn/select';
-import { useAlert } from '@/contexts/AlertContext';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
 import {
-  CREATE_API_BUSINESS_TRIP,
-  EDIT_API_BUSINESS_TRIP,
-  GET_DETAIL_BUSINESS_TRIP,
-} from '@/endpoint/business-trip/api';
-import {
-  GET_LIST_ALLOWANCES_BY_PURPOSE_TYPE,
-  GET_DETAIL_PURPOSE_TYPE,
-} from '@/endpoint/purpose-type/api';
-import { Button as ButtonMui } from '@mui/material';
+  WorkflowApprovalDiagramInterface,
+  WorkflowApprovalStepInterface,
+  WorkflowComponent,
+} from '@/components/commons/WorkflowComponent';
 import axios, { AxiosError } from 'axios';
-import moment from 'moment';
-import * as React from 'react';
+import { useFieldArray, useForm, useWatch } from 'react-hook-form';
+
+import { Button } from '@/components/shacdn/button';
+import { Button as ButtonMui } from '@mui/material';
+import { ChevronsUpDown } from 'lucide-react';
+import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
 import { DestinationModel } from '../../Destination/models/models';
-import { PurposeTypeModel } from '../../PurposeType/models/models';
-import {
-  AllowanceItemModel,
-  BusinessTripType,
-  Costcenter,
-  Pajak,
-  PurchasingGroup,
-} from '../models/models';
+import FormSwitch from '@/components/Input/formSwitchCustom';
 import { GET_LIST_DESTINATION_BY_TYPE } from '@/endpoint/destination/api';
+import { Inertia } from '@inertiajs/inertia';
+import { Input } from '@/components/shacdn/input';
+import { PurposeTypeModel } from '../../PurposeType/models/models';
+import { ScrollArea } from '@/components/shacdn/scroll-area';
+import { Separator } from '@/components/shacdn/separator';
+import { Textarea } from '@/components/shacdn/textarea';
+import axiosInstance from '@/axiosInstance';
+import moment from 'moment';
+import { useAlert } from '@/contexts/AlertContext';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 interface User {
   id: string;
@@ -563,7 +559,7 @@ export const BussinessTripFormV1 = ({
 
   const totalPercent: any = useWatch({
     control: form.control,
-    name: `total_percent`,
+    name: 'total_percent',
   });
 
   const [totalAllowance, setTotalAllowance] = React.useState(0);
@@ -574,13 +570,13 @@ export const BussinessTripFormV1 = ({
   React.useEffect(() => {
     // console.log(form.getValues('destinations'), ' edit destination');
     if (type == BusinessTripType.edit) {
-      setIsCashAdvance(form.getValues(`cash_advance`) ?? false);    
+      setIsCashAdvance(form.getValues('cash_advance') ?? false);
     }
     const percentValue = parseFloat((totalPercent || '0').toString());
     // const percentValue = parseFloat(totalPercent || 0); // Ensure totalPercent is a number
     const total = (percentValue / 100) * allowance; // Multiply percent with allowance
     // console.log(total, ' totalll');
-    form.setValue(`total_cash_advance`, total.toFixed(0)); // Save the total in total_cash_advance field
+    form.setValue('total_cash_advance', total.toFixed(0)); // Save the total in total_cash_advance field
   }, [totalPercent, allowance]); // Recalculate when totalPercent or allowance changes
 
   return (
@@ -778,6 +774,7 @@ export const BussinessTripFormV1 = ({
                       target='_blank'
                       className='text-blue-500 inline-block'
                       key={index}
+                      rel='noreferrer'
                     >
                       {attachment.file_name}
                     </a>
@@ -853,7 +850,7 @@ export const BussinessTripFormV1 = ({
               <td className='w-[50%]'>Cash Advance</td>
               <td className='w-[50%] pb-0'>
                 <FormSwitch
-                  fieldName={`cash_advance`}
+                  fieldName={'cash_advance'}
                   isRequired={false}
                   disabled={false}
                   onChanges={(e) => handleCashAdvanceChange(e.target.checked)}
@@ -867,7 +864,7 @@ export const BussinessTripFormV1 = ({
                   <td className='w-[50%]'>
                     <FormField
                       control={form.control}
-                      name={`reference_number`}
+                      name={'reference_number'}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
@@ -884,7 +881,7 @@ export const BussinessTripFormV1 = ({
                     />
                     <FormField
                       control={form.control}
-                      name={`total_percent`}
+                      name={'total_percent'}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
@@ -909,7 +906,7 @@ export const BussinessTripFormV1 = ({
                     />
                     <FormField
                       control={form.control}
-                      name={`total_cash_advance`}
+                      name={'total_cash_advance'}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>

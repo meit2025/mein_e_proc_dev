@@ -31,7 +31,7 @@ const Po = (props?: PrProps) => {
         url={{
           url: GET_PO_SAP,
         }}
-        onExport={async () => {
+        onSendSap={async () => {
           await sendSap();
         }}
         labelFilter='search'

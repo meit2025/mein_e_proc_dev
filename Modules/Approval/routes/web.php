@@ -143,7 +143,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/update/{id}', [ApprovalToUserController::class, 'update'])->name('approval.to-users.update')->middleware(PermissionMiddleware::class . ':approval update');
             Route::get('/detail/{id}', [ApprovalToUserController::class, 'show'])->name('approval.to-users.show')->middleware(PermissionMiddleware::class . ':approval view');
 
-            Route::get('/get-user-dropdown/{id}', [ApprovalToUserController::class, 'getUsersDropdown'])->name('approval.to-users.getUsersDropdown')->middleware(PermissionMiddleware::class . ':approval update');
+            Route::get('/get-user-dropdown/{id}/{type}', [ApprovalToUserController::class, 'getUsersDropdown'])->name('approval.to-users.getUsersDropdown')->middleware(PermissionMiddleware::class . ':approval update');
         });
 
         Route::group(['prefix' => 'approval-conditional-user'], function () {

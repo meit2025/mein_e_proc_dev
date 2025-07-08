@@ -32,7 +32,7 @@
             @endphp
             @foreach ($item['reimburses'] as $index => $reim)
                 @php
-                    $statusPaid = isset($item['pr'][$key]) && $item['pr'][$key]['is_closed'] == 'S' ? "Paid" : "Unpaid";
+                    $statusPaid = isset($item['pr'][$key]) && $item['pr'][$key]['clearing_status'] == 'S' ? "Paid" : "Unpaid";
                     $totalBalance = $reim['reimburseType']['grade_option'] == 'all' ? $reim['reimburseType']['grade_all_price'] : $reim['reimburseType']['gradeReimburseTypes']['plafon'];
                 @endphp
                 <tr>
@@ -59,7 +59,7 @@
                     <td>{{ $item['cancels'] }}</td>
                     <td>{{ $item['status'] }}</td>
                     <td>{{ $totalBalance }}</td>
-                    <td>{{ ($totalBalance - $data->sum('balance')) }}</td>
+                    <td>{{ $reim['remaining_balance_when_request'] }}</td>
                 </tr>
             @endforeach
         @endforeach
@@ -67,7 +67,7 @@
             <td colspan="8">Grand Total</td>
             <td></td>
             <td>{{ $data->sum('balance') }}</td>
-            <td>{{ $data->sum('balance') }}</td>
+            <td>{{ $data->where('status', 'Fully Approve')->sum('balance') }}</td>
             <td colspan="9"></td>
         </tr>
     </tbody>

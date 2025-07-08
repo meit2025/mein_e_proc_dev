@@ -47,6 +47,7 @@ class PurchaseRequisition extends Model
         'purchase_id', // Foreign key for relation
 
         'code_transaction',
+        'currency',
 
         'header_not',
         'tanggal_entertainment',
@@ -66,6 +67,8 @@ class PurchaseRequisition extends Model
         'attachment_link',
         'no_po',
 
+        'business_trip_day_total_id',
+        'business_trip_day_total_type',
     ];
 
     // Define the relationship with Purchase

@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Approval\Models\SettingApproval;
+use Modules\BusinessTrip\Models\BusinessTrip;
 use Modules\BusinessTrip\Models\BusinessTripAttachment;
 use Modules\PurchaseRequisition\Models\PurchaseOrder;
 use Modules\PurchaseRequisition\Models\PurchaseRequisition;
@@ -37,6 +38,7 @@ class BtPOService
             $reqno = (int) SettingApproval::where('key', 'dokumenType_' . $dokumenType)->lockForUpdate()->value('value') + 1;
             $increment = 1;
 
+
             foreach ($BusinessTrip as $key => $value) {
                 # code...
                 $data = $this->preparePurchaseRequisitionData(
@@ -62,6 +64,7 @@ class BtPOService
         } catch (Exception $e) {
             Log::channel('po_txt')->error($e->getMessage(), ['id' => $id]);
             DB::rollBack();
+            dd($e);
             throw new Exception($e->getMessage());
         }
     }
@@ -78,7 +81,9 @@ class BtPOService
         $StorageLocation,
         $PurchasingOrganization,
     ) {
-        $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y-m-d');
+        if ($BusinessTrip->created_at) {
+            $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y-m-d');
+        }
         $data = [
             'purchase_id' => $BusinessTrip->purchase_id,
             'code_transaction' => 'BTRE',
@@ -140,8 +145,52 @@ class BtPOService
 
     private function findBusinessTripPr($id)
     {
-        $items = PurchaseRequisition::where('purchase_id', $id)->where('code_transaction', 'BTRE')->get();
-        return $items;
+
+        $bt = new BtService();
+
+        $BusinessTrip = BusinessTrip::where('parent_id', $id)
+            ->first();
+
+        $data =  $bt->processTextData($BusinessTrip->id, false);
+        foreach ($data as &$obj) {
+
+            // find text item
+            $items = PurchaseRequisition::where('business_trip_day_total_id', $obj['business_trip_day_total_id'])
+                ->where('business_trip_day_total_type', $obj['business_trip_day_total_type'])->first();
+            if ($items) {
+                $obj['purchase_requisition_number'] = $items->purchase_requisition_number;
+                $obj['item_number'] = $items->item_number;
+                $obj['purchase_id'] = $items->purchase_id;
+            }
+
+            $obj['created_at'] = isset($items->created_at) ? $items->created_at : date('Y-m-d H:i:s');
+            $obj['remarks'] = $obj['short_text'];
+        }
+
+        // add sorting dari item_number
+        usort($data, function ($a, $b) {
+            // First priority: both item_number and balance have values
+            if ($a['item_number'] !== null && $a['balance'] !== '0' && $b['item_number'] === null && $b['balance'] === "0") {
+                return -1; // $a goes first
+            }
+
+            // Second priority: item_number null and balance has value
+            if ($a['item_number'] === null && $a['balance'] !== '0' && $b['item_number'] !== null && $b['balance'] !== '0') {
+                return -1; // $a goes first
+            }
+
+            // Third priority: item_number null and balance null
+            if ($a['item_number'] === null && $a['balance'] === '0' && $b['item_number'] !== null && $b['balance'] !== '0') {
+                return 1; // $b goes first
+            }
+
+            // Default sorting when both are similar
+            return 0; // No change in order
+        });
+
+        return array_map(function ($item) {
+            return (object) $item;
+        }, $data);
     }
 
     private function findBusinessAttachment($id)

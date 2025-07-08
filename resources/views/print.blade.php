@@ -193,6 +193,11 @@
                 $color = 'waiting';
                 $icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>';
             @endphp
+        @elseif ($data['status']['code'] == 'revise')
+            @php
+                $color = 'reject';
+                $icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ban"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg>';
+            @endphp
         @endif
         <button class="waiting-approve {{$color}}">
             <span class="icon">
@@ -280,8 +285,12 @@
                         <td>{{$detail['shift_code']}}</td>
                         <td>{{$detail['shift_start']}}</td>
                         <td>{{$detail['shift_end']}}</td>
-                        <td>{{$detail['start_time']}}</td>
-                        <td>{{$detail['end_time']}}</td>
+                        <td>
+                            {{date('d/m/Y',strtotime($detail['start_date']))}} {{$detail['start_time']}}
+                        </td>
+                        <td>
+                            {{date('d/m/Y',strtotime($detail['end_date']))}} {{$detail['end_time']}}
+                        </td>
                     </tr>
                 @endforeach
             </table>

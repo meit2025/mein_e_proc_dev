@@ -3,12 +3,13 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Events\AfterSheet;
 
-class BusinessTripExport implements FromArray, WithHeadings, WithEvents, WithCustomStartCell
+class BusinessTripExport implements FromArray, WithHeadings, WithEvents, WithCustomStartCell, ShouldAutoSize
 {
     protected $data;
 
@@ -37,14 +38,14 @@ class BusinessTripExport implements FromArray, WithHeadings, WithEvents, WithCus
                         'Dept' => $firstRow ? ($businessTrip['requestedBy']->departements->name ?? '') : '',
                         'Division' => $firstRow ? ($businessTrip['requestedBy']->divisions->name ?? '') : '',
                         'Requested By' => $firstRow ? ($businessTrip['requestFor']->name ?? '') : '',
-                        'Request Date' => $firstRow ? ($businessTrip['requestedBy']->created_at?->format('d/m/Y') ?? '') : '',
+                        'Request Date' => $firstRow ? $businessTrip['requestDate']?->format('d/m/Y') : '',
                         'Request Number' => $firstRow ? ($businessTrip['requestNo'] ?? '') : '',
                         'Request Status' => $firstRow ? ($businessTrip['status']->name ?? '') : '',
                         'Purpose Type' => $firstRow ? ($businessTrip['purposeType']->name ?? '') : '',
                         'Remarks' => $firstRow ? ($businessTrip['remarks'] ?? '') : '',
-                        'Destination' => $firstRow ? ($destination['destination'] ?? '') : '',
-                        'Start Date' => $firstRow ? (isset($destination['start_date']) ? date('d/m/Y', strtotime($destination['start_date'])) : '') : '',
-                        'End Date' => $firstRow ? (isset($destination['end_date']) ? date('d/m/Y', strtotime($destination['end_date'])) : '') : '',
+                        'Destination' => ($destination['destination'] ?? ''),
+                        'Start Date' => (isset($destination['start_date']) ? date('d/m/Y', strtotime($destination['start_date'])) : ''),
+                        'End Date' => (isset($destination['end_date']) ? date('d/m/Y', strtotime($destination['end_date'])) : ''),
                         'Allowance Item' => $allowanceItem['item_name'] ?? '',
                         'Allowance Value' => isset($allowanceItem['currency_id'], $allowanceItem['amount'])
                             ? $allowanceItem['currency_id'] . ' ' . number_format($allowanceItem['amount'], 0, ',', '.')
@@ -119,6 +120,15 @@ class BusinessTripExport implements FromArray, WithHeadings, WithEvents, WithCus
                 $sheet->getStyle('A1:R1')->applyFromArray([
                     'font' => ['bold' => true],
                 ]);
+
+                // Menambahkan border ke seluruh tabel
+                $highestRow = $sheet->getHighestRow();
+                $highestColumn = $sheet->getHighestColumn();
+                $tableRange = 'A1:' . $highestColumn . $highestRow;
+                $sheet->getDelegate()->getStyle($tableRange)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+                // Menjadikan semua teks rata tengah
+                $sheet->getDelegate()->getStyle($tableRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             },
         ];
     }

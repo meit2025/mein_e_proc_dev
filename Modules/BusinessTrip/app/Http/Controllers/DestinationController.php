@@ -74,13 +74,15 @@ class DestinationController extends Controller
     {
 
         $query =  Destination::query();
+        if ($request->search) {
+            $query = $query->where('code', 'ilike', '%' . $request->search . '%')
+                ->orWhere('destination', 'ilike', '%' . $request->search . '%')
+                ->orWhere('type', 'ilike', '%' . $request->search . '%');
+        }
 
-        // dd($query->get());
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
         $sortDirection = $request->get('sort_direction', 'asc');
-
-
 
 
         $query->orderBy($sortBy, $sortDirection);
@@ -131,9 +133,9 @@ class DestinationController extends Controller
             DB::commit();
             return $this->successResponse('Susccessfully', 'Successfully update purpose type');
         } catch (\Exception $e) {
-            dd($e);
 
             DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 500);
         }
     }
 
@@ -164,9 +166,9 @@ class DestinationController extends Controller
             DB::commit();
             return $this->successResponse($purpose, 'Successfully creeted purpose type');
         } catch (\Exception $e) {
-            dd($e);
 
             DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 500);
         }
     }
 

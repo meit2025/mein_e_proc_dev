@@ -55,10 +55,10 @@ const ReimburseDetail = () => {
           <strong>Requested By:</strong> {data?.user_create_request?.name}
         </p>
         <p className='text-sm'>
-          <strong>Remark:</strong> {data?.remark}
+          <strong>Remark Header:</strong> {data?.remark}
         </p>
         <br />
-        <p className='text-sm flex items-center gap-2'>
+        <p className='flex items-center gap-2 text-sm'>
           <strong>Status:</strong>{' '}
           <CustomStatus
             name={data?.reimbursementStatus?.name!}
@@ -80,7 +80,7 @@ const ReimburseDetail = () => {
               <div key={index}>
                 <h3>Detail Form {index + 1}</h3>
 
-                <table className='info-table text-sm mt-4'>
+                <table className='mt-4 text-sm info-table'>
                   <tr>
                     <td>
                       <strong>Reimburse Type</strong>
@@ -128,6 +128,12 @@ const ReimburseDetail = () => {
                       <strong>Balance</strong>
                     </td>
                     <td>{reimburse?.currency} {formatRupiah(reimburse?.reimburse_type?.grade_option == 'all' ? reimburse?.reimburse_type?.grade_all_price : reimburse?.reimburse_type?.grade_reimburse_types?.plafon ?? 0, false)}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Remaining Balance</strong>
+                    </td>
+                    <td>{reimburse?.currency} {formatRupiah(reimburse?.remaining_balance_when_request, false)}</td>
                   </tr>
                   <tr>
                     <td>
@@ -190,8 +196,10 @@ const ReimburseDetail = () => {
                       <strong>Attachment File</strong>
                     </td>
                     <td>
+                      <ul></ul>
                       {reimburse?.reimburse_attachment.map((attachment: any, index: number) => (
-                        <>
+                        <li>
+                          
                           <a
                             href={`/storage/reimburse/${attachment.url}`}
                             target='_blank'
@@ -202,13 +210,13 @@ const ReimburseDetail = () => {
                             {attachment.url}
                           </a>
                           <br />
-                        </>
+                        </li>
                       ))}
                     </td>
                   </tr>
                   <tr>
                     <td>
-                      <strong>Remark</strong>
+                      <strong>Remark Item</strong>
                     </td>
                     <td>{reimburse?.short_text}</td>
                   </tr>

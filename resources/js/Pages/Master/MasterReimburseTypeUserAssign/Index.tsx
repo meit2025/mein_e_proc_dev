@@ -35,7 +35,8 @@ export const Index = ({reimburseType} : {reimburseType: any}) => {
       field: 'isAssign',
       headerName: 'Status Assignment',
       width: 150,
-      filterable: true,
+      filterable: false,
+      sortable: false,
       renderCell: (params:any) => {
         let isChecked = checkedList?.[params.row.id]?.isAssign || params.row.isAssign;
 

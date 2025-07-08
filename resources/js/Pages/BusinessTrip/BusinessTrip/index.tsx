@@ -1,25 +1,28 @@
-import { CustomDialog } from '@/components/commons/CustomDialog';
-import DataGridComponent from '@/components/commons/DataGrid';
-import { DELET_API_BUSINESS_TRIP, GET_LIST_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
-import {
-  CLONE_PAGE_BUSINESS_TRIP,
-  DETAIL_PAGE_BUSINESS_TRIP,
-  EDIT_PAGE_BUSINESS_TRIP,
-} from '@/endpoint/business-trip/page';
-import MainLayout from '@/Pages/Layouts/MainLayout';
-import { Link, usePage } from '@inertiajs/react';
-import React, { ReactNode } from 'react';
-import { DestinationModel } from '../Destination/models/models';
-import { PurposeTypeModel } from '../PurposeType/models/models';
-import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
 import {
   BusinessTripType,
-  columns,
   Costcenter,
   Pajak,
   PurchasingGroup,
   UserModel,
+  columns,
 } from './models/models';
+import {
+  CLONE_PAGE_BUSINESS_TRIP,
+  DETAIL_PAGE_BUSINESS_TRIP,
+  PRINT_PAGE_BUSINESS_TRIP,
+  EDIT_PAGE_BUSINESS_TRIP,
+} from '@/endpoint/business-trip/page';
+import { DELET_API_BUSINESS_TRIP, GET_LIST_BUSINESS_TRIP } from '@/endpoint/business-trip/api';
+import { Link, usePage } from '@inertiajs/react';
+import React, { ReactNode } from 'react';
+
+import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
+import { CustomDialog } from '@/components/commons/CustomDialog';
+import DataGridComponent from '@/components/commons/DataGrid';
+import { DestinationModel } from '../Destination/models/models';
+import MainLayout from '@/Pages/Layouts/MainLayout';
+import { PurposeTypeModel } from '../PurposeType/models/models';
+
 interface propsType {
   listPurposeType: PurposeTypeModel[];
   users: UserModel[];
@@ -54,7 +57,10 @@ export const Index = ({
 }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
-  const [businessTripForm, setBusinessTripForm] = React.useState({
+  const [businessTripForm, setBusinessTripForm] = React.useState<{
+    type: BusinessTripType;
+    id: string | undefined;
+  }>({
     type: BusinessTripType.create,
     id: undefined,
   });
@@ -62,7 +68,7 @@ export const Index = ({
   function openFormHandler() {
     setBusinessTripForm({
       type: BusinessTripType.create,
-      id: null,
+      id: undefined,
     });
     setOpenForm(!openForm);
   }
@@ -75,7 +81,7 @@ export const Index = ({
 
   return (
     <>
-      <div className='flex md:mb-4 mb-2 w-full justify-end'>
+      <div className='flex justify-end w-full mb-2 md:mb-4'>
         {/* <Button onClick={openFormHandler}>
           <PlusIcon />
         </Button> */}
@@ -95,11 +101,15 @@ export const Index = ({
             purchasingGroup={purchasingGroup}
             type={businessTripForm.type}
             id={businessTripForm.id}
+            successSubmit={(x: boolean) => {
+              if (x) window.location.reload();
+            }}
           />
         </CustomDialog>
       </div>
       <DataGridComponent
         isHistory={true}
+        // isClone={true}
         role={{
           detail: `${roleAkses} view`,
           create: `${roleAkses} create`,
@@ -108,13 +118,6 @@ export const Index = ({
         }}
         onCreate={openFormHandler}
         columns={columns}
-        // onEdit={(value) => {
-        //   setBusinessTripForm({
-        //     type: BusinessTripType.edit,
-        //     id: value.toString(),
-        //   });
-        //   setOpenForm(true);
-        // }}
         onClone={(value) => {
           setBusinessTripForm({
             type: BusinessTripType.clone,
@@ -125,8 +128,7 @@ export const Index = ({
         url={{
           url: GET_LIST_BUSINESS_TRIP,
           detailUrl: DETAIL_PAGE_BUSINESS_TRIP,
-          //   editUrl: EDIT_PAGE_BUSINESS_TRIP,
-          clone: CLONE_PAGE_BUSINESS_TRIP,
+          printUrl: PRINT_PAGE_BUSINESS_TRIP,
           cancelApproval: 'trip',
         }}
         labelFilter='search'

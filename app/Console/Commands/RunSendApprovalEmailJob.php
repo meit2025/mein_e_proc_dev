@@ -57,26 +57,27 @@ class RunSendApprovalEmailJob extends Command
                 $type = "";
                 $url = "";
                 $name = "";
+                $baseUrl = env('APP_URL', 'https://meingmbh.com');
                 if ($approval->document_name == 'PR') {
-                    $url = env('APP_URL') .  '/purchase-requisition/detail/' .  $approval->document_id;
+                    $url =  $baseUrl . '/purchase-requisition/detail/' .  $approval->document_id;
                     $pr = Purchase::with('user')->where('id', $approval->document_id)->first();
                     $nopr = $pr->purchases_number;
                     $name = $pr->user->name ?? "";
                     $type = "Purchase Requistion";
                 } elseif ($approval->document_name == 'REIM') {
-                    $url = env('APP_URL') .  '/reimbursement/detail/' .  $approval->document_id;
+                    $url = $baseUrl . '/reimburse/detail/' .  $approval->document_id;
                     $reim = ReimburseGroup::with('user')->where('id', $approval->document_id)->first();
                     $name = $reim->user->name ?? "";
                     $nopr = $reim->code ?? "";
                     $type = "Reimbursement";
                 } elseif ($approval->document_name == 'TRIP') {
-                    $url = env('APP_URL') .  '/business-trip/detail-page/' .  $approval->document_id;
+                    $url = $baseUrl .  '/business-trip/detail-page/' .  $approval->document_id;
                     $trip = BusinessTrip::with('requestFor')->where('id', $approval->document_id)->where('type', 'request')->first();
                     $name = $trip->requestFor->name ?? "";
                     $nopr = $trip->request_no ?? "";
                     $type = "Business Trip";
                 } elseif ($approval->document_name == 'TRIP_DECLARATION') {
-                    $url = env('APP_URL') .  '/business-trip/detail-page/' .  $approval->document_id;
+                    $url = $baseUrl .  '/business-trip/detail-page/' .  $approval->document_id;
                     $trip = BusinessTrip::with('requestFor')->where('id', $approval->document_id)->where('type', 'declaration')->first();
                     $nopr = $trip->request_no ?? "";
                     $name = $trip->requestFor->name ?? "";

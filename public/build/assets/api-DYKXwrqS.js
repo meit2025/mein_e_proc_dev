@@ -1,1 +1,0 @@
-const R="/api/approval/route",O="/api/approval/approval-to-user",_=`${R}/list`,A=`${R}/create`,a=`${R}/update`,P=E=>`${R}/detail/${E}`,s=`${R}/delete`,t=E=>`${O}/get-user-dropdown/${E}`,T=`${O}/create`;export{A as C,P as D,a as E,_ as G,s as a,t as b,T as c};

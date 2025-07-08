@@ -10,6 +10,7 @@ import '../css/index.scss';
 import { Input } from '@/components/shacdn/input';
 import moment from 'moment';
 import * as React from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shacdn/select';
 export function DetailAttedances({
   form,
   destinationIndex,
@@ -53,7 +54,7 @@ export function DetailAttedances({
             <tbody>
               {detailAttedanceFields.map((attedance: any, index: any) => (
                 <tr key={attedance.index}>
-                  <td>
+                  <td style={{verticalAlign: 'middle'}}>
                     {moment(attedance.date).format('DD/MM/YYYY')}
 
                     <FormField
@@ -74,26 +75,36 @@ export function DetailAttedances({
                     />
                   </td>
 
-                  <td>
-                    {attedance.shift_code}
+                  <td style={{verticalAlign: 'middle'}}>
                     <FormField
                       control={form.control}
                       name={`destinations.${destinationIndex}.detail_attedances.${index}.shift_code`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input
-                              defaultValue={moment(field.value).format('YYYY-MM-DD')}
-                              onChange={field.onChange}
-                              type='hidden'
-                            />
+                          <Select
+                            onValueChange={(value) => field.onChange(value)} // Pass selected value to React Hook Form
+                            value={field.value} // Set the current value from React Hook Form
+                            >
+                            <SelectTrigger className='w-[140px]'>
+                                <SelectValue placeholder='Select Shiftcode' />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem key='REGULERSHIFT' value='REGULERSHIFT'>
+                                    REGULERSHIFT
+                                </SelectItem>
+                                <SelectItem key='DAY-OFF' value='DAY-OFF'>
+                                    DAY-OFF
+                                </SelectItem>
+                            </SelectContent>
+                            </Select>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </td>
-                  <td>
+                  <td style={{verticalAlign: 'middle'}}>
                     {attedance.shift_start}
                     <FormField
                       control={form.control}
@@ -112,7 +123,7 @@ export function DetailAttedances({
                       )}
                     />
                   </td>
-                  <td>
+                  <td style={{verticalAlign: 'middle'}}>
                     {attedance.shift_end}
                     <FormField
                       control={form.control}
@@ -131,7 +142,25 @@ export function DetailAttedances({
                       )}
                     />
                   </td>
-                  <td>
+                  <td style={{verticalAlign: 'middle'}}>
+                    <FormField
+                      control={form.control}
+                      name={`destinations.${destinationIndex}.detail_attedances.${index}.start_date`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              defaultValue={moment(field.value).format('YYYY-MM-DD')}
+                              onChange={(e) => field.onChange(new Date(e.target.value))}
+                              type='date'
+                              style={{marginBottom: '5px'}}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     <FormField
                       control={form.control}
                       name={`destinations.${destinationIndex}.detail_attedances.${index}.start_time`}
@@ -139,15 +168,9 @@ export function DetailAttedances({
                         <FormItem>
                           <FormControl>
                             <Input
-                              defaultValue={field.value}
-                              onChange={field.onChange}
-                              //   disabled={
-                              //     type == btEdit
-                              //       ? form.watch(
-                              //           `destinations.${destinationIndex}.detail_attedances.${index}.start_time`,
-                              //         )
-                              //       : false
-                              //   }
+                                value={field.value ? moment(field.value, "HH:mm").format("HH:mm") : ""}
+                                onChange={(e) => field.onChange(e.target.value)}
+                                type="time"
                             />
                           </FormControl>
                           <FormMessage />
@@ -158,6 +181,23 @@ export function DetailAttedances({
                   <td>
                     <FormField
                       control={form.control}
+                      name={`destinations.${destinationIndex}.detail_attedances.${index}.end_date`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              defaultValue={moment(field.value).format('YYYY-MM-DD')}
+                              onChange={(e) => field.onChange(new Date(e.target.value))}
+                              type='date'
+                              style={{marginBottom: '5px'}}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
                       name={`destinations.${destinationIndex}.detail_attedances.${index}.end_time`}
                       render={({ field }) => (
                         <FormItem>
@@ -165,13 +205,7 @@ export function DetailAttedances({
                             <Input
                               defaultValue={field.value}
                               onChange={field.onChange}
-                              //   disabled={
-                              //     type == btEdit
-                              //       ? form.watch(
-                              //           `destinations.${destinationIndex}.detail_attedances.${index}.end_time`,
-                              //         )
-                              //       : false
-                              //   }
+                              type='time'
                             />
                           </FormControl>
                           <FormMessage />

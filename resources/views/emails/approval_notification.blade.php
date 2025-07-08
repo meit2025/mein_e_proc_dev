@@ -47,8 +47,7 @@
         <div
             style="display:-webkit-flex; flex-direction: row; align-items: center; justify-content: center;text-align:center;">
             <div style="margin:auto; padding-top:50px">
-                <img style="width:200px;height:80px;margin-right:20px" src="{{public_path('images/icon.png')}}" alt="
-                    Icon" />
+                <h1>PT Mitsubishi Electric Indonesia</h1>
             </div>
         </div>
     </div>
@@ -81,7 +80,9 @@
                             <td>{{$item['pr']}}</td>
                             <td>{{$item['name']}}</td>
                             <td>{{$item['type']}}</td>
-                            <td><a href="{{$item['url']}}" class="link">Link</a></td>
+                            <td>
+                                <a href="{{ $item['url'] ?? '#' }}" class="link">Link</a>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -96,16 +97,8 @@
                     </p>
                 </div>
                 <div style="background-color: #D7E1EA;height:2px"></div>
-                <div style="display:flex;margin-top:20px">
-                    <div>
-                        <div style="display: flex">
-                            <img style="width:200px;height:80px;margin-right:20px;margin-top: 20px"
-                                src="{{public_path('images/icon.png')}}" alt=" Icon">
-                        </div>
-
-                    </div>
-
-                    <div style="margin-left: 20px">
+                {{-- <div style="display:flex;margin-top:20px">
+                    <div style="margin-left: 1px">
                         <div style="margin-top: 5px">
                             <b style="font-weight: 700;font-size: 20px;color: #1f1f1f;"><strong> PT Mitsubishi Electric
                                     Indonesia</strong></b>
@@ -127,7 +120,7 @@
                         </div>
 
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>

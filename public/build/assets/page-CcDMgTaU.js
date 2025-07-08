@@ -1,0 +1,1 @@
+const T="/api/master-pr/valuation-type",_=`${T}/list`,t=`${T}/create`,a=`${T}/update`,s=E=>`${T}/detail/${E}`,e=`${T}/delete`,A="/master-pr/valuation-type",I=`${A}`,L=`${A}/create`,P=`${A}/update`;export{L as C,e as D,P as E,_ as G,I as L,s as a,a as b,t as c};

@@ -1,3 +1,7 @@
+import '../css/index.scss';
+
+import * as React from 'react';
+
 import {
   Form,
   FormControl,
@@ -6,45 +10,36 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/shacdn/form';
-
-import { z } from 'zod';
-
-import { Inertia } from '@inertiajs/inertia';
-
-import { Button } from '@/components/shacdn/button';
-import { ChevronsUpDown } from 'lucide-react';
-
-import { Textarea } from '@/components/shacdn/textarea';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { Pajak, PurchasingGroup } from '../models/models';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 
+import { Button } from '@/components/shacdn/button';
+import { Checkbox } from '@/components/shacdn/checkbox';
+import { ChevronsUpDown } from 'lucide-react';
+import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
+import { DayPickerProps } from 'react-day-picker';
+import { DetailAllowance } from './DetailAllowance';
+import { DetailAttedances } from './DetailAttedances';
+import FormAutocomplete from '@/components/Input/formDropdown';
+import { Inertia } from '@inertiajs/inertia';
+import { ResultTotalItem } from './ResultTotalItem';
 import { ScrollArea } from '@/components/shacdn/scroll-area';
 import { Separator } from '@/components/shacdn/separator';
-import '../css/index.scss';
-
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
-import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
+import { Textarea } from '@/components/shacdn/textarea';
 import moment from 'moment';
-import * as React from 'react';
-import {
-  Pajak,
-  PurchasingGroup,
-} from '../models/models';
-import FormAutocomplete from '@/components/Input/formDropdown';
-import { DetailAttedances } from './DetailAttedances';
-import { DetailAllowance } from './DetailAllowance';
-import { ResultTotalItem } from './ResultTotalItem';
-import { DayPickerProps } from 'react-day-picker';
-import { Checkbox } from '@/components/shacdn/checkbox';
 import { useAlert } from '@/contexts/AlertContext';
+import useDropdownOptions from '@/lib/getDropdown';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 interface DateObject {
-    from: string;
-    to: string;
-  }
+  from: string;
+  to: string;
+}
 
 export function BussinessDestinationForm({
-    key,
+  key,
   form,
   index,
   destination,
@@ -102,37 +97,51 @@ export function BussinessDestinationForm({
   });
 
   const { showToast } = useAlert();
+  const { dataDropdown: dataDestinationOnSearch, getDropdown: getDestination } =
+    useDropdownOptions();
 
   function detailAttedancesGenerate() {
     let momentStart = moment(destination.business_trip_start_date).startOf('day');
-    let momentEnd = moment(destination.business_trip_end_date).startOf('day');
+    const momentEnd = moment(destination.business_trip_end_date).startOf('day');
+
+    if (
+      !destination.business_trip_start_date ||
+      !destination.business_trip_end_date ||
+      !momentStart.isValid() ||
+      !momentEnd.isValid()
+    ) {
+      showToast('Please Pick The Date', 'error');
+      return;
+    }
+
     removeAttendace();
     removeAllowance();
     if (momentStart.isAfter(momentEnd)) {
-        showToast('Start date must be before end date', 'error');
-        return;
+      showToast('Start date must be before end date', 'error');
+      return;
     }
 
     // Validate against existing dates
     let isConflict = false;
 
-    for (let key in dateBusinessTripByUser) {
-        let existingStart = moment(dateBusinessTripByUser[key].from).startOf('day');
-        let existingEnd = moment(dateBusinessTripByUser[key].to).startOf('day');
+    for (const key in dateBusinessTripByUser) {
+      const existingStart = moment(dateBusinessTripByUser[key].from).startOf('day');
+      const existingEnd = moment(dateBusinessTripByUser[key].to).startOf('day');
 
-        // Check if the selected date range overlaps with any existing date range
-        if (
-            (momentStart.isBetween(existingStart, existingEnd, null, '[)') || momentEnd.isBetween(existingStart, existingEnd, null, '(]')) ||
-            (momentStart.isBefore(existingStart) && momentEnd.isAfter(existingEnd))
-        ) {
-            isConflict = true;
-            break;
-        }
+      // Check if the selected date range overlaps with any existing date range
+      if (
+        momentStart.isBetween(existingStart, existingEnd, null, '[)') ||
+        momentEnd.isBetween(existingStart, existingEnd, null, '(]') ||
+        (momentStart.isBefore(existingStart) && momentEnd.isAfter(existingEnd))
+      ) {
+        isConflict = true;
+        break;
+      }
     }
 
     if (isConflict) {
-        showToast('Your Selected Range is Unavailable. Please Select Other Days', 'error');
-        return;
+      showToast('Your Selected Range is Unavailable. Please Select Other Days', 'error');
+      return;
     }
 
     // console.log(dateBusinessTripByUser,'dateBusinessTripByUser');
@@ -140,11 +149,13 @@ export function BussinessDestinationForm({
     while (momentStart.isBefore(momentEnd) || momentStart.isSame(momentEnd)) {
       const object = {
         date: momentStart.toDate(),
-        shift_code: 'SHIFTREGULAR',
+        shift_code: 'REGULERSHIFT',
         shift_start: '08:00',
         shift_end: '17:00',
         end_time: '17:00',
         start_time: '08:00',
+        start_date: momentStart.toDate(),
+        end_date: momentStart.toDate(),
       };
 
       detailAttedanceAppend(object);
@@ -153,8 +164,8 @@ export function BussinessDestinationForm({
 
     function generateDetailAllowanceByDate(price: string): any[] {
       let momentStart = moment(destination.business_trip_start_date).startOf('day');
-      let momentEnd = moment(destination.business_trip_end_date).startOf('day');
-      let detailAllowance = [];
+      const momentEnd = moment(destination.business_trip_end_date).startOf('day');
+      const detailAllowance = [];
 
       while (momentStart.isBefore(momentEnd) || momentStart.isSame(momentEnd)) {
         detailAllowance.push({
@@ -190,100 +201,111 @@ export function BussinessDestinationForm({
     replaceAllowance(allowancesForm);
   }
 
-    const handleDateStartChange = (value: Date | undefined, index: number) => {
-        updateDestination(index, {
-            ...destination,
-            business_trip_start_date: value,
-        });
-        setSelectedDates((prev: any) => {
-            const updated = [...prev];
-            // Jika nilai ada, perbarui elemen target
-            updated[index] = {
-                ...updated[index],
-                from: value,
-            };
-            return updated;
-        });
-    };
+  const handleDateStartChange = (value: Date | undefined, index: number) => {
+    updateDestination(index, {
+      ...destination,
+      business_trip_start_date: value,
+    });
+    setSelectedDates((prev: any) => {
+      const updated = [...prev];
+      // Jika nilai ada, perbarui elemen target
+      updated[index] = {
+        ...updated[index],
+        from: value,
+      };
+      return updated;
+    });
+  };
 
-    const handleDateEndChange = (value: Date | undefined, index: number) => {
-        updateDestination(index, {
-            ...destination,
-            business_trip_end_date: value,
-        });
-        setSelectedDates((prev: any) => {
-            const updated = [...prev];
-            // Perbarui hanya elemen yang ditargetkan
-            updated[index] = {
-                ...updated[index], // Pastikan data sebelumnya tetap ada
-                to: value,
-            };
+  const handleDateEndChange = (value: Date | undefined, index: number) => {
+    updateDestination(index, {
+      ...destination,
+      business_trip_end_date: value,
+    });
+    setSelectedDates((prev: any) => {
+      const updated = [...prev];
+      // Perbarui hanya elemen yang ditargetkan
+      updated[index] = {
+        ...updated[index], // Pastikan data sebelumnya tetap ada
+        to: value,
+      };
+      return updated;
+    });
+  };
+  const [selectedDateRemove, setSelectedDateRemove] = React.useState<Date | undefined>();
+  const modifiers: DayPickerProps['modifiers'] = {};
+  if (selectedDateRemove) {
+    modifiers.selected = selectedDateRemove;
+  }
+
+  const handleResetClick = (index: number, type: string): void => {
+    if (type === 'start') {
+      updateDestination(index, {
+        ...destination,
+        business_trip_start_date: null,
+      });
+
+      setSelectedDates((prev: any) => {
+        const updated = [...prev];
+
+        // Jika nilai undefined, hapus elemen target
+        updated[index] = {
+          ...updated[index],
+          from: undefined,
+        };
         return updated;
-        });
-    };
-    const [selectedDateRemove, setSelectedDateRemove] = React.useState<Date | undefined>();
-    const modifiers: DayPickerProps["modifiers"] = {};
-    if (selectedDateRemove) {
-        modifiers.selected = selectedDateRemove;
+      });
+    }
+    if (type === 'end') {
+      updateDestination(index, {
+        ...destination,
+        business_trip_end_date: null,
+      });
+
+      setSelectedDates((prev: any) => {
+        const updated = [...prev];
+
+        // Jika nilai undefined, hapus elemen target
+        updated[index] = {
+          ...updated[index],
+          to: undefined,
+        };
+        return updated;
+      });
     }
 
-    const handleResetClick = (index: number, type: string): void => {
-        if (type === 'start') {
-            updateDestination(index,{
-                ...destination,
-                business_trip_start_date: null,
-            });
+    setSelectedDateRemove(undefined);
+  };
 
-            setSelectedDates((prev: any) => {
-                const updated = [...prev];
+  const footerStart = (
+    <>
+      <button
+        type='button'
+        className='btn btn-danger'
+        onClick={() => handleResetClick(index, 'start')}
+      >
+        Reset
+      </button>
+    </>
+  );
 
-                // Jika nilai undefined, hapus elemen target
-                updated[index] = {
-                    ...updated[index],
-                    from: undefined,
-                };
-                return updated;
-            });
-        }
-        if (type === 'end') {
-            updateDestination(index,{
-                ...destination,
-                business_trip_end_date: null,
-            });
+  const footerEnd = (
+    <>
+      <button
+        type='button'
+        className='btn btn-danger'
+        onClick={() => handleResetClick(index, 'end')}
+      >
+        Reset
+      </button>
+    </>
+  );
 
-            setSelectedDates((prev: any) => {
-                const updated = [...prev];
-
-                // Jika nilai undefined, hapus elemen target
-                updated[index] = {
-                    ...updated[index],
-                    to: undefined,
-                };
-                return updated;
-            });
-        }
-
-        setSelectedDateRemove(undefined);
-    }
-
-
-    let footerStart = (
-        <>
-            <button type='button' className='btn btn-danger' onClick={() => handleResetClick(index, 'start')}>Reset</button>
-        </>
-    );
-
-    let footerEnd = (
-        <>
-            <button type='button' className='btn btn-danger' onClick={() => handleResetClick(index, 'end')}>Reset</button>
-        </>
-    );
-
-//   console.log(selectedDates, 'ini log');
+  //   console.log(selectedDates, 'ini log');
   return (
     <TabsContent key={key} value={`destination${index + 1}`}>
       <div key={index}>
-        <table className='text-xs mt-4 reimburse-form-detail font-thin'>
+        <table className='mt-4 text-xs font-thin reimburse-form-detail'>
           <tr>
             <td width={200}>
               Destination<span className='text-red-600'>*</span>
@@ -303,34 +325,78 @@ export function BussinessDestinationForm({
                     destination: value,
                   });
                 }}
+                onSearch={async (search) => {
+                  const isLabelMatch = dataDestination?.some((option) => option.label === search);
+                  if (search.length > 0 && !isLabelMatch) {
+                    await getDestination(search, {
+                      name: 'destination',
+                      id: 'destination',
+                      tabel: 'destinations',
+                      where: {
+                        key: 'type',
+                        parameter: destination.type,
+                      },
+                      search: search,
+                    });
+                  } else if (search.length == 0 && !isLabelMatch) {
+                    await getDestination('', {
+                      name: 'destination',
+                      id: 'destination',
+                      tabel: 'destinations',
+                      where: {
+                        key: 'type',
+                        parameter: destination.type,
+                      },
+                    });
+                  }
+
+                  dataDestination = dataDestinationOnSearch;
+                }}
+                onFocus={async () => {
+                  const value = form.getValues('cost_center');
+                  await getDestination('', {
+                    name: 'destination',
+                    id: 'destination',
+                    tabel: 'destinations',
+                    where: {
+                      key: 'type',
+                      parameter: destination.type,
+                    },
+                    hasValue: {
+                      key: value ? 'id' : '',
+                      value: value ?? '',
+                    },
+                  });
+
+                  dataDestination = dataDestinationOnSearch;
+                }}
               />
             </td>
           </tr>
           <tr>
-            <td width={200}>
-            </td>
+            <td width={200}></td>
             <td className='flex gap-2'>
-            <FormField
+              <FormField
                 control={form.control}
                 name={`destinations.${index}.restricted_area`}
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                    <Checkbox
+                      <Checkbox
                         checked={destination.restricted_area}
                         onCheckedChange={(value) => {
-                            updateDestination(index, {
-                                ...destination,
-                                restricted_area: value,
-                            });
+                          updateDestination(index, {
+                            ...destination,
+                            restricted_area: value,
+                          });
                         }}
-                    />
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            Restricted Area
+              Restricted Area
             </td>
           </tr>
           <tr>
@@ -381,7 +447,7 @@ export function BussinessDestinationForm({
             <td width={200}>
               Bussines Trip Date<span className='text-red-600'>*</span>
             </td>
-            <td className='flex space-x-2 items-center'>
+            <td className='flex items-center space-x-2'>
               <FormField
                 control={form.control}
                 name={`destinations.${index}.business_trip_start_date`}
@@ -395,23 +461,23 @@ export function BussinessDestinationForm({
                         // }}
                         modifiers={modifiers}
                         onDayClick={(day, modifiers) => {
-                            if (modifiers.selected) {
-                                handleDateStartChange(undefined, index);
-                                setSelectedDateRemove(undefined);
-                                updateDestination(index, {
-                                    ...destination,
-                                    business_trip_start_date: undefined,
-                                    business_trip_end_date: undefined,
-                                });
-                            } else {
-                                handleDateStartChange(day, index);
-                                setSelectedDateRemove(day);
-                                updateDestination(index, {
-                                    ...destination,
-                                    business_trip_start_date: day,
-                                    business_trip_end_date: day,
-                                });
-                            }
+                          if (modifiers.selected) {
+                            handleDateStartChange(undefined, index);
+                            setSelectedDateRemove(undefined);
+                            updateDestination(index, {
+                              ...destination,
+                              business_trip_start_date: undefined,
+                              business_trip_end_date: undefined,
+                            });
+                          } else {
+                            handleDateStartChange(day, index);
+                            setSelectedDateRemove(day);
+                            updateDestination(index, {
+                              ...destination,
+                              business_trip_start_date: day,
+                              business_trip_end_date: day,
+                            });
+                          }
                         }}
                         // disabled={false}
                         disabledDays={selectedDates}
@@ -436,21 +502,21 @@ export function BussinessDestinationForm({
                         // }}
                         modifiers={modifiers}
                         onDayClick={(day, modifiers) => {
-                            if (modifiers.selected) {
-                                handleDateEndChange(undefined, index);
-                                setSelectedDateRemove(undefined);
-                                updateDestination(index, {
-                                    ...destination,
-                                    business_trip_end_date: undefined,
-                                });
-                            } else {
-                                handleDateEndChange(day, index);
-                                setSelectedDateRemove(day);
-                                updateDestination(index, {
-                                    ...destination,
-                                    business_trip_end_date: day,
-                                });
-                            }
+                          if (modifiers.selected) {
+                            handleDateEndChange(undefined, index);
+                            setSelectedDateRemove(undefined);
+                            updateDestination(index, {
+                              ...destination,
+                              business_trip_end_date: undefined,
+                            });
+                          } else {
+                            handleDateEndChange(day, index);
+                            setSelectedDateRemove(day);
+                            updateDestination(index, {
+                              ...destination,
+                              business_trip_end_date: day,
+                            });
+                          }
                         }}
                         disabled={false}
                         disabledDays={selectedDates}
@@ -488,7 +554,7 @@ export function BussinessDestinationForm({
           type={type}
           btClone={btClone}
         />
-        <table className='text-xs mt-4 reimburse-form-detail font-thin'>
+        <table className='mt-4 text-xs font-thin reimburse-form-detail'>
           <tr>
             <td className='text-sm'>Detail Bussines Trip Allowance:</td>
             <td></td>

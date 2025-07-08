@@ -1,20 +1,13 @@
-import DataGridComponent from '@/components/commons/DataGrid';
-import MainLayout from '@/Pages/Layouts/MainLayout';
+import { BusinessTripType, UserModel, columns } from './models/models';
 import React, { ReactNode } from 'react';
 
-import { CustomDialog } from '@/components/commons/CustomDialog';
-import { BusinessTripType, columns, UserModel } from './models/models';
-
-import {
-  DELET_API,
-  GET_LIST_BUSINESS_TRIP_DECLARATION,
-} from '@/endpoint/business-trip-declaration/api';
-import {
-  CLONE_PAGE_BUSINESS_TRIP_DECLARATION,
-  DETAIL_PAGE_BUSINESS_TRIP_DECLARATION,
-} from '@/endpoint/business-trip-declaration/page';
-import { PurposeTypeModel } from '../PurposeType/models/models';
 import { BussinessTripFormV1 } from './components/BussinessTripFormV1';
+import { CustomDialog } from '@/components/commons/CustomDialog';
+import { DETAIL_PAGE_BUSINESS_TRIP_DECLARATION, PRINT_PAGE_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/page';
+import DataGridComponent from '@/components/commons/DataGrid';
+import { GET_LIST_BUSINESS_TRIP_DECLARATION } from '@/endpoint/business-trip-declaration/api';
+import MainLayout from '@/Pages/Layouts/MainLayout';
+import { PurposeTypeModel } from '../PurposeType/models/models';
 
 interface propsType {
   listPurposeType: PurposeTypeModel[];
@@ -25,7 +18,10 @@ const roleAkses = 'business trip declaration';
 export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) => {
   const [openForm, setOpenForm] = React.useState<boolean>(false);
 
-  const [businessTripForm, setBusinessTripForm] = React.useState({
+  const [businessTripForm, setBusinessTripForm] = React.useState<{
+    type: BusinessTripType;
+    id: string | undefined;
+  }>({
     type: BusinessTripType.create,
     id: undefined,
   });
@@ -33,13 +29,13 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
   function openFormHandler() {
     setBusinessTripForm({
       type: BusinessTripType.create,
-      id: null,
+      id: undefined,
     });
     setOpenForm(!openForm);
   }
   return (
     <>
-      <div className='flex md:mb-4 mb-2 w-full justify-end'>
+      <div className='flex justify-end w-full mb-2 md:mb-4'>
         {/* <Button onClick={openFormHandler}>
           <PlusIcon />
         </Button> */}
@@ -63,6 +59,7 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         }}
         onCreate={openFormHandler}
         columns={columns}
+        // isClone={true}
         // onEdit={(value) => {
         //   setBusinessTripForm({
         //     type: BusinessTripType.edit,
@@ -80,7 +77,7 @@ export const Index = ({ listPurposeType, users, listBusinessTrip }: propsType) =
         url={{
           url: GET_LIST_BUSINESS_TRIP_DECLARATION,
           detailUrl: DETAIL_PAGE_BUSINESS_TRIP_DECLARATION,
-          clone: CLONE_PAGE_BUSINESS_TRIP_DECLARATION,
+          printUrl: PRINT_PAGE_BUSINESS_TRIP_DECLARATION,
           cancelApproval: 'trip_declaration',
         }}
         labelFilter='search'

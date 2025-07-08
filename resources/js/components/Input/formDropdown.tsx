@@ -76,6 +76,7 @@ const FormAutocomplete = <T,>({
                 }}
                 sx={{ ...style, pointerEvents: 'auto !important', cursor: 'auto !important' }}
                 disabled={disabled}
+                disablePortal
                 loading={loading}
                 onInputChange={(_, newInputValue) => {
                   if (onSearch) {
@@ -111,7 +112,7 @@ const FormAutocomplete = <T,>({
         />
       </div>
       <div className='flex items-baseline flex-wrap lg:flex-nowrap gap-2.5'>
-        <label className='form-label max-w-32'>{''}</label>
+        {/* <label className='form-label max-w-32'>{''}</label> */}
         {errors[fieldName] && (
           <FormHelperText error>{String(errors[fieldName]?.message)}</FormHelperText>
         )}

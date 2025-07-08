@@ -1,3 +1,4 @@
+import DropdownBusinessPartner from '../components/dropdownBusinessPartner';
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
 
 export const formModel: Array<FormFieldModel<any>> = [
@@ -72,10 +73,25 @@ export const formModel: Array<FormFieldModel<any>> = [
     },
   },
   {
+    fieldCustome: true,
+    fieldCustomeValue: <DropdownBusinessPartner />,
+  },
+  //   {
+  //     type: 'select',
+  //     name: 'master_business_partner_id',
+  //     label: 'Business Partner',
+  //     placeholder: 'Select Business Partner',
+  //     options: [],
+  //     required: true,
+  //     style: {
+  //       width: '63.5rem',
+  //     },
+  //   },
+  {
     type: 'select',
-    name: 'master_business_partner_id',
-    label: 'Employee',
-    placeholder: 'Select Employee',
+    name: 'role_id',
+    label: 'Role',
+    placeholder: 'Select Role',
     options: [],
     required: true,
     style: {
@@ -83,15 +99,25 @@ export const formModel: Array<FormFieldModel<any>> = [
     },
   },
   {
-    type: 'select',
-    name: 'role_id',
-    label: 'Role',
-    placeholder: 'Select Employee',
-    options: [],
+    type: 'input',
+    name: 'user_id_mein_attandace',
+    label: 'User ID',
+    placeholder: 'Enter your ID',
     required: true,
-    style: {
-      width: '63.5rem',
-    },
+  },
+  {
+    type: 'input',
+    name: 'sensor_id_mein_attadance',
+    label: 'Sensor ID',
+    placeholder: 'Enter your Sensor ID',
+    required: true,
+  },
+  {
+    type: 'input',
+    name: 'sn_mein_attandance',
+    label: 'SN',
+    placeholder: 'Enter your SN',
+    required: true,
   },
   {
     type: 'switch',

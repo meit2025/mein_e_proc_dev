@@ -22,12 +22,12 @@ class PurposeTypeSeeder extends Seeder
             [
                 'code' => 'DOMESTIC1DAYSECTORA',
                 'name' => '1 Day sector A (non Jawa and Madura)'
-                
+
             ],
             [
                 'code' => 'DOMESTIC1DAYSECTORB',
                 'name' => '1 Day sector B (Jawa Madura)'
-               
+
             ]
         ];
 
@@ -42,7 +42,7 @@ class PurposeTypeSeeder extends Seeder
                     'attedance_status' => 'BST'
                 ]);
 
-              
+
                 PurposeTypeAllowance::create([
                     'purpose_type_id' => $purposeType->id,
                     'allowance_items_id' => 1
@@ -52,7 +52,6 @@ class PurposeTypeSeeder extends Seeder
             DB::commit();
         }
         catch(\Exception $e) {
-            dd($e);
             DB::rollBack();
         }
 

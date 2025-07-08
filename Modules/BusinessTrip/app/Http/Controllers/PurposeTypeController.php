@@ -95,7 +95,15 @@ class PurposeTypeController extends Controller
 
         $query =  PurposeType::query()->with(['listAllowance']);
 
-
+        if ($request->search) {
+            $query = $query->where('code', 'ilike', '%' . $request->search . '%')
+                ->orWhere('name', 'ilike', '%' . $request->search . '%')
+                ->orWhereHas('listAllowance', function ($query) use ($request) {
+                    $query->whereHas('allowanceItem', function ($query) use ($request) {
+                        $query->where('name', 'ilike', '%' . $request->search . '%');
+                    });
+                });
+        }
 
         $perPage = $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'id');
@@ -129,7 +137,7 @@ class PurposeTypeController extends Controller
     {
 
         $rules = [
-            'code' => 'required',
+            'code' => 'required:unique',
             'name' => 'required',
             'allowances.*' => 'required',
             'attedance_status' => 'required'
@@ -168,9 +176,9 @@ class PurposeTypeController extends Controller
 
             return $this->successResponse($purpose, 'Successfully creeted Destination');
         } catch (\Exception $e) {
-            dd($e);
 
             DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 500);
         }
     }
 
@@ -216,9 +224,9 @@ class PurposeTypeController extends Controller
 
             return $this->successResponse($purpose, 'Successfully update Destination');
         } catch (\Exception $e) {
-            dd($e);
 
             DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 500);
         }
     }
 
@@ -301,5 +309,13 @@ class PurposeTypeController extends Controller
 
             return $this->errorResponse($e);
         }
+    }
+
+    function checkUniqueCode($code) {
+        $data = PurposeType::where('code', $code)->first();
+        if (!is_null($data)) {
+            return response()->json(['msg'=>'already']);
+        }
+        return response()->json(['msg'=>'ready']);
     }
 }

@@ -2,6 +2,7 @@ import { CustomStatus } from '@/components/commons/CustomStatus';
 import { DETAIL_PAGE_PR } from '@/endpoint/purchaseRequisition/page';
 import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
 import { Link } from '@inertiajs/react';
+import { Box, Typography } from '@mui/material';
 import { GridColDef } from '@mui/x-data-grid';
 import moment from 'moment';
 export const columns: GridColDef[] = [
@@ -136,9 +137,27 @@ export const columns: GridColDef[] = [
     },
   },
 ];
-
+//
 export const columnsItem: GridColDef[] = [
   { field: 'qty', headerName: 'QTY', width: 200, filterable: true },
+  {
+    field: 'account_assignment_categories',
+    headerName: 'Account Assignment Categories',
+    width: 200,
+    filterable: false,
+  },
+  {
+    field: 'material_number',
+    headerName: 'Material Number',
+    width: 200,
+    filterable: false,
+  },
+  {
+    field: 'material_number_description',
+    headerName: 'Material Number Description',
+    width: 200,
+    filterable: false,
+  },
   {
     field: 'unit_price',
     headerName: 'Unit Price ',
@@ -151,15 +170,19 @@ export const columnsItem: GridColDef[] = [
     width: 200,
     filterable: false,
     renderCell: (params) => {
-      return formatRupiah(params.row.total_amount);
+      return formatRupiah(params.row.total_amount, false);
     },
   },
   {
-    field: 'account_assignment_categories',
-    headerName: 'Account Assignment Categories',
+    field: 'total_amount_conversion',
+    headerName: 'Total Amount conversion ',
     width: 200,
     filterable: false,
+    renderCell: (params) => {
+      return formatRupiah(params.row.total_amount_conversion, false);
+    },
   },
+
   {
     field: 'cost_center',
     headerName: 'Cost Center',
@@ -172,12 +195,7 @@ export const columnsItem: GridColDef[] = [
     width: 200,
     filterable: false,
   },
-  {
-    field: 'material_number',
-    headerName: 'Material Number',
-    width: 200,
-    filterable: false,
-  },
+
   {
     field: 'uom',
     headerName: 'UOM',

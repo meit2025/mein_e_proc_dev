@@ -14,6 +14,7 @@ use Modules\Approval\Models\ApprovalTrackingNumberChoose;
 use Modules\Approval\Models\ApprovalTrackingNumberChooseRoute;
 use Modules\Approval\Models\SettingApproval;
 use Modules\Master\Models\DocumentType;
+use Modules\Master\Models\ExchangeRate;
 use Modules\Master\Models\PurchasingGroup;
 
 class CheckApproval
@@ -23,9 +24,9 @@ class CheckApproval
     {
         $query = ApprovalPr::with('approvalRoute.user.divisions')
             ->where('document_type_id', $documentTypeId)
-            ->where('purchasing_group_id', $purchasingGroupId)
-            ->where('master_position_id', $positionId)
-            ->where('master_division_id', $divisionId);
+            ->where('purchasing_group_id', $purchasingGroupId);
+        // ->where('master_position_id', $positionId)
+        // ->where('master_division_id', $divisionId);
 
         if ($trackingNumberId) {
             $query->where('master_tracking_number_id', $trackingNumberId);
@@ -66,6 +67,10 @@ class CheckApproval
 
             // Define the conditions
             $total = (int)$request->value == 0 ? (int)$request->total_all_amount : (int)$request->value;
+            if ($request->currency_from && $request->currency_from != 'IDR') {
+                $exchangeRate = ExchangeRate::getExchangeRate($request->currency_from ?? 'IDR', 'IDR', $total);
+                $total = (int)$exchangeRate;
+            }
             $conditions = [
                 fn($query) => $query->where('condition_type', '=', '>')
                     ->whereRaw('? > value', [$total]),
@@ -136,7 +141,6 @@ class CheckApproval
         // Implement Reim logic if necessary
         try {
             //code...
-            // dd($request);
 
             if (isset($request->user_id)) {
                 $getUserId = User::where('id', $request->user_id)->first();
@@ -148,11 +152,20 @@ class CheckApproval
                 throw new Exception('Username not found');
             }
 
+
             // get approval
-            $approval = ApprovalToUser::where('user_id', $getUserId->id)->first();
+            $approval = ApprovalToUser::where('user_id', $getUserId->id);
+            if ($type == 'TRIP' || $type == 'TRIP_DECLARATION') {
+                $approval->where('is_bt', true);
+            } else {
+                $approval->where('is_reim', true);
+            }
+            $approval = $approval->first();
             if (!$approval) {
                 throw new Exception('Approval not found');
             }
+
+            // get approval route
 
             // get Approval route
             $approvalRoute = ApprovalRoute::where('id', $approval->approval_route_id)->first(); // get approval route
@@ -194,6 +207,7 @@ class CheckApproval
                 ->orderBy('approval_route_users.id', 'asc')
                 ->get()->toArray();
 
+
             if ($approvalRoute->is_hr) {
                 $hrUser = [
                     'id' => $dataUser->id,
@@ -211,28 +225,86 @@ class CheckApproval
             }
 
 
-            // chcek condition approval
-            $ApprovalCondition = ApprovalRoute::where('nominal', '<=', $request->value)
-                ->where('nominal', '!=', 0)
-                ->orderBy('nominal', 'desc')
-                ->first();
 
-            if ($ApprovalCondition) {
+
+            $baseQuery = ApprovalRoute::where('is_conditional', true);
+            if ($type == 'TRIP' || $type == 'TRIP_DECLARATION') {
+                $baseQuery->where('is_bt', true);
+            } else {
+                $baseQuery->where('is_reim', true);
+            }
+
+            // nominal approval
+            $ApprovalConditionNominal = (clone $baseQuery)->where('nominal', '<=', $request->value)
+                ->where('type_approval_conditional', 'nominal')->first();
+
+            if ($ApprovalConditionNominal) {
                 $getApprovalConditional = ApprovalRouteUsers::select('users.id', 'users.name', 'master_divisions.name as division_name')
                     ->join('users', 'approval_route_users.user_id', '=', 'users.id')
                     ->leftJoin('master_divisions', 'master_divisions.id', '=', 'users.division_id')
-                    ->where('approval_route_id', $ApprovalCondition->id)
+                    ->where('approval_route_id', $ApprovalConditionNominal->id)
                     ->orderBy('approval_route_users.id', 'asc')
                     ->get()->toArray();
 
                 $getApproval = array_merge($getApproval, $getApprovalConditional);
             }
 
+            if ($type == 'TRIP' || $type == 'TRIP_DECLARATION') {
+                // nominal day
+                if ($request->day) {
+                    try {
+                        //code...
+                        $ApprovalConditionday = (clone $baseQuery)->where('day', '<=', $request->day)
+                            ->where('type_approval_conditional', 'day')->first();
+
+                        if ($ApprovalConditionday) {
+                            $getApprovalDay = ApprovalRouteUsers::select('users.id', 'users.name', 'master_divisions.name as division_name')
+                                ->join('users', 'approval_route_users.user_id', '=', 'users.id')
+                                ->leftJoin('master_divisions', 'master_divisions.id', '=', 'users.division_id')
+                                ->where('approval_route_id', $ApprovalConditionday->id)
+                                ->orderBy('approval_route_users.id', 'asc')
+                                ->get()->toArray();
+
+                            $getApproval = array_merge($getApproval, $getApprovalDay);
+                        }
+                    } catch (\Throwable $th) {
+                        //throw $th;
+                        throw new Exception("Please Check Your Date Detail");
+                    }
+                }
+
+
+                // restricted_area
+                if ($request->is_restricted_area == 'true' || $request->is_restricted_area === true || $request->is_restricted_area === 1) {
+                    $ApprovalConditionarea = (clone $baseQuery)->where('is_restricted_area', '=', true)
+                        ->where('type_approval_conditional', 'restricted_area')->first();
+
+                    if ($ApprovalConditionarea) {
+                        $getApprovalarea = ApprovalRouteUsers::select('users.id', 'users.name', 'master_divisions.name as division_name')
+                            ->join('users', 'approval_route_users.user_id', '=', 'users.id')
+                            ->leftJoin('master_divisions', 'master_divisions.id', '=', 'users.division_id')
+                            ->where('approval_route_id', $ApprovalConditionarea->id)
+                            ->orderBy('approval_route_users.id', 'asc')
+                            ->get()->toArray();
+
+                        $getApproval = array_merge($getApproval, $getApprovalarea);
+                    }
+                }
+            }
+
+            $getApproval = collect($getApproval)->unique(function ($item) {
+                return $item['id'];
+            })->values();
+
             if ($save) {
+                // delete old approval
+                Approval::where('document_id', $idDocument)
+                    ->where('document_name', $type)->delete();
+
                 foreach ($getApproval as $key =>  $approvalRoute) {
                     Approval::create(
                         [
-                            'user_id' => $approvalRoute['id'],
+                            'user_id' => $approvalRoute->id ?? $approvalRoute['id'],
                             'is_status' => false,
                             'message' => '',
                             'document_id' => $idDocument,

@@ -9,7 +9,7 @@ export const columns: GridColDef[] = [
     filterable: true,
     renderCell: (params) => (
       <span
-        onClick={() => handlePrintDetail(params.row.id)}
+        onClick={() => goToDetail(params.row.id)}
         style={{ color: '#1976d2', cursor: 'pointer', textDecoration: 'underline' }}
       >
         {params.value}
@@ -36,12 +36,14 @@ export const columns: GridColDef[] = [
       );
     },
   },
+  { field: 'pr_number', headerName: 'PR Number', width: 200, filterable: true },
+  { field: 'status_pr_number', headerName: 'Status PR Number', width: 200, filterable: true },
   { field: 'total_destination', headerName: 'Total Destinations', width: 200, filterable: true },
 ];
 
 // Fungsi untuk menangani aksi cetak detail
-const handlePrintDetail = (id: string) => {
-  const printUrl = `/business-trip/print/${id}`;
+const goToDetail = (id: string) => {
+  const printUrl = `/business-trip/detail-page/${id}`;
   window.open(printUrl, '_blank');
 };
 

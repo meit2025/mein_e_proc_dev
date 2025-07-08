@@ -1,11 +1,31 @@
 // Variables
 
 // If you want to override variables do it here
-@import 'variables';
-@import 'custom';
+// @import 'variables';
+// @import 'custom';
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: $primary-color;
+  background-color: #3490dc;
   pointer-events: auto !important;
+}
+
+.busy-overlay {
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0.5;
+  z-index: 9999999;
+  background-color: white;
+}
+
+.busy-overlay div.spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

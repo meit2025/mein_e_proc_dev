@@ -62,10 +62,7 @@ export const formModelEdit: Array<FormFieldModel<any>> = [
   },
 
   {
-    conditional: true,
     disabled: true,
-    valueConditional: 'ZENT',
-    parameterConditional: 'document_type',
     type: 'textarea',
     name: 'entertainment.header_not',
     label: 'Header Note',
@@ -201,6 +198,37 @@ export const formModelEdit: Array<FormFieldModel<any>> = [
     required: true,
     texttype: 'number',
     placeholder: 'enter your Total Vendor',
+  },
+  {
+    disabled: true,
+    type: 'select',
+    name: 'currency_from',
+    label: 'Currency',
+    required: true,
+    options: [],
+    style: {
+      width: '58.3rem',
+    },
+  },
+  {
+    disabled: true,
+    type: 'switch',
+    name: 'is_conversion_currency',
+    label: 'Currency Conversion',
+  },
+  {
+    disabled: true,
+    conditional: true,
+    valueConditional: true,
+    parameterConditional: 'is_conversion_currency',
+    type: 'select',
+    name: 'currency_to',
+    label: 'Currency Conversion',
+    options: [],
+    required: true,
+    style: {
+      width: '58.5rem',
+    },
   },
   {
     fieldCustome: true,

@@ -73,7 +73,7 @@ class MasterTypeReimburseController extends Controller
             })
             ->pluck('user_id')
             ->toArray();
-            
+
             $data = $reimburseType->grade_option == 'all' ? User::get() : User::whereIn('id', $listUserInGrade)->get() ;
             return $this->successResponse($data);
         } catch (\Exception $e) {
@@ -87,7 +87,7 @@ class MasterTypeReimburseController extends Controller
     public function index()
     {
         try {
-            $listGrades             = BusinessTripGrade::select('id', 'grade')->get();
+            $listGrades = BusinessTripGrade::select('id', 'grade')->get();
 
             return Inertia::render(
                 'Master/MasterReimburseType/Index',
@@ -132,9 +132,9 @@ class MasterTypeReimburseController extends Controller
         try {
             $validatedData  = $validator->validated();
             $validatedData['family_status'] = $validatedData['is_employee'] == true ? null : $validatedData['family_status'];
-            
+
             $createData     = MasterTypeReimburse::create($validatedData);
-            
+
             if ($createData) {
                 $request->grades = array_map(function ($grade) use ($createData) {
                     return [
@@ -145,7 +145,7 @@ class MasterTypeReimburseController extends Controller
                 }, $request->grades);
 
                 MasterTypeReimburseGrades::insert($request->grades);
-                
+
                 dispatch(new InsertBatchUserAssignmentRimburseType($createData->id));
             }
             DB::commit();
@@ -244,7 +244,7 @@ class MasterTypeReimburseController extends Controller
             $dataReimburseType = MasterTypeReimburse::find($id);
             $checkReimburse = Reimburse::where('reimburse_type', $dataReimburseType->code)->first();
             if (!empty($checkReimburse)) return $this->errorResponse('Failed, Cannot delete this data because it is related to reimburse request data.');
-            
+
             MasterTypeReimburseGrades::where('reimburse_type_id', $id)->delete();
             $dataReimburseType->delete();
 
@@ -256,5 +256,16 @@ class MasterTypeReimburseController extends Controller
             if ($e instanceof \PDOException && $e->getCode() == '23503') return $this->errorResponse('Failed, Cannot delete this data because it is related to other data.');
             return $this->errorResponse($e);
         }
+    }
+
+    public function dropdownList(Request $request)
+    {
+        $data = MasterTypeReimburse::selectRaw("name || ' (' || code || ')' as label, code as value");
+        if ($request->search) {
+            $data = $data->where('name', 'ilike', '%' . $request->search . '%')->orWhere('code', 'ilike', '%' . $request->search . '%');
+        }
+
+        $data = $data->limit(50)->get();
+        return $this->successResponse($data);
     }
 }
