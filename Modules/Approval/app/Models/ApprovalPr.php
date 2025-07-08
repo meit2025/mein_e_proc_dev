@@ -38,9 +38,9 @@ class ApprovalPr extends Model
     //     // return ApprovalPrFactory::new();
     // }
 
-    public function approvalRoute()
+    public function approvalRoute($orderBy = 'id', $direction = 'asc')
     {
-        return $this->hasMany(ApprovalPrRoute::class);
+        return $this->hasMany(ApprovalPrRoute::class)->orderBy($orderBy, $direction);
     }
     public function documentType()
     {

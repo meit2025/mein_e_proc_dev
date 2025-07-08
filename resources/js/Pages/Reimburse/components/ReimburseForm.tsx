@@ -200,12 +200,24 @@ export const ReimburseForm: React.FC<Props> = ({
               .refine((file) => file.size <= MAX_FILE_SIZE, {
                 message: 'File size must be less than 1MB',
               }),
-          )
-          .min(type === ReimburseFormType.create ? 1 : 0, 'Attachment is required'),
+          ),
         savedAttachment: z.array(z.any()).optional().nullable(),
-        // url: z.string().optional(),
-      }),
-    ),
+      }).refine((data) => {
+        const isClone = type === ReimburseFormType.clone;
+        const isCreate = type === ReimburseFormType.create;
+        const hasSaved = Array.isArray(data.savedAttachment) && data.savedAttachment.length > 0;
+        const hasNewAttachment = Array.isArray(data.attachment) && data.attachment.length > 0;
+        
+        if ((isCreate && !hasNewAttachment) || (isClone && !hasSaved && !hasNewAttachment)) {
+          return false;
+        }
+    
+        return true;
+      }, {
+        message: 'Attachment is required',
+        path: ['attachment'],
+      })
+    )    
   });
 
   useEffect(() => {
@@ -810,7 +822,7 @@ export const ReimburseForm: React.FC<Props> = ({
               checkValidation(errors);
             })}
           >
-            <table className='w-full mt-4 text-xs font-thin reimburse-form-table'>
+            <table className='mt-4 w-full text-xs font-thin reimburse-form-table'>
               <tbody>
                 <tr>
                   <td className='w-1/4'>Request Status</td>
@@ -1004,7 +1016,7 @@ export const ReimburseForm: React.FC<Props> = ({
             <Separator className='my-4' />
 
             <Tabs value={activeTab} onValueChange={handleTabChange} className='w-full'>
-              <TabsList className={'flex items-center justify-start space-x-4'}>
+              <TabsList className={'flex justify-start items-center space-x-4'}>
                 {' '}
                 {Array.from({ length: Number(form.watch('formCount')) || 1 }).map((_, index) => (
                   <TabsTrigger key={index} value={`form${index + 1}`}>
@@ -1476,7 +1488,7 @@ export const ReimburseForm: React.FC<Props> = ({
 
                           <tr>
                             <td className='w-1/4'>Reimburse Cost</td>
-                            <td className='grid w-full grid-cols-7 gap-x-4'>
+                            <td className='grid grid-cols-7 gap-x-4 w-full'>
                               <div className='col-span-3'>
                                 <FormField
                                   control={form.control}
@@ -1595,12 +1607,12 @@ export const ReimburseForm: React.FC<Props> = ({
                                 name={`forms.${index}.attachment`}
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel className='mb-1 text-xs text-gray-500 font-extralight'>
+                                    <FormLabel className='mb-1 text-xs font-extralight text-gray-500'>
                                       Max File: 1000KB, Extension : jpg,jpeg,png,pdf,heic
                                     </FormLabel>
                                     <FormControl>
                                       <input
-                                        className='flex w-full px-3 py-1 text-xs transition-colors bg-transparent border rounded-md shadow-sm h-9 border-input file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
+                                        className='flex px-3 py-1 w-full h-9 text-xs bg-transparent rounded-md border shadow-sm transition-colors border-input file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
                                         type='file'
                                         multiple
                                         accept='image/*,.pdf,.heic'
@@ -1629,7 +1641,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                     {formValue.attachment.map((file: File, fileIndex: number) => (
                                       <li
                                         key={fileIndex}
-                                        className='flex items-center justify-between'
+                                        className='flex justify-between items-center'
                                       >
                                         <span className='text-xs'>{file.name}</span>
                                         <button
@@ -1658,7 +1670,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                       {formValue.savedAttachment.map((file: Object, fileIndex: number) => (
                                         <li
                                           key={fileIndex}
-                                          className='flex items-center justify-between'
+                                          className='flex justify-between items-center'
                                         >
                                           <span className='text-xs'>{file.url}</span>
                                           <button
