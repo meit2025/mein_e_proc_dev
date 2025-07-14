@@ -162,6 +162,7 @@ export const ReimburseForm: React.FC<Props> = ({
   const ACCEPTED_FILE_TYPES = [
     'image/jpeg',
     'image/png',
+    'image/svg+xml',
     'application/pdf',
     'image/heic',
     'image/heif',
@@ -188,14 +189,14 @@ export const ReimburseForm: React.FC<Props> = ({
         purchase_requisition_unit_of_measure: z.string().min(1, 'uom required'),
         purchasing_group: z.string().min(1, 'Purchasing Group required'),
         type: z.any(),
-        item_delivery_data: z.date(),
-        claim_date: z.date(),
+        item_delivery_data: z.date({ required_error: 'Receipt date is required' }),
+        claim_date: z.date().min(new Date(new Date().setHours(0,0,0,0)), 'Claim date must be today or greater'),
         attachment: z
           .array(
             z
               .instanceof(File)
               .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
-                message: 'File type must be JPG, JPEG, PNG, HEIC, or PDF',
+                message: 'File type must be JPG, JPEG, PNG, SVG, HEIC, or PDF',
               })
               .refine((file) => file.size <= MAX_FILE_SIZE, {
                 message: 'File size must be less than 1MB',
@@ -607,8 +608,8 @@ export const ReimburseForm: React.FC<Props> = ({
         // update format date
         values.forms = values.forms.map((form, formIndex) => ({
           ...form,
-          claim_date: moment(form.claim_date).toDate(),
-          item_delivery_data: moment(form.item_delivery_data).toDate(),
+          claim_date: moment(form.claim_date).format('YYYY-MM-DD'),
+          item_delivery_data: moment(form.item_delivery_data).format('YYYY-MM-DD'),
           remaining_balance_when_request: Number(detailLimit[formIndex]?.balance ?? 0),
         }));
       }
@@ -1183,7 +1184,7 @@ export const ReimburseForm: React.FC<Props> = ({
                                           <SelectValue placeholder='-' />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          {dataFamily[index]?.map((family) => (
+                                          {dataFamily[index]?.map((family: any) => (
                                             <SelectItem
                                               key={family.value}
                                               value={family.value.toString()}
@@ -1213,12 +1214,12 @@ export const ReimburseForm: React.FC<Props> = ({
                                 disabled={type === ReimburseFormType.edit}
                                 placeholder={'Puchasing Group'}
                                 classNames='mt-2 w-full'
-                                onSearch={(search) => {
+                                onSearch={async (search) => {
                                   const isLabelMatch = dataPurchasingGroup?.some(
-                                    (option) => option.label === search,
+                                    (option: any) => option.label === search,
                                   );
                                   if (search.length > 0 && !isLabelMatch) {
-                                    getPurchasingGroup(search, {
+                                    await getPurchasingGroup(search, {
                                       name: 'purchasing_group_desc',
                                       id: 'id',
                                       tabel: 'purchasing_groups',
@@ -1226,13 +1227,14 @@ export const ReimburseForm: React.FC<Props> = ({
                                       search: search,
                                     });
                                   } else if (search.length == 0 && !isLabelMatch) {
-                                    getPurchasingGroup('', {
+                                    await getPurchasingGroup('', {
                                       name: 'purchasing_group_desc',
                                       id: 'id',
                                       tabel: 'purchasing_groups',
                                       idType: 'string',
                                     });
                                   }
+                                  return [];
                                 }}
                                 onChangeOutside={(data) => {
                                   if (data) {
@@ -1406,28 +1408,12 @@ export const ReimburseForm: React.FC<Props> = ({
                                             ? field.value
                                             : new Date(field.value)
                                         }
-                                        minDate={new Date()}
                                         onDateChange={(date) => {
-                                          const selectedDate = moment(date).format('YYYY-MM-DD');
-                                          if (
-                                            selectedDate >= moment(new Date()).format('YYYY-MM-DD')
-                                          ) {
-                                            field.onChange(date);
+                                          field.onChange(date);
                                             updateForm(index, {
                                               ...formValue,
                                               item_delivery_data: date,
                                             });
-                                          } else {
-                                            field.onChange(field.value);
-                                            updateForm(index, {
-                                              ...formValue,
-                                              item_delivery_data: field.value,
-                                            });
-                                            showToast(
-                                              'Receipt date cannot be less than today',
-                                              'error',
-                                            );
-                                          }
                                         }}
                                       />
                                     </FormControl>
@@ -1454,28 +1440,13 @@ export const ReimburseForm: React.FC<Props> = ({
                                             ? field.value
                                             : new Date(field.value)
                                         }
-                                        minDate={new Date()}
+                                        disabledDays={[{ before: new Date() }]}
                                         onDateChange={(date) => {
-                                          const selectedDate = moment(date).format('YYYY-MM-DD');
-                                          if (
-                                            selectedDate >= moment(new Date()).format('YYYY-MM-DD')
-                                          ) {
-                                            field.onChange(date);
-                                            updateForm(index, {
-                                              ...formValue,
-                                              claim_date: date,
-                                            });
-                                          } else {
-                                            field.onChange(field.value);
-                                            updateForm(index, {
-                                              ...formValue,
-                                              claim_date: field.value,
-                                            });
-                                            showToast(
-                                              'Claim date cannot be less than today',
-                                              'error',
-                                            );
-                                          }
+                                          field.onChange(date);
+                                          updateForm(index, {
+                                            ...formValue,
+                                            claim_date: date,
+                                          });
                                         }}
                                       />
                                     </FormControl>
