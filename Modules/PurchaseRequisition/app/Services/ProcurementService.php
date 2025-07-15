@@ -68,7 +68,7 @@ class ProcurementService
                 PurchaseRequisition::create($datainsert);
                 $totalAmountDp += $value->total_amount;
             }
-            
+
             $cashData = CashAdvancePurchases::where('purchase_id', $id)->first();
             if ($cashData) {
                 $value->total_amount = $totalAmountDp;
@@ -132,8 +132,8 @@ class ProcurementService
 
     private function preparePurchaseRequisitionData($procurement, $vendor, $item, $businessPartner, $reqno, $entertainment, $inx, $settings, $attachmnet)
     {
-        $formattedDate = Carbon::parse($procurement->created_at)->format('Y-m-d');
-        $delivery_date = Carbon::parse($procurement->delivery_date)->format('Y-m-d');
+        $formattedDate = Carbon::parse($procurement->created_at)->format('Y.m.d');
+        $delivery_date = Carbon::parse($procurement->delivery_date)->format('Y.m.d');
 
 
         return [
@@ -167,12 +167,13 @@ class ProcurementService
             'order_number' => $item->order_number, // AUFNR
             'asset_subnumber' => $item->sub_asset_number,  // anln2
             'main_asset_number' => $item->asset_number,  // anln1
-            'tanggal_entertainment' => $entertainment->tanggal ?? '',  // b81
+            'tanggal_entertainment' => str_replace('-', '.', $entertainment->tanggal ?? ''),  // b81
             'tempat_entertainment' => $entertainment->tempat ?? '',  // b83
             'alamat_entertainment' => $entertainment->alamat ?? '',
             'jenis_entertainment' => $entertainment->jenis ?? '',
             'nama_entertainment' => $entertainment->nama ?? '',
             'posisi_entertainment' => $entertainment->posisi ?? '',
+            'nama_perusahaan' => $entertainment->nama_perusahaan ?? '',
             'jenis_usaha_entertainment' => $entertainment->jenis_usaha ?? '',
             'jenis_kegiatan_entertainment' => $entertainment->jenis_kegiatan ?? '', // b89
             'header_not' => $entertainment->header_not ?? '', // b01
