@@ -82,7 +82,7 @@ class BtPOService
         $PurchasingOrganization,
     ) {
         if ($BusinessTrip->created_at) {
-            $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y-m-d');
+            $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y.m.d');
         }
         $data = [
             'purchase_id' => $BusinessTrip->purchase_id,

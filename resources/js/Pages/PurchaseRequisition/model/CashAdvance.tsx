@@ -1,8 +1,9 @@
+import { useContext, useEffect, useState } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
+
 import FormAutocomplete from '@/components/Input/formDropdown';
 import FormInput from '@/components/Input/formInput';
 import FormSwitch from '@/components/Input/formSwitch';
-import { useContext, useEffect, useState } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
 
 const CashAdvance = ({ disable }: { disable: boolean }) => {
   const { getValues, setValue, watch } = useFormContext();
@@ -79,7 +80,7 @@ const CashAdvance = ({ disable }: { disable: boolean }) => {
       {currency_from === 'IDR' && (
         <>
           <FormSwitch
-            fieldLabel='cash Advance'
+            fieldLabel='Down Payment'
             fieldName={'is_cashAdvance'}
             isRequired={false}
             disabled={disable}

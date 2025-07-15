@@ -114,7 +114,7 @@ class BtService
         $settings = $params['settings'];
         $getDestination = $params['getDestination'];
 
-        $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y-m-d');
+        $formattedDate = Carbon::parse($BusinessTrip->created_at)->format('Y.m.d');
         $getAllowanceItem = AllowanceItem::where('id', $item->allowance_item_id)->first();
         if ($getAllowanceItem && $getAllowanceItem->material_number == '') {
             throw new Exception('allowance Item Not set materila number');
