@@ -92,7 +92,8 @@ class RunSendApprovalEmailJob extends Command
                 $arraySendEmail[] = $data;
             }
             if ($approval && $approval->user && $approval->user->email) {
-                Mail::to($approval->user->email)->send(new ApprovalNotificationMail($approval->user, $arraySendEmail));
+
+                Mail::mailer(env("MAIL_MAILER", 'smtp'))->to($approval->user->email)->send(new ApprovalNotificationMail($approval->user, $arraySendEmail));
             } else {
                 $this->info('Approval not found item id ' . $approval->id . ' documentApproval ' . $approval->document_name);
             }
