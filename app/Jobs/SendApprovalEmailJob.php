@@ -67,7 +67,7 @@ class SendApprovalEmailJob implements ShouldQueue
                         try {
                             Log::channel('notification_email')->info('Send email to ' . $approval->user->email);
                             // Kirim email dengan mailable yang sesuai dan queue-kan pengirimannya
-                            Mail::to($approval->user->email)->send(new ApprovalNotificationMail($approval->user, $documentName));
+                            Mail::mailer(env("MAIL_MAILER", 'smtp'))->to($approval->user->email)->send(new ApprovalNotificationMail($approval->user, $documentName));
                         } catch (\Exception $e) {
                             report($e);  // Log jika terjadi kesalahan saat mengirim email
                             Log::channel('notification_email')->info('Failed send email to ' . $approval->user->email);

@@ -96,7 +96,7 @@ class ReimbursementService
                 $validatedData['requester'] = $groupData['requester'];
 
                 $reimburse = Reimburse::create($validatedData);
-                
+
                 if (isset($form['attachment'])) {
                     foreach ($form['attachment'] as $file) {
                         $fileName = time() . '_' . str_replace(' ', '', $file->getClientOriginalName());
@@ -124,7 +124,7 @@ class ReimbursementService
             //     $reimburseGroup = ReimburseGroup::with(['reimburses.reimburseType'])->find($group->id);
             //     $reimburseGroup->notes = '';
 
-            //     Mail::to($getUserApproval->email)->send(new ChangeStatus($getUserApproval, 'Reimbursement', 'Approver', '', null, $reimburseGroup, null, $baseurl));
+            //     Mail::mailer(env("MAIL_MAILER", 'smtp'))->to($getUserApproval->email)->send(new ChangeStatus($getUserApproval, 'Reimbursement', 'Approver', '', null, $reimburseGroup, null, $baseurl));
             // }
 
             // $reim = new ReimburseServices();
@@ -178,11 +178,11 @@ class ReimbursementService
                     return ['error' => $validator->errors()];
                 }
                 $validatedData = $validator->validated();
-                
+
                 $reimburse = Reimburse::find($form['reimburseId']);
                 if ($reimburse) {
                     $reimburse->update($validatedData);
-                    
+
                     if (isset($form['savedAttachment']) && count($form['savedAttachment']) > 0) {
                         $savedAttachmentId = array_column($form['savedAttachment'], 'id');
                         $deletedAttachment = ReimburseAttachment::query()->where('reimburse', $reimburse->id)->whereNotIn('id', $savedAttachmentId);
@@ -199,7 +199,7 @@ class ReimbursementService
                             }
                         }
                     }
-                    
+
                     if (isset($form['attachment'])) {
                         foreach ($form['attachment'] as $file) {
                             $fileName = time() . '_' . str_replace(' ', '', $file->getClientOriginalName());
