@@ -112,8 +112,8 @@ export const formModel: Array<FormFieldModel<any>> = [
     type: 'input',
     required: true,
     name: 'entertainment.jenis',
-    label: 'Type of Entertainment',
-    placeholder: 'Type of Entertainment',
+    label: 'Purpose of Entertainment',
+    placeholder: 'Purpose of Entertainment',
     style: {
       width: '63.5rem',
     },
