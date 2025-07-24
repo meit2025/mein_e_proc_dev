@@ -1,16 +1,17 @@
-import axiosInstance from '@/axiosInstance';
-import { Loading } from '@/components/commons/Loading';
 import {
   WorkflowApprovalDiagramInterface,
   WorkflowApprovalStepInterface,
   WorkflowComponent,
 } from '@/components/commons/WorkflowComponent';
+import { useEffect, useState } from 'react';
+
+import { AxiosError } from 'axios';
+import { Button } from '@mui/material';
 import FormAutocomplete from '@/components/Input/formDropdown';
+import { Loading } from '@/components/commons/Loading';
+import axiosInstance from '@/axiosInstance';
 import { useAlert } from '@/contexts/AlertContext';
 import useDropdownOptions from '@/lib/getDropdown';
-import { Button } from '@mui/material';
-import { AxiosError } from 'axios';
-import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
@@ -195,19 +196,20 @@ const CheckApproval = ({ isDisabled }: { isDisabled?: boolean }) => {
           </div>
           {dokumnentType === 'ZENT' && (
             <>
+              {/* //   ,
+                  //   {
+                  //     label: 'Automatic Approval Tracking Number',
+                  //     value: 'automatic_approval_by_purchasing_group',
+                  //   },
+                    //   {
+                  //     label: 'Approval',
+                  //     value: 'approval',
+                  //   }, */}
               <FormAutocomplete<any>
                 options={[
                   {
-                    label: 'Approval',
-                    value: 'approval',
-                  },
-                  {
                     label: 'Chooses Approval Tracking Number',
                     value: 'chooses_approval',
-                  },
-                  {
-                    label: 'Automatic Approval Tracking Number',
-                    value: 'automatic_approval_by_purchasing_group',
                   },
                 ]}
                 fieldLabel={'Metode Approval'}
