@@ -510,29 +510,35 @@ class BusinessTripController extends Controller
 
         // $query->orderBy($sortBy, $sortDirection);
         if ($request->approval == "1") {
-            $data = Approval::where('user_id', Auth::user()->id)
-                ->where('document_name', 'TRIP')->get();
-            $arr = $data->filter(function ($value) {
-                // Cari approval sebelumnya berdasarkan document_id
-                $previousApproval = Approval::where('id', '<', $value->id)
-                    ->where('document_id', $value->document_id)
-                    ->orderBy('id', 'desc')
-                    ->first();
-
-                // Jika tidak ada approval sebelumnya, hanya tampilkan jika is_status = false
-                if (is_null($previousApproval)) {
-                    return !$value->is_status;
+            $approval = Approval::leftJoinSub(
+                "
+                SELECT DISTINCT ON (document_id)
+                    number_approval,
+                    id,
+                    user_id,
+                    document_id
+                FROM
+                    approvals
+                WHERE
+                    document_name = 'TRIP'
+                    AND status = 'Waiting'
+                ORDER BY
+                    document_id,
+                    number_approval
+            ",
+                'approvalQueueUser',
+                function ($join) {
+                    $join->on('approvalQueueUser.document_id', '=', 'approvals.document_id');
                 }
-
-                // Jika approval sebelumnya is_status = true, maka data ini boleh muncul
-                if ($previousApproval->is_status) {
-                    return true;
-                }
-
-                // Selain itu, tidak tampilkan
-                return false;
-            })->pluck('document_id');
-            $query = $query->whereIn('id', $arr)->where('status_id', 1);
+            )
+                ->where([
+                    'approvals.document_name' => 'TRIP',
+                    'approvals.status' => 'Waiting',
+                    'approvals.user_id' => Auth::user()->id,
+                ])
+                ->whereColumn('approvalQueueUser.user_id', 'approvals.user_id')
+                ->pluck('approvals.document_id')->toArray();
+            $query = $query->whereIn('id', $approval)->where('status_id', 1);
         } else {
             $query = $query->where(function ($query) {
                 $query->where('created_by', Auth::user()->id)
