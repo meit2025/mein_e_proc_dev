@@ -7,6 +7,8 @@ use App\Jobs\SapJobs;
 use App\Models\Currency;
 use App\Models\User;
 use Carbon\Carbon;
+use DateTime;
+use DateTimeZone;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -777,12 +779,13 @@ class BusinessTripController extends Controller
         foreach ($findData->businessTripDestination as $destination) {
             $detail_attendance = [];
             foreach ($destination->detailAttendance as $detail) {
+                $tz = new DateTimeZone('Asia/Jakarta');
                 $detail_attendance[] = [
-                    'date' => date('d-m-Y', strtotime($detail->date)),
+                    'date' => (new DateTime($detail->date, $tz))->format('d-m-Y'),
                     'start_time' => $detail->start_time,
                     'end_time' => $detail->end_time,
-                    'start_date' => date('d/m/Y', strtotime($detail->start_date)),
-                    'end_date' => date('d/m/Y', strtotime($detail->end_date)),
+                    'start_date' => (new DateTime($detail->start_date, $tz))->format('d/m/Y'),
+                    'end_date' => (new DateTime($detail->end_date, $tz))->format('d/m/Y'),
                     'shift_code' => $detail->shift_code,
                     'shift_start' => $detail->shift_start,
                     'shift_end' => $detail->shift_end,
@@ -871,16 +874,16 @@ class BusinessTripController extends Controller
                     ->where('pr.code_transaction', '=', 'BTRE')
                     ->where('pr.balance', '>', 0);
             })
-            ->where('business_trip.request_for', $user_id)
-            ->where('business_trip.type', 'request')
-            ->whereIn('business_trip.status_id', [1, 3, 5, 6])
-            ->where(function ($query) {
-                $query->where(function ($query) { 
-                    $query->whereNotNull('pr.status')
-                    ->where('pr.status', '!=', 'X'); 
-                })
-                ->orWhereNull('pr.status');
-            });
+                ->where('business_trip.request_for', $user_id)
+                ->where('business_trip.type', 'request')
+                ->whereIn('business_trip.status_id', [1, 3, 5, 6])
+                ->where(function ($query) {
+                    $query->where(function ($query) {
+                        $query->whereNotNull('pr.status')
+                            ->where('pr.status', '!=', 'X');
+                    })
+                        ->orWhereNull('pr.status');
+                });
         })->get();
 
         $destination = [];
