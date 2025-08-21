@@ -775,14 +775,11 @@ class BusinessTripController extends Controller
             foreach ($destination->detailAttendance as $detail) {
                 $tz = new DateTimeZone('Asia/Jakarta');
                 $detail_attendance[] = [
-                    // 'date' => (new DateTime($detail->date, $tz))->format('d-m-Y'),
-                    'date' => $detail->date,
+                    'date' => (new DateTime($detail->date, $tz))->format('d-m-Y'),
                     'start_time' => $detail->start_time,
                     'end_time' => $detail->end_time,
-                    // 'start_date' => (new DateTime($detail->start_date, $tz))->format('d/m/Y'),
-                    'start_date' => $detail->start_date,
-                    // 'end_date' => (new DateTime($detail->end_date, $tz))->format('d/m/Y'),
-                    'end_date' => $detail->end_date,
+                    'start_date' => (new DateTime($detail->start_date, $tz))->format('d/m/Y'),
+                    'end_date' => (new DateTime($detail->end_date, $tz))->format('d/m/Y'),
                     'shift_code' => $detail->shift_code,
                     'shift_start' => $detail->shift_start,
                     'shift_end' => $detail->shift_end,
