@@ -31,6 +31,15 @@ use Modules\BusinessTrip\Models\BusinessTrip;
 // Route::get('/allowance-category', [AllowanceCategoryController::class, 'index'])->name('allowance-category.index');
 
 
+Route::get('/check-timezone', function () {
+    return [
+        'default_timezone' => date_default_timezone_get(),
+        'laravel_timezone' => config('app.timezone'),
+        'current_time' => date('Y-m-d H:i:s'),
+        'carbon_now' => \Carbon\Carbon::now()->toDateTimeString(),
+    ];
+});
+
 
 Route::group(['middleware' => 'auth'], function () {
     Route::prefix('business-trip')->group(function () {

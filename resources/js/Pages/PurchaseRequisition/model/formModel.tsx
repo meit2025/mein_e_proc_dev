@@ -1,8 +1,8 @@
+import Attachment from './attachment';
+import CashAdvance from './CashAdvance';
+import CheckApproval from './checkApproval';
 import { FormFieldModel } from '@/interfaces/form/formWrapper';
 import ItemForm from './itemForm';
-import CheckApproval from './checkApproval';
-import CashAdvance from './CashAdvance';
-import Attachment from './attachment';
 
 export const formModel: Array<FormFieldModel<any>> = [
   {
@@ -112,8 +112,8 @@ export const formModel: Array<FormFieldModel<any>> = [
     type: 'input',
     required: true,
     name: 'entertainment.jenis',
-    label: 'Type of Entertainment',
-    placeholder: 'Type of Entertainment',
+    label: 'Purpose of Entertainment',
+    placeholder: 'Purpose of Entertainment',
     style: {
       width: '63.5rem',
     },
@@ -336,8 +336,8 @@ export const formModelEdit: Array<FormFieldModel<any>> = [
     parameterConditional: 'document_type',
     type: 'input',
     name: 'entertainment.jenis',
-    label: 'Type of Entertainment',
-    placeholder: 'Type of Entertainment',
+    label: 'Purpose of Entertainment',
+    placeholder: 'Purpose of Entertainment',
     style: {
       width: '63.5rem',
     },
