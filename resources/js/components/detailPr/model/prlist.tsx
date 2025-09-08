@@ -1,0 +1,117 @@
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
+import { GridColDef } from '@mui/x-data-grid';
+
+export const columns: GridColDef[] = [
+  {
+    field: 'purchase_requisition_number',
+    headerName: 'Purchase Requisition Number',
+    width: 200,
+    filterable: true,
+  },
+  { field: 'status', headerName: 'PR Status', width: 150, filterable: true },
+
+  { field: 'no_po', headerName: 'Number PO', width: 200, filterable: true },
+  { field: 'is_closed', headerName: 'PO Status', width: 150, filterable: true },
+
+  { field: 'requisitioner_name', headerName: 'Requisitioner Name', width: 200, filterable: true },
+  { field: 'requisition_date', headerName: 'Requisition Date', width: 200, filterable: true },
+
+  {
+    field: 'requirement_tracking_number',
+    headerName: 'Requirement Tracking Number',
+    width: 200,
+    filterable: true,
+  },
+  { field: 'item_number', headerName: 'Item Number', width: 150, filterable: true },
+  { field: 'document_type', headerName: 'Document Type', width: 200, filterable: true },
+  { field: 'valuation_type', headerName: 'Valuation Type', width: 200, filterable: true },
+  { field: 'purchasing_group', headerName: 'Purchasing Group', width: 200, filterable: true },
+  {
+    field: 'purchasing_organization',
+    headerName: 'Purchasing Organization',
+    width: 200,
+    filterable: true,
+  },
+  {
+    field: 'account_assignment_category',
+    headerName: 'Account Assignment Category',
+    width: 250,
+    filterable: true,
+  },
+  { field: 'item_delivery_date', headerName: 'Item Delivery Date', width: 200, filterable: true },
+  { field: 'storage_location', headerName: 'Storage Location', width: 200, filterable: true },
+  { field: 'desired_vendor', headerName: 'Desired Vendor', width: 200, filterable: true },
+  { field: 'material_group', headerName: 'Material Group', width: 200, filterable: true },
+  { field: 'material_number', headerName: 'Material Number', width: 200, filterable: true },
+  { field: 'unit_of_measure', headerName: 'Unit of Measure', width: 150, filterable: true },
+  { field: 'quantity', headerName: 'Quantity', width: 150, filterable: true },
+  { field: 'tax_code', headerName: 'Tax Code', width: 150, filterable: true },
+  { field: 'item_category', headerName: 'Item Category', width: 200, filterable: true },
+  { field: 'short_text', headerName: 'Short Text', width: 200, filterable: true },
+  { field: 'plant', headerName: 'Plant', width: 150, filterable: true },
+  { field: 'deletion_indicator', headerName: 'Deletion Indicator', width: 200, filterable: true },
+  { field: 'cost_center', headerName: 'Cost Center', width: 200, filterable: true },
+  { field: 'order_number', headerName: 'Order Number', width: 200, filterable: true },
+  { field: 'asset_subnumber', headerName: 'Asset Subnumber', width: 200, filterable: true },
+  { field: 'main_asset_number', headerName: 'Main Asset Number', width: 200, filterable: true },
+  { field: 'purchase_id', headerName: 'Purchase ID', width: 200, filterable: true },
+  { field: 'code_transaction', headerName: 'Code Transaction', width: 200, filterable: true },
+  { field: 'header_not', headerName: 'Header Not', width: 200, filterable: true },
+  {
+    field: 'tanggal_entertainment',
+    headerName: 'Entertainment Date',
+    width: 200,
+    filterable: true,
+  },
+  {
+    field: 'tempat_entertainment',
+    headerName: 'Entertainment Location',
+    width: 200,
+    filterable: true,
+  },
+  {
+    field: 'alamat_entertainment',
+    headerName: 'Entertainment Address',
+    width: 200,
+    filterable: true,
+  },
+  {
+    field: 'jenis_entertainment',
+    headerName: 'Type of Entertainment',
+    width: 200,
+    filterable: true,
+  },
+  { field: 'nama_entertainment', headerName: 'Entertained Name', width: 200, filterable: true },
+  {
+    field: 'posisi_entertainment',
+    headerName: 'Entertained Position',
+    width: 200,
+    filterable: true,
+  },
+  { field: 'nama_perusahaan', headerName: 'Company Name', width: 200, filterable: true },
+  {
+    field: 'jenis_usaha_entertainment',
+    headerName: 'type of Bussines',
+    width: 250,
+    filterable: true,
+  },
+  {
+    field: 'jenis_kegiatan_entertainment',
+    headerName: 'Type of Activity',
+    width: 250,
+    filterable: true,
+  },
+  { field: 'code', headerName: 'Code', width: 150, filterable: true },
+  { field: 'message', headerName: 'Message', width: 200, filterable: true },
+  { field: 'attachment', headerName: 'Attachment', width: 200, filterable: true },
+  {
+    field: 'balance',
+    headerName: 'Amount',
+    width: 150,
+    filterable: true,
+    renderCell: (params) => {
+      return formatRupiah(params.row.balance, false);
+    },
+  },
+  { field: 'attachment_link', headerName: 'Attachment Link', width: 250, filterable: true },
+];

@@ -1,0 +1,1 @@
+const R="/api/approval/route",O="/api/approval/approval-to-user",A=`${R}/list`,a=`${R}/create`,P=`${R}/update`,s=E=>`${R}/detail/${E}`,t=`${R}/delete`,T=(E,_)=>`${O}/get-user-dropdown/${E}/${_}`,o=`${O}/create`;export{a as C,s as D,P as E,A as G,t as a,T as b,o as c};

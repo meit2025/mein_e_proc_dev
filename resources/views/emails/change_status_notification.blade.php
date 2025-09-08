@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700,800,900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+        integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+</head>
+
+<body style="font-family: Nunito, sans-serif;">
+    <div style=" width: 100%; height: 200px; border-radius: 0 0 100% 100%; background-color: #D6D6D6;">
+        <div
+            style="display:-webkit-flex; flex-direction: row; align-items: center; justify-content: center;text-align:center;">
+            <div style="margin:auto; padding-top:50px">
+                <h1>PT Mitsubishi Electric Indonesia</h1>
+            </div>
+        </div>
+    </div>
+    <div style="padding: 0px 10px 0px 10px">
+        <div style="display: flex;justify-content: center;">
+            <div
+                style="width:100%;border: 2px solid #D7E1EA; border-radius:10px; padding:10px 30px 10px 30px; margin-top:20px">
+                <br>
+
+                <p>
+                    Dear <span class="font-weight-bold" style="font-weight: bold;">{{$user->name}}</span> ,
+
+                    {{-- body --}}
+                    @if($type == 'Purchase Requisition')
+                    <br>
+                    @if ($status == 'Approved')
+                    Your request has been approved by {{ $user_approve }}, with the details:
+                    @elseif ($status == 'Fully Approved')
+                    There are some Request Fully Approved. Kindly find the details below :
+                    @elseif ($status == 'Rejected')
+                    We regret to inform you that your Purchase Requisition (PR) request has been rejected. Below are the
+                    details:
+                    @elseif ($status == 'Revise')
+                    Your Purchase Requisition (PR) request requires revision. Please find the details below:
+                    @endif
+
+                    <br>
+                    <br>
+                    PR Number : {{$pr}}
+                    <br>
+                    Requester : {{$purchase->user->name}}
+                    <br>
+                    Proposed Vendor: {{
+                    $purchase->vendorsWinner->masterBusinesPartnerss->name_one
+                    }}
+                    <br>
+                    Quotation Number: {{$purchase->vendorsWinner->quotation}}
+                    <br>
+                    Item Details:
+                    <br>
+                    <hr>
+                    @foreach ($purchase->vendorsWinner->units as $item)
+                    Material Number: {{ $item->material_number }}
+                    <br>
+                    Quantity (QTY): {{ $item->qty }}
+                    <br>
+                    Unit Price: {{ $item->unit_price }}
+                    <br>
+                    Total Amount: {{ $item->total_amount }}
+                    <br>
+                    Remark: {{ $item->short_text }}
+                    <hr>
+                    @endforeach
+
+                    <br>
+                    Reason : {{$request->note ?? ''}}
+                    <br>
+                    <br>
+                    @if ($status == 'Rejected')
+                    Please review the request and make necessary adjustments if required.
+                    @elseif ($status == 'Revise')
+                    Please review then resubmit the request and make necessary adjustments if required.
+                    @elseif($status == 'Approval')
+                    The next approval process will be processed.
+                    @endif
+                <p style="font-weight: 700;font-family: 'Rubik', sans-serif;font-size: 20px">
+                    <a href="{{$url}}"> View Detail </a>
+                </p>
+                @endif
+                {{-- end body --}}
+
+                @if ($type == 'Reimbursement')
+                <br><br>
+                @if ($status == 'Approval')
+                Your request has been approved by {{ $reimburseGroup->approverName }}, with the details:
+                @elseif ($status == 'Approved')
+                There are some Request Fully Approved. Kindly find the details below :
+                @elseif ($status == 'Rejected')
+                We regret to inform you that your reimbursement request has been rejected. Below are the details:
+                @elseif ($status == 'Revise')
+                Your reimbursement request requires revision. Below are the details:
+                @elseif ($status == 'Approver')
+                You have a pending approval request for the Reimbursement. Below are the details:
+                @endif
+                <br><br>
+
+                Reimbursement Number: {{$reimburseGroup->code}}
+                <br>
+                Requester: {{$user->name}}
+                <br>
+                Reimbursement Details:
+                <br><br>
+
+                @foreach ($reimburseGroup->reimburses as $key => $item)
+                Form {{$key + 1}} :
+                <ul>
+                    <li>
+                        Reimbursement Type: {{$item->reimburseType->name}}
+                    </li>
+                    <li>
+                        Claim Date: {{ date('F j, Y', strtotime($item->claim_date)) }}
+                    </li>
+                    <li>
+                        Reimbursement Cost: Rp. {{ number_format($item->balance, 0, ',', '.') }}
+                    </li>
+                </ul>
+                @endforeach
+
+                @if ($status == 'Approval')
+                Reason :
+                @elseif ($status == 'Approved')
+                Notes :
+                @elseif ($status == 'Rejected')
+                Rejection Reason :
+                @elseif ($status == 'Revise')
+                Revision Notes :
+                @endif
+                {{ $reimburseGroup->notes }}
+                <br>
+                @if ($status == 'Rejected')
+                Please review the request and make necessary adjustments if required.
+                @elseif ($status == 'Revise')
+                Please review then resubmit the request and make necessary adjustments if required.
+                @elseif ($status == 'Approval')
+                The next approval process will be processed.
+                @endif
+                <br>
+                <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now'
+                    : 'View Detail'}}</a>
+                <br>
+                @endif
+
+                @if ($type == 'Business Trip')
+                <br><br>
+                @if ($status == 'Approval')
+                Your request has been approved by {{$businessTrip->approverName}}, with the details:
+                @elseif ($status == 'Approved')
+                There are some Request Fully Approved. Kindly find the details below :
+                @elseif ($status == 'Rejected')
+                We regret to inform you that your business trip request has been rejected. Below are the details:
+                @elseif ($status == 'Revise')
+                Your business trip request requires revision. Below are the details:
+                {{-- @elseif ($status == 'Approver')
+                You have a pending approval request for the Reimbursement. Below are the details: --}}
+                @endif
+                <br><br>
+                Business Trip Request Number: {{$businessTrip->request_no}} <br />
+                Requester: {{$businessTrip->requestFor->name}} <br />
+                Business Trip Request Details: <br />
+                <ul>
+                    <li>Propose Type: {{$businessTrip->purposeType->name}}</li>
+                </ul>
+                @foreach ($businessTrip->businessTripDestination as $key => $item)
+                Destination {{$key + 1}} :
+                <ul>
+                    <li>Destination: {{$item->destination}}</li>
+                    <li>Start Date: {{date('d-m-Y',strtotime($item->business_trip_start_date))}}</li>
+                    <li>End Date: {{date('d-m-Y',strtotime($item->business_trip_end_date))}}</li>
+                    <li>Total Request: {{number_format($item->getDetailDestinationDay->sum('price') +
+                        $item->detailDestinationTotal->sum('price'),0,',','.')}}</li>
+                </ul>
+                @endforeach
+                @if ($status == 'Approved')
+                Notes: {{$businessTrip->notes}}
+                @elseif ($status == 'Rejected')
+                Rejection Reason: {{$businessTrip->notes}} <br />
+                Please review the request and make necessary adjustments if required.
+                @elseif ($status == 'Revise')
+                Revision Notes: {{$businessTrip->notes}} </br>
+                Please review then resubmit the request and make necessary adjustments if required.
+                @elseif ($status == 'Approval')
+                Reason: {{$businessTrip->notes}} <br>
+                The next approval process will be processed.
+                @endif
+                <br>
+                <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now'
+                    : 'View Detail'}}</a>
+                <br>
+                @endif
+
+                @if ($type == 'Business Trip Declaration')
+                <br><br>
+                @if ($status == 'Approval')
+                Your request has been approved by {{$businessTrip->approverName}}, with the details:
+                @elseif ($status == 'Approved')
+                There are some Request Fully Approved. Kindly find the details below :
+                @elseif ($status == 'Rejected')
+                We regret to inform you that your business trip declaration has been rejected. Below are the details:
+                @elseif ($status == 'Revise')
+                Your business trip declaration requires revision. Below are the details:
+                {{-- @elseif ($status == 'Approver')
+                You have a pending approval request for the Reimbursement. Below are the details: --}}
+                @endif
+                <br><br>
+                Business Trip Declaration Number: {{$businessTrip->request_no}} <br />
+                Requester: {{$businessTrip->requestFor->name}} <br />
+                Business Trip Declaration Details: <br />
+                <ul>
+                    <li>Propose Type: {{$businessTrip->purposeType->name}}</li>
+                </ul>
+                @foreach ($businessTrip->businessTripDestination as $key => $item)
+                Destination {{$key + 1}} :
+                <ul>
+                    <li>Destination: {{$item->destination}}</li>
+                    <li>Start Date: {{date('d-m-Y',strtotime($item->business_trip_start_date))}}</li>
+                    <li>End Date: {{date('d-m-Y',strtotime($item->business_trip_end_date))}}</li>
+                    <li>Total Request: {{number_format($item->getDetailDestinationDay->sum('price') +
+                        $item->detailDestinationTotal->sum('price'),0,',','.')}}</li>
+                </ul>
+                @endforeach
+                @if ($status == 'Approved')
+                Notes: {{$businessTrip->notes}}
+                @elseif ($status == 'Rejected')
+                Rejection Reason: {{$businessTrip->notes}} <br />
+                Please review the request and make necessary adjustments if required.
+                @elseif ($status == 'Revise')
+                Revision Notes: {{$businessTrip->notes}} </br>
+                Please review then resubmit the request and make necessary adjustments if required.
+                @elseif ($status == 'Approval')
+                Reason: {{$businessTrip->notes}} <br>
+                The next approval process will be processed.
+                @endif
+                <br>
+                <a href="{{$url}}" target="_blank" style="font-weight: bolder;">{{$status == 'Approver' ? 'Approve Now'
+                    : 'View Detail'}}</a>
+                <br>
+                @endif
+                </p>
+
+                <div>
+                    <p style="font-weight: 500; font-size: 14px; color: #1f1f1f;">Thank you,
+                        <br>
+                        Best regards,
+                        <br> MEIN Information System Portal
+                    </p>
+                </div>
+                <div style="background-color: #D7E1EA;height:2px"></div>
+                {{-- <div style="display:flex;margin-top:20px">
+
+
+                    <div style="margin-left: 1px">
+                        <div style="margin-top: 5px">
+                            <b style="font-weight: 700;font-size: 20px;color: #1f1f1f;"><strong> PT Mitsubishi Electric
+                                    Indonesia</strong></b>
+                        </div>
+                        <div style="margin-top: 5px">
+                            <b style="  font-size: 16px;margin-top:10px;
+		font-weight: 500;
+		color: #6C6C6C">Gedung Jaya 8th Floor, Jl MH.Thamrin No 12 Jakarta Pusat 10340 Indonesia</b>
+                        </div>
+                        <div>
+                            <b style="  font-size: 16px;margin-top:10px;
+		font-weight: 500;
+		color: #6C6C6C">+62-21-31926461</b>
+                        </div>
+                        <div>
+                            <b style="  font-size: 16px;margin-top:10px;
+		font-weight: 500;
+		color: #6C6C6C">marcomm.mein@asia.meap.com</b>
+                        </div>
+
+                    </div>
+                </div> --}}
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

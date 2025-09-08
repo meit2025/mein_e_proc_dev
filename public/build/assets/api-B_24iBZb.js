@@ -1,0 +1,1 @@
+const E="/api/allowance-item",_=`${E}/list`,L=`${E}/create`,s=A=>`${E}/detail/${A}`,t=A=>`${E}/check-unique-code/${A}`,a=A=>`${E}/update/${A}`,e=`${E}/delete`;export{L as C,e as D,s as G,a as U,_ as a,t as b};

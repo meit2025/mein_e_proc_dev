@@ -1,0 +1,15 @@
+node_modules/
+vendor/
+app/
+bootstrap/
+config/
+database/
+config/
+public/
+resources/views/
+resources/lang/
+resources/assets/
+routes/
+storage/
+tests/
+

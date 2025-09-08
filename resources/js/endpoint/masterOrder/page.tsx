@@ -1,0 +1,6 @@
+const ROUTE_MASTER_ORDER_PAGE = '/master/order';
+
+export const LIST_PAGE_MASTER_ORDER = `${ROUTE_MASTER_ORDER_PAGE}`;
+export const CREATE_PAGE_MASTER_ORDER = `${ROUTE_MASTER_ORDER_PAGE}/create`;
+export const EDIT_PAGE_MASTER_ORDER = `${ROUTE_MASTER_ORDER_PAGE}/update`;
+export const DETAIL_PAGE_MASTER_ORDER = `${ROUTE_MASTER_ORDER_PAGE}/detail`;

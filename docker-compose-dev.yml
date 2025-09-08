@@ -1,0 +1,82 @@
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: dockerfile.dev
+    container_name: mein
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www/html/mein
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - utama
+
+  postgresql-mein:
+    container_name: postgresql-mein
+    image: postgres:14.1-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    networks:
+      - utama
+    expose:
+      - '5432'
+    volumes:
+      - ./postgresql:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # laravel-reverb:
+  #   build:
+  #     context: .
+  #     dockerfile: dockerfile.dev
+  #   command: ['php', 'artisan', 'reverb:start']
+  #   container_name: laravel-reverb
+  #   restart: unless-stopped
+  #   working_dir: /var/www/html/mein
+  #   volumes:
+  #     - ./:/var/www/html/mein
+  #   ports:
+  #     - 8080:8080
+  #   expose:
+  #     - 8080
+  #   networks:
+  #     - utama
+
+  # laravel-cron:
+  #   build:
+  #     context: .
+  #     dockerfile: dockerfile.dev
+  #   command: ['php', 'artisan', 'queue:work', '--sleep=3', '--tries=3']
+  #   container_name: laravel-cron
+  #   restart: unless-stopped
+  #   working_dir: /var/www/html/mein
+  #   volumes:
+  #     - ./:/var/www/html/mein
+  #   networks:
+  #     - utama
+
+
+  laravel-app:
+    build:
+      context: .
+      dockerfile: dockerfile.artisan
+    container_name: laravel-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/var/www/html/mein
+    networks:
+      - utama
+
+networks:
+  utama:
+    driver: bridge
+    name: utama

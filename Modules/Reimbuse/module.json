@@ -1,0 +1,11 @@
+{
+    "name": "Reimbuse",
+    "alias": "reimbuse",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Reimbuse\\Providers\\ReimbuseServiceProvider"
+    ],
+    "files": []
+}

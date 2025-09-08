@@ -1,0 +1,1 @@
+const _="/api/approval/tracking-number-auto",E=`${_}/list`,R=`${_}/create`,a=A=>`${_}/detail/${A}`,t=`${_}/delete`,T="/approval/tracking-number-auto",U=`${T}`,N=`${T}/create`,s=`${T}/update`;export{R as C,t as D,s as E,E as G,U as L,N as a,a as b};

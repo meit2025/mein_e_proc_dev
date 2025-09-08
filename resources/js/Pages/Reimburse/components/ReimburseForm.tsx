@@ -1,0 +1,1713 @@
+import { useState, useEffect, useRef } from 'react';
+import { Button } from '@/components/shacdn/button';
+import { Button as ButtonMui, FormHelperText } from '@mui/material';
+import moment from 'moment';
+import { number, z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { formatRupiah } from '@/lib/rupiahCurrencyFormat';
+import {
+  Form,
+  FormControl,
+  FormLabel,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@/components/shacdn/form';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { Textarea } from '@/components/shacdn/textarea';
+import '../css/reimburse.scss';
+import { ScrollArea } from '@/components/shacdn/scroll-area';
+import axiosInstance from '@/axiosInstance';
+import { AxiosError } from 'axios';
+import { Separator } from '@/components/shacdn/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shacdn/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/shacdn/select';
+import FormAutocomplete from '@/components/Input/formDropdown';
+import { CustomDatePicker } from '@/components/commons/CustomDatePicker';
+import { Input } from '@/components/shacdn/input';
+import { useAlert } from '../../../contexts/AlertContext.jsx';
+import { usePage } from '@inertiajs/react';
+import {
+  Currency,
+  PurchasingGroup,
+  User,
+  Tax,
+  CostCenter,
+  ReimburseFormType,
+} from '../model/listModel';
+import { FormType } from '@/lib/utils';
+import useDropdownOptions from '@/lib/getDropdown';
+import {
+  GET_LIST_MASTER_REIMBUSE_TYPE,
+  GET_LIST_EMPLOYEE_REIMBURSE,
+  GET_LIST_FAMILY_REIMBURSE,
+} from '@/endpoint/reimburse/api';
+import { CustomFormWrapper } from '@/components/commons/CustomFormWrapper';
+import {
+  WorkflowApprovalDiagramInterface,
+  WorkflowApprovalStepInterface,
+  WorkflowComponent,
+} from '@/components/commons/WorkflowComponent';
+import { CustomStatus } from '@/components/commons/CustomStatus';
+
+interface Props {
+  onSuccess?: (value?: boolean) => void;
+  taxDefaultValue: string;
+  uomDefaultValue: string;
+  currencies: Currency[];
+  edit_url?: string;
+  update_url?: string;
+  store_url?: string;
+  type?: ReimburseFormType;
+  currentUser?: User;
+}
+
+interface reimburseReviseInterface {
+  id: number | string,
+  reimburse_type: string,
+  balance: number | string,
+  limit: number,
+  for: string | number,
+}
+
+interface remainingBalanceReviseInterface {
+  reimburse_type: string,
+  totalBalance: number | string,
+  for: string | number,
+}
+
+interface reimburseFormDataInterface {
+  id: number | string;
+  for: string | number;
+  group: string | number;
+  reimburse_type: { code: string };
+  short_text: string;
+  balance: string | number;
+  currency: string;
+  tax_on_sales: string | number;
+  purchase_requisition_unit_of_measure: string | number;
+  remaining_balance_when_request: number;
+  purchasing_group: string | number;
+  type: string;
+  item_delivery_data: string;
+  claim_date: string;
+  reimburse_attachment: any[];
+}
+
+interface ErrorResponse {
+  message: string;
+  data: {
+    message: string;
+  };
+}
+
+interface RequestStatusInterface {
+  name: string;
+  classname: string;
+  code: string;
+}
+
+export const ReimburseForm: React.FC<Props> = ({
+  onSuccess,
+  currencies,
+  taxDefaultValue,
+  uomDefaultValue,
+  edit_url,
+  update_url,
+  store_url,
+  type,
+  currentUser,
+}) => {
+  const [activeTab, setActiveTab] = useState('form1');
+  const { showToast } = useAlert();
+  const { errors } = usePage().props;
+  const { dataDropdown: dataEmployee, getDropdown: getEmployee } = useDropdownOptions(
+    GET_LIST_EMPLOYEE_REIMBURSE,
+  );
+  const { dataDropdown: dataUom, getDropdown: getUom } = useDropdownOptions();
+  const { dataDropdown: dataTax, getDropdown: getTax } = useDropdownOptions();
+  const { dataDropdown: dataPurchasingGroup, getDropdown: getPurchasingGroup } = useDropdownOptions(
+    'api/master-pr/purchasing-group/dropdown-list',
+  );
+  const { dataDropdown: dataCostCenter, getDropdown: getCostCenter } = useDropdownOptions(
+    'api/master/cost-center/dropdown-list',
+  );
+
+  const [dataReimburseType, setDataReimburseType] = useState<any[]>([]);
+  const [dataFamily, setDataFamily] = useState<any[]>([]);
+  const [requestStatus, setRequestStatus] = useState<RequestStatusInterface | null>(null);
+  const [isShow, setIsShow] = useState(false);
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const [detailLimit, setDetailLimit] = useState<any[]>([]);
+  const [reviseDataUsed, setReviseDataUsed] = useState<Array<number | string>>([]);
+  const [additionalBalanceRevise, setAdditionalBalanceRevise] = useState<any[]>([]);
+  const reimburseReviseData = useRef<Array<reimburseReviseInterface>>([]);
+  const remainingBalanceRevise = useRef<Array<remainingBalanceReviseInterface>>([]);
+
+  const [approvalRoute, setApprovalRoute] = useState({
+    approvalRequest: [],
+    approvalFrom: [],
+    acknowledgeFrom: [],
+    approvalFromStatusRoute: [],
+  });
+
+  const MAX_FILE_SIZE = 1 * 1024 * 1024;
+  const ACCEPTED_FILE_TYPES = [
+    'image/jpeg',
+    'image/png',
+    'image/svg+xml',
+    'application/pdf',
+    'image/heic',
+    'image/heif',
+  ];
+
+  const formSchema = z.object({
+    formCount: z.string().min(1, 'total form must be have value'),
+    remark_group: z.string().min(1, 'header remark is required'),
+    cost_center: z.string().min(1, 'cost center required'),
+    requester: z.string().min(1, 'requester required'),
+    value: z.number().optional(),
+    user_id: z.string().optional(),
+    forms: z.array(
+      z.object({
+        reimburseId: z.string().optional(),
+        for: z.string().optional(),
+        group: z.string().optional(),
+        reimburse_type: z.string().min(1, 'reimburse type is required'),
+        short_text: z.string().min(1, 'remarks is required'),
+        balance: z.string(),
+        remaining_balance_when_request: z.number(),
+        currency: z.string().min(1, 'currency required'),
+        tax_on_sales: z.string().min(1, 'tax required'),
+        purchase_requisition_unit_of_measure: z.string().min(1, 'uom required'),
+        purchasing_group: z.string().min(1, 'Purchasing Group required'),
+        type: z.any(),
+        item_delivery_data: z.date({ required_error: 'Receipt date is required' }),
+        claim_date: z.date().min(new Date(new Date().setHours(0,0,0,0)), 'Claim date must be today or greater'),
+        attachment: z
+          .array(
+            z
+              .instanceof(File)
+              .refine((file) => ACCEPTED_FILE_TYPES.includes(file.type), {
+                message: 'File type must be JPG, JPEG, PNG, SVG, HEIC, or PDF',
+              })
+              .refine((file) => file.size <= MAX_FILE_SIZE, {
+                message: 'File size must be less than 1MB',
+              }),
+          ),
+        savedAttachment: z.array(z.any()).optional().nullable(),
+      }).refine((data) => {
+        const isClone = type === ReimburseFormType.clone;
+        const isCreate = type === ReimburseFormType.create;
+        const hasSaved = Array.isArray(data.savedAttachment) && data.savedAttachment.length > 0;
+        const hasNewAttachment = Array.isArray(data.attachment) && data.attachment.length > 0;
+        
+        if ((isCreate && !hasNewAttachment) || (isClone && !hasSaved && !hasNewAttachment)) {
+          return false;
+        }
+    
+        return true;
+      }, {
+        message: 'Attachment is required',
+        path: ['attachment'],
+      })
+    )    
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (type === ReimburseFormType.edit || type === ReimburseFormType.clone) {
+        setLoading(true);
+        await getDetailData();
+      }
+
+      getTax('', {
+        name: 'mwszkz',
+        id: 'id',
+        tabel: 'pajaks',
+        where: {
+          key: 'mwszkz',
+          parameter: 'V0',
+        },
+      });
+
+      // getUom('', {
+      //   name: 'unit_of_measurement_text',
+      //   id: 'id',
+      //   tabel: 'uoms',
+      //   where:{
+      //     key       : 'iso_code',
+      //     parameter : 'PC'
+      //   }
+      // });
+
+      const activeForm = Number(activeTab.split('form')[1]) - 1;
+      getPurchasingGroup('', {
+        name: 'purchasing_group_desc',
+        id: 'id',
+        tabel: 'purchasing_groups',
+        idType: 'string',
+        hasValue: {
+          key: form.getValues('forms')[activeForm]?.purchasing_group ? 'id' : '',
+          value: form.getValues('forms')[activeForm]?.purchasing_group ?? '',
+        },
+      });
+
+      getCostCenter('', {
+        name: 'cost_center',
+        id: 'id',
+        tabel: 'master_cost_centers',
+        idType: 'string',
+        hasValue: {
+          key: form.getValues('cost_center') ? 'id' : '',
+          value: form.getValues('cost_center') ?? '',
+        },
+      });
+
+      getEmployee('', {
+        name: 'name',
+        id: 'nip',
+        tabel: 'users',
+        hasValue: {
+          key: form.getValues('requester') ? 'nip' : '',
+          value: form.getValues('requester') ?? '',
+        },
+      });
+
+      if (form.getValues('requester') !== '' && type === ReimburseFormType.create) {
+        fetchReimburseType(0);
+      }
+    };
+
+    fetchData();
+  }, [type]);
+  
+  async function getDetailData() {
+    form.setValue('forms', []);
+
+    setLoading(true);
+
+    try {
+      const response = await axiosInstance.get(edit_url ?? '');
+      const data = response.data.data;
+      const reimburseForms = data.forms ?? [];
+      const reimburseGroup = data.group;
+
+      setRequestStatus(reimburseGroup.reimbursementStatus);
+      setReviseDataUsed(reimburseForms.map((form: reimburseFormDataInterface) => String(form.id)));
+
+      const reimburseFormMapping = reimburseForms.map((form : reimburseFormDataInterface, index : number) => {
+        const {
+          id, for: forValue, group, reimburse_type, short_text,
+          balance, currency, tax_on_sales, purchase_requisition_unit_of_measure,
+          remaining_balance_when_request, purchasing_group, type,
+          item_delivery_data, claim_date, reimburse_attachment,
+        } = form;
+
+        const matchingForms = reimburseForms.slice(index).filter((f : reimburseFormDataInterface) =>
+          f.for === forValue && f.reimburse_type.code === reimburse_type.code
+        );
+
+        reimburseReviseData.current.push({
+          id: String(id),
+          reimburse_type: reimburse_type.code,
+          balance: matchingForms.reduce((acc : number, curr : reimburseFormDataInterface) => acc + Number(curr.balance || 0), 0),
+          limit: matchingForms.reduce((acc : number) => acc + 1 || 0, 0),
+          for: String(forValue),
+        });
+
+        const existingIndex = remainingBalanceRevise.current.findIndex(item =>
+          item.reimburse_type === reimburse_type.code && item.for === String(forValue)
+        );
+
+        if (existingIndex !== -1) {
+          remainingBalanceRevise.current[existingIndex].totalBalance = Number(remainingBalanceRevise.current[existingIndex].totalBalance) + Number(balance || 0);
+        } else {
+          remainingBalanceRevise.current.push({
+            reimburse_type: reimburse_type.code,
+            totalBalance: Number(balance || 0),
+            for: String(forValue),
+          });
+        }
+
+        return {
+          reimburseId: String(id),
+          for: String(forValue),
+          group: String(group),
+          reimburse_type: reimburse_type.code,
+          short_text,
+          balance,
+          currency,
+          tax_on_sales: String(tax_on_sales),
+          purchase_requisition_unit_of_measure: String(purchase_requisition_unit_of_measure),
+          remaining_balance_when_request: Number(remaining_balance_when_request) || 0,
+          purchasing_group: String(purchasing_group),
+          type,
+          item_delivery_data: new Date(item_delivery_data),
+          claim_date: new Date(claim_date),
+          attachment: [],
+          savedAttachment: reimburse_attachment,
+        };
+      });
+
+      form.setValue('formCount', reimburseForms.length.toString());
+      form.setValue('remark_group', reimburseGroup.remark);
+      form.setValue('cost_center', String(reimburseGroup.cost_center.id));
+      form.setValue('requester', reimburseGroup.requester);
+      form.setValue('forms', reimburseFormMapping);
+
+      // Jalankan pemanggilan data per-form
+      for (let i = 0; i < reimburseForms.length; i++) {
+        const map = reimburseForms[i];
+        await fetchReimburseType(i, { reimburse_type: map.reimburse_type.code });
+        await fetchFamily(i, {
+          type: map.type,
+          reimburse_type: map.reimburse_type.code,
+        });
+        await getDataByLimit(i, {
+          reimburse_type: map.reimburse_type.code,
+          for: map.reimburse_type.is_employee === 1 ? null : map.for,
+        }, true);
+      }
+
+      setLoading(false);
+    } catch (e) {
+      const error = e as AxiosError<ErrorResponse>;
+      setLoading(false);
+      showToast(error?.response?.data?.message, 'error');
+    }
+  }
+  
+  const defaultValues = {
+    formCount: '1',
+    remark_group: '',
+    cost_center: '',
+    requester: String(currentUser?.is_admin) === '1' ? '' : currentUser?.nip,
+    forms: [
+      {
+        reimburseId: '',
+        for: '',
+        group: '',
+        reimburse_type: '',
+        short_text: '',
+        balance: '',
+        remaining_balance_when_request: 0,
+        currency: 'IDR',
+        tax_on_sales: taxDefaultValue,
+        purchase_requisition_unit_of_measure: uomDefaultValue,
+        purchasing_group: '',
+        type: '',
+        item_delivery_data: new Date(),
+        claim_date: new Date(),
+        attachment: [],
+        // url: '',
+      },
+    ],
+  };
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: defaultValues,
+  });
+  
+  const { fields: formFields, update: updateForm } = useFieldArray({
+    control: form.control,
+    name: 'forms',
+  });
+  
+  const fetchReimburseType = async (index: number, otherParams: any = null) => {
+    const requester = form.getValues('requester');
+
+    if (requester === null || requester === '') {
+      setDataReimburseType((prev) => {
+        const newData = [...prev];
+        newData[index] = [];
+        return newData;
+      });
+      return;
+    }
+
+    const response = await axiosInstance.get(GET_LIST_MASTER_REIMBUSE_TYPE, {
+      params: {
+        user: requester,
+        hasValue: otherParams != null ? otherParams.reimburse_type : null,
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    setDataReimburseType((prev) => {
+      const newData = [...prev];
+      newData[index] = response.data.data;
+      return newData;
+    });
+  };
+  
+  const handleSearchReimburseType = async (search: string, index: number) => {
+    if (search && search.length > 0) {
+      try {
+        const response = await axiosInstance.get(GET_LIST_MASTER_REIMBUSE_TYPE, {
+          params: {
+            search: search,
+            user: form.getValues('requester'),
+          },
+        });
+        setDataReimburseType((prev) => {
+          const newData = [...prev];
+          newData[index] = response.data.data;
+          return newData;
+        });
+      } catch (error) {
+        console.error('Error searching reimburse types:', error);
+      }
+    }
+  };
+
+  const fetchFamily = async (index: number, otherParams: any) => {
+    const response = await axiosInstance.get(GET_LIST_FAMILY_REIMBURSE, {
+      params: {
+        user: form.getValues('requester'),
+        familyRelationship: otherParams.type == 'Family' ? '0' : '1',
+        reimburseType: otherParams.reimburse_type,
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    setDataFamily((prev) => {
+      const newData = [...prev];
+      newData[index] = response.data.data;
+      return newData;
+    });
+  };
+
+  const onChangeEmployee = (value: string) => {
+    for (let index = 0; index < formFields.length; index++) {
+      fetchReimburseType(index);
+    }
+    if (value == null) {
+      for (let index = 0; index < formFields.length; index++) {
+        form.setValue(`forms.${index}.reimburse_type`, '');
+        form.setValue(`forms.${index}.for`, '');
+      }
+    }
+
+    setDetailLimit([]);
+    setDataFamily([]);
+  };
+
+  const updateRemainingBalanceNextFormWhenSameType = (index: number, formValue: any) => {
+    const forms = form.getValues('forms');
+    forms.forEach((formItem, idx) => {
+      if (
+        idx > index &&
+        forms[idx].reimburse_type === formValue.reimburse_type
+      ) {
+        const remainingBalance = detailLimit[idx]?.balance || 0;
+        const remainingLimit = detailLimit[idx]?.limit || 0;
+
+        setDetailLimit((prev) => {
+          const newDetailLimit = [...prev];
+          newDetailLimit[idx] = {
+            ...newDetailLimit[idx],
+            balance:
+              remainingBalance + Number(formValue.balance || '0'),
+          };
+
+          if (detailLimit[idx]?.type_limit !== 'Unlimited') {
+            newDetailLimit[idx] = {
+              ...newDetailLimit[idx],
+              limit: remainingLimit + 1,
+            };
+          }
+          return newDetailLimit;
+        });
+
+        form.setValue(`forms.${idx}.balance`, '');
+      }
+    });
+  }
+
+  function generateForms(count: string) {
+    const forms = [...form.getValues('forms')];
+    for (let i = 0; i < Number(count); i++) {
+      if (i + 1 > forms.length) {
+        fetchReimburseType(i);
+        const object = {
+          reimburseId: '',
+          for: '',
+          group: '',
+          reimburse_type: '',
+          short_text: '',
+          balance: '',
+          remaining_balance_when_request: 0,
+          currency: 'IDR',
+          tax_on_sales: taxDefaultValue,
+          purchase_requisition_unit_of_measure: uomDefaultValue,
+          purchasing_group: '',
+          type: '',
+          item_delivery_data: new Date(),
+          claim_date: new Date(),
+          attachment: [],
+          // url: '',
+        };
+
+        forms.push(object);
+      }
+    }
+
+    form.setValue('forms', forms);
+  }
+
+  const handleTabChange = (tabValue: string) => {
+    setActiveTab(tabValue);
+  };
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (detailLimit) {
+      for (let index = 0; index < detailLimit.length; index++) {
+        const formLength = values.forms.length == 0 ? 0 : values.forms.length - 1;
+
+        if (
+          detailLimit[index]?.type_limit !== 'Unlimited' &&
+          Number(detailLimit[index]?.limit) == 0
+        ) {
+          showToast(
+            'Claim Limit for form ' + (index + 1) + ' is Empty, Please Contact the Admin',
+            'error',
+          );
+          return;
+        }
+
+        if (values.forms[index].balance == '' || Number(values.forms[index].balance) == 0) {
+          showToast('Claim Balance for form ' + (index + 1) + ' cannot be 0', 'error');
+          return;
+        }
+
+        if (
+          Number(detailLimit[index]?.balance ?? 0) < Number(values.forms[index].balance ?? 0)
+        ) {
+          showToast(
+            'Please check your balance input for forms ' +
+              (index + 1) +
+              '  is not must be above ' +
+              detailLimit[index]?.balance,
+            'error',
+          );
+          return;
+        }
+
+        // update format date
+        values.forms = values.forms.map((form, formIndex) => ({
+          ...form,
+          claim_date: moment(form.claim_date).format('YYYY-MM-DD'),
+          item_delivery_data: moment(form.item_delivery_data).format('YYYY-MM-DD'),
+          remaining_balance_when_request: Number(detailLimit[formIndex]?.balance ?? 0),
+        }));
+      }
+    }
+    const totalNominal = values.forms.reduce((acc, item) => acc + Number(item.balance) || 0, 0);
+
+    values.value = totalNominal;
+    values.user_id = values?.requester || '0';
+    try {
+      let response;
+      if (type === ReimburseFormType.edit || type === ReimburseFormType.clone) {
+        response = await axiosInstance.post(update_url ?? '', values, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      } else {
+        response = await axiosInstance.post(store_url ?? '', values, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      }
+      showToast(response?.data?.data, 'success');
+      onSuccess?.();
+    } catch (e) {
+      const error = e as AxiosError<ErrorResponse>;
+    }
+  };
+  
+  async function getDataByLimit(index: number, param: any = null, fromGetData: boolean = false) {
+    const data = form.getValues(`forms.${index}`);
+    let forValue = !data.for || data.for === "" ? form.getValues('requester') || '' : data.for;
+    
+    const params = {
+      user: form.getValues('requester'),
+      reimbuse_type: param != null ? param.reimburse_type : data.reimburse_type,
+      for: param != null ? param.for : forValue,
+    };
+    
+    try {
+      const response = await axiosInstance.get('reimburse/data-limit-and-balance', {
+        params: params,
+      });
+      const forms = form.getValues('forms');
+      
+      let reviseBalance = 0;
+      let reviseLimit = 0;
+      let remainingBalanceOld = response.data.data.balance;
+      let remainingLimitOld = response.data.data.limit;
+
+      let sameTypeForms = (forLimit: boolean = false) => forms.filter(
+        (formItem, idx) => {
+          let formForValue = !formItem.for || formItem.for === "" ? form.getValues('requester') || '' : formItem.for;
+          return formItem.reimburse_type === data.reimburse_type
+          && formForValue === forValue
+          && (type === ReimburseFormType.clone && fromGetData && !forLimit ? true : idx !== index)
+        } 
+      );
+      let totalLimit = sameTypeForms(true).length;
+      
+      let totalBalance = sameTypeForms().reduce(
+        (acc, curr) => acc + Number(curr.balance || 0),
+        0
+      );
+      
+      // Adjust revise condition
+      if (type === ReimburseFormType.clone) {
+        let totalBalancePerReimburseType = (remainingBalanceRevise.current).find(reimburse => reimburse.reimburse_type === data.reimburse_type && reimburse.for === forValue)?.totalBalance ?? 0;
+        remainingBalanceOld += totalBalancePerReimburseType;
+        
+        if (fromGetData) {
+          let reviseMatch = (reimburseReviseData.current).find(reimburse => data.reimburseId == reimburse.id);
+          if (reviseMatch) {
+            reviseBalance = Number(reviseMatch.balance)
+            reviseLimit = totalLimit + Number(reviseMatch.limit)
+            setReviseDataUsed((prev) => {
+              const newReviseDataUsed = [...prev];
+              newReviseDataUsed[index] = reviseMatch.id;
+              return newReviseDataUsed;
+            })
+          }
+        } else {
+          let reviseMatch = (reimburseReviseData.current).find(reimburse => 
+            reimburse.reimburse_type === data.reimburse_type && reimburse.for === forValue);
+          if (reviseMatch !== undefined) {
+            reviseLimit = Number(reviseMatch.limit);
+            setReviseDataUsed((prev) => {
+              const newReviseDataUsed = [...prev];
+              newReviseDataUsed[index] = reviseMatch.id;
+              return newReviseDataUsed;
+            })
+          }
+        }
+      }
+      
+      let finalBalance = (remainingBalanceOld - totalBalance) + reviseBalance;
+      let finalLimit = Math.max(0, remainingLimitOld - totalLimit + reviseLimit);
+      
+      setDetailLimit((prev) => {
+        const newData = [...prev];
+        newData[index] = {
+          ...response.data.data,
+          balance: finalBalance,
+          limit: response.data.data.type_limit === 'Unlimited' ? response.data.data.type_limit : finalLimit,
+        };
+        return newData;
+      });
+    } catch (e) {
+      const error = e as AxiosError<ErrorResponse>;
+      showToast(error?.response?.data?.message, 'error');
+    }
+  }
+  
+  const fetchDataValue = async () => {
+    try {
+      const values = form.getValues('forms');
+      const reimburseCostFormList = values.map((item, index) => ({
+        index,
+        value: item.balance ? Number(item.balance) : 0,
+      }));
+
+      const hasZeroValue = reimburseCostFormList.some((item) => item.value === 0);
+      if (hasZeroValue) {
+        const index = reimburseCostFormList.findIndex((item) => item.value === 0);
+        showToast(`Please fill balance form ${index + 1}`, 'error');
+        return;
+      }
+
+      const totalNominal = values.reduce((acc, item) => acc + (Number(item.balance) || 0), 0);
+      const response = await axiosInstance.get('/check-approval', {
+        params: {
+          value: totalNominal,
+          requester: form.getValues('requester'),
+          type: 'REIM',
+        },
+      });
+      if (response.data.status_code === 200) {
+        const approvalRequest = response.data?.data?.approval.map(
+          (route: any) => route?.division_name || null,
+        );
+
+        const approvalFrom = response.data?.data?.approval.map((route: any) => route?.name || null);
+
+        const acknowledgeFrom: never[] = [];
+        if (response.data?.data?.hr) {
+          acknowledgeFrom.push(response.data?.data?.hr?.name as unknown as never);
+        }
+
+        const approvalFromStatusRoute = (response.data.data?.approval ?? []).map((route: any) => {
+          return {
+            status: '',
+            name: route.name,
+            dateApproved: '',
+          };
+        });
+
+        const dataApproval = {
+          approvalRequest,
+          approvalFrom,
+          acknowledgeFrom: acknowledgeFrom,
+          approvalFromStatusRoute: approvalFromStatusRoute,
+        };
+        setApprovalRoute(dataApproval);
+        setIsShow(true);
+      }
+    } catch (error) {
+      const err = error as AxiosError<ErrorResponse>;
+      showToast(err?.response?.data?.message, 'error');
+    }
+  };
+  
+  useEffect(() => {
+    const values = form.getValues('forms');
+    const totalNominal = values.reduce((acc, item) => acc + Number(item.balance) || 0, 0);
+    if (totalNominal > 0 && isShow === true) {
+      fetchDataValue();
+    }
+  }, [form.watch('forms'), form.watch('requester')]);
+
+  const checkValidation = (error: any) => {
+    const checkError = error;
+    if (Object.keys(checkError).length > 0) {
+      let errorMessages = `
+        <h3 style="color: rgb(211, 47, 47);font-weight: bolder">Error</h3>
+        <ul style="list-style-type: disc;margin-left: 1rem">
+      `;
+      Object.entries(checkError).forEach(([key, value]) => {
+        if (key === 'forms') {
+          (value as any[]).forEach((item: any, index: number) => {
+            errorMessages += `</br><strong>Form ${index + 1}:</strong></br>`;
+            Object.values(item).forEach((subItem: any) => {
+              errorMessages += `<li>${subItem.message}</li>`;
+            });
+          });
+        } else {
+          errorMessages += `<li>${(value as { message: string }).message}</li>`;
+        }
+      });
+      errorMessages += '</ul>';
+      showToast(<div dangerouslySetInnerHTML={{ __html: errorMessages }} />, 'error');
+    }
+  };
+  
+  return (
+    <ScrollArea className='h-[600px] w-full'>
+      <CustomFormWrapper isLoading={isLoading}>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit, (errors) => {
+              checkValidation(errors);
+            })}
+          >
+            <table className='mt-4 w-full text-xs font-thin reimburse-form-table'>
+              <tbody>
+                <tr>
+                  <td className='w-1/4'>Request Status</td>
+                  <td>
+                    {requestStatus && (
+                      <CustomStatus
+                        name={requestStatus.name}
+                        className={requestStatus.classname}
+                        code={requestStatus.code}
+                      />
+                    )}
+                  </td>
+                </tr>
+                <tr>
+                  <td className='w-1/4'>
+                    Remark Header<span className='text-red-600'>*</span>
+                  </td>
+                  <td>
+                    <FormField
+                      control={form.control}
+                      name='remark_group'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Textarea placeholder='Insert remark' {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className='w-1/4'>
+                    Cost Center<span className='text-red-600'>*</span>
+                  </td>
+                  <td>
+                    <FormAutocomplete<any>
+                      fieldLabel={''}
+                      options={dataCostCenter}
+                      fieldName='cost_center'
+                      disabled={type === ReimburseFormType.edit}
+                      placeholder={'Cost Center'}
+                      classNames='mt-2 w-full'
+                      onSearch={async (search) => {
+                        const isLabelMatch = dataCostCenter?.some(
+                          (option) => option.label === search,
+                        );
+                        if (search.length > 0 && !isLabelMatch) {
+                          await getCostCenter(search, {
+                            name: 'cost_center',
+                            id: 'id',
+                            tabel: 'master_cost_centers',
+                            idType: 'string',
+                            search: search,
+                          });
+                        } else if (search.length == 0 && !isLabelMatch) {
+                          getCostCenter('', {
+                            name: 'cost_center',
+                            id: 'id',
+                            tabel: 'master_cost_centers',
+                            idType: 'string',
+                          });
+                        }
+                      }}
+                      onFocus={() => {
+                        const value = form.getValues('cost_center');
+                        getCostCenter('', {
+                          name: 'cost_center',
+                          id: 'id',
+                          tabel: 'master_cost_centers',
+                          idType: 'string',
+                          hasValue: {
+                            key: value ? 'id' : '',
+                            value: value ?? '',
+                          },
+                        });
+                      }}
+                    />
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className='w-1/4'>
+                    Employee<span className='text-red-600'>*</span>
+                  </td>
+                  <td>
+                    <FormAutocomplete<any>
+                      options={dataEmployee}
+                      fieldName='requester'
+                      disabled={
+                        String(currentUser?.is_admin) === '0' || type === ReimburseFormType.edit
+                      }
+                      placeholder={'Select Employee'}
+                      onSearch={(search: string, data: any) => {
+                        const isLabelMatch = dataEmployee?.some(
+                          (option) => option.label === search,
+                        );
+                        if (search.length > 0 && !isLabelMatch) {
+                          getEmployee(search, {
+                            name: 'name',
+                            id: 'nip',
+                            tabel: 'users',
+                            search: search,
+                          });
+                        } else if (search.length == 0 && !isLabelMatch) {
+                          getEmployee('', {
+                            name: 'name',
+                            id: 'nip',
+                            tabel: 'users',
+                          });
+                        }
+                      }}
+                      onChangeOutside={(value) => onChangeEmployee(value)}
+                      onFocus={() => {
+                        const value = form.getValues('requester');
+                        getEmployee('', {
+                          name: 'name',
+                          id: 'nip',
+                          tabel: 'users',
+                          hasValue: {
+                            key: value ? 'nip' : '',
+                            value: value ?? '',
+                          },
+                        });
+                      }}
+                      classNames='mt-2 w-full'
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className='w-1/4'>Number of Forms</td>
+                  <td>
+                    <FormField
+                      control={form.control}
+                      name='formCount'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Select
+                              disabled={type === ReimburseFormType.edit}
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                generateForms(value);
+
+                                const forms = form.getValues('forms');
+                                let formIndex = Number(value)
+                                if (forms.length > formIndex) {
+                                  const updatedForms = forms.slice(0, formIndex);
+                                  form.setValue('forms', updatedForms);
+
+                                  setDetailLimit((prev) => {
+                                    let newDetailLimit = [...prev];
+                                    newDetailLimit = newDetailLimit.slice(0, formIndex);
+                                    return newDetailLimit;
+                                  });
+                                  
+                                  setActiveTab(`form${Math.max(1, formIndex)}`);
+
+                                  setReviseDataUsed((prev) => {
+                                    const newReviseDataUsed = [...prev];
+                                    newReviseDataUsed[formIndex] = '';
+                                    return newReviseDataUsed;
+                                  })
+                                }
+                              }}
+                              value={field.value?.toString()}
+                            >
+                              <SelectTrigger className='w-[200px]'>
+                                <SelectValue placeholder='Select number of forms' />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Array.from({ length: 3 }, (_, i) => i + 1).map((num) => (
+                                  <SelectItem key={num} value={num.toString()}>
+                                    {num}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <Separator className='my-4' />
+
+            <Tabs value={activeTab} onValueChange={handleTabChange} className='w-full'>
+              <TabsList className={'flex justify-start items-center space-x-4'}>
+                {' '}
+                {Array.from({ length: Number(form.watch('formCount')) || 1 }).map((_, index) => (
+                  <TabsTrigger key={index} value={`form${index + 1}`}>
+                    Form {index + 1}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              {formFields.map((formValue: any, index: number) => {
+                return (
+                  <TabsContent key={index} value={`form${index + 1}`}>
+                    <FormField
+                      control={form.control}
+                      name={`forms.${index}.reimburseId`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              className='sr-only'
+                              value={formValue.reimburseId}
+                              onChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div>
+                      <table className='mt-4 text-xs font-thin reimburse-form-detail'>
+                        <tbody>
+                          <tr>
+                            <td className='w-1/4'>
+                              Type of Reimbursement<span className='text-red-600'>*</span>
+                            </td>
+                            <td>
+                              <FormAutocomplete<any>
+                                options={dataReimburseType[index]}
+                                fieldName={`forms.${index}.reimburse_type`}
+                                disabled={
+                                  dataReimburseType[index] === undefined ||
+                                  dataReimburseType[index].length === 0 ||
+                                  type === ReimburseFormType.edit
+                                }
+                                placeholder={'Select Reimburse Type'}
+                                onSearch={async (search: string) => {
+                                  const isLabelMatch = dataReimburseType[index]?.some(
+                                    (reimburseType) => reimburseType.label === search,
+                                  );
+                                  if (!isLabelMatch) {
+                                    await handleSearchReimburseType(search, index);
+                                  }
+                                }}
+                                onChangeOutside={async (data: any) => {
+                                  if (data) {
+                                    const selectedValue = dataReimburseType[index].filter(
+                                      (reimburseType) => reimburseType.value == data,
+                                    )[0];
+                                    updateForm(index, {
+                                      ...formValue,
+                                      reimburse_type: data,
+                                      type: selectedValue.is_employee === 1 ? 'Employee' : 'Family',
+                                      balance: '',
+                                    });
+
+                                    if (selectedValue.is_employee === 1) {
+                                      getDataByLimit(index, { reimburse_type: data, for: null });
+                                    } else {
+                                      setDetailLimit((prev) => {
+                                        const newDetailLimit = [...prev];
+                                        newDetailLimit[index] = [];
+                                        return newDetailLimit;
+                                      });
+                                      form.setValue(`forms.${index}.balance`, '');
+                                      form.setValue(`forms.${index}.for`, '');
+                                      fetchFamily(index, { type: 'Family', reimburse_type: data });
+                                    }
+                                    const currentReimburseType = form.getValues(`forms.${index}.reimburse_type`);
+                                    if (data !== currentReimburseType) {
+                                      setReviseDataUsed((prev) => {
+                                        const newReviseDataUsed = [...prev];
+                                        newReviseDataUsed[index] = '';
+                                        return newReviseDataUsed;
+                                      })
+
+                                      updateRemainingBalanceNextFormWhenSameType(index, formValue);
+                                    }
+                                  } else {
+                                    setDetailLimit((prev) => {
+                                      const newDetailLimit = [...prev];
+                                      newDetailLimit[index] = [];
+                                      return newDetailLimit;
+                                    });
+                                    updateForm(index, {
+                                      ...formValue,
+                                      reimburse_type: '',
+                                      type: '',
+                                      balance: '',
+                                    });
+                                    setReviseDataUsed((prev) => {
+                                      const newReviseDataUsed = [...prev];
+                                      newReviseDataUsed[index] = '';
+                                      return newReviseDataUsed;
+                                    })
+
+                                    form.setValue(`forms.${index}.for`, '');
+                                    setDataFamily((prev) => {
+                                      const newData = [...prev];
+                                      newData[index] = [];
+                                      return newData;
+                                    });
+
+                                    updateRemainingBalanceNextFormWhenSameType(index, formValue);
+                                  }
+                                }}
+                                onFocus={() => {
+                                  fetchReimburseType(index);
+                                }}
+                                classNames='mt-2 w-full'
+                              />
+                              {form.formState.errors?.forms?.[index]?.reimburse_type && (
+                                <FormHelperText error>
+                                  {form.formState.errors?.forms?.[index]?.reimburse_type?.message}
+                                </FormHelperText>
+                              )}
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td className='w-1/4'>Family</td>
+                            <td>
+                              <FormField
+                                control={form.control}
+                                name={`forms.${index}.for`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Select
+                                        disabled={
+                                          dataReimburseType?.[index]?.filter(
+                                            (reimburseType) =>
+                                              reimburseType?.value ==
+                                              form.getValues(`forms.${index}.reimburse_type`),
+                                          )?.[0]?.is_employee === 1 ||
+                                          type === ReimburseFormType.edit
+                                        }
+                                        onValueChange={(value) => {
+                                          updateForm(index, {
+                                            ...formValue,
+                                            for: value,
+                                          });
+
+                                          getDataByLimit(index, {
+                                            reimburse_type: form.getValues(
+                                              `forms.${index}.reimburse_type`,
+                                            ),
+                                            for: value,
+                                          });
+                                        }}
+                                        defaultValue={formValue?.for}
+                                        value={formValue.for}
+                                      >
+                                        <SelectTrigger className='w-[200px]'>
+                                          <SelectValue placeholder='-' />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {dataFamily[index]?.map((family: any) => (
+                                            <SelectItem
+                                              key={family.value}
+                                              value={family.value.toString()}
+                                            >
+                                              {family.label}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td className='w-1/4'>
+                              Purchasing Group<span className='text-red-600'>*</span>
+                            </td>
+                            <td>
+                              <FormAutocomplete<any>
+                                fieldLabel={''}
+                                options={dataPurchasingGroup}
+                                fieldName={`forms.${index}.purchasing_group`}
+                                disabled={type === ReimburseFormType.edit}
+                                placeholder={'Puchasing Group'}
+                                classNames='mt-2 w-full'
+                                onSearch={async (search) => {
+                                  const isLabelMatch = dataPurchasingGroup?.some(
+                                    (option: any) => option.label === search,
+                                  );
+                                  if (search.length > 0 && !isLabelMatch) {
+                                    await getPurchasingGroup(search, {
+                                      name: 'purchasing_group_desc',
+                                      id: 'id',
+                                      tabel: 'purchasing_groups',
+                                      idType: 'string',
+                                      search: search,
+                                    });
+                                  } else if (search.length == 0 && !isLabelMatch) {
+                                    await getPurchasingGroup('', {
+                                      name: 'purchasing_group_desc',
+                                      id: 'id',
+                                      tabel: 'purchasing_groups',
+                                      idType: 'string',
+                                    });
+                                  }
+                                  return [];
+                                }}
+                                onChangeOutside={(data) => {
+                                  if (data) {
+                                    updateForm(index, {
+                                      ...formValue,
+                                      purchasing_group: data,
+                                    });
+                                  }
+                                }}
+                                onFocus={() => {
+                                  const value = form.getValues('forms')[index]?.purchasing_group;
+                                  getPurchasingGroup('', {
+                                    name: 'purchasing_group_desc',
+                                    id: 'id',
+                                    tabel: 'purchasing_groups',
+                                    idType: 'string',
+                                    hasValue: {
+                                      key: value ? 'id' : '',
+                                      value: value ?? '',
+                                    },
+                                  });
+                                }}
+                              />
+                              {form.formState.errors?.forms?.[index]?.purchasing_group && (
+                                <FormHelperText error>
+                                  {form.formState.errors?.forms?.[index]?.purchasing_group?.message}
+                                </FormHelperText>
+                              )}
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td className='w-1/4'>Tax</td>
+                            <td>
+                              <FormField
+                                control={form.control}
+                                name={`forms.${index}.tax_on_sales`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Select
+                                        disabled={true}
+                                        onValueChange={(value) => {
+                                          updateForm(index, {
+                                            ...formValue,
+                                            tax_on_sales: value,
+                                          });
+                                        }}
+                                        defaultValue={formValue.tax_on_sales}
+                                      >
+                                        <SelectTrigger className='w-[200px]'>
+                                          <SelectValue placeholder='-' />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {(dataTax ?? []).map((tax, index) => (
+                                            <SelectItem
+                                              key={tax.value}
+                                              value={tax.value.toString()}
+                                            >
+                                              {tax.description} - {tax.label}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className='w-1/4'>Uom</td>
+                            <td>
+                              <FormField
+                                control={form.control}
+                                name={`forms.${index}.purchase_requisition_unit_of_measure`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Select
+                                        disabled={true}
+                                        onValueChange={(value) => {
+                                          updateForm(index, {
+                                            ...formValue,
+                                            purchase_requisition_unit_of_measure: String(value),
+                                          });
+                                        }}
+                                        defaultValue={
+                                          formValue.purchase_requisition_unit_of_measure
+                                        }
+                                      >
+                                        <SelectTrigger className='w-[200px]'>
+                                          <SelectValue placeholder='-' />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {/* {(dataUom ?? []).map((uom, index) => ( */}
+                                          <SelectItem key='2' value='2'>
+                                            Piece - PC
+                                          </SelectItem>
+                                          {/* ))} */}
+                                        </SelectContent>
+                                      </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td className='w-1/4'>
+                              Remark Item<span className='text-red-600'>*</span>
+                            </td>
+                            <td>
+                              <FormField
+                                control={form.control}
+                                name={`forms.${index}.short_text`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Textarea
+                                        placeholder='Insert remark'
+                                        onChange={(event) => {
+                                          updateForm(index, {
+                                            ...formValue,
+                                            short_text: event.target.value,
+                                          });
+                                        }}
+                                        defaultValue={formValue.short_text}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td className='w-1/4'>Current Balance</td>
+                            <td>
+                              <span className='font-bold'>
+                                {detailLimit[index]?.balance &&
+                                  formatRupiah(detailLimit[index]?.balance)}
+                              </span>
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td className='w-1/4'>Limit Claim</td>
+                            <td>
+                              <span className='font-bold'>{detailLimit[index]?.limit}</span>{' '}
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td className='w-1/4'>Receipt Date</td>
+                            <td>
+                              <FormField
+                                control={form.control}
+                                name={`forms.${index}.item_delivery_data`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <CustomDatePicker
+                                        disabled={type === ReimburseFormType.edit}
+                                        initialDate={
+                                          field.value instanceof Date
+                                            ? field.value
+                                            : new Date(field.value)
+                                        }
+                                        onDateChange={(date) => {
+                                          field.onChange(date);
+                                            updateForm(index, {
+                                              ...formValue,
+                                              item_delivery_data: date,
+                                            });
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td className='w-1/4'>Claim Date</td>
+                            <td>
+                              <FormField
+                                control={form.control}
+                                name={`forms.${index}.claim_date`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <CustomDatePicker
+                                        disabled={type === ReimburseFormType.edit}
+                                        initialDate={
+                                          field.value instanceof Date
+                                            ? field.value
+                                            : new Date(field.value)
+                                        }
+                                        disabledDays={[{ before: new Date() }]}
+                                        onDateChange={(date) => {
+                                          field.onChange(date);
+                                          updateForm(index, {
+                                            ...formValue,
+                                            claim_date: date,
+                                          });
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td className='w-1/4'>Reimburse Cost</td>
+                            <td className='grid grid-cols-7 gap-x-4 w-full'>
+                              <div className='col-span-3'>
+                                <FormField
+                                  control={form.control}
+                                  name={`forms.${index}.currency`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Select
+                                          disabled={type === ReimburseFormType.edit}
+                                          onValueChange={(value) => {
+                                            updateForm(index, {
+                                              ...formValue,
+                                              currency: value,
+                                            });
+                                          }}
+                                          defaultValue={formValue.currency}
+                                        >
+                                          <SelectTrigger className='w-[200px]'>
+                                            <SelectValue placeholder='-' />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {currencies.map((currency) => (
+                                              <SelectItem key={currency.code} value={currency.code}>
+                                                {currency.name} ({currency.code})
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </FormControl>
+                                      <FormDescription className='h-6'></FormDescription>
+
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                              <div className='col-span-4'>
+                                <FormField
+                                  control={form.control}
+                                  name={`forms.${index}.balance`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          type='text'
+                                          placeholder='0'
+                                          onChange={(e) => {
+                                            const rawValue = e.target.value.replace(/[^0-9]/g, '');
+                                            const formattedValue = formatRupiah(rawValue, false);
+
+                                            const currentBalance = Number(rawValue) || 0;
+                                            const remainingBalance =
+                                              detailLimit[index]?.balance || 0;
+
+                                            if (currentBalance > remainingBalance) {
+                                              e.target.value = formatRupiah(
+                                                rawValue.slice(0, -1),
+                                                false,
+                                              );
+                                              return;
+                                            }
+
+                                            updateForm(index, {
+                                              ...formValue,
+                                              balance: rawValue,
+                                            });
+                                            e.target.value = formattedValue;
+
+                                            const forms = form.getValues('forms');
+                                            forms.forEach((formItem, idx) => {
+                                              if (
+                                                idx > index &&
+                                                formItem.reimburse_type === formValue.reimburse_type
+                                              ) {
+                                                const newRemainingBalance =
+                                                  remainingBalance - currentBalance;
+                                                setDetailLimit((prev) => {
+                                                  const newDetailLimit = [...prev];
+                                                  newDetailLimit[idx] = {
+                                                    ...newDetailLimit[idx],
+                                                    balance: newRemainingBalance,
+                                                  };
+                                                  return newDetailLimit;
+                                                });
+                                                updateForm(idx, {
+                                                  ...formItem,
+                                                  balance: '',
+                                                });
+                                              }
+                                            });
+                                          }}
+                                          defaultValue={formatRupiah(formValue.balance, false)}
+                                          value={formatRupiah(formValue.balance, false)}
+                                          disabled={
+                                            typeof detailLimit[index] === 'undefined' ||
+                                            detailLimit[index]?.length === 0 ||
+                                            type === ReimburseFormType.edit
+                                          }
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td className='w-1/4'>
+                              File Attachment<span className='text-red-600'>*</span>
+                            </td>
+                            <td>
+                              <FormField
+                                control={form.control}
+                                name={`forms.${index}.attachment`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className='mb-1 text-xs font-extralight text-gray-500'>
+                                      Max File: 1000KB, Extension : jpg,jpeg,png,pdf,heic
+                                    </FormLabel>
+                                    <FormControl>
+                                      <input
+                                        className='flex px-3 py-1 w-full h-9 text-xs bg-transparent rounded-md border shadow-sm transition-colors border-input file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
+                                        type='file'
+                                        multiple
+                                        accept='image/*,.pdf,.heic'
+                                        onChange={(e) => {
+                                          const files = e.target.files;
+                                          if (files) {
+                                            const updatedAttachments = [...formValue.attachment];
+                                            const fileArray = Array.from(files);
+
+                                            updatedAttachments.push(...fileArray);
+                                            updateForm(index, {
+                                              ...formValue,
+                                              attachment: updatedAttachments,
+                                            });
+                                          }
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <div className='pb-3 mt-2'>
+                                {formValue.attachment && formValue.attachment.length > 0 && (
+                                  <ul>
+                                    {formValue.attachment.map((file: File, fileIndex: number) => (
+                                      <li
+                                        key={fileIndex}
+                                        className='flex justify-between items-center'
+                                      >
+                                        <span className='text-xs'>{file.name}</span>
+                                        <button
+                                          type='button'
+                                          className='ml-2 text-red-500'
+                                          onClick={() => {
+                                            const updatedAttachments = formValue.attachment.filter(
+                                              (_, index) => index !== fileIndex,
+                                            );
+                                            updateForm(index, {
+                                              ...formValue,
+                                              attachment: updatedAttachments,
+                                            });
+                                          }}
+                                        >
+                                          Delete
+                                        </button>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                                <hr />
+                                <div className='pb-3 mt-2'>
+                                  {formValue.savedAttachment && formValue.savedAttachment.length > 0 && (
+                                    <ul>
+                                      {formValue.savedAttachment.map((file: Object, fileIndex: number) => (
+                                        <li
+                                          key={fileIndex}
+                                          className='flex justify-between items-center'
+                                        >
+                                          <span className='text-xs'>{file.url}</span>
+                                          <button
+                                            type='button'
+                                            className='ml-2 text-red-500'
+                                            onClick={() => {
+                                              const updatedSavedAttachments = formValue.savedAttachment.filter(
+                                                (_, index) => index !== fileIndex,
+                                              );
+                                              updateForm(index, {
+                                                ...formValue,
+                                                savedAttachment: updatedSavedAttachments,
+                                              });
+                                            }}
+                                          >
+                                            Delete
+                                          </button>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
+            <ButtonMui
+              onClick={async () => await fetchDataValue()}
+              variant='contained'
+              color='primary'
+              type='button'
+            >
+              Check Approval
+            </ButtonMui>
+            <div className='my-2'>
+              {isShow && (
+                <WorkflowComponent
+                  workflowApproval={{
+                    approvalRequest: approvalRoute.approvalRequest,
+                    approvalFrom: approvalRoute.approvalFrom,
+                    acknowledgeFrom: approvalRoute.acknowledgeFrom,
+                  }}
+                  workflowApprovalStep={
+                    approvalRoute.approvalFromStatusRoute as unknown as WorkflowApprovalStepInterface
+                  }
+                  workflowApprovalDiagram={
+                    approvalRoute.approvalFrom as unknown as WorkflowApprovalDiagramInterface
+                  }
+                />
+              )}
+            </div>
+            <Separator className='my-4' />
+            <div className='flex justify-end mt-4'>
+              <Button type='submit' className='w-32'>
+                Submit
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CustomFormWrapper>
+    </ScrollArea>
+  );
+};
