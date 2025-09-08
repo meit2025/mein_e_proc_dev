@@ -56,7 +56,7 @@ export const formModel: Array<FormFieldModel<any>> = [
   },
   {
     disabled: false,
-    maxLength: 100,
+    // maxLength: 100,
     type: 'textarea',
     name: 'entertainment.header_not',
     label: 'Header Note',
